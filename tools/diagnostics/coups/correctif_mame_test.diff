@@ -1,0 +1,11 @@
+--- <workspace>/scripts/untranspile/mame_test.py	2026-10-07 14:43:08.536979274 +0200
++++ untranspile/mame_test.py	2026-10-10 12:43:42.011268790 +0200
+@@ -573,6 +573,8 @@
+     print("octets via An apres ADDA Dk,An : %d acces a adresse exacte (HANDOFF §97)" % T.BYTE_ADDA[0])
+     print("flux d'octets decroissants -(An) a adresse exacte : %d (agent_ro9)" % T.BYTE_PRE[0])
+     print("drapeaux rendus places avant un epilogue partage : %d (HANDOFF §126)" % T.FTC_AVANT_N[0])
++    print("sauts terminaux absorbes gardes en RTS (cibles de branchements) : %d (agent_coups, TAILBR)" % T.TAILBR_N[0])
++    print("constantes lui seules gardees en valeur dans Dn : %d %s (agent_coups, LUIDN)" % (len(T.LUIDN_LOG), sorted({"%x:%x->%x" % e for e in T.LUIDN_LOG})))
+     print("valeurs de table seulement testees : %d (HANDOFF §126)" % T.TBL_TST_N[0])
+     print("echanges An<->Am par la pile MIPS : %d (HANDOFF §126)" % T.EXG_PILE_N[0])
+     print("aiguillages a index deja x4 : %d (HANDOFF §126)" % T.SW_X4_N[0])

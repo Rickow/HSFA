@@ -1,0 +1,531 @@
+va_ro5	etat_ro9	classe	partenaire_ro9	vu_VERSUS_upper	taille_mips	n68	zone_arcade	scenes
+0x23350	modifie	modifiee (70-90 %)	0x23610	non	336	3	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x26C80	modifie	apparentee (40-70 %)	0x38D10	non	624	20	moteur de combat $20000-$33FFF	continue
+0x29840	modifie	nouvelle (<40 %)	0x7CB10	non	272	12	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | game over / apres fin | selection
+0x29950	absent	deplacements	0x652C0	non	32	2	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin | init | selection
+0x29970	absent	nouvelle (<40 %)	0x13E7D0	non	656	25	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin | hors partie (A5+0=0000) | init | selection
+0x29C00	absent	nouvelle (<40 %)	0x3B7E10	non	448	16	moteur de combat $20000-$33FFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | game over / apres fin | selection
+0x29DE0	modifie	nouvelle (<40 %)	0x2E7C40	non	672	20	moteur de combat $20000-$33FFF	fin + generique
+0x2A080	absent	nouvelle (<40 %)	0x32BBF0	non	640	24	moteur de combat $20000-$33FFF	fin + generique
+0x2A300	modifie	deplacements	0x5DA40	non	112	4	sans alignement (propre a Upper ou au portage)	fin + generique
+0x2A6B0	modifie	nouvelle (<40 %)	0x9F4A0	non	2176	73	moteur de combat $20000-$33FFF	fin + generique
+0x2AF30	modifie	nouvelle (<40 %)	0x2C8040	non	864	32	moteur de combat $20000-$33FFF	fin + generique
+0x2B310	absent	nouvelle (<40 %)	0x31DF60	non	1536	76	moteur de combat $20000-$33FFF	fin + generique
+0x2B910	absent	nouvelle (<40 %)	0x979B0	non	1616	81	moteur de combat $20000-$33FFF	fin + generique
+0x2BFE0	modifie	nouvelle (<40 %)	0xA3AE0	non	128	7	moteur de combat $20000-$33FFF	fin + generique
+0x2C0F0	absent	nouvelle (<40 %)	0xA3AE0	non	128	7	moteur de combat $20000-$33FFF	fin + generique
+0x2C170	absent	nouvelle (<40 %)	0x116EE0	non	512	26	moteur de combat $20000-$33FFF	fin + generique
+0x2C370	modifie	apparentee (40-70 %)	0x7A090	non	416	13	moteur de combat $20000-$33FFF	fin + generique
+0x2C7D0	modifie	nouvelle (<40 %)	0x39E90	non	336	16	moteur de combat $20000-$33FFF	fin + generique
+0x2CAC0	absent	nouvelle (<40 %)	0x84730	non	320	13	moteur de combat $20000-$33FFF	fin + generique
+0x2CC60	modifie	apparentee (40-70 %)	0x3131E0	non	1360	34	moteur de combat $20000-$33FFF	fin + generique
+0x2D1B0	absent	nouvelle (<40 %)	0xA1770	non	672	25	moteur de combat $20000-$33FFF	fin + generique
+0x2D6E0	absent	nouvelle (<40 %)	0x13E7D0	non	96	4	moteur de combat $20000-$33FFF	fin + generique
+0x2D950	absent	nouvelle (<40 %)	0x55E80	non	480	23	moteur de combat $20000-$33FFF	fin + generique
+0x2DB30	modifie	deplacements	0x242E30	non	64	2	moteur de combat $20000-$33FFF	fin + generique
+0x2DB70	modifie	apparentee (40-70 %)	0x31000	non	1856	46	moteur de combat $20000-$33FFF	fin + generique
+0x2E2B0	absent	apparentee (40-70 %)	0x3B1F40	non	2144	63	moteur de combat $20000-$33FFF	fin + generique
+0x2EB10	modifie	nouvelle (<40 %)	0x24AB0	non	80	4	moteur de combat $20000-$33FFF	fin + generique
+0x2EB60	absent	nouvelle (<40 %)	0x60980	non	416	24	moteur de combat $20000-$33FFF	fin + generique
+0x2EE80	modifie	nouvelle (<40 %)	0xA4170	non	1232	44	moteur de combat $20000-$33FFF	fin + generique
+0x2F380	modifie	nouvelle (<40 %)	0x313DF0	non	288	12	moteur de combat $20000-$33FFF	fin + generique
+0x2F4A0	absent	nouvelle (<40 %)	0x313DF0	non	288	12	moteur de combat $20000-$33FFF	fin + generique
+0x2F5C0	modifie	nouvelle (<40 %)	0x313DF0	non	288	12	moteur de combat $20000-$33FFF	fin + generique
+0x2F820	absent	nouvelle (<40 %)	0x328170	non	288	22	moteur de combat $20000-$33FFF	fin + generique
+0x2F940	modifie	apparentee (40-70 %)	0xA37D0	non	256	16	moteur de combat $20000-$33FFF	fin + generique
+0x2FA40	modifie	nouvelle (<40 %)		non	96	5	sans alignement (propre a Upper ou au portage)	fin + generique
+0x2FB40	modifie	apparentee (40-70 %)	0x3219B0	non	144	6	moteur de combat $20000-$33FFF	fin + generique
+0x2FBD0	absent	nouvelle (<40 %)	0x7B3E0	non	4832	148	moteur de combat $20000-$33FFF	fin + generique
+0x30EB0	modifie	nouvelle (<40 %)		non	240	8	moteur de combat $20000-$33FFF	fin + generique
+0x30FA0	modifie	nouvelle (<40 %)	0xA6750	non	176	7	moteur de combat $20000-$33FFF	fin + generique
+0x310E0	absent	nouvelle (<40 %)	0x311550	non	608	24	moteur de combat $20000-$33FFF	fin + generique
+0x31340	absent	nouvelle (<40 %)	0xA8410	non	496	22	moteur de combat $20000-$33FFF	fin + generique
+0x31530	absent	apparentee (40-70 %)	0x7CB10	non	1184	49	moteur de combat $20000-$33FFF	fin + generique
+0x319D0	absent	nouvelle (<40 %)	0xA8410	non	720	33	moteur de combat $20000-$33FFF	fin + generique
+0x31CB0	absent	nouvelle (<40 %)		non	256	12	moteur de combat $20000-$33FFF	fin + generique
+0x4C1B0	absent	nouvelle (<40 %)	0x25E240	oui	576	19	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x4EEC0	modifie	nouvelle (<40 %)	0x3BD240	oui	736	49	sans alignement (propre a Upper ou au portage)	hors partie (A5+0=0000) | init
+0x50290	absent	nouvelle (<40 %)	0x75AC0	oui	944	41	intro/attraction $4000-$7FFF	hors partie (A5+0=0000) | init
+0x92D50	modifie	deplacements	0x2FEC0	non	112	3	sans alignement (propre a Upper ou au portage)	fin + generique | game over / apres fin
+0x92DC0	modifie	apparentee (40-70 %)	0x9F4A0	non	944	27	flux de jeu $8000-$DFFF	fin + generique | game over / apres fin
+0x93170	modifie	nouvelle (<40 %)	0xB39F0	non	1936	42	flux de jeu $8000-$DFFF	fin + generique
+0x93900	modifie	nouvelle (<40 %)		non	304	9	flux de jeu $8000-$DFFF	fin + generique
+0x93A30	absent	nouvelle (<40 %)	0x336550	non	128	7	flux de jeu $8000-$DFFF	fin + generique | game over / apres fin
+0x93AB0	absent	nouvelle (<40 %)	0x31B890	non	2720	58	flux de jeu $8000-$DFFF	fin + generique | game over / apres fin
+0x94550	absent	nouvelle (<40 %)	0x8E850	non	2752	57	flux de jeu $8000-$DFFF	fin + generique | game over / apres fin
+0x95010	modifie	nouvelle (<40 %)	0x63C90	non	848	28	flux de jeu $8000-$DFFF	fin + generique
+0x95360	modifie	nouvelle (<40 %)	0x3327E0	non	1360	47	flux de jeu $8000-$DFFF	fin + generique
+0x958B0	absent	nouvelle (<40 %)	0x31B890	non	3728	63	flux de jeu $8000-$DFFF	fin + generique
+0x96740	modifie	nouvelle (<40 %)	0x38E2B0	non	768	18	sans alignement (propre a Upper ou au portage)	fin + generique
+0xC8FE0	absent	nouvelle (<40 %)	0x30F240	non	416	19	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0006]
+0xC9410	absent	nouvelle (<40 %)	0x23B0C0	non	416	19	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0xC9840	absent	nouvelle (<40 %)	0x23E230	non	400	18	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0xC99D0	modifie	nouvelle (<40 %)	0x3989C0	non	848	36	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0006]
+0xC9D20	modifie	nouvelle (<40 %)	0x3989C0	non	864	37	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0xCA080	modifie	nouvelle (<40 %)	0x3989C0	non	848	36	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0xCD860	modifie	deplacements	0x391190	oui	320	7	objets (moteur) $1C000-$1DFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique | hors partie (A5+0=0010)
+0xCD9A0	modifie	identique 68K	0x3912D0	oui	384	16	objets (moteur) $1C000-$1DFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique | hors partie (A5+0=0010)
+0xFD830	modifie	nouvelle (<40 %)	0x3601B0	oui	176	9	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0xFD910	modifie	apparentee (40-70 %)	0x2DD6B0	oui	720	14	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0xFDCB0	modifie	apparentee (40-70 %)	0x3786A0	oui	144	5	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin
+0xFDDB0	modifie	nouvelle (<40 %)	0x3601B0	non	176	9	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0xFDE90	modifie	nouvelle (<40 %)	0x7D840	non	128	5	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0xFDFB0	absent	nouvelle (<40 %)	0x3601B0	non	288	14	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0xFE0D0	absent	nouvelle (<40 %)	0x105A90	non	432	16	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin
+0xFE280	modifie	nouvelle (<40 %)	0x7D840	non	128	5	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin
+0xFE300	absent	nouvelle (<40 %)	0x242E70	non	4256	192	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin
+0xFF410	absent	nouvelle (<40 %)	0x306A80	oui	304	14	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0xFF5A0	absent	modifiee (70-90 %)	0x366660	oui	608	19	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0xFF800	absent	nouvelle (<40 %)	0x2E6280	oui	1008	30	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x1001F0	modifie	nouvelle (<40 %)	0x39E90	non	304	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x100320	absent	nouvelle (<40 %)	0x37C940	non	320	13	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x1006E0	modifie	nouvelle (<40 %)		oui	192	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x1007A0	absent	nouvelle (<40 %)	0x105A90	oui	320	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x1011D0	modifie	nouvelle (<40 %)	0x38D510	non	768	33	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x101540	modifie	nouvelle (<40 %)		non	192	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x101600	absent	nouvelle (<40 %)	0x198BB0	non	432	16	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x101850	absent	nouvelle (<40 %)	0xDB6A0	non	400	20	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1019E0	modifie	nouvelle (<40 %)	0x8D4B0	non	368	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x101B50	modifie	apparentee (40-70 %)	0x2DEAD0	non	512	13	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x101D50	modifie	apparentee (40-70 %)	0x34FBE0	non	560	17	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x101FB0	modifie	nouvelle (<40 %)	0x3606A0	non	176	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x102160	modifie	apparentee (40-70 %)	0x349DA0	non	128	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1021E0	modifie	nouvelle (<40 %)	0xC1E30	non	432	19	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x102430	modifie	nouvelle (<40 %)	0xE60F0	non	176	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1024E0	modifie	nouvelle (<40 %)		non	64	2	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x1025E0	absent	nouvelle (<40 %)	0x211DF0	non	224	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1026C0	modifie	nouvelle (<40 %)	0x376EC0	non	800	30	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x102A80	modifie	apparentee (40-70 %)	0x281890	non	384	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x102C00	modifie	nouvelle (<40 %)		non	64	2	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x102CE0	modifie	nouvelle (<40 %)	0x3601B0	non	288	14	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x102ED0	absent	nouvelle (<40 %)	0x75DD0	non	384	13	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | game over / apres fin
+0x1031D0	modifie	apparentee (40-70 %)	0x327E00	non	128	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x103250	modifie	nouvelle (<40 %)	0x62150	non	192	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x1033B0	modifie	apparentee (40-70 %)	0x365E90	non	96	5	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x103500	modifie	nouvelle (<40 %)		non	64	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x103540	modifie	nouvelle (<40 %)	0x120250	non	256	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x103640	modifie	nouvelle (<40 %)	0x1A1A00	non	304	14	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1037D0	absent	nouvelle (<40 %)	0x322FA0	non	112	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1038B0	modifie	nouvelle (<40 %)		non	160	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x103950	modifie	nouvelle (<40 %)	0x3786A0	non	496	18	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x103B40	modifie	nouvelle (<40 %)	0x3786A0	non	416	15	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x103CE0	absent	nouvelle (<40 %)	0x241720	non	144	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x103D70	modifie	nouvelle (<40 %)	0x329C30	non	80	4	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x103DC0	modifie	nouvelle (<40 %)	0x1F3020	non	240	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x103EB0	modifie	nouvelle (<40 %)	0x8D4B0	non	224	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x103FC0	modifie	nouvelle (<40 %)	0x366660	non	240	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x1040B0	modifie	nouvelle (<40 %)	0x3606A0	non	176	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x1041D0	modifie	nouvelle (<40 %)	0x33F6B0	non	288	15	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x1042F0	modifie	apparentee (40-70 %)	0xEFEF0	non	960	24	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x1046E0	modifie	nouvelle (<40 %)	0x348760	non	592	25	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x1049A0	absent	nouvelle (<40 %)	0x3351F0	non	208	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x104A70	modifie	apparentee (40-70 %)	0x37AD80	non	432	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x104CC0	modifie	nouvelle (<40 %)	0x30BC30	non	192	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x104E20	modifie	nouvelle (<40 %)		non	64	2	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x104E60	modifie	nouvelle (<40 %)	0x2AAB00	non	496	21	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x105080	modifie	nouvelle (<40 %)		non	128	5	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x105170	modifie	apparentee (40-70 %)	0x2BC760	non	1552	34	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1057F0	modifie	nouvelle (<40 %)		non	112	5	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x105A20	modifie	nouvelle (<40 %)		non	64	2	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x105A90	modifie	nouvelle (<40 %)	0x33D00	non	176	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x105B40	modifie	apparentee (40-70 %)	0x1A0AE0	non	192	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x105C70	modifie	nouvelle (<40 %)	0x37E7A0	non	288	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x105DC0	modifie	nouvelle (<40 %)	0x2EA5C0	non	848	23	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x106110	absent	apparentee (40-70 %)	0x3B2AD0	non	288	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x106260	modifie	nouvelle (<40 %)	0x24CAC0	non	320	11	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x1063A0	modifie	apparentee (40-70 %)	0x5E8E0	non	1008	29	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x106850	absent	nouvelle (<40 %)	0x8D4B0	non	528	18	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x106E50	modifie	nouvelle (<40 %)	0x73C20	non	144	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x107070	modifie	nouvelle (<40 %)	0x2AAA20	non	160	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x107110	modifie	nouvelle (<40 %)		non	96	3	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1072B0	modifie	nouvelle (<40 %)	0x38A8D0	non	240	14	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1073A0	modifie	apparentee (40-70 %)	0x71AE0	non	864	24	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x107700	modifie	apparentee (40-70 %)	0x77490	non	64	3	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x107740	modifie	nouvelle (<40 %)	0x320360	non	64	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1077C0	modifie	apparentee (40-70 %)	0xA8A00	non	160	4	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x107860	modifie	nouvelle (<40 %)	0x77490	non	128	4	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1078E0	absent	nouvelle (<40 %)	0x3B0AD0	non	480	17	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x107AC0	absent	nouvelle (<40 %)	0x30F5B0	non	496	16	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x107D20	absent	nouvelle (<40 %)		non	208	13	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x107EE0	modifie	nouvelle (<40 %)	0x2685E0	non	320	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x108170	modifie	nouvelle (<40 %)		non	80	4	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1081C0	modifie	apparentee (40-70 %)	0x353710	non	848	20	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x108580	absent	nouvelle (<40 %)	0x3864E0	non	464	22	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x108860	modifie	apparentee (40-70 %)	0x8DA20	non	144	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1088F0	modifie	apparentee (40-70 %)	0x17CFA0	non	464	14	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x108AC0	modifie	apparentee (40-70 %)	0x329E0	non	800	19	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x108E10	modifie	nouvelle (<40 %)	0x385E30	non	208	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x108F90	absent	nouvelle (<40 %)	0x2A10C0	non	224	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x109070	absent	nouvelle (<40 %)	0xF6310	non	560	22	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1092A0	absent	nouvelle (<40 %)	0xF6310	non	464	18	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x1094E0	modifie	nouvelle (<40 %)		non	176	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x109680	modifie	nouvelle (<40 %)	0x212F50	non	160	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x109860	absent	nouvelle (<40 %)	0x322FA0	non	144	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x109AC0	modifie	nouvelle (<40 %)	0x342520	non	272	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x109C40	modifie	nouvelle (<40 %)	0x3655F0	non	224	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x109D20	modifie	nouvelle (<40 %)	0x1B25E0	non	304	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x109EF0	modifie	apparentee (40-70 %)	0x2F7850	non	80	4	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x10A040	absent	apparentee (40-70 %)	0x36CA80	non	176	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x10A0F0	modifie	nouvelle (<40 %)	0x21F2D0	non	464	21	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x10A3F0	modifie	nouvelle (<40 %)		non	160	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x10A4F0	modifie	nouvelle (<40 %)	0x31CA20	non	592	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x11A610	modifie	nouvelle (<40 %)	0xA2760	oui	192	7	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x11A6D0	absent	nouvelle (<40 %)	0x1C16B0	oui	208	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x11A920	absent	nouvelle (<40 %)	0x3373B0	oui	336	13	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x11AA70	modifie	apparentee (40-70 %)	0x37AD80	oui	640	17	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x11AD30	modifie	nouvelle (<40 %)	0x18C7D0	oui	272	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x11AE40	absent	nouvelle (<40 %)	0x1D29B0	oui	592	24	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x11B090	modifie	apparentee (40-70 %)	0x3BA930	oui	1664	45	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | fin + generique
+0x121290	modifie	apparentee (40-70 %)	0x3A9420	oui	2400	64	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x12A130	modifie	nouvelle (<40 %)	0x3B26B0	oui	336	16	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1346A0	absent	nouvelle (<40 %)	0x94EA0	non	224	13	intro/attraction $4000-$7FFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin | hors partie (A5+0=0000) | init | selection
+0x134780	modifie	apparentee (40-70 %)	0x5DA40	non	176	7	intro/attraction $4000-$7FFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin | hors partie (A5+0=0000) | init | selection
+0x134830	absent	apparentee (40-70 %)	0x8D4B0	non	272	11	intro/attraction $4000-$7FFF	game over / apres fin | hors partie (A5+0=0000) | init
+0x134940	modifie	apparentee (40-70 %)	0x77750	non	384	14	intro/attraction $4000-$7FFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | fin + generique | game over / apres fin | init | selection
+0x134AC0	modifie	nouvelle (<40 %)		non	80	3	intro/attraction $4000-$7FFF	selection
+0x134B10	absent	apparentee (40-70 %)	0x2B5470	non	464	26	intro/attraction $4000-$7FFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | selection
+0x134CE0	modifie	nouvelle (<40 %)	0xBF610	non	624	20	intro/attraction $4000-$7FFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | selection
+0x134F60	modifie	nouvelle (<40 %)		non	224	8	intro/attraction $4000-$7FFF	continue
+0x135040	modifie	nouvelle (<40 %)	0x20B3B0	non	864	35	intro/attraction $4000-$7FFF	continue
+0x1354E0	absent	nouvelle (<40 %)	0x2B7BF0	non	1664	55	intro/attraction $4000-$7FFF	continue
+0x135B60	modifie	modifiee (70-90 %)	0x4EA80	oui	1680	25	flux de jeu $8000-$DFFF	continue | init
+0x1361F0	modifie	nouvelle (<40 %)	0x110DF0	non	448	15	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue
+0x1363B0	absent	apparentee (40-70 %)	0x20A8F0	non	112	5	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x136420	modifie	nouvelle (<40 %)	0x6E160	non	1360	52	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue
+0x136970	absent	nouvelle (<40 %)	0x97D10	non	464	17	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006] | continue
+0x136B80	absent	apparentee (40-70 %)	0x31B230	non	464	20	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue
+0x136D70	modifie	nouvelle (<40 %)	0x319060	non	496	21	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008] | continue | selection
+0x136F80	modifie	nouvelle (<40 %)	0x2F6B0	non	496	20	flux de jeu $8000-$DFFF	continue
+0x137170	modifie	deplacements	0x1DBFE0	non	112	5	flux de jeu $8000-$DFFF	fin + generique | game over / apres fin
+0x137290	modifie	nouvelle (<40 %)		non	96	4	flux de jeu $8000-$DFFF	game over / apres fin
+0x1372F0	absent	nouvelle (<40 %)	0x1B4750	non	368	12	flux de jeu $8000-$DFFF	game over / apres fin
+0x137460	modifie	nouvelle (<40 %)	0x1AE6B0	non	384	11	flux de jeu $8000-$DFFF	game over / apres fin
+0x137620	absent	nouvelle (<40 %)	0x1753E0	non	112	5	flux de jeu $8000-$DFFF	game over / apres fin
+0x139AD0	absent	nouvelle (<40 %)	0xB0810	oui	3520	58	noyau	VS/combat/entre-combats [A5+8=0006]
+0x13AFC0	modifie	nouvelle (<40 %)	0x25A660	non	128	6	noyau	continue
+0x13B160	modifie	nouvelle (<40 %)	0x38DA90	oui	480	14	noyau	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0008]
+0x13B4E0	modifie	apparentee (40-70 %)	0x38A540	oui	464	14	noyau	VS/combat/entre-combats [A5+8=0006]
+0x13C2B0	absent	nouvelle (<40 %)	0x391F80	non	1040	44	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x13C6C0	modifie	apparentee (40-70 %)	0x391F80	non	912	39	systeme/affichage $E000-$1BFFF	fin + generique
+0x13CA50	modifie	apparentee (40-70 %)	0x391F80	oui	1200	49	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique | hors partie (A5+0=0010)
+0x1514E0	absent	nouvelle (<40 %)	0x1DD5C0	non	128	6	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1522E0	modifie	nouvelle (<40 %)	0x1D3770	oui	160	9	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique | hors partie (A5+0=0010)
+0x152380	modifie	apparentee (40-70 %)	0x311880	non	304	12	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x1524B0	modifie	apparentee (40-70 %)	0x336FA0	oui	128	4	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique | hors partie (A5+0=0010)
+0x152640	modifie	nouvelle (<40 %)	0x311880	non	192	7	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1528A0	modifie	apparentee (40-70 %)	0x311880	non	304	10	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x1529D0	absent	nouvelle (<40 %)	0x311550	non	240	7	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x152BA0	modifie	nouvelle (<40 %)	0x1753E0	non	272	15	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x152D20	modifie	nouvelle (<40 %)	0x162310	non	400	14	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x154CB0	modifie	apparentee (40-70 %)	0x30F5B0	non	256	8	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x155AD0	modifie	nouvelle (<40 %)	0x1D3770	non	208	13	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x155BA0	modifie	apparentee (40-70 %)	0x311880	non	304	10	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x155CD0	absent	nouvelle (<40 %)	0x3245F0	non	240	10	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x157940	modifie	nouvelle (<40 %)	0x1D3770	oui	160	9	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique | hors partie (A5+0=0010)
+0x1579E0	modifie	apparentee (40-70 %)	0x311880	non	304	10	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique
+0x157B10	absent	apparentee (40-70 %)	0x336FA0	oui	176	5	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | fin + generique | hors partie (A5+0=0010)
+0x157D70	modifie	nouvelle (<40 %)	0x1D3770	non	160	9	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x157E10	modifie	apparentee (40-70 %)	0x311880	non	304	10	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x157F40	modifie	apparentee (40-70 %)	0x336FA0	non	128	4	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x158200	modifie	nouvelle (<40 %)	0x69860	non	80	4	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x158250	modifie	apparentee (40-70 %)	0x9F4A0	non	1008	23	systeme/affichage $E000-$1BFFF	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x158F40	modifie	apparentee (40-70 %)	0x30F5B0	non	256	8	systeme/affichage $E000-$1BFFF	fin + generique
+0x15C400	absent	nouvelle (<40 %)	0x314D20	oui	880	39	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x15C770	absent	nouvelle (<40 %)	0x893E0	non	416	19	flux de jeu $8000-$DFFF	fin + generique
+0x15F310	modifie	nouvelle (<40 %)	0x2EBD60	non	384	18	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x17BC10	modifie	nouvelle (<40 %)	0x36CA80	non	128	7	sans alignement (propre a Upper ou au portage)	continue
+0x17C190	modifie	nouvelle (<40 %)	0x3B8E00	non	656	26	objets/effets/ecrans $80000-$BFFFF	continue
+0x17C420	modifie	apparentee (40-70 %)	0x34C300	non	816	27	objets/effets/ecrans $80000-$BFFFF	continue
+0x17C8D0	modifie	nouvelle (<40 %)	0x179F30	non	160	9	objets/effets/ecrans $80000-$BFFFF	continue
+0x17C970	modifie	apparentee (40-70 %)	0x7DA90	non	560	18	objets/effets/ecrans $80000-$BFFFF	continue
+0x17CC10	modifie	nouvelle (<40 %)	0x37E7A0	non	528	21	objets/effets/ecrans $80000-$BFFFF	continue
+0x17CE20	modifie	nouvelle (<40 %)	0x154F90	non	288	10	objets/effets/ecrans $80000-$BFFFF	continue
+0x17D200	modifie	nouvelle (<40 %)	0x32280	non	592	28	objets/effets/ecrans $80000-$BFFFF	continue
+0x17D4D0	modifie	nouvelle (<40 %)	0x1E1C50	non	160	8	objets/effets/ecrans $80000-$BFFFF	game over / apres fin
+0x17D620	modifie	apparentee (40-70 %)	0x326070	non	352	17	objets/effets/ecrans $80000-$BFFFF	game over / apres fin
+0x17D930	modifie	apparentee (40-70 %)	0x37DEE0	non	368	11	objets/effets/ecrans $80000-$BFFFF	game over / apres fin
+0x17DAA0	modifie	nouvelle (<40 %)	0x389B30	non	416	14	objets/effets/ecrans $80000-$BFFFF	game over / apres fin
+0x17E200	modifie	nouvelle (<40 %)	0x36CA80	non	128	7	objets/effets/ecrans $80000-$BFFFF	continue
+0x17E2F0	modifie	nouvelle (<40 %)	0x1E3390	non	176	9	objets/effets/ecrans $80000-$BFFFF	continue
+0x17E8F0	modifie	nouvelle (<40 %)	0x1E3390	non	176	9	objets/effets/ecrans $80000-$BFFFF	continue
+0x17EEF0	modifie	apparentee (40-70 %)	0x3BEBF0	non	160	8	objets/effets/ecrans $80000-$BFFFF	game over / apres fin
+0x17F0D0	absent	apparentee (40-70 %)	0x7D840	non	1152	49	objets/effets/ecrans $80000-$BFFFF	continue
+0x17F550	modifie	apparentee (40-70 %)	0x16A6D0	non	480	16	objets/effets/ecrans $80000-$BFFFF	game over / apres fin
+0x17F730	absent	nouvelle (<40 %)		non	208	12	objets/effets/ecrans $80000-$BFFFF	continue
+0x17F800	absent	apparentee (40-70 %)	0x942C0	non	1360	43	objets/effets/ecrans $80000-$BFFFF	continue
+0x1827D0	modifie	nouvelle (<40 %)	0x1D29B0	non	912	39	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0002]
+0x182E00	modifie	apparentee (40-70 %)	0x333AA0	oui	1392	54	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0004]
+0x1838D0	absent	nouvelle (<40 %)	0x2A1630	non	3344	53	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1847A0	modifie	apparentee (40-70 %)	0x37E400	non	368	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x184910	modifie	apparentee (40-70 %)	0x3762B0	non	880	21	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x192F60	modifie	nouvelle (<40 %)	0xB9250	oui	272	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008]
+0x193070	modifie	apparentee (40-70 %)	0x31F800	oui	1088	29	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008]
+0x1934B0	modifie	apparentee (40-70 %)	0x37DEE0	oui	336	12	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008] | continue
+0x1936B0	modifie	apparentee (40-70 %)	0x37FD40	oui	240	13	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0008]
+0x1937A0	modifie	apparentee (40-70 %)	0x300490	oui	432	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0008] | continue
+0x194040	modifie	nouvelle (<40 %)	0x338780	oui	416	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008] | continue
+0x194290	modifie	nouvelle (<40 %)	0x37B840	oui	416	19	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008]
+0x1945D0	modifie	nouvelle (<40 %)	0x33F020	oui	336	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008] | continue
+0x1948F0	modifie	nouvelle (<40 %)	0xCCEC0	oui	912	22	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008]
+0x195040	modifie	nouvelle (<40 %)	0x37B840	non	384	17	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008]
+0x1952E0	modifie	nouvelle (<40 %)	0x37B840	non	416	19	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x195860	modifie	nouvelle (<40 %)	0x37B840	non	416	19	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x195AE0	modifie	nouvelle (<40 %)	0x338780	non	416	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x195D30	modifie	apparentee (40-70 %)	0x37DBD0	non	496	24	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x195F20	modifie	apparentee (40-70 %)	0x37FE60	non	448	17	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1961E0	modifie	apparentee (40-70 %)	0x2F3690	oui	1584	46	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0008]
+0x196D70	modifie	apparentee (40-70 %)	0x37BDC0	oui	192	7	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0008] | continue | game over / apres fin
+0x196F50	absent	nouvelle (<40 %)	0x1592A0	oui	1088	55	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x197400	modifie	nouvelle (<40 %)	0x241CE0	non	256	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x197500	absent	apparentee (40-70 %)	0x257630	non	736	27	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x197970	modifie	nouvelle (<40 %)	0x2FFB0	non	176	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x197A20	modifie	apparentee (40-70 %)	0x3677E0	non	144	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x197AB0	modifie	apparentee (40-70 %)	0x14FD80	non	368	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x197C20	absent	nouvelle (<40 %)	0x3A7BA0	oui	992	48	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x198000	modifie	apparentee (40-70 %)	0x2EA5C0	oui	1760	43	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x198800	absent	nouvelle (<40 %)	0x1B2F30	oui	368	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x198980	modifie	apparentee (40-70 %)	0x3144C0	oui	128	4	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x198A00	modifie	nouvelle (<40 %)	0x3786A0	oui	160	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x198F90	modifie	apparentee (40-70 %)	0x14FD80	non	432	16	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x199140	modifie	apparentee (40-70 %)	0x25DDD0	non	224	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x199530	absent	nouvelle (<40 %)	0x33D7F0	oui	608	28	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x199790	modifie	modifiee (70-90 %)	0xAFC60	non	384	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x199910	modifie	nouvelle (<40 %)		non	176	8	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x1999C0	modifie	apparentee (40-70 %)	0x25DDD0	non	368	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x199B30	absent	apparentee (40-70 %)	0x14FD80	non	320	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x199DA0	modifie	nouvelle (<40 %)	0x331BB0	oui	544	25	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x199FC0	modifie	apparentee (40-70 %)	0x908A0	non	368	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19A1B0	modifie	nouvelle (<40 %)	0x25DDD0	non	320	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19A2F0	absent	nouvelle (<40 %)	0x2824C0	non	208	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19A3C0	modifie	apparentee (40-70 %)	0x25DDD0	non	224	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19A800	absent	nouvelle (<40 %)	0x16C7A0	non	128	6	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19A880	absent	nouvelle (<40 %)	0x3C040	non	624	30	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19AAF0	modifie	apparentee (40-70 %)	0x908A0	non	368	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19ACE0	modifie	nouvelle (<40 %)	0x25DDD0	non	320	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19AE20	absent	nouvelle (<40 %)	0x2824C0	non	208	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19AEF0	absent	apparentee (40-70 %)	0x14FD80	non	272	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19B000	modifie	apparentee (40-70 %)	0x338780	non	960	23	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19B4F0	modifie	nouvelle (<40 %)	0x331BB0	non	640	33	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19B770	modifie	apparentee (40-70 %)	0x908A0	non	368	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19B960	modifie	nouvelle (<40 %)	0x2B7880	non	752	19	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19BC50	absent	nouvelle (<40 %)	0x3C040	non	128	5	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19BCD0	modifie	nouvelle (<40 %)	0x348760	non	256	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19BDD0	modifie	apparentee (40-70 %)	0x25DDD0	non	224	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19BEB0	modifie	apparentee (40-70 %)	0x3A4100	non	1088	29	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19C420	modifie	nouvelle (<40 %)	0x33E4B0	non	896	43	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19C7A0	modifie	apparentee (40-70 %)	0x908A0	non	368	9	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19C990	modifie	nouvelle (<40 %)	0x25DDD0	non	320	11	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19CAD0	absent	nouvelle (<40 %)	0x3041D0	non	80	5	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19CB20	modifie	nouvelle (<40 %)	0x348760	non	256	10	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19CC20	modifie	apparentee (40-70 %)	0x25DDD0	non	224	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19CD00	modifie	nouvelle (<40 %)	0x311550	non	784	28	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19D140	modifie	nouvelle (<40 %)	0x329030	non	1248	50	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19D620	modifie	modifiee (70-90 %)	0x353AC0	non	352	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19DDF0	modifie	apparentee (40-70 %)	0xA8A00	oui	160	4	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19DE90	absent	nouvelle (<40 %)	0xFFB30	oui	192	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0002]
+0x19DF50	absent	nouvelle (<40 %)	0x3B0AD0	oui	448	16	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0002]
+0x1CEE50	modifie	apparentee (40-70 %)	0x332610	oui	384	15	objets/effets/ecrans $80000-$BFFFF	init
+0x1D1910	absent	nouvelle (<40 %)	0x1C16B0	oui	352	9	objets/effets/ecrans $80000-$BFFFF	init
+0x1D1AB0	absent	nouvelle (<40 %)	0x1C16B0	oui	192	7	objets/effets/ecrans $80000-$BFFFF	hors partie (A5+0=0004) | init
+0x1D60B0	modifie	nouvelle (<40 %)	0x3A8FC0	oui	224	13	sans alignement (propre a Upper ou au portage)	hors partie (A5+0=0010) | init
+0x1D6190	modifie	apparentee (40-70 %)	0x2C05A0	oui	384	9	sans alignement (propre a Upper ou au portage)	hors partie (A5+0=0004) | hors partie (A5+0=0010) | init
+0x1D6410	modifie	nouvelle (<40 %)	0x3B0AD0	oui	352	10	sans alignement (propre a Upper ou au portage)	hors partie (A5+0=0010) | init
+0x1DFFE0	modifie	apparentee (40-70 %)	0x358400	non	208	7	objets/effets/ecrans $80000-$BFFFF	VS/combat/entre-combats [A5+8=0006]
+0x1E3AB0	modifie	nouvelle (<40 %)	0x66CB0	non	448	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1E3C70	modifie	quasi identique (>=90 %)	0x365EF0	non	80	4	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1E3D70	modifie	nouvelle (<40 %)	0x12BA00	non	144	7	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1E3E00	modifie	nouvelle (<40 %)	0x66CB0	non	496	14	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1E44A0	modifie	nouvelle (<40 %)	0x342520	non	144	6	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1E4530	modifie	apparentee (40-70 %)	0x38D510	non	2384	42	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1E4F20	modifie	nouvelle (<40 %)	0x74A20	non	96	4	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1E5170	modifie	apparentee (40-70 %)	0x10F320	non	784	20	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1E54F0	absent	nouvelle (<40 %)	0x6F000	non	96	5	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1E5550	absent	nouvelle (<40 %)	0x31C740	non	480	19	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1E57F0	modifie	nouvelle (<40 %)	0x379620	non	128	6	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1E5E40	modifie	apparentee (40-70 %)	0x3131E0	non	1376	37	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1E67E0	modifie	nouvelle (<40 %)		non	112	4	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1EBDC0	modifie	apparentee (40-70 %)	0xA0FD0	non	528	19	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EC800	absent	nouvelle (<40 %)	0x89880	non	288	10	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EC920	absent	nouvelle (<40 %)	0xAE500	non	304	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1ECA50	absent	nouvelle (<40 %)	0xAE500	non	304	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1ECB80	absent	nouvelle (<40 %)	0xAE500	non	304	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1ECE70	absent	nouvelle (<40 %)	0x38F90	non	752	20	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EDBF0	modifie	nouvelle (<40 %)	0x38F90	non	608	29	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EE7E0	modifie	nouvelle (<40 %)		non	176	8	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1EE890	modifie	nouvelle (<40 %)	0x347FB0	non	352	17	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1EE9F0	modifie	apparentee (40-70 %)	0x7A090	non	560	16	sans alignement (propre a Upper ou au portage)	fin + generique
+0x1EEC20	modifie	apparentee (40-70 %)	0x367F00	non	560	16	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EEE50	absent	apparentee (40-70 %)	0x50B80	non	672	19	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EF0F0	absent	apparentee (40-70 %)	0x50B80	non	672	19	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EFD10	modifie	nouvelle (<40 %)	0x4CF60	non	576	24	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1EFF50	modifie	modifiee (70-90 %)	0x3BEF50	non	160	5	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F0310	modifie	nouvelle (<40 %)	0x4CF60	non	352	7	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F3470	modifie	nouvelle (<40 %)		non	112	4	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F34E0	modifie	apparentee (40-70 %)	0x37AD80	non	528	16	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F7230	modifie	nouvelle (<40 %)	0x9A980	non	480	15	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F8A20	modifie	apparentee (40-70 %)	0x301D0	non	352	7	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F8B80	modifie	nouvelle (<40 %)	0x1473E0	non	256	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F8FA0	modifie	apparentee (40-70 %)	0xA0FD0	non	464	16	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F9170	modifie	apparentee (40-70 %)	0x117130	non	512	16	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F9550	modifie	apparentee (40-70 %)	0xA0FD0	non	368	10	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1F9930	modifie	apparentee (40-70 %)	0xA0FD0	non	368	10	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1FDBE0	modifie	nouvelle (<40 %)	0x9A980	non	480	15	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x1FDE80	modifie	nouvelle (<40 %)	0x27B450	non	256	10	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x204400	modifie	nouvelle (<40 %)		non	96	4	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x204600	modifie	apparentee (40-70 %)	0x145930	non	192	5	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20A180	modifie	nouvelle (<40 %)	0xCFD50	non	64	3	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20A1C0	modifie	apparentee (40-70 %)	0xD3BE0	non	272	13	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20A480	modifie	nouvelle (<40 %)	0xD6B60	non	112	6	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20A4F0	modifie	apparentee (40-70 %)	0xA0FD0	non	384	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20A670	modifie	nouvelle (<40 %)	0x1D4190	non	496	21	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20AA00	modifie	nouvelle (<40 %)	0x1AC870	non	480	13	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20AE70	modifie	nouvelle (<40 %)	0xD6B60	non	112	6	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20AEE0	modifie	apparentee (40-70 %)	0xA0FD0	non	432	13	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20E1E0	modifie	nouvelle (<40 %)	0x347FB0	non	352	17	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20E410	modifie	nouvelle (<40 %)	0x2B7BF0	non	288	12	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20E8B0	absent	nouvelle (<40 %)	0x3B230	non	224	10	sans alignement (propre a Upper ou au portage)	fin + generique
+0x20E990	absent	nouvelle (<40 %)	0x2D2D90	non	320	10	sans alignement (propre a Upper ou au portage)	fin + generique
+0x20EAD0	absent	apparentee (40-70 %)	0x3245F0	non	400	15	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20FDA0	modifie	apparentee (40-70 %)	0x753C0	non	240	10	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20FE90	absent	nouvelle (<40 %)		non	144	7	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x20FF20	modifie	nouvelle (<40 %)	0xA9790	non	208	6	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x210A80	modifie	apparentee (40-70 %)	0x327510	non	1104	47	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x210F40	modifie	nouvelle (<40 %)	0x4CF60	non	592	22	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2113D0	modifie	nouvelle (<40 %)	0x377460	non	560	18	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2116F0	absent	nouvelle (<40 %)	0x2C66B0	non	688	18	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x211A10	modifie	nouvelle (<40 %)	0x4CF60	non	448	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x211C20	modifie	nouvelle (<40 %)	0x38A8D0	non	336	17	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x211D70	modifie	nouvelle (<40 %)	0x384320	non	464	22	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x211F40	modifie	nouvelle (<40 %)	0x3B26B0	non	544	27	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2126F0	modifie	nouvelle (<40 %)		non	96	4	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x212890	absent	nouvelle (<40 %)	0x40BB0	non	640	31	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x212B10	absent	nouvelle (<40 %)	0x335920	non	1088	42	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x212F50	absent	apparentee (40-70 %)	0x366660	non	112	3	sans alignement (propre a Upper ou au portage)	fin + generique
+0x213040	modifie	nouvelle (<40 %)	0x3B65F0	non	208	12	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2134F0	modifie	apparentee (40-70 %)	0x327E00	non	176	10	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2135A0	modifie	nouvelle (<40 %)	0x327E00	non	192	9	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x213B40	modifie	apparentee (40-70 %)	0xA0FD0	non	496	15	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x213D30	modifie	apparentee (40-70 %)	0xA0FD0	non	528	16	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2142F0	modifie	nouvelle (<40 %)	0x4CF60	non	368	8	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x215690	absent	nouvelle (<40 %)	0x354A60	non	1200	40	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2168F0	absent	nouvelle (<40 %)	0x343840	non	688	22	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x216D60	modifie	nouvelle (<40 %)	0x2FEA50	non	896	23	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2170E0	absent	nouvelle (<40 %)	0x225880	non	304	12	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x217210	modifie	nouvelle (<40 %)	0x60160	non	416	29	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2173B0	absent	nouvelle (<40 %)	0x3E3A0	non	112	7	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x217920	modifie	apparentee (40-70 %)	0x30300	non	352	8	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x217DD0	modifie	apparentee (40-70 %)	0xA0FD0	non	368	9	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x217F40	modifie	apparentee (40-70 %)	0xA0FD0	non	464	15	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2182F0	modifie	nouvelle (<40 %)	0x4CF60	non	352	7	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x218450	absent	nouvelle (<40 %)	0x32BD50	non	144	6	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2184E0	modifie	apparentee (40-70 %)	0x1E8CF0	non	576	15	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x219D80	absent	nouvelle (<40 %)	0x3755A0	non	256	12	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x219E80	absent	nouvelle (<40 %)	0x3414D0	non	896	40	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x21A200	modifie	apparentee (40-70 %)	0x312BE0	non	640	11	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x21A480	modifie	apparentee (40-70 %)	0x38FA20	non	272	18	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x21A5B0	modifie	apparentee (40-70 %)	0x367F00	non	512	14	sans alignement (propre a Upper ou au portage)	fin + generique
+0x21A9B0	modifie	nouvelle (<40 %)	0x347FB0	non	352	17	objets/effets/ecrans $80000-$BFFFF	fin + generique
+0x2489E0	absent	nouvelle (<40 %)	0x2D4EB0	oui	3200	102	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0000] | VS/combat/entre-combats [A5+8=0008]
+0x249660	modifie	deplacements	0x387DD0	non	112	4	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0008]
+0x249820	absent	nouvelle (<40 %)	0x62430	non	640	30	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x249AA0	absent	nouvelle (<40 %)	0x2EEA50	non	1216	53	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x249F60	modifie	apparentee (40-70 %)	0x9EC70	non	256	10	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x24A060	modifie	nouvelle (<40 %)	0x177570	non	256	10	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x24A200	absent	nouvelle (<40 %)	0x6F000	non	96	6	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x24A260	absent	nouvelle (<40 %)	0x9B4F0	non	128	7	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x24A630	modifie	nouvelle (<40 %)	0x62430	non	464	21	flux de jeu $8000-$DFFF	continue
+0x24A800	absent	nouvelle (<40 %)	0x24ED10	non	192	9	flux de jeu $8000-$DFFF	continue
+0x24A8C0	modifie	nouvelle (<40 %)	0xA0E00	non	384	16	flux de jeu $8000-$DFFF	continue
+0x24AA40	modifie	apparentee (40-70 %)	0x2D90D0	non	960	16	flux de jeu $8000-$DFFF	continue
+0x24AE00	absent	nouvelle (<40 %)	0x320C60	non	64	4	flux de jeu $8000-$DFFF	continue
+0x24AE40	absent	nouvelle (<40 %)	0x9B4F0	non	304	17	flux de jeu $8000-$DFFF	continue | fin + generique
+0x24B0F0	modifie	nouvelle (<40 %)	0x9F7A0	non	240	13	flux de jeu $8000-$DFFF	game over / apres fin
+0x24B1E0	modifie	apparentee (40-70 %)	0x62430	non	192	6	flux de jeu $8000-$DFFF	game over / apres fin
+0x24B2A0	modifie	apparentee (40-70 %)	0x62430	non	208	7	flux de jeu $8000-$DFFF	game over / apres fin
+0x24B370	modifie	nouvelle (<40 %)	0x128E80	non	224	8	flux de jeu $8000-$DFFF	game over / apres fin
+0x24B460	modifie	nouvelle (<40 %)	0x8DA20	non	208	8	flux de jeu $8000-$DFFF	game over / apres fin
+0x24B530	modifie	nouvelle (<40 %)	0x316900	non	320	17	flux de jeu $8000-$DFFF	game over / apres fin | sortie
+0x24B670	modifie	nouvelle (<40 %)	0x32F3B0	non	336	15	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0006]
+0x24BCC0	absent	nouvelle (<40 %)	0x14FD80	oui	624	30	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0004]
+0x24BF30	absent	nouvelle (<40 %)	0xDF6E0	non	1552	71	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x24E240	modifie	nouvelle (<40 %)		oui	96	4	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x24F020	modifie	apparentee (40-70 %)	0xA49E0	oui	2480	41	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006] | selection
+0x24F9D0	absent	nouvelle (<40 %)	0xA50E0	oui	3376	108	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006] | selection
+0x250EF0	modifie	nouvelle (<40 %)	0x3A3C20	oui	1072	30	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x2517C0	modifie	apparentee (40-70 %)	0x38A760	non	400	9	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x2519A0	absent	nouvelle (<40 %)	0x1D8AC0	non	288	10	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x251AC0	modifie	modifiee (70-90 %)	0xA5D40	non	512	8	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x253290	modifie	apparentee (40-70 %)	0x4A860	oui	1456	27	selection $1E000-$1FFFF	selection
+0x253A80	absent	identique 68K	0x317AD0	oui	208	12	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004] | selection
+0x2553E0	absent	apparentee (40-70 %)	0x319430	oui	5136	180	selection $1E000-$1FFFF	selection
+0x2569A0	modifie	apparentee (40-70 %)	0x31B890	oui	2544	68	selection $1E000-$1FFFF	selection
+0x2575D0	absent	nouvelle (<40 %)	0x3B4300	oui	304	15	selection $1E000-$1FFFF	selection
+0x258A00	modifie	apparentee (40-70 %)	0x9C0A0	oui	1728	63	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004]
+0x2590C0	absent	nouvelle (<40 %)		non	208	12	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x259190	modifie	nouvelle (<40 %)	0x320360	non	288	12	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0004]
+0x2592B0	absent	nouvelle (<40 %)	0x31E2C0	non	2816	95	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25A4E0	absent	nouvelle (<40 %)	0x2B07E0	non	288	13	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25A600	modifie	nouvelle (<40 %)	0x37E7A0	non	128	6	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25A690	modifie	nouvelle (<40 %)		non	64	3	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25A6D0	modifie	apparentee (40-70 %)	0x9EC70	non	224	8	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25A7B0	modifie	nouvelle (<40 %)	0x96330	non	512	12	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25C6E0	modifie	apparentee (40-70 %)	0x9C0A0	oui	1888	69	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25CEF0	absent	nouvelle (<40 %)	0x9F7A0	non	128	6	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25CF70	modifie	nouvelle (<40 %)	0x16C7A0	non	352	14	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25D0D0	absent	nouvelle (<40 %)	0x344AC0	non	832	37	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25D410	modifie	apparentee (40-70 %)	0x9EC70	non	320	12	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25D550	modifie	nouvelle (<40 %)	0x375D70	non	304	12	selection $1E000-$1FFFF	VS/combat/entre-combats [A5+8=0002]
+0x25D680	absent	nouvelle (<40 %)	0x2BDB0	non	96	5	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0002]
+0x25DAA0	modifie	apparentee (40-70 %)	0x4EF90	oui	592	9	sans alignement (propre a Upper ou au portage)	selection
+0x260390	modifie	apparentee (40-70 %)	0x95340	oui	2480	104	flux de jeu $8000-$DFFF	hors partie (A5+0=0000) | init
+0x2615D0	absent	nouvelle (<40 %)	0x96690	oui	4128	125	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0000] | VS/combat/entre-combats [A5+8=0002] | VS/combat/entre-combats [A5+8=0008]
+0x263820	modifie	modifiee (70-90 %)	0x2D90D0	non	1008	14	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0000] | VS/combat/entre-combats [A5+8=0008]
+0x263C10	modifie	nouvelle (<40 %)	0x2D2EB0	oui	1552	32	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0000] | VS/combat/entre-combats [A5+8=0008]
+0x266560	modifie	nouvelle (<40 %)	0x9B630	non	960	38	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x266F20	modifie	nouvelle (<40 %)	0x31D6A0	non	2080	54	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x269340	absent	apparentee (40-70 %)	0x9D240	oui	6320	137	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26B0B0	modifie	nouvelle (<40 %)	0x4AD50	oui	1808	47	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26B7C0	modifie	apparentee (40-70 %)	0xA1980	oui	1424	36	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26C010	modifie	apparentee (40-70 %)	0x9EBE0	oui	304	11	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26C140	modifie	apparentee (40-70 %)	0x9ED70	oui	2592	56	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26CD00	modifie	nouvelle (<40 %)	0x9F4A0	oui	2208	65	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26E2F0	modifie	nouvelle (<40 %)	0x2FCB70	non	1440	45	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26F5B0	modifie	nouvelle (<40 %)		oui	144	6	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x26F9F0	modifie	nouvelle (<40 %)	0xA05C0	oui	1136	43	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x26FE60	modifie	nouvelle (<40 %)	0x61D00	oui	224	11	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x26FF40	modifie	apparentee (40-70 %)	0x9EC70	oui	272	9	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x270050	modifie	apparentee (40-70 %)	0x31F210	oui	784	28	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x270360	modifie	nouvelle (<40 %)	0x9F7A0	non	128	7	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x2703E0	modifie	nouvelle (<40 %)	0x3D6B0	non	352	18	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0008]
+0x2712E0	modifie	nouvelle (<40 %)	0xA08A0	non	944	47	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x271BF0	modifie	apparentee (40-70 %)	0x2DECF0	oui	1728	46	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x2722B0	modifie	nouvelle (<40 %)		oui	176	8	flux de jeu $8000-$DFFF	VS/combat/entre-combats [A5+8=0006]
+0x272B90	modifie	apparentee (40-70 %)	0x38A760	non	496	13	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x272EB0	modifie	nouvelle (<40 %)	0x232180	oui	944	30	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x273260	absent	nouvelle (<40 %)		non	96	10	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x369920	modifie	modifiee (70-90 %)	0x256FA0	non	288	14	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4077C0	absent	nouvelle (<40 %)	0x3B4D50	non	176	7	sans alignement (propre a Upper ou au portage)	sortie
+0x408020	absent	deplacements	0x24370	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408050	absent	deplacements	0x24640	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408080	absent	deplacements	0x243A0	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4080B0	absent	deplacements	0x243D0	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4080E0	absent	deplacements	0x24400	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408110	absent	deplacements	0x24430	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408140	absent	deplacements	0x24370	non	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408170	absent	deplacements	0x24640	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4081A0	absent	deplacements	0x243A0	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4081D0	absent	deplacements	0x243D0	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408200	absent	deplacements	0x24400	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408260	absent	deplacements	0x24370	non	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408290	absent	deplacements	0x24640	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4082C0	absent	deplacements	0x243A0	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4082F0	absent	deplacements	0x243D0	oui	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x408320	modifie	deplacements	0x24400	non	48	2	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x40B250	modifie	deplacements	0x2C440	oui	432	7	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x40F550	modifie	identique 68K	0x3B41B0	oui	336	16	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4105D0	absent	apparentee (40-70 %)	0x3B5450	oui	224	4	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0006]
+0x4118D0	modifie	nouvelle (<40 %)	0x3601B0	non	224	11	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x4119B0	modifie	nouvelle (<40 %)	0x7F5C0	non	592	27	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x411CA0	absent	nouvelle (<40 %)	0x3601B0	non	192	9	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006]
+0x411D60	modifie	nouvelle (<40 %)	0x33E9D0	non	800	24	sans alignement (propre a Upper ou au portage)	VS/combat/entre-combats [A5+8=0004] | VS/combat/entre-combats [A5+8=0006] | VS/combat/entre-combats [A5+8=0008]
+0x41A000	modifie	identique 68K	0x3B65F0	oui	176	9	sans alignement (propre a Upper ou au portage)	init

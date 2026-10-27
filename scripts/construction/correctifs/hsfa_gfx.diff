@@ -1,0 +1,39 @@
+--- hsfa_gfx.orig.py	2026-10-10 13:53:28.994613017 +0200
++++ mod/hsfa_gfx.py	2026-10-10 13:53:42.760780406 +0200
+@@ -6,6 +6,9 @@
+ Les tables du banc (banques/f<N>.bin : local -> code) recoivent les nouveaux codes.
+ 
+ Usage : MODULE=ro5 hsfa_gfx.py [N...]   (defaut : banques de carte.txt)   -> <travail>/hsfa_gfx.bin, tables dans <banques>_hx/
++IDEMPOTENT : chaque table etendue est recalculee depuis la table d'ORIGINE (<banques>/f<N>.bin), jamais depuis
++<banques>_hx/ (deja completee par une execution precedente : relance, il n'y trouvait plus de tuile absente et
++recrivait un hsfa_gfx.bin VIDE).
+ Verification de l'encodage : hsfa_gfx.py --verif <fichier de vidage de la region MAME> (tuiles SFA3)."""
+ import os, sys
+ import numpy as np
+@@ -43,7 +46,12 @@
+     # tables etendues dans un dossier a part (les tables d'origine restent valables pour MAME stock)
+     import shutil
+     OUT = banques.OUT.rstrip('/') + '_hx'
+-    if not os.path.isdir(OUT): shutil.copytree(banques.OUT, OUT)
++    # (idempotence) <banques>_hx = copie FRAICHE de <banques> a chaque execution (carte.txt, plan1, f312... a jour si
++    # banques.py a ete relance), sauf plan2.bin deja ecrite par hsfa_plans.py ; les tables f<N> sont recalculees ci-dessous
++    os.makedirs(OUT, exist_ok=True)
++    for f in sorted(os.listdir(banques.OUT)):
++        if f == "plan2.bin" and os.path.exists(os.path.join(OUT, f)): continue
++        if os.path.isfile(os.path.join(banques.OUT, f)): shutil.copyfile(os.path.join(banques.OUT, f), os.path.join(OUT, f))
+     noms = [int(a) for a in sys.argv[1:]] or banques.carte()
+     idx = banques.index_rom()
+     neuf = {}                                        # contenu -> code etendu
+@@ -58,9 +66,10 @@
+         blob += b0; n0 = len(px0)
+         print("HSFA_GFX_BASE : %d tuiles reprises (codes $%x-$%x)" % (n0, EXT0, EXT0 + n0 - 1))
+     for n in noms:
++        src = os.path.join(banques.OUT, "f%d.bin" % n)          # table d'origine (banques.py), pas celle de _hx
+         p = os.path.join(OUT, "f%d.bin" % n)
+-        if not os.path.exists(p): continue
+-        t = np.fromfile(p, '<u4').copy()
++        if not os.path.exists(src): continue
++        t = np.fromfile(src, '<u4').copy()
+         buf = banques.fichier(n); ajout = 0
+         for k, m, px in anthgfx.tiles(buf):
+             if k != 1 or px is None or m >= len(t) or t[m] != VIDE: continue

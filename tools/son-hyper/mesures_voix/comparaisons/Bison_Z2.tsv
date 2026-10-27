@@ -1,0 +1,37 @@
+geste	arcade	hyper	ecart
+projection HP	0314	0314	
+projection HK	-	-	
+HP debout	-	-	
+HK debout	-	-	
+MP debout	-	-	
+MK debout	-	-	
+LP debout	-	-	
+LK debout	-	-	
+HP accroupi	-	-	
+HK accroupi	0315	0315	
+QCF+LP	-	-	
+QCF+HP	-	-	
+DP+LP	-	-	
+DP+HP	-	-	
+QCB+LK	-	-	
+QCB+HK	-	-	
+QCF+LK	-	-	
+QCF+HK	-	-	
+QCB+LP	-	-	
+QCB+HP	-	-	
+saut HP	-	-	
+saut HK	-	-	
+projection HP 2	0314	0314	
+charge arriere-avant+HP	0316	SFA3:044F	ECART
+charge arriere-avant+HK	0314	0314	
+charge bas-haut+HK	0317	SFA3:0450	ECART
+charge bas-haut+HP	-	-	
+360+HP	-	-	
+DP inverse+HP	-	-	
+DP inverse+HK	0315	0315	
+HP repete	-	-	
+HK repete	-	-	
+demi-cercle avant+HP	-	-	
+demi-cercle arriere+HK	-	-	
+Start	0318	SFA3:0451	ECART
+# hyper : depart des gestes 1351 ; CHOIX J1 image 578 : $102=4a base=0a ism=00 $116=22 $122=00 $123=00 $15F=00 $D0=00 $5C=00 | MANCHE 1 image 1084 J1 4a J2 00

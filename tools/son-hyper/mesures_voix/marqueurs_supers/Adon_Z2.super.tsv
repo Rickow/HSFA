@@ -1,0 +1,5 @@
+# Adon_Z2 : version $45, table $E72F00 (redirection), 23 entrees, origine prog+1EA588
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	45	03AC	01C0	2		super QCFx2+HK ; super QCFx2+LK
+# voix Hyper sans voix d'arcade : 03AC@super QCFx2+HP 03AD@super QCFx2+HP 03AC@super QCFx2+LP 03AD@super QCFx2+LP
+# voix d'arcade sans voix Hyper : 

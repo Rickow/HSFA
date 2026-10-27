@@ -1,0 +1,37 @@
+geste	arcade	hyper	ecart
+projection HP	0170 0171	0171 0171	ECART
+projection HK	0170 0170 0170 0170 0170	0171 0171 0171 0171 0171	ECART
+HP debout	-	-	
+HK debout	-	-	
+MP debout	-	-	
+MK debout	-	-	
+LP debout	-	-	
+LK debout	-	-	
+HP accroupi	-	-	
+HK accroupi	-	-	
+QCF+LP	0169	0169	
+QCF+HP	0169	0169	
+DP+LP	016A	016A	
+DP+HP	016A	016A	
+QCB+LK	016B	016B	
+QCB+HK	016B	016B	
+QCF+LK	-	-	
+QCF+HK	-	-	
+QCB+LP	-	-	
+QCB+HP	-	-	
+saut HP	-	-	
+saut HK	-	-	
+projection HP 2	0170 0171	0171 0171	ECART
+charge arriere-avant+HP	-	-	
+charge arriere-avant+HK	-	-	
+charge bas-haut+HK	-	-	
+charge bas-haut+HP	-	-	
+360+HP	-	-	
+DP inverse+HP	-	-	
+DP inverse+HK	-	-	
+HP repete	-	-	
+HK repete	-	-	
+demi-cercle avant+HP	0169	0169	
+demi-cercle arriere+HK	016B	016B	
+Start	016F	016F	
+# hyper : depart des gestes 1346 ; CHOIX J1 image 546 : $102=31 base=01 ism=00 $116=01 $122=00 $123=00 $15F=00 $D0=00 $5C=00 | MANCHE 1 image 1083 J1 31 J2 00

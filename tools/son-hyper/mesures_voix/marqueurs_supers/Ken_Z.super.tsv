@@ -1,0 +1,8 @@
+# Ken_Z : version $31, table $E70480 (redirection), 26 entrees, origine prog+1A9D6A
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	31	032C	016C	2		super QCFx2+HP ; super QCFx2+LP
+sfa1	31	032D	016E	2		super QCFx2+HP ; super QCFx2+LP
+sfa1	31	0332	0171	2		super QCBx2+HK ; super demi-cercle x2+HP
+sfa1	31	0333	0170	7		super QCBx2+HK ; super demi-cercle x2+HP
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 016D@super QCFx2+HK 016D@super QCFx2+LK

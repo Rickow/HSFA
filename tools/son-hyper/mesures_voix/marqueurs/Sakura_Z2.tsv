@@ -1,0 +1,11 @@
+# Sakura_Z2 : version $4D, table $E74300 (redirection), 33 entrees, origine prog+267306
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	4D	04A9	0340	3		QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	4D	04AA	0341	2		DP+HP ; DP+LP
+sfa2	4D	04AB	0342	3		QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	4D	04AE	0345	6		projection HP ; projection HP 2
+sfa2	4D	04B2	0349	1		projection HK
+sfa2	4D	04B3	034A	1		projection HK
+sfa2	4D	04B7	034E	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

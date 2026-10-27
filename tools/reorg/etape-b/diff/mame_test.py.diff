@@ -1,0 +1,56 @@
+--- a/scripts/untranspile/mame_test.py	2026-10-10 18:58:22.829394678 +0200
++++ b/scripts/untranspile/mame_test.py	2026-10-11 12:47:57.648410578 +0200
+@@ -73,6 +73,8 @@
+     keys |= set(T._CODE_STARTS.get('set') or ())             # (constantes CODE_x emises par le traducteur)
+     keys = sorted(keys)
+     assert CODEMAP + 8*len(keys) <= CODECONV
++    import assemble as _AS
++    if _AS.RELOGE_CODE: T.RELOGE_KEYS = set(keys)        # (ETAPE B) relogement des tables de pointeurs de code
+     HASH = None if os.environ.get("CODECONV_DICHO") == "1" else 0x3C0000      # (HANDOFF §98) table de hachage, 128 Ko
+     cconv, CCE = K.build_code_conv(CODECONV, CODEMAP, len(keys), T.RUNTIME_BASE + CODE0, T.CODE_END_RT, hash_addr=HASH)
+     T.CODE_CONV = CCE
+@@ -380,6 +382,44 @@
+         v = struct.unpack_from('<I', data, o)[0]
+         if T.is_code_ptr(v):
+             struct.pack_into('<I', data, o, lab(v - T.RUNTIME_BASE)); nrel += 1
++    if T.RELOGE_RAM_TABLES:                              # (amorce de l'etape C) pointeurs RAM PS2 -> $FFxxxx
++        R_ = T.RAM_HI << 16; nrr = 0
++        for p_, f_ in sorted(T.RELOGE_RAM_TABLES.items()):
++            for a_ in range(p_, f_, 4):
++                o_ = a_ - T.CODE_END_RT; v_ = struct.unpack_from('<I', data, o_)[0]
++                if v_ == 0: continue
++                assert R_ <= v_ < R_ + 0x10000
++                l_ = v_ - R_ + 0xff0000                  # = talon $400 (plage (R, R + $10000) -> $FF0000)
++                if p_ in T.RELOGE_NATIF_TABLES: struct.pack_into('<HH', data, o_, l_ >> 16, l_ & 0xffff)
++                else: struct.pack_into('<I', data, o_, l_)
++                nrr += 1
++        print("etape C (amorce) : %d tables de pointeurs RAM relogees (%d cases), %d lectures sans talon" % (
++              len(T.RELOGE_RAM_TABLES), nrr, len(T.RELOGE_RAM_SITES)))
++        with open(os.path.join(W, "etapeC_ram.txt"), "w") as f_:
++            for p_, f2_ in sorted(T.RELOGE_RAM_TABLES.items()):
++                f_.write("table %06x-%06x  68K $%06x  %d cases%s\n" % (p_, f2_, T.addr_to_68k(p_) & 0xffffff, (f2_ - p_) // 4,
++                         "  ordre 68K" if p_ in T.RELOGE_NATIF_TABLES else ""))
++            for va_, n_, tb_ in T.RELOGE_RAM_SITES:
++                f_.write("lecture mips %07x A%d $%06x  table %06x\n" % (va_, n_, lab(va_), tb_[0]))
++    if T.RELOGE_TABLES:                                  # (ETAPE B) cases des tables de code -> etiquettes 68K
++        nrc = 0; kset = set(keys)
++        for p_, f_ in sorted(T.RELOGE_TABLES.items()):
++            for a_ in range(p_, f_, 4):
++                o_ = a_ - T.CODE_END_RT; v_ = struct.unpack_from('<I', data, o_)[0]
++                if v_ == 0: continue
++                assert v_ in kset, "etape B : case %x = %x hors des cles" % (a_, v_)
++                l_ = lab(v_ - T.RUNTIME_BASE)
++                if p_ in T.RELOGE_NATIF_TABLES: struct.pack_into('<HH', data, o_, l_ >> 16, l_ & 0xffff)   # ordre 68K
++                else: struct.pack_into('<I', data, o_, l_)       # moities echangees (recette cps2)
++                nrc += 1
++        print("etape B : %d tables de code relogees (%d cases, %d tables en ordre 68K), %d sites directs%s" % (len(T.RELOGE_TABLES),
++              nrc, len(T.RELOGE_NATIF_TABLES), len(T.RELOGE_SITES), " (CONTROLE : talon de code garde)" if _AS.RELOGE_CODE == 2 else ""))
++        with open(os.path.join(W, "etapeB_reloge.txt"), "w") as f_:
++            for p_, f2_ in sorted(T.RELOGE_TABLES.items()):
++                f_.write("table %06x-%06x  68K $%06x  %d cases%s\n" % (p_, f2_, T.addr_to_68k(p_) & 0xffffff, (f2_ - p_) // 4,
++                         "  ordre 68K" if p_ in T.RELOGE_NATIF_TABLES else ""))
++            for va_, n_, tb_ in T.RELOGE_SITES:
++                f_.write("site mips %07x A%d $%06x  tables %s\n" % (va_, n_, lab(va_), ",".join("%06x" % t for t in tb_)))
+     data = bytes(data)
+     print("pointeurs de code relocalises dans les donnees :", nrel)
+     be = bytes(b for i in range(0, len(data), 2) for b in (data[i+1], data[i]))

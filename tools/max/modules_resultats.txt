@@ -1,0 +1,46 @@
+modules persos : 0xe9724..0x1caf0c  (902 Ko)
+ID   perso            module  fonctions  pointées  API moteur  dont arcade
+0x00 RYU              18.5 Ko      162       83 %        70         70
+0x01 KEN              15.7 Ko      143       81 %        70         70
+0x02 AKUMA            26.3 Ko      221       81 %        86         86
+0x03 CHARLIE          17.1 Ko      162       87 %        73         73
+0x04 CHUN-LI          18.0 Ko      146       81 %        70         70
+0x05 ADON             14.3 Ko      157       83 %        58         58
+0x06 SODOM            19.8 Ko      147       80 %        70         70
+0x07 GUY              25.1 Ko      233       75 %        74         74
+0x08 BIRDIE           15.2 Ko      119       83 %        62         62
+0x09 ROSE             29.8 Ko      196       71 %        78         78
+0x0a M.BISON          20.3 Ko      176       73 %        67         67
+0x0b SAGAT            20.8 Ko      183       87 %        72         72
+0x0c DAN              22.3 Ko      211       73 %        67         67
+0x0d SAKURA           16.8 Ko      160       86 %        71         71
+0x0e ROLENTO          32.6 Ko      290       74 %        84         84
+0x0f DHALSIM          27.3 Ko      243       70 %        75         75
+0x10 ZANGIEF          23.8 Ko      218       82 %        75         75
+0x11 GEN              24.5 Ko      115       69 %        77         77
+0x12 CHUN-LI (alt)    16.7 Ko      133       80 %        63         63
+0x13 GEN (alt)        24.5 Ko      115       69 %        77         77
+0x14 SODOM (alt)      19.8 Ko      148       80 %        70         70
+0x15 BALROG           17.0 Ko      153       78 %        66         66
+0x16 CAMMY            22.9 Ko      211       79 %        60         60
+0x17 EVIL RYU         19.5 Ko      175       85 %        83         83
+0x18 E.HONDA          16.2 Ko      139       81 %        68         68
+0x19 BLANKA           29.6 Ko      250       82 %        76         76
+0x1a R.MIKA           32.3 Ko      228       83 %        65         65
+0x1b CODY             35.5 Ko      338       80 %        81         81
+0x1c VEGA             24.8 Ko      180       75 %        66         66
+0x1d KARIN            41.6 Ko      393       83 %        74         74
+0x1e JULI             27.0 Ko      213       85 %        78         78
+0x1f JUNI              1.1 Ko        2      100 %         7          7
+0x20 GUILE            12.7 Ko      118       83 %        64         64
+0x21 FEI-LONG         19.0 Ko      177       81 %        60         60
+0x22 DEE JAY          12.1 Ko      117       85 %        64         64
+0x23 T.HAWK           15.1 Ko      142       88 %        59         59
+0x24 SHIN AKUMA       26.4 Ko      220       80 %        88         88
+0x25 BALROG (alt)     30.2 Ko      273       80 %       110         74
+0x26 EAGLE            26.0 Ko      202       85 %       106         55
+0x27 MAKI             21.4 Ko      168       86 %        97         54
+0x28 YUN              27.4 Ko      220       86 %       108         57
+0x29 INGRID           19.4 Ko      145       84 %        42         21
+
+utilitaires moteur appelés par Eagle/Maki/Yun/Ingrid mais par aucun perso arcade : 88 (~6 Ko), dont 44 partagés par >= 2 des 4, 0 utilisés par les ajouts d'Upper

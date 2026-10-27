@@ -1,0 +1,78 @@
+--- a/scripts/untranspile/mame_test.py
++++ b/scripts/untranspile/mame_test.py
+@@ -639,6 +639,64 @@
+         # (agent_ro9) liste des blocs externes pour banc_mem_liste.lua (banc_mem.lua ne connait que des bases fixes)
+         exts = sorted(["%06x" % b_ for b_ in AN.FIXES.values()] + (["%06x" % T.DATA_EXT] if T.DATA_SPLIT else []) + EXT_PLUS)
+         open(os.path.join(W, "ext_liste.txt"), "w").write("\n".join(exts) + "\n")
++    # (agent_options_hyper, OPTIONS-HYPER-UPPER.md) BGM_UPPER : reglage BGM de l'ecran RANDOM PLAYER d'Hyper ($C3B5(A5)
++    # = $FF43B5 ; Hyper : -1 hasard, 0 J1, 1 J2) transpose dans Upper. Upper choisit la musique du combat dans la routine
++    # du MIPS 0x329C18 : en VERSUS (1), TRAINING (4) et VERSUS cache (7), celle du DECOR (T_613380[$100], variante au
++    # hasard) ; dans les autres modes, le theme du perso du joueur humain. Hyper joue le theme d'un des deux persos.
++    # Talon en CODECONV-$100 : $FF43B5 = 0 -> CMPI d'origine refait, retour au Bcc d'origine ; sinon, dans ces trois
++    # modes, A4 = J1 (2), J2 (3) ou l'un des deux au hasard (1, meme tirage que la variante de decor), puis branche
++    # « theme du perso » d'Upper juste apres son propre choix de A4. Descripteur en CODECONV-$110 : 'HSFABGM1', adresse
++    # du site (CMPI.B #7,$C201(A5), 6 o).
++    #   BGM_UPPER=1 (defaut) : talon + descripteur SEULEMENT ; le site reste tel quel (jeu inchange, au cycle pres). Le
++    #     coeur FBNeo (DIP « Option: BGM ») ou banc_options.lua (HSFA_OPT_BGM) y posent JMP talon.L (6 o) quand le
++    #     reglage est choisi, et ecrivent $FF43B5 ; ils remettent le CMPI quand on revient a « Game default ».
++    #   BGM_UPPER=2 : JMP pose dans la ROM (seul $FF43B5 decide ; quelques cycles de plus a chaque choix de musique, ce
++    #     qui suffit a decaler d'une image une partie scriptee). BGM_UPPER=0 : ROM identique a l'ancienne.
++    if P.get('bgm') and os.environ.get("BGM_UPPER", "1") != "0":
++        v_site, v_hasard, v_theme = P['bgm']
++        def item_(va, debut):
++            L_ = [it for it in its if it.va == va and it.mn.startswith(debut)]
++            assert len(L_) == 1, "BGM_UPPER : %x %r introuvable (%d)" % (va, debut, len(L_))
++            return L_[0].off
++        a_site = item_(v_site, 'CMPI.B #$7,$c201(A5)')
++        a_has = item_(v_hasard, 'JSR')
++        a_the = item_(v_theme, 'MOVEQ #$0,D0')
++        # formes attendues : CMPI.B #7,$C201(A5) ; ... JSR hasard.L ; ANDI.W #1,D0 ; ... LEA $800(A5),A4 ; MOVEQ #0,D0
++        assert img[a_site:a_site+6] == bytes.fromhex('0c2d0007c201'), "BGM_UPPER : site %x" % a_site
++        assert img[a_has:a_has+2] == b'\x4e\xb9' and img[a_has+6:a_has+10] == bytes.fromhex('02400001'), "BGM_UPPER : hasard %x" % a_has
++        assert img[a_the-4:a_the+2] == bytes.fromhex('49ed08007000'), "BGM_UPPER : theme %x" % a_the
++        hasard = struct.unpack_from('>I', img, a_has + 2)[0]
++        TB = CODECONV - 0x100                            # zone libre entre la table des adresses de code et CODECONV
++        assert img[TB:TB+0x60] == bytes(0x60) and CODEMAP + 8*len(keys) <= TB
++        O = 0xC3B5
++        prog = [None, '4a2d%04x' % O, ('67', 'orig'),            # TST.B $C3B5(A5) ; BEQ.S orig
++                '0c2d0007c201', ('67', 'bgm'),                     # CMPI.B #7,$C201(A5) ; BEQ.S bgm
++                '0c2d0001c201', ('67', 'bgm'),                     # CMPI.B #1,$C201(A5) ; BEQ.S bgm
++                '0c2d0004c201', ('66', 'orig'),                    # CMPI.B #4,$C201(A5) ; BNE.S orig
++                'bgm', '0c2d0002%04x' % O, ('67', 'j1'),           # CMPI.B #2,$C3B5(A5) ; BEQ.S j1
++                '0c2d0003%04x' % O, ('67', 'j2'),                  # CMPI.B #3,$C3B5(A5) ; BEQ.S j2
++                '4eb9%08x' % hasard, '08000000', ('66', 'j1'),     # JSR hasard.L ; BTST #0,D0 ; BNE.S j1
++                'j2', '49ed0800', ('60', 'go'),                    # LEA $800(A5),A4 ; BRA.S go
++                'j1', '49ed0400',                                  # LEA $400(A5),A4
++                'go', '4ef9%08x' % a_the,                          # JMP theme.L
++                'orig', '0c2d0007c201', '4ef9%08x' % (a_site + 6)] # CMPI.B #7,$C201(A5) ; JMP Bcc d'origine.L
++        etq, pos = {}, 0
++        for x in prog[1:]:                               # 1re passe : etiquettes
++            if isinstance(x, tuple): pos += 2
++            elif all(c in '0123456789abcdef' for c in x): pos += len(x) // 2
++            else: etq[x] = pos
++        t, pos = bytearray(), 0
++        for x in prog[1:]:                               # 2e passe : Bcc.S d8 = cible - (adresse du Bcc + 2)
++            if isinstance(x, tuple):
++                d8 = etq[x[1]] - (len(t) + 2); assert 0 < d8 < 0x80; t += bytes.fromhex(x[0]) + bytes([d8])
++            elif all(c in '0123456789abcdef' for c in x): t += bytes.fromhex(x)
++        assert len(t) <= 0x60
++        img[TB:TB+len(t)] = t
++        assert img[TB-0x10:TB] == bytes(0x10)
++        img[TB-0x10:TB-4] = b'HSFABGM1' + struct.pack('>I', a_site)   # descripteur lu par le coeur / banc_options.lua
++        statique = os.environ.get("BGM_UPPER") == "2"
++        if statique: struct.pack_into('>HI', img, a_site, 0x4ef9, TB)  # CMPI.B #7,$C201(A5) (6 o) -> JMP talon.L (6 o)
++        print("BGM : choix de la musique $%x -> talon $%x (%d o ; $FF43B5 : 0 Upper, 1 hasard, 2 J1, 3 J2 ; hasard $%x, theme $%x ; JMP %s) (agent_options_hyper, BGM_UPPER)" % (a_site, TB, len(t), hasard, a_the, "pose dans la ROM" if statique else "pose par le coeur / le banc"))
+     sw = bytes(b for i in range(0, len(img), 2) for b in (img[i+1], img[i]))
+     out = os.path.join(W, P['sortie'], "sfa3ud"); os.makedirs(out, exist_ok=True)
+     names = ["sz3ud.03c", "sz3ud.04c", "sz3.05c", "sz3.06c", "sz3.07c", "sz3.08c", "sz3.09c", "sz3.10b"]
+--- a/scripts/untranspile/profils.py
++++ b/scripts/untranspile/profils.py
+@@ -39,6 +39,8 @@
+                                                  # donnees (§108) tombe au debut d'un bloc (pointeurs base + decalage)
+         travail='<workspace>/work/mame_ro5', sortie='roms_ro5',
+         option=(0x5f22e0, 0x5f72e0, 0x222ce0, 0x222eb0, 0xff4201),           # (agent_options) tache OPTION, sortie de l'ecran, creer / finir une tache (exec.), curseur des modes (68K)
++        bgm=(0x139c18, 0x139e70, 0x139fb8),      # (agent_options_hyper, BGM_UPPER) choix de la musique du combat (va du module) :
++                                                 # CMPI.B #7,$C201(A5) ; JSR hasard (variante de decor) ; MOVEQ #0,D0 apres le choix de A4 (theme)
+     ),
+     # (agent_ro9, MISE-EN-ROUTE-ro9.md) Hyper : valeurs de CARTE-ro9 §4, reverifiees dans le MIPS (outils/compare.py)
+     'ro9': dict(

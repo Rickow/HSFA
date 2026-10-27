@@ -1,0 +1,392 @@
+From 6a4a33e5ec907864f3acfaf77fa1fb0934656e97 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 18 Oct 2026 14:21:38 +0200
+Subject: [PATCH 10/11] HSFA: sprite blending registers, per object and per OBJ
+ palette (v3)
+
+Translucent sprites like SFA3 MAX on PSP, where an object's mode field
+selects sceGuBlendFunc(ADD, FIX, FIX, 0xFFFFFF, 0xFFFFFF) for the MAX
+characters' effects.
+
+Modes: 0 = opaque (default, reset value), 1 = saturated additive,
+2 = alpha 50 %, 3 = alpha 75 %, 4 = saturated subtractive, other values
+reserved (opaque). Mode 2 drivers only (Upper, Hyper).
+
+- Marked objects: bit 12 of the X word of the game's object list (never
+  set by the translated programs: 0 in 11 M measured entries; no meaning
+  for the hardware) is kept by the list converter (HsfaEclater) and
+  selects the mode in $804240-$804241 (low byte; 0 = bit ignored).
+- Per OBJ palette: $804220-$80423F, one byte per palette 0-31.
+- Priority: marked object with a non-zero $804240 mode uses that mode,
+  otherwise the palette mode.
+- Cps2ObjDraw passes the mode to the tile plotters as nCpsBlend =
+  0x100 | mode; values below 0x100 keep the original blendtable meaning.
+  PLOT macros: 24/32-bit through cps_mix(), 16-bit (RGB565 or 0RGB1555,
+  detected from BurnHighCol) through cps_mix16() for HSFA modes only.
+- Save states stay compatible: the registers are the last area of the
+  libretro state (LibretroAreaScan, HSFA_CORE builds) and each part is
+  read only when the loaded state contains it (older states: 0). States
+  from this core also load in older cores (trailing bytes ignored).
+- Test helpers: HSFA_OBJMIX=oo:m[,oo:m] (offset from $804220; 21 = marked
+  objects) forces values at reset, HSFA_MIX_LOG=<file> logs changes.
+- Registers never written: output identical to the pixel (nonreg_coeur:
+  sfa3, upper, hyper identical, 32-bit and 16-bit, 4:3 and 16:9).
+
+Revisions: v2 made save states compatible; v3 adds the per-object mode
+(bit 12 of X, register $804240).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps.h            |   2 +
+ src/burn/drv/capcom/cps_hsfa.cpp     | 109 ++++++++++++++++++++++++++-
+ src/burn/drv/capcom/cps_obj.cpp      |   7 ++
+ src/burn/drv/capcom/ctv.cpp          |  59 +++++++++++++++
+ src/burn/drv/capcom/ctv_do.h         |  12 +--
+ src/burner/libretro/retro_memory.cpp |  11 +++
+ 6 files changed, 193 insertions(+), 7 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index cf13bc2..96aa75e 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -555,6 +555,8 @@ INT32 HsfaPortWriteByte(UINT32 a, UINT8 d);
+ INT32 HsfaPortWriteWord(UINT32 a, UINT16 d);
+ void HsfaPortWriteWordStart(UINT32 a, UINT16 d);
+ UINT32 HsfaGfxLenMin();
++extern UINT8 nHsfaObjMix[32];							// (patch 0010) melange par palette OBJ, $804220-$80423F
++extern UINT8 nHsfaObjFlagMix;							// (patch 0010) melange des objets marques (bit 12 de X), $804240
+ void HsfaPortWriteWordEnd();
+ 
+ extern INT32 Cps2Volume;
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 0710ce0..9bbefd6 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -93,6 +93,84 @@ static INT32 nDepuis4 = 0;							// image de la demande
+ static INT32 nVu4 = 0;								// objets de l'emplacement 4 (max sur les listes de l'image)
+ static UINT32 nPlanBase[5];							// SFA3 : bases connues de scroll1/2/3 (indices 2..4)
+ static UINT16 nPlaneReg[3];							// Upper : registres $804200-$804205
++// (agent_alpha, patch 0010) transparence des objets, comme la PSP (SFA3 MAX ; mode 2 : Upper, Hyper). Modes :
++// 0 = opaque (defaut, et apres un reset) ; 1 = additif sature (PSP : FIX 0xFFFFFF / 0xFFFFFF, ADD) ; 2 = alpha 50 % ;
++// 3 = alpha 75 % ; 4 = soustractif ; le reste est reserve (opaque).
++//  - $804220-$80423F : un octet par palette OBJ 0-31 (mode de tous les objets de cette palette) ;
++//  - $804240-$804241 : mot, octet bas = mode des objets MARQUES (bit 12 du mot X de la liste du jeu, garde par
++//    HsfaEclater ; jamais pose par les programmes traduits : 0 sur 11 M d'entrees mesurees). 0 = bit ignore.
++//  Priorite : bit 12 pose et $804240 non nul -> mode de $804240 ; sinon mode de la palette.
++// Lu par Cps2ObjDraw (cps_obj.cpp) et les macros PLOT (ctv_do.h, ctv.cpp). Jamais ecrits : rendu identique au pixel.
++// Essais : HSFA_OBJMIX=oo:m[,oo:m...] (hexa, oo = decalage depuis $804220 : 00-1F palettes, 21 = mode du bit 12)
++// impose des valeurs a chaque reset ; HSFA_MIX_LOG=<fichier> journalise chaque changement.
++UINT8 nHsfaObjMix[32];
++UINT8 nHsfaObjFlagMix = 0;
++static FILE *HsfaMixLog = NULL;
++static INT32 nMixLog = -1;
++
++static void HsfaMixWrite(INT32 p, UINT8 v)
++{
++	if (nHsfaObjMix[p] == v) return;
++	nHsfaObjMix[p] = v;
++	if (nMixLog < 0) {
++		const char *f = getenv("HSFA_MIX_LOG");
++		HsfaMixLog = (f && *f) ? fopen(f, "w") : NULL;
++		nMixLog = HsfaMixLog ? 1 : 0;
++	}
++	if (nMixLog) { fprintf(HsfaMixLog, "%d : palette %02x = %d\n", nImage, p, v); fflush(HsfaMixLog); }
++}
++
++static void HsfaFlagMixWrite(UINT8 v)
++{
++	if (nHsfaObjFlagMix == v) return;
++	nHsfaObjFlagMix = v;
++	if (nMixLog < 0) {
++		const char *f = getenv("HSFA_MIX_LOG");
++		HsfaMixLog = (f && *f) ? fopen(f, "w") : NULL;
++		nMixLog = HsfaMixLog ? 1 : 0;
++	}
++	if (nMixLog) { fprintf(HsfaMixLog, "%d : objets marques = %d\n", nImage, v); fflush(HsfaMixLog); }
++}
++
++static void HsfaMixReset()
++{
++	memset(nHsfaObjMix, 0, sizeof(nHsfaObjMix));
++	nHsfaObjFlagMix = 0;
++	const char *e = getenv("HSFA_OBJMIX");			// essais : HSFA_OBJMIX=03:1,04:2 (21:1 = objets marques)
++	if (HsfaMode != 2 || e == NULL) return;
++	for (const char *q = e; *q; ) {
++		char *f = NULL, *g = NULL;
++		long p = strtol(q, &f, 16);
++		if (f == q || *f != ':') break;
++		long v = strtol(f + 1, &g, 16);
++		if (g == f + 1) break;
++		if (p >= 0 && p < 32) nHsfaObjMix[p] = (UINT8)v;
++		if (p == 0x21) nHsfaObjFlagMix = (UINT8)v;
++		if (*g != ',') break;
++		q = g + 1;
++	}
++}
++
++// (patch 0010) etats : les registres ne sont PAS dans HsfaScan mais en DERNIERE zone de l'etat libretro
++// (LibretroAreaScan, retro_memory.cpp), pour que les etats anterieurs au patch (sans ces octets, tout le reste a la
++// meme place) se rechargent : ce qui manque a la fin de l'etat charge est remis a 0.
++// nRestant = octets encore disponibles dans l'etat charge (-1 : pas de limite, sauvegarde ou taille) ; chaque partie
++// absente vaut 0 : palettes (32 octets), puis mode des objets marques (1 octet).
++INT32 HsfaScanMelange(INT32 nAction, INT64 nRestant)
++{
++	if (HsfaMode != 2 || !(nAction & ACB_DRIVER_DATA)) return 0;
++	if (nRestant < 0 || nRestant >= (INT64)sizeof(nHsfaObjMix)) {
++		SCAN_VAR(nHsfaObjMix);
++		if (nRestant >= 0) nRestant -= sizeof(nHsfaObjMix);
++	} else {
++		if (nAction & ACB_WRITE) memset(nHsfaObjMix, 0, sizeof(nHsfaObjMix));
++		nRestant = 0;
++	}
++	if (nRestant < 0 || nRestant >= 1) SCAN_VAR(nHsfaObjFlagMix);
++	else if (nAction & ACB_WRITE) nHsfaObjFlagMix = 0;
++	return 0;
++}
++
+ static INT32 nPlanesPending = 0;					// Upper : bases a ecrire a la fin de la 1re image
+ 
+ static INT32 bHsfaWordWrite = 0;					// ecriture de mot en cours (CpsWriteWord -> 2 octets)
+@@ -299,7 +377,8 @@ static UINT16 HsfaEclater(UINT32 nPage, UINT32 nFin, UINT32 nCourante)
+ 				if (g >= 0) {
+ 					if (n < 1023) {
+ 						// (HANDOFF §116) bits 16-17 -> Y 13-14 ; bits 18-19 -> X 10-11
+-						Out[n * 4 + 0] = (UINT16)((((x & 0x3ff) + 16 * nxs) & 0x3ff) | (x & 0xe000) | (((g >> 18) & 3) << 10));
++						// (patch 0010) bit 12 = objet marque (melange), garde avec la priorite
++						Out[n * 4 + 0] = (UINT16)((((x & 0x3ff) + 16 * nxs) & 0x3ff) | (x & 0xf000) | (((g >> 18) & 3) << 10));
+ 						Out[n * 4 + 1] = (UINT16)((((y & 0x3ff) + 16 * nys) & 0x3ff) | (((g >> 16) & 3) << 13));
+ 						Out[n * 4 + 2] = (UINT16)(g & 0xffff);
+ 						Out[n * 4 + 3] = (UINT16)(at & 0x00ff);
+@@ -494,6 +573,14 @@ INT32 HsfaPortReadByte(UINT32 a, UINT8 *d)
+ 		*d = (a & 1) ? (v & 0xff) : (v >> 8);
+ 		return 1;
+ 	}
++	if (HsfaMode == 2 && a >= 0x804220 && a <= 0x80423F) {	// (patch 0010) melange par palette OBJ
++		*d = nHsfaObjMix[a - 0x804220];
++		return 1;
++	}
++	if (HsfaMode == 2 && (a == 0x804240 || a == 0x804241)) {	// (patch 0010) mode des objets marques (octet bas)
++		*d = (a & 1) ? nHsfaObjFlagMix : 0;
++		return 1;
++	}
+ 	return 0;
+ }
+ 
+@@ -504,6 +591,15 @@ INT32 HsfaPortWriteWord(UINT32 a, UINT16 d)
+ 		HsfaPlaneWrite((a - 0x804200) >> 1, d, 0xFFFF);
+ 		return 1;
+ 	}
++	if (HsfaMode == 2 && a >= 0x804220 && a <= 0x80423F) {	// (patch 0010) mot = palettes paire (fort) et impaire
++		HsfaMixWrite((a & ~1) - 0x804220, d >> 8);
++		HsfaMixWrite((a | 1) - 0x804220, d & 0xff);
++		return 1;
++	}
++	if (HsfaMode == 2 && a == 0x804240) {						// (patch 0010) mode des objets marques
++		HsfaFlagMixWrite(d & 0xff);
++		return 1;
++	}
+ 	return 0;
+ }
+ 
+@@ -514,6 +610,14 @@ INT32 HsfaPortWriteByte(UINT32 a, UINT8 d)
+ 		else HsfaPlaneWrite((a - 0x804200) >> 1, d << 8, 0xFF00);
+ 		return 1;
+ 	}
++	if (HsfaMode == 2 && a >= 0x804220 && a <= 0x80423F) {	// (patch 0010) melange par palette OBJ
++		HsfaMixWrite(a - 0x804220, d);
++		return 1;
++	}
++	if (HsfaMode == 2 && (a == 0x804240 || a == 0x804241)) {	// (patch 0010) octet haut : sans effet
++		if (a & 1) HsfaFlagMixWrite(d);
++		return 1;
++	}
+ 	if (HsfaMode == 1 && !bHsfaWordWrite && a >= 0x804102 && a <= 0x804107) {
+ 		HsfaBaseWrite(a, (a & 1) ? d : (d << 8));
+ 	}
+@@ -620,6 +724,7 @@ static INT32 HsfaReset()
+ 	nPlanBase[0] = nPlanBase[1] = 0;
+ 	nPlanBase[2] = 0x900000; nPlanBase[3] = 0x904000; nPlanBase[4] = 0x908000;
+ 	nPlaneReg[0] = nPlaneReg[1] = nPlaneReg[2] = 0;
++	HsfaMixReset();									// (patch 0010)
+ 	nPlanesPending = (HsfaMode == 2 && bCfgPlans) ? 1 : 0;
+ 	nStatListes = nStatTuiles = nStatRetires = nStatTronques = 0;
+ 	if (HsfaMode == 2) HsfaUpdateScroll();
+@@ -1374,6 +1479,8 @@ INT32 HsfaExit()
+ {
+ 	if (HsfaPlansLog) fclose(HsfaPlansLog);
+ 	HsfaPlansLog = NULL; nPlansLog = -1;
++	if (HsfaMixLog) fclose(HsfaMixLog);
++	HsfaMixLog = NULL; nMixLog = -1;
+ 	delete HsfaFlux;
+ 	HsfaFlux = NULL;
+ 	HsfaMusiqueLibere();
+diff --git a/src/burn/drv/capcom/cps_obj.cpp b/src/burn/drv/capcom/cps_obj.cpp
+index 809c1e8..1a9ec7f 100644
+--- a/src/burn/drv/capcom/cps_obj.cpp
++++ b/src/burn/drv/capcom/cps_obj.cpp
+@@ -438,6 +438,12 @@ INT32 Cps2ObjDraw(INT32 nLevelFrom, INT32 nLevelTo)
+ 		
+ 		// Find the palette for the tiles on this sprite
+ 		CpstPal = CpsPal + ((a & 0x1F) << 4);
++		// (HSFA, patch 0010) melange : bit 12 du mot X (objet marque par le jeu) avec un mode $804240 non nul, sinon
++		// mode de la palette OBJ ($804220-$80423F) ; 0 = opaque, comme avant
++		UINT32 nHsfaMix = 0;
++		if (HsfaMode == 2) {
++			nHsfaMix = ((BURN_ENDIAN_SWAP_INT16(ps[0]) & 0x1000) && nHsfaObjFlagMix) ? nHsfaObjFlagMix : nHsfaObjMix[a & 0x1F];
++		}
+ 
+ 		nFlip = (a >> 5) & 3;
+ 		// Find out sprite size
+@@ -486,6 +492,7 @@ INT32 Cps2ObjDraw(INT32 nLevelFrom, INT32 nLevelTo)
+ 				}
+ 				
+ 				nCpsBlend = (blendtable && nCpstTile < 0x40000) ? blendtable[nCpstTile] : 0;
++				if (nHsfaMix) nCpsBlend = 0x100 | nHsfaMix;	// (patch 0010) objet HSFA translucide
+ 				nCpstTile <<= 7;						// Find real tile address					
+ 
+ 				pCpstOne();
+diff --git a/src/burn/drv/capcom/ctv.cpp b/src/burn/drv/capcom/ctv.cpp
+index ff3d247..03daf25 100644
+--- a/src/burn/drv/capcom/ctv.cpp
++++ b/src/burn/drv/capcom/ctv.cpp
+@@ -18,6 +18,64 @@ static inline UINT32 alpha_blend(UINT32 d, UINT32 s, UINT32 p)
+ 		((((s & 0x00ff00) * p) + ((d & 0x00ff00) * a)) & 0x00ff0000)) >> 8;
+ }
+ 
++// (HSFA, patch 0010) melange des objets par palette OBJ (registres $804220-$80423F, cps_hsfa.cpp). nCpsBlend vaut
++// 0x100 | mode pour un objet HSFA (les valeurs < 0x100 restent celles de la blendtable des jeux CPS1/CPS2 d'origine) :
++//   1 = additif sature (dst + src par composante, PSP sceGuBlendFunc(ADD, FIX, FIX, 0xFFFFFF, 0xFFFFFF))
++//   2 = alpha 50 % (src * 0x80 + dst * 0x7F) / 256 (PSP : couleur de sommet d'alpha 0x80)
++//   3 = alpha 75 % (src * 0xC0 + dst * 0x3F) / 256 (PSP : alpha 0xC0)
++//   4 = soustractif sature (dst - src)
++//   autre = opaque (reserve)
++static inline UINT32 hsfa_mix(UINT32 d, UINT32 s, UINT32 m)
++{
++	switch (m) {
++		case 1: {
++			UINT32 rb = (d & 0xff00ff) + (s & 0xff00ff);
++			UINT32 g  = (d & 0x00ff00) + (s & 0x00ff00);
++			rb |= ((rb & 0x01000100) - ((rb & 0x01000100) >> 8));	// saturation de R et B
++			g  |= ((g  & 0x00010000) - ((g  & 0x00010000) >> 8));	// saturation de G
++			return (rb & 0xff00ff) | (g & 0x00ff00);
++		}
++		case 2: return alpha_blend(d, s, 0x80);
++		case 3: return alpha_blend(d, s, 0xC0);
++		case 4: {
++			INT32 r = (INT32)((d >> 16) & 0xff) - (INT32)((s >> 16) & 0xff);
++			INT32 g = (INT32)((d >>  8) & 0xff) - (INT32)((s >>  8) & 0xff);
++			INT32 b = (INT32)( d        & 0xff) - (INT32)( s        & 0xff);
++			return ((r < 0 ? 0 : r) << 16) | ((g < 0 ? 0 : g) << 8) | (b < 0 ? 0 : b);
++		}
++	}
++	return s;
++}
++
++static inline UINT32 cps_mix(UINT32 d, UINT32 s, UINT32 p)
++{
++	if (p < 0x100) return alpha_blend(d, s, p);
++	return hsfa_mix(d, s, p & 0xff);
++}
++
++// 16 bits (RGB565 ou 0RGB1555 selon BurnHighCol : nCtvVert6 pose par CtvReady) : objets HSFA seulement ; les valeurs
++// < 0x100 de nCpsBlend restent ignorees a 16 bits, comme avant
++static INT32 nCtvVert6 = 1;
++static inline UINT32 cps_mix16(UINT32 d, UINT32 s, UINT32 p)
++{
++	if (p < 0x100) return s;
++	UINT32 d32, s32, r;
++	if (nCtvVert6) {
++		d32 = ((d & 0xf800) << 8) | ((d & 0x07e0) << 5) | ((d & 0x001f) << 3);
++		s32 = ((s & 0xf800) << 8) | ((s & 0x07e0) << 5) | ((s & 0x001f) << 3);
++		d32 |= ((d32 >> 5) & 0x070007) | ((d32 >> 6) & 0x000300);
++		s32 |= ((s32 >> 5) & 0x070007) | ((s32 >> 6) & 0x000300);
++		r = hsfa_mix(d32, s32, p & 0xff);
++		return ((r >> 8) & 0xf800) | ((r >> 5) & 0x07e0) | ((r >> 3) & 0x001f);
++	}
++	d32 = ((d & 0x7c00) << 9) | ((d & 0x03e0) << 6) | ((d & 0x001f) << 3);
++	s32 = ((s & 0x7c00) << 9) | ((s & 0x03e0) << 6) | ((s & 0x001f) << 3);
++	d32 |= (d32 >> 5) & 0x070707;
++	s32 |= (s32 >> 5) & 0x070707;
++	r = hsfa_mix(d32, s32, p & 0xff);
++	return ((r >> 9) & 0x7c00) | ((r >> 6) & 0x03e0) | ((r >> 3) & 0x001f);
++}
++
+ // Include all tile variants:
+ #include "ctv.h"
+ 
+@@ -45,5 +103,6 @@ INT32 CtvReady()
+ 	  }
+   }
+   nLastBpp=nBurnBpp;
++  if (nBurnBpp==2 && BurnHighCol) nCtvVert6 = (BurnHighCol(0, 0xff, 0, 0) == 0x07e0);	// (patch 0010) 565 ou 1555
+   return 0;
+ }
+diff --git a/src/burn/drv/capcom/ctv_do.h b/src/burn/drv/capcom/ctv_do.h
+index 6af9712..4ee1456 100644
+--- a/src/burn/drv/capcom/ctv_do.h
++++ b/src/burn/drv/capcom/ctv_do.h
+@@ -91,26 +91,26 @@ for (y = 0; y < CU_SIZE; y++, pCtvLine += nBurnPitch, pCtvTile += nCtvTileAdd
+ // Make macros for plotting c and advancing pPix by one pixel
+ #if CU_BPP==2
+  #if   CU_MASK==1
+-  #define PLOT { if(*pPixZ < ZValue) { *((UINT16 *)pPix)=(UINT16)c; *pPixZ=ZValue; } }
++  #define PLOT { if(*pPixZ < ZValue) { if (nCpsBlend & 0x100) { c = cps_mix16(*((UINT16 *)pPix), c, nCpsBlend); } *((UINT16 *)pPix)=(UINT16)c; *pPixZ=ZValue; } }
+   #define ADV { pPix+=2; pPixZ++; }
+  #else
+-  #define PLOT { *((UINT16 *)pPix)=(UINT16)c; }
++  #define PLOT { if (nCpsBlend & 0x100) { c = cps_mix16(*((UINT16 *)pPix), c, nCpsBlend); } *((UINT16 *)pPix)=(UINT16)c; }
+   #define ADV pPix+=2
+  #endif
+ #elif CU_BPP==3
+  #if   CU_MASK==1
+-  #define PLOT { if(*pPixZ < ZValue) { if (nCpsBlend) { c = alpha_blend(pPix[0]|(pPix[1]<<8)|(pPix[2]<<16), c, nCpsBlend); } pPix[0]=(UINT8)c; pPix[1]=(UINT8)(c>>8); pPix[2]=(UINT8)(c>>16); } }
++  #define PLOT { if(*pPixZ < ZValue) { if (nCpsBlend) { c = cps_mix(pPix[0]|(pPix[1]<<8)|(pPix[2]<<16), c, nCpsBlend); } pPix[0]=(UINT8)c; pPix[1]=(UINT8)(c>>8); pPix[2]=(UINT8)(c>>16); } }
+   #define ADV { pPix+=3; pPixZ++; }
+  #else
+-  #define PLOT { if (nCpsBlend) { c = alpha_blend(pPix[0]|(pPix[1]<<8)|(pPix[2]<<16), c, nCpsBlend); } pPix[0]=(UINT8)c; pPix[1]=(UINT8)(c>>8); pPix[2]=(UINT8)(c>>16); }
++  #define PLOT { if (nCpsBlend) { c = cps_mix(pPix[0]|(pPix[1]<<8)|(pPix[2]<<16), c, nCpsBlend); } pPix[0]=(UINT8)c; pPix[1]=(UINT8)(c>>8); pPix[2]=(UINT8)(c>>16); }
+   #define ADV pPix+=3
+  #endif
+ #elif CU_BPP==4
+  #if   CU_MASK==1
+-  #define PLOT { if(*pPixZ < ZValue) { if (nCpsBlend) { c = alpha_blend(*((UINT32 *)pPix), c, nCpsBlend); } *((UINT32 *)pPix)=c; *pPixZ=ZValue; } }
++  #define PLOT { if(*pPixZ < ZValue) { if (nCpsBlend) { c = cps_mix(*((UINT32 *)pPix), c, nCpsBlend); } *((UINT32 *)pPix)=c; *pPixZ=ZValue; } }
+   #define ADV { pPix+=4; pPixZ++; }
+  #else
+-  #define PLOT { if (nCpsBlend) { c = alpha_blend(*((UINT32 *)pPix), c, nCpsBlend); } *((UINT32 *)pPix)=c; }
++  #define PLOT { if (nCpsBlend) { c = cps_mix(*((UINT32 *)pPix), c, nCpsBlend); } *((UINT32 *)pPix)=c; }
+   #define ADV pPix+=4
+  #endif
+ #else
+diff --git a/src/burner/libretro/retro_memory.cpp b/src/burner/libretro/retro_memory.cpp
+index 0e7e372..40a4dc5 100644
+--- a/src/burner/libretro/retro_memory.cpp
++++ b/src/burner/libretro/retro_memory.cpp
+@@ -262,6 +262,10 @@ static int StateLenAcb(BurnArea *pba)
+ 	return 0;
+ }
+ 
++#ifdef HSFA_CORE
++INT32 HsfaScanMelange(INT32 nAction, INT64 nRestant);	// cps_hsfa.cpp (patch 0010)
++#endif
++
+ static INT32 LibretroAreaScan(INT32 nAction)
+ {
+ 	nStateTmpLen[nSavestateContext] = 0;
+@@ -281,6 +285,13 @@ static INT32 LibretroAreaScan(INT32 nAction)
+ 	if (nAction & ACB_RUNAHEAD)
+ 		SCAN_VAR(nDiagInputHoldCounter);
+ 
++#ifdef HSFA_CORE
++	// (HSFA, patch 0010) registres de melange des objets ($804220-$804240, Upper / Hyper) : derniere zone de l'etat,
++	// lue seulement dans la mesure ou l'etat charge la contient (etats anterieurs : registres absents -> 0)
++	HsfaScanMelange(nAction, ((nAction & ACB_WRITE) && BurnAcb == StateReadAcb)
++		? (INT64)nTempSize - (INT64)nStateTmpLen[nSavestateContext] : (INT64)-1);
++#endif
++
+ 	return 0;
+ }
+ 
+-- 
+2.53.0
+

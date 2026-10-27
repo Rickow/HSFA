@@ -1,0 +1,7 @@
+# Dan_Z : version $3C, table $E72000 (redirection), 29 entrees, origine prog+25D3E2
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	3C	048A	01E6	2		DP+HP ; DP+LP
+sfa1	3C	048E	01E5	11		QCB+HK ; QCB+LK ; QCF+HP ; QCF+LP ; Start ; demi-cercle arriere+HK ; demi-cercle avant+HP
+sfa1	3C	048F	0174	2		projection HP ; projection HP 2
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 01E5@Start

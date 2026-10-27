@@ -1,0 +1,38 @@
+# Correspondance espace de travail -> depot (dossiers). Le depot ecrit les chemins de l'espace de travail
+# `<workspace>/...` ; cette table dit ou se trouve, dans le depot, la copie publiee de chaque dossier.
+# Lue par scripts/qualite/verifier_imports.py et scripts/localiser.py ; publier.sh (hors depot) suit la meme table.
+# Un dossier `<workspace>/work/...` absent d'ici n'est pas publie (donnees ou essais locaux).
+# Ordre = priorite (le prefixe le plus long d'abord).
+# espace_de_travail	depot
+<workspace>/scripts/untranspile	src/hsfa
+<workspace>/scripts	src/hsfa
+<workspace>/scripts	legacy/tools
+<workspace>/anthology_extract	src/hsfa
+<workspace>/github	.
+<workspace>/work/mame	src/hsfa/mame
+<workspace>/work/agent_hyper_son	src/hsfa
+<workspace>/work/agent_son_ro5/hybride	src/hsfa
+<workspace>/work/agent_build/correctifs	scripts/construction/correctifs
+<workspace>/work/agent_build	scripts/construction
+<workspace>/work/fbneo	tools/fbneo-hsfa
+<workspace>/work/agent_flux	tools/flux
+<workspace>/work/carto_modules	tools/carto-modules
+<workspace>/work/decors_ws/injection_fork/py	tools/decors/injection
+<workspace>/work/decors_ws/injection_fork	tools/decors/injection
+<workspace>/work/decors_ws/reimport	tools/decors/reimport
+<workspace>/work/decors_ws/py	tools/decors/export
+<workspace>/work/decors_sfa2/py	tools/decors/sfa2
+<workspace>/work/greffe_arcade/outils	tools/greffe-arcade/outils
+<workspace>/work/greffe_arcade/decors	tools/greffe-arcade/decors
+<workspace>/work/agent_hyper_etats/outils	tools/hyper-etats
+<workspace>/work/agent_hyper_etats/lua	tools/hyper-etats
+<workspace>/work/agent_voix_max	tools/integration-max/voix
+<workspace>/work/agent_conv_max	tools/integration-max/conversion
+<workspace>/work/agent_reorg_A/outils	tools/reorg
+<workspace>/work/agent_symboles/outils	tools/symboles/outils
+<workspace>/work/agent_son_hyper_rom/outils	tools/son-hyper
+<workspace>/work/agent_son_hyper_rom	tools/son-hyper
+<workspace>/work/etude_upper_hyper	tools/etude-upper-hyper
+<workspace>/work/agent_zangief/py	tools/diagnostics/zangief
+<workspace>/work/agent_portraits/outils	tools/diagnostics/portraits
+<workspace>/work/agent_coups	tools/diagnostics/coups

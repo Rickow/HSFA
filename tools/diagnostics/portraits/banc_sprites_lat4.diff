@@ -1,0 +1,85 @@
+--- a/work/mame/banc_sprites.lua
++++ b/work/mame/banc_sprites.lua
+@@ -28,7 +28,20 @@
+   if c == 0xFFFFFFFF then return nil end
+   return c
+ end
+-local fichier4                                          -- derniere animation connue pointee par $BE48
++local fichier4                                          -- fichier AFFICHE dans l'emplacement 4
++-- (agent_portraits) CHARGEMENT DIFFERE de l'emplacement 4. Sur la PS2, le chargeur natif (0x4112D0 -> moteur 0x155080 /
++-- 0x154C90, argument 1) ne fait que METTRE EN FILE la lecture du fichier : les tuiles de l'emplacement 4 restent celles
++-- de l'ancien fichier jusqu'a la fin du chargement, quelques images plus tard. Le jeu s'appuie dessus : le grand portrait
++-- du face-a-face reste liste 5 images apres l'appel du chargeur de l'ecran VS (457). Le banc changeait de table tout de
++-- suite -> 5 images de tuiles de 457 sous la forme du portrait. Nouveau fichier : en ATTENTE tant que les listes
++-- converties pendant l'image contiennent encore des objets de l'emplacement 4 (une image sans liste compte comme libre :
++-- la liste deja convertie reste affichee telle quelle), au plus BANC_LAT4_MAX images. BANC_LAT4=0 : ancien comportement.
++local LAT4 = os.getenv("BANC_LAT4") ~= "0"
++local LAT4_MAX = tonumber(os.getenv("BANC_LAT4_MAX") or "10")
++local LAT4_LOG = os.getenv("BANC_LAT4_LOG") and io.open(os.getenv("BANC_LAT4_LOG"), "w")
++LISTE_LOG = os.getenv("BANC_LISTE_LOG") and io.open(os.getenv("BANC_LISTE_LOG"), "w")   -- (diagnostic) empreintes
++local attente4, depuis4 = nil, 0                       -- fichier demande pas encore « charge », image de la demande
++VU4, LISTES4 = 0, 0                                     -- objets de l'emplacement 4 (max sur les listes de l'image), listes
+ local function suivre4()
+   -- (HANDOFF §108) $BE48(A5) : deplacement SIGNE -> $FF8000 - $41B8 = $FF3E48 (et non $FFBE48, lu a tort jusqu'ici) ;
+   -- Upper : $C0BC(A5) -> $FF40BC (BANC_PTR_ANIM)
+@@ -36,9 +49,30 @@
+   local f = anim[p]
+   -- (HANDOFF §106) pointeur nul (avant tout chargement natif) : couple de l'intro (graphismes 456, animation 310)
+   if p == 0 then f = tonumber(os.getenv("BANC_GFX_INTRO") or "456") end
+-  if f then fichier4 = f end
++  if not f then return end
++  if not LAT4 or fichier4 == nil then fichier4 = f; return end
++  if f == fichier4 then
++    if attente4 and LAT4_LOG then LAT4_LOG:write(string.format("%d annule %d (retour a %d)\n", IMAGE, attente4, f)) end
++    attente4 = nil
++  elseif f ~= attente4 then
++    if LAT4_LOG then LAT4_LOG:write(string.format("%d demande %d -> %d vu4=%d\n", IMAGE, fichier4, f, VU4)) end
++    attente4, depuis4 = f, IMAGE
++  end
+ end
+-emu.register_frame_done(suivre4)
++emu.register_frame_done(function()
++  suivre4()
++  if attente4 then
++    if LAT4_LOG then LAT4_LOG:write(string.format("%d   attente %d vu4=%d listes=%d\n", IMAGE, attente4, VU4, LISTES4)) end
++    local libre = VU4 == 0                              -- aucune liste de l'image n'a d'objet de l'emplacement 4
++    if libre or IMAGE - depuis4 >= LAT4_MAX then
++      if LAT4_LOG then LAT4_LOG:write(string.format("%d charge %d -> %d apres %d images (%s)\n", IMAGE, fichier4, attente4,
++        IMAGE - depuis4, libre and "plus d'objet" or "delai max")) end
++      fichier4, attente4 = attente4, nil
++    end
++  end
++  if LISTE_LOG and LISTE_H then LISTE_LOG:write(IMAGE, " ", LISTE_H, "\n"); LISTE_H = nil end
++  VU4, LISTES4 = 0, 0
++end)
+ local function emplacements()
+   suivre4()
+   local e = {}
+@@ -78,11 +112,13 @@
+ local function eclater(page, fin, adr_courante)
+   local e = emplacements()
+   local out = {}
++  local n4 = 0
+   for a = page, fin - 8, 8 do   -- objets avant le marqueur de fin
+     local x, y, code, at = lit(a), lit(a + 2), lit(a + 4), lit(a + 6)
+     if not recent(a) then goto suivant end
+     if SANS_PAL and SANS_PAL[at & 0x1f] then goto suivant end   -- (diagnostic) objets d'une palette masques
+     local t = e[(y >> 13) & 7]
++    if (y >> 13) & 7 == 4 then n4 = n4 + 1 end
+     if PALSTAT then local c = ((y >> 13) & 7) * 256 + (at & 0x1f); PALSTAT[c] = (PALSTAT[c] or 0) + 1 end
+     local nx, ny = ((at >> 8) & 15) + 1, ((at >> 12) & 15) + 1
+     local fx, fy = (at & 0x20) ~= 0, (at & 0x40) ~= 0
+@@ -105,6 +141,13 @@
+     end
+     ::suivant::
+   end
++  if n4 > VU4 then VU4 = n4 end
++  if LISTE_LOG then                                     -- (diagnostic) empreinte de la liste convertie
++    local h = 0
++    for _, o in ipairs(out) do h = (h * 31 + o[1] * 7 + o[2] * 13 + o[3] * 17 + o[4]) % 4294967296 end
++    LISTE_H = string.format("%08x %d", h, #out)
++  end
++  LISTES4 = LISTES4 + 1
+   if #out > 1023 then STATS.tronques = STATS.tronques + #out - 1023; for k = #out, 1024, -1 do out[k] = nil end end
+   out[#out + 1] = {0x8000, 0x8000, 0, 0}
+   STATS.listes = STATS.listes + 1; STATS.tuiles = STATS.tuiles + #out - 1

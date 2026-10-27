@@ -1,0 +1,49 @@
+--- a/src/cpu/m68000_intf.cpp
++++ b/src/cpu/m68000_intf.cpp
+@@ -722,9 +722,30 @@
+ 
+ #ifdef EMU_M68K
+ extern "C" {
+-UINT32 __fastcall M68KReadByte(UINT32 a) { return (UINT32)ReadByte(a); }
+-UINT32 __fastcall M68KReadWord(UINT32 a) { return (UINT32)ReadWord(a); }
+-UINT32 __fastcall M68KReadLong(UINT32 a) { return               ReadLong(a); }
++
++/* HSFA sonde (banc seulement) : HSFA_SW=lo-hi (ecritures), HSFA_SR=lo-hi (lectures), HSFA_SI=f0-f1 (images), HSFA_SF=fichier */
++#include <stdio.h>
++#include <stdlib.h>
++extern UINT32 nCurrentFrame;
++static int sonde_ok = -1; static UINT32 sw0, sw1, sr0, sr1, si0, si1; static FILE *sonde_f;
++static void sonde_init() {
++	const char *e; sonde_ok = 0; sw0 = sr0 = 1; sw1 = sr1 = 0; si0 = 0; si1 = 0xffffffff;
++	if ((e = getenv("HSFA_SW"))) { sscanf(e, "%x-%x", &sw0, &sw1); sonde_ok = 1; }
++	if ((e = getenv("HSFA_SR"))) { sscanf(e, "%x-%x", &sr0, &sr1); sonde_ok = 1; }
++	if ((e = getenv("HSFA_SI"))) sscanf(e, "%u-%u", &si0, &si1);
++	if (sonde_ok) sonde_f = fopen(getenv("HSFA_SF") ? getenv("HSFA_SF") : "sonde.txt", "w");
++}
++static inline void sonde(char k, int n, UINT32 a, UINT32 d) {
++	if (sonde_ok < 0) sonde_init();
++	if (!sonde_ok) return;
++	a &= 0xffffff;
++	if (k == 'W' ? (a < sw0 || a > sw1) : (a < sr0 || a > sr1)) return;
++	if (nCurrentFrame < si0 || nCurrentFrame > si1) return;
++	fprintf(sonde_f, "%u %c%d %06x %06x %x\n", nCurrentFrame, k, n, m68k_get_reg(NULL, M68K_REG_PPC) & 0xffffff, a, d);
++}
++UINT32 __fastcall M68KReadByte(UINT32 a) { UINT32 d = ReadByte(a); sonde('R', 1, a, d); return d; }
++UINT32 __fastcall M68KReadWord(UINT32 a) { UINT32 d = ReadWord(a); sonde('R', 2, a, d); return d; }
++UINT32 __fastcall M68KReadLong(UINT32 a) { UINT32 d = ReadLong(a); sonde('R', 4, a, d); return d; }
+ 
+ UINT32 __fastcall M68KFetchByte(UINT32 a) { return (UINT32)FetchByte(a); }
+ UINT32 __fastcall M68KFetchWord(UINT32 a) { return (UINT32)FetchWord(a); }
+@@ -751,9 +772,9 @@
+ void (__fastcall *M68KWriteLongDebug)(UINT32, UINT32);
+ #endif
+ 
+-void __fastcall M68KWriteByte(UINT32 a, UINT32 d) { WriteByte(a, d); }
+-void __fastcall M68KWriteWord(UINT32 a, UINT32 d) { WriteWord(a, d); }
+-void __fastcall M68KWriteLong(UINT32 a, UINT32 d) { WriteLong(a, d); }
++void __fastcall M68KWriteByte(UINT32 a, UINT32 d) { sonde('W', 1, a, d); WriteByte(a, d); }
++void __fastcall M68KWriteWord(UINT32 a, UINT32 d) { sonde('W', 2, a, d); WriteWord(a, d); }
++void __fastcall M68KWriteLong(UINT32 a, UINT32 d) { sonde('W', 4, a, d); WriteLong(a, d); }
+ }
+ #endif
+ 

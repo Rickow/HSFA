@@ -1,0 +1,16 @@
+--- a/scripts/untranspile/diag.py	2026-10-04 13:15:31.819549774 +0200
++++ b/scripts/untranspile/diag.py	2026-10-11 12:35:51.926301072 +0200
+@@ -70,10 +70,12 @@
+ 
+ def mame(script, debug=False, timeout=400):
+     path = os.path.join(W, "_diag.lua"); open(path, "w").write('dofile("%s/banc_mem.lua")\n' % LUA + LUA_INPUTS + script)
++    import tempfile; _t = tempfile.mkdtemp(dir=W)          # (agent_bandeau_A) nvram/cfg propres a chaque lancement
+     cmd = ["mame", "sfa3ud", "-rompath", ROMS, "-video", "none", "-sound", "none",
+-           "-nothrottle", "-skip_gameinfo", "-autoboot_script", path]
++           "-nothrottle", "-skip_gameinfo", "-nvram_directory", _t + "/nv", "-cfg_directory", _t + "/cfg", "-autoboot_script", path]
+     if debug: cmd += ["-debug", "-debugger", "none"]
+     subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=timeout, cwd=W)
++    import shutil; shutil.rmtree(_t, ignore_errors=True)
+ 
+ def carte():
+     rows = []

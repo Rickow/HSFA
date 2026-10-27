@@ -1,0 +1,8 @@
+# Akuma_Z2 : version $42, table $E72780 (redirection), 21 entrees, origine prog+1B664A
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	42	0349	0199	4		QCF+HP ; QCF+LP ; demi-cercle avant+HP ; projection HK
+sfa2	42	034A	019A	6		DP+HP ; DP+LP ; QCB+HK ; QCB+LK ; Start ; demi-cercle arriere+HK
+sfa2	42	034B	019B	2		projection HP ; projection HP 2
+sfa2	42	034C	019C	1		projection HK
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

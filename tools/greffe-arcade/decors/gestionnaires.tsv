@@ -1,0 +1,46 @@
+table	T_upper	decors	cible_upper(fichier)	couv_k	partenaire_ro9	classe	dans_table_hyper
+ordre de mise a jour des plans (arcade ~$1749A)	6147b0	$02 $0A $0C $0E $10 $12 $18 $1A $1C $22 $26 $28 $30 $34 $36 $38 $3A $40 $42 $44 $46 $48 $4A $4C $4E	151e40	1.00	60a60	identique	
+ordre de mise a jour des plans (arcade ~$1749A)	6147b0	$00 $04 $06 $08 $14 $16 $1E $20 $24 $2A $2C $2E $32 $3C $3E	151e70	1.00	60a60	identique	
+gestionnaire scroll1 ($17532)	614850	$00 $04 $16 $2C $2E $48	151f50	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$02 $06 $10 $34	151ff0	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$08 $24	152090	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$0A $0C $12 $1A $20 $28 $30 $36 $3A $42 $4A $4C	152130	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$0E	1521d0	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$14 $2A $3C $3E	152270	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$18	152530	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$1C	1525d0	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$1E	152700	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$22 $26	1527a0	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$32	152ac0	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$38	152b30	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$40	152ee0	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$44	153f60	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$46	154000	1.00	30efc0	identique	oui
+gestionnaire scroll1 ($17532)	614850	$4E	1540a0	1.00	30efc0	identique	oui
+gestionnaire scroll2 ($17C6C)	6149b0	$00 $02 $04 $06 $08 $0A $0C $0E $10 $12 $14 $16 $18 $1A $1C $1E $20 $22 $24 $26 $28 $2A $2E $30 $32 $34 $36 $38 $3A $3C $3E $40 $42 $44 $46 $48 $4A $4C $4E	1559d0	1.00	30ff90	identique	oui
+gestionnaire scroll2 ($17C6C)	6149b0	$2C	155a50	1.00	30ff90	identique	oui
+gestionnaire scroll3 ($18000)	614ad0	$00	157470	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$02 $06 $0C $16 $28 $4A	157510	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$04 $12 $2C $2E $32 $38 $42 $48 $4E	1575b0	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$08 $24	157650	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$0A $1C $30 $36	1576f0	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$0E $1A $22 $26 $34 $3A $44	157790	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$10	157830	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$14 $2A $3C $3E	1578d0	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$18	157bc0	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$1E	157c60	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$20	157d00	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$40	157fc0	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$46	1580f0	1.00	30efc0	identique	
+gestionnaire scroll3 ($18000)	614ad0	$4C	158190	1.00	30efc0	identique	
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$00	13bc10	0.92	391f80	apparentee (40-70 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$02	13c010	0.96	391f80	modifiee (70-90 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$06	13c2b0	0.29	391f80	nouvelle (<40 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$08 $24	13c6c0	0.86	391f80	apparentee (40-70 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$14 $2A $3C $3E	13ca50	0.67	391f80	apparentee (40-70 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$16	13cf00	0.94	391f80	apparentee (40-70 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$38	13d200	0.94	391f80	apparentee (40-70 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$0A $0C $0E $1C $28 $2C $40 $42 $44 $4C $4E	13d500	0.94	391f80	apparentee (40-70 %)	oui
+effet par decor ($19BA8 ; + $C174/$C176)	6135a0	$04 $10 $12 $18 $1A $1E $20 $22 $26 $2E $30 $32 $34 $36 $3A $46 $48 $4A	13d530	1.00	391f80	identique	oui
+defilement scenes Arcade (0x2CAC0)	60b400	$02 $0A $0C $0E $10 $12 $18 $1A $1C $22 $26 $28 $30 $34 $36 $38 $3A $40 $42 $44 $46 $48 $4A $4C $4E	2cc00	1.00	60a60	identique	
+defilement scenes Arcade (0x2CAC0)	60b400	$00 $04 $06 $08 $14 $16 $1E $20 $24 $2A $2C $2E $32 $3C $3E	2cc30	1.00	60a60	identique	

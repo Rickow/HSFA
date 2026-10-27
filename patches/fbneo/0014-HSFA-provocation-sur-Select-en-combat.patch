@@ -1,0 +1,178 @@
+From 4bdd36aee54c87a1a8f4299c8b68e49180a19d2b Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 25 Oct 2026 09:07:24 +0100
+Subject: [PATCH] HSFA: core option "Taunt on Select (in fight)"
+
+The taunt tests bit 15 (Start) of the player's new-press word $378
+(arcade $2E0CC). The PS2 port sets Start in $370 and in $372 (previous
+frame) on the same frame, so $378 = $370 & ~$372 never gets that bit:
+Start never taunts in the translations (SFA3, Upper, Hyper, ro9a).
+
+- Core option (bit 6 of DIP A, "Taunt on Select (in fight)", on by
+  default) for all HSFA drivers: in fight ($FF8000 = 2, $FF8004 = 4), a
+  new press on Coin of player N (Select on the RetroPad) is removed from
+  the inputs (no credit) and bit 15 is added to the writes of player N's
+  $378 ($FF8778, $FF8B78) during that frame. Outside fights nothing
+  changes (credits, Hyper's select-screen roulette, patch 0007).
+- The $FF8400-$FF8BFF write handler (0007) is now installed for every
+  HSFA driver; the roulette part stays Hyper-only.
+- A CPU-controlled player never taunts: its $378 is not written by the
+  input routine.
+- Coin has no effect in fights today (free play: a challenger joins with
+  Start alone), so taking it over loses nothing.
+- Test helper: HSFA_PROVOC=0/1 forces the option.
+- Option off: output identical to the pixel.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps.h        |  2 ++
+ src/burn/drv/capcom/cps_hsfa.cpp | 37 +++++++++++++++++++++++++++-----
+ src/burn/drv/capcom/cps_rw.cpp   |  1 +
+ src/burn/drv/capcom/d_cps2.cpp   | 12 +++++++++--
+ 4 files changed, 45 insertions(+), 7 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index 7060a4a..32468ff 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -557,6 +557,8 @@ void HsfaPortWriteWordStart(UINT32 a, UINT16 d);
+ UINT32 HsfaGfxLenMin();
+ extern UINT8 nHsfaObjMix[32];							// (patch 0010) melange par palette OBJ, $804220-$80423F
+ extern UINT8 nHsfaObjFlagMix;							// (patch 0010) melange des objets marques (bit 12 de X), $804240
++extern INT32 nHsfaProvoc;								// (patch 0014) option "provocation sur Piece en combat"
++void HsfaProvocEntrees(UINT8 *pInp020);
+ extern INT32 nHsfaOmbres;								// (patch 0011) option "ombres transparentes (PSP)" active
+ static inline INT32 HsfaEstOmbre(UINT32 t)				// (patch 0011) code global d'une tuile d'ombre (palette OBJ 0x14)
+ {
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index c960a5b..5974043 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -1357,17 +1357,42 @@ static UINT8 HsfaRoulette(UINT32 a)
+ 	return CpsInp020[4 + j] ? 0xFF : 0;
+ }
+ 
++// (patch 0014) provocation sur la touche Piece en combat. La provocation teste le bit 15 (Start) des nouveaux appuis
++// $378 du joueur (arcade $2E0CC) ; le portage pose Start dans $370 ET dans $372 (image precedente) a la meme image, si
++// bien que $378 = $370 & ~$372 ne recoit jamais ce bit : Start ne provoque pas. Option "Taunt on Select (in fight)"
++// (bit 6 du Dip A, HSFA_PROVOC=0/1 pour les essais) : en combat ($FF8000 = 2, $FF8004 = 4), un nouvel appui sur Piece du
++// joueur N est retire des entrees (pas de credit) et le bit 15 est ajoute aux ecritures de $378 du joueur N ($FF8778,
++// $FF8B78) pendant cette image. Hors combat, rien ne change (credits, roulette d'Hyper).
++INT32 nHsfaProvoc = 0;
++static INT32 nHsfaProvocForce = -2;
++static UINT8 nProvocAttente[2] = { 0, 0 }, nProvocPiece[2] = { 0, 0 };
++
++void HsfaProvocEntrees(UINT8 *pInp020)				// appele par CpsRwGetInp (cps_rw.cpp) a chaque image
++{
++	if (nHsfaProvocForce == -2) nHsfaProvocForce = getenv("HSFA_PROVOC") ? atoi(getenv("HSFA_PROVOC")) : -1;
++	nHsfaProvoc = (nHsfaProvocForce >= 0) ? (nHsfaProvocForce != 0) : ((HsfaFluxDip & 0x40) != 0);
++	const INT32 bCombat = nHsfaProvoc && RamW(0xFF8000) == 2 && RamW(0xFF8004) == 4;
++	for (INT32 j = 0; j < 2; j++) {
++		const UINT8 p = CpsInp020[4 + j] & 1;		// Piece du joueur j (Select de RetroPad)
++		nProvocAttente[j] = (bCombat && p && !nProvocPiece[j]) ? 1 : 0;
++		if (bCombat) *pInp020 &= ~(1 << (4 + j));	// en combat, Piece ne donne pas de credit
++		nProvocPiece[j] = p;
++	}
++}
++
+ static void __fastcall HsfaRouletteWriteByte(UINT32 a, UINT8 d)
+ {
+ 	a &= 0xFFFF;
+-	if (a == 0x84D3 || a == 0x88D3) d = HsfaRoulette(a);
++	if (HsfaHyper && (a == 0x84D3 || a == 0x88D3)) d = HsfaRoulette(a);
++	if ((a == 0x8778 && nProvocAttente[0]) || (a == 0x8B78 && nProvocAttente[1])) d |= 0x80;	// (patch 0014)
+ 	CpsRamFF[a ^ 1] = d;
+ }
+ 
+ static void __fastcall HsfaRouletteWriteWord(UINT32 a, UINT16 d)
+ {
+ 	a &= 0xFFFE;
+-	if (a == 0x84D2 || a == 0x88D2) d = (d & 0xFF00) | HsfaRoulette(a);
++	if (HsfaHyper && (a == 0x84D2 || a == 0x88D2)) d = (d & 0xFF00) | HsfaRoulette(a);
++	if ((a == 0x8778 && nProvocAttente[0]) || (a == 0x8B78 && nProvocAttente[1])) d |= 0x8000;	// (patch 0014)
+ 	WrW(CpsRamFF + a, d);
+ }
+ 
+@@ -1459,11 +1484,13 @@ INT32 HsfaInit()
+ 	}
+ 	// sorties Phoenix ($FFFFF0) : seule la derniere page de RAM passe par le gestionnaire (vitesse)
+ 	SekMapMemory(CpsRamFF, 0xFF0000, 0xFFFBFF, MAP_WRITE);
++	// joueurs ($FF8400-$FF8BFF) : roulette d'Hyper (patch 0007) et provocation sur Piece (patch 0014, tous les pilotes)
++	nProvocAttente[0] = nProvocAttente[1] = 0;
++	SekMapHandler(7, 0xFF8400, 0xFF8BFF, MAP_WRITE);
++	SekSetWriteByteHandler(7, HsfaRouletteWriteByte);
++	SekSetWriteWordHandler(7, HsfaRouletteWriteWord);
+ 	if (HsfaHyper) {
+ 		nHsfaNoroul = getenv("HSFA_NOROUL") && atoi(getenv("HSFA_NOROUL")) == 1;
+-		SekMapHandler(7, 0xFF8400, 0xFF8BFF, MAP_WRITE);
+-		SekSetWriteByteHandler(7, HsfaRouletteWriteByte);
+-		SekSetWriteWordHandler(7, HsfaRouletteWriteWord);
+ 		if (nHsfaNoroul) bprintf(0, _T("HSFA : HSFA_NOROUL (essais) : $FF84D3 / $FF88D3 ecrits a 0\n"));
+ 		else bprintf(0, _T("HSFA : roulette de la selection sur la touche Piece (Start garde pour EX / S-ISM)\n"));
+ 	}
+diff --git a/src/burn/drv/capcom/cps_rw.cpp b/src/burn/drv/capcom/cps_rw.cpp
+index 0a81d46..c2cbd36 100644
+--- a/src/burn/drv/capcom/cps_rw.cpp
++++ b/src/burn/drv/capcom/cps_rw.cpp
+@@ -630,6 +630,7 @@ INT32 CpsRwGetInp()
+     for (i = 0; i < 8; i++) { Inp##nnn |= (CpsInp##nnn[i] & 1) << i; }  }
+ 	CPSINPSET
+ #undef INP
++	if (HsfaMode) HsfaProvocEntrees(&Inp020);		// (patch 0014) provocation sur Piece en combat
+ 
+ 
+ #define INP(nnnn) \
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index ec187d6..aa05562 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -177,6 +177,12 @@ STDINPUTINFO(Hsfa)
+ 
+ 
+ // (patch 0011) bit 7 du Dip A : ombres des persos en noir a 75 % comme sur PSP (cps.h, HsfaEstOmbre)
++// (patch 0014) bit 6 du Dip A : en combat, la touche Piece du joueur fait sa provocation (cps_hsfa.cpp)
++#define HSFA_OPT_PROVOC \
++	{0   , 0xfe, 0   ,    2, "Taunt on Select (in fight)"			}, \
++	{0x00, 0x01, 0x40, 0x00, "Off"								}, \
++	{0x00, 0x01, 0x40, 0x40, "On"								},
++
+ #define HSFA_OPT_OMBRES \
+ 	{0   , 0xfe, 0   ,    2, "Transparent shadows (PSP)"			}, \
+ 	{0x00, 0x01, 0x80, 0x00, "Off"								}, \
+@@ -185,7 +191,7 @@ STDINPUTINFO(Hsfa)
+ static struct BurnDIPInfo HsfaDIPList[] =
+ {
+ 	DIP_OFFSET(0x1d)
+-	{0x00, 0xff, 0xff, 0x81, NULL								},
++	{0x00, 0xff, 0xff, 0xc1, NULL								},
+ 
+ 	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+@@ -193,6 +199,7 @@ static struct BurnDIPInfo HsfaDIPList[] =
+ 	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
+ 
+ 	HSFA_OPT_OMBRES
++	HSFA_OPT_PROVOC
+ 
+ 	HSFA_OPT_DEFAUTS
+ 	HSFA_OPT_JEU
+@@ -209,7 +216,7 @@ STDDIPINFO(Hsfa)
+ static struct BurnDIPInfo HhsfaDIPList[] =
+ {
+ 	DIP_OFFSET(0x1d)
+-	{0x00, 0xff, 0xff, 0x82, NULL								},
++	{0x00, 0xff, 0xff, 0xc2, NULL								},
+ 
+ 	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+@@ -217,6 +224,7 @@ static struct BurnDIPInfo HhsfaDIPList[] =
+ 	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
+ 
+ 	HSFA_OPT_OMBRES
++	HSFA_OPT_PROVOC
+ 
+ 	// Hyper : un seul MAX ROUND sur PS2 (champ 1P, recopie dans le champ VS au debut du match) ; pas de JOIN IN
+ 	HSFA_OPT_DEFAUTS
+-- 
+2.53.0
+

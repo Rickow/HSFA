@@ -1,0 +1,10 @@
+# Birdie_Z : version $38, table $E71600 (redirection), 37 entrees, origine prog+21BB5C
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	38	0409	01D3	1		charge arriere-avant+HP
+sfa1	38	0415	01D7	1		360+HP
+sfa1	38	0416	01D8	1		360+HP
+sfa1	38	0417	01D5	1		360+HP
+sfa1	38	0419	01D6	2		360+HP
+sfa1	38	041B	01DC	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

@@ -1,0 +1,7 @@
+# Zangief_A : version $70, table $7BE2A2 (module), 23 entrees, origine prog+2A3162
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	70	050D	0377	3		360+HP ; projection HP ; projection HP 2
+sfa2	70	050E	0378	2		DP+HP ; DP+LP
+sfa2	70	050F	0379	1		360+HP
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

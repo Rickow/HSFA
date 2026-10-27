@@ -1,0 +1,49 @@
+--- a/tools/options/lua/banc_options.lua
++++ b/tools/options/lua/banc_options.lua
+@@ -15,6 +15,10 @@
+ --   HSFA_OPT_VS1P / HSFA_OPT_VS2P  1 HUMAN, 2 COM : VS MODE                    -> SFA3 $FF4111/$FF4110, Upper/Hyper $FF4311/$FF4310
+ --   HSFA_OPT_JOIN       1 OFF, 2 ON (PS2)                                      -> $FF80A5 = n-1   (arcade $A4)
+ --   HSFA_OPT_EXTRA      "p1,p2,p3" : octets hexa des options secretes EXTRA OPTION 1-3 (bit = 2e valeur de l'ecran)
++--   HSFA_OPT_BGM        (Upper, agent_options_hyper) BGM de l'ecran RANDOM PLAYER d'Hyper : 1 theme de J1 ou de J2 au
++--                       hasard, 2 J1, 3 J2 (au lieu de la musique du decor en VERSUS, TRAINING et VERSUS cache) ; ROM
++--                       construite avec BGM_UPPER=1 (talon + descripteur 'HSFABGM1' en $3FEEF0) : JMP pose sur le site
++--                       dans ces 3 modes (region :maincpu + copie des opcodes), $FF43B5 = valeur ; DIP E bits 2-3
+ --   HSFA_OPT_DIP        "B,C,D,E,F,G,H" : octets hexa des DIP B-H du coeur FBNeo (memes codages), prioritaires
+ --   HSFA_OPT_JEU        sfa3 | upper | hyper (defaut : d'apres BANC_COMMUN, 545 = hyper, 351 = upper, sinon sfa3)
+ if os.getenv("HSFA_OPTIONS") == "0" then return end
+@@ -23,7 +27,7 @@
+ d[1] = (n("HSFA_OPT_DIFFICULTE") & 0x0F) | ((n("HSFA_OPT_DEGATS") & 7) << 4)
+ d[2] = (n("HSFA_OPT_CHRONO") & 7) | ((n("HSFA_OPT_VITESSE") & 7) << 3)
+ d[3] = (n("HSFA_OPT_MANCHES") & 3) | ((n("HSFA_OPT_MANCHES_VS") & 3) << 2) | ((n("HSFA_OPT_VS1P") & 3) << 4) | ((n("HSFA_OPT_VS2P") & 3) << 6)
+-d[4] = n("HSFA_OPT_JOIN") & 3
++d[4] = (n("HSFA_OPT_JOIN") & 3) | ((n("HSFA_OPT_BGM") & 3) << 2)
+ local k = 5
+ for v in string.gmatch(os.getenv("HSFA_OPT_EXTRA") or "", "%x+") do if k <= 7 then d[k] = tonumber(v, 16) & 0xFF; k = k + 1 end end
+ if os.getenv("HSFA_OPT_DIP") then
+@@ -53,3 +57,26 @@
+   v = d[4] & 3; if v > 0 then w(0xFF80A5, v - 1) end         -- JOIN IN
+   for p = 1, 3 do if d[4 + p] ~= 0 then w(X[p], d[4 + p]) end end   -- EXTRA OPTION 1-3
+ end)
++-- (agent_options_hyper, OPTIONS-HYPER-UPPER.md) BGM d'Hyper dans Upper : meme logique que HsfaOptBgm (cps_hsfa.cpp)
++local bgm = (d[4] >> 2) & 3
++if jeu == "upper" and bgm > 0 then
++  local mem = manager.machine.memory
++  local rg, op = mem.regions[":maincpu"], mem.shares[":decrypted_opcodes"]
++  local D, TB = 0x3FEEF0, 0x3FEF00
++  if rg and rg:read_u32(D) == 0x48534641 and rg:read_u32(D + 4) == 0x42474D31 then
++    local site = rg:read_u32(D + 8)
++    local CMPI, JMP = {0x0C2D, 0x0007, 0xC201}, {0x4EF9, TB >> 16, TB & 0xFFFF}
++    local function lit(t) for i = 1, 3 do if rg:read_u16(site + 2 * (i - 1)) ~= t[i] then return false end end return true end
++    local function ecrit(t) for i = 1, 3 do
++      rg:write_u16(site + 2 * (i - 1), t[i]); if op then op:write_u16(site + 2 * (i - 1), t[i]) end end end
++    print(string.format("banc_options : BGM %d, site $%06X", bgm, site))
++    emu.register_frame_done(function()
++      local m = sp:read_u8(0xFF4201)
++      local pose = (m == 1 or m == 4 or m == 7)
++      if pose and lit(CMPI) then ecrit(JMP) elseif not pose and lit(JMP) then ecrit(CMPI) end
++      if pose then w(0xFF43B5, bgm) end
++    end)
++  else
++    print("banc_options : BGM demande, mais ROM sans descripteur BGM_UPPER : sans effet")
++  end
++end

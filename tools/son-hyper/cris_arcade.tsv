@@ -1,0 +1,36 @@
+# Cris mesures sur l'arcade (2026-10-16, coeur FBNeo, commandes son du 68K journalisees ; le perso de J1 se fait frapper)
+# jeu	base	perso	degats	degats_fort	ko	source
+# degats : cri a chaque coup recu (SFA1 : le seul ; SFA2 : le plus frequent) ; degats_fort : SFA2, le plus rare ; ko : K.O.
+# source : mesure = vu en arcade (Akuma, Bison, Dan de SFA1 : perso force par l'octet $FF84A2 pendant la selection) ;
+# Dan SFA1 crie avec les echantillons de Ryu (0167 / 0168)
+sfa1	00	Ryu	0167	0167	0168	mesure
+sfa1	01	Ken	0172	0172	0173	mesure
+sfa1	02	Akuma	01D1	01D1	01D2	mesure
+sfa1	03	Charlie	0187	0187	0188	mesure
+sfa1	04	Chun-Li	019D	019D	01A1	mesure
+sfa1	05	Adon	01B6	01B6	01B7	mesure
+sfa1	06	Sodom	01BF	01BF	01C0	mesure
+sfa1	07	Guy	017E	017E	017F	mesure
+sfa1	08	Birdie	01DB	01DB	01DE	mesure
+sfa1	09	Rose	01A8	01A8	01AC	mesure
+sfa1	0A	Bison	01CA	01CA	01CB	mesure
+sfa1	0B	Sagat	0192	0192	0193	mesure
+sfa1	0C	Dan	0167	0167	0168	mesure
+sfa2	00	Ryu	0187	0188	018A	mesure
+sfa2	01	Ken	0195	0196	0198	mesure
+sfa2	02	Akuma	01A0	01A1	01A3	mesure
+sfa2	03	Charlie	01AC	01AD	01AF	mesure
+sfa2	04	Chun-Li	01BC	01BD	01BF	mesure
+sfa2	05	Adon	01CB	01CC	01CE	mesure
+sfa2	06	Sodom	01D8	01D9	01DB	mesure
+sfa2	07	Guy	01E6	01E7	01E9	mesure
+sfa2	08	Birdie	01F9	01FA	01FC	mesure
+sfa2	09	Rose	030C	030D	030F	mesure
+sfa2	0A	Bison	0319	031A	031C	mesure
+sfa2	0B	Sagat	0328	0329	032B	mesure
+sfa2	0C	Dan	033B	033C	033E	mesure
+sfa2	0D	Sakura	0350	0351	0353	mesure
+sfa2	0E	Rolento	0360	0361	0363	mesure
+sfa2	0F	Dhalsim	036F	0370	0372	mesure
+sfa2	10	Zangief	00C0	00C1	00C3	mesure
+sfa2	11	Gen	00CD	00CE	00D0	mesure

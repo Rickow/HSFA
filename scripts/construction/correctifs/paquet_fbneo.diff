@@ -1,0 +1,134 @@
+--- paquet_fbneo.orig.py	2026-10-10 13:51:20.422525358 +0200
++++ paquet_fbneo.py	2026-10-10 13:51:45.245833299 +0200
+@@ -15,6 +15,14 @@
+ 
+ Usage : python3 paquet_fbneo.py [sfa3|upper ...]   (defaut : les deux)
+ Variables : HSFA_WORK (dossier work, defaut : dossier parent de ce script), HSFA_SORTIE (defaut : dossier du script).
++  SOURCE_DATE_EPOCH (secondes Unix, convention reproducible-builds.org) : archives DETERMINISTES -- date fixe pour chaque
++      membre du zip et pour « construite le » de hsfa_info.txt (UTC), dates des sources ramenees a cette date au plus ;
++      deux constructions identiques donnent alors des zips identiques a l'octet. Sans elle : dates reelles (comme avant).
++  HSFA_STRICT=1 : n'embarquer QUE les fichiers attendus du jeu -- blocs ext_<adresse>.bin de ext_liste.txt (ecrite par
++      mame_test.py) et tables f<N>.bin de carte.txt (banque commune, persos, animations) + f312, plan1, plan2 (+ la liste
++      JEUX[..]['tables_en_plus']) ; un fichier attendu absent est une erreur, un fichier en trop est ignore et signale
++      (ex. restes de la demonstration MAX : ext_b00000.bin, banques/pl26.bin). Sans elle : tout ce qui est present
++      (comme avant).
+ """
+ import hashlib, os, struct, sys, time, zipfile
+ 
+@@ -42,6 +50,17 @@
+ 
+ journal = []
+ 
++DATE_FIXE = os.environ.get("SOURCE_DATE_EPOCH")
++DATE_FIXE = int(DATE_FIXE) if DATE_FIXE not in (None, "") else None
++STRICT = os.environ.get("HSFA_STRICT") == "1"
++
++
++def date_texte(t):
++    """date d'un fichier ou de la construction : ramenee a SOURCE_DATE_EPOCH au plus (et en UTC) si elle est donnee"""
++    if DATE_FIXE is None:
++        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t))
++    return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(min(t, DATE_FIXE)))
++
+ def lit(chemin):
+     """lit un fichier (stable : relu si modifie pendant la lecture) et note md5 / date"""
+     for _ in range(10):
+@@ -53,7 +72,7 @@
+     else:
+         raise SystemExit("fichier instable (reconstruction en cours ?) : " + chemin)
+     rel = os.path.relpath(os.path.realpath(chemin), WORK) if os.path.realpath(chemin).startswith(WORK) else os.path.basename(chemin)
+-    journal.append("%s  %s  %s  %d" % (hashlib.md5(d).hexdigest(), time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(st.st_mtime)), rel, len(d)))
++    journal.append("%s  %s  %s  %d" % (hashlib.md5(d).hexdigest(), date_texte(st.st_mtime), rel, len(d)))
+     return d
+ 
+ def echange(d):
+@@ -65,16 +84,24 @@
+ def image_ext(dossier):
+     img = bytearray(EXT_LEN)
+     pris = bytearray(EXT_LEN)
+-    bases = list(EXT_FIXES)
++    bases = [] if STRICT else list(EXT_FIXES)
+     lst = os.path.join(dossier, "ext_liste.txt")
+     if os.path.exists(lst):
+         for l in lit(lst).decode().split():
+             if l and l not in bases:
+                 bases.append(l)
++    elif STRICT:
++        raise SystemExit("HSFA_STRICT : pas de ext_liste.txt dans " + dossier)
++    if STRICT:
++        for f in sorted(os.listdir(dossier)):
++            if f.startswith("ext_") and f.endswith(".bin") and f[4:-4] not in bases:
++                print("  ignore (absent de ext_liste.txt) : " + f)
+     n = 0
+     for nom in bases:
+         p = os.path.join(dossier, "ext_%s.bin" % nom)
+         if not os.path.exists(p):
++            if STRICT:
++                raise SystemExit("HSFA_STRICT : bloc de ext_liste.txt absent : " + p)
+             continue
+         d = lit(p)
+         base = int(nom, 16)
+@@ -91,11 +118,30 @@
+         raise SystemExit("aucun bloc ext_*.bin dans " + dossier)
+     return echange(bytes(img))
+ 
+-def tables(dossier, config):
++def tables_attendues(carte, config, en_plus=()):
++    """HSFA_STRICT : f<banque commune>, f<N> de carte.txt (lignes « perso id N » et « anim ptr N », N > 0), f312, plan1,
++    plan2 (+ en_plus) : exactement ce que banques.py tout / 312 / plans ecrit (et hsfa_gfx.py / hsfa_plans.py, _hx)"""
++    att = {"f%s" % config["commun"], "f312", "plan1", "plan2"} | set(en_plus)
++    for l in carte.decode().splitlines():
++        m = l.split()
++        if len(m) == 3 and m[0] in ("perso", "anim") and int(m[2]) > 0:
++            att.add("f%d" % int(m[2]))
++    return att
++
++def tables(dossier, config, en_plus=()):
+     ent = [("config", "".join("%s=%s\n" % kv for kv in config.items()).encode())]
+-    ent.append(("carte", lit(os.path.join(dossier, "carte.txt"))))
++    carte = lit(os.path.join(dossier, "carte.txt"))
++    ent.append(("carte", carte))
++    att = tables_attendues(carte, config, en_plus) if STRICT else None
++    if STRICT:
++        manque = sorted(n for n in att if not os.path.exists(os.path.join(dossier, n + ".bin")))
++        if manque:
++            raise SystemExit("HSFA_STRICT : tables attendues absentes de %s : %s" % (dossier, ", ".join(manque)))
+     for f in sorted(os.listdir(dossier)):
+         if f.endswith(".bin"):
++            if STRICT and f[:-4] not in att:
++                print("  ignore (table non attendue) : " + f)
++                continue
+             nom = f[:-4]
+             if len(nom) > 23:
+                 raise SystemExit("nom de table trop long : " + f)
+@@ -137,17 +183,25 @@
+     for f in sl:
+         fichiers.append((f, lit(os.path.join(WORK, sd, f))))
+     fichiers.append(("hsfa_ext.bin", image_ext(os.path.join(WORK, J["dossier"]))))
+-    fichiers.append(("hsfa_tab.bin", tables(os.path.join(WORK, J["banques"]), J["config"])))
++    fichiers.append(("hsfa_tab.bin", tables(os.path.join(WORK, J["banques"]), J["config"], J.get("tables_en_plus", ()))))
+     if J["gfx"]:
+         fichiers.append(("hsfa_gfx.bin", image_gfx(J["gfx"])))
+     info = "Archive %s construite le %s par paquet_fbneo.py\nmd5  date  fichier source  taille\n%s\n" % (
+-        J["nom"], time.strftime("%Y-%m-%d %H:%M:%S"), "\n".join(journal))
++        J["nom"], date_texte(time.time()), "\n".join(journal))
+     sortie = os.path.join(SORTIE, J["nom"] + ".zip")
+     tmp = sortie + ".tmp"
+     with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+-        for f, d in fichiers:
+-            z.writestr(f, d)
+-        z.writestr("hsfa_info.txt", info)
++        for f, d in fichiers + [("hsfa_info.txt", info)]:
++            if DATE_FIXE is None:
++                z.writestr(f, d)
++                continue
++            # membre a date fixe (ZIP : heure locale sans fuseau, 1980 au plus tot ; secondes paires), droits et
++            # systeme d'origine fixes (sinon 0 sous Windows, 3 ailleurs) : octets identiques d'une construction a l'autre
++            zi = zipfile.ZipInfo(f, date_time=time.gmtime(max(DATE_FIXE, 315532800))[:6])
++            zi.create_system = 3
++            zi.external_attr = 0o644 << 16
++            zi.compress_type = zipfile.ZIP_DEFLATED
++            z.writestr(zi, d, compresslevel=6)
+     os.replace(tmp, sortie)
+     open(os.path.join(SORTIE, J["nom"] + "_sources.txt"), "w").write(info)
+     print("  -> %s (%.1f Mo)" % (sortie, os.path.getsize(sortie) / 2**20))

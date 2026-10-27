@@ -1,0 +1,93 @@
+From 8d27ebb0f1d1056860bf92ecc66e8865a33877ef Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Fri, 16 Oct 2026 14:23:36 +0000
+Subject: [PATCH] HSFA : roulette de la selection d'Hyper sur la touche Piece
+ (Start garde pour EX / S-ISM)
+
+Sur PS2, la roulette (perso au hasard a la validation) vient d'une touche a part (Select) ; le portage traduit
+recopie le bit de Start dans l'octet $D3 des joueurs ($FF84D3, $FF88D3), si bien que Start tenu a la validation
+du perso donnait un perso au hasard. Le coeur ecrit maintenant $D3 d'apres la touche Piece du joueur (Select de
+RetroPad), seulement sur la grille des persos (phases 2/2/4, etat 0). Start reste celui du jeu : versions EX
+(Start tenu a la validation de la version), S-ISM (Start tenu + gauche / droite sur le mode). HSFA_NOROUL=1
+(essais) : $D3 toujours a 0, comme avant.
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 41 ++++++++++++++++++++++----------
+ 1 file changed, 28 insertions(+), 13 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 8ff91bbf1..aaf1d6a93 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -22,7 +22,7 @@ static hsfa_mus::carte *HsfaMus = NULL;				// carte musique (partitions SFA1 / S
+ extern UINT8 *CpsRam660;
+ 
+ INT32 HsfaMode = 0;									// 0 = inactif, 1 = SFA3 traduit, 2 = Upper ou Hyper (fork)
+-INT32 HsfaHyper = 0;								// Hyper (mode 2) : seulement pour le crochet d'essai HSFA_NOROUL
++INT32 HsfaHyper = 0;								// Hyper (mode 2) : roulette sur la touche Piece, crochet HSFA_NOROUL
+ UINT32 nCpsGfxLenMin = 0;							// taille minimale de la region graphique (Upper, Hyper : 64 Mo)
+ 
+ // donnees externes du portage : image de [base, $F00000) ; la base vient de la taille de hsfa_ext.bin
+@@ -1179,21 +1179,34 @@ static INT32 HsfaLoadData()
+ 	return (HsfaTab == NULL) ? 1 : 0;
+ }
+ 
+-// (essais sur PC seulement) HSFA_NOROUL=1 : equivalent de NOROUL des scripts du banc (hyper.lua, tournee_hyper.lua,
+-// prise d'ecriture Lua) pour comparer FBNeo au fork avec les memes entrees. L'octet $D3 des joueurs 1 et 2 ($FF84D3,
+-// $FF88D3 : drapeau "Start" de la selection, qui lance la roulette aleatoire) est toujours ecrit a 0. Sans la variable
+-// (cas normal, et toujours sous Android), rien n'est installe.
+-static void __fastcall HsfaNoroulWriteByte(UINT32 a, UINT8 d)
++// Roulette de la selection d'Hyper. L'octet $D3 des joueurs 1 et 2 ($FF84D3, $FF88D3) lance la roulette aleatoire
++// de l'ecran des persos. Sur PS2 il vient d'une touche a part (Select) ; le portage traduit le recopie du bit 15 de la
++// manette, c.-a-d. de Start, que la selection utilise aussi (version EX : Start tenu a la validation de la version ;
++// S-ISM : Start tenu + gauche / droite sur le mode). Le coeur le remplace par la touche Piece (Select de RetroPad) du
++// joueur, et seulement sur la grille des persos (phases $FF8000/4/8 = 2/2/4, etat du joueur 0) : $FF tant qu'elle est
++// tenue, 0 sinon. (essais sur PC seulement) HSFA_NOROUL=1 : toujours 0, equivalent de NOROUL des scripts du banc.
++static INT32 nHsfaNoroul = 0;
++
++static UINT8 HsfaRoulette(UINT32 a)
++{
++	if (nHsfaNoroul) return 0;
++	INT32 j = (a >= 0x8800) ? 1 : 0;
++	UINT32 p = 0x8400 + 0x400 * j;
++	if (CpsRamFF[0x8000] != 2 || CpsRamFF[0x8004] != 2 || CpsRamFF[0x8008] != 4 || CpsRamFF[(p + 5) ^ 1] != 0) return 0;
++	return CpsInp020[4 + j] ? 0xFF : 0;
++}
++
++static void __fastcall HsfaRouletteWriteByte(UINT32 a, UINT8 d)
+ {
+ 	a &= 0xFFFF;
+-	if (a == 0x84D3 || a == 0x88D3) d = 0;
++	if (a == 0x84D3 || a == 0x88D3) d = HsfaRoulette(a);
+ 	CpsRamFF[a ^ 1] = d;
+ }
+ 
+-static void __fastcall HsfaNoroulWriteWord(UINT32 a, UINT16 d)
++static void __fastcall HsfaRouletteWriteWord(UINT32 a, UINT16 d)
+ {
+ 	a &= 0xFFFE;
+-	if (a == 0x84D2 || a == 0x88D2) d &= 0xFF00;
++	if (a == 0x84D2 || a == 0x88D2) d = (d & 0xFF00) | HsfaRoulette(a);
+ 	WrW(CpsRamFF + a, d);
+ }
+ 
+@@ -1257,11 +1270,13 @@ INT32 HsfaInit()
+ 	}
+ 	// sorties Phoenix ($FFFFF0) : seule la derniere page de RAM passe par le gestionnaire (vitesse)
+ 	SekMapMemory(CpsRamFF, 0xFF0000, 0xFFFBFF, MAP_WRITE);
+-	if (HsfaHyper && getenv("HSFA_NOROUL") && atoi(getenv("HSFA_NOROUL")) == 1) {
++	if (HsfaHyper) {
++		nHsfaNoroul = getenv("HSFA_NOROUL") && atoi(getenv("HSFA_NOROUL")) == 1;
+ 		SekMapHandler(7, 0xFF8400, 0xFF8BFF, MAP_WRITE);
+-		SekSetWriteByteHandler(7, HsfaNoroulWriteByte);
+-		SekSetWriteWordHandler(7, HsfaNoroulWriteWord);
+-		bprintf(0, _T("HSFA : HSFA_NOROUL (essais) : $FF84D3 / $FF88D3 ecrits a 0\n"));
++		SekSetWriteByteHandler(7, HsfaRouletteWriteByte);
++		SekSetWriteWordHandler(7, HsfaRouletteWriteWord);
++		if (nHsfaNoroul) bprintf(0, _T("HSFA : HSFA_NOROUL (essais) : $FF84D3 / $FF88D3 ecrits a 0\n"));
++		else bprintf(0, _T("HSFA : roulette de la selection sur la touche Piece (Start garde pour EX / S-ISM)\n"));
+ 	}
+ 	SekClose();
+ 
+-- 
+2.43.0
+

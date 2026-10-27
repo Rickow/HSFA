@@ -1,0 +1,1 @@
+-- (etape 5) script vide (attraction sans piece)

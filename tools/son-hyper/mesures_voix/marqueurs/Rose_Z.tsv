@@ -1,0 +1,9 @@
+# Rose_Z : version $39, table $E71880 (redirection), 35 entrees, origine prog+229A40
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	39	0429	01A2	1		demi-cercle avant+HP
+sfa1	39	042B	01A4	2		QCB+HP ; QCB+LP
+sfa1	39	042E	01A5	2		projection HP ; projection HP 2
+sfa1	39	0430	01A7	2		projection HP ; projection HP 2
+sfa1	39	0432	01AA	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

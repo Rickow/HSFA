@@ -1,0 +1,26 @@
+role (rapport.json ro3)	n_ro3	Upper (va MIPS)	Hyper (va MIPS / image)	ou le refaire
+bibliotheque blocs scroll1	4	0x14FBE4 0x150448 0x150968 0x150A0C	0x314154 $0787C2 ; 0x3149B8 $07890E ; 0x314ED8 $0789C0 ; 0x314F7C $0789D8	Hyper, 4
+super-tuiles scroll1	3	0x150250 0x150724 0x150AA0	0x3147C0 $0788AC ; 0x314C94 $078954 ; 0x315010 $0789EC	Hyper, 3
+bibliotheque blocs scroll2	1	0x15163C	0x315B2C $078B58	Hyper, 1
+bibliotheque blocs scroll3	1	0x151A7C	0x315F6C $078C24	Hyper, 1
+type scroll1	1	0x14F554	0x313AC4 $07867E	Hyper, 1
+type scroll2 / scroll3	2	constante 0 (0x151270, 0x151750)	constante 0 (0x3157E0, 0x315C40)	rien
+longs $40/$44 scroll1/2/3	6	constantes	constantes (0x313F20, 0x315A50, 0x315EA0)	rien
+controle CPS-B	2	T_614CD0 (0x15ACB0)	T_5C51F0 / T_5C51F2 (0x313960)	Hyper, 2
+couleur ROUND	2	T_6112D0 (0xF29A0, 0xF2A30)	T_5C87D0 (0x37BDC0, 0x37BE50), deja 40 entrees	Hyper, 2 (au-dela de $4E seulement)
+init joueur ($F, $18/$D0, X/Y)	5	constantes (0x247D80, 0x247DB0, 0x247E40)	constantes (0x2C75E0, 0x2C7610, 0x2C76A0)	rien
+positions par decor	2	0x196F50 / 0x198A00	absent	code Upper greffe
+listes scroll1/2/3	3	0x14F590 0x1512A4 0x151784	0x313B00 $07869A ; 0x315814 $078AD0 ; 0x315C74 $078B9C	Hyper, 3
+palettes scroll1/2/3	6	0x4ABD8 0x4BAF8 / 0x4AC78 0x4BB98 / 0x4AD18 0x4BC38	A 0x605B8 $009234, 0x611C8 $00942C ; B 0x61288 $00944A ; C 0x61348 $009468	Hyper, 4 (+ variantes $C178)
+palettes sprites de decor	2	0x4AA88 0x4B958	absent	code Upper greffe
+objets de decor	2	0x4C1B0 (T_950CE0)	absent	code Upper greffe
+ordre des plans (table de sauts)	1	0x151B80 (T_6147B0)	0x30EC10 (T_5C50D0)	Hyper, 1
+gestionnaires scroll1/2/3 (tables de sauts)	3	0x151EA0 / 0x155920 / 0x157300	0x30EF00 / 0x30FEE0 / 0x311550	Hyper, 3 (+ T_5C50B0/T_5C50C0 : 2)
+effet par decor (table de sauts)	1	0x13BB10 (T_6135A0 + T_6134E0/T_613530)	0x391E50 (T_5C9E30 + T_5C9E00/T_5C9E08)	Hyper, 1 (+ 2 tables de mots)
+ordre des plans (fins)	1	moteur des fins (scene A)	absent	code Upper greffe
+alias : animation par decor	2	0x199530 / 0x199DA0	absent	code Upper greffe
+alias : animations des objets / donnees par decor	2	0xFDC10 (0x971E70) / 0x105C70 (0x740B70)	absent	code Upper greffe
+alias : masques par decor	2	0x196F50, 0x198A00 ($C0A00400) ; 0x371920 ($3F60BDB3)	absent	code Upper greffe
+alias : animation de palettes	2	0xC8890, 0x1E4530	0x38D510 (identique)	Hyper, 1
+musique (decor >= $50)	1	0x139AD0 (VERSUS, par decor)	absent ; musique d'Hyper non etudiee	a refaire
+selection Arcade (tirage)	1	0x24F2F4 ($174, 0x24F020)	0xA4A68 ($174, 0xA49E0) ou site greffe	Hyper ou greffe, 1

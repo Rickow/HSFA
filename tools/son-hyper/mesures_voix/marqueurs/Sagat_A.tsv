@@ -1,0 +1,9 @@
+# Sagat_A : version $6B, table $E73E00 (redirection), 27 entrees, origine prog+250632
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	6B	0469	031D	5		QCF+HK ; QCF+HP ; QCF+LK ; QCF+LP ; demi-cercle avant+HP
+sfa2	6B	046A	031E	2		DP+HP ; DP+LP
+sfa2	6B	046F	0323	8		projection HP ; projection HP 2
+sfa2	6B	0473	0327	2		projection HP ; projection HP 2
+sfa2	6B	0476	0324	2		projection HP ; projection HP 2
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

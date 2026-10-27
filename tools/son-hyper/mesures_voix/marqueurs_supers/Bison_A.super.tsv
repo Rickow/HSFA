@@ -1,0 +1,7 @@
+# Bison_A : version $6A, table $E73B80 (redirection), 53 entrees, origine prog+239FDC
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	6A	044D	0314	1		super charge AR,AV,AR,AV+HK
+sfa2	6A	044F	0316	1		super charge AR,AV,AR,AV+HP
+sfa2	6A	0450	0317	1		super charge bas,haut-bas+HK
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

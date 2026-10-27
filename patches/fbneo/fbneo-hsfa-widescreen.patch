@@ -1,0 +1,77 @@
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index ce09851..6c73f85 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15258,6 +15258,20 @@ static struct BurnRomInfo Sfa3uhsfaRomDesc[] = {
+ STD_ROM_PICK(Sfa3uhsfa)
+ STD_ROM_FN(Sfa3uhsfa)
+ 
++// Variante widescreen (coeur fbneo_hsfaws, -DHSFA_WS) : memes noms de pilotes et memes archives, image elargie a
++// 448x224 (16:9). Le decor existe au-dela des 384 px ; FBNeo recentre plans et objets (nCpsGlobalXOffset = 32).
++#ifdef HSFA_WS
++#define HSFA_SCRW	448
++#define HSFA_ASPX	16
++#define HSFA_ASPY	9
++#define HSFA_SUFFIXE	", 16:9"
++#else
++#define HSFA_SCRW	384
++#define HSFA_ASPX	4
++#define HSFA_ASPY	3
++#define HSFA_SUFFIXE	""
++#endif
++
+ static INT32 HsfaSfa3Init()
+ {
+ 	HsfaMode = 1;
+@@ -15284,22 +15298,22 @@ static INT32 HsfaDrvExit()
+ 
+ struct BurnDriver BurnDrvCpsSfa3hsfa = {
+ 	"sfa3hsfa", NULL, NULL, NULL, "2026",
+-	"Street Fighter Alpha 3 (HSFA, Anthology PS2 retraduit)\0", NULL, "HSFA", "CPS2",
++	"Street Fighter Alpha 3 (HSFA, Anthology PS2 retraduit" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
+ 	NULL, NULL, NULL, NULL,
+ 	BDF_GAME_WORKING | BDF_HACK, 2, HARDWARE_CAPCOM_CPS2, GBF_VSFIGHT, FBF_SF,
+ 	NULL, Sfa3hsfaRomInfo, Sfa3hsfaRomName, NULL, NULL, NULL, NULL, Cps2FightingInputInfo, NULL,
+ 	HsfaSfa3Init, HsfaDrvExit, Cps2Frame, CpsRedraw, CpsAreaScan,
+-	&CpsRecalcPal, 0x1000, 384, 224, 4, 3
++	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
+ };
+ 
+ struct BurnDriver BurnDrvCpsSfa3uhsfa = {
+ 	"sfa3uhsfa", NULL, NULL, NULL, "2026",
+-	"Street Fighter Alpha 3 Upper (HSFA, Anthology PS2 retraduit)\0", NULL, "HSFA", "CPS2",
++	"Street Fighter Alpha 3 Upper (HSFA, Anthology PS2 retraduit" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
+ 	NULL, NULL, NULL, NULL,
+ 	BDF_GAME_WORKING | BDF_HACK, 2, HARDWARE_CAPCOM_CPS2, GBF_VSFIGHT, FBF_SF,
+ 	NULL, Sfa3uhsfaRomInfo, Sfa3uhsfaRomName, NULL, NULL, NULL, NULL, Cps2FightingInputInfo, NULL,
+ 	HsfaUpperInit, HsfaDrvExit, Cps2Frame, CpsRedraw, CpsAreaScan,
+-	&CpsRecalcPal, 0x1000, 384, 224, 4, 3
++	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
+ };
+ 
+ struct BurnDriver BurnDrvCpsSfz3jr2d = {
+diff --git a/src/burner/libretro/Makefile.hsfaws b/src/burner/libretro/Makefile.hsfaws
+new file mode 100644
+index 0000000..134f371
+--- /dev/null
++++ b/src/burner/libretro/Makefile.hsfaws
+@@ -0,0 +1,4 @@
++# Coeur HSFA widescreen : meme sous-ensemble que Makefile.hsfa, pilotes sfa3hsfa / sfa3uhsfa en 448x224 (16:9)
++include $(dir $(lastword $(MAKEFILE_LIST)))Makefile.hsfa
++CFLAGS += -DHSFA_WS
++CXXFLAGS += -DHSFA_WS
+diff --git a/src/burner/libretro/libretro.cpp b/src/burner/libretro/libretro.cpp
+index 7cfb3c7..6fb3e41 100644
+--- a/src/burner/libretro/libretro.cpp
++++ b/src/burner/libretro/libretro.cpp
+@@ -33,7 +33,9 @@
+ 
+ #ifdef SUBSET
+ #undef APP_TITLE
+-#ifdef HSFA_CORE
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++#define APP_TITLE "FinalBurn Neo HSFA Widescreen"
++#elif defined(HSFA_CORE)
+ #define APP_TITLE "FinalBurn Neo HSFA"
+ #else
+ #define APP_TITLE "FinalBurn Neo (" SUBSET " subset)"

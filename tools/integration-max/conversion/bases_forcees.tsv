@@ -1,0 +1,32 @@
+etiquette	registre	genre	justification
+psp_cfd9c	d0	tab	argument « D0 = TAB_xxxxxx » (tables_explicites_*.s, table de pointeurs MAX) — commentaire de psp_cfd9c
+psp_cfb6c	d0	tab	argument « D0 = TAB_xxxxxx » (petits pas convertis, tables MAX) — commentaire de psp_cfb6c ; appelant psp_79f88 : move.l #TAB_220120,d0
+psp_raz_alloc	a4	objet	appelée juste après une allocation ($1C1C8/$1C2C8/$1C368…) qui rend A4 = nouvel objet (commentaire « Réservoirs d'objets »)
+moteur_max_main.s:150	a0	objet	A0 = $FF8400 + $400×(D0 & 3) : structure joueur (lignes 133-136 de psp_78408)
+moteur_max_main.s:220	a0	tab	A0 = entrée de TAB_VOIX_2x (table MAX) relue de la pile après psp_cee0c (l. 197-207 de psp_cec94)
+psp_66ae8	d0	objet	« D0 = victime (PSP a1) » (commentaire de psp_66ae8) ; appelants : move.w $38(a6),d0
+psp_66ae8	d1	ps2:attaque:0	« D1 = entrée d'attaque » : tous les appelants font move.l $a0(a6),d3 ; addi.l #$20k,d3 ; move.l d3,d1 (Eagle l.2610/2653, Maki l.4091, Yun l.4052) -> adresse PS2 brute d'une entrée de 32 o
+psp_63708	d0	fiche_psp	« D0 = adresse de la fiche PSP » (objet + 0x350..0x3B8) ; A4 = D0 − $1D0 = fiche arcade (objet + $180..$1E8), lue seulement par les routines de manipulation d'Upper
+psp_64220	d0	fiche_psp	même entrée que psp_63708 (étiquettes consécutives)
+psp_64a34	d0	fiche_psp	même entrée que psp_63708 (étiquettes consécutives)
+psp_66ae8.s1	a2	objet	A2 = victime (movea.l d0,a2 en tête de psp_66ae8) ; le flux le perd à cause de « bsr psp_78408 » : la source note elle-même que psp_78408 « devra préserver A2/A3 » (à vérifier, voir CONV-MAX.md)
+psp_66ae8.s2	a2	objet	idem (A2 = victime)
+moteur_max_main.s:414	a2	objet	idem (A2 = victime)
+moteur_max_main.s:204	a0	tab	A0 = entrée de TAB_VOIX_MAX (table de voix propre à MAX, mots) : lea TAB_VOIX_MAX(pc) ; move.l 0(a0,d1.w),d1 ; movea.l d1,a0
+moteur_max_main.s:219	a0	tab	même A0 (entrée de TAB_VOIX_MAX) après le point de jonction .duree : les deux chemins viennent de la ligne 193
+fin_pos_4f05.trouve	a0	tab	A0 = acteur $4F/05 du réservoir $3000(A5) ; ses mots $40-$57 (12 mots, écrits en move.w par $AAFAC) sont rangés au MÊME déplacement dans l image d Upper (mesuré : $AAFC2-$AB046, 12 sites alignés $40.W->$40 … $56.W->$56) ; accès indexé move.w $40/$42(a0,d7.w), d7 = 0..20 pair -> identité (genre « tab » = identité, voir CONV-MAX.md §9)
+CONTRE_MAX_11	a1	objet	contres_max.s (session MAX, 17/10) : « A1 = défenseur » (contexte des gestionnaires de contre 4-9 d'Upper, image $40EC)
+CONTRE_MAX_11	a6	objet	contres_max.s : « A6 = attaquant (joueur OU objet lancé) »
+CONTRE_MAX_11	a3	donnee:attaque:0	contres_max.s : « A3 = attaque reçue (enregistrement de 32 o) »
+CONTRE_MAX_12	a1	objet	contres_max.s (session MAX, 17/10) : « A1 = défenseur » (contexte des gestionnaires de contre 4-9 d'Upper, image $40EC)
+CONTRE_MAX_12	a6	objet	contres_max.s : « A6 = attaquant (joueur OU objet lancé) »
+CONTRE_MAX_12	a3	donnee:attaque:0	contres_max.s : « A3 = attaque reçue (enregistrement de 32 o) »
+CONTRE_MAX_13	a1	objet	contres_max.s (session MAX, 17/10) : « A1 = défenseur » (contexte des gestionnaires de contre 4-9 d'Upper, image $40EC)
+CONTRE_MAX_13	a6	objet	contres_max.s : « A6 = attaquant (joueur OU objet lancé) »
+CONTRE_MAX_13	a3	donnee:attaque:0	contres_max.s : « A3 = attaque reçue (enregistrement de 32 o) »
+CONTRE_MAX_14	a1	objet	contres_max.s (session MAX, 17/10) : « A1 = défenseur » (contexte des gestionnaires de contre 4-9 d'Upper, image $40EC)
+CONTRE_MAX_14	a6	objet	contres_max.s : « A6 = attaquant (joueur OU objet lancé) »
+CONTRE_MAX_14	a3	donnee:attaque:0	contres_max.s : « A3 = attaque reçue (enregistrement de 32 o) »
+contre_ingrid	a1	objet	contres_max.s (session MAX, 17/10) : « A1 = défenseur » (contexte des gestionnaires de contre 4-9 d'Upper, image $40EC)
+contre_ingrid	a6	objet	contres_max.s : « A6 = attaquant (joueur OU objet lancé) »
+contre_ingrid	a3	donnee:attaque:0	contres_max.s : « A3 = attaque reçue (enregistrement de 32 o) »

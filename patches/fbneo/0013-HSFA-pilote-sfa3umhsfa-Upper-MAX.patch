@@ -1,0 +1,99 @@
+From 5ceb13ca701215a8a7aa862865060e5b3124c8d7 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 24 Oct 2026 17:33:10 +0200
+Subject: [PATCH] HSFA: sfa3umhsfa driver, Street Fighter Alpha 3 Upper MAX
+
+Upper built with the SFA3 MAX characters (build option MAX=1) gets its
+own driver and archive, sfa3umhsfa.zip, so that it can live next to
+Upper (sfa3uhsfa) with separate save states, configuration and NVRAM.
+
+- Same members, mechanisms and options as sfa3uhsfa (mode 2: graphics
+  banks, plane bases, hybrid sound, ADX streams, DIPs, 0010-0012):
+  HsfaUpperInit, HsfaDIPInfo. Translated program and HSFA data looked
+  up by name (CRC not checked), like the other HSFA drivers.
+- Optional member hsfa_trous.bin (patch 0009: data served in the free
+  holes of the 68K map), as for sfa3hahsfa.
+- No parent: nothing is ever read from sfa3uhsfa.zip.
+- Title "Street Fighter Alpha 3 Upper MAX (HSFA)" (", 16:9" in the
+  widescreen core).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/d_cps2.cpp | 54 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 54 insertions(+)
+
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 8a29ea2..ec187d6 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15446,6 +15446,50 @@ static struct BurnRomInfo Sfa3uhsfaRomDesc[] = {
+ STD_ROM_PICK(Sfa3uhsfa)
+ STD_ROM_FN(Sfa3uhsfa)
+ 
++// (patch 0013) Upper + persos MAX (option de construction MAX=1) : pilote et archive propres (sfa3umhsfa.zip), pour
++// cohabiter avec Upper (etats, configuration, NVRAM separes). Memes membres et memes mecanismes que sfa3uhsfa (mode 2,
++// banques, son hybride, flux ADX, options), programme et donnees cherches par nom (CRC non verifies), plus le membre
++// facultatif des trous de la carte 68K (patch 0009). Pas de parent : rien n'est lu dans sfa3uhsfa.zip.
++static struct BurnRomInfo Sfa3umhsfaRomDesc[] = {
++	// programme 68000 retraduit (CRC variable : cherche par nom dans l'archive)
++	{ "sz3ud.03c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3ud.04c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.05c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.06c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.07c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.08c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.09c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.10b",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++
++	{ "sz3.13m",       0x400000, 0x0f7a60d9, CPS2_GFX | BRF_GRA },
++	{ "sz3.15m",       0x400000, 0x8e933741, CPS2_GFX | BRF_GRA },
++	{ "sz3.17m",       0x400000, 0xd6e98147, CPS2_GFX | BRF_GRA },
++	{ "sz3.19m",       0x400000, 0xf31a728a, CPS2_GFX | BRF_GRA },
++	{ "sz3.14m",       0x400000, 0x5ff98297, CPS2_GFX | BRF_GRA },
++	{ "sz3.16m",       0x400000, 0x52b5bdee, CPS2_GFX | BRF_GRA },
++	{ "sz3.18m",       0x400000, 0x40631ed5, CPS2_GFX | BRF_GRA },
++	{ "sz3.20m",       0x400000, 0x763409b4, CPS2_GFX | BRF_GRA },
++
++	// son hybride d'Upper (Z80 d'Upper + musiques de SFA3), QSound 16 Mo
++	{ "hx3.01",        0x020000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++	{ "hx3.02",        0x028000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++
++	{ "hx3.11m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.12m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.13m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.14m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++
++	{ "phoenix.key",   0x000014, 0x2cf772b0, CPS2_ENCRYPTION_KEY },
++
++	{ "hsfa_ext.bin",  0x500000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// $A00000-$EFFFFF
++	{ "hsfa_tab.bin",  0x400000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// tables de banques
++	{ "hsfa_gfx.bin",  0x2000000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_GRA },	// region $2000000-$3FFFFFF
++	{ "hsfa_trous.bin", 0x516000, 0x00000000, CPS2_HSFA_DATA | BRF_OPT | BRF_PRG },	// (patch 0009, facultatif) trous de la carte 68K
++};
++
++STD_ROM_PICK(Sfa3umhsfa)
++STD_ROM_FN(Sfa3umhsfa)
++
+ // Hyper Street Fighter Alpha (module ro9 de l'Anthology) : memes mecanismes qu'Upper (ROM graphique etendue, bases de
+ // plans, son hybride + flux ADX), banque commune e545, donnees externes $940000-$EFFFFF (blocs $940000 et $C84000).
+ static struct BurnRomInfo Sfa3hhsfaRomDesc[] = {
+@@ -15598,6 +15642,16 @@ struct BurnDriver BurnDrvCpsSfa3uhsfa = {
+ 	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
+ };
+ 
++struct BurnDriver BurnDrvCpsSfa3umhsfa = {
++	"sfa3umhsfa", NULL, NULL, NULL, "2026",
++	"Street Fighter Alpha 3 Upper MAX (HSFA" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
++	NULL, NULL, NULL, NULL,
++	BDF_GAME_WORKING | BDF_HACK, 2, HARDWARE_CAPCOM_CPS2, GBF_VSFIGHT, FBF_SF,
++	NULL, Sfa3umhsfaRomInfo, Sfa3umhsfaRomName, NULL, NULL, NULL, NULL, HsfaInputInfo, HsfaDIPInfo,
++	HsfaUpperInit, HsfaDrvExit, Cps2Frame, CpsRedraw, CpsAreaScan,
++	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
++};
++
+ struct BurnDriver BurnDrvCpsSfa3hhsfa = {
+ 	"sfa3hhsfa", NULL, NULL, NULL, "2026",
+ 	"Hyper Street Fighter Alpha (HSFA, Anthology PS2 retraduit" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
+-- 
+2.53.0
+

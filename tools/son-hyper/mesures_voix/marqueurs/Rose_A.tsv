@@ -1,0 +1,9 @@
+# Rose_A : version $69, table $E73900 (redirection), 35 entrees, origine prog+229A40
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	69	0427	0305	2		projection HP ; projection HP 2
+sfa2	69	0429	0300	1		demi-cercle avant+HP
+sfa2	69	042B	0302	2		QCB+HP ; QCB+LP
+sfa2	69	042F	0307	4		QCF+HK ; QCF+LK ; projection HP ; projection HP 2
+sfa2	69	0432	0309	1		Start
+# voix Hyper sans voix d'arcade : 0427@projection HK 0427@charge arriere-avant+HK
+# voix d'arcade sans voix Hyper : 

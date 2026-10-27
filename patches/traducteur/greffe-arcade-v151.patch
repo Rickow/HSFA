@@ -1,0 +1,481 @@
+diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assemble.py b/assemble.py
+--- a/assemble.py	2026-10-25 09:18:38.853022929 +0100
++++ b/assemble.py	2026-10-25 09:18:38.866650551 +0100
+@@ -362,10 +362,15 @@
+             if k_=='p1': x.nofix='natif'
+             else: x.ws=x.ws[:2]+x.ws[7:]
+ 
+-def assemble(buf, start, end, base=0, external=None, native=()):
++def assemble(buf, start, end, base=0, external=None, native=(), extra=()):
+     """external(va_fichier) -> adresse 68K absolue pour une cible HORS de l'unite (ou None).
+-    native : cibles DANS l'unite qui sont du code natif du portage (non traduisible) -> external."""
++    native : cibles DANS l'unite qui sont du code natif du portage (non traduisible) -> external.
++    extra : (greffe_arcade) plages de code supplementaires [(debut, fin)] traduites A LA SUITE de [start, end)."""
+     items,_=T.translate(buf,start,end)
++    for a_,b_ in extra:
++        it2,_=T.translate(buf,a_,b_); items=list(items)+list(it2)
++    plages=[(start,end)]+list(extra)
++    def dedans(va): return any(a_<=va<b_ for a_,b_ in plages)
+     FAR_ENT.clear()
+     its=classify(items,buf)
+     if RELOGE_CODE and T.CODE_CONV and T.RELOGE_KEYS: reloge_code(its, buf)
+@@ -373,14 +378,14 @@
+     native=set(native)
+     def label(va):
+         """offset de la premiere instruction emise a partir de va (dans l'unite)"""
+-        if not (start <= va < end) or va in native: return None
++        if not dedans(va) or va in native: return None
+         k=bisect.bisect_left(vas, va)
+         return its[k].off if k < len(its) else None
+     # cibles HORS de l'unite : adresse absolue connue (external) -> on peut quand meme
+     # employer la forme RELATIVE (BSR/BRA) si elle porte, comme un assembleur classique
+     # (et comme le code d'origine : 5 201 BSR pour 6 207 JSR dans la ROM de SFA3)
+     for it in its:
+-        if it.kind in ('call','jump','bcc') and it.tgt is not None and (not (start<=it.tgt<end) or it.tgt in native) and external:
++        if it.kind in ('call','jump','bcc') and it.tgt is not None and (not dedans(it.tgt) or it.tgt in native) and external:
+             it.ext=external(it.tgt)
+     def target(it):
+         t=label(it.tgt) if it.tgt is not None else None
+@@ -391,7 +396,7 @@
+     # choix initiaux optimistes
+     for it in its:
+         if it.kind=='bcc' and it.choice!='dbcc': it.choice='short'
+-        inside=start<=it.tgt<end and it.tgt not in native if it.tgt is not None else False
++        inside=dedans(it.tgt) and it.tgt not in native if it.tgt is not None else False
+         if it.kind=='call': it.choice='bsr_s' if (inside or it.ext is not None) else 'jsr'
+         if it.kind=='jump': it.choice='none' if inside else ('bra_s' if it.ext is not None else 'jmp')
+     for _ in range(30):
+diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assets_natifs.py b/assets_natifs.py
+--- a/assets_natifs.py	2026-10-25 09:18:38.853069189 +0100
++++ b/assets_natifs.py	2026-10-25 09:18:38.866723861 +0100
+@@ -69,6 +69,22 @@
+     FIXES = {547: 0xC84000}              # frames de sprites (en-tete d1ff f2ff.. comme 289/390), 553 352 o :
+                                          # 39 656 longs alignes des donnees dans [$C84000, $D0B188)
+     N_SITE = 0
++# (greffe_arcade, etape 2) HYPER AUGMENTE : chargeurs natifs d'Upper appeles par le code greffe. Les tables (site, perso,
++# fin) sont celles d'Upper (lues dans son module), les sites d'appel sont ceux des COPIES greffees ; fichiers anim
++# d'Upper (pointeurs internes relatifs a $B83800) ranges a VBASE. JSON : HSFA_GREFFE_ASSETS (ecrit par greffe2.py).
++GREFFE_ASSETS = None
++if os.environ.get("MODULE", "ro3") == "ro9" and os.environ.get("HSFA_GREFFE_ASSETS"):
++    import json as _json
++    GREFFE_ASSETS = _json.load(open(os.environ["HSFA_GREFFE_ASSETS"]))
++    _A = GREFFE_ASSETS
++    LOAD_BASE = LOAD_SITE = _A['load_base']; VBASE = _A['vbase']
++    N_SITE = len(_A['site']); N_PERSO = len(_A['perso']); N_FIN = len(_A['fin'])
++    T_FIN = 1 if _A['fin'] else None                       # (non nul : active le chargeur de fin ; tables lues ci-dessous)
++    SITES = {int(k): v for k, v in _A['sites'].items()}
++    PERSO_JOUEUR = {int(k): v for k, v in _A['perso_joueur'].items()}
++    FIN_SITES = tuple(_A['fin_sites'])
++    PERSO_TABLE = _A['perso_table']
++    NATIF_SITE = NATIF_PERSO = None                        # appels repatches site par site (SITES, PERSO_JOUEUR, FIN_SITES)
+ CACHE_ECRIT = os.environ.get("ANIM_CACHE", CACHE)   # (agent_ro9) cache en ecriture (lecture : CACHE d'abord)
+ 
+ def fichier(n):
+@@ -86,6 +102,8 @@
+ 
+ def tables(buf, rtbase=0x1F0000):
+     """(anim par index de 0x383700, anim par index de 0x3837d0) ; 0 = pas de fichier"""
++    if GREFFE_ASSETS:
++        return [a for g, a in GREFFE_ASSETS['site']], [a if g else 0 for g, a in GREFFE_ASSETS['perso']]
+     site = [struct.unpack_from('<h', buf, T_SITE - rtbase + 4*i + 2)[0] for i in range(N_SITE)]
+     perso = []
+     for i in range(N_PERSO):
+@@ -95,6 +113,7 @@
+ 
+ def fin_tables(buf, rtbase=0x1F0000):
+     """(HANDOFF §122) anim par index du chargeur de fin (ro5) ; 0 = pas de fichier"""
++    if GREFFE_ASSETS: return [a if g else 0 for g, a in GREFFE_ASSETS['fin']]
+     fin = []
+     for i in range(N_FIN):
+         g, a = struct.unpack_from('<hh', buf, T_FIN - rtbase + 4*i)
+diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/extra_regs.py b/extra_regs.py
+--- a/extra_regs.py	2026-10-25 09:18:38.854049847 +0100
++++ b/extra_regs.py	2026-10-25 09:18:38.866777311 +0100
+@@ -26,10 +26,11 @@
+ 
+ def analyse(buf, runtime_base=0x1f0000):
+     end = struct.unpack_from('<I', buf, 12)[0]
+-    c0 = 0x22de0 if end == 0x3bf140 else 0x22b00
+-    L = list(decode(buf, c0, end))
+-    starts = sorted({x.tgt - runtime_base for x in L if x.m == 'jal'} | {c0})
+-    starts = [s for s in starts if c0 <= s < end]
++    import mips as _mg
++    c0 = _mg.c0_module(end); _pl = _mg.plages_module(buf, end)
++    L = list(_mg.decode_module(buf, end))
++    starts = sorted({x.tgt - runtime_base for x in L if x.m == 'jal'} | {a_ for a_, _ in _pl})
++    starts = [s for s in starts if any(a_ <= s < b_ for a_, b_ in _pl)]
+     fof = lambda va: starts[bisect.bisect_right(starts, va) - 1]
+     used = collections.defaultdict(set); calls = collections.defaultdict(set); indirect = set(); l7 = set()
+     for x in L:
+@@ -38,7 +39,7 @@
+             used[fof(x.va)].add(x.imm)
+         if x.m == 'jal':
+             t = x.tgt - runtime_base
+-            if c0 <= t < end: calls[fof(x.va)].add(t)
++            if any(a_ <= t < b_ for a_, b_ in _pl): calls[fof(x.va)].add(t)
+         if x.m == 'jalr': indirect.add(fof(x.va))
+     # fermeture iterative (graphe avec cycles)
+     clo = {f: set(used[f]) for f in starts}
+@@ -79,11 +80,12 @@
+     - registre 68K du meme type NON utilise dans toute la fonction (A5 jamais) ;
+     traduite par MOVE.L Rk,-(SP) avant / MOVE.L (SP)+,Rk apres. Rend (plan, refus)."""
+     end = struct.unpack_from('<I', buf, 12)[0]
+-    c0 = 0x22de0 if end == 0x3bf140 else 0x22b00
+-    L = [x for x in decode(buf, c0, end) if not (x.m == 'sll' and x.w == 0)]
++    import mips as _mg
++    c0 = _mg.c0_module(end); _pl = _mg.plages_module(buf, end)
++    L = [x for x in _mg.decode_module(buf, end) if not (x.m == 'sll' and x.w == 0)]
+     vas = [x.va for x in L]
+-    starts = sorted({x.tgt - runtime_base for x in L if x.m == 'jal'} | {c0})
+-    starts = [s for s in starts if c0 <= s < end]
++    starts = sorted({x.tgt - runtime_base for x in L if x.m == 'jal'} | {a_ for a_, _ in _pl})
++    starts = [s for s in starts if any(a_ <= s < b_ for a_, b_ in _pl)]
+     fof = lambda va: starts[bisect.bisect_right(starts, va) - 1]
+     used = collections.defaultdict(set); acc = collections.defaultdict(list); usedva = collections.defaultdict(list)
+     calls = collections.defaultdict(list); brs = collections.defaultdict(list); l7 = set()
+diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
+--- a/mame_test.py	2026-10-25 09:18:38.854993065 +0100
++++ b/mame_test.py	2026-10-25 09:18:38.866864611 +0100
+@@ -52,6 +52,10 @@
+     buf = open(module_chemin(), "rb").read()
+     os.makedirs(W, exist_ok=True)
+     end = struct.unpack_from('<I', buf, 12)[0]
++    import mips as _MG                                   # (greffe_arcade) 2e zone de code greffe hors du module
++    Z2 = _MG.zones_ajoutees()
++    FIN_FICHIER = struct.unpack_from('<I', buf, 24)[0] - 0x1F0000 if Z2 else len(buf)   # fin des donnees (fichier)
++    def en_code(v): return T.RUNTIME_BASE + CODE0 <= v < T.CODE_END_RT or any(T.RUNTIME_BASE + a_ <= v < T.RUNTIME_BASE + b_ for a_, b_ in Z2)
+     T.set_module_bounds(buf)
+     CODE = 0x1000
+     import kernel68k as K
+@@ -60,15 +64,15 @@
+     # statique des donnees (faux positifs : paires de mots de script '0000 0040' = 0x400000)
+     CODEMAP, CODECONV = 0x3E0000, 0x3FF000
+     from mips import decode
+-    Lm = list(decode(buf, CODE0, end))
+-    keys = {x.tgt for x in Lm if x.m == 'jal' and T.RUNTIME_BASE + CODE0 <= x.tgt < T.CODE_END_RT}
++    Lm = [x for a_, b_ in [(CODE0, end)] + Z2 for x in decode(buf, a_, b_)]
++    keys = {x.tgt for x in Lm if x.m == 'jal' and en_code(x.tgt)}
+     def prologue(va):                                        # debut de fonction plausible (cle en trop : sans effet)
+         w = struct.unpack_from('<I', buf, va)[0]
+         return ((w >> 16) == 0x27bd and (w & 0x8000)) or w == 0x03e00008 or (w & 0xffe0ffff) == 0x3c007000
+                                                              # addiu sp,sp,-N | jr ra (vide) | lui rX,0x7000 (feuille)
+-    for o in range(end, len(buf) - 3, 4):
++    for o in range(end, FIN_FICHIER - 3, 4):
+         v = struct.unpack_from('<I', buf, o)[0]
+-        if T.RUNTIME_BASE + CODE0 <= v < T.CODE_END_RT and v % 4 == 0 and prologue(v - T.RUNTIME_BASE): keys.add(v)
++        if en_code(v) and v % 4 == 0 and prologue(v - T.RUNTIME_BASE): keys.add(v)
+     T.translate(buf, CODE0, CODE0 + 4)                        # initialise l'ensemble des debuts connus
+     keys |= set(T._CODE_STARTS.get('set') or ())             # (constantes CODE_x emises par le traducteur)
+     keys = sorted(keys)
+@@ -76,7 +80,8 @@
+     import assemble as _AS
+     if _AS.RELOGE_CODE: T.RELOGE_KEYS = set(keys)        # (ETAPE B) relogement des tables de pointeurs de code
+     HASH = None if os.environ.get("CODECONV_DICHO") == "1" else 0x3C0000      # (HANDOFF §98) table de hachage, 128 Ko
+-    cconv, CCE = K.build_code_conv(CODECONV, CODEMAP, len(keys), T.RUNTIME_BASE + CODE0, T.CODE_END_RT, hash_addr=HASH)
++    HI_CODE = max([T.CODE_END_RT] + [T.RUNTIME_BASE + b_ for a_, b_ in Z2])   # (greffe_arcade) 2e zone comprise
++    cconv, CCE = K.build_code_conv(CODECONV, CODEMAP, len(keys), T.RUNTIME_BASE + CODE0, HI_CODE, hash_addr=HASH)
+     T.CODE_CONV = CCE
+     KORG = 0xB00
+     _, KL = K.build(KORG, 0)                             # adresses des points d'entree du noyau
+@@ -111,6 +116,20 @@
+     if os.environ.get("HSFA_SON_DONNEES"):            # (agent_son_hyper_rom) bloc ajoute, cf. translate.SON_X
+         SON_BLOB = open(os.environ["HSFA_SON_DONNEES"], "rb").read(); SON_BLOB += bytes(len(SON_BLOB) & 1)
+         T.SON_X = int(os.environ.get("HSFA_SON_X", "E70000"), 16); T.SON_LEN = len(SON_BLOB)
++    GRF_BLOB = None; GRF_EXT = []
++    if os.environ.get("HSFA_GREFFE_DONNEES"):         # (greffe_arcade) bloc de donnees de la greffe, cf. translate.GRF_X
++        GRF_BLOB = bytearray(open(os.environ["HSFA_GREFFE_DONNEES"], "rb").read()); GRF_BLOB += bytes(len(GRF_BLOB) & 1)
++        T.GRF_X = int(os.environ.get("HSFA_GREFFE_X", "E80000"), 16); T.GRF_LEN = len(GRF_BLOB)
++        if os.environ.get("HSFA_GREFFE_Y"): T.GRF_Y = int(os.environ["HSFA_GREFFE_Y"], 16)   # bloc externe propre
++        if os.environ.get("HSFA_GREFFE_Y2"):          # (etape 4) 2e fenetre : "adresse:taille de la 1re fenetre"
++            y2_, n1_ = os.environ["HSFA_GREFFE_Y2"].split(':'); T.GRF_Y2 = int(y2_, 16); T.GRF_N1 = int(n1_, 16)
++        if os.environ.get("HSFA_GREFFE_FEN"):         # (etape 4) fenetres "lo:hi:y,..." (PS2 [lo, hi) -> 68K y)
++            T.GRF_FEN = [tuple(int(z_, 16) for z_ in f_.split(':')) for f_ in os.environ["HSFA_GREFFE_FEN"].split(',')]
++        # (greffe_arcade, etape 3) BASES DES PLANS du fork/coeur ($804200-$804205, 3 mots) ecrites par le code greffe
++        # (ecrans Arcade d'Upper : tuiles de plans d'Upper ; combat : celles d'Hyper) : adresse PS2 RAM + $7FF00..$7FF04
++        # (libre dans ro5 et ro9) -> registre ; HSFA_GREFFE_PLANS=0 : sans
++        if os.environ.get("HSFA_GREFFE_PLANS", "1") != "0":
++            T.HWREG.update({0x7FF00: 0x804200, 0x7FF02: 0x804202, 0x7FF04: 0x804204})
+     def plages_conv():                                   # (agent_defauts_banc) plages du talon CONV (HANDOFF §63)
+         R = T.RAM_HI << 16; PR = T.PORT_RAM; TG = 0x01000000
+         ranges = ([(T.CODE_END_RT, T.DATA_SPLIT, T.DATA_BASE - T.CODE_END_RT),
+@@ -124,16 +143,30 @@
+                   (R + 0x50000, R + 0x60000, PR + 0x80000 - (R + 0x50000)),
+                   (R + 0x60000, R + 0x62000, TG + 0x618000 - (R + 0x60000)),
+                   (R + 0x62000, R + 0x80000, PR + 0x80000 + 0x12000 - (R + 0x62000))]
+-        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (len(buf) - end)   # donnees DANS l'image
++        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (FIN_FICHIER - end)   # donnees DANS l'image
+         ASSET = (T.DATA_BASE + NDATA + 0xff) & ~0xff      # bloc des tables d'animation, apres les donnees
+         if ablob: ranges.append((AN.VBASE, AN.VBASE + len(ablob), ASSET - AN.VBASE))   # (agent_ro9) ro9 : bloc vide
+         if T.SON_X is not None: ranges.append((T.SON_X, T.SON_X + T.SON_LEN, T.son_y() + TG - T.SON_X))
++        if T.GRF_X is not None:                          # (greffe_arcade) bloc de la greffe, moins le bloc son s'il l'entoure
++            g0_, g1_ = T.GRF_X, T.GRF_X + T.GRF_LEN
++            if T.SON_X is not None and g0_ <= T.SON_X < g1_ and T.GRF_FEN is None:
++                ranges.append((g0_, T.SON_X, T.grf_y() + TG - T.GRF_X))
++                g0_ = (T.SON_X + T.SON_LEN + 0xffff) & ~0xffff
++            if T.GRF_FEN is not None:                    # (etape 4) un intervalle par morceau
++                for lo_, hi_, y_ in T.GRF_FEN:
++                    if lo_ < g1_: ranges.append((lo_, min(hi_, g1_), y_ + TG - lo_))
++            elif T.GRF_Y2 is not None and g1_ > T.GRF_X + T.GRF_N1:   # (etape 4) queue du bloc dans la 2e fenetre
++                ranges.append((g0_, T.GRF_X + T.GRF_N1, T.grf_y() + TG - T.GRF_X))
++                ranges.append((T.GRF_X + T.GRF_N1, g1_, T.GRF_Y2 + TG - (T.GRF_X + T.GRF_N1)))
++            else: ranges.append((g0_, g1_, T.grf_y() + TG - T.GRF_X))
+         return ranges
+     def plages_retag():                                  # (agent_defauts_banc, RETAG24) blocs 68K etiquetes x plages converties
+         if not T.HW_TAG or not T.DATA_SPLIT: return []
+         blocs = []
+         if P.get('data_ext'): blocs.append((T.DATA_EXT, T.DATA_EXT + (T.DATA_END_RT - T.DATA_SPLIT)))
+         if T.SON_X is not None: blocs.append((T.son_y(), T.son_y() + T.SON_LEN))
++        if T.GRF_FEN is not None and os.environ.get("RETAG_GREFFE", "1") == "1":   # (greffe_arcade) fenetres 68K du bloc
++            for lo_, hi_, y_ in T.GRF_FEN: blocs.append((y_, y_ + hi_ - lo_))
+         res = []
+         for b0, b1 in blocs:
+             for r0, r1, add in plages_conv():
+@@ -146,8 +179,13 @@
+             else: m.append((lo, hi))
+         return m
+     T.RETAG_FN = plages_retag
+-    its, words, unres = assemble(buf, CODE0, T.code_end_translate(buf), base=CODE, external=ext, native=NAT)
++    its, words, unres = assemble(buf, CODE0, T.code_end_translate(buf), base=CODE, external=ext, native=NAT, extra=Z2)
+     PLAFOND = 0x3C0000 - len(ablob) - 4*len(aperso) - 0x2000   # sous la table de hachage (HANDOFF §98)
++    # (greffe_arcade, etape 7, decision D3) RESERVE_MAX=hhhh : zone [$3C0000 - RESERVE, $3C0000) laissee VIDE pour le code
++    # MAX (ro9a : $3A0000-$3BFFFF, RESERVE_MAX=20000) : plafond des donnees abaisse d'autant, la fin des donnees part dans
++    # le bloc externe $940000 ; les tables d'animation natives (ASSET) descendent avec elles
++    RESERVE_MAX = int(os.environ.get("RESERVE_MAX", "0"), 16)
++    PLAFOND -= RESERVE_MAX
+     COUPE_BLOCS = os.environ.get('COUPE_BLOCS', '1') != '0'   # (agent_defauts_banc)
+     def coupe():                                         # (HANDOFF §108) donnees trop grandes : la fin part en externe
+         lim = T.CODE_END_RT + (PLAFOND - T.DATA_BASE)
+@@ -184,7 +222,7 @@
+         nb = (CODE + 2*len(words) + 0xfff) & ~0xfff
+         if nb == T.DATA_BASE and coupe() == T.DATA_SPLIT: break
+         T.DATA_BASE = nb; T.DATA_SPLIT = coupe()
+-        its, words, unres = assemble(buf, CODE0, T.code_end_translate(buf), base=CODE, external=ext, native=NAT)
++        its, words, unres = assemble(buf, CODE0, T.code_end_translate(buf), base=CODE, external=ext, native=NAT, extra=Z2)
+     if T.DATA_SPLIT: print("donnees : fin du segment ($%x-$%x) en bloc externe $%x (HANDOFF §108)" % (T.DATA_SPLIT, T.DATA_END_RT, T.DATA_EXT))
+     assert CODE + 2*len(words) <= T.DATA_BASE, "code (%x) chevauche les donnees (%x)" % (CODE+2*len(words), T.DATA_BASE)
+     vas = [it.va for it in its]
+@@ -218,7 +256,7 @@
+     img[STUB_RTS:STUB_RTS+4] = bytes.fromhex('4e754e73')
+     if T.HW_TAG:
+         ranges = plages_conv()
+-        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (len(buf) - end)   # donnees DANS l'image
++        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (FIN_FICHIER - end)   # donnees DANS l'image
+         ASSET = (T.DATA_BASE + NDATA + 0xff) & ~0xff      # bloc des tables d'animation, apres les donnees
+         ccode, _ = K.build_conv(CONV, ranges)
+         assert CONV + len(ccode) <= STUB_RTS
+@@ -313,7 +351,7 @@
+         assert d1_ - d0_ >= 2 * len(MUS), "repere musique : place"
+         struct.pack_into('>%dH' % len(MUS), img, d0_, *MUS)
+         print("intro : repere de musique arcade en $%x (au lieu de la table de ticks PS2)" % d0_)
+-    data = bytearray(buf[end:]); data = data[:len(data)//2*2]
++    data = bytearray(buf[end:FIN_FICHIER]); data = data[:len(data)//2*2]
+     demo = os.environ.get("MAX_DEMO")                    # (HANDOFF §99) ex. pl26 : garde de Ryu -> frames 0-5 du perso MAX
+     if demo:
+         import json
+@@ -471,6 +509,34 @@
+             assert T.DATA_EXT + len(be) - k_ == T.son_y()
+             be = be + bytes(b for i in range(0, len(SON_BLOB), 2) for b in (SON_BLOB[i+1], SON_BLOB[i]))
+             print("donnees du son par version : %d octets, exec $%x -> $%x" % (len(SON_BLOB), T.SON_X, T.son_y()))
++        if GRF_BLOB is not None:                         # (greffe_arcade) bloc de la greffe a la suite ; pointeurs de
++            assert T.GRF_Y is not None or T.DATA_EXT + len(be) - k_ == T.grf_y()   # code listes (HSFA_GREFFE_PTRS) -> adresses 68K
++            nptr = 0
++            if os.environ.get("HSFA_GREFFE_PTRS"):
++                for l_ in open(os.environ["HSFA_GREFFE_PTRS"]):
++                    if not l_.strip(): continue
++                    o_ = int(l_.split()[0], 16); v_ = struct.unpack_from('<I', GRF_BLOB, o_)[0]
++                    struct.pack_into('<I', GRF_BLOB, o_, lab(v_ - T.RUNTIME_BASE)); nptr += 1
++            gb_ = bytes(b for i in range(0, len(GRF_BLOB), 2) for b in (GRF_BLOB[i+1], GRF_BLOB[i]))
++            if T.GRF_FEN is not None:                    # (etape 4) un ext_<y>.bin par suite de morceaux contigus en 68K
++                grp_ = []
++                for lo_, hi_, y_ in sorted(T.GRF_FEN, key=lambda f_: f_[2]):
++                    if lo_ >= T.GRF_X + len(gb_): continue
++                    o0_, o1_ = lo_ - T.GRF_X, min(hi_ - T.GRF_X, len(gb_))
++                    if grp_ and grp_[-1][0] + len(grp_[-1][1]) == y_: grp_[-1][1] += gb_[o0_:o1_]
++                    else: grp_.append([y_, bytearray(gb_[o0_:o1_])])
++                for y_, b_ in grp_:
++                    assert (y_ >= T.DATA_EXT + len(be) - k_ or y_ + len(b_) <= 0x940000) and y_ + len(b_) <= 0xF00000, "fenetre $%06x" % y_   # (etape 5) trous de la carte 68K sous $940000
++                    open(os.path.join(W, "ext_%06x.bin" % y_), "wb").write(b_); GRF_EXT.append("%06x" % y_)
++            elif T.GRF_Y is not None and T.GRF_Y2 is not None and len(gb_) > T.GRF_N1:   # (etape 4) deux fenetres
++                assert T.GRF_Y + T.GRF_N1 <= 0xF00000 and T.GRF_Y2 + len(gb_) - T.GRF_N1 <= 0xC84000
++                assert T.DATA_EXT + len(be) - k_ <= T.GRF_Y2, "2e fenetre de la greffe chevauchant ext_%06x" % T.DATA_EXT
++                open(os.path.join(W, "ext_%06x.bin" % T.GRF_Y), "wb").write(gb_[:T.GRF_N1]); GRF_EXT.append("%06x" % T.GRF_Y)
++                open(os.path.join(W, "ext_%06x.bin" % T.GRF_Y2), "wb").write(gb_[T.GRF_N1:]); GRF_EXT.append("%06x" % T.GRF_Y2)
++            elif T.GRF_Y is not None:                    # (etape 2) bloc externe propre : ext_<Y>.bin, liste des blocs
++                open(os.path.join(W, "ext_%06x.bin" % T.GRF_Y), "wb").write(gb_); GRF_EXT.append("%06x" % T.GRF_Y)
++            else: be = be + gb_
++            print("donnees de la greffe : %d octets, exec $%x -> $%x, %d pointeurs de code" % (len(GRF_BLOB), T.GRF_X, T.grf_y(), nptr))
+         open(os.path.join(W, "ext_%06x.bin" % T.DATA_EXT), "wb").write(be[k_:])
+         print("donnees externes : %d octets -> ext_%06x.bin" % (len(be) - k_, T.DATA_EXT))
+         be = be[:k_]
+@@ -542,7 +608,9 @@
+                 def B(op, cible): fix.append((len(w), cible)); w.append(op)      # Bcc.S, deplacement resolu apres
+                 E(0x48e7, 0xc0c0)                                   # MOVEM.L D0-D1/A0-A1,-(SP)
+                 E(0x43f9, base >> 16, base & 0xffff)                # LEA base,A1
+-                E(0x7000, 0x1029, 0x0103)                           # MOVEQ #0,D0 ; MOVE.B $103(A1),D0
++                # (greffe_arcade, etape 3) Hyper augmente : perso de BASE (+$117, = PS2 $116) : les versions d'Hyper
++                # (ids $30-$7F) debordaient la table d'Upper (40 persos) ; ZERO 3 : $117 = $103
++                E(0x7000, 0x1029, 0x0117 if AN.GREFFE_ASSETS else 0x0103)   # MOVEQ #0,D0 ; MOVE.B $103(A1),D0
+                 E(0x0c2d, 0x0004, 0x013e); B(0x6600, 'tbl')         # CMPI.B #4,$13E(A5) ; BNE tbl
+                 E(0x4a29, 0x0124); B(0x6700, 'tbl')                 # TST.B $124(A1) ; BEQ tbl
+                 E(0x0c00, 0x000a); B(0x6600, 'tbl')                 # CMPI.B #$A,D0 ; BNE tbl
+@@ -596,6 +664,10 @@
+                 patch_call(img, it, stub_site[AN.SITES[it.va]])
+         print("tables d'animation natives : %d fichiers, %d octets en $%x" % (len(ava), len(ablob), ASSET))
+         assert (tperso_fin if stub_pj else tperso + 4*len(aperso)) <= (HASH or CODEMAP), "donnees + blocs chevauchent la table des adresses de code"
++        if RESERVE_MAX:
++            assert (tperso_fin if stub_pj else tperso + 4*len(aperso)) <= 0x3C0000 - RESERVE_MAX, "tables natives dans la zone MAX"
++            assert not any(img[0x3C0000 - RESERVE_MAX:0x3C0000]), "zone MAX non vide"
++            print("zone MAX $%x-$%x vide (RESERVE_MAX)" % (0x3C0000 - RESERVE_MAX, 0x3C0000 - 1))
+         cible = {v: lab(v - T.RUNTIME_BASE) for v in keys}
+         # (agent_options, OPTIONS.md) OPTION du menu des modes : la tache de l'ecran d'options du portage est du C
+         # natif (affichage PS2, reglages dans la sauvegarde de l'Anthology) -> sans traduction : ecran noir.
+@@ -679,7 +751,7 @@
+             open(os.path.join(W, "ext_%06x.bin" % base), "wb").write(bytes(b for i in range(0, len(d), 2) for b in (d[i+1], d[i])))
+             print("fichier %d : %d octets a adresse fixe $%x (banc_mem.lua)" % (n, len(d), base))
+         # (agent_ro9) liste des blocs externes pour banc_mem_liste.lua (banc_mem.lua ne connait que des bases fixes)
+-        exts = sorted(["%06x" % b_ for b_ in AN.FIXES.values()] + (["%06x" % T.DATA_EXT] if T.DATA_SPLIT else []) + EXT_PLUS)
++        exts = sorted(["%06x" % b_ for b_ in AN.FIXES.values()] + (["%06x" % T.DATA_EXT] if T.DATA_SPLIT else []) + EXT_PLUS + GRF_EXT)
+         open(os.path.join(W, "ext_liste.txt"), "w").write("\n".join(exts) + "\n")
+     sw = bytes(b for i in range(0, len(img), 2) for b in (img[i+1], img[i]))
+     out = os.path.join(W, P['sortie'], "sfa3ud"); os.makedirs(out, exist_ok=True)
+diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mips.py b/mips.py
+--- a/mips.py	2026-10-25 09:18:38.855389824 +0100
++++ b/mips.py	2026-10-25 09:18:38.866945000 +0100
+@@ -74,6 +74,26 @@
+ #                       (200 774 acces). Premier acces 68K 0x22b0c, dernier Z80 0x22ae8.
+ Z80_0, Z80_1 = 0x20, 0x22b00
+ CODE0 = 0x22b00       # debut du code 68K recompile
++import os as _os_g
++GREFFE_C0 = int(_os_g.environ['GREFFE_C0'], 16) if _os_g.environ.get('GREFFE_C0') else None   # (greffe_arcade) zone greffee [GREFFE_C0, 0x22b00)
++if GREFFE_C0 is not None: CODE0 = GREFFE_C0
++def c0_module(end):
++    """(greffe_arcade) debut du 68K pour les analyses par module (ro9 : 0x22de0) ; avec une greffe, la zone greffee
++    est AJOUTEE devant (les analyses decodent [GREFFE_C0, 0x22b00) puis [c0, end))"""
++    return 0x22de0 if end == 0x3bf140 else 0x22b00
++# (greffe_arcade, etape 2) DEUXIEME ZONE DE CODE GREFFE, HORS DU MODULE : GREFFE_Z2="debut:fin" (decalages FICHIER
++# du module prolonge ; execution = fichier + 0x1F0000, ex. 0xCD0000 -> $EC0000). Le fichier du module est prolonge
++# (zeros puis code) ; l'en-tete n'est pas touche (fin du code, fin des donnees). Traduite a la suite du code.
++GREFFE_Z2 = tuple(int(x, 16) for x in _os_g.environ['GREFFE_Z2'].split(':')) if _os_g.environ.get('GREFFE_Z2') else None
++def zones_ajoutees():
++    return [GREFFE_Z2] if GREFFE_Z2 is not None else []
++def plages_module(buf, end):
++    c0 = c0_module(end)
++    return ([(GREFFE_C0, 0x22b00)] if GREFFE_C0 is not None else []) + [(c0, end)] + zones_ajoutees()
++def decode_module(buf, end):
++    for a, b in plages_module(buf, end):
++        for x in decode(buf, a, b): yield x
++
+ CODE1 = 0x393c40      # taille du code, d'apres l'en-tete
+ def code_bounds(buf):
+     import struct
+diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/profils.py b/profils.py
+--- a/profils.py	2026-10-25 09:18:38.855670814 +0100
++++ b/profils.py	2026-10-25 09:18:38.866992900 +0100
+@@ -65,4 +65,4 @@
+ NOM = os.environ.get("MODULE", "ro3")
+ P = PROFILS[NOM]
+ if os.environ.get("TRAVAIL"): P = dict(P, travail=os.environ["TRAVAIL"])   # (agent_ro9) essais hors des dossiers partages
+-def chemin(): return os.path.join(EXTRACT, P['fichier'])
++def chemin(): return os.environ.get("MODULE_FICHIER") or os.path.join(EXTRACT, P['fichier'])   # (greffe_arcade) module augmente
+diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
+--- a/translate.py	2026-10-25 09:18:38.857242360 +0100
++++ b/translate.py	2026-10-25 09:18:38.867210620 +0100
+@@ -164,7 +164,8 @@
+         from mips import decode, CODE0
+         CODE1=_st.unpack_from('<I',buf,12)[0]             # fin du code DU MODULE (pas celle de SFA3)
+         refs=set(); lu={}
+-        for x in decode(buf, CODE0, CODE1):
++        import mips as _mg
++        for x in (y for a_, b_ in [(CODE0, CODE1)] + _mg.zones_ajoutees() for y in decode(buf, a_, b_)):
+             if x.m=='lui': lu[x.rt]=x.imm
+             elif x.m=='addiu' and x.rs in lu:
+                 v=((lu[x.rs]<<16)+x.simm)&0xffffffff
+@@ -191,7 +192,7 @@
+         v=struct.unpack_from('<I',buf,o)[0]
+         # (HANDOFF §67) une entree NULLE est un trou (cas inutilise) : la table continue apres
+         # (T_587150 : 3 cas, 0, puis 12 autres ; l'index 8 tombait hors de la table tronquee)
+-        if v!=0 and not (CODE0 <= v-RUNTIME_BASE < CODE1): break
++        if v!=0 and not (CODE0 <= v-RUNTIME_BASE < CODE1 or any(a_ <= v-RUNTIME_BASE < b_ for a_, b_ in __import__('mips').zones_ajoutees())): break
+         ent.append(v); o+=4
+     while ent and ent[-1]==0: ent.pop()
+     return ent
+@@ -1510,8 +1511,25 @@
+ SON_X = None; SON_LEN = 0
+ def son_y():
+     return (DATA_EXT + (DATA_END_RT - DATA_SPLIT) + 1) & ~1
++# (greffe_arcade) BLOC DE DONNEES DE LA GREFFE ARCADE : plage d'execution PS2 [GRF_X, GRF_X + GRF_LEN), servie a la
++# suite du bloc son (ou du bloc externe de fin des donnees s'il n'y a pas de bloc son)
++GRF_X = None; GRF_LEN = 0
++GRF_Y = None                           # (greffe_arcade, etape 2) bloc de la greffe dans son PROPRE bloc externe (HSFA_GREFFE_Y)
++GRF_Y2 = None; GRF_N1 = 0              # (greffe_arcade, etape 4) 2e fenetre 68K : octets [GRF_N1, fin) du bloc en GRF_Y2
++GRF_FEN = None                         # (greffe_arcade, etape 4) morceaux (lo, hi, y) : PS2 [lo, hi) -> 68K y (HSFA_GREFFE_FEN)
++                                       # (HSFA_GREFFE_Y2="adresse:taille_1re_fenetre" ; blocs externes $940000-$EFFFFF)
++def grf_y():
++    if GRF_Y is not None: return GRF_Y
++    return (son_y() + (SON_LEN if SON_X is not None else 0) + 1) & ~1
+ def _addr_to_68k(v):
++    # (greffe_arcade) le bloc son est teste AVANT le bloc de la greffe : celui-ci peut l'entourer (trou reserve)
+     if SON_X is not None and DATA_SPLIT is not None and SON_X <= v < SON_X + SON_LEN: return son_y() + (v - SON_X)
++    if GRF_FEN is not None and GRF_X is not None and DATA_SPLIT is not None and GRF_X <= v < GRF_X + GRF_LEN:
++        for lo_, hi_, y_ in GRF_FEN:                # (etape 4) hors des morceaux (trou $DA, son) : conversion ordinaire
++            if lo_ <= v < hi_: return y_ + (v - lo_)
++    elif GRF_X is not None and DATA_SPLIT is not None and GRF_X <= v < GRF_X + GRF_LEN:
++        if GRF_Y2 is not None and v - GRF_X >= GRF_N1: return GRF_Y2 + (v - GRF_X - GRF_N1)   # (etape 4) 2e fenetre
++        return grf_y() + (v - GRF_X)
+     rel = v - (RAM_HI<<16)
+     if MEMMODE in ('cps2','type') and rel in HWREG: return HWREG[rel]   # rendu au vrai registre CPS2
+     for a0,a1,k in ADDRMAP:
+@@ -1651,11 +1669,12 @@
+         import struct as _st
+         from mips import decode as _dec
+         end=_st.unpack_from('<I',buf,12)[0]
+-        c0=0x22de0 if end==0x3bf140 else 0x22b00
+-        starts={x.tgt-RUNTIME_BASE for x in _dec(buf,c0,end) if x.m=='jal'}
++        import mips as _mg
++        c0=_mg.c0_module(end); _pl=_mg.plages_module(buf,end)
++        starts={x.tgt-RUNTIME_BASE for x in _mg.decode_module(buf,end) if x.m=='jal'}
+         E=set()
+         for s0 in starts:
+-            if not (c0<=s0<end): continue
++            if not any(a_<=s0<b_ for a_,b_ in _pl): continue
+             ins=[x for x in _dec(buf,s0,s0+0x20) if not (x.m=='sll' and x.w==0)]
+             body=[x for x in ins[:6] if not (x.rs==29 and x.m in ('addiu','sd','ld','sw','lw'))]
+             if body and body[0].m=='jr' and body[0].rs==31: E.add(s0)
+@@ -1882,10 +1901,11 @@
+     if _CODE_STARTS.get('id')!=id(buf):
+         import struct as _st
+         from mips import decode as _dec
+-        _e=_st.unpack_from('<I',buf,12)[0]; _c0=0x22de0 if _e==0x3bf140 else 0x22b00
++        _e=_st.unpack_from('<I',buf,12)[0]
++        import mips as _mg
+         # debuts de fonction = PROLOGUES 'addiu sp,sp,-16 ; sd ra,0(sp)' (y compris les fonctions jamais
+         # appelees par jal, seulement par pointeur : entrees de taches, routines d'etat...)
+-        _L=list(_dec(buf,_c0,_e)); _S=set()
++        _L=list(_mg.decode_module(buf,_e)); _S=set()
+         for _k in range(len(_L)-1):
+             _x=_L[_k]
+             if _x.m=='addiu' and _x.rs==29 and _x.rt==29 and _x.simm<0 and _L[_k+1].m=='sd' and _L[_k+1].rt==31:
+@@ -4028,6 +4048,7 @@
+     if L[z].m=='lh' and sa==16 and st_.m=='sw': return 'L'
+     return None
+ 
++_LEATAB_AJOUTE = __import__('os').environ.get('LEATAB_AJOUTE', '1') != '0'
+ def lea_table_index(L, i):
+     """L[i] = sw r,An : r = addu(sext16(Dk), T) avec T adresse de DONNEES -> (T, k), sinon None"""
+     j=_producer(L, i, L[i].rt, 8)
+@@ -4051,7 +4072,14 @@
+             if not sn or sn[0]!='D': return None
+             dk=sn[1]; continue
+         return None
+-    if const is None or dk is None or not (CODE_END_RT <= const < DATA_END_RT): return None
++    if const is None or dk is None: return None
++    # (greffe_arcade, LEATAB_AJOUTE) tables des blocs AJOUTES hors du module (son $E70000, greffe $E80000) acceptees
++    # comme celles du module : sinon l'ecriture de An (LEA table(PC,Dk)) tombait sans traduction (chutes.json).
++    # LEATAB_AJOUTE=0 : ancien comportement.
++    ajoute = _LEATAB_AJOUTE and ((GRF_X is not None and GRF_X <= const < GRF_X + GRF_LEN and
++                                  (GRF_FEN is None or any(lo_ <= const < hi_ for lo_, hi_, y_ in GRF_FEN))) or
++                                 (SON_X is not None and SON_X <= const < SON_X + SON_LEN))
++    if not (CODE_END_RT <= const < DATA_END_RT or ajoute): return None
+     if addr_to_68k(const) is None: return None
+     return const, dk
+ 

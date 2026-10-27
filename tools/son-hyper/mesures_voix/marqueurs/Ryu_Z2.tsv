@@ -1,0 +1,9 @@
+# Ryu_Z2 : version $40, table $E72280 (redirection), 20 entrees, origine prog+1989DC
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	40	0309	0180	3		QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	40	030A	0181	2		DP+HP ; DP+LP
+sfa2	40	030B	0182	3		QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	40	030D	0185	2		projection HP ; projection HP 2
+sfa2	40	030E	0186	1		projection HK
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

@@ -1,0 +1,164 @@
+From 35b617bc5e2a604afdb2af3b7a3a222ea90ff870 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 18 Oct 2026 15:12:26 +0200
+Subject: [PATCH 11/11] HSFA: core option "Transparent shadows (PSP)"
+
+SFA3 MAX on PSP draws the characters' shadows in black at 75 % (vertex
+colour 0xC0000000). The CPS2 translations draw them opaque, as OBJ tiles
+of palette 0x14.
+
+- New blend mode 5: black at 75 % (dst * 0x40 / 256), also available to
+  the 0010 registers.
+- Core option (bit 7 of DIP A, "Transparent shadows (PSP)", on by
+  default) for all HSFA drivers, modes 1 and 2 (SFA3, Upper, Hyper,
+  ro9a): a tile is a shadow when its OBJ palette is 0x14 AND its global
+  tile code is 0x0284A, 0x305DF-0x30613 or 0x50888-0x5088A (the same
+  codes in all four games). Palette 0x14 also holds stage objects
+  (foreground posts...), which stay opaque. The codes only appear in
+  fights (attract demo included), never on menus, portraits or endings
+  (measured, 7 games and runs, 178 000 frames).
+- Priority: game modes (bit 12 / $804240, then OBJ palette registers)
+  before the option, then opaque.
+- Test helper: HSFA_OMBRES=0/1 forces the option.
+- Option off: output identical to the pixel (nonreg_coeur).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps.h        |  5 +++++
+ src/burn/drv/capcom/cps_hsfa.cpp |  5 +++++
+ src/burn/drv/capcom/cps_obj.cpp  |  4 ++++
+ src/burn/drv/capcom/ctv.cpp      |  2 ++
+ src/burn/drv/capcom/d_cps2.cpp   | 14 ++++++++++++--
+ 5 files changed, 28 insertions(+), 2 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index 96aa75e..7060a4a 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -557,6 +557,11 @@ void HsfaPortWriteWordStart(UINT32 a, UINT16 d);
+ UINT32 HsfaGfxLenMin();
+ extern UINT8 nHsfaObjMix[32];							// (patch 0010) melange par palette OBJ, $804220-$80423F
+ extern UINT8 nHsfaObjFlagMix;							// (patch 0010) melange des objets marques (bit 12 de X), $804240
++extern INT32 nHsfaOmbres;								// (patch 0011) option "ombres transparentes (PSP)" active
++static inline INT32 HsfaEstOmbre(UINT32 t)				// (patch 0011) code global d'une tuile d'ombre (palette OBJ 0x14)
++{
++	return t == 0x0284A || (t >= 0x305DF && t <= 0x30613) || (t >= 0x50888 && t <= 0x5088A);
++}
+ void HsfaPortWriteWordEnd();
+ 
+ extern INT32 Cps2Volume;
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 9bbefd6..c960a5b 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -105,6 +105,8 @@ static UINT16 nPlaneReg[3];							// Upper : registres $804200-$804205
+ // impose des valeurs a chaque reset ; HSFA_MIX_LOG=<fichier> journalise chaque changement.
+ UINT8 nHsfaObjMix[32];
+ UINT8 nHsfaObjFlagMix = 0;
++INT32 nHsfaOmbres = 0;								// (patch 0011) bit 7 du Dip A, ou HSFA_OMBRES=0/1 (essais)
++static INT32 nHsfaOmbresForce = -2;
+ static FILE *HsfaMixLog = NULL;
+ static INT32 nMixLog = -1;
+ 
+@@ -692,6 +694,9 @@ void HsfaFrameDone()
+ 		HsfaUpdateScroll();
+ 		nPlanesPending = 0;
+ 	}
++	// (patch 0011) option "ombres transparentes (PSP)" : DIP lu a chaque image (changement immediat)
++	if (nHsfaOmbresForce == -2) nHsfaOmbresForce = getenv("HSFA_OMBRES") ? atoi(getenv("HSFA_OMBRES")) : -1;
++	nHsfaOmbres = (nHsfaOmbresForce >= 0) ? (nHsfaOmbresForce != 0) : ((HsfaFluxDip & 0x80) != 0);
+ 	HsfaSuivre4();
+ 	HsfaOptions();										// (agent_options) reglages de l'ecran OPTION (DIP)
+ 	// (agent_portraits) fin du chargement differe : aucune liste de l'image n'a plus d'objet de l'emplacement 4 (une
+diff --git a/src/burn/drv/capcom/cps_obj.cpp b/src/burn/drv/capcom/cps_obj.cpp
+index 1a9ec7f..e063094 100644
+--- a/src/burn/drv/capcom/cps_obj.cpp
++++ b/src/burn/drv/capcom/cps_obj.cpp
+@@ -444,6 +444,9 @@ INT32 Cps2ObjDraw(INT32 nLevelFrom, INT32 nLevelTo)
+ 		if (HsfaMode == 2) {
+ 			nHsfaMix = ((BURN_ENDIAN_SWAP_INT16(ps[0]) & 0x1000) && nHsfaObjFlagMix) ? nHsfaObjFlagMix : nHsfaObjMix[a & 0x1F];
+ 		}
++		// (HSFA, patch 0011) option "ombres transparentes (PSP)" : tuiles d'ombre de la palette 0x14 (modes 1 et 2),
++		// apres les modes poses par le jeu
++		const INT32 bHsfaOmbre = (HsfaMode && nHsfaOmbres && !nHsfaMix && (a & 0x1F) == 0x14);
+ 
+ 		nFlip = (a >> 5) & 3;
+ 		// Find out sprite size
+@@ -493,6 +496,7 @@ INT32 Cps2ObjDraw(INT32 nLevelFrom, INT32 nLevelTo)
+ 				
+ 				nCpsBlend = (blendtable && nCpstTile < 0x40000) ? blendtable[nCpstTile] : 0;
+ 				if (nHsfaMix) nCpsBlend = 0x100 | nHsfaMix;	// (patch 0010) objet HSFA translucide
++				else if (bHsfaOmbre && HsfaEstOmbre(nCpstTile)) nCpsBlend = 0x105;	// (patch 0011) ombre : noir a 75 %
+ 				nCpstTile <<= 7;						// Find real tile address					
+ 
+ 				pCpstOne();
+diff --git a/src/burn/drv/capcom/ctv.cpp b/src/burn/drv/capcom/ctv.cpp
+index 03daf25..1ffdd8e 100644
+--- a/src/burn/drv/capcom/ctv.cpp
++++ b/src/burn/drv/capcom/ctv.cpp
+@@ -24,6 +24,7 @@ static inline UINT32 alpha_blend(UINT32 d, UINT32 s, UINT32 p)
+ //   2 = alpha 50 % (src * 0x80 + dst * 0x7F) / 256 (PSP : couleur de sommet d'alpha 0x80)
+ //   3 = alpha 75 % (src * 0xC0 + dst * 0x3F) / 256 (PSP : alpha 0xC0)
+ //   4 = soustractif sature (dst - src)
++//   5 = noir a 75 % (dst * 0x40 / 256 ; PSP : ombres, couleur de sommet 0xC0000000) (patch 0011)
+ //   autre = opaque (reserve)
+ static inline UINT32 hsfa_mix(UINT32 d, UINT32 s, UINT32 m)
+ {
+@@ -37,6 +38,7 @@ static inline UINT32 hsfa_mix(UINT32 d, UINT32 s, UINT32 m)
+ 		}
+ 		case 2: return alpha_blend(d, s, 0x80);
+ 		case 3: return alpha_blend(d, s, 0xC0);
++		case 5: return alpha_blend(d, 0, 0xC0);
+ 		case 4: {
+ 			INT32 r = (INT32)((d >> 16) & 0xff) - (INT32)((s >> 16) & 0xff);
+ 			INT32 g = (INT32)((d >>  8) & 0xff) - (INT32)((s >>  8) & 0xff);
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 8ea3577..8a29ea2 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -176,16 +176,24 @@ STDINPUTINFO(Hsfa)
+ 	HSFA_OPT_BIT(0x07, 0x10, "Extra option: Alpha counter", "On", "Off")
+ 
+ 
++// (patch 0011) bit 7 du Dip A : ombres des persos en noir a 75 % comme sur PSP (cps.h, HsfaEstOmbre)
++#define HSFA_OPT_OMBRES \
++	{0   , 0xfe, 0   ,    2, "Transparent shadows (PSP)"			}, \
++	{0x00, 0x01, 0x80, 0x00, "Off"								}, \
++	{0x00, 0x01, 0x80, 0x80, "On"								},
++
+ static struct BurnDIPInfo HsfaDIPList[] =
+ {
+ 	DIP_OFFSET(0x1d)
+-	{0x00, 0xff, 0xff, 0x01, NULL								},
++	{0x00, 0xff, 0xff, 0x81, NULL								},
+ 
+ 	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+ 	{0x00, 0x01, 0x03, 0x01, "Missing tracks only"				},
+ 	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
+ 
++	HSFA_OPT_OMBRES
++
+ 	HSFA_OPT_DEFAUTS
+ 	HSFA_OPT_JEU
+ 	HSFA_OPT_MANCHES("Option: Max round (1P)")
+@@ -201,13 +209,15 @@ STDDIPINFO(Hsfa)
+ static struct BurnDIPInfo HhsfaDIPList[] =
+ {
+ 	DIP_OFFSET(0x1d)
+-	{0x00, 0xff, 0xff, 0x02, NULL								},
++	{0x00, 0xff, 0xff, 0x82, NULL								},
+ 
+ 	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+ 	{0x00, 0x01, 0x03, 0x01, "Missing tracks only"				},
+ 	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
+ 
++	HSFA_OPT_OMBRES
++
+ 	// Hyper : un seul MAX ROUND sur PS2 (champ 1P, recopie dans le champ VS au debut du match) ; pas de JOIN IN
+ 	HSFA_OPT_DEFAUTS
+ 	HSFA_OPT_JEU
+-- 
+2.53.0
+

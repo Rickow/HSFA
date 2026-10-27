@@ -1,0 +1,8 @@
+# Dhalsim_Z2 : version $4F, table $E74800 (redirection), 33 entrees, origine prog+28B6C6
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	4F	04EA	0365	3		QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	4F	04EC	0367	1		demi-cercle arriere+HK
+sfa2	4F	04F1	036C	1		QCB+HP
+sfa2	4F	04F3	036E	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

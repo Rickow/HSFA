@@ -1,0 +1,1344 @@
+From 97a9b1c1171b7953dd4670b544f7ac7c2f6c9bcd Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 18:53:58 +0200
+Subject: [PATCH] HSFA : rejeu QSound des sons SFA1/SFA2 d'Hyper + donnees lues
+ dans l'archive du jeu
+
+- 2e QSound (hsfa_qsound.h : HLE de qs_c.cpp rendu instanciable, semantique du
+  qsound_hle_device de MAME) pilote par hsfa_rejeu.h (meme lecteur que le fork
+  MAME) : les codes $2000+/$3000+/$4000+ du programme traduit d'Hyper sont
+  rejoues tels que les pilotes Z80 d'origine les ecrivaient, priorite et
+  coupure de voie selon la regle Capcom ; le Z80 recoit le code vide ou ALIAS.
+  Crochet a la pose de commande ($61801F = 0) apres le lecteur de flux ; sortie
+  mixee au QSound principal avec le meme volume ; etats sauvegardes (zones
+  toujours presentes pour Hyper).
+- Membres de l'archive lus sur place (hors liste de ROM, stockes) :
+  hsfa_flux.bin + hsfa_flux_table.txt (flux ADX), hsfa_rejeu.bin +
+  hsfa_rejeu_table.txt (rejeu). Ordre : archive, puis <systeme>/fbneo/hsfa/
+  (Y_DATA/X_DATA/ISO), sinon inactif. Chemin de l'archive : szBurnHsfaArchive
+  (libretro). Sans membre ni fichier : comportement inchange.
+- hsfa_flux.h / hsfa_rejeu.h : tables lisibles depuis un texte en memoire.
+- hsfa_run : STATETEST compare aussi le son apres restauration.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ hsfa/hsfa_run.c                   |  18 +-
+ src/burn/burn.cpp                 |   1 +
+ src/burn/burn.h                   |   1 +
+ src/burn/drv/capcom/cps.h         |   2 +
+ src/burn/drv/capcom/cps_hsfa.cpp  | 315 +++++++++++++++++++++++++-
+ src/burn/drv/capcom/cps_mem.cpp   |   6 +
+ src/burn/drv/capcom/hsfa_flux.h   |  32 ++-
+ src/burn/drv/capcom/hsfa_qsound.h | 335 ++++++++++++++++++++++++++++
+ src/burn/drv/capcom/hsfa_rejeu.h  | 355 ++++++++++++++++++++++++++++++
+ src/burn/drv/capcom/qs.cpp        |   1 +
+ src/burner/libretro/libretro.cpp  |   4 +
+ 11 files changed, 1059 insertions(+), 11 deletions(-)
+ create mode 100644 src/burn/drv/capcom/hsfa_qsound.h
+ create mode 100644 src/burn/drv/capcom/hsfa_rejeu.h
+
+diff --git a/hsfa/hsfa_run.c b/hsfa/hsfa_run.c
+index a5026f6..dc7a603 100644
+--- a/hsfa/hsfa_run.c
++++ b/hsfa/hsfa_run.c
+@@ -358,10 +358,20 @@ static uint32_t wavlen = 0;
+ static double rms_acc = 0; static long rms_n = 0;
+ 
+ static void audio_sample(int16_t l, int16_t r) { (void)l; (void)r; }
++/* STATETEST : son de la 1re passe garde en memoire, compare a celui des passes rejouees (meme image -> memes octets) */
++static int16_t *son1 = NULL; static size_t son1_n = 0, son1_cap = 0, *son1_img = NULL;
++static int son_mode = 0;	/* 1 = capture, 2 = comparaison */
++static size_t son_pos = 0, son_diff = 0, son_cmp = 0;
+ static size_t audio_batch(const int16_t *d, size_t n)
+ {
+ 	for (size_t i = 0; i < n * 2; i++) { rms_acc += (double)d[i] * d[i]; rms_n++; }
+-	if (wav) { fwrite(d, 4, n, wav); wavlen += n * 4; }
++	if (wav && son_mode != 2) { fwrite(d, 4, n, wav); wavlen += n * 4; }
++	if (son_mode == 1) {
++		if (son1_n + 2 * n > son1_cap) { son1_cap = (son1_n + 2 * n) * 2; son1 = realloc(son1, son1_cap * 2); }
++		memcpy(son1 + son1_n, d, n * 4); son1_n += 2 * n;
++	} else if (son_mode == 2) {
++		for (size_t i = 0; i < 2 * n; i++, son_pos++) { son_cmp++; if (son_pos >= son1_n || son1[son_pos] != d[i]) son_diff++; }
++	}
+ 	return n;
+ }
+ 
+@@ -493,7 +503,9 @@ int main(int argc, char **argv)
+ 	char lastst[64] = "";
+ 	clock_t t0 = clock();
+ 	if (pilote && getenv("STATETEST")) { recpad = calloc(2 * (nf + 2), sizeof(uint16_t)); enreg = 1; }
++	if (getenv("STATETEST")) { son_mode = 1; son1_img = calloc(nf + 2, sizeof(size_t)); }
+ 	for (frame = 1; frame <= nf; frame++) {
++		if (son1_img) son1_img[frame] = son1_n;
+ 		calc_inputs(frame - 1);		/* jeu.lua : entrees calculees a la fin de l'image precedente */
+ 		if (recpad) for (int p = 0; p < 2; p++) { uint16_t m = 0; for (int i = 0; i < 16; i++) if (pad[p][i]) m |= 1 << i; recpad[2 * frame + p] = m; }
+ 		rms_acc = 0; rms_n = 0;
+@@ -519,6 +531,7 @@ int main(int argc, char **argv)
+ 		int n0 = atoi(getenv("STATETEST"));
+ 		/* premiere passe deja faite : on relance depuis le debut avec sauvegarde a n0 */
+ 		uint8_t *imgA = malloc(lw * lh * 3); memcpy(imgA, last, lw * lh * 3);
++		if (son_mode == 1) son_mode = 3;	/* 2e passe : son ni capture ni compare */
+ 		retro_unload_game(); retro_load_game(&gi);
+ 		if (ram) ram = retro_get_memory_data(RETRO_MEMORY_SYSTEM_RAM);	/* memoire reallouee au rechargement */
+ 		size_t sz = 0; void *st = NULL;
+@@ -530,6 +543,7 @@ int main(int argc, char **argv)
+ 		}
+ 		int same1 = !memcmp(imgA, last, lw * lh * 3);
+ 		retro_unserialize(st, sz);
++		son_mode = 2; son_pos = son1_img[n0 + 1]; son_diff = son_cmp = 0;
+ 		for (frame = n0 + 1; frame <= nf; frame++) {
+ 			if (recpad) rejoue_entrees(frame); else calc_inputs(frame - 1);
+ 			retro_run();
+@@ -537,6 +551,8 @@ int main(int argc, char **argv)
+ 		}
+ 		int same2 = !memcmp(imgA, last, lw * lh * 3);
+ 		fprintf(stderr, "ETAT : %zu octets ; relance identique %s ; apres restauration de l'image %d : %s\n", sz, same1 ? "oui" : "NON", n0, same2 ? "IDENTIQUE" : "DIFFERENT");
++		fprintf(stderr, "ETAT SON : images %d-%d apres restauration : %zu echantillons compares, %zu differents (%s)\n", n0 + 1, nf, son_cmp, son_diff, son_diff ? "DIFFERENT" : "IDENTIQUE");
++		son_mode = 0;
+ 	}
+ 	double dt = (double)(clock() - t0) / CLOCKS_PER_SEC;
+ 	fprintf(stderr, "%d images en %.1f s (%.0f images/s)\n", nf, dt, nf / dt);
+diff --git a/src/burn/burn.cpp b/src/burn/burn.cpp
+index c0e10ae..33c602d 100644
+--- a/src/burn/burn.cpp
++++ b/src/burn/burn.cpp
+@@ -28,6 +28,7 @@ UINT32 nBurnDrvSelect[8] = { ~0U, ~0U, ~0U, ~0U, ~0U, ~0U, ~0U, ~0U }; // Which
+ 
+ char* pszCustomNameA = NULL;
+ char szBackupNameA[MAX_PATH];
++char szBurnHsfaArchive[MAX_PATH] = "";	// HSFA : archive du jeu charge (rempli par le frontal libretro ; membres lus sur place)
+ TCHAR szBackupNameW[MAX_PATH];
+ 
+ char** szShortNamesExArray = NULL;
+diff --git a/src/burn/burn.h b/src/burn/burn.h
+index c49785c..7b351e5 100644
+--- a/src/burn/burn.h
++++ b/src/burn/burn.h
+@@ -25,6 +25,7 @@
+ #include <time.h>
+ 
+ extern TCHAR szAppHiscorePath[MAX_PATH];
++extern char szBurnHsfaArchive[MAX_PATH];		// HSFA : archive du jeu charge (frontal libretro)
+ extern TCHAR szAppSamplesPath[MAX_PATH];
+ extern TCHAR szAppHDDPath[MAX_PATH];
+ extern TCHAR szAppBlendPath[MAX_PATH];
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index 216b2ad..91aa170 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -546,6 +546,8 @@ void HsfaFrameDone();
+ extern UINT8 HsfaFluxDip;
+ INT32 HsfaFluxCommande(UINT16 nCmd, UINT8 nV, UINT16 nP);
+ void HsfaFluxRendu(INT16 *pOut, INT32 nLen);
++INT32 HsfaRejeuCommande(UINT16 nCmd, UINT16 *pZ80);
++void HsfaRejeuRendu(INT16 *pOut, INT32 nLen);
+ INT32 HsfaPortReadByte(UINT32 a, UINT8 *d);
+ INT32 HsfaPortWriteByte(UINT32 a, UINT8 d);
+ void HsfaPortWriteWordStart(UINT32 a, UINT16 d);
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index f753e94..cda82c6 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -12,6 +12,9 @@
+ 
+ #include "cps.h"
+ #include "hsfa_flux.h"
++#include "hsfa_rejeu.h"
++#include "hsfa_qsound.h"
++#include <string>
+ 
+ extern UINT8 *CpsRam660;
+ 
+@@ -479,6 +482,8 @@ void HsfaFrameDone()
+ 	}
+ }
+ 
++static void HsfaRejeuReset();
++
+ static INT32 HsfaReset()
+ {
+ 	memset(Ombre, 0, 0x8000 * sizeof(UINT16));
+@@ -495,6 +500,7 @@ static INT32 HsfaReset()
+ 	nPlanesPending = (HsfaMode == 2 && bCfgPlans) ? 1 : 0;
+ 	nStatListes = nStatTuiles = nStatRetires = nStatTronques = 0;
+ 	if (HsfaMode == 2) HsfaUpdateScroll();
++	HsfaRejeuReset();
+ 	return 0;
+ }
+ 
+@@ -519,13 +525,115 @@ static INT32 HsfaFichierExiste(const char *p)
+ 	return f != NULL;
+ }
+ 
++// --------------------------------------------------------------------------------------------------------------
++// Membres supplementaires de l'archive du jeu (paquet_fbneo.py), lus sur place : ils ne sont PAS dans la liste de ROM
++// du pilote (FBNeo ne les charge donc pas en memoire) et doivent etre STOCKES (sans compression). Le chemin de l'archive
++// est donne par le frontal (szBurnHsfaArchive, libretro.cpp) ; vide ou archive non zip -> membres absents.
++//   hsfa_flux.bin        AFS reduit (memes indices que Y_DATA.BIN, entrees inutiles vides) : flux ADX du jeu
++//   hsfa_flux_table.txt  table code -> flux
++//   hsfa_rejeu.bin       ROM du 2e QSound (8 Mo : e222 en banque 0, e251 en banque $40), CRC controles par la table
++//   hsfa_rejeu_table.txt table du rejeu (gen_rejeu.py + gen_redirection.py)
++
++
++static UINT32 HsfaLe16(const UINT8 *p) { return p[0] | (p[1] << 8); }
++static UINT32 HsfaLe32(const UINT8 *p) { return p[0] | (p[1] << 8) | (p[2] << 16) | ((UINT32)p[3] << 24); }
++
++// membre STOCKE de l'archive zip : decalage des donnees dans le fichier et taille ; 0 = absent (ou comprime, zip64...)
++static INT32 HsfaZipMembre(const char *zip, const char *nom, UINT64 *pOff, UINT32 *pTaille)
++{
++	if (!zip || !zip[0]) return 0;
++	FILE *f = fopen(zip, "rb");
++	if (!f) return 0;
++	INT32 ok = 0;
++	std::vector<UINT8> fin, cd;
++	UINT8 lh[30];
++	INT64 taille = 0, n = 0, k = 0;
++	UINT32 cdtai = 0, cdoff = 0, ne = 0, p = 0, nl = strlen(nom);
++	if (fseek(f, 0, SEEK_END) != 0) goto sortie;
++	taille = ftell(f);
++	if (taille < 22) goto sortie;
++	n = taille < 65557 ? taille : 65557;
++	fin.resize((size_t)n);
++	if (fseek(f, (long)(taille - n), SEEK_SET) != 0 || fread(&fin[0], 1, (size_t)n, f) != (size_t)n) goto sortie;
++	for (k = n - 22; k >= 0; k--) if (HsfaLe32(&fin[(size_t)k]) == 0x06054b50) break;
++	if (k < 0) goto sortie;
++	ne = HsfaLe16(&fin[(size_t)k + 10]); cdtai = HsfaLe32(&fin[(size_t)k + 12]); cdoff = HsfaLe32(&fin[(size_t)k + 16]);
++	if (cdtai == 0 || cdtai > 0x4000000 || (INT64)cdoff + cdtai > taille) goto sortie;
++	cd.resize(cdtai);
++	if (fseek(f, (long)cdoff, SEEK_SET) != 0 || fread(&cd[0], 1, cdtai, f) != cdtai) goto sortie;
++	for (UINT32 e = 0; e < ne && p + 46 <= cdtai; e++) {
++		if (HsfaLe32(&cd[p]) != 0x02014b50) break;
++		UINT32 meth = HsfaLe16(&cd[p + 10]), ct = HsfaLe32(&cd[p + 20]), ut = HsfaLe32(&cd[p + 24]);
++		UINT32 l1 = HsfaLe16(&cd[p + 28]), l2 = HsfaLe16(&cd[p + 30]), l3 = HsfaLe16(&cd[p + 32]), lo = HsfaLe32(&cd[p + 42]);
++		if (p + 46 + l1 > cdtai) break;
++		if (l1 == nl && !memcmp(&cd[p + 46], nom, nl)) {
++			if (meth != 0 || ct != ut || ct == 0xFFFFFFFF || lo == 0xFFFFFFFF) {
++				bprintf(0, _T("HSFA : %s n'est pas stocke sans compression dans l'archive (ignore)\n"), nom);
++				goto sortie;
++			}
++			if (fseek(f, (long)lo, SEEK_SET) != 0 || fread(lh, 1, 30, f) != 30 || HsfaLe32(lh) != 0x04034b50) goto sortie;
++			*pOff = (UINT64)lo + 30 + HsfaLe16(lh + 26) + HsfaLe16(lh + 28);
++			*pTaille = ut;
++			ok = (*pOff + ut <= (UINT64)taille);
++			goto sortie;
++		}
++		p += 46 + l1 + l2 + l3;
++	}
++sortie:
++	fclose(f);
++	return ok;
++}
++
++// lit un membre stocke en memoire (texte : un octet nul ajoute)
++static INT32 HsfaZipLit(const char *nom, std::string &d, UINT32 nMax)
++{
++	UINT64 o = 0; UINT32 n = 0;
++	if (!HsfaZipMembre(szBurnHsfaArchive, nom, &o, &n) || n > nMax) return 0;
++	FILE *f = fopen(szBurnHsfaArchive, "rb");
++	if (!f) return 0;
++	d.resize(n);
++	INT32 ok = fseek(f, (long)o, SEEK_SET) == 0 && (n == 0 || fread(&d[0], 1, n, f) == n);
++	fclose(f);
++	return ok;
++}
++
++// le frontal donne le nom de l'archive sans extension (FBNeo essaie .zip puis .7z) : fichier reel, ou vide
++static void HsfaResoutArchive()
++{
++	static const char *ext[] = { "", ".zip", ".ZIP" };
++	char p[MAX_PATH + 8];
++	if (!szBurnHsfaArchive[0]) return;
++	for (INT32 i = 0; i < 3; i++) {
++		snprintf(p, sizeof(p), "%s%s", szBurnHsfaArchive, ext[i]);
++		FILE *f = fopen(p, "rb");
++		if (f) {
++			UINT8 sig[4] = { 0, 0, 0, 0 };
++			INT32 zip = fread(sig, 1, 4, f) == 4 && HsfaLe32(sig) == 0x04034b50;
++			fclose(f);
++			if (zip) { snprintf(szBurnHsfaArchive, MAX_PATH, "%s", p); return; }
++		}
++	}
++	szBurnHsfaArchive[0] = 0;							// 7z ou introuvable : pas de membres lus sur place
++}
++
++static char szHsfaYdata[MAX_PATH + 64] = "";		// Y_DATA / ISO retenu par le flux (hors archive) : repli du rejeu
++
+ static void HsfaFluxInit()
+ {
+ 	char dir[MAX_PATH], y[MAX_PATH + 64] = "", t[MAX_PATH + 64] = "";
++	std::string tz;									// table des flux lue dans l'archive
++	UINT64 zo = 0; UINT32 zn = 0;
++	szHsfaYdata[0] = 0;
++	HsfaResoutArchive();
+ 	snprintf(dir, sizeof(dir), "%.*shsfa/", MAX_PATH - 8, szAppHiscorePath);	// <systeme>/fbneo/hsfa/
+ 	nHsfaFluxForce = getenv("HSFA_FLUX") ? atoi(getenv("HSFA_FLUX")) : -1;
+ 	if (getenv("HSFA_YDATA")) snprintf(y, sizeof(y), "%s", getenv("HSFA_YDATA"));
+-	else {
++	else if (HsfaZipMembre(szBurnHsfaArchive, "hsfa_flux.bin", &zo, &zn)) {
++		// 1. flux dans l'archive du jeu (lus sur place par blocs, jamais charges en entier)
++		snprintf(y, sizeof(y), "%s@%llx", szBurnHsfaArchive, (unsigned long long)zo);
++	}
++	if (!y[0]) {
++		// 2. dossier systeme : Y_DATA.BIN, anthology.iso ou ydata.txt (chemin)
+ 		static const char *noms[] = { "Y_DATA.BIN", "y_data.bin", "anthology.iso" };
+ 		for (INT32 i = 0; i < 3 && !y[0]; i++) {
+ 			snprintf(t, sizeof(t), "%s%s", dir, noms[i]);
+@@ -537,13 +645,16 @@ static void HsfaFluxInit()
+ 			if (fgets(y, sizeof(y), f)) y[strcspn(y, "\r\n")] = 0;
+ 			fclose(f);
+ 		}
++		if (y[0]) snprintf(szHsfaYdata, sizeof(szHsfaYdata), "%s", y);
+ 	}
+-	if (!y[0]) { bprintf(0, _T("HSFA flux : pas de Y_DATA.BIN dans %s (musiques PS2 inactives)\n"), dir); return; }
+-	if (getenv("HSFA_FLUX_TABLE")) snprintf(t, sizeof(t), "%s", getenv("HSFA_FLUX_TABLE"));
+-	else snprintf(t, sizeof(t), "%shsfa_flux_table.txt", dir);
++	if (!y[0]) { bprintf(0, _T("HSFA flux : ni hsfa_flux.bin dans l'archive, ni Y_DATA.BIN dans %s (musiques PS2 inactives)\n"), dir); return; }
+ 	HsfaFlux = new hsfa_flux::lecteur();
+ 	HsfaFlux->ouvre_journal(getenv("HSFA_FLUX_LOG"));
+-	if (!HsfaFlux->ouvre(y, t)) {
++	bool ok;
++	if (getenv("HSFA_FLUX_TABLE")) { snprintf(t, sizeof(t), "%s", getenv("HSFA_FLUX_TABLE")); ok = HsfaFlux->ouvre(y, t); }
++	else if (HsfaZipLit("hsfa_flux_table.txt", tz, 0x100000)) { snprintf(t, sizeof(t), "hsfa_flux_table.txt (archive)"); ok = HsfaFlux->ouvre_texte(y, tz.data(), tz.size()); }
++	else { snprintf(t, sizeof(t), "%shsfa_flux_table.txt", dir); ok = HsfaFlux->ouvre(y, t); }
++	if (!ok) {
+ 		bprintf(0, _T("HSFA flux : %s (musiques PS2 inactives)\n"), HsfaFlux->erreur.c_str());
+ 		delete HsfaFlux; HsfaFlux = NULL;
+ 		return;
+@@ -551,7 +662,7 @@ static void HsfaFluxInit()
+ 	HsfaFlux->taux = nBurnSoundRate > 0 ? nBurnSoundRate : 48000;
+ 	HsfaFlux->gain = 0.26f * (getenv("HSFA_FLUX_VOL") ? (float)atof(getenv("HSFA_FLUX_VOL")) : 100.f) / 100.f;
+ 	HsfaFlux->mode = HsfaFluxMode();
+-	bprintf(0, _T("HSFA flux : %d flux ADX, %d codes (%s)\n"), (INT32)HsfaFlux->nb_flux(), (INT32)HsfaFlux->nb_codes(), t);
++	bprintf(0, _T("HSFA flux : %d flux ADX, %d codes (%s ; %s)\n"), (INT32)HsfaFlux->nb_flux(), (INT32)HsfaFlux->nb_codes(), y, t);
+ }
+ 
+ // commande posee par le 68K ($61801F = 0) : 1 = a remplacer par FF05 pour le Z80
+@@ -574,6 +685,183 @@ void HsfaFluxRendu(INT16 *pOut, INT32 nLen)
+ 	if (HsfaFlux->mode) HsfaFlux->rend(pOut, nLen);
+ }
+ 
++// --------------------------------------------------------------------------------------------------------------
++// Rejeu QSound des sons de SFA1 / SFA2 (Hyper seulement ; hsfa_rejeu.h, comme le fork MAME : agent_son_hyper_rom,
++// SON-HYPER-ROM.md §12-§13). Les codes $2000+ / $3000+ / $4000+ du programme traduit d'Hyper sont rejoues sur un
++// 2e QSound (hsfa_qsound.h) dont la ROM vient des fichiers de l'utilisateur ; le Z80 recoit un code vide.
++// Donnees (dans cet ordre) : 1. membres hsfa_rejeu.bin + hsfa_rejeu_table.txt de l'archive ; 2. X_DATA.BIN, x_data.bin,
++// xdata.txt (chemin) ou l'ISO (anthology.iso, ydata.txt) dans <systeme>/fbneo/hsfa/, table de l'archive ou
++// hsfa_rejeu_table.txt de ce dossier ; 3. sinon inactif (sons SFA3).
++// Variables (PC, essais) : HSFA_REJEU=0 (inactif), HSFA_REJEU_TABLE, HSFA_XDATA (X_DATA.BIN | ISO | fichier@decalage),
++// HSFA_REJEU_LOG (journal des decisions, format du fork).
++// Temps : periodes de 60 MHz depuis la mise sous tension ; image n = [n*6e9/nBurnFPS, (n+1)*6e9/nBurnFPS), position
++// dans l'image d'apres les cycles 68000 ; un echantillon du 2e QSound toutes les 2496 periodes (24 038 Hz), ecritures
++// appliquees avant l'echantillon de leur instant, sortie interpolee a la frequence du son et mixee au QSound principal
++// avec le meme volume (Cps2Volume / 39, comme le fork : meme gain numerique que le QSound principal).
++
++#define HSFA_REJEU_ROM	0x800000
++#define HSFA_QS_PERIODE	2496
++
++static hsfa_rejeu::rejeu *HsfaRejeu = NULL;
++static hsfa_qs::qsound *HsfaQs2 = NULL;
++static UINT8 *HsfaRejeuRom = NULL;
++static INT64 nRejeuTrame = 0;						// image courante
++static INT64 nRejeuEch = 0;							// prochain echantillon du 2e QSound
++static INT16 nRejeuPrec[2] = { 0, 0 };				// echantillon precedent (interpolation)
++static INT32 bRejeuSeul = 0;						// HSFA_REJEU_SEUL=1 (essais) : sortie = 2e QSound seul
++
++static inline INT64 HsfaRejeuDebut(INT64 trame) { return trame * 6000000000LL / (nBurnFPS > 0 ? nBurnFPS : 6000); }
++
++// instant courant (us) : debut de l'image + part des cycles 68000 deja executes
++static INT64 HsfaRejeuMaintenant()
++{
++	INT64 d = HsfaRejeuDebut(nRejeuTrame), f = HsfaRejeuDebut(nRejeuTrame + 1);
++	INT64 c = nCpsCycles > 0 ? SekTotalCycles() : 0;
++	if (c < 0) c = 0;
++	return (d + (nCpsCycles > 0 ? (f - d) * c / nCpsCycles : 0)) / 60;
++}
++
++struct HsfaRejeuEcrivain { void ecrit(UINT8 reg, UINT16 val) { HsfaQs2->ecrit(reg, val); } };
++
++// produit les echantillons du 2e QSound jusqu'a l'instant t (periodes de 60 MHz) inclus
++static inline void HsfaRejeuGenere(INT64 t)
++{
++	HsfaRejeuEcrivain w;
++	while (nRejeuEch * HSFA_QS_PERIODE <= t) {
++		nRejeuPrec[0] = HsfaQs2->c.out[0]; nRejeuPrec[1] = HsfaQs2->c.out[1];
++		INT64 te = nRejeuEch * HSFA_QS_PERIODE / 60;
++		INT64 pr = HsfaRejeu->prochain();
++		if (pr >= 0 && pr <= te) HsfaRejeu->avance(te, w);
++		HsfaQs2->echantillon();
++		nRejeuEch++;
++	}
++}
++
++static INT32 HsfaRejeuCharge(const char *dir)
++{
++	std::string tz, source;
++	if (getenv("HSFA_REJEU") && atoi(getenv("HSFA_REJEU")) == 0) return 0;
++	HsfaRejeu = new hsfa_rejeu::rejeu();
++	// table : HSFA_REJEU_TABLE, membre de l'archive, ou fichier du dossier systeme
++	char t[MAX_PATH + 64];
++	bool ok = false;
++	if (getenv("HSFA_REJEU_TABLE")) {
++		FILE *f = fopen(getenv("HSFA_REJEU_TABLE"), "rb");
++		if (f) {
++			char b[65536]; size_t n;
++			while ((n = fread(b, 1, sizeof(b), f)) > 0) tz.append(b, n);
++			fclose(f);
++			ok = true;
++		}
++		snprintf(t, sizeof(t), "%s", getenv("HSFA_REJEU_TABLE"));
++	} else if (HsfaZipLit("hsfa_rejeu_table.txt", tz, 0x4000000)) {
++		ok = true; snprintf(t, sizeof(t), "hsfa_rejeu_table.txt (archive)");
++	} else {
++		snprintf(t, sizeof(t), "%shsfa_rejeu_table.txt", dir);
++		FILE *f = fopen(t, "rb");
++		if (f) {
++			char b[65536]; size_t n;
++			while ((n = fread(b, 1, sizeof(b), f)) > 0) tz.append(b, n);
++			fclose(f);
++			ok = true;
++		}
++	}
++	if (!ok) { bprintf(0, _T("HSFA rejeu : pas de table (hsfa_rejeu_table.txt) : sons SFA3\n")); return 1; }
++	if (!HsfaRejeu->ouvre_texte(tz.data(), tz.size())) { bprintf(0, _T("HSFA rejeu : %s (inactif)\n"), HsfaRejeu->erreur.c_str()); return 1; }
++	tz.clear(); std::string().swap(tz);
++	HsfaRejeuRom = (UINT8*)BurnMalloc(HSFA_REJEU_ROM);
++	if (!HsfaRejeuRom) return 1;
++	memset(HsfaRejeuRom, 0, HSFA_REJEU_ROM);
++	// ROM : HSFA_XDATA, membre de l'archive, X_DATA du dossier systeme, ISO
++	UINT64 zo = 0; UINT32 zn = 0;
++	if (!getenv("HSFA_XDATA") && HsfaZipMembre(szBurnHsfaArchive, "hsfa_rejeu.bin", &zo, &zn)) {
++		FILE *f = fopen(szBurnHsfaArchive, "rb");
++		ok = f && zn == HSFA_REJEU_ROM && fseek(f, (long)zo, SEEK_SET) == 0 && fread(HsfaRejeuRom, 1, zn, f) == zn;
++		if (f) fclose(f);
++		if (ok && HsfaRejeu->verifie_rom(HsfaRejeuRom, HSFA_REJEU_ROM)) source = "hsfa_rejeu.bin (archive)";
++		else bprintf(0, _T("HSFA rejeu : hsfa_rejeu.bin de l'archive invalide (%s)\n"), ok ? HsfaRejeu->erreur.c_str() : "taille ou lecture");
++	}
++	if (source.empty()) {
++		std::vector<std::string> cand;
++		if (getenv("HSFA_XDATA")) cand.push_back(getenv("HSFA_XDATA"));
++		else {
++			static const char *noms[] = { "X_DATA.BIN", "x_data.bin" };
++			for (INT32 i = 0; i < 2; i++) { snprintf(t, sizeof(t), "%s%s", dir, noms[i]); if (HsfaFichierExiste(t)) cand.push_back(t); }
++			snprintf(t, sizeof(t), "%sxdata.txt", dir);
++			FILE *f = fopen(t, "r");
++			if (f) { char l[MAX_PATH + 64]; if (fgets(l, sizeof(l), f)) { l[strcspn(l, "\r\n")] = 0; if (l[0]) cand.push_back(l); } fclose(f); }
++			if (szHsfaYdata[0]) cand.push_back(szHsfaYdata);			// ISO de l'Anthology (X_DATA.BIN y est cherche)
++			else {
++				snprintf(t, sizeof(t), "%santhology.iso", dir); if (HsfaFichierExiste(t)) cand.push_back(t);
++			}
++		}
++		for (size_t i = 0; i < cand.size() && source.empty(); i++) {
++			if (HsfaRejeu->charge_xdata(cand[i].c_str(), HsfaRejeuRom, HSFA_REJEU_ROM)) source = cand[i];
++			else bprintf(0, _T("HSFA rejeu : %s\n"), HsfaRejeu->erreur.c_str());
++		}
++	}
++	if (source.empty()) { bprintf(0, _T("HSFA rejeu : ni hsfa_rejeu.bin dans l'archive, ni X_DATA.BIN (ou ISO) dans %s : sons SFA3\n"), dir); return 1; }
++	HsfaRejeu->ouvre_journal(getenv("HSFA_REJEU_LOG"));
++	HsfaQs2 = new hsfa_qs::qsound();
++	HsfaQs2->fixe_rom(HsfaRejeuRom, HSFA_REJEU_ROM);
++	bprintf(0, _T("HSFA rejeu : %d sons, %d codes (%s ; %s)\n"), (INT32)HsfaRejeu->nb_sons(), (INT32)HsfaRejeu->nb_codes(), t, source.c_str());
++	return 0;
++}
++
++static void HsfaRejeuLibere()
++{
++	delete HsfaRejeu; HsfaRejeu = NULL;
++	delete HsfaQs2; HsfaQs2 = NULL;
++	BurnFree(HsfaRejeuRom);
++}
++
++static void HsfaRejeuInit()
++{
++	nRejeuTrame = 0; nRejeuEch = 0; nRejeuPrec[0] = nRejeuPrec[1] = 0;
++	bRejeuSeul = getenv("HSFA_REJEU_SEUL") && atoi(getenv("HSFA_REJEU_SEUL")) == 1;
++	if (!HsfaHyper) return;
++	char dir[MAX_PATH];
++	snprintf(dir, sizeof(dir), "%.*shsfa/", MAX_PATH - 8, szAppHiscorePath);
++	if (HsfaRejeuCharge(dir)) HsfaRejeuLibere();
++}
++
++static void HsfaRejeuReset()
++{
++	if (!HsfaRejeu) return;
++	HsfaQs2->reset();
++	HsfaRejeu->reset(HsfaRejeuDebut(nRejeuTrame) / 60);
++}
++
++// commande posee par le 68K (apres le lecteur de flux) : 1 = a remplacer par *pZ80 pour le Z80
++INT32 HsfaRejeuCommande(UINT16 nCmd, UINT16 *pZ80)
++{
++	if (!HsfaRejeu) return 0;
++	return HsfaRejeu->commande(nCmd, HsfaRejeuMaintenant(), pZ80) == hsfa_rejeu::REMPLACE;
++}
++
++// fin d'image : 2e QSound rendu sur l'image, ajoute a la sortie (stereo entrelacee, nBurnSoundRate)
++void HsfaRejeuRendu(INT16 *pOut, INT32 nLen)
++{
++	if (!HsfaRejeu) return;
++	INT64 d = HsfaRejeuDebut(nRejeuTrame), f = HsfaRejeuDebut(nRejeuTrame + 1);
++	if (pOut && nLen > 0) {
++		double g = Cps2Volume / 39.0;
++		if (bRejeuSeul) memset(pOut, 0, nLen * 2 * sizeof(INT16));
++		for (INT32 i = 0; i < nLen; i++) {
++			INT64 t = d + (f - d) * i / nLen;
++			HsfaRejeuGenere(t);
++			INT32 fr = (INT32)(t - (nRejeuEch - 1) * HSFA_QS_PERIODE);	// 0..2495 apres l'echantillon courant
++			for (INT32 c = 0; c < 2; c++) {
++				INT32 o = nRejeuPrec[c] + (((HsfaQs2->c.out[c] - nRejeuPrec[c]) * fr) / HSFA_QS_PERIODE);
++				INT32 v = pOut[2 * i + c] + (INT32)(o * g);
++				pOut[2 * i + c] = (INT16)(v > 32767 ? 32767 : (v < -32768 ? -32768 : v));
++			}
++		}
++	}
++	HsfaRejeuGenere(f - 1);
++	nRejeuTrame++;
++}
++
+ static INT32 HsfaScan(INT32 nAction, INT32 *)
+ {
+ 	if (nAction & ACB_DRIVER_DATA) {
+@@ -596,6 +884,19 @@ static INT32 HsfaScan(INT32 nAction, INT32 *)
+ 			ba.Data = &HsfaFlux->e; ba.nLen = sizeof(HsfaFlux->e); ba.szName = "HsfaFlux"; BurnAcb(&ba);
+ 			if (nAction & ACB_WRITE) HsfaFlux->apres_chargement();
+ 		}
++		if (HsfaHyper) {
++			// rejeu : zones toujours presentes pour Hyper (etat « vide » si inactif) -> un etat sauve avec ou sans les
++			// donnees du rejeu se recharge dans l'autre configuration
++			static hsfa_rejeu::etat_t RejeuVide;
++			static hsfa_qs::etat_t QsVide;
++			ba.Data = HsfaRejeu ? (void*)&HsfaRejeu->e : (void*)&RejeuVide; ba.nLen = sizeof(RejeuVide); ba.szName = "HsfaRejeu"; BurnAcb(&ba);
++			ba.Data = HsfaQs2 ? (void*)&HsfaQs2->c : (void*)&QsVide;       ba.nLen = sizeof(QsVide);    ba.szName = "HsfaQs2";   BurnAcb(&ba);
++			SCAN_VAR(nRejeuTrame);
++			SCAN_VAR(nRejeuEch);
++			SCAN_VAR(nRejeuPrec);
++			RejeuVide.raz();
++			memset(&QsVide, 0, sizeof(QsVide));
++		}
+ 
+ 		if (nAction & ACB_WRITE) {
+ 			if (HsfaMode == 2) HsfaUpdateScroll();
+@@ -748,6 +1049,7 @@ INT32 HsfaInit()
+ 	SekClose();
+ 
+ 	HsfaFluxInit();
++	HsfaRejeuInit();
+ 
+ 	CpsRunResetCallbackFunction = HsfaReset;
+ 	CpsMemScanCallbackFunction = HsfaScan;
+@@ -760,6 +1062,7 @@ INT32 HsfaExit()
+ {
+ 	delete HsfaFlux;
+ 	HsfaFlux = NULL;
++	HsfaRejeuLibere();
+ 	BurnFree(HsfaExt);
+ 	BurnFree(HsfaTab);
+ 	BurnFree(HsfaEntries);
+diff --git a/src/burn/drv/capcom/cps_mem.cpp b/src/burn/drv/capcom/cps_mem.cpp
+index 4f6ba05..86f6b2a 100644
+--- a/src/burn/drv/capcom/cps_mem.cpp
++++ b/src/burn/drv/capcom/cps_mem.cpp
+@@ -265,6 +265,12 @@ void __fastcall CPSQSoundC0WriteByte(UINT32 sekAddress, UINT8 byteValue)
+ 			CpsZRamC0[0] = 0xFF;
+ 			CpsZRamC0[1] = 0x05;
+ 		}
++		// HSFA : rejeu des sons de SFA1 / SFA2 (Hyper) sur le 2e QSound ; le Z80 recoit le code donne (vide ou ALIAS)
++		UINT16 nZ80;
++		if (HsfaRejeuCommande((CpsZRamC0[0] << 8) | CpsZRamC0[1], &nZ80)) {
++			CpsZRamC0[0] = nZ80 >> 8;
++			CpsZRamC0[1] = nZ80 & 0xFF;
++		}
+ 	}
+ }
+ 
+diff --git a/src/burn/drv/capcom/hsfa_flux.h b/src/burn/drv/capcom/hsfa_flux.h
+index 88c0df0..be46db4 100644
+--- a/src/burn/drv/capcom/hsfa_flux.h
++++ b/src/burn/drv/capcom/hsfa_flux.h
+@@ -89,6 +89,18 @@ public:
+ 	bool ouvre(const char *ydata, const char *table)
+ 	{
+ 		if (!lit_table(table)) return false;
++		return ouvre_y(ydata);
++	}
++	// table deja en memoire (ex. membre hsfa_flux_table.txt du zip du jeu ; arret au premier octet nul)
++	bool ouvre_texte(const char *ydata, const char *texte, size_t n)
++	{
++		lit_table_texte(texte, n);
++		return ouvre_y(ydata);
++	}
++	// ydata : Y_DATA.BIN, ISO, ou 'fichier@decalage' (AFS a ce decalage : membre hsfa_flux.bin stocke dans le zip)
++	bool ouvre_y(const char *ydata)
++	{
++		if (m_f) { fclose(m_f); m_f = NULL; }
+ 		std::string chemin(ydata);
+ 		uint64_t base = 0;
+ 		size_t at = chemin.rfind('@');
+@@ -227,11 +239,25 @@ private:
+ 
+ 	bool lit_table(const char *chemin)
+ 	{
+-		FILE *f = fopen(chemin, "r");
++		FILE *f = fopen(chemin, "rb");
+ 		if (!f) { erreur = std::string("table introuvable : ") + chemin; return false; }
++		std::string t;
++		char b[16384];
++		size_t n;
++		while ((n = fread(b, 1, sizeof b, f)) > 0) t.append(b, n);
++		fclose(f);
++		lit_table_texte(t.data(), t.size());
++		return true;
++	}
++	void lit_table_texte(const char *texte, size_t taille)
++	{
+ 		m_tab.assign(0x1200, entree());
++		const char *p = texte, *fin = texte + taille;
+ 		char l[256];
+-		while (fgets(l, sizeof l, f)) {
++		while (p < fin && *p) {
++			size_t k = 0;
++			while (p < fin && *p && k + 1 < sizeof l) { char c = *p++; l[k++] = c; if (c == '\n') break; }
++			l[k] = 0;
+ 			unsigned code, fid, vol; char dr[32] = "-";
+ 			if (l[0] == '#' || sscanf(l, "%x %u %u %31s", &code, &fid, &vol, dr) < 3 || code >= 0x1200) continue;
+ 			entree &x = m_tab[code];
+@@ -242,8 +268,6 @@ private:
+ 				else if (*c == 'x') x.drap |= DRAP_JAMAIS;
+ 			}
+ 		}
+-		fclose(f);
+-		return true;
+ 	}
+ 
+ 	bool charge_entete(int32_t fid)
+diff --git a/src/burn/drv/capcom/hsfa_qsound.h b/src/burn/drv/capcom/hsfa_qsound.h
+new file mode 100644
+index 0000000..d371663
+--- /dev/null
++++ b/src/burn/drv/capcom/hsfa_qsound.h
+@@ -0,0 +1,335 @@
++// HSFA : 2e QSound (rejeu des sons de SFA1 / SFA2 pour Hyper, hsfa_rejeu.h). Copie instanciable de l'emulateur HLE
++// du DL-1425 de qs_c.cpp (superctr, Valley Bell ; licence BSD-3-Clause, comme qsoundhle.cpp de MAME) : l'etat du chip
++// est dans un objet, la ROM d'echantillons est fournie par l'hote. Meme semantique que le qsound_hle_device de MAME
++// utilise par le fork (2e QSound « qsound_hsfa ») : en particulier la banque est lue sans tester le bit 15.
++// Un echantillon toutes les 2496 periodes de 60 MHz (24 038 Hz). C++98.
++#pragma once
++#include <stdint.h>
++#include <stdlib.h>
++#include <string.h>
++
++namespace hsfa_qs {
++
++#define HSFA_QS_CLAMP(x, lo, hi) (((x) > (hi)) ? (hi) : (((x) < (lo)) ? (lo) : (x)))
++
++static const int16_t dry_mix[33] = {
++	-16384,-16384,-16384,-16384,-16384,-16384,-16384,-16384,
++	-16384,-16384,-16384,-16384,-16384,-16384,-16384,-16384,
++	-16384,-14746,-13107,-11633,-10486,-9175,-8520,-7209,
++	-6226,-5226,-4588,-3768,-3277,-2703,-2130,-1802,
++	0
++};
++static const int16_t wet_mix[33] = {
++	0,-1638,-1966,-2458,-2949,-3441,-4096,-4669,
++	-4915,-5120,-5489,-6144,-7537,-8831,-9339,-9830,
++	-10240,-10322,-10486,-10568,-10650,-11796,-12288,-12288,
++	-12534,-12648,-12780,-12829,-12943,-13107,-13418,-14090,
++	-16384
++};
++static const int16_t linear_mix[33] = {
++	-16379,-16338,-16257,-16135,-15973,-15772,-15531,-15251,
++	-14934,-14580,-14189,-13763,-13303,-12810,-12284,-11729,
++	-11729,-11144,-10531,-9893,-9229,-8543,-7836,-7109,
++	-6364,-5604,-4829,-4043,-3246,-2442,-1631,-817,
++	0
++};
++static const int16_t filter_data[5][95] = {
++	{	0,0,0,6,44,-24,-53,-10,59,-40,-27,1,39,-27,56,127,174,36,-13,49,
++		212,142,143,-73,-20,66,-108,-117,-399,-265,-392,-569,-473,-71,95,-319,-218,-230,331,638,
++		449,477,-180,532,1107,750,9899,3828,-2418,1071,-176,191,-431,64,117,-150,-274,-97,-238,165,
++		166,250,-19,4,37,204,186,-6,140,-77,-1,1,18,-10,-151,-149,-103,-9,55,23,
++		-102,-97,-11,13,-48,-27,5,18,-61,-30,64,72,0,0,0 },
++	{	0,0,0,85,24,-76,-123,-86,-29,-14,-20,-7,6,-28,-87,-89,-5,100,154,160,
++		150,118,41,-48,-78,-23,59,83,-2,-176,-333,-344,-203,-66,-39,2,224,495,495,280,
++		432,1340,2483,5377,1905,658,0,97,347,285,35,-95,-78,-82,-151,-192,-171,-149,-147,-113,
++		-22,71,118,129,127,110,71,31,20,36,46,23,-27,-63,-53,-21,-19,-60,-92,-69,
++		-12,25,29,30,40,41,29,30,46,39,-15,-74,0,0,0 },
++	{	0,0,0,23,42,47,29,10,2,-14,-54,-92,-93,-70,-64,-77,-57,18,94,113,
++		87,69,67,50,25,29,58,62,24,-39,-131,-256,-325,-234,-45,58,78,223,485,496,
++		127,6,857,2283,2683,4928,1328,132,79,314,189,-80,-90,35,-21,-186,-195,-99,-136,-258,
++		-189,82,257,185,53,41,84,68,38,63,77,14,-60,-71,-71,-120,-151,-84,14,29,
++		-8,7,66,69,12,-3,54,92,52,-6,-15,-2,0,0,0 },
++	{	0,0,0,2,-28,-37,-17,0,-9,-22,-3,35,52,39,20,7,-6,2,55,121,
++		129,67,8,1,9,-6,-16,16,66,96,118,130,75,-47,-92,43,223,239,151,219,
++		440,475,226,206,940,2100,2663,4980,865,49,-33,186,231,103,42,114,191,184,116,29,
++		-47,-72,-21,60,96,68,31,32,63,87,76,39,7,14,55,85,67,18,-12,-3,
++		21,34,29,6,-27,-49,-37,-2,16,0,-21,-16,0,0,0 },
++	{	0,0,0,48,7,-22,-29,-10,24,54,59,29,-36,-117,-185,-213,-185,-99,13,90,
++		83,24,-5,23,53,47,38,56,67,57,75,107,16,-242,-440,-355,-120,-33,-47,152,
++		501,472,-57,-292,544,1937,2277,6145,1240,153,47,200,152,36,64,134,74,-82,-208,-266,
++		-268,-188,-42,65,74,56,89,133,114,44,-3,-1,17,29,29,-2,-76,-156,-187,-151,
++		-85,-31,-5,7,20,32,24,-5,-20,6,48,62,0,0,0 }
++};
++static const int16_t filter_data2[209] = {
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,
++	-371,-196,-268,-512,-303,-315,-184,-76,276,-256,298,196,990,236,1114,-126,4377,6549,791,
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,-16384,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
++	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
++};
++static const int16_t adpcm_step[16] = { 154, 154, 128, 102, 77, 58, 58, 58, 58, 58, 58, 58, 77, 102, 128, 154 };
++
++enum { ST_INIT1 = 0x288, ST_INIT2 = 0x61a, ST_REFRESH1 = 0x039, ST_REFRESH2 = 0x04f, ST_NORMAL1 = 0x314, ST_NORMAL2 = 0x6b2 };
++
++struct voix { uint16_t bank; int16_t addr; uint16_t phase; uint16_t rate; int16_t loop_len; int16_t end_addr; int16_t volume; int16_t echo; };
++struct adpcm { uint16_t start_addr; uint16_t end_addr; uint16_t bank; int16_t volume; uint16_t flag; int16_t cur_vol; int16_t step_size; uint16_t cur_addr; };
++struct fir { int32_t tap_count; int32_t delay_pos; int16_t table_pos; int16_t taps[95]; int16_t delay_line[95]; };
++struct retard { int16_t delay; int16_t volume; int16_t write_pos; int16_t read_pos; int16_t delay_line[51]; };
++struct echo_t { uint16_t end_pos; int16_t feedback; int16_t length; int16_t last_sample; int16_t delay_line[1024]; int16_t delay_pos; };
++
++// etat complet (sauvegarde d'un bloc)
++struct etat_t {
++	int16_t out[2];
++	voix voice[16];
++	adpcm adp[3];
++	uint16_t voice_pan[19];
++	int16_t voice_output[19];
++	echo_t echo;
++	fir filter[2], alt_filter[2];
++	retard wet[2], dry[2];
++	uint16_t state, next_state, delay_update, data_latch;
++	int32_t state_counter;
++	uint8_t ready_flag, pad[3];
++};
++
++class qsound {
++public:
++	etat_t c;
++	const uint8_t *rom;           // ROM d'echantillons (taille puissance de 2, lecture en miroir comme MAME)
++	uint32_t masque;
++
++	qsound() : rom(NULL), masque(0)
++	{
++		memset(&c, 0, sizeof(c));
++		for (int i = 0; i < 33; i++) {
++			pan[0][0][i] = dry_mix[i]; pan[1][0][i] = dry_mix[32 - i];
++			pan[0][1][i] = wet_mix[i]; pan[1][1][i] = wet_mix[32 - i];
++			pan[0][0][i + 0x30] = linear_mix[i]; pan[1][0][i + 0x30] = linear_mix[32 - i];
++		}
++		carte();
++	}
++	void fixe_rom(const uint8_t *r, uint32_t taille) { rom = r; masque = taille ? taille - 1 : 0; }
++	void reset() { c.ready_flag = 0; c.out[0] = c.out[1] = 0; c.state = 0; c.state_counter = 0; }
++	void ecrit(uint8_t reg, uint16_t val)
++	{
++		uint16_t *d = reg_map[reg];
++		if (d) *d = val;
++		c.ready_flag = 0;
++	}
++	void echantillon()
++	{
++		switch (c.state) {
++		default: case ST_INIT1: case ST_INIT2: etat_init(); return;
++		case ST_REFRESH1: refresh1(); return;
++		case ST_REFRESH2: refresh2(); return;
++		case ST_NORMAL1: case ST_NORMAL2: normal(); return;
++		}
++	}
++
++private:
++	int16_t pan[2][2][98];
++	uint16_t *reg_map[256];
++
++	void carte()
++	{
++		for (int i = 0; i < 256; i++) reg_map[i] = NULL;
++		for (int i = 0; i < 16; i++) {
++			reg_map[(i << 3) + 0] = &c.voice[(i + 1) % 16].bank;
++			reg_map[(i << 3) + 1] = (uint16_t*)&c.voice[i].addr;
++			reg_map[(i << 3) + 2] = &c.voice[i].rate;
++			reg_map[(i << 3) + 3] = &c.voice[i].phase;
++			reg_map[(i << 3) + 4] = (uint16_t*)&c.voice[i].loop_len;
++			reg_map[(i << 3) + 5] = (uint16_t*)&c.voice[i].end_addr;
++			reg_map[(i << 3) + 6] = (uint16_t*)&c.voice[i].volume;
++			reg_map[i + 0x80] = &c.voice_pan[i];
++			reg_map[i + 0xba] = (uint16_t*)&c.voice[i].echo;
++		}
++		for (int i = 0; i < 3; i++) {
++			reg_map[(i << 2) + 0xca] = &c.adp[i].start_addr;
++			reg_map[(i << 2) + 0xcb] = &c.adp[i].end_addr;
++			reg_map[(i << 2) + 0xcc] = &c.adp[i].bank;
++			reg_map[(i << 2) + 0xcd] = (uint16_t*)&c.adp[i].volume;
++			reg_map[i + 0xd6] = &c.adp[i].flag;
++			reg_map[i + 0x90] = &c.voice_pan[16 + i];
++		}
++		reg_map[0x93] = (uint16_t*)&c.echo.feedback;
++		reg_map[0xd9] = &c.echo.end_pos;
++		reg_map[0xe2] = &c.delay_update;
++		reg_map[0xe3] = &c.next_state;
++		for (int i = 0; i < 2; i++) {
++			reg_map[(i << 1) + 0xda] = (uint16_t*)&c.filter[i].table_pos;
++			reg_map[(i << 1) + 0xde] = (uint16_t*)&c.wet[i].delay;
++			reg_map[(i << 1) + 0xe4] = (uint16_t*)&c.wet[i].volume;
++			reg_map[(i << 1) + 0xdb] = (uint16_t*)&c.alt_filter[i].table_pos;
++			reg_map[(i << 1) + 0xdf] = (uint16_t*)&c.dry[i].delay;
++			reg_map[(i << 1) + 0xe5] = (uint16_t*)&c.dry[i].volume;
++		}
++	}
++	// qsoundhle.cpp : bank &= 0x7fff ; read_byte((bank << 16) | address) (ROM en miroir)
++	int16_t lit(uint16_t bank, uint16_t addr) const
++	{
++		if (!rom) return 0;
++		uint32_t a = ((uint32_t(bank) & 0x7FFF) << 16) | addr;
++		return int16_t(uint16_t(rom[a & masque]) << 8);
++	}
++	static const int16_t *table_filtre(uint16_t off)
++	{
++		if (off >= 0xf2e && off < 0xfff) return &filter_data2[off - 0xf2e];
++		int i = (int(off) - 0xd53) / 95;
++		if (i >= 0 && i < 5) return filter_data[i];
++		return NULL;
++	}
++	void etat_init()
++	{
++		int mode = (c.state == ST_INIT2) ? 1 : 0;
++		if (c.state_counter >= 2) { c.state_counter = 0; c.state = c.next_state; return; }
++		else if (c.state_counter == 1) { c.state_counter++; return; }
++		memset(c.voice, 0, sizeof(c.voice)); memset(c.adp, 0, sizeof(c.adp));
++		memset(c.filter, 0, sizeof(c.filter)); memset(c.alt_filter, 0, sizeof(c.alt_filter));
++		memset(c.wet, 0, sizeof(c.wet)); memset(c.dry, 0, sizeof(c.dry)); memset(&c.echo, 0, sizeof(c.echo));
++		for (int i = 0; i < 19; i++) { c.voice_pan[i] = 0x120; c.voice_output[i] = 0; }
++		for (int i = 0; i < 16; i++) c.voice[i].bank = 0x8000;
++		for (int i = 0; i < 3; i++) c.adp[i].bank = 0x8000;
++		if (mode == 0) {
++			c.wet[0].delay = 0; c.dry[0].delay = 46; c.wet[1].delay = 0; c.dry[1].delay = 48;
++			c.filter[0].table_pos = 0xdb2; c.filter[1].table_pos = 0xe11;
++			c.echo.end_pos = 0x554 + 6; c.next_state = ST_REFRESH1;
++		} else {
++			c.wet[0].delay = 1; c.dry[0].delay = 0; c.wet[1].delay = 0; c.dry[1].delay = 0;
++			c.filter[0].table_pos = 0xf73; c.filter[1].table_pos = 0xfa4;
++			c.alt_filter[0].table_pos = 0xf73; c.alt_filter[1].table_pos = 0xfa4;
++			c.echo.end_pos = 0x53c + 6; c.next_state = ST_REFRESH2;
++		}
++		c.wet[0].volume = 0x3fff; c.dry[0].volume = 0x3fff; c.wet[1].volume = 0x3fff; c.dry[1].volume = 0x3fff;
++		c.delay_update = 1; c.ready_flag = 0; c.state_counter = 1;
++	}
++	void refresh1()
++	{
++		for (int ch = 0; ch < 2; ch++) {
++			c.filter[ch].delay_pos = 0; c.filter[ch].tap_count = 95;
++			const int16_t *t = table_filtre(c.filter[ch].table_pos);
++			if (t) memcpy(c.filter[ch].taps, t, 95 * sizeof(int16_t));
++		}
++		c.state = c.next_state = ST_NORMAL1;
++	}
++	void refresh2()
++	{
++		for (int ch = 0; ch < 2; ch++) {
++			c.filter[ch].delay_pos = 0; c.filter[ch].tap_count = 45;
++			const int16_t *t = table_filtre(c.filter[ch].table_pos);
++			if (t) memcpy(c.filter[ch].taps, t, 45 * sizeof(int16_t));
++			c.alt_filter[ch].delay_pos = 0; c.alt_filter[ch].tap_count = 44;
++			t = table_filtre(c.alt_filter[ch].table_pos);
++			if (t) memcpy(c.alt_filter[ch].taps, t, 44 * sizeof(int16_t));
++		}
++		c.state = c.next_state = ST_NORMAL2;
++	}
++	int16_t pcm(int n, int32_t *echo_out)
++	{
++		voix *v = &c.voice[n];
++		int16_t output = int16_t((v->volume * lit(v->bank, uint16_t(v->addr))) >> 14);
++		*echo_out += (output * v->echo) << 2;
++		int32_t np = v->rate + ((v->addr << 12) | (v->phase >> 4));
++		if ((np >> 12) >= v->end_addr) np -= (v->loop_len << 12);
++		np = HSFA_QS_CLAMP(np, -0x8000000, 0x7FFFFFF);
++		v->addr = int16_t(np >> 12);
++		v->phase = uint16_t((np << 4) & 0xffff);
++		return output;
++	}
++	void adpcm_maj(int n, int nibble)
++	{
++		adpcm *v = &c.adp[n];
++		int8_t step;
++		if (!nibble) {
++			if (v->cur_addr == v->end_addr) v->cur_vol = 0;
++			if (v->flag) { c.voice_output[16 + n] = 0; v->flag = 0; v->step_size = 10; v->cur_vol = v->volume; v->cur_addr = v->start_addr; }
++			step = int8_t(lit(v->bank, v->cur_addr) >> 8);
++		} else step = int8_t(lit(v->bank, v->cur_addr++) >> 4);
++		step >>= 4;
++		int32_t delta = ((1 + abs(step << 1)) * v->step_size) >> 1;
++		if (step <= 0) delta = -delta;
++		delta += c.voice_output[16 + n];
++		delta = HSFA_QS_CLAMP(delta, -32768, 32767);
++		c.voice_output[16 + n] = int16_t((delta * v->cur_vol) >> 16);
++		v->step_size = int16_t((adpcm_step[8 + step] * v->step_size) >> 6);
++		v->step_size = HSFA_QS_CLAMP(v->step_size, 1, 2000);
++	}
++	static int16_t echo(echo_t *r, int32_t input)
++	{
++		int32_t old_sample = r->delay_line[r->delay_pos];
++		int32_t last_sample = r->last_sample;
++		r->last_sample = int16_t(old_sample);
++		old_sample = (old_sample + last_sample) >> 1;
++		int32_t ns = input + ((old_sample * r->feedback) << 2);
++		r->delay_line[r->delay_pos++] = int16_t(ns >> 16);
++		if (r->delay_pos >= r->length) r->delay_pos = 0;
++		return int16_t(old_sample);
++	}
++	static int32_t applique_fir(fir *f, int16_t input)
++	{
++		int32_t output = 0, tap = 0;
++		for (; tap < (f->tap_count - 1); tap++) {
++			output -= (f->taps[tap] * f->delay_line[f->delay_pos++]) << 2;
++			if (f->delay_pos >= f->tap_count - 1) f->delay_pos = 0;
++		}
++		output -= (f->taps[tap] * input) << 2;
++		f->delay_line[f->delay_pos++] = input;
++		if (f->delay_pos >= f->tap_count - 1) f->delay_pos = 0;
++		return output;
++	}
++	static int32_t applique_retard(retard *d, int32_t input)
++	{
++		d->delay_line[d->write_pos++] = int16_t(input >> 16);
++		if (d->write_pos >= 51) d->write_pos = 0;
++		int32_t output = d->delay_line[d->read_pos++] * d->volume;
++		if (d->read_pos >= 51) d->read_pos = 0;
++		return output;
++	}
++	static void maj_retard(retard *d)
++	{
++		int16_t nr = int16_t((d->write_pos - d->delay) % 51);
++		if (nr < 0) nr += 51;
++		d->read_pos = nr;
++	}
++	void normal()
++	{
++		int32_t echo_input = 0;
++		c.ready_flag = 0x80;
++		if (c.state == ST_NORMAL2) c.echo.length = int16_t(c.echo.end_pos - 0x53c);
++		else c.echo.length = int16_t(c.echo.end_pos - 0x554);
++		c.echo.length = HSFA_QS_CLAMP(c.echo.length, 0, 1024);
++		for (int v = 0; v < 16; v++) c.voice_output[v] = pcm(v, &echo_input);
++		adpcm_maj(c.state_counter % 3, c.state_counter / 3);
++		int16_t eo = echo(&c.echo, echo_input);
++		for (int ch = 0; ch < 2; ch++) {
++			int32_t wet = (ch == 1) ? eo << 14 : 0;
++			int32_t dry = (ch == 0) ? eo << 14 : 0;
++			for (int v = 0; v < 19; v++) {
++				uint16_t pi = uint16_t(c.voice_pan[v] - 0x110);
++				if (pi > 97) pi = 97;
++				dry -= (c.voice_output[v] * pan[ch][0][pi]);
++				wet -= (c.voice_output[v] * pan[ch][1][pi]);
++			}
++			dry = HSFA_QS_CLAMP(dry, -0x1fffffff, 0x1fffffff) << 2;
++			wet = HSFA_QS_CLAMP(wet, -0x1fffffff, 0x1fffffff) << 2;
++			wet = applique_fir(&c.filter[ch], int16_t(wet >> 16));
++			if (c.state == ST_NORMAL2) dry = applique_fir(&c.alt_filter[ch], int16_t(dry >> 16));
++			int32_t output = applique_retard(&c.wet[ch], wet) + applique_retard(&c.dry[ch], dry);
++			output = ((output + 0x2000) & ~0x3fff) >> 14;
++			c.out[ch] = int16_t(HSFA_QS_CLAMP(output, -0x7fff, 0x7fff));
++			if (c.delay_update) { maj_retard(&c.wet[ch]); maj_retard(&c.dry[ch]); }
++		}
++		c.delay_update = 0;
++		c.state_counter++;
++		if (c.state_counter > 5) { c.state_counter = 0; c.state = c.next_state; }
++	}
++};
++
++} // namespace hsfa_qs
+diff --git a/src/burn/drv/capcom/hsfa_rejeu.h b/src/burn/drv/capcom/hsfa_rejeu.h
+new file mode 100644
+index 0000000..b5ed316
+--- /dev/null
++++ b/src/burn/drv/capcom/hsfa_rejeu.h
+@@ -0,0 +1,355 @@
++// HSFA : REJEU QSOUND des sons de SFA1 et SFA2 (voix, cris, K.O., annonceur, bruitages simples et en sequence) sur un
++// 2e QSound, pour les versions ZERO / ZERO 2 / ALPHA d'Hyper. En-tete seul, C++98 portable (MAME, FBNeo/libretro),
++// sans dependance. Aucune donnee de jeu dans le code : la ROM d'echantillons est lue dans le X_DATA.BIN de
++// l'utilisateur (ou l'ISO de l'Anthology), les sons sont decrits par une table texte separee (gen_rejeu.py) : pour chaque
++// code, les ecritures de registres QSound (temps, registre, valeur) que le pilote Z80 d'origine fait pour la commande.
++//
++// Principe : a chaque commande posee par le 68K dans la boite aux lettres ($61801F = 0), commande() decide :
++//   - code de la table (CODE ou REF) : le son est rejoue sur le 2e QSound ; la commande transmise au Z80 devient un code
++//     VIDE du Z80 (aucun effet) ; la priorite et la coupure de voie suivent la regle des pilotes Capcom (v1.05 $046E,
++//     v1.71 $05AF) : pour chaque voie du son, si la voie est occupee par un son de priorite plus haute, cette voie
++//     n'est pas prise ; sinon le son en cours sur la voie est coupe (ses ecritures suivantes sur la voie sont
++//     abandonnees). Une voie se libere a la derniere ecriture du son qui l'occupe ;
++//   - ALIAS : la commande transmise au Z80 est remplacee par le code Z80 donne (rien n'est rejoue) ;
++//   - FF00 : tout s'arrete (reponse du pilote d'origine a FF00), la commande passe aussi au Z80 ;
++//   - le reste passe au Z80 sans changement.
++// L'hote fournit le temps en microsecondes emulees, appelle avance() a l'instant prochain() et ecrit chaque registre
++// dans son 2e QSound (MAME : qsound_hle_device ; FBNeo : 2e instance du QSound).
++#pragma once
++#include <stdarg.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <string>
++#include <vector>
++
++namespace hsfa_rejeu {
++
++#if defined(__LIBRETRO_SDK_FILE_STREAM_TRANSFORMS_H)
++static inline int fseek64r(FILE *f, uint64_t o) { return fseek(f, (int64_t)o, SEEK_SET) < 0 ? -1 : 0; }
++#elif defined(_WIN32)
++static inline int fseek64r(FILE *f, uint64_t o) { return _fseeki64(f, (long long)o, SEEK_SET); }
++#else
++static inline int fseek64r(FILE *f, uint64_t o) { return fseeko(f, (off_t)o, SEEK_SET); }
++#endif
++
++enum { NV = 19, NI = 32 };                     // voies (16 PCM + 3 ADPCM), sons simultanes
++enum { PASSE = 0, REMPLACE = 1 };
++enum { K_SON = 0, K_INIT = 1, K_STOP = 2 };
++
++struct ecriture { uint32_t t; uint16_t val; uint8_t reg; uint8_t voie; };   // voie 0xFF = registre global
++struct son { uint16_t code, src; uint8_t jeu, prio; uint32_t debut, n, voies; uint32_t fin[NV]; };
++struct source { std::string nom; uint64_t off; uint32_t taille, crc; uint8_t banque; };
++
++// etat sauvegardable (types simples, enregistres un par un par l'hote)
++struct instance { int32_t kind, ent; int64_t t0; uint32_t pos, voies; };
++struct etat_t {
++	instance ins[NI];
++	int32_t proprio[NV];                   // instance qui occupe la voie (-1 libre)
++	int32_t prio[NV];
++	int64_t fin[NV];                       // fin d'occupation (us)
++	etat_t() { raz(); }
++	void raz() { memset(this, 0, sizeof(*this)); for (int i = 0; i < NI; i++) ins[i].ent = -1; for (int v = 0; v < NV; v++) proprio[v] = -1; }
++};
++
++static inline int voie_de(int r)
++{
++	if (r < 0x80) return ((r & 7) == 0) ? (((r >> 3) + 1) & 15) : (r >> 3);
++	if (r >= 0x80 && r <= 0x8F) return r - 0x80;
++	if (r >= 0x90 && r <= 0x92) return 16 + r - 0x90;
++	if (r >= 0xBA && r <= 0xC9) return r - 0xBA;
++	if (r >= 0xCA && r <= 0xD5) return 16 + ((r - 0xCA) >> 2);
++	if (r >= 0xD6 && r <= 0xD8) return 16 + r - 0xD6;
++	return 0xFF;
++}
++static inline bool reg_banque(int r) { return (r < 0x80 && (r & 7) == 0) || r == 0xCC || r == 0xD0 || r == 0xD4; }
++
++static inline uint32_t crc32(const uint8_t *p, size_t n, uint32_t c = 0)
++{
++	c = ~c;
++	for (size_t i = 0; i < n; i++) { c ^= p[i]; for (int k = 0; k < 8; k++) c = (c >> 1) ^ (0xEDB88320u & (0u - (c & 1))); }
++	return ~c;
++}
++
++class rejeu {
++public:
++	std::string erreur;
++	etat_t e;
++	uint16_t vide;                          // code Z80 vide envoye a la place d'un son rejoue
++	rejeu() : vide(0x0000), m_j(NULL) {}
++	~rejeu() { if (m_j) fclose(m_j); }
++
++	void ouvre_journal(const char *p) { if (p && *p) m_j = fopen(p, "w"); }
++	size_t nb_sons() const { return m_sons.size(); }
++	size_t nb_codes() const { size_t k = 0; for (size_t i = 0; i < m_code.size(); i++) if (m_code[i] >= 0 || m_alias[i] >= 0) k++; return k; }
++
++	// table : hsfa_rejeu_table.txt ; xdata : X_DATA.BIN, ou ISO (X_DATA.BIN cherche dans la racine ISO9660), ou
++	// 'fichier@decalage hexa' (debut de X_DATA.BIN dans le fichier) ; rom : memoire du 2e QSound (banques de 64 Ko)
++	bool ouvre(const char *table, const char *xdata, uint8_t *rom, size_t taille_rom)
++	{
++		if (!lit_table(table)) return false;
++		return charge_xdata(xdata, rom, taille_rom);
++	}
++
++	// table deja en memoire (texte, eventuellement complete par des octets nuls : la lecture s'arrete au premier)
++	bool ouvre_texte(const char *texte, size_t n) { return lit_table_texte(texte, n); }
++
++	// sources (SOURCE de la table) copiees de X_DATA dans la ROM du 2e QSound, CRC controle ; table lue avant
++	bool charge_xdata(const char *xdata, uint8_t *rom, size_t taille_rom)
++	{
++		std::string chemin(xdata);
++		uint64_t base = 0;
++		size_t at = chemin.rfind('@');
++		if (at != std::string::npos && at > 0 && chemin.find('/', at) == std::string::npos) { base = strtoull(chemin.c_str() + at + 1, NULL, 16); chemin.resize(at); }
++		FILE *f = fopen(chemin.c_str(), "rb");
++		if (!f) { erreur = "X_DATA introuvable : " + chemin; return false; }
++		uint8_t pvd[6];
++		if (base == 0 && lire(f, 0x8000, pvd, 6) && !memcmp(pvd + 1, "CD001", 5)) {
++			base = cherche_iso(f, "X_DATA.BIN");
++			if (!base) { fclose(f); erreur = "ISO sans X_DATA.BIN"; return false; }
++		}
++		for (size_t i = 0; i < m_src.size(); i++) {
++			const source &s = m_src[i];
++			size_t o = size_t(s.banque) << 16;
++			if (o + s.taille > taille_rom) { fclose(f); erreur = "ROM du 2e QSound trop petite"; return false; }
++			if (!lire(f, base + s.off, rom + o, s.taille)) { fclose(f); erreur = "X_DATA illisible (" + s.nom + ")"; return false; }
++			if (crc32(rom + o, s.taille) != s.crc) { fclose(f); erreur = "X_DATA : CRC different pour " + s.nom; return false; }
++		}
++		fclose(f);
++		return true;
++	}
++
++	// ROM du 2e QSound deja remplie (image des sources a leur banque, ex. membre hsfa_rejeu.bin du zip) : CRC controle
++	bool verifie_rom(const uint8_t *rom, size_t taille_rom)
++	{
++		if (m_src.empty()) { erreur = "table non lue"; return false; }
++		for (size_t i = 0; i < m_src.size(); i++) {
++			const source &s = m_src[i];
++			size_t o = size_t(s.banque) << 16;
++			if (o + s.taille > taille_rom) { erreur = "ROM du 2e QSound trop petite"; return false; }
++			if (crc32(rom + o, s.taille) != s.crc) { erreur = "ROM du rejeu : CRC different pour " + s.nom; return false; }
++		}
++		return true;
++	}
++	// sources decrites par la table (pour construire l'image hors de l'emulateur)
++	size_t nb_sources() const { return m_src.size(); }
++
++	// mise sous tension du 2e QSound : initialisation du pilote d'origine apres 0,1 s (le DSP doit avoir demarre)
++	void reset(int64_t maintenant)
++	{
++		e.raz();
++		if (!m_init.empty()) lance(K_INIT, 0, maintenant + 100000, 0);
++	}
++
++	// commande posee par le 68K. Rend PASSE ou REMPLACE (*z80 = code a transmettre au Z80 a la place).
++	int commande(uint16_t cmd, int64_t maintenant, uint16_t *z80)
++	{
++		if (m_sons.empty()) return PASSE;
++		if (cmd == 0xFF00) {
++			for (int i = 0; i < NI; i++) e.ins[i].ent = -1;
++			for (int v = 0; v < NV; v++) { e.proprio[v] = -1; e.prio[v] = 0; e.fin[v] = 0; }
++			if (!m_stop.empty()) lance(K_STOP, 0, maintenant, 0);
++			trace("%lld FF00 : arret\n", (long long)maintenant);
++			return PASSE;
++		}
++		if (m_alias[cmd] >= 0) { *z80 = uint16_t(m_alias[cmd]); trace("%lld %04X -> Z80 %04X\n", (long long)maintenant, cmd, *z80); return REMPLACE; }
++		int32_t k = m_code[cmd];
++		if (k < 0) return PASSE;
++		const son &s = m_sons[k];
++		uint32_t prises = 0;
++		for (int v = 0; v < NV; v++) {
++			if (!(s.voies & (1u << v))) continue;
++			bool occupee = e.proprio[v] >= 0 && maintenant < e.fin[v];
++			if (occupee && s.prio < e.prio[v]) continue;            // pilote : 'cp (ix+prio) ; jp c,suivante'
++			prises |= 1u << v;
++		}
++		*z80 = vide;
++		if (!prises) { trace("%lld %04X (%s %04X prio %02X) refuse : voies occupees\n", (long long)maintenant, cmd, m_src[s.jeu].nom.c_str(), s.src, s.prio); return REMPLACE; }
++		int i = lance(K_SON, k, maintenant, prises);
++		for (int v = 0; v < NV; v++) {
++			if (!(prises & (1u << v))) continue;
++			int32_t a = e.proprio[v];
++			if (a >= 0 && a != i) e.ins[a].voies &= ~(1u << v);
++			e.proprio[v] = i; e.prio[v] = s.prio; e.fin[v] = maintenant + s.fin[v];
++		}
++		trace("%lld %04X -> %s %04X prio %02X voies %05X\n", (long long)maintenant, cmd, m_src[s.jeu].nom.c_str(), s.src, s.prio, prises);
++		return REMPLACE;
++	}
++
++	// instant (us) de la prochaine ecriture, ou -1
++	int64_t prochain() const
++	{
++		int64_t m = -1;
++		for (int i = 0; i < NI; i++) {
++			const instance &x = e.ins[i];
++			if (x.ent < 0) continue;
++			int64_t t = x.t0 + ecr(x)[x.pos].t;
++			if (m < 0 || t < m) m = t;
++		}
++		return m;
++	}
++
++	// ecrit (dans l'ordre des temps) toutes les ecritures dues a l'instant maintenant : W::ecrit(reg, val)
++	template <class W> void avance(int64_t maintenant, W &w)
++	{
++		for (;;) {
++			int best = -1; int64_t bt = 0;
++			for (int i = 0; i < NI; i++) {
++				const instance &x = e.ins[i];
++				if (x.ent < 0) continue;
++				int64_t t = x.t0 + ecr(x)[x.pos].t;
++				if (t <= maintenant && (best < 0 || t < bt)) { best = i; bt = t; }
++			}
++			if (best < 0) return;
++			instance &x = e.ins[best];
++			const ecriture &c = ecr(x)[x.pos];
++			int jeu = x.kind == K_SON ? m_sons[x.ent].jeu : x.ent;
++			bool garde = x.kind != K_SON || (c.voie == 0xFF ? x.voies != 0 : (x.voies & (1u << c.voie)) != 0);
++			if (garde) {
++				uint16_t v = c.val;
++				if (reg_banque(c.reg) && m_src[jeu].banque) v = uint16_t((v & 0x8000) | ((v + m_src[jeu].banque) & 0x7FFF));
++				w.ecrit(c.reg, v);
++			}
++			if (++x.pos >= taille(x)) {
++				if (x.kind == K_SON) for (int v = 0; v < NV; v++) if (e.proprio[v] == best) e.proprio[v] = -1;
++				x.ent = -1;
++			}
++		}
++	}
++
++private:
++	std::vector<son> m_sons;
++	std::vector<ecriture> m_ecr, m_init, m_stop;
++	std::vector<source> m_src;
++	std::vector<int32_t> m_code, m_alias;
++	FILE *m_j;
++
++	void trace(const char *fmt, ...)
++#if defined(__GNUC__)
++		__attribute__((format(printf, 2, 3)))
++#endif
++	{
++		if (!m_j) return;
++		char t[512]; va_list ap; va_start(ap, fmt); vsnprintf(t, sizeof(t), fmt, ap); va_end(ap);
++		fwrite(t, 1, strlen(t), m_j); fflush(m_j);   // vsnprintf + fwrite : compatible avec la couche fichiers de libretro
++	}
++	const ecriture *ecr(const instance &x) const
++	{
++		if (x.kind == K_INIT) return &m_init[0];
++		if (x.kind == K_STOP) return &m_stop[0];
++		return &m_ecr[m_sons[x.ent].debut];
++	}
++	uint32_t taille(const instance &x) const
++	{
++		if (x.kind == K_INIT) return uint32_t(m_init.size());
++		if (x.kind == K_STOP) return uint32_t(m_stop.size());
++		return m_sons[x.ent].n;
++	}
++	int lance(int kind, int32_t ent, int64_t t0, uint32_t voies)
++	{
++		int libre = -1;
++		for (int i = 0; i < NI; i++) if (e.ins[i].ent < 0) { libre = i; break; }
++		if (libre < 0) {                                       // plein : on remplace le son le plus ancien
++			libre = 0;
++			for (int i = 1; i < NI; i++) if (e.ins[i].t0 < e.ins[libre].t0) libre = i;
++			for (int v = 0; v < NV; v++) if (e.proprio[v] == libre) e.proprio[v] = -1;
++		}
++		instance &x = e.ins[libre];
++		x.kind = kind; x.ent = ent; x.t0 = t0; x.pos = 0; x.voies = voies;
++		return libre;
++	}
++	static bool lire(FILE *f, uint64_t o, void *d, size_t n) { return !fseek64r(f, o) && fread(d, 1, n, f) == n; }
++	static uint32_t rd32le(const uint8_t *p) { return p[0] | (p[1] << 8) | (p[2] << 16) | (uint32_t(p[3]) << 24); }
++	uint64_t cherche_iso(FILE *f, const char *nom)
++	{
++		uint8_t pvd[2048];
++		if (!lire(f, 0x8000, pvd, 2048)) return 0;
++		uint32_t lba = rd32le(pvd + 156 + 2), tai = rd32le(pvd + 156 + 10);
++		if (tai > 1 << 20) return 0;
++		std::vector<uint8_t> d(tai);
++		if (!lire(f, uint64_t(lba) * 2048, &d[0], tai)) return 0;
++		size_t ln = strlen(nom);
++		for (size_t p = 0; p < tai;) {
++			uint8_t l = d[p];
++			if (!l) { p = (p / 2048 + 1) * 2048; continue; }
++			if (p + 33 > tai) break;
++			uint8_t nl = d[p + 32];
++			if (nl >= ln && !memcmp(&d[p + 33], nom, ln) && (nl == ln || d[p + 33 + ln] == ';')) return uint64_t(rd32le(&d[p + 2])) * 2048;
++			p += l;
++		}
++		return 0;
++	}
++	int jeu_de(const char *nom) const { for (size_t i = 0; i < m_src.size(); i++) if (m_src[i].nom == nom) return int(i); return -1; }
++
++	// lecteur de lignes (comme fgets) sur un texte en memoire, arret au premier octet nul
++	struct lignes {
++		const char *p, *fin;
++		bool suivante(char *l, size_t n)
++		{
++			if (p >= fin || !*p) return false;
++			size_t k = 0;
++			while (p < fin && *p && k + 1 < n) { char c = *p++; l[k++] = c; if (c == '\n') break; }
++			l[k] = 0;
++			return true;
++		}
++	};
++
++	bool lit_table(const char *chemin)
++	{
++		FILE *f = fopen(chemin, "rb");
++		if (!f) { erreur = std::string("table introuvable : ") + chemin; return false; }
++		std::string t;
++		char b[65536];
++		size_t n;
++		while ((n = fread(b, 1, sizeof(b), f)) > 0) t.append(b, n);
++		fclose(f);
++		return lit_table_texte(t.data(), t.size());
++	}
++
++	bool lit_table_texte(const char *texte, size_t taille)
++	{
++		lignes src; src.p = texte; src.fin = texte + taille;
++		m_sons.clear(); m_ecr.clear(); m_init.clear(); m_stop.clear(); m_src.clear(); vide = 0x0000;
++		m_code.assign(65536, -1); m_alias.assign(65536, -1);
++		std::vector<std::pair<uint16_t, uint16_t> > refs;
++		char l[256], a[64], b[64];
++		std::vector<ecriture> *bloc = NULL; int reste = 0; son *cour = NULL;
++		while (src.suivante(l, sizeof(l))) {
++			if (reste > 0) {
++				unsigned t = 0, r = 0, v = 0;
++				if (cour) { if (sscanf(l, "%u %x %x", &t, &r, &v) != 3) break; }
++				else if (sscanf(l, "%x %x", &r, &v) != 2) break;
++				ecriture c; c.t = cour ? t : 0; c.reg = uint8_t(r); c.val = uint16_t(v); c.voie = uint8_t(voie_de(r));
++				bloc->push_back(c);
++				if (cour && c.voie != 0xFF) { cour->voies |= 1u << c.voie; if (t > cour->fin[c.voie]) cour->fin[c.voie] = t; }
++				if (--reste == 0) { if (cour) cour->n = uint32_t(m_ecr.size() - cour->debut); cour = NULL; }
++				continue;
++			}
++			if (l[0] == '#' || l[0] == '\n') continue;
++			unsigned x1 = 0, x2 = 0, x3 = 0, x4 = 0; int n = 0;
++			if (sscanf(l, "SOURCE %63s %x %x %x %x", a, &x1, &x2, &x3, &x4) == 5) {
++				source s; s.nom = a; s.off = x1; s.taille = x2; s.banque = uint8_t(x3); s.crc = x4; m_src.push_back(s);
++			} else if (sscanf(l, "INIT %63s %d", a, &n) == 2) { bloc = &m_init; reste = n; cour = NULL; m_init.clear(); }
++			else if (sscanf(l, "STOP %63s %d", a, &n) == 2) { bloc = &m_stop; reste = n; cour = NULL; m_stop.clear(); }
++			else if (sscanf(l, "CODE %x %63s %x %x %d", &x1, a, &x2, &x3, &n) == 5) {
++				int j = jeu_de(a);
++				if (j < 0 || n <= 0 || x1 > 0xFFFF) { erreur = std::string("table : ligne invalide ") + l; return false; }
++				son s; memset(&s, 0, sizeof(s)); s.code = uint16_t(x1); s.jeu = uint8_t(j); s.src = uint16_t(x2); s.prio = uint8_t(x3);
++				s.debut = uint32_t(m_ecr.size());
++				m_code[x1] = int32_t(m_sons.size()); m_sons.push_back(s); cour = &m_sons.back();
++				bloc = &m_ecr; reste = n;
++			} else if (sscanf(l, "REF %x %x", &x1, &x2) == 2) refs.push_back(std::make_pair(uint16_t(x1), uint16_t(x2)));
++			else if (sscanf(l, "ALIAS %x %x", &x1, &x2) == 2) m_alias[x1 & 0xFFFF] = int32_t(x2 & 0xFFFF);
++			else if (sscanf(l, "VIDE %x", &x1) == 1) vide = uint16_t(x1);
++			(void)b;
++		}
++		if (reste) { erreur = "table tronquee"; return false; }
++		for (int passe = 0; passe < 4; passe++)                    // REF vers un REF : resolu en quelques passes
++			for (size_t i = 0; i < refs.size(); i++) if (m_code[refs[i].second] >= 0) m_code[refs[i].first] = m_code[refs[i].second];
++		if (m_sons.empty() || m_src.empty()) { erreur = "table vide"; return false; }
++		return true;
++	}
++};
++
++} // namespace hsfa_rejeu
+diff --git a/src/burn/drv/capcom/qs.cpp b/src/burn/drv/capcom/qs.cpp
+index 3cb91d6..4aa60fe 100644
+--- a/src/burn/drv/capcom/qs.cpp
++++ b/src/burn/drv/capcom/qs.cpp
+@@ -94,6 +94,7 @@ void QsndEndFrame()
+ 	BurnTimerEndFrame(nCpsZ80Cycles);
+ 	if (pBurnSoundOut) QscUpdate(nBurnSoundLen);
+ 	if (HsfaMode && pBurnSoundOut) HsfaFluxRendu(pBurnSoundOut, nBurnSoundLen);	// HSFA : flux musique ADX
++	if (HsfaMode) HsfaRejeuRendu(pBurnSoundOut, nBurnSoundLen);				// HSFA : rejeu SFA1 / SFA2 (Hyper)
+ 	if (Cps2Turbo && pBurnSoundOut) {
+ 		BurnSampleRender(pBurnSoundOut, nBurnSoundLen);
+ 	}
+diff --git a/src/burner/libretro/libretro.cpp b/src/burner/libretro/libretro.cpp
+index 6fb3e41..2427d2d 100644
+--- a/src/burner/libretro/libretro.cpp
++++ b/src/burner/libretro/libretro.cpp
+@@ -1124,6 +1124,10 @@ static bool open_archive()
+ 	// HSFA : jeux retraduits (programme et donnees reconstruits a chaque traduction) -> ROM sans CRC cherchees par nom
+ 	const char *hsfa_name = BurnDrvGetTextA(DRV_NAME);
+ 	const bool bHsfaDriver = hsfa_name && strstr(hsfa_name, "hsfa") != NULL;
++	// HSFA : archive du jeu, dont le pilote lit sur place des membres hors liste de ROM (flux ADX, rejeu ; cps_hsfa.cpp)
++	szBurnHsfaArchive[0] = 0;
++	if (bHsfaDriver && g_find_list_path.size() > 0)
++		snprintf_nowarn(szBurnHsfaArchive, sizeof(szBurnHsfaArchive), "%s", g_find_list_path[0].path.c_str());
+ 
+ 	if (g_find_list_path.size() > 0)
+ 	{
+-- 
+2.53.0
+

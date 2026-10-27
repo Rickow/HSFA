@@ -1,0 +1,248 @@
+--- a/scripts/untranspile/assemble.py	2026-10-04 10:14:14.013602485 +0200
++++ b/scripts/untranspile/assemble.py	2026-10-11 12:49:41.067821936 +0200
+@@ -25,9 +25,9 @@
+ RX_MIPS  = re.compile(r'\[mips ([0-9a-f]+)\]|\[cible ([0-9a-f]+)')
+ 
+ class Item:
+-    __slots__=('va','mn','ws','kind','tgt','cond','table','choice','off','ext','hosted','data','dhost','host','esz','areg')
++    __slots__=('va','mn','ws','kind','tgt','cond','table','choice','off','ext','hosted','data','dhost','host','esz','areg','nofix')
+     def __init__(s, va, mn, ws):
+-        s.va=va; s.mn=mn; s.ws=list(ws); s.kind='fixed'; s.tgt=None; s.cond=None
++        s.va=va; s.mn=mn; s.ws=list(ws); s.kind='fixed'; s.tgt=None; s.cond=None; s.nofix=False
+         s.table=None; s.choice=None; s.off=0; s.ext=None; s.hosted=None; s.data=None; s.dhost=[]; s.host=None
+ 
+ def classify(items, buf):
+@@ -134,7 +134,7 @@
+ 
+ def dtab_fix(it):
+     """MOVEA.L T(PC,Xi),An lu dans une table de POINTEURS : routine de conversion (T.DPTR_FIX) ou None"""
+-    if (it.ws[0] & 0xf1c0)!=0x2040: return None
++    if (it.ws[0] & 0xf1c0)!=0x2040 or it.nofix: return None     # nofix : table de code relogee (etape B)
+     return T.DPTR_FIX.get((it.ws[0]>>9)&7)
+ 
+ def base_size(it):
+@@ -149,6 +149,7 @@
+     if k in ('switch','tblref'): return 4
+     if k=='codeptr': return 2*len(it.ws)
+     if k=='dtab':
++        if it.choice=='abs' and it.nofix=='natif': return 10      # LEA table.L,An ; MOVEA.L 0(An,Xi),An (etape B)
+         if it.choice=='abs':
+             extra = 12 if (it.esz==1 and T.MEMMODE=='cps2') else 0     # (HANDOFF §80) octet : adresse exacte
+             return 2 + 6 + 2*len(it.ws) + 2 + extra + (4 if dtab_fix(it) is not None else 0)
+@@ -169,12 +170,205 @@
+         if x.choice=='host': a+=len(x.data)
+     return None
+ 
++# (ETAPE B, work/agent_reorg_B/ETAPE-B.md) RELOGEMENT DES POINTEURS DE CODE. Les sauts indirects 'JSR/JMP (An)' de la
++# traduction convertissent l'adresse PS2 a l'usage (talon $3FF000 + hachage $3C0000, HANDOFF §76/§98), apres le talon
++# de donnees $400 du MOVEA qui l'a lue (§63), qui la laisse. Aux sites dont TOUTES les definitions de An sont des
++# lectures dans des tables de pointeurs de code (MOVEA.L T(PC,Dn),An ; ou LEA table.L,Ab [; LEA autre,Ab] ;
++# MOVEA.L 0(Ab,Dn.W),An), les cases de ces tables sont relogees a l'assemblage (mame_test.py : etiquette 68K = ce que
++# rendrait le talon a l'execution, meme table d'adresses) et le site devient 'JSR/JMP (An)' direct, sans les deux talons.
++# Etendue d'une table : de son debut a la table suivante referencee par le code (data_refs), toutes les cases etant des
++# debuts de fonction connus (cles du talon) ou 0 ; sinon la table et ses sites sont laisses tels quels.
++# RELOGE_CODE=0 (defaut) : octets identiques ; =1 : relogement ; =2 : controle (tables relogees et talons de donnees
++# retires, mais talon de code garde aux sites liberes : le journal des talons y voit les valeurs).
++RELOGE_CODE = int(os.environ.get("RELOGE_CODE", "0") or "0")
++T.RELOGE_TABLES = {}; T.RELOGE_SITES = []; T.RELOGE_NATIF_TABLES = set()
++if not hasattr(T, 'RELOGE_KEYS'): T.RELOGE_KEYS = None   # cles du talon de code (mame_test.py)
++RX_P1 = re.compile(r'^MOVEA\.L T_([0-9a-f]{6})\(PC,D\d\.W\),A(\d)')
++RX_P2 = re.compile(r'^MOVEA\.L (-?\d+)\(A(\d),D\d\.[WL]\),A(\d)')
++RX_LEA = re.compile(r'^LEA \$[0-9a-f]+\.L,A(\d)  \[PS2 ([0-9a-f]+)\]$')
++def _areg_cite(mn, r): return re.search(r'(?<![0-9A-Za-z_])A%d(?![0-9])' % r, mn) is not None
++
++def reloge_code(its, buf):
++    """(ETAPE B) sites 'JSR CCONV_An ; JSR/JMP (An)' dont An vient seulement de tables de code : liberes.
++    Remplit T.RELOGE_TABLES {debut PS2: fin PS2} et T.RELOGE_SITES ; modifie les elements en place."""
++    import struct as _st
++    T.RELOGE_TABLES.clear(); del T.RELOGE_SITES[:]; T.RELOGE_NATIF_TABLES.clear()
++    T.RELOGE_RAM_TABLES.clear(); del T.RELOGE_RAM_SITES[:]
++    keys=T.RELOGE_KEYS; refs=T.data_refs(buf)
++    vas=[it.va for it in its]
++    def idx(va): return bisect.bisect_left(vas, va)
++    src={}                                                 # indice cible -> indices des branchements qui y vont
++    for i,it in enumerate(its):
++        if it.tgt is not None and it.kind in ('bcc','jump','call','codeptr'): src.setdefault(idx(it.tgt),[]).append(i)
++    # debuts de fonction (appels indirects) : entrees inconnues. Les cles venues des DONNEES (critere 'prologue' de
++    # mame_test.py : un long des donnees qui vise 'lui rX,$7000' ou 'jr ra') sont souvent des valeurs fortuites au milieu
++    # d'une fonction (ex. Upper 0x2E00DC) : comptees seulement si l'instruction a k-8 termine une fonction (jr/j/b) ou si
++    # k-8 et k-4 sont des nop de bourrage. Les cibles de jal et les debuts connus du traducteur comptent toujours.
++    from mips import decode as _dec
++    def _fin(k):
++        a=k-T.RUNTIME_BASE
++        if a<8: return True
++        x8,x4=list(_dec(buf, a-8, a))
++        if x8.m in ('jr','j') or (x8.m=='beq' and x8.rs==0 and x8.rt==0): return True
++        w8,w4=_st.unpack_from('<II', buf, a-8)
++        return w8==0 and w4==0
++    sur=set(T._CODE_STARTS.get('set') or ()) | {it.tgt+T.RUNTIME_BASE for it in its if it.kind in ('call','jump') and it.tgt is not None}
++    entree={idx(k-T.RUNTIME_BASE) for k in keys if k in sur or _fin(k)}
++    for tb,ents in T.TABLES.items():                       # cibles des aiguillages
++        for e in ents:
++            if e: entree.add(idx(e-T.RUNTIME_BASE))
++    def suit(it):                                          # l'element precedent peut-il tomber dans le suivant ?
++        w=it.ws
++        if it.kind=='jump' or (it.kind=='bcc' and it.cond==0 and it.choice!='dbcc'): return False
++        if w and (w[-1] in (0x4e75,0x4e73) or (w[-1] & 0xfff8)==0x4ed0 or (len(w)>=3 and w[-3]==0x4ef9)): return False
++        if it.kind=='switch' and w[0]==0x4efb: return False
++        return True
++    def ecrit(it, r):                                      # True / False / None (inconnu)
++        if it.kind in ('call','switch') or it.hosted is not None: return None
++        if not _areg_cite(it.mn, r):
++            if any(w in (0x4eb9,0x4eb8) for w in it.ws) and 'CONV' not in it.mn: return None
++            return False
++        return 'def'
++    def defs(u, r, prof=14):
++        """elements qui definissent Ar a l'entree de u (None si inconnu : entree externe, effet incertain, trop loin)"""
++        res=set(); vu=set(); pile=[u]
++        while pile:
++            i=pile.pop()
++            if i in entree: return None
++            ps=list(src.get(i,()))
++            if i>0 and suit(its[i-1]): ps.append(i-1)
++            if not ps: return None
++            for p in ps:
++                if p<u-prof or p>=u: return None
++                if p in vu: continue
++                vu.add(p); e=ecrit(its[p], r)
++                if e is None: return None
++                if e: res.add(p)
++                else: pile.append(p)
++        return res
++    def etendue(p):                                        # table de code pure [p, fin) ou None
++        k=bisect.bisect_right(refs, p); fin=refs[k] if k<len(refs) else None
++        if fin is None or not (T.CODE_END_RT<=p<fin<=T.DATA_END_RT) or (fin-p)%4 or fin-p>0x1000: return None
++        vals=[_st.unpack_from('<I', buf, p-T.RUNTIME_BASE+4*j)[0] for j in range((fin-p)//4)]
++        if not all(v==0 or v in keys for v in vals) or not any(vals): return None
++        return fin
++    nlib=0; libres=[]
++    for u,it in enumerate(its):
++        w=it.ws
++        if len(w)!=4 or w[0]!=0x4eb9 or (w[3]&0xfff8) not in (0x4e90,0x4ed0): continue
++        n=w[3]&7
++        if ((w[1]<<16)|w[2])!=T.CODE_CONV.get(n): continue
++        D=defs(u, n)
++        dbg=os.environ.get("RELOGE_DEBUG")=="1"
++        if not D:
++            if dbg: print("etape B : site %x (%s) : definitions de A%d inconnues" % (it.va, it.mn, n))
++            continue
++        tables=set(); ecrivains=[]; leas=set(); ok=True
++        for d in sorted(D):
++            x=its[d]; m1=RX_P1.match(x.mn); m2=RX_P2.match(x.mn)
++            if m1 and int(m1.group(2))==n and x.kind=='dtab' and x.choice=='abs' and (x.ws[0]&0xf1c0)==0x2040 \
++               and ((x.ws[0]>>9)&7)==n:
++                tables.add(int(m1.group(1),16)); ecrivains.append(('p1',d))
++            elif m2 and int(m2.group(3))==n and int(m2.group(1))==0 and (x.ws[0]&0xf1c0)==0x2040 and ((x.ws[0]>>9)&7)==n \
++                 and x.ws[-2:]==[0x4eb8, T.DPTR_FIX.get(n)]:
++                b=int(m2.group(2)); B=defs(d, b)
++                if not B: ok=False; break
++                for e in B:
++                    ml=RX_LEA.match(its[e].mn)
++                    if not ml or int(ml.group(1))!=b: ok=False; break
++                    tables.add(int(ml.group(2),16)); leas.add(e)
++                ecrivains.append(('p2',d) if b==n else ('p2b',d))
++            else: ok=False
++            if not ok: break
++        if not ok or not tables:
++            if dbg: print("etape B : site %x : definition non reconnue (%s)" % (it.va, '; '.join(its[d].mn for d in sorted(D))))
++            continue
++        fins={p: etendue(p) for p in tables}
++        if not all(fins.values()):
++            if dbg: print("etape B : site %x : table(s) %s non pure(s)" % (it.va, ','.join('%x' % p for p,f in fins.items() if not f)))
++            continue
++        for p,f in fins.items(): T.RELOGE_TABLES[p]=f
++        libres.append((ecrivains, tables, leas))
++        for k_,d in ecrivains:
++            x=its[d]
++            if k_=='p1': x.nofix=True
++            elif x.ws[-2:]==[0x4eb8, T.DPTR_FIX.get(n)]: x.ws=x.ws[:-2]
++            if 'etape B :' not in x.mn: x.mn=x.mn.replace(' ; JSR CONV_A%d'%n,'')+'  [etape B : table de code relogee, sans talon]'
++        if RELOGE_CODE==1:
++            it.ws=[w[3]]; it.mn=it.mn+'  [etape B : direct, tables %s]'%','.join('%06x'%p for p in sorted(tables))
++        else: it.mn=it.mn+'  [etape B controle : talon de code garde, tables %s]'%','.join('%06x'%p for p in sorted(tables))
++        T.RELOGE_SITES.append((it.va, n, sorted(tables))); nlib+=1
++    if RELOGE_RAM:                                         # (amorce de l'etape C) tables de pointeurs RAM PS2
++        R=T.RAM_HI<<16; vus={}
++        for d,x in enumerate(its):
++            m1=RX_P1.match(x.mn)
++            if not (m1 and x.kind=='dtab' and x.choice=='abs' and (x.ws[0]&0xf1c0)==0x2040 and dtab_fix(x) is not None): continue
++            p=int(m1.group(1),16)
++            if p not in vus:
++                k=bisect.bisect_right(refs, p); fin=refs[k] if k<len(refs) else None; vus[p]=None
++                if fin and T.CODE_END_RT<=p<fin<=T.DATA_END_RT and not (fin-p)%4 and fin-p<=0x400:
++                    vals=[_st.unpack_from('<I', buf, p-T.RUNTIME_BASE+4*j)[0] for j in range((fin-p)//4)]
++                    if all(v==0 or R<=v<R+0x10000 for v in vals) and any(vals): vus[p]=fin
++            if not vus[p]: continue
++            T.RELOGE_RAM_SITES.append((x.va, (x.ws[0]>>9)&7, [p])); T.RELOGE_RAM_TABLES[p]=vus[p]
++            if RELOGE_CODE==2:                             # controle : talon $400 garde (le journal y voit la valeur)
++                x.mn=x.mn+'  [etape C controle : table de pointeurs RAM relogee, talon garde]'; continue
++            x.nofix=True; x.mn=x.mn+'  [etape C : table de pointeurs RAM relogee, sans talon]'
++            libres.append(([('p1',d)], {p}, set()))
++    if RELOGE_NATIF: natif(its, libres)
++    return nlib
++
++# (amorce de l'ETAPE C, RELOGE_RAM=1) tables de la ROM dont TOUTES les cases (de leur debut a la table suivante referencee)
++# sont des pointeurs vers la RAM PS2 [$900000,$910000) (ETAPE-A §5 : T_587740, T_58af80, T_5924b0 ; 2,2 M appels) : cases
++# relogees comme le ferait le talon $400 (+$6F0000 -> $FFxxxx), talon retire derriere les 'MOVEA.L T(PC,Dn),An' qui les lisent
++RELOGE_RAM = os.environ.get("RELOGE_RAM", "0") == "1"
++T.RELOGE_RAM_TABLES = {}; T.RELOGE_RAM_SITES = []
++
++RELOGE_NATIF = os.environ.get("RELOGE_NATIF", "0") == "1"
++RX_REF = re.compile(r'(?:T_|\[PS2 00)([0-9a-f]{6})')
++def natif(its, libres):
++    """(ETAPE B, RELOGE_NATIF=1) tables relogees lues SEULEMENT par les ecrivains des sites liberes : cases rangees en
++    ordre 68K (long gros-boutiste, sans echange des moities) -> plus de remise en ordre (EXG/SWAP/drapeaux) a la lecture,
++    et MOVEA.L T(PC,Dn),An devient 'LEA table.L,An ; MOVEA.L 0(An,Dn),An' (sans registre de base sauve).
++    Une table citee par une autre instruction (ex. T_5899a4 copie dans $40(A6), relu par un MOVEA ordinaire) reste en
++    ordre echange, ainsi que toutes les tables des ecrivains qui la lisent (point fixe)."""
++    permis={}                                              # indice d'element -> tables qu'il a le droit de citer
++    for ecr,tabs,leas in libres:
++        for k_,d in ecr: permis.setdefault(d,set()).update(tabs)
++        for e in leas: permis.setdefault(e,set()).update(tabs)
++    ext=sorted(list(T.RELOGE_TABLES.items())+list(T.RELOGE_RAM_TABLES.items()))
++    def table_de(a):
++        k=bisect.bisect_right(ext, (a, 1<<40))-1
++        return ext[k][0] if k>=0 and ext[k][0]<=a<ext[k][1] else None
++    exclues=set()
++    for i,it in enumerate(its):
++        for m in RX_REF.finditer(it.mn):
++            t=table_de(int(m.group(1),16))
++            if t is not None and t not in permis.get(i,()): exclues.add(t)
++    while True:                                            # un ecrivain est natif pour toutes ses tables ou aucune
++        n0=len(exclues)
++        for ecr,tabs,leas in libres:
++            if (tabs & exclues) or any(k_=='p2b' for k_,d in ecr): exclues |= tabs
++        if len(exclues)==n0: break
++    faits=set()
++    for ecr,tabs,leas in libres:
++        if tabs & exclues: continue
++        T.RELOGE_NATIF_TABLES.update(tabs)
++        for k_,d in ecr:
++            if d in faits: continue
++            faits.add(d); x=its[d]; r_=(x.ws[0]>>9)&7
++            assert x.ws[2:7]==[0xc188|r_,0x40e7,0x4840,0x44df,0xc188|r_], "etape B : remise en ordre attendue (%x)" % x.va
++            x.mn=x.mn.replace(' ; [remise en ordre du long]','')+'  [ordre 68K]'
++            if k_=='p1': x.nofix='natif'
++            else: x.ws=x.ws[:2]+x.ws[7:]
++
+ def assemble(buf, start, end, base=0, external=None, native=()):
+     """external(va_fichier) -> adresse 68K absolue pour une cible HORS de l'unite (ou None).
+     native : cibles DANS l'unite qui sont du code natif du portage (non traduisible) -> external."""
+     items,_=T.translate(buf,start,end)
+     FAR_ENT.clear()
+     its=classify(items,buf)
++    if RELOGE_CODE and T.CODE_CONV and T.RELOGE_KEYS: reloge_code(its, buf)
+     vas=[it.va for it in its]
+     native=set(native)
+     def label(va):
+@@ -307,6 +501,10 @@
+             if it.choice: a=((a&0xffff)<<16)|(a>>16)            # long echange (mode cps2, en memoire)
+             words+=[it.ws[0], (a>>16)&0xffff, a&0xffff]+it.ws[3:]; put_table(it); continue
+         if k=='fixed': words+=it.ws; put_table(it); continue
++        if k=='dtab' and it.choice=='abs' and it.nofix=='natif':
++            n=(it.ws[0]>>9)&7; a=T.addr_to_68k(it.table)        # (etape B) table en ordre 68K, base = destination
++            words+=[0x41f9|(n<<9), (a>>16)&0xffff, a&0xffff, (it.ws[0]&~0x3f)|0x30|n, it.ws[1]&0xff00]
++            put_table(it); continue
+         if k=='dtab' and it.choice=='abs':
+             n=it.areg; a=T.addr_to_68k(it.table)
+             if it.esz==1 and T.MEMMODE=='cps2':

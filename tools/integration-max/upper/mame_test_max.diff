@@ -1,0 +1,50 @@
+--- untranspile/mame_test.py.orig	2026-10-17 16:42:14.139296385 +0200
++++ untranspile/mame_test.py	2026-10-18 19:37:51.710779634 +0200
+@@ -119,6 +119,9 @@
+     MAX = os.environ.get("MAX", "0") == "1" and MODULE == 'ro5'
+     if MAX:
+         import integre_max as IM
++        os.environ["MAX_W"] = W; IM.AN_BUF[:] = [buf]; ablob, ava, aperso = IM.bio(ablob, ava, aperso, AN)   # (agent_integration_max) bios MAX : fichiers natifs ajoutés
++        AN.N_PERSO = len(aperso)
++        PLAFOND = 0x3C0000 - len(ablob) - 4*len(aperso) - 0x2000
+     def coupe():                                         # (HANDOFF §108) donnees trop grandes : la fin part en externe
+         lim = T.CODE_END_RT + (PLAFOND - T.DATA_BASE)
+         if lim >= T.DATA_END_RT: return None
+@@ -509,11 +512,20 @@
+         if AN.PERSO_JOUEUR:
+             tab68 = T.addr_to_68k(AN.PERSO_TABLE) & 0xffffff
+             o_pj = tperso + 4*len(aperso)
++            if MAX and len(aperso) > 40:
++                # (agent_integration_max, 2b13) table ID -> index de fichier (0x60AD90, 40 octets) RECOPIÉE à 48 dans la zone
++                # des talons : les ID $2D / $2E lisaient au-delà (portrait de bio de Ryu) ; MAX : index = ID
++                t48 = list(buf[AN.PERSO_TABLE - 0x1F0000:AN.PERSO_TABLE - 0x1F0000 + 40]) + [0] * 8
++                for p_ in IM.ACTIFS: t48[int(p_, 16)] = int(p_, 16)
++                for k_, v_ in enumerate(t48): img[o_pj + (k_ ^ 1)] = v_
++                tab68 = o_pj; o_pj += 48
+             for pj in (0, 1):
+                 base = 0xFF8400 + 0x400 * pj
+                 w = []; lab_ = {}; fix = []
+                 def E(*ws): w.extend(ws)
+                 def B(op, cible): fix.append((len(w), cible)); w.append(op)      # Bcc.S, deplacement resolu apres
++                if MAX: E(0x4279, 0x0080, 0x4240)                   # (agent_integration_max, 2b14) CLR.W $804240 (mode additif
++                                                                    # coupé à chaque chargement de perso : hors combat)
+                 E(0x48e7, 0xc0c0)                                   # MOVEM.L D0-D1/A0-A1,-(SP)
+                 E(0x43f9, base >> 16, base & 0xffff)                # LEA base,A1
+                 E(0x7000, 0x1029, 0x0103)                           # MOVEQ #0,D0 ; MOVE.B $103(A1),D0
+@@ -551,7 +563,7 @@
+                 tfin = o_pj
+                 for k, n in enumerate(afin): struct.pack_into('>I', img, tfin + 4*k, AN.swapped(ava[n]) if n else 0)
+                 o_pj = tfin + 4*len(afin)
+-                w = [0x48e7, 0x8080, 0x7000, 0x102d, (T.D8_HOME + 1) & 0xffff,   # MOVEM.L D0/A0,-(SP) ; MOVEQ #0,D0 ;
++                w = ([0x4279, 0x0080, 0x4240] if MAX else []) + [0x48e7, 0x8080, 0x7000, 0x102d, (T.D8_HOME + 1) & 0xffff,   # MOVEM.L D0/A0,-(SP) ; MOVEQ #0,D0 ;
+                                                                        # MOVE.B $87F1(A5),D0 (octet bas de D8 = index)
+                      0x0c40, len(afin), 0x6412,                        # CMPI.W #N,D0 ; BCC fin
+                      0xe548, 0x41f9, tfin >> 16, tfin & 0xffff,        # LSL.W #2,D0 ; LEA tfin,A0
+@@ -694,6 +706,7 @@
+     print("zones A8/D8 : retours de boucle sur la restauration : %d (agent_ro9)" % _X.BACK_AFTER_N[0])
+     print("longs par post-increment fusionnes : %d (HANDOFF §103)" % T.LONG_POSTINC[0])
+     print("adresses video formees par decalage converties : %d (HANDOFF §110)" % T.VRAM_SHIFT[0])
++    print("adresses video formees par decalage d'un mot de table converties : %d (agent_decor_cammy, VRAM_TABLE)" % T.VRAM_TABLE[0])
+     print("pointeurs de table a index brut (x4) : %d (HANDOFF §112)" % T.IDX_X4[0])
+     print("operations sur long echange sans sauvegarde des drapeaux : %d (HANDOFF §104)" % T.LONG_SR[0])
+     print("MOVEA.L abs.L,An retrouves : %d (HANDOFF §106)" % T.ABS_AN[0])

@@ -1,0 +1,9 @@
+# Guy_A : version $67, table $E73400 (redirection), 24 entrees, origine prog+20EDCA
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	67	03E9	01DC	2		super QCFx2+HP ; super QCFx2+LP
+sfa2	67	03EA	01DD	2		super QCFx2+HK ; super QCFx2+LK
+sfa2	67	03EB	01DE	2		super QCFx2+HK ; super QCFx2+LK
+sfa2	67	03ED	01DF	10		super QCBx2+HP ; super QCFx2+HK ; super QCFx2+HP ; super QCFx2+LK ; super QCFx2+LP ; super demi-cercle x2+HP
+sfa2	67	03EE	01E1	7		super QCBx2+HK
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

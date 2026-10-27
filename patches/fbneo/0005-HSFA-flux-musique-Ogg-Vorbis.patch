@@ -1,0 +1,271 @@
+From dc9f63f568492d27ebc8c130b0d34f03d0a728e7 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Fri, 16 Oct 2026 10:37:38 +0000
+Subject: [PATCH 5/5] HSFA : flux musique Ogg Vorbis dans le lecteur de flux
+ (hsfa_flux.h)
+
+Une entree de l'AFS (hsfa_flux.bin, Y_DATA.BIN) peut etre un fichier Ogg Vorbis complet au lieu d'un ADX,
+reconnu a OggS ; ADX et Ogg cohabitent. Boucle : commentaires LOOPSTART / LOOPEND (fin exclue) ou LOOPLENGTH ;
+stb_vorbis_seek au point de boucle (exact a l'echantillon). Fichier charge par blocs en avance sur le decodeur.
+Etat de sauvegarde : structure inchangee (124 octets) ; un anneau des 2,7 dernieres secondes decodees evite
+tout seek au run-ahead. pcm_entree() pour les outils (encodeur, controles).
+Banc : tools/flux/tests/lance_tests.sh du depot (23 controles, Linux, Windows sous Wine, ARM64 sous QEMU).
+---
+ src/burn/drv/capcom/cps_hsfa.cpp |   2 +-
+ src/burn/drv/capcom/hsfa_flux.h  | 165 ++++++++++++++++++++++++++++++-
+ 2 files changed, 163 insertions(+), 4 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index f175813de..8a4902567 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -736,7 +736,7 @@ static void HsfaFluxInit()
+ 	HsfaFlux->taux = nBurnSoundRate > 0 ? nBurnSoundRate : 48000;
+ 	HsfaFlux->gain = 0.26f * (getenv("HSFA_FLUX_VOL") ? (float)atof(getenv("HSFA_FLUX_VOL")) : 100.f) / 100.f;
+ 	HsfaFlux->mode = HsfaFluxMode();
+-	bprintf(0, _T("HSFA flux : %d flux ADX, %d codes (%s ; %s)\n"), (INT32)HsfaFlux->nb_flux(), (INT32)HsfaFlux->nb_codes(), y, t);
++	bprintf(0, _T("HSFA flux : %d flux (ADX ou Ogg Vorbis), %d codes (%s ; %s)\n"), (INT32)HsfaFlux->nb_flux(), (INT32)HsfaFlux->nb_codes(), y, t);
+ }
+ 
+ // commande posee par le 68K ($61801F = 0) : 1 = a remplacer par FF05 pour le Z80
+diff --git a/src/burn/drv/capcom/hsfa_flux.h b/src/burn/drv/capcom/hsfa_flux.h
+index be46db4b5..b679b82f7 100644
+--- a/src/burn/drv/capcom/hsfa_flux.h
++++ b/src/burn/drv/capcom/hsfa_flux.h
+@@ -13,6 +13,13 @@
+ //   - le reste (bruitages, voix) passe au Z80 sans changement.
+ // Volume (pilote PS2, 0x155470) : amplitude = gain * (vol_table/127) * (niveau/127), niveau 0..127 ; fondu lineaire
+ // (0x155820) de l'indice courant (vol*niveau/127) vers 127*v/255 en 0xFFFF/p images ; niveau 0 => pause.
++//
++// Flux Ogg Vorbis (HSFA_FLUX_VORBIS, coeur FBNeo ; le fork MAME reste en ADX) : une entree de l'AFS peut etre un fichier
++// Ogg Vorbis complet au lieu d'un ADX (reconnu a « OggS »). Boucle : commentaires LOOPSTART / LOOPEND (fin exclue) ou
++// LOOPLENGTH, en echantillons, recopies de l'en-tete ADX par l'encodeur (tools/flux/flux_ogg.py). Decodeur stb_vorbis
++// en memoire ; fichier charge par blocs en avance sur le decodeur ; boucle par stb_vorbis_seek (exact a l'echantillon).
++// Etat : meme structure que l'ADX (etats de sauvegarde inchanges) : pos_abs = echantillon suivant dans le fichier,
++// boucle_ok = boucles faites. Un anneau des ~2,7 s decodees evite tout seek au run-ahead et aux petits retours arriere.
+ #pragma once
+ #include <stdarg.h>
+ #include <stdint.h>
+@@ -22,6 +29,12 @@
+ #include <math.h>
+ #include <string>
+ #include <vector>
++#ifdef HSFA_FLUX_VORBIS
++#define STB_VORBIS_HEADER_ONLY
++#define STB_VORBIS_NO_STDIO
++#define STB_VORBIS_NO_PUSHDATA_API
++#include "stb_vorbis.c"
++#endif
+ 
+ #ifndef M_PI
+ #define M_PI 3.14159265358979323846
+@@ -81,9 +94,20 @@ public:
+ 	etat_t e;
+ 
+ 	lecteur() : mode(0), gain(1.0f), max_niveau(127), taux(48000), m_f(NULL), m_j(NULL), m_charge(0), m_fid_charge(-1),
+-		m_freq(48000), m_ns(0), m_bs(18), m_can(2), m_spf(32), m_c1(0), m_c2(0), m_bcl(0), m_bdeb(0), m_bfin(0), m_debut(0)
++		m_freq(48000), m_ns(0), m_bs(18), m_can(2), m_spf(32), m_c1(0), m_c2(0), m_bcl(0), m_bdeb(0), m_bfin(0), m_ogg(0),
++#ifdef HSFA_FLUX_VORBIS
++		m_v(NULL), m_ls(0), m_le(0), m_dec_t(0), m_ann_deb(0), m_fin_t(-1), m_dec_p(0),
++#endif
++		m_debut(0)
+ 	{ memset(m_trame, 0, sizeof(m_trame)); }
+-	~lecteur() { if (m_f) fclose(m_f); if (m_j) fclose(m_j); }
++	~lecteur()
++	{
++		if (m_f) fclose(m_f);
++		if (m_j) fclose(m_j);
++#ifdef HSFA_FLUX_VORBIS
++		if (m_v) stb_vorbis_close(m_v);
++#endif
++	}
+ 
+ 	// ydata : Y_DATA.BIN, ou l'ISO de l'Anthology (Y_DATA.BIN cherche dans la racine ISO9660), ou 'fichier@decalage'
+ 	bool ouvre(const char *ydata, const char *table)
+@@ -188,6 +212,13 @@ public:
+ 		etat_t s = e;
+ 		if (m_fid_charge != s.fid && !charge_entete(s.fid)) { e.actif = 0; return; }
+ 		e = s;
++#ifdef HSFA_FLUX_VORBIS
++		if (m_ogg) {
++			// etat ecrit par la version ADX (meme fid) : position = debut de trame + echantillons deja produits
++			if (e.n_ech > 0) { e.pos_abs += e.ech; e.ech = e.n_ech = 0; e.boucle_ok = 0; }
++			return;                       // suivant_ogg() reprend depuis l'anneau, ou par seek
++		}
++#endif
+ 		if (e.n_ech > 0) {
+ 			memcpy(e.hist, e.hist_debut, sizeof e.hist);
+ 			if (!decode_trame(e.trame - 1)) { e.actif = 0; return; }
+@@ -195,6 +226,37 @@ public:
+ 		}
+ 	}
+ 
++	// PCM stereo entrelace d'une entree entiere (sans repetition de boucle), pour l'encodeur et les controles
++	// (tools/flux/fluxtool.cpp) : meme decodeur que la lecture. Rend la frequence et la boucle (fin exclue ; 0, 0 sans).
++	bool pcm_entree(int32_t fid, std::vector<int16_t> &pcm, uint32_t &freq, int32_t &debut, int32_t &fin)
++	{
++		if (!charge_entete(fid)) return false;
++		pcm.clear(); freq = m_freq; debut = fin = 0;
++#ifdef HSFA_FLUX_VORBIS
++		if (m_ogg) {
++			if (!charge_jusqu(m_data.size())) { erreur = "lecture du flux"; return false; }
++			stb_vorbis_seek_start(m_v);
++			short b[4096];
++			int r;
++			while ((r = stb_vorbis_get_samples_short_interleaved(m_v, 2, b, 4096)) > 0) pcm.insert(pcm.end(), b, b + 2 * r);
++			if (m_le) { debut = m_ls; fin = m_le; }
++			m_fid_charge = -1;            // decodeur deplace : recharger avant de jouer
++			return true;
++		}
++#endif
++		e = etat_t();
++		int32_t n = int32_t(m_ns);
++		for (int32_t tr = 0; tr * int32_t(m_spf) < n; tr++) {
++			if (!decode_trame(tr)) break;
++			for (uint32_t j = 0; j < m_spf && tr * int32_t(m_spf) + int32_t(j) < n; j++) {
++				pcm.push_back(m_trame[0][j]); pcm.push_back(m_trame[m_can > 1 ? 1 : 0][j]);
++			}
++		}
++		if (m_bcl) { debut = m_bdeb; fin = m_bfin; }
++		e = etat_t();
++		return true;
++	}
++
+ private:
+ 	FILE *m_f, *m_j;
+ 	std::vector<uint64_t> m_off; std::vector<uint32_t> m_tai;
+@@ -205,6 +267,15 @@ private:
+ 	int32_t m_c1, m_c2;
+ 	int32_t m_bcl, m_bdeb, m_bfin;
+ 	int16_t m_trame[2][64];
++	int m_ogg;                            // entree courante : 0 ADX, 1 Ogg Vorbis
++#ifdef HSFA_FLUX_VORBIS
++	enum { ANNEAU = 1 << 17 };            // echantillons (par canal) gardes apres decodage : 2,73 s a 48 kHz
++	stb_vorbis *m_v;
++	int32_t m_ls, m_le;                   // boucle [m_ls, m_le) ; m_le = 0 : pas de boucle
++	std::vector<int16_t> m_anneau;
++	int64_t m_dec_t, m_ann_deb, m_fin_t;  // temps continu (boucles depliees) : prochain decode, plus ancien garde, fin
++	int32_t m_dec_p;                      // position du decodeur dans le fichier
++#endif
+ 
+ 	static uint32_t rd32le(const uint8_t *p) { return p[0] | (p[1] << 8) | (p[2] << 16) | (uint32_t(p[3]) << 24); }
+ 	static uint32_t rd32be(const uint8_t *p) { return (uint32_t(p[0]) << 24) | (p[1] << 16) | (p[2] << 8) | p[3]; }
+@@ -275,7 +346,9 @@ private:
+ 		if (fid < 0 || size_t(fid) >= m_off.size()) { erreur = "flux hors AFS"; return false; }
+ 		uint32_t t = m_tai[fid];
+ 		uint8_t h[0x40];
+-		if (t < 0x40 || !lire(m_off[fid], h, 0x40) || h[0] != 0x80) { erreur = "en-tete ADX invalide"; return false; }
++		if (t < 0x40 || !lire(m_off[fid], h, 0x40)) { erreur = "entree vide ou illisible"; return false; }
++		if (!memcmp(h, "OggS", 4)) return charge_ogg(fid, t);
++		if (h[0] != 0x80) { erreur = "en-tete ADX invalide"; return false; }
+ 		uint32_t co = (h[2] << 8) | h[3];
+ 		m_bs = h[5]; m_can = h[7]; m_freq = rd32be(h + 8); m_ns = rd32be(h + 12);
+ 		uint32_t hp = (h[16] << 8) | h[17];
+@@ -295,8 +368,46 @@ private:
+ 		m_charge = 0;
+ 		m_debut = m_off[fid] + co + 4;
+ 		m_fid_charge = fid;
++		m_ogg = 0;
+ 		return true;
+ 	}
++
++	bool charge_ogg(int32_t fid, uint32_t t)
++	{
++#ifdef HSFA_FLUX_VORBIS
++		if (m_v) { stb_vorbis_close(m_v); m_v = NULL; }
++		m_fid_charge = -1;
++		m_data.assign(t, 0); m_charge = 0; m_debut = m_off[fid];
++		if (!charge_jusqu(AVANCE)) { erreur = "Ogg illisible"; return false; }
++		int err = 0;
++		m_v = stb_vorbis_open_memory(&m_data[0], int(t), &err, NULL);
++		if (!m_v) { erreur = "Ogg Vorbis invalide"; return false; }
++		stb_vorbis_info vi = stb_vorbis_get_info(m_v);
++		if (vi.channels < 1 || vi.channels > 2 || !vi.sample_rate) { erreur = "Ogg : canaux ou frequence"; return false; }
++		m_freq = vi.sample_rate; m_can = 2;
++		m_ls = m_le = 0;
++		int32_t lg = 0;
++		stb_vorbis_comment c = stb_vorbis_get_comment(m_v);
++		for (int i = 0; i < c.comment_list_length; i++) {
++			const char *k = c.comment_list[i];
++			if (!strncmp(k, "LOOPSTART=", 10) || !strncmp(k, "loopstart=", 10)) m_ls = atoi(k + 10);
++			else if (!strncmp(k, "LOOPEND=", 8) || !strncmp(k, "loopend=", 8)) m_le = atoi(k + 8);
++			else if (!strncmp(k, "LOOPLENGTH=", 11) || !strncmp(k, "looplength=", 11)) lg = atoi(k + 11);
++		}
++		if (!m_le && lg > 0) m_le = m_ls + lg;
++		if (m_ls < 0 || m_le <= m_ls) m_ls = m_le = 0;
++		m_anneau.assign(2 * size_t(ANNEAU), 0);
++		m_dec_t = m_ann_deb = 0; m_fin_t = -1; m_dec_p = 0;
++		m_fid_charge = fid;
++		m_ogg = 1;
++		return true;
++#else
++		(void)fid; (void)t;
++		erreur = "flux Ogg Vorbis : coeur compile sans HSFA_FLUX_VORBIS";
++		return false;
++#endif
++	}
++	enum { AVANCE = 0x20000 };            // octets lus en avance sur le decodeur (une page Ogg fait au plus ~64 Ko)
+ 	uint64_t m_debut;
+ 	// lecture paresseuse par blocs de 64 Ko (pas d'a-coup au demarrage d'un flux)
+ 	bool charge_jusqu(size_t fin)
+@@ -363,9 +474,57 @@ private:
+ 		}
+ 		return true;
+ 	}
++#ifdef HSFA_FLUX_VORBIS
++	// temps continu (boucles depliees) d'une position du fichier apres n boucles
++	int64_t temps(int32_t pos, int32_t n) const
++	{
++		if (!m_le || n <= 0) return pos;
++		return int64_t(m_le) + int64_t(n - 1) * (m_le - m_ls) + (pos - m_ls);
++	}
++	void place(int32_t pos, int64_t t)
++	{
++		charge_jusqu(m_data.size());
++		stb_vorbis_seek(m_v, unsigned(pos < 0 ? 0 : pos));
++		m_dec_p = pos; m_dec_t = m_ann_deb = t; m_fin_t = -1;
++	}
++	bool decode_bloc()
++	{
++		if (m_fin_t >= 0 && m_dec_t >= m_fin_t) return false;
++		int32_t n = 1024;
++		if (m_le && m_le - m_dec_p < n) n = m_le - m_dec_p;
++		charge_jusqu(size_t(stb_vorbis_get_file_offset(m_v)) + AVANCE);
++		short b[2 * 1024];
++		int r = n > 0 ? stb_vorbis_get_samples_short_interleaved(m_v, 2, b, 2 * n) : 0;
++		if (r <= 0) { m_fin_t = m_dec_t; return false; }
++		for (int i = 0; i < r; i++) {
++			size_t k = size_t((m_dec_t + i) & (ANNEAU - 1)) * 2;
++			m_anneau[k] = b[2 * i]; m_anneau[k + 1] = b[2 * i + 1];
++		}
++		m_dec_t += r; m_dec_p += r;
++		if (m_dec_t - m_ann_deb > ANNEAU) m_ann_deb = m_dec_t - ANNEAU;
++		if (m_le && m_dec_p >= m_le) {
++			charge_jusqu(m_data.size());
++			stb_vorbis_seek(m_v, unsigned(m_ls)); m_dec_p = m_ls;
++		}
++		return true;
++	}
++	bool suivant_ogg(int16_t *s)
++	{
++		int64_t t = temps(e.pos_abs, e.boucle_ok);
++		if (t < m_ann_deb || t > m_dec_t + 24000) place(e.pos_abs, t);   // hors de l'anneau : seek
++		while (t >= m_dec_t) if (!decode_bloc()) return false;
++		size_t k = size_t(t & (ANNEAU - 1)) * 2;
++		s[0] = m_anneau[k]; s[1] = m_anneau[k + 1];
++		if (++e.pos_abs >= m_le && m_le) { e.pos_abs = m_ls; e.boucle_ok++; }
++		return true;
++	}
++#endif
+ 	// echantillon suivant (stereo) du flux, boucle comprise
+ 	bool suivant(int16_t *s)
+ 	{
++#ifdef HSFA_FLUX_VORBIS
++		if (m_ogg) return suivant_ogg(s);
++#endif
+ 		int32_t fin = m_bcl ? m_bfin : int32_t(m_ns);
+ 		if (e.pos_abs + e.ech >= fin) {
+ 			if (!m_bcl || !e.boucle_ok) return false;
+-- 
+2.43.0
+

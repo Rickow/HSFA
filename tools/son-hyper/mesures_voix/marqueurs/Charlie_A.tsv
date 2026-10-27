@@ -1,0 +1,10 @@
+# Charlie_A : version $63, table $E72A00 (redirection), 21 entrees, origine prog+1C5DF4
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	63	0369	01A4	1		charge arriere-avant+HP
+sfa2	63	036A	01A5	1		charge bas-haut+HK
+sfa2	63	036C	01A7	10		QCB+HK ; QCF+HK ; QCF+HP ; charge arriere-avant+HK ; demi-cercle arriere+HK ; demi-cercle avant+HP ; projection HK
+sfa2	63	036D	01A8	2		projection HP ; projection HP 2
+sfa2	63	036E	01A9	1		projection HK
+sfa2	63	036F	01AA	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

@@ -1,0 +1,11 @@
+IS20_1	Ingrid super 2xQCF + LP dist 20	3:D 3:D+F 3:F 3:D 3:D+F 3:F+1 2:N	20	super	400
+IS20_2	Ingrid super 2xQCF + MP dist 20	3:D 3:D+F 3:F 3:D 3:D+F 3:F+2 2:N	20	super	400
+IS20_3	Ingrid super 2xQCF + HP dist 20	3:D 3:D+F 3:F 3:D 3:D+F 3:F+3 2:N	20	super	400
+IS40_1	Ingrid super 2xQCF + LP dist 40	3:D 3:D+F 3:F 3:D 3:D+F 3:F+1 2:N	40	super	400
+IS40_2	Ingrid super 2xQCF + MP dist 40	3:D 3:D+F 3:F 3:D 3:D+F 3:F+2 2:N	40	super	400
+IS40_3	Ingrid super 2xQCF + HP dist 40	3:D 3:D+F 3:F 3:D 3:D+F 3:F+3 2:N	40	super	400
+IS60_1	Ingrid super 2xQCF + LP dist 60	3:D 3:D+F 3:F 3:D 3:D+F 3:F+1 2:N	60	super	400
+IS60_2	Ingrid super 2xQCF + MP dist 60	3:D 3:D+F 3:F 3:D 3:D+F 3:F+2 2:N	60	super	400
+IS60_3	Ingrid super 2xQCF + HP dist 60	3:D 3:D+F 3:F 3:D 3:D+F 3:F+3 2:N	60	super	400
+IQ40_1	Ingrid QCB + LP dist 40	3:D 3:D+B 3:B+1 2:N	40	special	200
+IQ40_3	Ingrid QCB + HP dist 40	3:D 3:D+B 3:B+3 2:N	40	special	200

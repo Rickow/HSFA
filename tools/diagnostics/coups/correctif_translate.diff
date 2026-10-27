@@ -1,0 +1,118 @@
+--- <workspace>/scripts/untranspile/translate.py	2026-10-07 14:48:21.484206481 +0200
++++ untranspile/translate.py	2026-10-10 12:43:48.807614032 +0200
+@@ -1541,6 +1541,42 @@
+ EXG_PILE=__import__('os').environ.get('EXG_PILE','1')!='0'; EXG_PILE_N=[0]   # (HANDOFF §126)
+ TBL_TST=__import__('os').environ.get('TBL_TST','1')!='0'; TBL_TST_N=[0]   # (HANDOFF §126)
+ FTC_AVANT=__import__('os').environ.get('FTC_AVANT','1')!='0'; FTC_AVANT_N=[0]   # (HANDOFF §126)
++# (agent_coups) saut terminal ('jal ; beq zero,zero -> epilogue') absorbe par un JMP, mais CIBLE d'un autre branchement
++# ('BEQ fin ... BSR x ; fin: RTS') : il doit rester un RTS, sinon le branchement tombe sur l'instruction emise suivante
++# (super boule d'Akuma : 'TST.B $35 ; BEQ rts' devenu 'BEQ JMP $2BAF2', fin du coup avant le lancer). TAILBR=0 : ancien.
++TAILBR=__import__('os').environ.get('TAILBR','1')!='0'; TAILBR_N=[0]
++# (agent_coups) constante 'lui' SEULE rangee dans Dn puis utilisee comme VALEUR (BTST Dk,Dn ; ASR ; ADD...) : la prendre
++# pour une adresse PS2 la convertissait (masque de types $800000 -> $3103C0 / $296340 : boules de Sakura a 42 coups dans
++# Upper ; plafond de vitesse $900000 -> $FF0000). LUIDN=0 : ancien comportement.
++LUIDN=__import__('os').environ.get('LUIDN','1')!='0'; LUIDN_LOG=[]
++_LDST=('lb','lbu','lh','lhu','lw','lwl','lwr','ld','lq','sb','sh','sw','swl','swr','sd','sq')
++_ARITH=('sra','srl','sll','srav','srlv','sllv','and','or','xor','nor','addu','subu','daddu','dsubu','slt','sltu',
++        'andi','ori','xori','addiu','slti','sltiu','mult','multu','dsra','dsrl','dsll','dsra32','dsrl32','dsll32')
++def lui_dn_usage(L, i, slot):
++    """(agent_coups) premier usage de la case Dn ecrite par L[i] : 'val' (arithmetique / test de bit), 'addr' (base d'un
++    acces memoire, copie vers An, appel), ou None (inconnu : ecrasee, appel, fenetre depassee)."""
++    for j in range(i+1, min(len(L), i+40)):
++        x=L[j]
++        if x.m in ('jal','jalr','jr'): return None
++        if x.m in ('sw','sd','sq') and (x.imm & 0xffff)==slot: return None
++        if x.m=='lw' and (x.imm & 0xffff)==slot:
++            r=x.rt
++            for k in range(j+1, min(len(L), j+7)):
++                y=L[k]
++                if y.m in _LDST and y.rs==r: return 'addr'
++                if y.m=='sw' and y.rt==r:
++                    nm=slot_name(y.imm & 0xffff)
++                    return 'addr' if (nm and nm[0]=='A') else None
++                if y.m in ('jalr','jr') and y.rs==r: return 'addr'
++                if y.m in _ARITH and r in (getattr(y,'rs',None), getattr(y,'rt',None)):
++                    if y.m in ('addu','daddu','addiu'):        # base + index : adresse si le resultat sert de base
++                        d=dest_reg(y)
++                        for q in range(k+1, min(len(L), k+4)):
++                            if L[q].m in _LDST and L[q].rs==d: return 'addr'
++                    return 'val'
++                if dest_reg(y)==r: return None
++            return None
++    return None
+ 
+ LATERAL_REW=[0]; LATERAL_OK_VA=set()
+ def rot_idiom(L, i):
+@@ -1681,6 +1717,7 @@
+     no_rts=set()               # 'jr ra' qui terminent un appel terminal (-> JMP)
+     no_rts_ind=set()           # 'jr ra' qui terminent un JMP indirect (table de sauts)
+     absorbed=set()             # 'beq zero,zero' vers l'epilogue, absorbes par un JMP
++    tail_abs=set()             # (agent_coups) parmi eux : ceux des appels terminaux (tail_branch)
+     ldsize={}                  # registre MIPS -> taille du chargement de slot (B/W/L)
+     idxread={}                 # registre MIPS -> lecture indexee (taille, An, Dn, taille Dn, d8)
+     idxbig={}                  # (HANDOFF §78) idem, deplacement 16 bits : (taille, An, Dn, taille Dn, d16 MIPS)
+@@ -2352,6 +2389,9 @@
+                     v=src.val
+                     if MEMMODE=='cps2':
+                         a68=addr_to_68k(v)                 # une adresse PS2 rangee dans Dn
++                        if a68 is not None and LUIDN and isinstance(v,int) and (v & 0xffff)==0 \
++                           and lui_dn_usage(ins_list, i, ins.imm & 0xffff)=='val':
++                            LUIDN_LOG.append((ins.va, v, a68)); a68=None   # (agent_coups) constante, pas une adresse
+                         if a68 is not None: v=a68
+                     ws,mn=enc_imm_dn('L',v,nm[1])
+                     out.append((ins.va,mn,ws)); REG68[nm]=src; i+=1; continue
+@@ -2990,7 +3030,7 @@
+                 if tr is not None: no_rts.add(tr)
+                 else:
+                     tb=tail_branch(ins_list, i)
+-                    if tb is not None: tr=tb; absorbed.add(tb)
++                    if tb is not None: tr=tb; absorbed.add(tb); tail_abs.add(tb)
+                 if tr is not None: ws_=ws_+[RTS]; mn_+=" ; RTS  [appel terminal]"
+                 out.append((ins.va,mn_,ws_))
+                 for r in (2,3): st.pop(r,None)
+@@ -3000,7 +3040,7 @@
+             if tr is not None: no_rts.add(tr)
+             else:
+                 tb=tail_branch(ins_list, i)
+-                if tb is not None: tr=tb; absorbed.add(tb)
++                if tb is not None: tr=tb; absorbed.add(tb); tail_abs.add(tb)
+             k=mips_to_68k(tgt - RUNTIME_BASE)
+             name,enc=("JMP",enc_jmp_abs) if tr is not None else ("JSR",enc_jsr_abs)
+             if tr is not None and (tgt - RUNTIME_BASE) in empty_funcs(buf):
+@@ -3027,7 +3067,7 @@
+                 if tr is not None: no_rts_ind.add(tr)
+                 else:
+                     tb=tail_branch(ins_list, i)
+-                    if tb is not None: tr=tb; absorbed.add(tb)
++                    if tb is not None: tr=tb; absorbed.add(tb); tail_abs.add(tb)
+                 # (HANDOFF §76) adresse de code PS2 en memoire -> la notre, a l'usage
+                 cc=[0x4eb9, CODE_CONV[n]>>16, CODE_CONV[n]&0xffff] if CODE_CONV else []
+                 if tr is not None: out.append((ins.va,"JMP (A%d)"%n,cc+[0x4ed0|n]))
+@@ -3093,7 +3133,7 @@
+                         len(TABLES.setdefault(tbl, read_jump_table(buf,tbl)))),
+                         [op, 0x0002 | (ix<<12)]))
+             if tr is not None: no_rts_ind.add(tr)
+-            if tb is not None: absorbed.add(tb)
++            if tb is not None: absorbed.add(tb); tail_abs.add(tb)
+             for r in (2,3): st.pop(r,None)
+             i+=1; continue
+         if CDISP_ON and m=='jalr' and MEMMODE=='cps2':
+@@ -3121,7 +3161,7 @@
+             if tr is not None: no_rts_ind.add(tr)
+             else:
+                 tb=tail_branch(ins_list, i)
+-                if tb is not None: absorbed.add(tb)
++                if tb is not None: absorbed.add(tb); tail_abs.add(tb)
+             for r in (2,3): st.pop(r,None)
+             i+=1; continue
+         # jr ra -> RTS  (sauf s'il clot un appel terminal deja traduit en JMP)
+@@ -3249,6 +3289,9 @@
+             out.append((ins.va,"(test interne a la conversion d'adresse, absorbe)",[])); i+=1; continue
+         if m=='beq' and ins.va in absorbed and not (ins.rs==0 and ins.rt==0):
+             out.append((ins.va,"(calcul interne de la retenue, absorbe)",[])); i+=1; continue
++        if m=='beq' and ins.va in absorbed and TAILBR and ins.va in tail_abs and ins.va in br_targets:
++            TAILBR_N[0]+=1
++            out.append((ins.va,"RTS  [saut terminal absorbe, cible d'un branchement]",[RTS])); i+=1; continue
+         if m=='beq' and ins.va in absorbed:
+             # saut inconditionnel absorbe : vers l'epilogue (appel terminal) ou saut
+             # interne du calcul de la retenue

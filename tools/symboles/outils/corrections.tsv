@@ -1,0 +1,66 @@
+# nom	action (suppr | champ=valeur ...)
+portage_zone_code_190000	type=constante
+portage_zone_menus_natifs	type=constante
+portage_zone_code_50000	type=constante
+portage_init_contexte	type=constante
+portage_init_contexte_b	type=constante
+recomp_zone_talons_natifs	type=constante
+derniere_fonction_fin	type=constante
+natif_pile_privee_3803xx	type=constante
+# numérotation des variables octet citées par le journal : a = ROM arcade, t = image traduite (banc), p = MIPS/PS2
+var_00ac	num=a
+var_008a	num=a
+var_a5_0012	num=a
+var_a5_0095	num=a
+objets_page_courante	num=a
+page_objets_courante	num=a
+perso_courant_132	num=a
+anim_perso_octet_132	num=a
+anthology_menu_a9	num=t
+joueurs_en_jeu	num=a
+var_a9	num=p
+var_a8	num=a
+entrees_brutes_62	num=t
+manche_10d	num=t
+fin_pose_bits_10b	num=a
+chrono	num=t
+intro_repere_musique	num=a
+tick_jeu	num=t
+combat_index_adversaire	num=t
+combat_derive_8137	num=t
+combat_derive_816d	num=t
+menu_curseur_mode	num=t
+menu_curseur	num=p
+menu_curseur_2	num=p
+manettes_etat_c018	num=t
+manettes_etat_c019	num=t
+manette_etat_1	num=p
+manette_etat_2	num=p
+var_c172	num=p
+var_c175	num=p
+var_c176	num=p
+survival_index	num=p
+portage_option_c19c	num=p
+portage_var_c112	num=p
+var_c000	num=p
+anthology_c1a4	num=t
+version_jeu_anthology	num=t
+tache_drapeau_image	num=a
+joueurs_compteur_boucle	num=a
+portage_var_c19c	num=p
+var_c19c	num=p
+portage_var_c000	num=p
+portage_var_c018	num=p
+portage_var_8c31	num=p
+# champs : numérotation de l'image traduite (moitiés de longs)
+joueur_x	num=t
+joueur_y	num=t	taille=W
+objet_xy_ps2	num=t	taille=W
+joueur_objet_j1	type=variable A5	a5=$0400	champ=
+tache_table_rom	a5=	arcade=$FF025C
+# §62 : « $617C » et « $6328 » étaient des adresses de l'IMAGE TRADUITE de l'époque, pas de la ROM (vérifié : l'entrée de tâche arcade est $4036, emplacement $40)
+tache_attraction_entree	arcade=$004036	role=Entrée de la tâche d'attraction (emplacement de tâche $40), remet (A5) à 0 ; le journal (§62) la cite « $617C », adresse de l'image traduite de l'époque, pas de la ROM.
+attract_entree	arcade=$004036
+attraction_avance_mode	arcade=	role=Avance le mode de 2 (ADDQ.W #2,(A5)) ; « $6328 » du journal (§62) = adresse de l'image traduite de l'époque.
+attract_addq_phase	arcade=
+trap4_7	nom=trap4_tache_ceder	confiance=sûr	source=§60 + ROM $13A6 (décodé ici)	role=TRAP #4 : la tâche courante cède la main (état 4 = prête, sauve USP/SR/PC dans son bloc) puis retour à l'ordonnanceur $1166. Les TRAP #5-#7 sont décodés à $13CC, $13E8, $13FC.

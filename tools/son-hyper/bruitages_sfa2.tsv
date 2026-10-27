@@ -1,0 +1,286 @@
+code	genre	transplantable	voies	notes	echantillons	durees_s	boucle
+003F	sequence	non (sequence a convertir)	12,13	42	078000 1837b7	1.51 0.40	oui
+0050	sequence	non (sequence a convertir)	14,15	2	3ed047	0.39	non
+0051	sequence	non (sequence a convertir)	14,15	6	3a8000	0.59	non
+0052	sequence	non (sequence a convertir)	14,15	6	1e0000	1.08	non
+0053	sequence	non (sequence a convertir)	13,14,15	7	110000 29d714	1.47 0.87	non
+0054	simple	oui	15	1	3758e5	0.62	non
+0055	simple	oui	15	1	340000	0.68	oui
+0060	simple	oui	12	1	2df7eb	0.15	non
+0061	simple	oui	12	1	3fb405	0.20	non
+0062	simple	oui	12	1	37f29d	0.28	non
+0063	simple	oui	12	1	027690	0.20	non
+0064	simple	oui	12	1	17eff3	0.34	non
+0065	simple	oui	12	1	3adc50	0.48	non
+0066	simple	oui	12	1	3d5e2d	0.39	non
+0067	simple	oui	12	1	3f23b2	0.25	non
+0068	simple	oui	12	1	3b2d33	0.48	non
+0069	simple	oui	12	1	3edc46	0.26	non
+006A	simple	oui	12	1	3fa9da	0.22	non
+006B	simple	oui	12	1	3f6911	0.23	non
+006C	simple	oui	12	1	3d9209	0.38	non
+006D	simple	oui	12	1	3f9f9d	0.22	non
+006E	simple	oui	12	1	3f954a	0.22	non
+006F	simple	oui	12	1	3ea968	0.29	non
+0070	simple	oui	14	1	2df7eb	0.15	non
+0071	simple	oui	14	1	3fb405	0.20	non
+0072	simple	oui	14	1	37f29d	0.28	non
+0073	simple	oui	14	1	027690	0.20	non
+0074	simple	oui	14	1	17eff3	0.34	non
+0075	simple	oui	14	1	3adc50	0.48	non
+0076	simple	oui	14	1	3d5e2d	0.39	non
+0077	simple	oui	14	1	3f23b2	0.25	non
+0078	simple	oui	14	1	3b2d33	0.48	non
+0079	simple	oui	14	1	3edc46	0.26	non
+007A	simple	oui	14	1	3fa9da	0.22	non
+007B	simple	oui	14	1	3f6911	0.23	non
+007C	simple	oui	14	1	3d9209	0.38	non
+007D	simple	oui	14	1	3f9f9d	0.22	non
+007E	simple	oui	14	1	3f954a	0.22	non
+007F	simple	oui	14	1	3ea968	0.29	non
+0080	sequence	non (sequence a convertir)	8,9	24	15ff07	0.00	oui
+0081	sequence	non (sequence a convertir)	8,9	32	15ff07	0.00	oui
+0082	sequence	non (sequence a convertir)	12,13	8	15ff07	0.00	oui
+0083	sequence	non (sequence a convertir)	14,15	8	15ff07	0.00	oui
+0084	sequence	non (sequence a convertir)	12,13	40	15ff07	0.00	oui
+0085	sequence	non (sequence a convertir)	14,15	40	15ff07	0.00	oui
+0086	sequence	non (sequence a convertir)	14,15	6	16fef3	0.00	oui
+0087	sequence	non (sequence a convertir)	12,13	6	16fef3	0.00	oui
+0088	sequence	non (sequence a convertir)	14,15	24	15ff07	0.00	oui
+0089	sequence	non (sequence a convertir)	12,13	24	15ff07	0.00	oui
+008A	sequence	non (sequence a convertir)	12,13,14	6	12ff0e	0.00	oui
+008B	sequence	non (sequence a convertir)	10,11	40	15ff07	0.00	oui
+008C	simple	oui	12	1	3d136a	0.41	non
+008D	simple	oui	12	1	02f4f8	0.23	non
+008E	simple	oui	14	1	3d136a	0.41	non
+008F	simple	oui	14	1	02f4f8	0.23	non
+0090	sequence	non (sequence a convertir)	9,10,14,15	4	13bffe	0.68	oui
+0091	sequence	non (sequence a convertir)	12,13,14,15	4	355f3a	0.68	oui
+0092	sequence	non (sequence a convertir)	5,7	2	010000	1.36	oui
+0093	sequence	non (sequence a convertir)	5,7	2	000000	1.36	oui
+0094	simple	oui	10	1	389ba1	0.57	non
+0095	simple	oui	11	1	0a8000	0.92	oui
+0100	simple	oui	15	1	245ea6	0.35	non
+0101	simple	oui	15	1	1c352b	0.56	non
+0102	sequence	non (sequence a convertir)	14,15	2	1c352b 1db34a	0.56 0.55	non
+0103	sequence	non (sequence a convertir)	14,15	2	1c352b 1db34a	0.56 0.55	non
+0104	simple	oui	15	1	24de54	0.35	non
+0105	simple	oui	15	1	2b0000	0.46	non
+0106	sequence	non (sequence a convertir)	14,15	2	20b065 2b0000	0.51 0.46	non
+0107	sequence	non (sequence a convertir)	14,15	2	20b065 2b0000	0.51 0.46	non
+0108	sequence	non (sequence a convertir)	11,15	6	245ea6	0.35	non
+0109	sequence	non (sequence a convertir)	11,15	6	1c352b	0.56	non
+010A	sequence	non (sequence a convertir)	11,14,15	7	1c352b 1db34a	0.56 0.55	non
+010B	sequence	non (sequence a convertir)	11,14,15	7	1c352b 1db34a	0.56 0.55	non
+010C	sequence	non (sequence a convertir)	11,15	6	24de54	0.35	non
+010D	sequence	non (sequence a convertir)	11,15	6	2b0000	0.46	non
+010E	sequence	non (sequence a convertir)	11,14,15	7	20b065 2b0000	0.51 0.46	non
+010F	sequence	non (sequence a convertir)	11,14,15	7	20b065 2b0000	0.51 0.46	non
+0110	simple	oui	13	1	03f1de	0.21	non
+0111	simple	oui	13	1	03f1de	0.21	non
+0112	simple	oui	13	1	03f1de	0.21	non
+0113	simple	oui	13	1	03f1de	0.21	non
+0114	simple	oui	13	1	3e1dbe	0.31	non
+0115	simple	oui	13	1	316ccb	0.41	non
+0116	simple	oui	13	1	3b7086	0.39	non
+0117	simple	oui	13	1	3e9bb2	0.35	non
+0118	simple	oui	13	1	1c69ec	0.47	non
+0119	simple	oui	13	1	1c69ec	0.47	non
+011A	simple	oui	13	1	196d84	0.20	non
+011B	simple	oui	13	1	373b46	0.32	non
+011C	simple	oui	13	1	196d84	0.20	non
+011D	simple	oui	13	1	3e736a	0.26	non
+011E	simple	oui	15	1	2e776d	0.17	non
+0120	simple	oui	13	1	38ec48	0.38	non
+0121	simple_hauteurs	oui	13	2	38ec48	0.38	non
+0122	simple	oui	13	2	378000	0.62	non
+0123	sequence	non (sequence a convertir)	11,13	2	225fe7 38ec48	0.68 0.38	non
+0124	sequence	non (sequence a convertir)	11,13	3	225fe7 38ec48	0.68 0.38	non
+0125	sequence	non (sequence a convertir)	11,13	2	225fe7 378000	0.68 0.62	non
+0126	simple	oui	13	1	268000	0.99	oui
+0127	simple	oui	13	1	3775ed	0.24	non
+0128	simple	oui	13	1	2ef5d6	0.21	non
+0129	simple	oui	13	1	3a30f8	0.51	non
+012A	simple	oui	13	1	3a30f8	0.51	non
+012B	simple	oui	13	1	3a30f8	0.51	non
+012C	simple	oui	13	1	3a30f8	0.51	non
+012D	simple	oui	13	1	3c9437	0.43	non
+012E	simple_hauteurs	oui	15	2	3c9437	0.43	non
+012F	simple	oui	12	1	320000	0.74	oui
+0131	sequence	non (sequence a convertir)	10,13	6	38ec48	0.38	non
+0132	sequence	non (sequence a convertir)	10,13	6	38ec48	0.38	non
+0133	sequence	non (sequence a convertir)	10,13	6	378000	0.62	non
+0134	sequence	non (sequence a convertir)	10,13,15	7	225fe7 38ec48	0.68 0.38	non
+0135	sequence	non (sequence a convertir)	10,13,15	7	225fe7 38ec48	0.68 0.38	non
+0136	sequence	non (sequence a convertir)	10,13,15	7	225fe7 378000	0.68 0.62	non
+0137	sequence	non (sequence a convertir)	11,15	12	3c9437	0.43	non
+0138	simple	oui	15	1	339ff6	0.65	oui
+0139	simple	oui	15	1	3da3cf	0.34	non
+013A	sequence	non (sequence a convertir)	14,15	2	24de54 3beb5d	0.35 0.46	non
+013B	simple	oui	15	1	3ca833	0.42	non
+013C	sequence	non (sequence a convertir)	10,13	2	140000	0.68	non
+013D	simple	oui	13	1	038000	1.21	oui
+013E	simple	oui	13	1	038000	1.21	oui
+013F	simple	oui	13	1	038000	1.21	oui
+0140	simple	oui	10	1	0e0000	0.85	non
+0141	simple	oui	13	1	3c3e19	0.43	oui
+0142	simple	oui	13	1	32e3dc	0.60	non
+0143	simple	oui	13	1	1e64c2	0.58	non
+0144	simple	oui	13	1	33bfeb	0.68	non
+0145	simple	oui	13	1	36db13	0.64	non
+0146	simple	oui	13	1	381c6a	0.60	non
+0147	simple	oui	13	1	215ff9	0.68	non
+0148	simple	oui	13	1	14bfe9	1.36	oui
+0149	simple	oui	13	1	3775ed	0.24	non
+014A	simple	oui	13	1	2f4dad	0.82	non
+014B	simple	oui	13	1	3b95f8	0.47	non
+014C	simple	oui	13	1	307285	0.29	oui
+014D	sequence	non (sequence a convertir)	12,13	4	3a60d8	0.51	non
+014E	simple	oui	13	1	3a0000	0.53	non
+014F	simple	oui	13	1	3854e4	0.59	non
+0150	sequence	non (sequence a convertir)	10,13	3	31e9af	0.47	non
+0151	simple	oui	13	1	345fb5	0.68	non
+0152	simple	oui	13	1	11452d	1.25	non
+0153	simple	oui	13	1	3a9748	0.49	non
+0154	simple	oui	13	1	065fd4	0.72	non
+0155	simple	oui	13	1	268000	0.99	oui
+0156	simple	oui	13	1	3e3b06	0.30	non
+0157	simple	oui	13	1	2baa65	0.90	oui
+0158	simple	oui	13	1	3d0000	0.41	non
+0159	simple	oui	13	1	348000	0.68	non
+015A	simple	oui	13	1	3c14ec	0.44	non
+015B	sequence	non (sequence a convertir)	12,13,15	3	3d8000	0.38	oui
+015C	simple	oui	13	1	3ed047	0.39	non
+015D	simple	oui	13	1	3e3b06	0.30	non
+015E	simple	oui	13	1	046fcc	0.34	non
+015F	simple	oui	11	1	3a8000	0.59	non
+0160	simple	oui	13	1	373b46	0.32	non
+0161	simple	oui	12	1	1d6757	0.51	oui
+0162	simple	oui	13	1	186f5c	0.34	non
+0163	simple	oui	13	1	340000	0.68	oui
+0164	simple	oui	13	1	33bfeb	0.68	non
+0165	simple	oui	13	1	398000	0.55	non
+0166	simple	oui	13	1	37b9ac	0.61	non
+0167	simple	oui	13	1	3dd33e	0.32	non
+0168	simple	oui	14	1	3dd33e	0.32	non
+0169	sequence	non (sequence a convertir)	12,13	2	21dff3	0.68	non
+016A	sequence	non (sequence a convertir)	11,15	6	3beb5d	0.46	non
+016B	sequence	non (sequence a convertir)	11,15	6	3ca833	0.42	non
+016C	sequence	non (sequence a convertir)	11,15	6	3da3cf	0.34	non
+016D	simple_hauteurs	oui	10	2	12ff0e	0.00	oui
+016E	simple	oui	13	1	065fd4	0.72	non
+016F	simple	oui	13	1	3a8000	0.59	non
+0170	simple	oui	13	1	3a60d8	0.51	non
+0171	simple	oui	14	1	3b95f8	0.47	non
+0200	simple	oui	13	1	245ea6	0.35	non
+0201	simple	oui	13	1	1c352b	0.56	non
+0202	sequence	non (sequence a convertir)	12,13	2	1c352b 1db34a	0.56 0.55	non
+0203	sequence	non (sequence a convertir)	12,13	2	1c352b 1db34a	0.56 0.55	non
+0204	simple	oui	13	1	24de54	0.35	non
+0205	simple	oui	13	1	2b0000	0.46	non
+0206	sequence	non (sequence a convertir)	12,13	2	20b065 2b0000	0.51 0.46	non
+0207	sequence	non (sequence a convertir)	12,13	2	20b065 2b0000	0.51 0.46	non
+0208	sequence	non (sequence a convertir)	10,13	6	245ea6	0.35	non
+0209	sequence	non (sequence a convertir)	10,13	6	1c352b	0.56	non
+020A	sequence	non (sequence a convertir)	10,12,13	7	1c352b 1db34a	0.56 0.55	non
+020B	sequence	non (sequence a convertir)	10,12,13	7	1c352b 1db34a	0.56 0.55	non
+020C	sequence	non (sequence a convertir)	10,13	6	24de54	0.35	non
+020D	sequence	non (sequence a convertir)	10,13	6	2b0000	0.46	non
+020E	sequence	non (sequence a convertir)	10,12,13	7	20b065 2b0000	0.51 0.46	non
+020F	sequence	non (sequence a convertir)	10,12,13	7	20b065 2b0000	0.51 0.46	non
+0210	simple	oui	15	1	03f1de	0.21	non
+0211	simple	oui	15	1	03f1de	0.21	non
+0212	simple	oui	15	1	03f1de	0.21	non
+0213	simple	oui	15	1	03f1de	0.21	non
+0214	simple	oui	15	1	3e1dbe	0.31	non
+0215	simple	oui	15	1	316ccb	0.41	non
+0216	simple	oui	15	1	3b7086	0.39	non
+0217	simple	oui	15	1	3e9bb2	0.35	non
+0218	simple	oui	15	1	1c69ec	0.47	non
+0219	simple	oui	15	1	1c69ec	0.47	non
+021A	simple	oui	15	1	196d84	0.20	non
+021B	simple	oui	15	1	373b46	0.32	non
+021C	simple	oui	15	1	196d84	0.20	non
+021D	simple	oui	15	1	3e736a	0.26	non
+021E	simple	oui	13	1	2e776d	0.17	non
+0220	simple	oui	15	1	38ec48	0.38	non
+0221	simple_hauteurs	oui	15	2	38ec48	0.38	non
+0222	simple	oui	15	2	378000	0.62	non
+0223	sequence	non (sequence a convertir)	11,15	2	225fe7 38ec48	0.68 0.38	non
+0224	sequence	non (sequence a convertir)	11,15	3	225fe7 38ec48	0.68 0.38	non
+0225	sequence	non (sequence a convertir)	11,15	2	225fe7 378000	0.68 0.62	non
+0226	simple	oui	15	1	268000	0.99	oui
+0227	simple	oui	15	1	3775ed	0.24	non
+0228	simple	oui	15	1	2ef5d6	0.21	non
+0229	simple	oui	15	1	3a30f8	0.51	non
+022A	simple	oui	15	1	3a30f8	0.51	non
+022B	simple	oui	15	1	3a30f8	0.51	non
+022C	simple	oui	15	1	3a30f8	0.51	non
+022D	simple	oui	15	1	3c9437	0.43	non
+022E	simple_hauteurs	oui	13	2	3c9437	0.43	non
+022F	simple	oui	14	1	320000	0.74	oui
+0231	sequence	non (sequence a convertir)	11,15	6	38ec48	0.38	non
+0232	sequence	non (sequence a convertir)	11,15	6	38ec48	0.38	non
+0233	sequence	non (sequence a convertir)	11,15	6	378000	0.62	non
+0234	sequence	non (sequence a convertir)	11,13,15	7	225fe7 38ec48	0.68 0.38	non
+0235	sequence	non (sequence a convertir)	11,13,15	7	225fe7 38ec48	0.68 0.38	non
+0236	sequence	non (sequence a convertir)	11,13,15	7	225fe7 378000	0.68 0.62	non
+0237	sequence	non (sequence a convertir)	10,13	12	3c9437	0.43	non
+0238	simple	oui	13	1	339ff6	0.65	oui
+0239	simple	oui	13	1	3da3cf	0.34	non
+023A	sequence	non (sequence a convertir)	12,13	2	24de54 3beb5d	0.35 0.46	non
+023B	simple	oui	13	1	3ca833	0.42	non
+023C	sequence	non (sequence a convertir)	10,15	2	140000	0.68	non
+023D	simple	oui	15	1	038000	1.21	oui
+023E	simple	oui	15	1	038000	1.21	oui
+023F	simple	oui	15	1	038000	1.21	oui
+0240	simple	oui	10	1	0e0000	0.85	non
+0241	simple	oui	15	1	3c3e19	0.43	oui
+0242	simple	oui	15	1	32e3dc	0.60	non
+0243	simple	oui	15	1	1e64c2	0.58	non
+0244	simple	oui	15	1	33bfeb	0.68	non
+0245	simple	oui	15	1	36db13	0.64	non
+0246	simple	oui	15	1	381c6a	0.60	non
+0247	simple	oui	15	1	215ff9	0.68	non
+0248	simple	oui	15	1	14bfe9	1.36	oui
+0249	simple	oui	15	1	3775ed	0.24	non
+024A	simple	oui	15	1	2f4dad	0.82	non
+024B	simple	oui	15	1	3b95f8	0.47	non
+024C	simple	oui	15	1	307285	0.29	oui
+024D	sequence	non (sequence a convertir)	14,15	4	3a60d8	0.51	non
+024E	simple	oui	15	1	3a0000	0.53	non
+024F	simple	oui	15	1	3854e4	0.59	non
+0250	sequence	non (sequence a convertir)	10,15	3	31e9af	0.47	non
+0251	simple	oui	15	1	345fb5	0.68	non
+0252	simple	oui	15	1	11452d	1.25	non
+0253	simple	oui	15	1	3a9748	0.49	non
+0254	simple	oui	15	1	065fd4	0.72	non
+0255	simple	oui	15	1	268000	0.99	oui
+0256	simple	oui	15	1	3e3b06	0.30	non
+0257	simple	oui	15	1	2baa65	0.90	oui
+0258	simple	oui	15	1	3d0000	0.41	non
+0259	simple	oui	15	1	348000	0.68	non
+025A	simple	oui	15	1	3c14ec	0.44	non
+025B	sequence	non (sequence a convertir)	13,14,15	3	3d8000	0.38	oui
+025C	simple	oui	15	1	3ed047	0.39	non
+025D	simple	oui	15	1	3e3b06	0.30	non
+025E	simple	oui	15	1	046fcc	0.34	non
+025F	simple	oui	11	1	3a8000	0.59	non
+0260	simple	oui	15	1	373b46	0.32	non
+0261	simple	oui	14	1	1d6757	0.51	oui
+0262	simple	oui	15	1	186f5c	0.34	non
+0263	simple	oui	15	1	340000	0.68	oui
+0264	simple	oui	15	1	33bfeb	0.68	non
+0265	simple	oui	15	1	398000	0.55	non
+0266	simple	oui	15	1	37b9ac	0.61	non
+0267	simple	oui	15	1	3dd33e	0.32	non
+0268	simple	oui	12	1	3dd33e	0.32	non
+0269	sequence	non (sequence a convertir)	14,15	2	21dff3	0.68	non
+026A	sequence	non (sequence a convertir)	10,13	6	3beb5d	0.46	non
+026B	sequence	non (sequence a convertir)	10,13	6	3ca833	0.42	non
+026C	sequence	non (sequence a convertir)	10,13	6	3da3cf	0.34	non
+026D	simple_hauteurs	oui	10	2	12ff0e	0.00	oui
+026E	simple	oui	15	1	065fd4	0.72	non
+026F	simple	oui	15	1	3a8000	0.59	non
+0270	simple	oui	15	1	3a60d8	0.51	non
+0271	simple	oui	12	1	3b95f8	0.47	non

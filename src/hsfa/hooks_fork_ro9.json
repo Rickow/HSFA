@@ -1,0 +1,278 @@
+{
+"238e0": {
+"type": "natif du module",
+"sites": [
+"24298"
+]
+},
+"28b10": {
+"type": "natif du module",
+"sites": [
+"28b88"
+]
+},
+"-227c0": {
+"type": "moteur PS2",
+"sites": [
+"28bcc"
+]
+},
+"-22720": {
+"type": "moteur PS2",
+"sites": [
+"28be8"
+]
+},
+"-d75a0": {
+"type": "moteur PS2",
+"sites": [
+"28d34",
+"28d58",
+"6358c"
+]
+},
+"28950": {
+"type": "natif du module",
+"sites": [
+"28dac"
+]
+},
+"-d7638": {
+"type": "moteur PS2",
+"sites": [
+"28ed4"
+]
+},
+"295a0": {
+"type": "natif du module",
+"sites": [
+"2957c"
+]
+},
+"-245a0": {
+"type": "moteur PS2",
+"sites": [
+"2be64"
+]
+},
+"-9a510": {
+"type": "moteur PS2",
+"sites": [
+"2be70",
+"2bf84",
+"2c428"
+]
+},
+"2c090": {
+"type": "natif du module",
+"sites": [
+"2d0dc"
+]
+},
+"-a4c60": {
+"type": "moteur PS2",
+"sites": [
+"2d11c"
+]
+},
+"2c350": {
+"type": "natif du module",
+"sites": [
+"2d128"
+]
+},
+"-a4ba0": {
+"type": "moteur PS2",
+"sites": [
+"2d138"
+]
+},
+"2c300": {
+"type": "natif du module",
+"sites": [
+"2d170"
+]
+},
+"-a4be0": {
+"type": "moteur PS2",
+"sites": [
+"2d180"
+]
+},
+"-d73e8": {
+"type": "moteur PS2",
+"sites": [
+"2f90c",
+"2fa58",
+"3b33bc",
+"3b46c4",
+"3b4934"
+]
+},
+"-1fbb0": {
+"type": "moteur PS2",
+"sites": [
+"2fa60"
+]
+},
+"23910": {
+"type": "natif du module",
+"sites": [
+"2fe7c"
+]
+},
+"-a4a60": {
+"type": "moteur PS2",
+"sites": [
+"3efd8"
+]
+},
+"-e2790": {
+"type": "moteur PS2",
+"sites": [
+"3f108",
+"3f154"
+]
+},
+"-ecaf0": {
+"type": "moteur PS2",
+"sites": [
+"3f120",
+"3f8bc",
+"3fbd4",
+"3fca0"
+]
+},
+"-ecb00": {
+"type": "moteur PS2",
+"sites": [
+"3f128",
+"3f178",
+"3fbdc",
+"3fca8"
+]
+},
+"-eb8e0": {
+"type": "moteur PS2",
+"sites": [
+"3f170"
+]
+},
+"-ecc20": {
+"type": "moteur PS2",
+"sites": [
+"3f7f8"
+]
+},
+"-ecbe0": {
+"type": "moteur PS2",
+"sites": [
+"3f8c4"
+]
+},
+"-ecbd0": {
+"type": "moteur PS2",
+"sites": [
+"3fa74"
+]
+},
+"-ecc10": {
+"type": "moteur PS2",
+"sites": [
+"3fa90"
+]
+},
+"-25380": {
+"type": "moteur PS2",
+"sites": [
+"63438"
+]
+},
+"-d60b8": {
+"type": "moteur PS2",
+"sites": [
+"78384",
+"78d80",
+"85970"
+]
+},
+"-d6060": {
+"type": "moteur PS2",
+"sites": [
+"8592c",
+"85c38",
+"8a300"
+]
+},
+"-24650": {
+"type": "moteur PS2",
+"sites": [
+"94bf0"
+]
+},
+"22b00": {
+"type": "natif du module",
+"sites": [
+"970bc",
+"31af78",
+"31afa4"
+]
+},
+"241b0": {
+"type": "natif du module",
+"sites": [
+"29f64c",
+"29f6d4",
+"29fabc"
+]
+},
+"3b2d00": {
+"type": "natif du module",
+"sites": [
+"3b44d4"
+]
+},
+"24080": {
+"type": "natif du module",
+"sites": [
+"3b4518",
+"3b4578"
+]
+},
+"3b3920": {
+"type": "natif du module",
+"sites": [
+"3b4d58"
+]
+},
+"3b9ca0": {
+"type": "natif du module",
+"sites": [
+"3b9c68"
+]
+},
+"3ba0e0": {
+"type": "natif du module",
+"sites": [
+"3b9c78"
+]
+},
+"-9af90": {
+"type": "moteur PS2",
+"sites": [
+"3ba5cc"
+]
+},
+"-9df20": {
+"type": "moteur PS2",
+"sites": [
+"3ba5d8"
+]
+},
+"-24620": {
+"type": "moteur PS2",
+"sites": [
+"3bb1ac"
+]
+}
+}

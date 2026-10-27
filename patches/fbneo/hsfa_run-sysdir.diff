@@ -1,0 +1,17 @@
+diff --git a/hsfa/hsfa_run.c b/hsfa/hsfa_run.c
+index a5026f6..4470fcb 100644
+--- a/hsfa/hsfa_run.c
++++ b/hsfa/hsfa_run.c
+@@ -446,7 +446,11 @@ int main(int argc, char **argv)
+ 	SYM(bool, retro_unserialize, (const void *, size_t));
+ 
+ 	if (getenv("OUTDIR")) outdir = getenv("OUTDIR");
+-	sysdir = getenv("SYSDIR") ? getenv("SYSDIR") : outdir;
++	/* copie dans un tampon large : le coeur lit sizeof(g_system_dir) octets (memcpy) depuis ce pointeur ;
++	   une chaine en fin de pile (bloc d'environnement) le ferait sortir de la memoire projetee */
++	static char sysbuf[4096];
++	snprintf(sysbuf, sizeof(sysbuf), "%s", getenv("SYSDIR") ? getenv("SYSDIR") : outdir);
++	sysdir = sysbuf;
+ 	int nf = getenv("NF") ? atoi(getenv("NF")) : 6000;
+ 	if (getenv("INPUTS")) lit_inputs(getenv("INPUTS"));
+ 	static char want[1 << 20];

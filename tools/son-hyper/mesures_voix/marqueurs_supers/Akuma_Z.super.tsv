@@ -1,0 +1,6 @@
+# Akuma_Z : version $32, table $E70700 (redirection), 21 entrees, origine prog+1B664A
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	32	034A	01CD	2		super QCBx2+HP ; super demi-cercle x2+HP
+sfa1	32	034C	01CF	2		super QCBx2+HK ; super QCFx2+HK
+# voix Hyper sans voix d'arcade : 034A@super QCFx2+HP 034A@super QCFx2+LP
+# voix d'arcade sans voix Hyper : 01CD@super QCFx2+HP 01CF@super QCFx2+HP 01CD@super QCFx2+LP 01CF@super QCFx2+LP

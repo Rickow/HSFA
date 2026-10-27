@@ -1,0 +1,41 @@
+decor	groupe_export	persos_arcade_Upper	pal_s1_Upper	liste_s1_Upper	liste_s2_Upper	liste_s3_Upper	alias	donnees_dans_Hyper	gfx_s1_%Hyper	gfx_s2_%Hyper	gfx_s3_%Hyper	gfx_SFA3	decor_Hyper
+$00	Ryu/Evil Ryu	Ryu, id12, id14, id26	70e5b0	747f80	748124	748394		non	1.2	0.5	1.1	oui	
+$02	Ken	Ken	70e5f0	747f84	748134	7483d4		non	1.4	1.8	0.0	oui	
+$04	Akuma	Akuma	70e910	747f8c	748144	748414		non	0.5	0.5	3.2	oui	
+$06	Charlie	Charlie	70e9d0	747f90	748154	748454		non	0.7	2.2	0.0	oui	
+$08	Chun-Li/Chun-Li (variante)	Chun-Li	70ed70	747f98	748164	748494		non	1.2	0.7	0.0	oui	
+$0A	Adon	Adon	70f0d0	747fa0	748174	7484d4		non	0.9	1.2	0.0	oui	
+$0C	Sodom/Sodom (variante)	Sodom	70f410	747fa8	748184	748514		listes scroll2	1.1	1.1	0.0	oui	
+$0E	Guy	Guy	70f790	747fb0	748194	748554		non	0.8	0.6	4.3	oui	
+$10	Birdie	Birdie	70fa50	747fb8	7481a4	748594		non	2.7	0.9	2.1	oui	
+$12	Rose	Rose	70fcf0	747fc0	7481b4	7485d4		non	1.1	1.6	0.0	oui	
+$14	M.Bison	—	70ffd0	747fc8	7481c4	748614		non	2.2	1.6	0.0	oui	
+$16	Sagat	Sagat	70fff0	747fcc	7481d4	748654		non	1.2	1.7	0.0	oui	
+$18	Dan	Dan	7101d0	747fd0	7481e4	748694		non	0.9	2.1	0.0	oui	
+$1A	Sakura	Sakura	710590	747fd8	7481f4	7486d4		non	1.4	2.6	0.0	oui	
+$1C	Rolento	Rolento	710950	747fe0	748204	748714		non	2.3	1.2	3.9	oui	
+$1E	Dhalsim	Dhalsim	710c90	747fe4	748214	748754		listes scroll2	20.5	1.4	0.0	oui	
+$20	Zangief	Zangief	710cd0	747fe8	748224	748794		non	2.0	0.7	0.0	oui	
+$22	Gen/Gen (variante)	Gen, id13	710dd0	747ff0	748234	7487d4		non	1.7	0.4	6.0	oui	
+$24	Chun-Li/Chun-Li (variante)	—	70ed70	747f98	748164	748494	$08	non	1.2	0.7	0.0	oui	
+$26	Gen/Gen (variante)	—	710dd0	747ff0	748234	7487d4	$22	non	1.7	0.4	6.0	oui	
+$28	Sodom/Sodom (variante)	—	70f410	747fa8	748184	748514	$0C	non	1.1	1.1	0.0	oui	
+$2A	Balrog/Juli/Juni	M.Bison, Juli, Juni, id27	710ff0	747fc8	748244	748614		non	2.2	1.6	0.0	oui	
+$2C	Cammy	Cammy	711010	747ff8	748254	748814		non	2.0	1.1	0.0	oui	
+$2E	Ryu/Evil Ryu	EvilRyu	711150	747f8c	748144	748414	listes=$04	non	0.5	0.5	3.2	oui	
+$30	E.Honda	E.Honda	711210	747ffc	748274	748854		non	1.6	2.7	11.1	oui	
+$32	Blanka	Blanka	7115d0	748004	748284	748894		non	1.7	0.8	0.0	oui	
+$34	R.Mika	R.Mika	711650	74800c	748294	7488d4		non	1.9	0.8	2.4	oui	
+$36	Cody	Cody	711a10	748014	7482a4	748914		non	1.3	0.5	2.0	oui	
+$38	Vega	Vega	711ad0	74801c	7482b4	748954		non	1.6	0.4	1.4	oui	
+$3A	Karin	—	711b10	748024	7482c4	748994		non	1.4	2.4	0.0	oui	
+$3C	Balrog/Juli/Juni	—	710ff0	747fc8	748244	748614	$2A	non	2.2	1.6	0.0	oui	
+$3E	Balrog/Juli/Juni	—	710ff0	747fc8	748244	748614	$2A $3C	non	2.2	1.6	0.0	oui	
+$40	Upper (neuf)	Guile	711ed0	74802c	7482d4	7489d4		non	1.0	0.6	1.2	non	
+$42	Upper (neuf)	Fei-Long	7122d0	7480ac	7482e4	748a14		non	3.0	0.7	3.3	non	
+$44	Upper (neuf)	DeeJay	7126d0	7480b4	7482f4	748a54		non	1.4	0.7	0.0	non	
+$46	Upper (neuf)	T.Hawk	712ad0	7480bc	748304	748a94		non	2.4	0.5	1.5	non	
+$48	Upper (neuf)	ShinAkuma	712ed0	747f8c	748144	748414	listes=$04	non	0.5	0.5	3.2	oui	
+$4A	Upper (neuf)	Balrog, EX-Balrog	712f90	7480c0	748314	748ad4		non	0.0	1.3	0.0	non	
+$4C	Upper (neuf)	Karin	713390	7480c4	748324	748b14		non	1.5	1.9	0.0	non	
+$4E	Upper (neuf)	(attraction / VERSUS)	713790	7480cc	748334	748b54		palettes = Hyper décor 4 var. 0	99.4	100.0	100.0	non	4 / 6 (ZERO 3)

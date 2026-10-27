@@ -1,0 +1,433 @@
+From cc75134f62a74d0c1dd2e8cbb46f1bcbd0d5ba60 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 16:23:13 +0200
+Subject: [PATCH] HSFA: plane base registers for ro9a (Hyper + Upper Arcade
+ graft), sfa3hahsfa driver
+
+- $804200-$804205: word writes handled in one step (byte mask kept for byte
+  writes), nCpsGfxScroll updated only on change (FBNeo redraws planes every
+  frame, so this is the equivalent of MAME's mark_all_dirty); reset to 0,
+  saved in states (unchanged); HSFA_PLANS_LOG=<file> logs every change.
+- Extended graphics region sized from the declared hsfa_gfx.bin
+  ($2000000 + size, at least 64 MB: Upper and Hyper unchanged); hsfa_gfx.bin
+  loaded and converted in place (no temporary buffer).
+- New driver sfa3hahsfa (ro9a test build): Hyper files with a 48 MB
+  hsfa_gfx.bin (Upper planes at $4000000), 80 MB region.
+- hsfa_run: PILOTE=arcade, port of greffe_arcade/lua/tournee_arcade.lua.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ hsfa/hsfa_run.c                  | 135 ++++++++++++++++++++++++++++++-
+ src/burn/drv/capcom/cps.h        |   2 +
+ src/burn/drv/capcom/cps_hsfa.cpp |  72 ++++++++++++++---
+ src/burn/drv/capcom/cps_rw.cpp   |   1 +
+ src/burn/drv/capcom/d_cps2.cpp   |  56 ++++++++++++-
+ 5 files changed, 253 insertions(+), 13 deletions(-)
+
+diff --git a/hsfa/hsfa_run.c b/hsfa/hsfa_run.c
+index dc7a603..ccb2927 100644
+--- a/hsfa/hsfa_run.c
++++ b/hsfa/hsfa_run.c
+@@ -13,6 +13,8 @@
+  *                            et combats pilotes d'apres l'etat du jeu ; variables LISTE, MODEJEU, MODEFORCE, CONTOURNE_E,
+  *                            SNAPM, journal JOURNAL (meme format que le OUT du script). Sans prise d'ecriture possible
+  *                            ici, NOROUL n'est pas reproduit (voir LISEZMOI-hyper.md).
++ *   PILOTE=arcade            (ro9a, sfa3hahsfa) portage de greffe_arcade/lua/tournee_arcade.lua : partie ARCADE de J1
++ *                            (PERSO, GRAINE, SNAPETAT, NOCONT, SCENEA_PASSIF, BLOCAGE, SNAPSC ; journal JOURNAL).
+  */
+ #include <dlfcn.h>
+ #include <stdarg.h>
+@@ -310,6 +312,116 @@ static void pilote_image(int k)		/* frame_done de l'image k : entrees de l'image
+ 	}
+ }
+ 
++/* --- PILOTE=arcade (agent_coeur_banques) : portage de greffe_arcade/lua/tournee_arcade.lua (partie ARCADE de ro9a,
++   J1 seul) : titre -> menu (curseur $FF4201 force a 0 = ARCADE) -> selection de J1 (spec PERSO, format LISTE) ->
++   combats (vie de J1 maintenue, adversaires a 1 apres 60 images, J1 avance et frappe) ; hors combat : Start et bouton 1.
++   Variables comme le script : PERSO, GRAINE (graine $FF80AE imposee en fin de selection), SNAPETAT=1 (capture 40 images
++   apres la 1re apparition de chaque etat A5+0/4/8/C avec A5+0 = 2), NOCONT, SCENEA_PASSIF, BLOCAGE (defaut 4000),
++   SNAPSC=n ; journal JOURNAL au format du OUT du script (lignes d'etat, MANCHE, SNAP, BLOQUE, FIN). -------------- */
++static int arcade = 0, arc_stable = 0, arc_combats = 0, arc_graine = -1, arc_snapetat = 0, arc_nocont = 0, arc_passif = 0;
++static int arc_graine_sel = 0;		/* GRAINE_SEL=1 : graine imposee a toutes les images de la selection (A5+4 = 2) */
++static int arc_blocage = 4000, arc_immobile = 0, arc_fini = 0, arc_snapsc = 0;
++static struct spec arc_spec;
++static char arc_last[400] = "";
++static short *arc_snapq = NULL;			/* image -> 1 + indice de l'etat qui a demande la capture */
++static int arc_force = 0; static uint8_t arc_liste[16]; static uint32_t arc_ladv = 0xFF4B2E;	/* LISTE_ADV (script) */	/* FORCE_LISTE=32 chiffres hexa : liste des adversaires imposee */
++static char arc_vus[512][24]; static int arc_nvus = 0;
++static void arc_selectionne(const struct spec *s)
++{
++	uint32_t P = JJ[0]; int et = u8(P + 5);
++	if (et == 0) {
++		int d = chemin(u16(P + 0x12) & 7, u16(P + 0x16) & 7, s->base, 0);
++		if (d >= 0) appui(1, DNOM[d]); else { if (s->ex) on("1 Player Start"); if (K % 16 >= 8 && K % 16 < 11) on("P1 Button 1"); }
++	} else if (et == 2) {
++		int c = colonne(s); if (c < 0) c = 0;
++		if (u8(P + 0x5C) != c) appui(1, "Down"); else if (K % 16 >= 8 && K % 16 < 11) on("P1 Button 1");
++	} else if (et == 6) {
++		if (u8(P + 0x5C) == s->mode) appui(1, "Button 1"); else appui(1, "Down");
++	} else if (et == 8) {
++		int i = u8(P + 0x133); if (i >= 0x80) i -= 0x100;
++		if (i != s->ism) appui(1, "Down"); else appui(1, "Button 1");
++	} else if (et == 4 || et == 0xA) appui(1, "Button 1");
++}
++static void arc_image(int k, int nf)
++{
++	K = k;
++	memset(vpad, 0, sizeof(vpad));
++	if (arc_fini) return;
++	int p0 = u16(0xFF8000), p4 = u16(0xFF8004), p8 = u16(0xFF8008), pc_ = u16(0xFF800C), p10 = u16(0xFF8010);
++	if (p0 == 6 || p0 == 4 || (p0 == 2 && p4 == 0)) {
++		if (k > 200 && k % 60 < 6 && k < 900) on("Coin 1");
++		if (p0 == 6 && k > 300 && k % 40 < 6) on("1 Player Start");
++		if (p0 == 4) {
++			w8(0xFF4201, 0);
++			if (u8(0xFF4201) != 0) { if (k % 20 < 4) on("P1 Up"); }
++			else if (k % 20 >= 10 && k % 20 < 14) on("P1 Button 1");
++		}
++	}
++	if (p0 == 2 && p4 == 2 && p8 == 4 && u8(JJ[0] + 1) != 0 && u8(JJ[0] + 5) < 0xC) arc_selectionne(&arc_spec);
++	if (p0 == 2 && p4 == 2 && p8 != 4 && k % 24 >= 12 && k % 24 < 15) on("P1 Button 1");
++	if (arc_graine >= 0 && p0 == 2 && p4 == 2 && (p8 == 6 || arc_graine_sel)) w16(0xFF80AE, arc_graine);
++	/* FORCE_LISTE (comparaison avec le banc : memes adversaires) : liste $FF4B2E (format de la ligne MANCHE) recopiee
++	   a chaque image de fin de selection et de partie */
++	if (arc_force && p0 == 2 && ((p4 == 2 && p8 == 6) || p4 == 4)) for (int i = 0; i < 16; i++) w8(arc_ladv + (i ^ 1), arc_liste[i]);
++	uint32_t adv[3]; int nadv = 0;
++	const uint32_t AO[3] = { 0xFF8800, 0xFF8C00, 0xFF9000 };
++	for (int i = 0; i < 3; i++) if (u8(AO[i] + 5) == 2) adv[nadv++] = AO[i];
++	int combat = p0 == 2 && p4 == 4 && p8 == 6 && u8(JJ[0] + 5) == 2 && nadv > 0;
++	if (combat) {
++		arc_stable++;
++		if (arc_stable == 1) {
++			arc_combats++;
++			if (jrn) {
++				fprintf(jrn, "MANCHE %d image %d J1 %02x/%02x/%02x J2 %02x/%02x/%02x etape %04x decor %04x liste ", arc_combats, k,
++					u8(JJ[0] + 0x103), u8(JJ[0] + 0x117), u8(JJ[0] + 0x116), u8(JJ[1] + 0x103), u8(JJ[1] + 0x117), u8(JJ[1] + 0x116),
++					u16(0xFF8114), u16(0xFF8100));
++				for (int i = 0; i < 16; i++) fprintf(jrn, "%02x", u8(arc_ladv + (i ^ 1)));
++				fprintf(jrn, "\n");
++			}
++		}
++		w16(JJ[0] + 0x50, 0x90); w16(JJ[0] + 0x52, 0x90);
++		if (arc_stable > 60) {
++			for (int i = 0; i < nadv; i++) { int vie = u16(adv[i] + 0x50); if (vie > 1 && vie < 0x100) { w16(adv[i] + 0x50, 1); w16(adv[i] + 0x52, 1); } }
++			const char *av = (u16(JJ[0] + 0x12) < u16(adv[0] + 0x12)) ? "P1 Right" : "P1 Left";
++			int t = arc_stable % 40;
++			if (t < 3) on("P1 Down");
++			else if (t < 6) { on("P1 Down"); on(av); }
++			else if (t < 10) { on(av); if (t >= 7) on("P1 Button 1"); }
++			else if (t < 30) on(av);		/* "P1 Button 4" du script : sur :IN1 dans MAME, jamais appuye */
++		}
++	} else {
++		arc_stable = 0;
++		if (p0 == 2 && p4 != 2 && p4 != 0 && !(arc_nocont && p4 == 6) && !(arc_passif && p4 == 0xA)) {
++			if (k % 30 < 3) on("1 Player Start");
++			if (k % 30 >= 15 && k % 30 < 18) on("P1 Button 1");
++		}
++	}
++	{	/* journal : liste des adversaires a chaque changement (ligne LISTE) */
++		static char lprec[40] = ""; char l[40];
++		for (int i = 0; i < 16; i++) snprintf(l + 2 * i, 3, "%02x", u8(arc_ladv + (i ^ 1)));
++		if (strcmp(l, lprec)) { if (jrn) fprintf(jrn, "LISTE %d %s graine %04x\n", k, l, u16(0xFF80AE)); strcpy(lprec, l); }
++	}
++	char st[400];
++	snprintf(st, sizeof(st), "%04x %04x %04x %04x %04x | J1 %02x %02x %02x %02x | J2 %02x %02x %02x %02x | $A9 %02x $100 %04x",
++		p0, p4, p8, pc_, p10, u8(JJ[0] + 1), u8(JJ[0] + 5), u8(JJ[0] + 0x103), u8(JJ[0] + 0xD2),
++		u8(JJ[1] + 1), u8(JJ[1] + 5), u8(JJ[1] + 0x103), u8(JJ[1] + 0xD2), u8(0xFF80A9), u16(0xFF8100));
++	if (strcmp(st, arc_last)) { if (jrn) fprintf(jrn, "%6d : %s\n", k, st); strcpy(arc_last, st); arc_immobile = 0; } else arc_immobile++;
++	if (arc_immobile > arc_blocage && !combat) {
++		arc_fini = 1; snap(k);
++		if (jrn) fprintf(jrn, "BLOQUE %d etat %s\n", k, st);
++		return;
++	}
++	char nom[24]; snprintf(nom, sizeof(nom), "%04x %04x %04x %04x", p0, p4, p8, pc_);
++	int vu = 0;
++	for (int i = 0; i < arc_nvus && !vu; i++) if (!strcmp(arc_vus[i], nom)) vu = 1;
++	if (!vu && arc_nvus < 512) {
++		strcpy(arc_vus[arc_nvus++], nom);
++		if (arc_snapetat && p0 == 2 && k + 40 <= nf) arc_snapq[k + 40] = arc_nvus;
++	}
++	if (arc_snapsc > 0 && k % arc_snapsc == 0 && p0 == 2 && (p4 == 6 || p4 == 8 || p4 == 0xA || p4 == 0xC) && !arc_snapq[k]) arc_snapq[k] = -1;
++	if (arc_snapq[k]) { snap(k); if (jrn) fprintf(jrn, "SNAP %d %s\n", k, arc_snapq[k] > 0 ? arc_vus[arc_snapq[k] - 1] : nom); }
++}
++
+ static void input_poll(void) {}
+ static int16_t input_state(unsigned port, unsigned device, unsigned index, unsigned id)
+ {
+@@ -500,6 +612,25 @@ int main(int argc, char **argv)
+ 		if (getenv("JOURNAL")) jrn = fopen(getenv("JOURNAL"), "w");
+ 		if (getenv("WATCHW")) { char *c = strdup(getenv("WATCHW")), *sv = NULL; for (char *t = strtok_r(c, ",", &sv); t && nwatchw < 16; t = strtok_r(NULL, ",", &sv)) watchw[nwatchw++] = strtoul(t, NULL, 16); free(c); }
+ 	}
++	if (getenv("PILOTE") && !strcmp(getenv("PILOTE"), "arcade") && ram) {
++		pilote = 1; arcade = 1;
++		lit_liste(getenv("PERSO") ? getenv("PERSO") : "00.Z3");
++		arc_spec = liste[0][0];
++		if (getenv("GRAINE") && *getenv("GRAINE")) arc_graine = (int)strtol(getenv("GRAINE"), NULL, 16);
++		arc_snapetat = getenv("SNAPETAT") && !strcmp(getenv("SNAPETAT"), "1");
++		arc_nocont = getenv("NOCONT") && !strcmp(getenv("NOCONT"), "1");
++		arc_passif = getenv("SCENEA_PASSIF") && !strcmp(getenv("SCENEA_PASSIF"), "1");
++		if (getenv("BLOCAGE")) arc_blocage = atoi(getenv("BLOCAGE"));
++		if (getenv("SNAPSC")) arc_snapsc = atoi(getenv("SNAPSC"));
++		arc_snapq = calloc(nf + 2, sizeof(short));
++		arc_graine_sel = getenv("GRAINE_SEL") && !strcmp(getenv("GRAINE_SEL"), "1");
++		if (getenv("LISTE_ADV")) arc_ladv = strtoul(getenv("LISTE_ADV"), NULL, 16);
++		if (getenv("FORCE_LISTE") && strlen(getenv("FORCE_LISTE")) >= 32) {
++			arc_force = 1;
++			for (int i = 0; i < 16; i++) { char h[3] = { getenv("FORCE_LISTE")[2 * i], getenv("FORCE_LISTE")[2 * i + 1], 0 }; arc_liste[i] = (uint8_t)strtol(h, NULL, 16); }
++		}
++		if (getenv("JOURNAL")) jrn = fopen(getenv("JOURNAL"), "w");
++	}
+ 	char lastst[64] = "";
+ 	clock_t t0 = clock();
+ 	if (pilote && getenv("STATETEST")) { recpad = calloc(2 * (nf + 2), sizeof(uint16_t)); enreg = 1; }
+@@ -522,9 +653,11 @@ int main(int argc, char **argv)
+ 			char p[1024]; snprintf(p, sizeof(p), "%s/ram_%06d.bin", outdir, frame);
+ 			FILE *f = fopen(p, "wb"); if (f) { for (int i = 0; i < 0x10000; i++) fputc(ram[i ^ 1], f); fclose(f); }
+ 		}
+-		if (pilote) pilote_image(frame);
++		if (arcade) { arc_image(frame, nf); if (arc_fini) break; }
++		else if (pilote) pilote_image(frame);
+ 	}
+ 	enreg = 0;
++	if (jrn && arcade) { if (!arc_fini) fprintf(jrn, "FIN %d manches %d\n", nf, arc_combats); fclose(jrn); jrn = NULL; }
+ 	if (jrn) { fprintf(jrn, "FIN %d selections %d manches %d\n", nf, nsel, combats); fclose(jrn); jrn = NULL; }
+ 	/* STATETEST=N : etat sauve a l'image N, rejoue jusqu'a NF, image finale comparee a la premiere execution */
+ 	if (getenv("STATETEST")) {
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index fa751f5..cf13bc2 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -552,7 +552,9 @@ void HsfaRejeuRendu(INT16 *pOut, INT32 nLen);
+ void HsfaMusiqueRendu(INT16 *pOut, INT32 nLen);
+ INT32 HsfaPortReadByte(UINT32 a, UINT8 *d);
+ INT32 HsfaPortWriteByte(UINT32 a, UINT8 d);
++INT32 HsfaPortWriteWord(UINT32 a, UINT16 d);
+ void HsfaPortWriteWordStart(UINT32 a, UINT16 d);
++UINT32 HsfaGfxLenMin();
+ void HsfaPortWriteWordEnd();
+ 
+ extern INT32 Cps2Volume;
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index aaf1d6a..0153a20 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -449,6 +449,30 @@ static void HsfaUpdateScroll()
+ 	}
+ }
+ 
++// (agent_coeur_banques, patch 0008) ecriture d'un registre de plan avec masque d'octets (COMBINE_DATA du fork MAME).
++// Equivalent de mark_all_dirty : FBNeo redessine chaque image tous les plans depuis la ROM graphique a partir de
++// nCpsGfxScroll (aucun cache de tuiles a invalider) ; seul un CHANGEMENT de valeur met nCpsGfxScroll a jour.
++// HSFA_PLANS_LOG=<fichier> (essais) : « image k : s1 s2 s3 » a chaque changement (comparaison avec le banc MAME).
++static FILE *HsfaPlansLog = NULL;
++static INT32 nPlansLog = -1;
++
++static void HsfaPlaneWrite(INT32 k, UINT16 d, UINT16 nMask)
++{
++	UINT16 v = (nPlaneReg[k] & ~nMask) | (d & nMask);
++	if (v == nPlaneReg[k]) return;
++	nPlaneReg[k] = v;
++	HsfaUpdateScroll();
++	if (nPlansLog < 0) {
++		const char *f = getenv("HSFA_PLANS_LOG");
++		HsfaPlansLog = (f && *f) ? fopen(f, "w") : NULL;
++		nPlansLog = HsfaPlansLog ? 1 : 0;
++	}
++	if (nPlansLog) {
++		fprintf(HsfaPlansLog, "%d : %04x %04x %04x\n", nImage, nPlaneReg[0], nPlaneReg[1], nPlaneReg[2]);
++		fflush(HsfaPlansLog);
++	}
++}
++
+ // appele par CpsReadByte / CpsWriteByte / CpsWriteWord (cps_rw.cpp) ; rend 1 si l'acces est traite
+ INT32 HsfaPortReadByte(UINT32 a, UINT8 *d)
+ {
+@@ -460,13 +484,21 @@ INT32 HsfaPortReadByte(UINT32 a, UINT8 *d)
+ 	return 0;
+ }
+ 
++// ecriture de mot (MOVE.W #imm,$80420x.L du code traduit) : un seul changement, sans etat intermediaire
++INT32 HsfaPortWriteWord(UINT32 a, UINT16 d)
++{
++	if (HsfaMode == 2 && a >= 0x804200 && a <= 0x804205) {
++		HsfaPlaneWrite((a - 0x804200) >> 1, d, 0xFFFF);
++		return 1;
++	}
++	return 0;
++}
++
+ INT32 HsfaPortWriteByte(UINT32 a, UINT8 d)
+ {
+ 	if (HsfaMode == 2 && a >= 0x804200 && a <= 0x804205) {
+-		UINT16 *r = &nPlaneReg[(a - 0x804200) >> 1];
+-		if (a & 1) *r = (*r & 0xff00) | d;
+-		else *r = (*r & 0x00ff) | (d << 8);
+-		HsfaUpdateScroll();
++		if (a & 1) HsfaPlaneWrite((a - 0x804200) >> 1, d, 0x00FF);
++		else HsfaPlaneWrite((a - 0x804200) >> 1, d << 8, 0xFF00);
+ 		return 1;
+ 	}
+ 	if (HsfaMode == 1 && !bHsfaWordWrite && a >= 0x804102 && a <= 0x804107) {
+@@ -539,7 +571,7 @@ void HsfaFrameDone()
+ {
+ 	if (!HsfaMode) return;
+ 	if (nPlanesPending) {								// banc_plans.lua (HSFA_PLANS) : bases ecrites a la 1re image
+-		for (INT32 k = 0; k < 3; k++) nPlaneReg[k] = nCfgPlans[k];
++		for (INT32 k = 0; k < 3; k++) HsfaPlaneWrite(k, nCfgPlans[k], 0xFFFF);
+ 		HsfaUpdateScroll();
+ 		nPlanesPending = 0;
+ 	}
+@@ -1169,11 +1201,11 @@ static INT32 HsfaLoadData()
+ 		}
+ 		else if (strcmp(pszName, "hsfa_gfx.bin") == 0) {
+ 			if (HSFA_GFX_BASE + ri.nLen > nCpsGfxLen) return 1;
+-			UINT8 *tmp = (UINT8*)BurnMalloc(ri.nLen);
+-			if (tmp == NULL) return 1;
+-			if (BurnLoadRom(tmp, i, 1)) { BurnFree(tmp); return 1; }
+-			HsfaConvertGfx(tmp, ri.nLen, CpsGfx + HSFA_GFX_BASE);
+-			BurnFree(tmp);
++			// (patch 0008) chargee et convertie sur place (conversion mot de 32 bits par mot de 32 bits) : plus de
++			// tampon de la taille du fichier (ro9a : 48 Mo de moins au demarrage)
++			UINT8 *p = CpsGfx + HSFA_GFX_BASE;
++			if (BurnLoadRom(p, i, 1)) return 1;
++			HsfaConvertGfx(p, ri.nLen, p);
+ 		}
+ 	}
+ 	return (HsfaTab == NULL) ? 1 : 0;
+@@ -1230,6 +1262,24 @@ static INT32 HsfaExtTaille()
+ 	return 1;
+ }
+ 
++// (patch 0008) taille minimale de la region graphique : $2000000 + taille de hsfa_gfx.bin dans la liste de ROM du
++// pilote, et au moins 64 Mo (Upper, Hyper : inchange). ro9a : hsfa_gfx.bin de 48 Mo (plans d'Upper en $4000000)
++// -> 80 Mo. Appelee avant PhoenixInit (allocation de la region).
++UINT32 HsfaGfxLenMin()
++{
++	UINT32 n = 0x4000000;
++	struct BurnRomInfo ri;
++	for (INT32 i = 0; ; i++) {
++		memset(&ri, 0, sizeof(ri));
++		if (BurnDrvGetRomInfo(&ri, i) || ri.nLen == 0) break;
++		if ((ri.nType & 0x0f) != CPS2_HSFA_DATA) continue;
++		char *pszName = NULL;
++		BurnDrvGetRomName(&pszName, i, 0);
++		if (pszName && strcmp(pszName, "hsfa_gfx.bin") == 0 && HSFA_GFX_BASE + ri.nLen > n) n = HSFA_GFX_BASE + ri.nLen;
++	}
++	return n;
++}
++
+ INT32 HsfaInit()
+ {
+ 	if (HsfaExtTaille()) {
+@@ -1293,6 +1343,8 @@ INT32 HsfaInit()
+ 
+ INT32 HsfaExit()
+ {
++	if (HsfaPlansLog) fclose(HsfaPlansLog);
++	HsfaPlansLog = NULL; nPlansLog = -1;
+ 	delete HsfaFlux;
+ 	HsfaFlux = NULL;
+ 	HsfaMusiqueLibere();
+diff --git a/src/burn/drv/capcom/cps_rw.cpp b/src/burn/drv/capcom/cps_rw.cpp
+index c7463cd..0a81d46 100644
+--- a/src/burn/drv/capcom/cps_rw.cpp
++++ b/src/burn/drv/capcom/cps_rw.cpp
+@@ -582,6 +582,7 @@ void __fastcall CpsWriteWord(UINT32 a, UINT16 d)
+ //	bprintf(PRINT_NORMAL, _T("Write Word %x, %x\n"), a, d);
+ 
+ 	if (HsfaMode) {
++		if (HsfaPortWriteWord(a, d)) return;		// (patch 0008) registres des plans $804200-$804205
+ 		HsfaPortWriteWordStart(a, d);
+ 		SEK_DEF_WRITE_WORD(0, a, d);
+ 		HsfaPortWriteWordEnd();
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 80a0853..1a30b57 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15477,6 +15477,48 @@ static struct BurnRomInfo Sfa3hhsfaRomDesc[] = {
+ STD_ROM_PICK(Sfa3hhsfa)
+ STD_ROM_FN(Sfa3hhsfa)
+ 
++// (agent_coeur_banques, patch 0008) Hyper + mode Arcade d'Upper greffe ("ro9a", voie B, GREFFE-ETAPE4.md) : memes
++// fichiers qu'Hyper, mais la region graphique etendue couvre aussi les ecrans d'Upper (hsfa_plans.bin d'Upper en
++// $4000000, bases $400/$440/$4A0 ecrites par le jeu dans $804200-$804205) : hsfa_gfx.bin de 48 Mo, region de 80 Mo.
++static struct BurnRomInfo Sfa3hahsfaRomDesc[] = {
++	// programme 68000 retraduit (CRC variable : cherche par nom dans l'archive)
++	{ "sz3ud.03c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3ud.04c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.05c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.06c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.07c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.08c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.09c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.10b",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++
++	{ "sz3.13m",       0x400000, 0x0f7a60d9, CPS2_GFX | BRF_GRA },
++	{ "sz3.15m",       0x400000, 0x8e933741, CPS2_GFX | BRF_GRA },
++	{ "sz3.17m",       0x400000, 0xd6e98147, CPS2_GFX | BRF_GRA },
++	{ "sz3.19m",       0x400000, 0xf31a728a, CPS2_GFX | BRF_GRA },
++	{ "sz3.14m",       0x400000, 0x5ff98297, CPS2_GFX | BRF_GRA },
++	{ "sz3.16m",       0x400000, 0x52b5bdee, CPS2_GFX | BRF_GRA },
++	{ "sz3.18m",       0x400000, 0x40631ed5, CPS2_GFX | BRF_GRA },
++	{ "sz3.20m",       0x400000, 0x763409b4, CPS2_GFX | BRF_GRA },
++
++	// son hybride d'Upper (bruitages et voix ; musiques ZERO 3 en QSound, les autres en flux ADX)
++	{ "hx3.01",        0x020000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++	{ "hx3.02",        0x028000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++
++	{ "hx3.11m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.12m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.13m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.14m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++
++	{ "phoenix.key",   0x000014, 0x2cf772b0, CPS2_ENCRYPTION_KEY },
++
++	{ "hsfa_ext.bin",  0x5C0000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// $940000-$EFFFFF
++	{ "hsfa_tab.bin",  0x400000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// tables de banques
++	{ "hsfa_gfx.bin",  0x3000000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_GRA },	// region $2000000-$4FFFFFF (plans d'Upper en $4000000)
++};
++
++STD_ROM_PICK(Sfa3hahsfa)
++STD_ROM_FN(Sfa3hahsfa)
++
+ // Variante widescreen (coeur fbneo_hsfaws, -DHSFA_WS) : memes noms de pilotes et memes archives, image elargie a
+ // 448x224 (16:9). Le decor existe au-dela des 384 px ; FBNeo recentre plans et objets (nCpsGlobalXOffset = 32).
+ #ifdef HSFA_WS
+@@ -15502,7 +15544,7 @@ static INT32 HsfaSfa3Init()
+ static INT32 HsfaUpperInit()
+ {
+ 	HsfaMode = 2;
+-	nCpsGfxLenMin = 0x4000000;					// ROM graphique etendue : 64 Mo
++	nCpsGfxLenMin = HsfaGfxLenMin();			// ROM graphique etendue : 64 Mo (ro9a : 80 Mo)
+ 	INT32 nRet = PhoenixInit();
+ 	if (!nRet) nRet = HsfaInit();
+ 	return nRet;
+@@ -15512,7 +15554,7 @@ static INT32 HsfaHyperInit()
+ {
+ 	HsfaMode = 2;								// memes mecanismes qu'Upper (bases de plans, objets 20 bits)
+ 	HsfaHyper = 1;
+-	nCpsGfxLenMin = 0x4000000;					// ROM graphique etendue : 64 Mo
++	nCpsGfxLenMin = HsfaGfxLenMin();			// ROM graphique etendue : 64 Mo (ro9a : 80 Mo)
+ 	INT32 nRet = PhoenixInit();
+ 	if (!nRet) nRet = HsfaInit();
+ 	return nRet;
+@@ -15555,6 +15597,16 @@ struct BurnDriver BurnDrvCpsSfa3hhsfa = {
+ 	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
+ };
+ 
++struct BurnDriver BurnDrvCpsSfa3hahsfa = {
++	"sfa3hahsfa", NULL, NULL, NULL, "2026",
++	"Hyper Street Fighter Alpha + Arcade (HSFA, essai ro9a" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
++	NULL, NULL, NULL, NULL,
++	BDF_GAME_WORKING | BDF_HACK, 2, HARDWARE_CAPCOM_CPS2, GBF_VSFIGHT, FBF_SF,
++	NULL, Sfa3hahsfaRomInfo, Sfa3hahsfaRomName, NULL, NULL, NULL, NULL, HsfaInputInfo, HhsfaDIPInfo,
++	HsfaHyperInit, HsfaDrvExit, Cps2Frame, CpsRedraw, CpsAreaScan,
++	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
++};
++
+ struct BurnDriver BurnDrvCpsSfz3jr2d = {
+ 	"sfz3jr2d", "sfa3", NULL, NULL, "1998",
+ 	"Street Fighter Zero 3 (Japan 980629 Phoenix Edition) (bootleg)\0", NULL, "bootleg", "CPS2",
+-- 
+2.53.0
+

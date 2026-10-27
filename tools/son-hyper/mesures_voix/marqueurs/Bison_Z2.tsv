@@ -1,0 +1,9 @@
+# Bison_Z2 : version $4A, table $E73B80 (redirection), 53 entrees, origine prog+239FDC
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	4A	044D	0314	3		charge arriere-avant+HK ; projection HP ; projection HP 2
+sfa2	4A	044E	0315	2		DP inverse+HK ; HK accroupi
+sfa2	4A	044F	0316	1		charge arriere-avant+HP
+sfa2	4A	0450	0317	1		charge bas-haut+HK
+sfa2	4A	0451	0318	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

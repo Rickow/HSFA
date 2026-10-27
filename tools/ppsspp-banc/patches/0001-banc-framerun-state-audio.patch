@@ -1,0 +1,710 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 070f49b..b10503a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2143,6 +2143,8 @@ add_library(${CoreLibName} ${CoreLinkType}
+ 	Core/Debugger/DisassemblyManager.h
+ 	Core/Debugger/WebSocket.cpp
+ 	Core/Debugger/WebSocket.h
++	Core/Debugger/WebSocket/BancSubscriber.cpp
++	Core/Debugger/WebSocket/BancSubscriber.h
+ 	Core/Debugger/WebSocket/BreakpointSubscriber.cpp
+ 	Core/Debugger/WebSocket/BreakpointSubscriber.h
+ 	Core/Debugger/WebSocket/CPUCoreSubscriber.cpp
+diff --git a/Common/Net/HTTPServer.cpp b/Common/Net/HTTPServer.cpp
+index c69aae0..c46b46e 100644
+--- a/Common/Net/HTTPServer.cpp
++++ b/Common/Net/HTTPServer.cpp
+@@ -158,8 +158,13 @@ void Server::SetFallbackHandler(UrlHandlerFunc handler) {
+ 	fallback_ = handler;
+ }
+ 
++// [banc] true : écoute sur 127.0.0.1 seulement (IPv4), jamais sur le réseau local. Posé par PPSSPPHeadless.
++bool g_banc_loopback_only = false;
++
+ bool Server::Listen(int port, const char *reason, net::DNSType type) {
+ 	bool success = false;
++	if (g_banc_loopback_only)
++		type = net::DNSType::IPV4;
+ 	if (type == net::DNSType::ANY || type == net::DNSType::IPV6) {
+ 		success = Listen6(port, type == net::DNSType::IPV6, reason);
+ 	}
+@@ -177,7 +182,7 @@ bool Server::Listen4(int port, const char *reason) {
+ 	struct sockaddr_in server_addr;
+ 	memset(&server_addr, 0, sizeof(server_addr));
+ 	server_addr.sin_family = AF_INET;
+-	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
++	server_addr.sin_addr.s_addr = htonl(g_banc_loopback_only ? INADDR_LOOPBACK : INADDR_ANY);
+ 	server_addr.sin_port = htons(port);
+ 
+ 	int opt = 1;
+diff --git a/Core/Core.cpp b/Core/Core.cpp
+index 639ed65..574a1b4 100644
+--- a/Core/Core.cpp
++++ b/Core/Core.cpp
+@@ -18,6 +18,7 @@
+ #include "ppsspp_config.h"
+ 
+ #include <cstdint>
++#include <functional>
+ #include <mutex>
+ #include <set>
+ #include <condition_variable>
+@@ -81,6 +82,14 @@ volatile bool coreStatePending = false;
+ 
+ static bool powerSaving = false;
+ static bool g_breakAfterFrame = false;
++// [banc] hook de fin d'image (voir Core.h)
++static std::function<bool()> g_frameHook;
++static std::mutex g_frameHookMutex;
++
++void Core_SetFrameHook(std::function<bool()> hook) {
++	std::lock_guard<std::mutex> guard(g_frameHookMutex);
++	g_frameHook = std::move(hook);
++}
+ static BreakReason g_breakReason = BreakReason::None;
+ 
+ static MIPSExceptionInfo g_exceptionInfo;
+@@ -218,6 +227,29 @@ void Core_RunLoopUntil(u64 globalticks) {
+ 			break;
+ 		case CORE_RUNNING_CPU:
+ 			mipsr4k.RunLoopUntil(globalticks);
++			if (coreState == CORE_NEXTFRAME) {
++				// [banc] hook de fin d'image
++				std::function<bool()> hook;
++				{
++					std::lock_guard<std::mutex> guard(g_frameHookMutex);
++					hook = g_frameHook;
++				}
++				if (hook && hook()) {
++					{
++						std::lock_guard<std::mutex> guard(g_frameHookMutex);
++						g_frameHook = nullptr;
++					}
++					{
++						std::lock_guard<std::mutex> lock(g_stepMutex);
++						g_breakReason = BreakReason::AfterFrame;
++						g_cpuStepCommand.type = CPUStepType::None;
++						g_cpuStepCommand.reason = BreakReason::AfterFrame;
++						g_cpuStepCommand.relatedAddr = 0;
++						steppingCounter++;
++					}
++					Core_UpdateState(CORE_STEPPING_CPU);
++				}
++			}
+ 			if (g_breakAfterFrame && coreState == CORE_NEXTFRAME) {
+ 				g_breakAfterFrame = false;
+ 				g_breakReason = BreakReason::AfterFrame;
+diff --git a/Core/Debugger/Breakpoints.cpp b/Core/Debugger/Breakpoints.cpp
+index 5e6849c..ace9b1c 100644
+--- a/Core/Debugger/Breakpoints.cpp
++++ b/Core/Debugger/Breakpoints.cpp
+@@ -265,6 +265,8 @@ void BreakpointManager::ChangeBreakPointLogFormat(u32 addr, const std::string &f
+ 	}
+ }
+ 
++void Banc_TraceHit(u32 addr);  // [banc] Core/Debugger/WebSocket/BancSubscriber.cpp
++
+ BreakAction BreakpointManager::ExecBreakPoint(u32 addr) {
+ 	if (!anyBreakPoints_)
+ 		return BREAK_ACTION_IGNORE;
+@@ -281,6 +283,11 @@ BreakAction BreakpointManager::ExecBreakPoint(u32 addr) {
+ 				return BREAK_ACTION_IGNORE;
+ 		}
+ 
++		// [banc] point d'arrêt de TRACE (trace.start) : journalise (frame, pc, ra, a0-a3, sp) sans arrêter ni écrire de log.
++		if ((info.result & BREAK_ACTION_LOG) && info.logFormat == "\x01banc") {
++			Banc_TraceHit(addr);
++			return BREAK_ACTION_IGNORE;
++		}
+ 		if (info.result & BREAK_ACTION_LOG) {
+ 			if (info.logFormat.empty()) {
+ 				NOTICE_LOG(Log::JIT, "BKP PC=%08x (%s)", addr, g_symbolMap->GetDescription(addr).c_str());
+diff --git a/Core/Debugger/WebSocket.cpp b/Core/Debugger/WebSocket.cpp
+index 6e12abe..aec4964 100644
+--- a/Core/Debugger/WebSocket.cpp
++++ b/Core/Debugger/WebSocket.cpp
+@@ -62,6 +62,7 @@
+ #include "Core/Debugger/WebSocket/MemorySubscriber.h"
+ #include "Core/Debugger/WebSocket/ReplaySubscriber.h"
+ #include "Core/Debugger/WebSocket/SteppingSubscriber.h"
++#include "Core/Debugger/WebSocket/BancSubscriber.h"
+ #include "Core/Debugger/WebSocket/ClientConfigSubscriber.h"
+ 
+ typedef DebuggerSubscriber *(*SubscriberInit)(DebuggerEventHandlerMap &map);
+@@ -79,6 +80,7 @@ static const std::vector<SubscriberInit> subscribers({
+ 	&WebSocketMemoryInit,
+ 	&WebSocketReplayInit,
+ 	&WebSocketSteppingInit,
++	&WebSocketBancInit,
+ 	&WebSocketClientConfigInit,
+ });
+ 
+diff --git a/GPU/Debugger/Stepping.cpp b/GPU/Debugger/Stepping.cpp
+index 0ec2072..97386ad 100644
+--- a/GPU/Debugger/Stepping.cpp
++++ b/GPU/Debugger/Stepping.cpp
+@@ -155,14 +155,18 @@ static void RunPauseAction() {
+ 
+ void WaitForPauseAction() {
+ 	std::unique_lock<std::mutex> guard(actionLock);
+-	actionWait.wait(guard);
++	// [banc] avec prédicat : sinon une action exécutée avant l'attente perd la notification (blocage).
++	actionWait.wait(guard, [] { return actionComplete; });
+ }
+ 
+ bool ProcessStepping() {
+ 	_dbg_assert_(gpuDebug);
+ 
+ 	std::unique_lock<std::mutex> guard(pauseLock);
+-	if (coreState != CORE_STEPPING_GE) {
++	// [banc] En pause CPU (cas du débogueur WebSocket), exécuter aussi les actions demandées (capture d'écran,
++	// lecture de tampon) : sinon gpu.buffer.* échoue toujours avec « Could not download output ».
++	const bool cpuAction = coreState == CORE_STEPPING_CPU && pauseAction != PAUSE_CONTINUE && pauseAction != PAUSE_BREAK;
++	if (coreState != CORE_STEPPING_GE && !cpuAction) {
+ 		// Not stepping any more, don't try.
+ 		actionComplete = true;
+ 		actionWait.notify_all();
+diff --git a/headless/Headless.cpp b/headless/Headless.cpp
+index 293878d..379225a 100644
+--- a/headless/Headless.cpp
++++ b/headless/Headless.cpp
+@@ -37,6 +37,7 @@
+ #include "Common/StringUtils.h"
+ #include "Common/Thread/ThreadManager.h"
+ #include "Core/Config.h"
++#include "Core/Debugger/Breakpoints.h"
+ #include "Core/ConfigValues.h"
+ #include "Core/Core.h"
+ #include "Core/CoreTiming.h"
+@@ -138,6 +139,8 @@ int printUsage(const char *progname, const char *reason)
+ 	fprintf(stderr, "  -m, --mount umd.cso   mount iso on umd1:\n");
+ 	fprintf(stderr, "  -r, --root some/path  mount path on host0: (elfs must be in here)\n");
+ 	fprintf(stderr, "  -l, --log             full log output, not just emulated printfs\n");
++	fprintf(stderr, "  --sound               [banc] mixe l'audio (audio.record)\n");
++	fprintf(stderr, "  --memstick=DIR        [banc] dossier de la carte mémoire\n");
+ 	fprintf(stderr, "  --debugger=PORT       enable websocket debugger and break at start\n");
+ 
+ 	fprintf(stderr, "  --graphics=BACKEND    use a different gpu backend\n");
+@@ -242,6 +245,12 @@ bool RunAutoTest(HeadlessHost *headlessHost, CoreParameter &coreParameter, const
+ 		if (coreState == CORE_STEPPING_CPU && !coreParameter.startBreak) {
+ 			break;
+ 		}
++		// [banc] En pause (débogueur), ne pas tourner à vide : 1 ms de sommeil.
++		if (coreState == CORE_STEPPING_CPU) {
++			sleep_ms(1, "banc-pause");
++		}
++		// [banc] Normalement fait par l'interface : applique les points d'arrêt ajoutés (vide le cache JIT).
++		g_breakpoints.Frame();
+ 		bool debugger = false;
+ #ifdef _WIN32
+ 		if (IsDebuggerPresent())
+@@ -342,6 +351,8 @@ static void AddTestsByPath(std::vector<std::string> *tests, std::string_view pat
+ 	}
+ }
+ 
++namespace http { extern bool g_banc_loopback_only; }  // [banc] Common/Net/HTTPServer.cpp
++
+ int main(int argc, const char* argv[])
+ {
+ 	PROFILE_INIT();
+@@ -370,6 +381,8 @@ int main(int argc, const char* argv[])
+ 	int debuggerPort = -1;
+ 	bool oldAtrac = false;
+ 	bool outputDebugStringLog = false;
++	bool bancSound = false;           // [banc] --sound : mixe l'audio (nécessaire à audio.record), sans carte son
++	const char *bancMemstick = nullptr;  // [banc] --memstick=DIR : carte mémoire (sinon $HOME/.ppsspp)
+ 
+ 	std::vector<std::string> testFilenames;
+ 	std::vector<std::string> ignoredTests;
+@@ -411,6 +424,10 @@ int main(int argc, const char* argv[])
+ 			testOptions.verbose = true;
+ 		else if (!strcmp(argv[i], "--old-atrac"))
+ 			oldAtrac = true;
++		else if (!strcmp(argv[i], "--sound"))
++			bancSound = true;
++		else if (!strncmp(argv[i], "--memstick=", strlen("--memstick=")) && strlen(argv[i]) > strlen("--memstick="))
++			bancMemstick = argv[i] + strlen("--memstick=");
+ 		else if (!strncmp(argv[i], "--graphics=", strlen("--graphics=")) && strlen(argv[i]) > strlen("--graphics="))
+ 		{
+ 			const char *gpuName = argv[i] + strlen("--graphics=");
+@@ -517,10 +534,11 @@ int main(int argc, const char* argv[])
+ 	// we actually set the cpu core in CoreParameter above. Probably because we end up using the JIT vs non-JIT
+ 	// vertex decoder.
+ 	g_Config.iCpuCore = 0;
++	g_Config.iCpuCore = (int)cpuCore;  // [banc] le coeur demandé par -i / -j / --ir / --jit-ir est réellement utilisé
+ 
+ 	// NOTE: In headless mode, we never save the config. This is just for this run.
+ 	g_Config.iDumpFileTypes = 0;
+-	g_Config.bEnableSound = false;
++	g_Config.bEnableSound = bancSound;
+ 	g_Config.bFirstRun = false;
+ 	g_Config.bIgnoreBadMemAccess = true;  // NOTE: A few tests rely on this, which is BAD: threads/mbx/refer/refer , threads/mbx/send/send, threads/vtimers/interrupt
+ 	// Never report from tests.
+@@ -571,6 +589,8 @@ int main(int argc, const char* argv[])
+ 	CreateSysDirectories();
+ #elif !PPSSPP_PLATFORM(ANDROID)
+ 	g_Config.memStickDirectory = Path(std::string(getenv("HOME"))) / ".ppsspp";
++	if (bancMemstick)
++		g_Config.memStickDirectory = Path(std::string(bancMemstick));
+ #endif
+ 
+ 	// Try to find the flash0 directory.  Often this is from a subdirectory.
+@@ -612,6 +632,7 @@ int main(int argc, const char* argv[])
+ 	UpdateUIState(UISTATE_INGAME);
+ 
+ 	if (debuggerPort > 0) {
++		http::g_banc_loopback_only = true;  // [banc] débogueur joignable depuis 127.0.0.1 uniquement
+ 		g_Config.iRemoteISOPort = debuggerPort;
+ 		coreParameter.startBreak = true;
+ 		StartWebServer(WebServerFlags::DEBUGGER);
+diff --git a/Core/Debugger/WebSocket/BancSubscriber.cpp b/Core/Debugger/WebSocket/BancSubscriber.cpp
+new file mode 100644
+index 0000000..9fa8406
+--- /dev/null
++++ b/Core/Debugger/WebSocket/BancSubscriber.cpp
+@@ -0,0 +1,431 @@
++// [banc] Extension locale du débogueur WebSocket (projet HSFA, banc d'essai PPSSPP).
++//
++// Événements ajoutés :
++//   frame.run     exécute N images exactes avec entrées par image et relevés mémoire par image
++//   state.save    sauvegarde un état dans un fichier (synchrone)
++//   state.load    charge un état depuis un fichier (synchrone)
++//   audio.record  démarre / arrête l'enregistrement WAV de la sortie audio émulée
++//   banc.info     compteur d'images (vblank), cycles, état du coeur, drapeaux
++//
++// Tout ce qui touche à l'émulation s'exécute sur le thread d'émulation (hook de fin d'image) :
++// le résultat ne dépend ni de la latence du réseau ni de l'ordonnancement des threads.
++
++#include <atomic>
++#include <chrono>
++#include <memory>
++#include <mutex>
++#include <thread>
++#include <vector>
++
++#include "Common/Data/Encoding/Base64.h"
++#include "Common/File/Path.h"
++#include "Core/Config.h"
++#include "Core/Core.h"
++#include "Core/CoreTiming.h"
++#include "Core/Debugger/Breakpoints.h"
++#include "Core/Debugger/WebSocket/BancSubscriber.h"
++#include "Core/HLE/__sceAudio.h"
++#include "Core/HLE/sceCtrl.h"
++#include "Core/HW/Display.h"
++#include "Core/MemMap.h"
++#include "Core/MIPS/MIPS.h"
++#include "Core/SaveState.h"
++#include "Core/System.h"
++
++// Défini dans Core/Core.cpp (déclaré ici pour ne pas toucher Core.h et éviter une recompilation totale).
++void Core_SetFrameHook(std::function<bool()> hook);
++
++static const uint32_t BANC_BUTTON_MASK = CTRL_SQUARE | CTRL_TRIANGLE | CTRL_CIRCLE | CTRL_CROSS | CTRL_UP | CTRL_DOWN |
++	CTRL_LEFT | CTRL_RIGHT | CTRL_START | CTRL_SELECT | CTRL_LTRIGGER | CTRL_RTRIGGER;
++
++namespace {
++
++struct FrameRun {
++	std::mutex m;
++	bool finished = false;
++	uint32_t total = 0;
++	uint32_t done = 0;
++	std::vector<uint32_t> masks;
++	std::vector<std::pair<uint32_t, uint32_t>> probes;
++	std::vector<uint8_t> samples;
++};
++
++struct StateOp {
++	std::atomic<bool> done{false};
++	std::atomic<int> status{0};
++	std::string message;
++	std::mutex m;
++};
++
++void ApplyMask(uint32_t mask) {
++	__CtrlUpdateButtons(mask & BANC_BUTTON_MASK, ~mask & BANC_BUTTON_MASK);
++}
++
++bool ParseU32Array(const JsonNode *node, std::vector<uint32_t> *out) {
++	if (!node || node->value.getTag() != JSON_ARRAY)
++		return false;
++	for (const JsonNode *n : node->value) {
++		if (n->value.getTag() != JSON_NUMBER)
++			return false;
++		out->push_back((uint32_t)(int64_t)n->value.toNumber());
++	}
++	return true;
++}
++
++void SleepUs(int us) {
++	std::this_thread::sleep_for(std::chrono::microseconds(us));
++}
++
++}  // namespace
++
++static void BancFrameRun(DebuggerRequest &req);
++static void BancStateSave(DebuggerRequest &req);
++static void BancStateLoad(DebuggerRequest &req);
++static void BancAudioRecord(DebuggerRequest &req);
++static void BancInfo(DebuggerRequest &req);
++static void BancTraceStart(DebuggerRequest &req);
++static void BancTraceStop(DebuggerRequest &req);
++static void BancTraceGet(DebuggerRequest &req);
++
++// --- Trace d'appels : un enregistrement de 32 octets (frame, pc, ra, a0, a1, a2, a3, sp, little-endian) par passage ---
++namespace {
++struct TraceState {
++	std::mutex m;
++	bool active = false;
++	int baseVblank = 0;
++	std::vector<uint32_t> recs;       // 8 mots par enregistrement
++	std::vector<uint32_t> addrs;      // points d'arrêt posés
++	uint32_t maxRecs = 4000000;
++	uint32_t dropped = 0;
++};
++TraceState g_trace;
++}  // namespace
++
++void Banc_TraceHit(u32 addr) {
++	std::lock_guard<std::mutex> lk(g_trace.m);
++	if (!g_trace.active)
++		return;
++	if (g_trace.recs.size() / 8 >= g_trace.maxRecs) {
++		g_trace.dropped++;
++		return;
++	}
++	const uint32_t f = (uint32_t)(__DisplayGetNumVblanks() - g_trace.baseVblank);
++	const uint32_t rec[8] = { f, addr, currentMIPS->r[31], currentMIPS->r[4], currentMIPS->r[5], currentMIPS->r[6], currentMIPS->r[7], currentMIPS->r[29] };
++	g_trace.recs.insert(g_trace.recs.end(), rec, rec + 8);
++}
++
++DebuggerSubscriber *WebSocketBancInit(DebuggerEventHandlerMap &map) {
++	map["frame.run"] = &BancFrameRun;
++	map["state.save"] = &BancStateSave;
++	map["state.load"] = &BancStateLoad;
++	map["audio.record"] = &BancAudioRecord;
++	map["banc.info"] = &BancInfo;
++	map["banc.flush"] = [](DebuggerRequest &req) { g_breakpoints.Frame(); mipsr4k.ClearJitCache(); req.Respond(); };
++	map["trace.start"] = &BancTraceStart;
++	map["trace.stop"] = &BancTraceStop;
++	map["trace.get"] = &BancTraceGet;
++	return nullptr;
++}
++
++// Exécute exactement N images (frame.run)
++//
++// Le coeur doit être en pause. Parameters:
++//  - frames: nombre d'images à exécuter (défaut 1). Une image = jusqu'au prochain vblank (CORE_NEXTFRAME).
++//  - inputs: optionnel, tableau de masques de boutons (bits PSP : select 1, start 8, haut 0x10, droite 0x20,
++//    bas 0x40, gauche 0x80, L 0x100, R 0x200, triangle 0x1000, rond 0x2000, croix 0x4000, carré 0x8000).
++//    inputs[k] est appliqué AVANT l'image k ; si le tableau est plus court, le dernier masque est conservé ;
++//    s'il est absent, les boutons ne changent pas.
++//  - probes: optionnel, tableau de {address, size} lus à la FIN de chaque image.
++//  - timeout: secondes (défaut 600).
++//
++// Réponse (même nom) :
++//  - stopped: "frames" (N images faites) ou "break" (point d'arrêt / erreur avant la fin).
++//  - framesDone, vblank (compteur absolu), ticks, pc, reason (si arrêt).
++//  - sampleBytes: octets par image ; samples: base64 de framesDone * sampleBytes octets (image par image).
++static void BancFrameRun(DebuggerRequest &req) {
++	if (PSP_GetBootState() != BootState::Complete)
++		return req.Fail("Game not running");
++	if (coreState != CORE_STEPPING_CPU)
++		return req.Fail("frame.run needs the CPU to be paused (stepping)");
++
++	auto run = std::make_shared<FrameRun>();
++	uint32_t frames = 1;
++	if (!req.ParamU32("frames", &frames, false, DebuggerParamType::OPTIONAL))
++		return;
++	run->total = frames;
++	uint32_t timeoutSec = 600;
++	if (!req.ParamU32("timeout", &timeoutSec, false, DebuggerParamType::OPTIONAL))
++		return;
++
++	bool haveInputs = false;
++	const JsonNode *inputs = req.data.get("inputs");
++	if (inputs && inputs->value.getTag() != JSON_NULL) {
++		if (!ParseU32Array(inputs, &run->masks))
++			return req.Fail("Invalid 'inputs' (array of numbers expected)");
++		haveInputs = !run->masks.empty();
++	}
++	const JsonNode *probes = req.data.get("probes");
++	uint32_t sampleBytes = 0;
++	if (probes && probes->value.getTag() != JSON_NULL) {
++		if (probes->value.getTag() != JSON_ARRAY)
++			return req.Fail("Invalid 'probes' (array expected)");
++		for (const JsonNode *n : probes->value) {
++			if (n->value.getTag() != JSON_OBJECT)
++				return req.Fail("Invalid 'probes' entry");
++			json::JsonGet g(n->value);
++			uint32_t addr = (uint32_t)(int64_t)g.getFloat("address", 0.0);
++			uint32_t size = (uint32_t)(int64_t)g.getFloat("size", 0.0);
++			if (size == 0 || !Memory::IsValidRange(addr, size))
++				return req.Fail("Invalid probe range");
++			run->probes.push_back({ addr, size });
++			sampleBytes += size;
++		}
++	}
++	if (frames == 0)
++		frames = 0;
++
++	if (haveInputs)
++		ApplyMask(run->masks[0]);
++
++	// Applique tout de suite les points d'arrêt ajoutés avant l'appel (vide le cache JIT) : sinon un bloc déjà
++	// compilé ne les voit pas. D'ordinaire c'est l'interface qui appelle Frame().
++	g_breakpoints.Frame();
++
++	std::weak_ptr<FrameRun> weak = run;
++	Core_SetFrameHook([run]() -> bool {
++		std::lock_guard<std::mutex> lk(run->m);
++		// Relevés de fin d'image.
++		for (const auto &p : run->probes) {
++			const u8 *ptr = Memory::IsValidRange(p.first, p.second) ? Memory::GetPointer(p.first) : nullptr;
++			size_t at = run->samples.size();
++			run->samples.resize(at + p.second);
++			if (ptr)
++				memcpy(&run->samples[at], ptr, p.second);
++		}
++		run->done++;
++		if (run->done >= run->total) {
++			run->finished = true;
++			return true;
++		}
++		if (!run->masks.empty()) {
++			size_t k = run->done < run->masks.size() ? run->done : run->masks.size() - 1;
++			ApplyMask(run->masks[k]);
++		}
++		return false;
++	});
++
++	bool brokeEarly = false;
++	if (frames > 0) {
++		Core_Resume();
++		auto start = std::chrono::steady_clock::now();
++		while (true) {
++			SleepUs(200);
++			{
++				std::lock_guard<std::mutex> lk(run->m);
++				if (run->finished)
++					break;
++			}
++			CoreState st = coreState;
++			if (st != CORE_RUNNING_CPU && st != CORE_NEXTFRAME) {
++				// Point d'arrêt, erreur, arrêt demandé : on laisse un instant au hook si c'est lui qui conclut.
++				SleepUs(2000);
++				std::lock_guard<std::mutex> lk(run->m);
++				if (!run->finished)
++					brokeEarly = true;
++				break;
++			}
++			if (std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() > timeoutSec) {
++				Core_Break(BreakReason::DebugBreak, 0);
++				brokeEarly = true;
++				break;
++			}
++		}
++		Core_SetFrameHook(nullptr);
++		if (brokeEarly) {
++			// Laisser l'état se stabiliser en pause avant de répondre.
++			for (int i = 0; i < 5000 && coreState == CORE_RUNNING_CPU; i++)
++				SleepUs(200);
++		}
++	} else {
++		Core_SetFrameHook(nullptr);
++	}
++
++	std::lock_guard<std::mutex> lk(run->m);
++	JsonWriter &json = req.Respond();
++	json.writeString("stopped", brokeEarly ? "break" : "frames");
++	json.writeUint("framesDone", run->done);
++	json.writeInt("vblank", __DisplayGetNumVblanks());
++	json.writeFloat("ticks", CoreTiming::GetTicks());
++	json.writeUint("pc", currentMIPS->pc);
++	if (brokeEarly) {
++		SteppingReason r = Core_GetSteppingReason();
++		json.writeString("reason", BreakReasonToString(r.reason));
++		json.writeUint("relatedAddress", r.relatedAddress);
++	}
++	json.writeUint("sampleBytes", sampleBytes);
++	json.writeString("samples", Base64Encode(run->samples.data(), run->samples.size()));
++}
++
++static void WaitStateOp(DebuggerRequest &req, const std::shared_ptr<StateOp> &op, const char *what) {
++	auto start = std::chrono::steady_clock::now();
++	while (!op->done) {
++		SleepUs(200);
++		if (std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count() > 120.0)
++			return req.Fail(std::string(what) + ": timeout (is the CPU stepping? a state is processed by the emu thread)");
++	}
++	std::lock_guard<std::mutex> lk(op->m);
++	JsonWriter &json = req.Respond();
++	json.writeBool("ok", op->status == (int)SaveState::Status::SUCCESS);
++	json.writeInt("status", op->status);
++	json.writeString("message", op->message);
++}
++
++// Sauvegarde un état dans un fichier (state.save). Parameters: path (chaîne). Synchrone ; le coeur doit être en pause.
++static void BancStateSave(DebuggerRequest &req) {
++	if (PSP_GetBootState() != BootState::Complete)
++		return req.Fail("Game not running");
++	std::string path;
++	if (!req.ParamString("path", &path))
++		return;
++	auto op = std::make_shared<StateOp>();
++	SaveState::Save(Path(path), -1, [op](SaveState::Status s, std::string_view msg) {
++		std::lock_guard<std::mutex> lk(op->m);
++		op->status = (int)s;
++		op->message = std::string(msg);
++		op->done = true;
++	});
++	WaitStateOp(req, op, "state.save");
++}
++
++// Charge un état depuis un fichier (state.load). Parameters: path (chaîne). Synchrone ; le coeur doit être en pause.
++static void BancStateLoad(DebuggerRequest &req) {
++	if (PSP_GetBootState() != BootState::Complete)
++		return req.Fail("Game not running");
++	std::string path;
++	if (!req.ParamString("path", &path))
++		return;
++	auto op = std::make_shared<StateOp>();
++	SaveState::Load(Path(path), -1, [op](SaveState::Status s, std::string_view msg) {
++		std::lock_guard<std::mutex> lk(op->m);
++		op->status = (int)s;
++		op->message = std::string(msg);
++		op->done = true;
++	});
++	WaitStateOp(req, op, "state.load");
++}
++
++// Enregistrement WAV de la sortie audio émulée (audio.record). Le coeur doit être lancé avec --sound.
++// Parameters: path (chaîne) pour démarrer, ou stop:true pour finir et écrire l'en-tête.
++static void BancAudioRecord(DebuggerRequest &req) {
++	if (PSP_GetBootState() != BootState::Complete)
++		return req.Fail("Game not running");
++	bool stop = false;
++	if (!req.ParamBool("stop", &stop, DebuggerParamType::OPTIONAL))
++		return;
++	if (!g_Config.bEnableSound)
++		return req.Fail("Sound is disabled (start the emulator with --sound)");
++	if (stop) {
++		g_Config.bDumpAudio = false;
++		__StopLogAudio();
++		req.Respond();
++		return;
++	}
++	std::string path;
++	if (!req.ParamString("path", &path))
++		return;
++	g_Config.bDumpAudio = true;
++	__StartLogAudio(Path(path));
++	req.Respond();
++}
++
++// État du banc (banc.info) : vblank, ticks, coreState, sound.
++static void BancInfo(DebuggerRequest &req) {
++	JsonWriter &json = req.Respond();
++	json.writeInt("vblank", __DisplayGetNumVblanks());
++	json.writeFloat("ticks", CoreTiming::GetTicks());
++	json.writeString("coreState", CoreStateToString(coreState));
++	json.writeBool("sound", g_Config.bEnableSound);
++	json.writeInt("cpuCore", g_Config.iCpuCore);
++	json.writeBool("softwareRendering", g_Config.bSoftwareRendering);
++	json.writeUint("pc", currentMIPS ? currentMIPS->pc : 0);
++}
++
++// Trace d'appels de fonctions (trace.start) : journalise chaque passage sur une adresse, en marche, sans arrêt.
++// Parameters:
++//  - addresses: tableau d'adresses PSP (entrées de fonctions). Remplace la liste précédente.
++//  - max: nombre maximal d'enregistrements (défaut 4 000 000).
++// Pose des points d'arrêt de « journal » (action LOG marquée « banc », jamais PAUSE) ; frame = vblank depuis trace.start.
++// L'exécution reste déterministe. Le cache JIT est vidé à la reprise (g_breakpoints.Frame()).
++static void BancTraceStart(DebuggerRequest &req) {
++	if (PSP_GetBootState() != BootState::Complete)
++		return req.Fail("Game not running");
++	std::vector<uint32_t> addrs;
++	if (!ParseU32Array(req.data.get("addresses"), &addrs))
++		return req.Fail("Missing or invalid 'addresses'");
++	uint32_t maxRecs = 4000000;
++	if (!req.ParamU32("max", &maxRecs, false, DebuggerParamType::OPTIONAL))
++		return;
++	{
++		std::lock_guard<std::mutex> lk(g_trace.m);
++		for (uint32_t a : g_trace.addrs)
++			g_breakpoints.RemoveBreakPoint(a);
++		g_trace.addrs.clear();
++		g_trace.recs.clear();
++		g_trace.dropped = 0;
++		g_trace.maxRecs = maxRecs;
++		g_trace.baseVblank = __DisplayGetNumVblanks();
++	}
++	for (uint32_t a : addrs) {
++		g_breakpoints.AddBreakPoint(a);
++		g_breakpoints.ChangeBreakPoint(a, BreakAction(BREAK_ACTION_LOG));
++		g_breakpoints.ChangeBreakPointLogFormat(a, "\x01banc");
++	}
++	{
++		std::lock_guard<std::mutex> lk(g_trace.m);
++		g_trace.addrs = addrs;
++		g_trace.active = true;
++	}
++	// BreakpointManager::Update() ne retient que la DERNIÈRE adresse : les blocs déjà compilés par le JIT qui contiennent les autres
++	// n'étaient jamais invalidés (points d'arrêt muets). On vide donc tout le cache JIT (le coeur est en pause).
++	g_breakpoints.Frame();
++	mipsr4k.ClearJitCache();
++	JsonWriter &json = req.Respond();
++	json.writeUint("count", (uint32_t)addrs.size());
++}
++
++// Arrête la trace et retire ses points d'arrêt (trace.stop). Les enregistrements restent lisibles.
++static void BancTraceStop(DebuggerRequest &req) {
++	std::vector<uint32_t> addrs;
++	{
++		std::lock_guard<std::mutex> lk(g_trace.m);
++		g_trace.active = false;
++		addrs.swap(g_trace.addrs);
++	}
++	for (uint32_t a : addrs)
++		g_breakpoints.RemoveBreakPoint(a);
++	g_breakpoints.Frame();
++	mipsr4k.ClearJitCache();
++	req.Respond();
++}
++
++// Lit (et vide si clear:true) les enregistrements (trace.get) : count, dropped, base64 de count x 32 octets.
++static void BancTraceGet(DebuggerRequest &req) {
++	bool clear = true;
++	if (!req.ParamBool("clear", &clear, DebuggerParamType::OPTIONAL))
++		return;
++	std::vector<uint32_t> recs;
++	uint32_t dropped;
++	{
++		std::lock_guard<std::mutex> lk(g_trace.m);
++		recs = g_trace.recs;
++		dropped = g_trace.dropped;
++		if (clear) {
++			g_trace.recs.clear();
++			g_trace.dropped = 0;
++		}
++	}
++	JsonWriter &json = req.Respond();
++	json.writeUint("count", (uint32_t)(recs.size() / 8));
++	json.writeUint("dropped", dropped);
++	json.writeString("records", Base64Encode((const uint8_t *)recs.data(), recs.size() * 4));
++}
+diff --git a/Core/Debugger/WebSocket/BancSubscriber.h b/Core/Debugger/WebSocket/BancSubscriber.h
+new file mode 100644
+index 0000000..00e6365
+--- /dev/null
++++ b/Core/Debugger/WebSocket/BancSubscriber.h
+@@ -0,0 +1,7 @@
++// [banc] Extension locale du débogueur WebSocket : exécution image par image déterministe,
++// états de sauvegarde, enregistrement audio. Voir PPSSPP-BANC.md (projet HSFA).
++#pragma once
++
++#include "Core/Debugger/WebSocket/WebSocketUtils.h"
++
++DebuggerSubscriber *WebSocketBancInit(DebuggerEventHandlerMap &map);

@@ -1,0 +1,7 @@
+# Adon_Z : version $35, table $E70E80 (redirection), 23 entrees, origine prog+1EA588
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	35	03AA	01AE	1		DP inverse+HK
+sfa1	35	03AB	01AF	1		demi-cercle arriere+HK
+sfa1	35	03AE	01B1	2	01B0:2	demi-cercle arriere+HK ; projection HK ; projection HP ; projection HP 2
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

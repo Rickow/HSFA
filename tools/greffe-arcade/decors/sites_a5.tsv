@@ -1,0 +1,174 @@
+module	dep	va_instr	mnemo	routine	partenaire_ro9	classe	couv_k
+ro5	$0100	2cad0	lh	2cac0	84730	nouvelle (<40 %)	0.33
+ro5	$0100	2eed4	sh	2ee80	a4170	nouvelle (<40 %)	0.50
+ro5	$0100	2efb8	lh	2ee80	a4170	nouvelle (<40 %)	0.50
+ro5	$0100	2f084	sh	2ee80	a4170	nouvelle (<40 %)	0.50
+ro5	$0100	4aa70	lh	4aa60	3c390	nouvelle (<40 %)	0.91
+ro5	$0100	4abc0	lh	4abb0	60570	modifiee (70-90 %)	1.00
+ro5	$0100	4ac60	lh	4ac50	60570	modifiee (70-90 %)	1.00
+ro5	$0100	4ad00	lh	4acf0	61300	modifiee (70-90 %)	1.00
+ro5	$0100	4b940	lh	4b930	3c390	nouvelle (<40 %)	0.91
+ro5	$0100	4bae0	lh	4bad0	60570	modifiee (70-90 %)	0.95
+ro5	$0100	4bb80	lh	4bb70	60570	modifiee (70-90 %)	1.00
+ro5	$0100	4bc20	lh	4bc10	61300	modifiee (70-90 %)	1.00
+ro5	$0100	4c1c0	lh	4c1b0	25e240	nouvelle (<40 %)	0.27
+ro5	$0100	4c474	sh	4c3f0	618c0	quasi identique (>=90 %)	0.94
+ro5	$00DC	4c564	sh	4c3f0	618c0	quasi identique (>=90 %)	0.94
+ro5	$0100	4eb30	sh	4ea30	63560	apparentee (40-70 %)	0.97
+ro5	$0100	4f70c	sh	4f430	a08a0	nouvelle (<40 %)	0.32
+ro5	$0100	4fdd4	sh	4fc30	a7e50	apparentee (40-70 %)	0.70
+ro5	$00DC	51038	sh	50d80	2ea330	apparentee (40-70 %)	0.44
+ro5	$00DC	53718	lb	536e0	108930	nouvelle (<40 %)	0.09
+ro5	$00DC	54c70	sh	54b30	3245f0	nouvelle (<40 %)	0.00
+ro5	$0100	54ce0	sh	54b30	3245f0	nouvelle (<40 %)	0.00
+ro5	$00DC	554a8	lb	55440	fe700	nouvelle (<40 %)	0.42
+ro5	$0100	c88e0	lh	c8890	38d510	identique	1.00
+ro5	$0110	ca9a8	lb	ca990	38ded0	identique	1.00
+ro5	$0110	caaf8	lb	caae0	38e020	identique	1.00
+ro5	$0100	f29c0	lh	f29a0	37bdc0	identique	1.00
+ro5	$0100	f2a50	lh	f2a30	37bdc0	identique	1.00
+ro5	$0110	f3030	lb	f2fd0	37c3f0	identique	1.00
+ro5	$0110	f5da8	lb	f5bd0	37eff0	identique	1.00
+ro5	$0110	f8d58	lb	f8c20	382040	identique	1.00
+ro5	$0110	fbf48	lb	fbf30	385350	identique	1.00
+ro5	$0110	fc768	lb	fc620	385a40	identique	1.00
+ro5	$0100	fd9b0	lh	fd910	2dd6b0	apparentee (40-70 %)	0.86
+ro5	$0100	fdc20	lh	fdc10	3c390	nouvelle (<40 %)	1.00
+ro5	$0100	105c94	lh	105c70	37e7a0	nouvelle (<40 %)	0.60
+ro5	$0110	11c318	lb	11bf90	3a4fd0	quasi identique (>=90 %)	0.99
+ro5	$0110	11c6b0	lb	11bf90	3a4fd0	quasi identique (>=90 %)	0.99
+ro5	$0100	139ec8	lh	139ad0	b0810	nouvelle (<40 %)	0.30
+ro5	$0100	13a56c	lh	139ad0	b0810	nouvelle (<40 %)	0.30
+ro5	$0100	13a738	lh	139ad0	b0810	nouvelle (<40 %)	0.30
+ro5	$0100	13bb58	lh	13bb10	391e50	quasi identique (>=90 %)	1.00
+ro5	$0100	14f53c	lh	14f510	313a80	identique	1.00
+ro5	$0100	14f9b8	lh	14f9b0	313f20	identique	1.00
+ro5	$0100	151280	lh	151270	3157e0	identique	1.00
+ro5	$0100	151568	lh	151560	315a50	identique	1.00
+ro5	$0100	151760	lh	151750	315c40	identique	1.00
+ro5	$0100	1519b8	lh	1519b0	313f20	identique	1.00
+ro5	$0100	151dd8	lh	151b80	30ec10	identique	1.00
+ro5	$0100	151ec4	lh	151ea0	30fee0	identique	1.00
+ro5	$0100	154290	lh	154280	30f240	identique	1.00
+ro5	$0100	155944	lh	155920	30fee0	identique	1.00
+ro5	$0100	157324	lh	157300	311550	modifiee (70-90 %)	0.92
+ro5	$0100	1586d0	lh	1586c0	311ab0	identique	1.00
+ro5	$0100	15acb8	lh	15acb0	313960	identique	1.00
+ro5	$0172	197058	lh	196f50	1592a0	nouvelle (<40 %)	0.38
+ro5	$0100	1970d0	lh	196f50	1592a0	nouvelle (<40 %)	0.38
+ro5	$0100	197114	lh	196f50	1592a0	nouvelle (<40 %)	0.38
+ro5	$0100	198a10	lh	198a00	3786a0	nouvelle (<40 %)	0.65
+ro5	$0100	1996c4	lh	199530	33d7f0	nouvelle (<40 %)	0.41
+ro5	$0100	199f7c	lh	199da0	331bb0	nouvelle (<40 %)	0.71
+ro5	$00DC	1cbd78	lb	1cbcc0	1938f0	nouvelle (<40 %)	0.32
+ro5	$00DC	1cbdb0	lb	1cbcc0	1938f0	nouvelle (<40 %)	0.32
+ro5	$00DC	1cbf94	lb	1cbe80	25db30	apparentee (40-70 %)	0.64
+ro5	$00DC	1cc018	lb	1cbe80	25db30	apparentee (40-70 %)	0.64
+ro5	$0100	1e4a54	lh	1e4530	38d510	apparentee (40-70 %)	0.56
+ro5	$0100	247d88	lh	247d80	2c75e0	identique	1.00
+ro5	$0100	247dc0	lh	247db0	2c7610	identique	1.00
+ro5	$0100	248058	lh	247e40	2c76a0	identique	1.00
+ro5	$0100	249054	sh	2489e0	2d4eb0	nouvelle (<40 %)	0.35
+ro5	$0174	249064	sh	2489e0	2d4eb0	nouvelle (<40 %)	0.35
+ro5	$0100	2492a0	sh	2489e0	2d4eb0	nouvelle (<40 %)	0.35
+ro5	$0174	2492b0	sh	2489e0	2d4eb0	nouvelle (<40 %)	0.35
+ro5	$0100	249464	sh	2489e0	2d4eb0	nouvelle (<40 %)	0.35
+ro5	$0174	249474	sh	2489e0	2d4eb0	nouvelle (<40 %)	0.35
+ro5	$0100	24f29c	lh	24f020	a49e0	apparentee (40-70 %)	0.52
+ro5	$0172	24f2a8	sh	24f020	a49e0	apparentee (40-70 %)	0.52
+ro5	$0174	24f2f4	sh	24f020	a49e0	apparentee (40-70 %)	0.52
+ro5	$0174	24f49c	sh	24f020	a49e0	apparentee (40-70 %)	0.52
+ro5	$0174	24f710	sh	24f020	a49e0	apparentee (40-70 %)	0.52
+ro5	$0174	24f980	sh	24f020	a49e0	apparentee (40-70 %)	0.52
+ro5	$0100	254a80	sh	254440	318490	identique	1.00
+ro5	$0100	258658	sh	258450	31d6a0	quasi identique (>=90 %)	0.99
+ro5	$0100	25ed88	sh	25ed20	3034c0	apparentee (40-70 %)	0.77
+ro5	$0100	25faac	sh	25f570	321220	identique	1.00
+ro5	$0172	25fac4	sh	25f570	321220	identique	1.00
+ro5	$0174	25fadc	sh	25f570	321220	identique	1.00
+ro5	$0110	2618c0	sb	2615d0	96690	nouvelle (<40 %)	0.26
+ro5	$0174	261b24	lh	2615d0	96690	nouvelle (<40 %)	0.26
+ro5	$0100	261b30	sh	2615d0	96690	nouvelle (<40 %)	0.26
+ro5	$0110	2623ac	sb	2615d0	96690	nouvelle (<40 %)	0.26
+ro5	$0100	263dac	sh	263c10	2d2eb0	nouvelle (<40 %)	0.82
+ro5	$0110	26cdac	lb	26cd00	9f4a0	nouvelle (<40 %)	0.58
+ro5	$0100	26f8d4	sh	26f680	a05c0	quasi identique (>=90 %)	0.99
+ro5	$0100	2923cc	lh	292370	1a0bc0	deplacements	0.99
+ro5	$0100	2fd118	lh	2fcd60	1f94e0	apparentee (40-70 %)	0.74
+ro5	$0100	371a0c	lh	371920	244c10	modifiee (70-90 %)	0.85
+ro5	$0100	37ec94	lh	37eae0	7c840	apparentee (40-70 %)	0.82
+ro5	$0100	37efc0	lh	37ef10	a8070	nouvelle (<40 %)	0.81
+ro5	$0100	37f95c	lh	37f830	238f50	identique	1.00
+ro5	$0100	37fde4	lh	37fa90	2391b0	identique	1.00
+ro5	$0100	40e2ac	sh	40d410	2da90	identique	1.00
+ro9	$0100	2e92c	sh	2da90			
+ro9	$0100	60580	lh	60570			
+ro9	$C178	6059c	lh	60570			
+ro9	$0100	61190	lh	61180			
+ro9	$C178	611ac	lh	61180			
+ro9	$0100	61250	lh	61240			
+ro9	$C178	6126c	lh	61240			
+ro9	$0100	61310	lh	61300			
+ro9	$C178	6132c	lh	61300			
+ro9	$0100	61944	sh	618c0			
+ro9	$00DC	61a34	sh	618c0			
+ro9	$C178	627e8	sh	626e0			
+ro9	$0100	6363c	sh	63560			
+ro9	$0110	96980	sb	96690			
+ro9	$0174	96c14	lh	96690			
+ro9	$0100	96c20	sh	96690			
+ro9	$C178	96c2c	lh	96690			
+ro9	$C178	96c34	sh	96690			
+ro9	$C178	96c40	lh	96690			
+ro9	$C178	96c48	sh	96690			
+ro9	$0110	97040	sb	96690			
+ro9	$0100	9872c	sh	98590			
+ro9	$C178	98758	sh	98590			
+ro9	$0100	a0814	sh	a05c0			
+ro9	$C178	a0840	sh	a05c0			
+ro9	$0100	a4a14	lh	a49e0			
+ro9	$0172	a4a20	sh	a49e0			
+ro9	$0174	a4a68	sh	a49e0			
+ro9	$0174	a4bdc	sh	a49e0			
+ro9	$0174	a4e28	sh	a49e0			
+ro9	$0174	a5098	sh	a49e0			
+ro9	$0100	1a0c1c	lh	1a0bc0			
+ro9	$0100	238214	lh	237950			
+ro9	$0100	2384d0	lh	237950			
+ro9	$0100	23907c	lh	238f50			
+ro9	$0100	239504	lh	2391b0			
+ro9	$0100	2c75e8	lh	2c75e0			
+ro9	$0100	2c7620	lh	2c7610			
+ro9	$0100	2c78b8	lh	2c76a0			
+ro9	$0100	30ee68	lh	30ec10			
+ro9	$0100	30ef24	lh	30ef00			
+ro9	$0100	30f250	lh	30f240			
+ro9	$0100	30ff04	lh	30fee0			
+ro9	$0100	311574	lh	311550			
+ro9	$0100	311ac0	lh	311ab0			
+ro9	$0100	313968	lh	313960			
+ro9	$0100	313aac	lh	313a80			
+ro9	$0100	313f28	lh	313f20			
+ro9	$0100	3157f0	lh	3157e0			
+ro9	$0100	315a58	lh	315a50			
+ro9	$0100	315c50	lh	315c40			
+ro9	$0100	315ea8	lh	315ea0			
+ro9	$0100	318ad0	sh	318490			
+ro9	$0100	31d8a8	sh	31d6a0			
+ro9	$0100	320ca8	sh	320c60			
+ro9	$0100	32175c	sh	321220			
+ro9	$0172	321774	sh	321220			
+ro9	$0174	32178c	sh	321220			
+ro9	$0100	37bde0	lh	37bdc0			
+ro9	$0100	37be70	lh	37be50			
+ro9	$0110	37c450	lb	37c3f0			
+ro9	$0110	37f1c8	lb	37eff0			
+ro9	$0110	382178	lb	382040			
+ro9	$0110	385368	lb	385350			
+ro9	$0110	385b88	lb	385a40			
+ro9	$0100	38d560	lh	38d510			
+ro9	$0110	38dee8	lb	38ded0			
+ro9	$0110	38e038	lb	38e020			
+ro9	$0100	391e98	lh	391e50			
+ro9	$0110	3a5450	lb	3a4fd0			
+ro9	$0110	3a57e8	lb	3a4fd0			

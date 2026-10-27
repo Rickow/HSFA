@@ -1,0 +1,73 @@
+--- a/scripts/untranspile/mame_test.py
++++ b/scripts/untranspile/mame_test.py
+@@ -514,10 +514,42 @@
+                 patch_call(img, it, stub_site[AN.SITES[it.va]])
+         print("tables d'animation natives : %d fichiers, %d octets en $%x" % (len(ava), len(ablob), ASSET))
+         assert (tperso_fin if stub_pj else tperso + 4*len(aperso)) <= (HASH or CODEMAP), "donnees + blocs chevauchent la table des adresses de code"
++        cible = {v: lab(v - T.RUNTIME_BASE) for v in keys}
++        # (agent_options, OPTIONS.md) OPTION du menu des modes : la tache de l'ecran d'options du portage est du C
++        # natif (affichage PS2, reglages dans la sauvegarde de l'Anthology) -> sans traduction : ecran noir.
++        # OPTION_RETOUR=1 (defaut) : l'adresse de cette tache se convertit en celle de la routine de SORTIE de l'ecran
++        # (traduite : applique, remet l'etat a zero, relance la tache d'amorcage) = OPTION puis EXIT tout de suite ;
++        # retour a l'ecran-titre puis au menu. Les reglages passent par les options du coeur / banc_options.lua.
++        # OPTION_RETOUR=0 : ancien comportement (ROM identique).
++        if P.get('option') and os.environ.get("OPTION_RETOUR", "1") != "0":
++            tache, sortie = P['option'][:2]
++            assert tache in cible and sortie in cible, "OPTION_RETOUR : %x / %x absentes de la table" % (tache, sortie)
++            cible[tache] = cible[sortie]
++            print("OPTION : tache %x -> sortie de l'ecran d'options %x ($%x) (agent_options, OPTION_RETOUR)" % (tache, sortie, cible[sortie]))
++        # (agent_options) EXIT du menu des modes : appel natif 0x1CAC80 (retour au menu general de l'Anthology) -> talon
++        # RTS puis attente sans fin (ecran noir). EXIT_RETOUR=1 (defaut) : l'appel va a la meme routine de sortie (retour
++        # au menu des modes ; il n'y a rien a quitter sur CPS2). EXIT_RETOUR=0 : ancien comportement.
++        if P.get('option') and os.environ.get("EXIT_RETOUR", "1") != "0":
++            # Le menu appelle EXIT depuis SA tache (emplacement $80, celui que la sortie veut recreer) : on fait comme
++            # OPTION -> nouvelle tache (emplacement $40) sur la routine de sortie, puis fin de la tache du menu.
++            # Tremplin $804 (libre entre le RTE $802 et STUB_ANIM $810, a portee des BSR.W) -> talon pres de CODECONV.
++            tache, sortie, creer, finir, curseur = P['option']
++            n_exit, STUB_EXIT, TALON = 0, STUB_RTE + 2, CODECONV - 0x20
++            assert img[STUB_EXIT:STUB_EXIT+6] == bytes(6) and img[TALON:TALON+0x20] == bytes(0x20) and CODEMAP + 8*len(keys) <= TALON
++            struct.pack_into('>HI', img, STUB_EXIT, 0x4ef9, TALON)                          # JMP talon.L
++            # curseur du menu remis sur OPTION (5) : la tache relancee par la sortie ne montre le menu que dans ce cas
++            # (sinon elle lance directement le mode du curseur : EXIT recommencerait, VERSUS partirait)
++            struct.pack_into('>HHIHHHIHIHI', img, TALON, 0x13fc, 5, curseur,               # MOVE.B #5,curseur.L
++                             0x303c, 0x40, 0x41f9, sortie,                                   # MOVE.W #$40,D0 ; LEA sortie,A0
++                             0x4eb9, lab(creer - T.RUNTIME_BASE), 0x4ef9, lab(finir - T.RUNTIME_BASE))   # JSR creer ; JMP finir
++            for it in its:
++                if it.kind in ('call', 'jump') and getattr(it, 'tgt', None) == 0x1CAC80 - T.RUNTIME_BASE:
++                    patch_call(img, it, STUB_EXIT); n_exit += 1
++            print("EXIT : %d appel(s) de 0x1cac80 -> tache %x ($%x) creee par $%x, puis $%x (agent_options, EXIT_RETOUR)" % (n_exit, sortie, cible[sortie], lab(creer - T.RUNTIME_BASE), lab(finir - T.RUNTIME_BASE)))
+         for k, v in enumerate(keys):                     # table des adresses de code (triee)
+-            struct.pack_into('>II', img, CODEMAP + 8*k, v, lab(v - T.RUNTIME_BASE))
++            struct.pack_into('>II', img, CODEMAP + 8*k, v, cible[v])
+         if HASH is not None:
+-            ht = K.build_hash([(v, lab(v - T.RUNTIME_BASE)) for v in keys])
++            ht = K.build_hash([(v, cible[v]) for v in keys])
+             assert img[HASH:HASH+len(ht)] == bytes(len(ht)), "table de hachage : zone $%x occupee" % HASH
+             img[HASH:HASH+len(ht)] = ht
+             print("conversion des adresses de code : table de hachage %d cles en $%x (HANDOFF §98)" % (len(keys), HASH))
+--- a/scripts/untranspile/profils.py
++++ b/scripts/untranspile/profils.py
+@@ -20,6 +20,7 @@
+         palettes=0x451230,                       # table moteur des palettes par perso (§105)
+         mains=True,                              # routines reecrites a la main (§103-§104)
+         travail='<workspace>/work/mame', sortie='roms_tr',
++        option=(0x573e20, 0x5792e0, 0x21f710, 0x21f8e0, 0xff4001),           # (agent_options) tache OPTION, sortie de l'ecran, creer / finir une tache (exec.), curseur des modes (68K)
+     ),
+     'ro5': dict(
+         fichier='ro5_usa_prog68k.bin',
+@@ -37,6 +38,7 @@
+         blocs=(0x61a100, 32),                    # (HANDOFF §126) table des blocs de donnees par perso : la coupure des
+                                                  # donnees (§108) tombe au debut d'un bloc (pointeurs base + decalage)
+         travail='<workspace>/work/mame_ro5', sortie='roms_ro5',
++        option=(0x5f22e0, 0x5f72e0, 0x222ce0, 0x222eb0, 0xff4201),           # (agent_options) tache OPTION, sortie de l'ecran, creer / finir une tache (exec.), curseur des modes (68K)
+     ),
+     # (agent_ro9, MISE-EN-ROUTE-ro9.md) Hyper : valeurs de CARTE-ro9 §4, reverifiees dans le MIPS (outils/compare.py)
+     'ro9': dict(
+@@ -55,6 +57,7 @@
+         data_ext=0x940000,                       # fin des donnees en $940000 (marquee $01 dans la conversion) :
+                                                  # $C80000 est occupe par le fichier fixe 547 ($C84000-$D0B188)
+         travail='<workspace>/work/mame_ro9', sortie='roms_ro9',
++        option=(0x214ab0, 0x2185b0, 0x22f660, 0x22f830, 0xff4201),           # (agent_options) tache OPTION, sortie de l'ecran, creer / finir une tache (exec.), curseur des modes (68K)
+     ),
+ }
+ 

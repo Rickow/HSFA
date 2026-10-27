@@ -1,0 +1,10 @@
+# Dan_A : version $6C, table $E74080 (redirection), 29 entrees, origine prog+25D3E2
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	6C	0489	032C	3		QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	6C	048A	032D	2		DP+HP ; DP+LP
+sfa2	6C	048B	032E	5		QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	6C	048E	0332	2		projection HP ; projection HP 2
+sfa2	6C	048F	0331	2		QCB+HK ; demi-cercle arriere+HK
+sfa2	6C	0491	0334	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

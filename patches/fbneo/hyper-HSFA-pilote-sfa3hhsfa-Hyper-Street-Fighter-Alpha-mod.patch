@@ -1,0 +1,672 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 14:24:14 +0200
+Subject: [PATCH] HSFA : pilote sfa3hhsfa (Hyper Street Fighter Alpha, module
+ ro9 retraduit en 68000)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- d_cps2.cpp : pilote sfa3hhsfa ; memes mecanismes qu'Upper (HsfaMode 2 : bases de plans, ROM graphique etendue
+  de 64 Mo, codes d'objet sur 20 bits), son hybride d'Upper (hx3.*) ; DIP « PS2 music » a « All tracks » par defaut
+  (les musiques ZERO, ZERO 2, ALPHA et variantes n'existent qu'en flux ADX) ; hsfa_ext.bin de 5,75 Mo.
+- cps_hsfa.cpp : la base des donnees externes vient de la taille de hsfa_ext.bin (fin fixe $F00000 ; SFA3 / Upper :
+  $A00000, inchange ; Hyper : $940000, blocs $940000 et $C84000) ; crochet d'essai HSFA_NOROUL (PC seulement,
+  variable d'environnement, Hyper) equivalent au NOROUL des scripts du banc.
+- Les tests HsfaMode == 2 ne changent pas : le patch « decors » (bCfgPlans) reste applicable tel quel.
+- hsfa_run.c : PILOTE=hyper (portage de tournee_hyper.lua : titre, menu, selections EX, combats, contournement de la
+  scene E), DUMPRAM, WATCHW ; STATETEST rejoue les entrees et ecritures enregistrees du pilote.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ gamelist.txt                     |   3 +-
+ hsfa/hsfa_run.c                  | 267 ++++++++++++++++++++++++++++++-
+ src/burn/drv/capcom/cps.h        |   1 +
+ src/burn/drv/capcom/cps_hsfa.cpp |  78 +++++++--
+ src/burn/drv/capcom/d_cps2.cpp   |  75 +++++++++
+ src/dep/generated/driverlist.h   |   3 +
+ 6 files changed, 412 insertions(+), 15 deletions(-)
+
+diff --git a/gamelist.txt b/gamelist.txt
+index 2fddacb..83949ef 100644
+--- a/gamelist.txt
++++ b/gamelist.txt
+@@ -1,6 +1,6 @@
+ This list contains all games supported by FinalBurn Neo.
+ 
+-816 games supported in total; X = excluded from build; D = included in debug build only; NW = not working
++817 games supported in total; X = excluded from build; D = included in debug build only; NW = not working
+ 
+ +--------------+--------+--------------------------------------------------------------------------------------------------+------------+-----------+-------------------------------------+---------------+----------------------------------------------+
+ | name         | status | full name                                                                                        | parent     | year      | company                             | hardware      | remarks                                      |
+@@ -225,6 +225,7 @@ This list contains all games supported by FinalBurn Neo.
+ | gulunpa      |        | Gulun.Pa! (Japan 931220 L) (prototype)                                                           |            | 1993      | Capcom                              | CPS1          |                                              |
+ | halfway      |        | Halfway To Hell: Progear Red Label (2016-1-17 Red label ver)                                     | progear    | 2016      | The Halfway House                   | CPS2          |                                              |
+ | wofhfh       |        | Huo Feng Huang (Chinese bootleg of Sangokushi II)                                                | wof        | 1999      | bootleg                             | CPS1          |                                              |
++| sfa3hhsfa    |        | Hyper Street Fighter Alpha (HSFA, Anthology PS2 retraduit)                                       |            | 2026      | HSFA                                | CPS2          |                                              |
+ | hsf2app      |        | Hyper Street Fighter II Plus Plus (Asia ver.170625 Hack by yumeji)                               | hsf2       | 2017      | hack                                | CPS2          |                                              |
+ | hsf2jpp      |        | Hyper Street Fighter II Plus Plus (Japan ver.170625 Hack by yumeji)                              | hsf2       | 2017      | hack                                | CPS2          |                                              |
+ | hsf2pp       |        | Hyper Street Fighter II Plus Plus (USA ver.170625 Hack by yumeji)                                | hsf2       | 2017      | hack                                | CPS2          |                                              |
+diff --git a/hsfa/hsfa_run.c b/hsfa/hsfa_run.c
+index fc131d4..a5026f6 100644
+--- a/hsfa/hsfa_run.c
++++ b/hsfa/hsfa_run.c
+@@ -9,6 +9,10 @@
+  *   OUT=<journal>            journal "image : $FF8000 $FF8002 $FF8004" a chaque changement
+  *   WAV=<fichier>            son complet en WAV 16 bits stereo
+  *   SYSDIR=<dossier>         dossier systeme / sauvegardes (defaut OUTDIR)
++ *   PILOTE=hyper             (Hyper, sfa3hhsfa) portage de tournee_hyper.lua (agent_hyper_etats) : titre, menu, selections
++ *                            et combats pilotes d'apres l'etat du jeu ; variables LISTE, MODEJEU, MODEFORCE, CONTOURNE_E,
++ *                            SNAPM, journal JOURNAL (meme format que le OUT du script). Sans prise d'ecriture possible
++ *                            ici, NOROUL n'est pas reproduit (voir LISEZMOI-hyper.md).
+  */
+ #include <dlfcn.h>
+ #include <stdarg.h>
+@@ -32,6 +36,8 @@ static int frame = 0;
+ struct seq { int a, b, per, dur, port, id; } seqs[MAXSEQ];
+ static int nseq = 0;
+ static int16_t pad[2][16];
++static int pilote = 0;
++static int16_t vpad[2][16];
+ 
+ static int champ(const char *f, int *port, int *id)
+ {
+@@ -80,6 +86,228 @@ static void calc_inputs(int frames)
+ 		int on = frames >= q->a && frames <= q->b && (!q->per || (frames - q->a) % q->per < q->dur);
+ 		if (on) pad[q->port][q->id] = 1;
+ 	}
++	if (pilote) for (int p = 0; p < 2; p++) for (int i = 0; i < 16; i++) if (vpad[p][i]) pad[p][i] = 1;
++}
++
++/* --- PILOTE=hyper : portage de tournee_hyper.lua ------------------------------------------------------------ */
++static uint8_t *ram = NULL;			/* $FF0000-$FFFFFF, mots 16 bits dans l'ordre de l'hote (octet 68K a = ram[a ^ 1]) */
++static FILE *jrn = NULL;
++static void snap(int n);
++
++static int u8(uint32_t a) { return ram[(a & 0xffff) ^ 1]; }
++static int u16(uint32_t a) { a &= 0xfffe; return ram[a] | (ram[a + 1] << 8); }
++/* STATETEST avec le pilote : entrees et ecritures de la 1re passe enregistrees, puis rejouees telles quelles (le pilote
++   a un etat propre qui ne fait pas partie de l'etat sauvegarde du coeur) */
++static uint16_t *recpad = NULL;		/* masques des 2 manettes, par image */
++struct ecr { int k; uint32_t a; int v, large; };
++static struct ecr *ecrs = NULL; static int necr = 0, capecr = 0, enreg = 0;
++static void note(uint32_t a, int v, int large)
++{
++	if (!enreg) return;
++	if (necr == capecr) { capecr = capecr ? 2 * capecr : 4096; ecrs = realloc(ecrs, capecr * sizeof(*ecrs)); }
++	ecrs[necr].k = frame; ecrs[necr].a = a; ecrs[necr].v = v; ecrs[necr].large = large; necr++;
++}
++static void w8(uint32_t a, int v) { note(a, v, 0); ram[(a & 0xffff) ^ 1] = v; }
++static void w16(uint32_t a, int v) { note(a, v, 1); a &= 0xfffe; ram[a] = v & 0xff; ram[a + 1] = (v >> 8) & 0xff; }
++static void rejoue_entrees(int k)
++{
++	for (int p = 0; p < 2; p++) for (int i = 0; i < 16; i++) pad[p][i] = (recpad[2 * k + p] >> i) & 1;
++}
++static void rejoue_ecritures(int k)
++{
++	int sv = enreg; enreg = 0;
++	for (int i = 0; i < necr; i++) if (ecrs[i].k == k) { if (ecrs[i].large) w16(ecrs[i].a, ecrs[i].v); else w8(ecrs[i].a, ecrs[i].v); }
++	enreg = sv;
++}
++static void on(const char *f) { int port, id; if (champ(f, &port, &id)) vpad[port][id] = 1; }
++
++static const uint8_t GRILLE[64] = {0xff,0xff,0xa6,0x0a,0x67,0xff,0xff,0xff,0xff,0x20,0x03,0x04,0x0b,0x21,0xff,0xff,0x22,0x0c,0x07,0x1a,0x08,0x02,0x17,0x3f,0x00,0x18,0x1b,0x1d,0x1c,0x19,0x01,0x3f,0x1e,0x0f,0x06,0x16,0x05,0x10,0x1f,0x3f,0xff,0x23,0x0e,0x0d,0x11,0x15,0xff,0xff,0xff,0xff,0x69,0x09,0xa8,0xff,0xff,0xff,0xff,0xff,0x3f,0x3f,0x3f,0xff,0xff,0xff};
++static const uint8_t VERS[] = {0x30,0x40,0x60,0x00,0x31,0x41,0x61,0x01,0x32,0x42,0x62,0x02,0x33,0x43,0x63,0x03,0x34,0x44,0x64,0x04,0x35,0x45,0x65,0x05,0x36,0x46,0x66,0x06,0x37,0x47,0x67,0x07,0x38,0x48,0x68,0x08,0x39,0x49,0x69,0x09,0x3a,0x4a,0x6a,0x0a,0x3b,0x4b,0x6b,0x0b,0x3c,0x4c,0x6c,0x0c,0x4d,0x6d,0x0d,0xff,0x4e,0x6e,0x0e,0xff,0x4f,0x6f,0x0f,0xff,0x50,0x70,0x10,0xff,0x51,0x71,0x11,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x15,0xff,0xff,0xff,0x7e,0x16,0xff,0xff,0x57,0x77,0x17,0xff,0x18,0xff,0xff,0xff,0x19,0xff,0xff,0xff,0x1a,0xff,0xff,0xff,0x1b,0xff,0xff,0xff,0x1c,0xff,0xff,0xff,0x1d,0xff,0xff,0xff,0x1e,0xff,0xff,0xff,0x1f,0xff,0xff,0xff,0x20,0xff,0xff,0xff,0x21,0xff,0xff,0xff,0x22,0xff,0xff,0xff,0x23,0xff,0xff,0xff,0x32,0x42,0x62,0x02,0x15,0xff,0xff,0xff};
++enum { FAM_Z3, FAM_Z, FAM_Z2, FAM_A };
++struct spec { int base, fam, ex, mode, ism; char txt[32]; };
++static struct spec liste[64][2];
++static int nliste = 0, nparts[64];
++static int nocombat = 0, modejeu = 1, modeforce = -1, contourne_e = 0, snapm = 0;
++static const uint32_t JJ[2] = { 0xFF8400, 0xFF8800 };
++
++static void lit_liste(const char *s)
++{
++	char *c = strdup(s), *sv = NULL;
++	for (char *paire = strtok_r(c, ",", &sv); paire && nliste < 64; paire = strtok_r(NULL, ",", &sv)) {
++		char *sv2 = NULL; int n = 0;
++		for (char *sp = strtok_r(paire, "/", &sv2); sp && n < 2; sp = strtok_r(NULL, "/", &sv2)) {
++			struct spec *q = &liste[nliste][n++];
++			memset(q, 0, sizeof(*q)); q->fam = FAM_Z3;
++			snprintf(q->txt, sizeof(q->txt), "%s", sp);
++			char *sv3 = NULL; int i = 0;
++			for (char *f = strtok_r(sp, ".", &sv3); f; f = strtok_r(NULL, ".", &sv3), i++) {
++				if (i == 0) q->base = (int)strtol(f, NULL, 16);
++				else if (i == 1) q->fam = !strcmp(f, "Z") ? FAM_Z : !strcmp(f, "Z2") ? FAM_Z2 : !strcmp(f, "A") ? FAM_A : FAM_Z3;
++				else if (!strcmp(f, "S")) q->ex = 1;
++				else if (f[0] == 'm' && f[1] >= '0' && f[1] <= '7') q->mode = f[1] - '0';
++				else if (!strcmp(f, "iX")) q->ism = -1; else if (!strcmp(f, "iA")) q->ism = 0; else if (!strcmp(f, "iV")) q->ism = 1;
++			}
++		}
++		nparts[nliste++] = n;
++	}
++	free(c);
++}
++static int famille(int id) { return id < 0x30 ? FAM_Z3 : id < 0x40 ? FAM_Z : id < 0x60 ? FAM_Z2 : FAM_A; }
++static int colonne(const struct spec *s)
++{
++	for (int c = 0; c < 4; c++) { int id = VERS[s->base * 4 + c]; if (id != 0xff && famille(id) == s->fam) return c; }
++	return -1;
++}
++static const char *DNOM[4] = { "Right", "Left", "Down", "Up" };
++static const int DX[4] = { 1, -1, 0, 0 }, DY[4] = { 0, 0, 1, -1 };
++static int pas(int *x, int *y, int dx, int dy, int j)
++{
++	int xx = *x, yy = *y;
++	for (int i = 0; i < 8; i++) {
++		xx = (xx + dx) & 7; yy = (yy + dy) & 7;
++		int c = GRILLE[yy * 8 + xx];
++		if (c != 0x3f) { if ((c >> (6 + j)) & 1) return 0; *x = xx; *y = yy; return 1; }
++	}
++	return 0;
++}
++static int chemin(int x0, int y0, int base, int j)	/* premiere direction d'un plus court chemin (BFS), -1 = ici / aucun */
++{
++	int vu[64], par[64], dir[64], file[64], nf = 0, i = 0;
++	for (int k = 0; k < 64; k++) vu[k] = 0;
++	vu[y0 * 8 + x0] = 2; file[nf++] = y0 * 8 + x0;
++	while (i < nf) {
++		int n = file[i++], x = n & 7, y = n >> 3;
++		if ((GRILLE[n] & 0x3f) == base) {
++			int k = n;
++			while (vu[k] != 2 && par[k] != y0 * 8 + x0) k = par[k];
++			return vu[k] == 2 ? -1 : dir[k];
++		}
++		for (int d = 0; d < 4; d++) {
++			int nx = x, ny = y;
++			if (pas(&nx, &ny, DX[d], DY[d], j) && !vu[ny * 8 + nx]) { vu[ny * 8 + nx] = 1; par[ny * 8 + nx] = n; dir[ny * 8 + nx] = d; file[nf++] = ny * 8 + nx; }
++		}
++	}
++	return -1;
++}
++static int K;
++static const char *manette(int j) { return (modejeu == 4 || j == 1) ? "P1" : "P2"; }
++static void appui(int j, const char *quoi) { char b[48]; if (K % 8 < 3) { snprintf(b, sizeof(b), "%s %s", manette(j), quoi); on(b); } }
++static void startj(int j) { on((modejeu == 4 || j == 1) ? "1 Player Start" : "2 Players Start"); }
++static void btn1_16(int j) { char b[48]; if (K % 16 >= 8 && K % 16 < 11) { snprintf(b, sizeof(b), "%s Button 1", manette(j)); on(b); } }
++static void selectionne(int j, const struct spec *s)
++{
++	uint32_t P = JJ[j - 1]; int et = u8(P + 5);
++	if (et == 0) {
++		int d = chemin(u16(P + 0x12) & 7, u16(P + 0x16) & 7, s->base, j - 1);
++		if (d >= 0) appui(j, DNOM[d]); else { if (s->ex) startj(j); btn1_16(j); }
++	} else if (et == 2) {
++		int c = colonne(s); if (c < 0) c = 0;
++		if (u8(P + 0x5C) != c) appui(j, "Down"); else { if (s->ex) startj(j); btn1_16(j); }
++	} else if (et == 6) {
++		static const int BASE[8] = { 0, 1, 2, 3, 3, 1, 0, 2 };
++		int m = u8(P + 0x5C);
++		if (m == s->mode) appui(j, "Button 1");
++		else if (m <= 3 && m != BASE[s->mode]) appui(j, "Down");
++		else { char b[48]; startj(j); if (K % 16 >= 8 && K % 16 < 11) { snprintf(b, sizeof(b), "%s Right", manette(j)); on(b); } }
++	} else if (et == 8) {
++		int i = u8(P + 0x133); if (i >= 0x80) i -= 0x100;
++		if (i != s->ism) appui(j, "Down"); else appui(j, "Button 1");
++	} else if (et == 4 || et == 0xA) appui(j, "Button 1");
++}
++static int nsel = 0, combats = 0, stable = 0, debut_vs = -1, vs_vu = 0, scene_e = 0, en_sel[3], bloque[3];
++static char jlast[400] = "";
++static uint32_t watchw[16]; static int nwatchw = 0;
++static void pilote_image(int k)		/* frame_done de l'image k : entrees de l'image k + 1 et ecritures */
++{
++	K = k;
++	memset(vpad, 0, sizeof(vpad));
++	int p0 = u16(0xFF8000), p4 = u16(0xFF8004), p8 = u16(0xFF8008), pc_ = u16(0xFF800C), p10 = u16(0xFF8010);
++	if (p0 == 6 || p0 == 4 || (p0 == 2 && p4 == 0)) {
++		if (k > 200 && k % 60 < 6 && k < 900) { on("Coin 1"); if (modejeu == 1) on("Coin 2"); }
++		if (p0 == 6 && k > 300 && k % 40 < 6) on("1 Player Start");
++		if (p0 == 4) {
++			if (modeforce >= 0) w8(0xFF4201, modeforce);
++			int cur = u8(0xFF4201);
++			if (modeforce < 0 && cur != modejeu) { if (k % 20 < 4) on("P1 Down"); }
++			else if (k % 20 >= 10 && k % 20 < 14) on("P1 Button 1");
++		}
++	}
++	if (p0 == 2 && p4 == 2 && p8 == 4) {
++		if (modejeu == 1 && (u8(0xFF80A9) & 2) == 0 && k % 30 < 4) on("2 Players Start");
++		for (int j = 1; j <= 2; j++) {
++			uint32_t P = JJ[j - 1]; int et = u8(P + 5);
++			int actif = (modejeu == 1) || j == 1 || u8(JJ[0] + 5) == 0xC;
++			if (u8(P + 1) != 0 && et < 0xC && actif) {
++				if (!en_sel[j]) {
++					en_sel[j] = 1; bloque[j] = 0;
++					if (j == 1) { nsel++; vs_vu = 0; debut_vs = -1; if (jrn) fprintf(jrn, "SELECTION %d image %d\n", nsel, k); }
++				}
++				int ip = (nsel - 1) % nliste;
++				selectionne(j, &liste[ip][(j - 1) < nparts[ip] ? j - 1 : 0]);
++				if (++bloque[j] == 3000 && jrn) fprintf(jrn, "BLOQUE J%d image %d etat %02x/%02x\n", j, k, et, u8(P + 4));
++			}
++		}
++	}
++	for (int j = 1; j <= 2; j++) {
++		uint32_t P = JJ[j - 1];
++		if (en_sel[j] && u8(P + 5) == 0xC) {
++			en_sel[j] = 0;
++			int ip = (nsel - 1) % nliste;
++			if (jrn) fprintf(jrn, "CHOIX J%d image %d : $102=%02x base=%02x drapeaux=%02x mode=%02x $123=%02x $15F=%02x ism=%02x (%s)\n",
++				j, k, u8(P + 0x103), u8(P + 0x117), u8(P + 0x116), u8(P + 0x5C), u8(P + 0x123), u8(P + 0x15F), u8(P + 0x133),
++				(j - 1) < nparts[ip] ? liste[ip][j - 1].txt : "?");
++		}
++	}
++	if (p0 == 2 && p4 == 2 && p8 != 4 && k % 24 >= 12 && k % 24 < 15) { on("P1 Button 1"); if (modejeu == 1) on("P2 Button 1"); }
++	if (p0 == 2 && p4 == 0xE) {
++		scene_e++;
++		if (scene_e == 1 && jrn) fprintf(jrn, "SCENE_E image %d (fin de match VERSUS)\n", k);
++		if (scene_e == 120 && contourne_e) {
++			static const int O[] = { 0x3D, 0x118, 0x120, 0x123, 0x129, 0x130, 0x131, 0x133, 0x148, 0x14A, 0x15A, 0x15B, 0x15C, 0x15D, 0x15E, 0x15F, 0x162, 0x163 };
++			if (jrn) fprintf(jrn, "CONTOURNEMENT scene E image %d : A5+4 <- 2, A5+8/C/10 <- 0\n", k);
++			w16(0xFF8004, 2); w16(0xFF8008, 0); w16(0xFF800C, 0); w16(0xFF8010, 0);
++			for (int j = 0; j < 2; j++) for (unsigned i = 0; i < sizeof(O) / sizeof(O[0]); i++) w8(JJ[j] + O[i], 0);
++		}
++	} else scene_e = 0;
++	if (p4 == 4 && p8 == 4 && !vs_vu) { vs_vu = 1; debut_vs = k; }
++	if (snapm && debut_vs >= 0 && k == debut_vs + 60) snap(k);
++	uint32_t adv[3]; int nadv = 0;
++	const uint32_t AO[3] = { 0xFF8800, 0xFF8C00, 0xFF9000 };
++	for (int i = 0; i < 3; i++) if (u8(AO[i] + 5) == 2) adv[nadv++] = AO[i];
++	int combat = p0 == 2 && p4 == 4 && p8 == 6 && u8(JJ[0] + 5) == 2 && nadv > 0;
++	if (combat) {
++		stable++;
++		if (stable == 1) { combats++; if (jrn) fprintf(jrn, "MANCHE %d image %d J1 %02x/%02x J2 %02x/%02x\n", combats, k, u8(JJ[0] + 0x103), u8(JJ[0] + 0xD2), u8(JJ[1] + 0x103), u8(JJ[1] + 0xD2)); }
++		if (snapm && stable == 150) snap(k);
++		w16(JJ[0] + 0x50, 0x90); w16(JJ[0] + 0x52, 0x90);
++		if (stable > 60 && !nocombat) {
++			for (int i = 0; i < nadv; i++) { int vie = u16(adv[i] + 0x50); if (vie > 1 && vie < 0x100) { w16(adv[i] + 0x50, 1); w16(adv[i] + 0x52, 1); } }
++			const char *av = (u16(JJ[0] + 0x12) < u16(adv[0] + 0x12)) ? "P1 Right" : "P1 Left";
++			int t = stable % 40;
++			if (t < 3) on("P1 Down");
++			else if (t < 6) { on("P1 Down"); on(av); }
++			else if (t < 10) { on(av); if (t >= 7) on("P1 Button 1"); }
++			else if (t < 30) on(av);	/* le script pose aussi "P1 Button 4" sur :IN0, mais ce bouton est sur :IN1 dans
++			                         	   MAME : il n'est jamais appuye au banc, donc pas ici non plus */
++		}
++	} else stable = 0;
++	if (jrn) {
++		char st[400];
++		snprintf(st, sizeof(st), "%04x %04x %04x %04x %04x | J1 %02x %02x %02x %02x | J2 %02x %02x %02x %02x",
++			p0, p4, p8, pc_, p10, u8(JJ[0] + 1), u8(JJ[0] + 5), u8(JJ[0] + 0x103), u8(JJ[0] + 0xD2),
++			u8(JJ[1] + 1), u8(JJ[1] + 5), u8(JJ[1] + 0x103), u8(JJ[1] + 0xD2));
++		if (nwatchw) {		/* WATCHW="FF8412,..." : mots ajoutes a la ligne du journal (comme hyper.lua) */
++			size_t l = strlen(st);
++			for (int i = 0; i < nwatchw && l + 16 < sizeof(st); i++) l += snprintf(st + l, sizeof(st) - l, " %06x=%04x", watchw[i], u16(watchw[i]));
++		}
++		if (nwatchw) {		/* entrees du pilote pour l'image suivante, codees comme IN0 de MAME (actif bas) */
++			static const int B[7] = { RETRO_DEVICE_ID_JOYPAD_RIGHT, RETRO_DEVICE_ID_JOYPAD_LEFT, RETRO_DEVICE_ID_JOYPAD_DOWN, RETRO_DEVICE_ID_JOYPAD_UP,
++			                          RETRO_DEVICE_ID_JOYPAD_Y, RETRO_DEVICE_ID_JOYPAD_X, RETRO_DEVICE_ID_JOYPAD_L };
++			int in0 = 0xffff; for (int i = 0; i < 7; i++) if (vpad[0][B[i]]) in0 &= ~(1 << i);
++			size_t l = strlen(st); snprintf(st + l, sizeof(st) - l, " IN0=%04x", in0);
++		}
++		if (strcmp(st, jlast)) { fprintf(jrn, "%6d : %s\n", k, st); strcpy(jlast, st); }
++	}
+ }
+ 
+ static void input_poll(void) {}
+@@ -227,6 +455,12 @@ int main(int argc, char **argv)
+ 		for (char *t = strtok(c, ","); t; t = strtok(NULL, ",")) { int n = atoi(t); if (n > 0 && n < (1 << 20)) want[n] = 1; }
+ 	}
+ 	FILE *log = getenv("OUT") ? fopen(getenv("OUT"), "w") : NULL;
++	static char dumpram[1 << 20];
++	if (getenv("DUMPRAM")) {
++		char *c = strdup(getenv("DUMPRAM"));
++		for (char *t = strtok(c, ","); t; t = strtok(NULL, ",")) { int n = atoi(t); if (n > 0 && n < (1 << 20)) dumpram[n] = 1; }
++		free(c);
++	}
+ 
+ 	retro_set_environment(environment);
+ 	retro_set_video_refresh(video_refresh);
+@@ -244,11 +478,24 @@ int main(int argc, char **argv)
+ 	fprintf(stderr, "video %ux%u, %.3f Hz, son %.0f Hz\n", av.geometry.base_width, av.geometry.base_height, av.timing.fps, av.timing.sample_rate);
+ 	if (getenv("WAV")) { wav = fopen(getenv("WAV"), "wb"); if (wav) wav_head(wav, (uint32_t)av.timing.sample_rate, 0); }
+ 
+-	uint8_t *ram = retro_get_memory_data(RETRO_MEMORY_SYSTEM_RAM);
++	ram = retro_get_memory_data(RETRO_MEMORY_SYSTEM_RAM);
++	if (getenv("PILOTE") && !strcmp(getenv("PILOTE"), "hyper") && ram) {
++		pilote = 1;
++		lit_liste(getenv("LISTE") ? getenv("LISTE") : "00.A/01.Z");
++		if (getenv("MODEJEU")) modejeu = atoi(getenv("MODEJEU"));
++		if (getenv("MODEFORCE")) modeforce = atoi(getenv("MODEFORCE"));
++		contourne_e = getenv("CONTOURNE_E") && !strcmp(getenv("CONTOURNE_E"), "1");
++		snapm = getenv("SNAPM") && !strcmp(getenv("SNAPM"), "1");
++		nocombat = getenv("NOCOMBAT") && !strcmp(getenv("NOCOMBAT"), "1");	/* sans entrees de combat (essais) */
++		if (getenv("JOURNAL")) jrn = fopen(getenv("JOURNAL"), "w");
++		if (getenv("WATCHW")) { char *c = strdup(getenv("WATCHW")), *sv = NULL; for (char *t = strtok_r(c, ",", &sv); t && nwatchw < 16; t = strtok_r(NULL, ",", &sv)) watchw[nwatchw++] = strtoul(t, NULL, 16); free(c); }
++	}
+ 	char lastst[64] = "";
+ 	clock_t t0 = clock();
++	if (pilote && getenv("STATETEST")) { recpad = calloc(2 * (nf + 2), sizeof(uint16_t)); enreg = 1; }
+ 	for (frame = 1; frame <= nf; frame++) {
+ 		calc_inputs(frame - 1);		/* jeu.lua : entrees calculees a la fin de l'image precedente */
++		if (recpad) for (int p = 0; p < 2; p++) { uint16_t m = 0; for (int i = 0; i < 16; i++) if (pad[p][i]) m |= 1 << i; recpad[2 * frame + p] = m; }
+ 		rms_acc = 0; rms_n = 0;
+ 		retro_run();
+ 		if (ram && log) {
+@@ -259,21 +506,35 @@ int main(int argc, char **argv)
+ 		}
+ 		if (log && frame % 60 == 0) fprintf(log, "SON %d %.1f\n", frame, rms_n ? __builtin_sqrt(rms_acc / rms_n) : 0.0);
+ 		if (want[frame]) snap(frame);
++		if (dumpram[frame] && ram) {	/* DUMPRAM=f1,f2 : RAM $FF0000-$FFFFFF (gros-boutiste) de l'image, avant les ecritures du pilote */
++			char p[1024]; snprintf(p, sizeof(p), "%s/ram_%06d.bin", outdir, frame);
++			FILE *f = fopen(p, "wb"); if (f) { for (int i = 0; i < 0x10000; i++) fputc(ram[i ^ 1], f); fclose(f); }
++		}
++		if (pilote) pilote_image(frame);
+ 	}
++	enreg = 0;
++	if (jrn) { fprintf(jrn, "FIN %d selections %d manches %d\n", nf, nsel, combats); fclose(jrn); jrn = NULL; }
+ 	/* STATETEST=N : etat sauve a l'image N, rejoue jusqu'a NF, image finale comparee a la premiere execution */
+ 	if (getenv("STATETEST")) {
+ 		int n0 = atoi(getenv("STATETEST"));
+ 		/* premiere passe deja faite : on relance depuis le debut avec sauvegarde a n0 */
+ 		uint8_t *imgA = malloc(lw * lh * 3); memcpy(imgA, last, lw * lh * 3);
+ 		retro_unload_game(); retro_load_game(&gi);
++		if (ram) ram = retro_get_memory_data(RETRO_MEMORY_SYSTEM_RAM);	/* memoire reallouee au rechargement */
+ 		size_t sz = 0; void *st = NULL;
+ 		for (frame = 1; frame <= nf; frame++) {
+-			calc_inputs(frame - 1); retro_run();
++			if (recpad) rejoue_entrees(frame); else calc_inputs(frame - 1);
++			retro_run();
++			if (recpad) rejoue_ecritures(frame);
+ 			if (frame == n0) { sz = retro_serialize_size(); st = malloc(sz); retro_serialize(st, sz); }
+ 		}
+ 		int same1 = !memcmp(imgA, last, lw * lh * 3);
+ 		retro_unserialize(st, sz);
+-		for (frame = n0 + 1; frame <= nf; frame++) { calc_inputs(frame - 1); retro_run(); }
++		for (frame = n0 + 1; frame <= nf; frame++) {
++			if (recpad) rejoue_entrees(frame); else calc_inputs(frame - 1);
++			retro_run();
++			if (recpad) rejoue_ecritures(frame);
++		}
+ 		int same2 = !memcmp(imgA, last, lw * lh * 3);
+ 		fprintf(stderr, "ETAT : %zu octets ; relance identique %s ; apres restauration de l'image %d : %s\n", sz, same1 ? "oui" : "NON", n0, same2 ? "IDENTIQUE" : "DIFFERENT");
+ 	}
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index c1c972e..216b2ad 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -538,6 +538,7 @@ INT32 Sf2mdtScanSound(INT32 nAction, INT32 *pnMin);
+ 
+ // cps_hsfa.cpp (HSFA : SFA Anthology retraduit en 68000)
+ extern INT32 HsfaMode;
++extern INT32 HsfaHyper;
+ extern UINT32 nCpsGfxLenMin;
+ INT32 HsfaInit();
+ INT32 HsfaExit();
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 44321c3..f753e94 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -15,11 +15,16 @@
+ 
+ extern UINT8 *CpsRam660;
+ 
+-INT32 HsfaMode = 0;									// 0 = inactif, 1 = SFA3 traduit, 2 = Upper (fork)
+-UINT32 nCpsGfxLenMin = 0;							// taille minimale de la region graphique (Upper : 64 Mo)
+-
+-#define HSFA_EXT_BASE	0xA00000
+-#define HSFA_EXT_LEN	0x500000					// $A00000-$EFFFFF
++INT32 HsfaMode = 0;									// 0 = inactif, 1 = SFA3 traduit, 2 = Upper ou Hyper (fork)
++INT32 HsfaHyper = 0;								// Hyper (mode 2) : seulement pour le crochet d'essai HSFA_NOROUL
++UINT32 nCpsGfxLenMin = 0;							// taille minimale de la region graphique (Upper, Hyper : 64 Mo)
++
++// donnees externes du portage : image de [base, $F00000) ; la base vient de la taille de hsfa_ext.bin
++// (SFA3 / Upper : 5 Mo = $A00000-$EFFFFF ; Hyper : $940000-$EFFFFF, blocs $940000 et $C84000 de banc_mem.lua)
++#define HSFA_EXT_FIN	0xF00000
++#define HSFA_EXT_MIN	0x930000					// au-dessus de la memoire video ($900000-$92FFFF)
++static UINT32 nHsfaExtBase = 0xA00000;
++static UINT32 nHsfaExtLen = 0x500000;
+ #define HSFA_GFX_BASE	0x2000000					// ROM graphique etendue (code de tuile $40000)
+ 
+ // --------------------------------------------------------------------------------------------------------------
+@@ -362,7 +367,7 @@ static void HsfaReconvertit(INT32 k)
+ 			UINT8 *p = HsfaRamPtr(o);
+ 			if (p) v = RdW(p);
+ 			else if (o < nCpsRomLen) v = RdW(CpsRom + o);
+-			else if (o >= HSFA_EXT_BASE && o < HSFA_EXT_BASE + HSFA_EXT_LEN) v = RdW(HsfaExt + (o - HSFA_EXT_BASE));
++			else if (o >= nHsfaExtBase && o < HSFA_EXT_FIN) v = RdW(HsfaExt + (o - nHsfaExtBase));
+ 			else v = 0;
+ 		}
+ 		UINT8 *p = HsfaRamPtr(o);
+@@ -636,7 +641,7 @@ static INT32 HsfaLoadData()
+ 		if (pszName == NULL) continue;
+ 
+ 		if (strcmp(pszName, "hsfa_ext.bin") == 0) {
+-			if (ri.nLen != HSFA_EXT_LEN) return 1;
++			if (ri.nLen != nHsfaExtLen) return 1;
+ 			if (BurnLoadRom(HsfaExt, i, 1)) return 1;			// mots deja echanges (format ROM_LOAD16_WORD_SWAP)
+ 		}
+ 		else if (strcmp(pszName, "hsfa_tab.bin") == 0) {
+@@ -656,9 +661,51 @@ static INT32 HsfaLoadData()
+ 	return (HsfaTab == NULL) ? 1 : 0;
+ }
+ 
++// (essais sur PC seulement) HSFA_NOROUL=1 : equivalent de NOROUL des scripts du banc (hyper.lua, tournee_hyper.lua,
++// prise d'ecriture Lua) pour comparer FBNeo au fork avec les memes entrees. L'octet $D3 des joueurs 1 et 2 ($FF84D3,
++// $FF88D3 : drapeau "Start" de la selection, qui lance la roulette aleatoire) est toujours ecrit a 0. Sans la variable
++// (cas normal, et toujours sous Android), rien n'est installe.
++static void __fastcall HsfaNoroulWriteByte(UINT32 a, UINT8 d)
++{
++	a &= 0xFFFF;
++	if (a == 0x84D3 || a == 0x88D3) d = 0;
++	CpsRamFF[a ^ 1] = d;
++}
++
++static void __fastcall HsfaNoroulWriteWord(UINT32 a, UINT16 d)
++{
++	a &= 0xFFFE;
++	if (a == 0x84D2 || a == 0x88D2) d &= 0xFF00;
++	WrW(CpsRamFF + a, d);
++}
++
++// taille de hsfa_ext.bin dans la liste de ROM du pilote -> base de la region externe
++static INT32 HsfaExtTaille()
++{
++	struct BurnRomInfo ri;
++	for (INT32 i = 0; ; i++) {
++		memset(&ri, 0, sizeof(ri));
++		if (BurnDrvGetRomInfo(&ri, i) || ri.nLen == 0) break;
++		if ((ri.nType & 0x0f) != CPS2_HSFA_DATA) continue;
++		char *pszName = NULL;
++		BurnDrvGetRomName(&pszName, i, 0);
++		if (pszName && strcmp(pszName, "hsfa_ext.bin") == 0) {
++			if (ri.nLen > HSFA_EXT_FIN - HSFA_EXT_MIN || (ri.nLen & 0xFFFF)) return 1;
++			nHsfaExtLen = ri.nLen;
++			nHsfaExtBase = HSFA_EXT_FIN - ri.nLen;
++			return 0;
++		}
++	}
++	return 1;
++}
++
+ INT32 HsfaInit()
+ {
+-	HsfaExt = (UINT8*)BurnMalloc(HSFA_EXT_LEN);
++	if (HsfaExtTaille()) {
++		bprintf(PRINT_ERROR, _T("HSFA : hsfa_ext.bin absent de la liste de ROM ou de taille invalide\n"));
++		return 1;
++	}
++	HsfaExt = (UINT8*)BurnMalloc(nHsfaExtLen);
+ 	Ombre   = (UINT16*)BurnMalloc(0x8000 * sizeof(UINT16));
+ 	Age     = (INT32*)BurnMalloc(0x8000 * sizeof(INT32));
+ 	Conv    = (UINT16*)BurnMalloc(0x8000 * sizeof(UINT16));
+@@ -666,19 +713,20 @@ INT32 HsfaInit()
+ 	Raw90   = (UINT16*)BurnMalloc(0x18000 * sizeof(UINT16));
+ 	Raw90Ok = (UINT8*)BurnMalloc(0x18000);
+ 	if (!HsfaExt || !Ombre || !Age || !Conv || !ConvOk || !Raw90 || !Raw90Ok) return 1;
+-	memset(HsfaExt, 0, HSFA_EXT_LEN);
++	memset(HsfaExt, 0, nHsfaExtLen);
+ 
+ 	if (HsfaLoadData()) {
+ 		bprintf(PRINT_ERROR, _T("HSFA : donnees du portage absentes ou invalides\n"));
+ 		return 1;
+ 	}
+ 	if (HsfaMode == 2 && !bCfgPlans) {
+-		bprintf(PRINT_ERROR, _T("HSFA : Upper sans bases de plans (config)\n"));
++		bprintf(PRINT_ERROR, _T("HSFA : Upper / Hyper sans bases de plans (config)\n"));
+ 	}
+ 
+ 	SekOpen(0);
+ 	// banc_mem.lua / HSFA_EXT : blocs de donnees du portage a adresse fixe
+-	SekMapMemory(HsfaExt, HSFA_EXT_BASE, HSFA_EXT_BASE + HSFA_EXT_LEN - 1, MAP_READ | MAP_FETCH);
++	SekMapMemory(HsfaExt, nHsfaExtBase, HSFA_EXT_FIN - 1, MAP_READ | MAP_FETCH);
++	bprintf(0, _T("HSFA : donnees externes $%06X-$%06X\n"), nHsfaExtBase, HSFA_EXT_FIN - 1);
+ 	// banc_sprites.lua : toutes les ecritures dans $700000-$70FFFF passent par la conversion
+ 	SekMapHandler(5, 0x700000, 0x70FFFF, MAP_WRITE);
+ 	SekSetWriteByteHandler(5, HsfaObjWriteByte);
+@@ -691,6 +739,12 @@ INT32 HsfaInit()
+ 	}
+ 	// sorties Phoenix ($FFFFF0) : seule la derniere page de RAM passe par le gestionnaire (vitesse)
+ 	SekMapMemory(CpsRamFF, 0xFF0000, 0xFFFBFF, MAP_WRITE);
++	if (HsfaHyper && getenv("HSFA_NOROUL") && atoi(getenv("HSFA_NOROUL")) == 1) {
++		SekMapHandler(7, 0xFF8400, 0xFF8BFF, MAP_WRITE);
++		SekSetWriteByteHandler(7, HsfaNoroulWriteByte);
++		SekSetWriteWordHandler(7, HsfaNoroulWriteWord);
++		bprintf(0, _T("HSFA : HSFA_NOROUL (essais) : $FF84D3 / $FF88D3 ecrits a 0\n"));
++	}
+ 	SekClose();
+ 
+ 	HsfaFluxInit();
+@@ -721,6 +775,8 @@ INT32 HsfaExit()
+ 	nCfgCommun = 254; nCfgPtrAnim = 0xFF3E48; nCfgGfxIntro = 456; bCfgPlans = 0;
+ 	nCfgPlans[0] = nCfgPlans[1] = nCfgPlans[2] = 0;
+ 	HsfaMode = 0;
++	HsfaHyper = 0;
+ 	nCpsGfxLenMin = 0;
++	nHsfaExtBase = 0xA00000; nHsfaExtLen = 0x500000;
+ 	return 0;
+ }
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 4319b26..8a222f4 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -91,6 +91,20 @@ static struct BurnDIPInfo HsfaDIPList[] =
+ 
+ STDDIPINFO(Hsfa)
+ 
++// Hyper : ses musiques (ZERO, ZERO 2, ALPHA, variantes) n'existent qu'en flux ADX sur PS2 -> "All tracks" par defaut
++static struct BurnDIPInfo HhsfaDIPList[] =
++{
++	DIP_OFFSET(0x1d)
++	{0x00, 0xff, 0xff, 0x02, NULL								},
++
++	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
++	{0x00, 0x01, 0x03, 0x00, "Off"								},
++	{0x00, 0x01, 0x03, 0x01, "Missing tracks only"				},
++	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
++};
++
++STDDIPINFO(Hhsfa)
++
+ static struct BurnInputInfo Sfz3mixInputList[] = {
+ 	{"P1 Coin"          , BIT_DIGITAL  , CpsInp020+4, "p1 coin"   },
+ 	{"P1 Start"         , BIT_DIGITAL  , CpsInp020+0, "p1 start"  },
+@@ -15309,6 +15323,47 @@ static struct BurnRomInfo Sfa3uhsfaRomDesc[] = {
+ STD_ROM_PICK(Sfa3uhsfa)
+ STD_ROM_FN(Sfa3uhsfa)
+ 
++// Hyper Street Fighter Alpha (module ro9 de l'Anthology) : memes mecanismes qu'Upper (ROM graphique etendue, bases de
++// plans, son hybride + flux ADX), banque commune e545, donnees externes $940000-$EFFFFF (blocs $940000 et $C84000).
++static struct BurnRomInfo Sfa3hhsfaRomDesc[] = {
++	// programme 68000 retraduit (CRC variable : cherche par nom dans l'archive)
++	{ "sz3ud.03c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3ud.04c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.05c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.06c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.07c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.08c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.09c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.10b",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++
++	{ "sz3.13m",       0x400000, 0x0f7a60d9, CPS2_GFX | BRF_GRA },
++	{ "sz3.15m",       0x400000, 0x8e933741, CPS2_GFX | BRF_GRA },
++	{ "sz3.17m",       0x400000, 0xd6e98147, CPS2_GFX | BRF_GRA },
++	{ "sz3.19m",       0x400000, 0xf31a728a, CPS2_GFX | BRF_GRA },
++	{ "sz3.14m",       0x400000, 0x5ff98297, CPS2_GFX | BRF_GRA },
++	{ "sz3.16m",       0x400000, 0x52b5bdee, CPS2_GFX | BRF_GRA },
++	{ "sz3.18m",       0x400000, 0x40631ed5, CPS2_GFX | BRF_GRA },
++	{ "sz3.20m",       0x400000, 0x763409b4, CPS2_GFX | BRF_GRA },
++
++	// son hybride d'Upper (bruitages et voix ; musiques ZERO 3 en QSound, les autres en flux ADX)
++	{ "hx3.01",        0x020000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++	{ "hx3.02",        0x028000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++
++	{ "hx3.11m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.12m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.13m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.14m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++
++	{ "phoenix.key",   0x000014, 0x2cf772b0, CPS2_ENCRYPTION_KEY },
++
++	{ "hsfa_ext.bin",  0x5C0000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// $940000-$EFFFFF
++	{ "hsfa_tab.bin",  0x400000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// tables de banques
++	{ "hsfa_gfx.bin",  0x2000000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_GRA },	// region $2000000-$3FFFFFF
++};
++
++STD_ROM_PICK(Sfa3hhsfa)
++STD_ROM_FN(Sfa3hhsfa)
++
+ // Variante widescreen (coeur fbneo_hsfaws, -DHSFA_WS) : memes noms de pilotes et memes archives, image elargie a
+ // 448x224 (16:9). Le decor existe au-dela des 384 px ; FBNeo recentre plans et objets (nCpsGlobalXOffset = 32).
+ #ifdef HSFA_WS
+@@ -15340,6 +15395,16 @@ static INT32 HsfaUpperInit()
+ 	return nRet;
+ }
+ 
++static INT32 HsfaHyperInit()
++{
++	HsfaMode = 2;								// memes mecanismes qu'Upper (bases de plans, objets 20 bits)
++	HsfaHyper = 1;
++	nCpsGfxLenMin = 0x4000000;					// ROM graphique etendue : 64 Mo
++	INT32 nRet = PhoenixInit();
++	if (!nRet) nRet = HsfaInit();
++	return nRet;
++}
++
+ static INT32 HsfaDrvExit()
+ {
+ 	INT32 nRet = DrvExit();
+@@ -15367,6 +15432,16 @@ struct BurnDriver BurnDrvCpsSfa3uhsfa = {
+ 	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
+ };
+ 
++struct BurnDriver BurnDrvCpsSfa3hhsfa = {
++	"sfa3hhsfa", NULL, NULL, NULL, "2026",
++	"Hyper Street Fighter Alpha (HSFA, Anthology PS2 retraduit" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
++	NULL, NULL, NULL, NULL,
++	BDF_GAME_WORKING | BDF_HACK, 2, HARDWARE_CAPCOM_CPS2, GBF_VSFIGHT, FBF_SF,
++	NULL, Sfa3hhsfaRomInfo, Sfa3hhsfaRomName, NULL, NULL, NULL, NULL, HsfaInputInfo, HhsfaDIPInfo,
++	HsfaHyperInit, HsfaDrvExit, Cps2Frame, CpsRedraw, CpsAreaScan,
++	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
++};
++
+ struct BurnDriver BurnDrvCpsSfz3jr2d = {
+ 	"sfz3jr2d", "sfa3", NULL, NULL, "1998",
+ 	"Street Fighter Zero 3 (Japan 980629 Phoenix Edition) (bootleg)\0", NULL, "bootleg", "CPS2",
+diff --git a/src/dep/generated/driverlist.h b/src/dep/generated/driverlist.h
+index 1d84c44..44964d6 100644
+--- a/src/dep/generated/driverlist.h
++++ b/src/dep/generated/driverlist.h
+@@ -222,6 +222,7 @@ DRV		BurnDrvCpsGreatMahouDaiJ;
+ DRV		BurnDrvGulunpa;
+ DRV		BurnDrvCpsHalfway;
+ DRV		BurnDrvCpsWofhfh;
++DRV		BurnDrvCpsSfa3hhsfa;
+ DRV		BurnDrvCpsHsf2app;
+ DRV		BurnDrvCpsHsf2jpp;
+ DRV		BurnDrvCpsHsf2pp;
+@@ -1055,6 +1056,7 @@ static struct BurnDriver* pDriver[] = {
+ 	&BurnDrvGulunpa,			// Gulun.Pa! (Japan 931220 L) (prototype)
+ 	&BurnDrvCpsHalfway,			// Halfway To Hell: Progear Red Label (2016-1-17 Red label ver)
+ 	&BurnDrvCpsWofhfh,			// Huo Feng Huang (Chinese bootleg of Sangokushi II)
++	&BurnDrvCpsSfa3hhsfa,		// Hyper Street Fighter Alpha (HSFA, Anthology PS2 retraduit)
+ 	&BurnDrvCpsHsf2app,			// Hyper Street Fighter II Plus Plus (Asia ver.170625 Hack by yumeji)
+ 	&BurnDrvCpsHsf2jpp,			// Hyper Street Fighter II Plus Plus (Japan ver.170625 Hack by yumeji)
+ 	&BurnDrvCpsHsf2pp,			// Hyper Street Fighter II Plus Plus (USA ver.170625 Hack by yumeji)
+@@ -1892,6 +1894,7 @@ static game_sourcefile_entry sourcefile_table[] = {
+ 	{ "gulunpa", "capcom/d_cps1.cpp"},
+ 	{ "halfway", "capcom/d_cps2.cpp"},
+ 	{ "wofhfh", "capcom/d_cps1.cpp"},
++	{ "sfa3hhsfa", "capcom/d_cps2.cpp"},
+ 	{ "hsf2app", "capcom/d_cps2.cpp"},
+ 	{ "hsf2jpp", "capcom/d_cps2.cpp"},
+ 	{ "hsf2pp", "capcom/d_cps2.cpp"},
+-- 
+2.53.0
+

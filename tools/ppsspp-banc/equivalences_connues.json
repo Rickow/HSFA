@@ -1,0 +1,32 @@
+{
+ "_note": "Différences STRUCTURELLES connues entre la PSP et Upper MAX (ne sont pas des bugs) : utilisées par défaut par trace_appels.py ; --brut les désactive. A compléter par la session MAX / intégration.",
+ "ignorer": {
+  "_remanences": "Rémanences d'Ingrid (objets de classe $35) : la PSP les crée par psp_1c8ec8 et les met à jour par 1c8f10/1c8f44/1c8f9c et la famille 1c8874-1c8df0 (2 passages par image) ; Upper les crée / met à jour autrement (générateur natif).",
+  "noms": [
+   "psp_1c8ec8",
+   "psp_1c8f10",
+   "psp_1c8f44",
+   "psp_1c8f9c",
+   "psp_1c8874",
+   "psp_1c88a8",
+   "psp_1c8900",
+   "psp_1c8958",
+   "psp_1c8b28",
+   "psp_1c8bac",
+   "psp_1c8c30",
+   "psp_1c8d24",
+   "psp_1c8df0"
+  ]
+ },
+ "alias": {
+  "_effet_1c84dc": "Variantes de la routine d'un objet effet d'Ingrid (a0 = 0x09510f28 sur la PSP) : la PSP appelle 1c839c / 1c84dc selon l'étape, Upper 1c849c.",
+  "paires": {
+   "psp_1c84dc": "psp_1c849c",
+   "psp_1c839c": "psp_1c849c"
+  }
+ },
+ "constats_non_appliques": {
+  "_note": "Écarts RÉELS observés (non masqués) à transmettre à la session MAX / intégration.",
+  "yun_rappel_0x40": "psp_1bb944 (rappel +0x40 de Yun, appelé par 0x57814 avec a0 = J1) x4, et ses appels psp_1bba38 x1 / psp_1bbdfc x3, au début de la manipulation (image 15-20 du scénario yun_qcbp) : jamais appelés par Upper (banc_max12, 15 et 17). Le rappel +0x50 (psp_1bc8bc, à chaque image) est bien exécuté des DEUX côtés (PSP : 191 passages sur 144 images, a0 = J1, +0x175 = 0, pas de mannequin)."
+ }
+}

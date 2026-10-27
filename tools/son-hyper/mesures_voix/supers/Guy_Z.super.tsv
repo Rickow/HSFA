@@ -1,0 +1,13 @@
+geste	arcade	hyper	ecart
+super QCFx2+HP	0176 0178	0176	ECART
+super QCFx2+HK	017A 017A 0178 0178 0175	017A 0178 0178	ECART
+super QCBx2+HP	0178	0178	
+super QCBx2+HK	0179 0179 0179 0179 0179 0179 0179	0179 0179 0179 0179 0179 0179 0179	
+super QCFx2+LP	0176 0178	0176	ECART
+super QCFx2+LK	017A 017A 0178 0178 0175	017A 0178 0178	ECART
+super charge AR,AV,AR,AV+HP	-	-	
+super charge AR,AV,AR,AV+HK	-	-	
+super charge bas,haut-bas+HK	-	-	
+super 360x2+HP	-	-	
+super demi-cercle x2+HP	0178	0178	
+# hyper : depart des gestes 2854 ; CHOIX J1 image 562 : $102=37 base=07 ism=00 $116=01 $122=00 $123=00 $15F=00 $D0=00 $5C=00 | MANCHE 1 image 1083 J1 37 J2 00

@@ -1,0 +1,275 @@
+diff --git a/src/mame/capcom/cps1.h b/src/mame/capcom/cps1.h
+index df723116..33723111 100644
+--- a/src/mame/capcom/cps1.h
++++ b/src/mame/capcom/cps1.h
+@@ -278,6 +278,9 @@ protected:
+ 	int m_palette_size = 0;
+ 	int m_stars_rom_size = 0;
+ 	uint8_t m_empty_tile[32*32]{};
++	// HSFA : base de chaque plan dans la ROM graphique (unites de 64 Ko ; 0 = mappage CPS d'origine)
++	uint16_t m_hsfa_plane_base[3]{};
++	int hsfa_plane_code(int plane, int code);
+ 
+ 	/* video/cps1.cpp */
+ 	inline uint16_t *cps1_base( int offset, int boundary );
+diff --git a/src/mame/capcom/cps1_v.cpp b/src/mame/capcom/cps1_v.cpp
+index ee8fe2db..a7664b9d 100644
+--- a/src/mame/capcom/cps1_v.cpp
++++ b/src/mame/capcom/cps1_v.cpp
+@@ -2492,13 +2492,21 @@ TILEMAP_MAPPER_MEMBER(cps_state::tilemap2_scan)
+ 	return (row & 0x07) + ((col & 0x3f) << 3) + ((row & 0x38) << 6);
+ }
+ 
++// HSFA : code brut de la tilemap = indice LOCAL dans la memoire de decor rangee telle quelle a partir de la base du
++// plan (plus de renumerotation). Taille d'un element : 64 o (8x8, deux moities), 128 o (16x16), 512 o (32x32).
++int cps_state::hsfa_plane_code(int plane, int code)
++{
++	static const int elem[3] = { 64, 128, 512 };
++	return int((uint32_t(m_hsfa_plane_base[plane]) << 16) / elem[plane]) + code;
++}
++
+ TILE_GET_INFO_MEMBER(cps_state::get_tile0_info)
+ {
+ 	int code = m_scroll1[2 * tile_index];
+ 	int attr = m_scroll1[2 * tile_index + 1];
+ 	int gfxset;
+ 
+-	code = gfxrom_bank_mapper(GFXTYPE_SCROLL1, code);
++	code = m_hsfa_plane_base[0] ? hsfa_plane_code(0, code) : gfxrom_bank_mapper(GFXTYPE_SCROLL1, code);
+ 
+ 	/* allows us to reproduce a problem seen with a ffight board where USA and Japanese
+ 	     roms have been mixed to be reproduced (ffightub) -- it looks like each column
+@@ -2522,7 +2530,7 @@ TILE_GET_INFO_MEMBER(cps_state::get_tile1_info)
+ 	int code = m_scroll2[2 * tile_index];
+ 	int attr = m_scroll2[2 * tile_index + 1];
+ 
+-	code = gfxrom_bank_mapper(GFXTYPE_SCROLL2, code);
++	code = m_hsfa_plane_base[1] ? hsfa_plane_code(1, code) : gfxrom_bank_mapper(GFXTYPE_SCROLL2, code);
+ 
+ 	tileinfo.set(2,
+ 			code,
+@@ -2540,7 +2548,7 @@ TILE_GET_INFO_MEMBER(cps_state::get_tile2_info)
+ 	int code = m_scroll3[2 * tile_index] & 0x3fff;
+ 	int attr = m_scroll3[2 * tile_index + 1];
+ 
+-	code = gfxrom_bank_mapper(GFXTYPE_SCROLL3, code);
++	code = m_hsfa_plane_base[2] ? hsfa_plane_code(2, code) : gfxrom_bank_mapper(GFXTYPE_SCROLL3, code);
+ 
+ 	tileinfo.set(3,
+ 			code,
+diff --git a/src/mame/capcom/cps2.cpp b/src/mame/capcom/cps2.cpp
+index 69c760cf..0ee81a0c 100644
+--- a/src/mame/capcom/cps2.cpp
++++ b/src/mame/capcom/cps2.cpp
+@@ -681,6 +681,8 @@ public:
+ 	void init_pzloop2() ATTR_COLD;
+ 	void init_singbrd() ATTR_COLD;
+ 	void init_ecofghtr() ATTR_COLD;
++	void init_hsfa() ATTR_COLD;          // HSFA : banc de developpement (ROM graphique etendue, donnees externes)
++	void hsfa(machine_config &config) ATTR_COLD;
+ 
+ protected:
+ 	virtual void machine_start() override ATTR_COLD;
+@@ -714,6 +716,7 @@ private:
+ 	void cps2_map(address_map &map) ATTR_COLD;
+ 	void cps2_comm_map(address_map &map) ATTR_COLD;
+ 	void dead_cps2_map(address_map &map) ATTR_COLD;
++	void hsfa_map(address_map &map) ATTR_COLD;
+ 	void dead_cps2_comm_map(address_map &map) ATTR_COLD;
+ 	void decrypted_opcodes_map(address_map &map) ATTR_COLD;
+ 
+@@ -753,6 +756,7 @@ private:
+ 	int          m_ecofghtr_dial_direction1 = 0;
+ 	int          m_ecofghtr_dial_last0 = 0;
+ 	int          m_ecofghtr_dial_last1 = 0;
++	bool         m_hsfa = false;          // HSFA : bits 10-11 de X = bits 18-19 du code de tuile
+ };
+ 
+ 
+@@ -934,6 +938,7 @@ void cps2_state::cps2_render_sprites(screen_device &screen, bitmap_ind16 &bitmap
+ 		int y = base[i + 1];
+ 		int priority = (x >> 13) & 0x07;
+ 		int code = base[i + 2] + ((y & 0x6000) << 3);
++		if (m_hsfa) code += (x & 0x0c00) << 8;   // HSFA : ROM graphique etendue (X & 0x3ff seul sert a la position)
+ 		int colour = base[i + 3];
+ 		int col = colour & 0x1f;
+ 
+@@ -1393,6 +1398,28 @@ void cps2_state::dead_cps2_map(address_map &map)
+ 	map(0xfffffc, 0xffffff).ram();
+ }
+ 
++// HSFA : carte de dead_cps2 + donnees externes du portage ($A00000-$CFFFFF : fichiers a adresse fixe, bloc de fin
++// des donnees d'Upper en $C80000), en ROM, remplies au demarrage depuis HSFA_EXT (dossier des ext_<adresse>.bin)
++void cps2_state::hsfa_map(address_map &map)
++{
++	dead_cps2_map(map);
++	map(0xa00000, 0xcfffff).rom().region("hsfaext", 0);
++	// bases des plans scroll1/2/3 (unites de 64 Ko de la ROM graphique ; 0 = mappage d'origine)
++	map(0x804200, 0x804205).lrw16(
++			NAME([this](offs_t offset) { return m_hsfa_plane_base[offset]; }),
++			NAME([this](offs_t offset, uint16_t data, uint16_t mem_mask) {
++				uint16_t old = m_hsfa_plane_base[offset];
++				COMBINE_DATA(&m_hsfa_plane_base[offset]);
++				if (old != m_hsfa_plane_base[offset]) m_bg_tilemap[offset]->mark_all_dirty();
++			}));
++}
++
++void cps2_state::hsfa(machine_config &config)
++{
++	dead_cps2(config);
++	m_maincpu->set_addrmap(AS_PROGRAM, &cps2_state::hsfa_map);
++}
++
+ void cps2_state::dead_cps2_comm_map(address_map &map)
+ {
+ 	dead_cps2_map(map);
+@@ -10975,6 +11002,84 @@ void cps2_state::init_cps2()
+ 	init_cps2nc();
+ }
+ 
++// HSFA : apres le decodage normal, ROM graphique etendue (HSFA_GFX : tuiles 16x16 au format interne de MAME,
++// 128 octets, chargees a partir de $2000000 = code $40000) et blocs de donnees (HSFA_EXT/ext_<adresse>.bin, mots
++// gros-boutistes). Horloge : HSFA_CLOCK (defaut 0.7375 comme MAME ; > 1 = surcadencage).
++void cps2_state::init_hsfa()
++{
++	init_cps2();
++	m_hsfa = true;
++	save_item(NAME(m_hsfa_plane_base));
++	if (const char *g = getenv("HSFA_GFX"))   // 'fichier[@decalage hexa],...' (defaut $2000000)
++	{
++		std::string all(g);
++		size_t p0 = 0;
++		while (p0 <= all.size())
++		{
++			size_t p1 = all.find(',', p0);
++			std::string item = all.substr(p0, p1 == std::string::npos ? std::string::npos : p1 - p0);
++			p0 = (p1 == std::string::npos) ? all.size() + 1 : p1 + 1;
++			if (item.empty()) continue;
++			uint32_t off = 0x2000000;
++			size_t at = item.rfind('@');
++			if (at != std::string::npos) { off = strtoul(item.c_str() + at + 1, nullptr, 16); item.resize(at); }
++			FILE *f = fopen(item.c_str(), "rb");
++			if (!f || off >= memregion("gfx")->bytes()) { if (f) fclose(f); continue; }
++			size_t n = fread(memregion("gfx")->base() + off, 1, memregion("gfx")->bytes() - off, f);
++			fclose(f);
++			osd_printf_info("HSFA : %u octets de tuiles en $%x (%s)\n", unsigned(n), off, item);
++		}
++	}
++	if (const char *d = getenv("HSFA_EXT"))
++	{
++		uint16_t *ext = (uint16_t *)memregion("hsfaext")->base();
++		static const uint32_t bases[] = { 0xa04000, 0xb00000, 0xb04000, 0xb40000, 0xb80000, 0xbc0000, 0xc80000 };
++		for (uint32_t b : bases)
++		{
++			std::string p = util::string_format("%s/ext_%06x.bin", d, b);
++			FILE *f = fopen(p.c_str(), "rb");
++			if (!f) continue;
++			uint8_t w[2]; uint32_t a = b - 0xa00000;
++			while (a < 0x300000 && fread(w, 1, 2, f) == 2) { ext[a / 2] = (w[0] << 8) | w[1]; a += 2; }
++			fclose(f);
++			osd_printf_info("HSFA : %s\n", p);
++		}
++	}
++	if (const char *c = getenv("HSFA_CLOCK"))
++		m_maincpu->set_clock_scale(atof(c));
++	// Son : region qsound de 16 Mo. Sans HSFA_SON, les 8 Mo hauts recopient les 8 Mo bas (= miroir de la region de
++	// 8 Mo d'origine : comportement inchange). HSFA_SON=<dossier> : ROM son hybride d'Upper (gen_hybride.py, option C) :
++	// hx3.01 (0x20000 : 0x0000-0x7FFF + 0x10000-0x27FFF) et hx3.02 (0x28000 : 0x28000-0x4FFFF, banque 15 comprise)
++	// -> audiocpu ; hx3.11m..hx3.14m (4 Mo chacun, mots echanges comme ROM_LOAD16_WORD_SWAP) -> qsound 0-16 Mo.
++	uint8_t *qs = memregion("qsound")->base();
++	if (const char *d = getenv("HSFA_SON"))
++	{
++		uint8_t *z = memregion("audiocpu")->base();
++		auto lit = [d](const char *nom, uint8_t *dst, size_t n, bool swap)
++		{
++			std::string p = util::string_format("%s/%s", d, nom);
++			FILE *f = fopen(p.c_str(), "rb");
++			if (!f) throw emu_fatalerror("HSFA_SON : %s introuvable\n", p);
++			std::vector<uint8_t> b(n + 1);
++			size_t r = fread(b.data(), 1, n + 1, f);
++			fclose(f);
++			if (r != n) throw emu_fatalerror("HSFA_SON : %s : %u octets au lieu de %u\n", p, unsigned(r), unsigned(n));
++			for (size_t k = 0; k < n; k++) dst[k] = b[swap ? (k ^ 1) : k];
++		};
++		std::vector<uint8_t> z1(0x20000);
++		lit("hx3.01", z1.data(), 0x20000, false);
++		memcpy(z, z1.data(), 0x8000);
++		memcpy(z + 0x10000, z1.data() + 0x8000, 0x18000);
++		lit("hx3.02", z + 0x28000, 0x28000, false);
++		static const char *const q[] = { "hx3.11m", "hx3.12m", "hx3.13m", "hx3.14m" };
++		for (int k = 0; k < 4; k++)
++			lit(q[k], qs + k * 0x400000, 0x400000, true);
++		osd_printf_info("HSFA : son hybride (%s)\n", d);
++	}
++	else
++		memcpy(qs + 0x800000, qs, 0x800000);
++}
++
+ void cps2_state::init_cps2nc()
+ {
+ 	// Initialize some video elements
+@@ -11718,6 +11823,44 @@ ROM_START( sfa3ud )
+ 	ROM_LOAD( "phoenix.key",  0x000000, 0x000014, CRC(2cf772b0) SHA1(eff33c65a4f3862c231f9e4d6fefa7b34398dbf2) )
+ ROM_END
+ 
++ROM_START( sfa3hx )
++	ROM_REGION( CODE_SIZE, "maincpu", 0 ) // 68000 code
++	ROM_LOAD16_WORD_SWAP( "sz3ud.03c", 0x000000, 0x80000, CRC(6db8add7) SHA1(f6dc8ed330254acab16e42a8e729bca7713c8dc1) )
++	ROM_LOAD16_WORD_SWAP( "sz3ud.04c", 0x080000, 0x80000, CRC(d9c65a26) SHA1(8293ef112eaa534b58a3b56721af5d2f53fd1576) )
++	ROM_LOAD16_WORD_SWAP( "sz3.05c",   0x100000, 0x80000, CRC(57fd0a40) SHA1(bc2d5f4d57117bbf58b1adb088e00424ef489e92) )
++	ROM_LOAD16_WORD_SWAP( "sz3.06c",   0x180000, 0x80000, CRC(f6305f8b) SHA1(3fd1ebdbad96103aca604e950b488e52460a71ec) )
++	ROM_LOAD16_WORD_SWAP( "sz3.07c",   0x200000, 0x80000, CRC(6eab0f6f) SHA1(f8d093dda65cf4e8a3000dc1b96355bb03dcb495) )
++	ROM_LOAD16_WORD_SWAP( "sz3.08c",   0x280000, 0x80000, CRC(910c4a3b) SHA1(dbd41280f9b16ad6a5b8f12092549970349395f1) )
++	ROM_LOAD16_WORD_SWAP( "sz3.09c",   0x300000, 0x80000, CRC(b29e5199) SHA1(c6c215eb5aa37f678a9cafcbd8620969fb5ca12f) )
++	ROM_LOAD16_WORD_SWAP( "sz3.10b",   0x380000, 0x80000, CRC(deb2ff52) SHA1(0aa4722aad68a04164946c78bf05752f947b4322) )
++
++	ROM_REGION16_BE( CODE_SIZE, "user1", 0 )
++	ROM_FILL( 0x000000, 0x100000, 0x00 )
++
++	ROM_REGION( 0x8000000, "gfx", ROMREGION_ERASE00 )
++	ROM_LOAD64_WORD( "sz3.13m",   0x0000000, 0x400000, CRC(0f7a60d9) SHA1(c69e0ee22537312909dacc86d2e4be319d54e426) )
++	ROM_LOAD64_WORD( "sz3.15m",   0x0000002, 0x400000, CRC(8e933741) SHA1(f4ac4bfe830dc7df9fe4f680e4e0c053e7cbd8fe) )
++	ROM_LOAD64_WORD( "sz3.17m",   0x0000004, 0x400000, CRC(d6e98147) SHA1(37f331fbb1284db446faecade6f484f58c0e1b2a) )
++	ROM_LOAD64_WORD( "sz3.19m",   0x0000006, 0x400000, CRC(f31a728a) SHA1(f14136564648f006c1b74afda78349f260524b5f) )
++	ROM_LOAD64_WORD( "sz3.14m",   0x1000000, 0x400000, CRC(5ff98297) SHA1(9e0ce43380b776c7a03872bafd4856f6fa60bda7) )
++	ROM_LOAD64_WORD( "sz3.16m",   0x1000002, 0x400000, CRC(52b5bdee) SHA1(7918204dc457f7a146d8fb8cf7242dfed3109fd8) )
++	ROM_LOAD64_WORD( "sz3.18m",   0x1000004, 0x400000, CRC(40631ed5) SHA1(c18c56822b90a71ca5fbdf3440eb2671011f3d8f) )
++	ROM_LOAD64_WORD( "sz3.20m",   0x1000006, 0x400000, CRC(763409b4) SHA1(af60a5116c1ca9050366a35ea29128921867f3cc) )
++
++	ROM_REGION( QSOUND_SIZE, "audiocpu", 0 ) // 64k for the audio CPU (+banks)
++	ROM_LOAD( "sz3.01",   0x00000, 0x08000, CRC(de810084) SHA1(fd0b969b732921ed8b40c16fbfa30ee09c7a7cbd) )
++	ROM_CONTINUE(         0x10000, 0x18000 )
++	ROM_LOAD( "sz3.02",   0x28000, 0x20000, CRC(72445dc4) SHA1(14fca7596ac45ba655016eef5b6120f9f9671c23) )
++
++	ROM_REGION( 0x1000000, "qsound", ROMREGION_ERASE00 ) // QSound samples (HSFA : 16 Mo, cf. init_hsfa / HSFA_SON)
++	ROM_LOAD16_WORD_SWAP( "sz3.11m",   0x000000, 0x400000, CRC(1c89eed1) SHA1(649a0b0a3eb72e2e69e9fb1ac51a58b70daa39f3) )
++	ROM_LOAD16_WORD_SWAP( "sz3.12m",   0x400000, 0x400000, CRC(f392b13a) SHA1(fa04ce0370144a49bd1d5acd873eef87b0dc9d15) )
++
++	ROM_REGION( 0x20, "key", 0 )
++	ROM_LOAD( "phoenix.key",  0x000000, 0x000014, CRC(2cf772b0) SHA1(eff33c65a4f3862c231f9e4d6fefa7b34398dbf2) )
++	ROM_REGION16_BE( 0x300000, "hsfaext", ROMREGION_ERASE00 )   // HSFA : donnees externes $A00000-$CFFFFF
++ROM_END
++
+ ROM_START( spf2xjd )
+ 	ROM_REGION(CODE_SIZE, "maincpu", 0 ) // 68000 code
+ 	ROM_LOAD16_WORD_SWAP( "pzfjd.03a", 0x000000, 0x80000, CRC(5e85ed08) SHA1(8242030daf24d8058368d2e7bfe8199db62966c3) )
+@@ -12914,6 +13057,7 @@ GAME( 1997, vhunt2d,    vhunt2,   dead_cps2,     cps2_2p6b, cps2_state, init_cps
+ GAME( 1997, vsav2d,     vsav2,    dead_cps2,     cps2_2p6b, cps2_state, init_cps2,     ROT0,   "bootleg", "Vampire Savior 2: The Lord of Vampire (Japan 970913 Phoenix Edition) (bootleg)",             MACHINE_SUPPORTS_SAVE )
+ GAME( 1998, mvscud,     mvsc,     dead_cps2,     cps2_2p6b, cps2_state, init_cps2,     ROT0,   "bootleg", "Marvel Vs. Capcom: Clash of Super Heroes (USA 980123 Phoenix Edition) (bootleg)",            MACHINE_SUPPORTS_SAVE )
+ GAME( 1998, sfa3ud,     sfa3,     dead_cps2,     cps2_2p6b, cps2_state, init_cps2,     ROT0,   "bootleg", "Street Fighter Alpha 3 (USA 980904 Phoenix Edition) (bootleg)",                              MACHINE_SUPPORTS_SAVE )
++GAME( 1998, sfa3hx,     sfa3,     hsfa,          cps2_2p6b, cps2_state, init_hsfa,     ROT0,   "HSFA",    "Street Fighter Alpha 3 (HSFA development bench)",                                           MACHINE_SUPPORTS_SAVE )
+ GAME( 1998, sfz3jr2d,   sfa3,     dead_cps2,     cps2_2p6b, cps2_state, init_cps2,     ROT0,   "bootleg", "Street Fighter Zero 3 (Japan 980629 Phoenix Edition) (bootleg)",                             MACHINE_SUPPORTS_SAVE )
+ GAME( 1999, gigawingd,  gigawing, dead_cps2,     cps2_2p2b, cps2_state, init_cps2,     ROT0,   "bootleg", "Giga Wing (USA 990222 Phoenix Edition) (bootleg)",                                           MACHINE_SUPPORTS_SAVE )
+ GAME( 1999, gigawingjd, gigawing, dead_cps2,     cps2_2p2b, cps2_state, init_cps2,     ROT0,   "bootleg", "Giga Wing (Japan 990223 Phoenix Edition) (bootleg)",                                         MACHINE_SUPPORTS_SAVE )
+diff --git a/src/mame/mame.lst b/src/mame/mame.lst
+index 3eaedb90..e8737c2f 100644
+--- a/src/mame/mame.lst
++++ b/src/mame/mame.lst
+@@ -15893,6 +15893,7 @@ sfa3h
+ sfa3hr1
+ sfa3u
+ sfa3ud
++sfa3hx
+ sfa3ur1
+ sfa3us
+ sfad

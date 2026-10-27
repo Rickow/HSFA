@@ -1,0 +1,150 @@
+From 682b2bbeecc33c2d560763839e50d6611867df0b Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 10 Oct 2026 13:37:55 +0200
+Subject: [PATCH] =?UTF-8?q?HSFA=20decors=20widescreen=20:=20mode=20=C2=AB?=
+ =?UTF-8?q?=20bases=20de=20plans=20=C2=BB=20pour=20SFA3=20(plans=3D=20dans?=
+ =?UTF-8?q?=20hsfa=5Ftab.bin),=20hsfa=5Fgfx.bin=20facultatif?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- cps_hsfa.cpp : registres $804200-$804205 et bases ecrites a la 1re image pour tout jeu dont la config donne
+  « plans= » (SFA3 compris) ; la renumerotation par tables (prise sur la VRAM) ne sert plus qu'a SFA3 sans « plans= » ;
+  hsfa_gfx.bin facultatif (BRF_OPT) : archive SFA3 ancienne acceptee.
+- d_cps2.cpp : sfa3hsfa : region graphique de 64 Mo, hsfa_gfx.bin facultatif (memoire de decor rangee en +$1000000 et
+  tuiles des decors widescreen injectes).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 29 +++++++++++++++++------------
+ src/burn/drv/capcom/d_cps2.cpp   |  4 ++++
+ 2 files changed, 21 insertions(+), 12 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 750eb1a..eec141b 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -3,7 +3,8 @@
+ // Reprend dans FBNeo ce que fait le banc MAME du projet (jeu sfa3ud + scripts Lua, et le fork MAME sfa3hx) :
+ //  - banc_mem.lua     : blocs de donnees du portage a adresse fixe ($A00000-$EFFFFF), servis en lecture (ROM) ;
+ //  - banc_plans.lua   : SFA3 = renumerotation des codes de tuiles des plans (tables plan1 / plan2 / f312) ;
+-//                       Upper = bases des plans ecrites dans les registres $804200-$804205 (fork) ;
++//                       Upper, et SFA3 si l'archive donne « plans= » (decors widescreen injectes) = bases des plans
++//                       ecrites dans les registres $804200-$804205 (fork), memoire de decor dans hsfa_gfx.bin ;
+ //  - banc_sprites.lua : conversion de la liste d'objets du portage (codes LOCAUX par emplacement de banque,
+ //                       bits 13-15 de Y) en tuiles 16x16 aux codes globaux, liste ecrite dans les deux banques ;
+ //  - fork sfa3hx      : ROM graphique etendue ($2000000+), code d'objet sur 20 bits (bits 10-11 de X),
+@@ -418,7 +419,7 @@ static void HsfaUpdateScroll()
+ // appele par CpsReadByte / CpsWriteByte / CpsWriteWord (cps_rw.cpp) ; rend 1 si l'acces est traite
+ INT32 HsfaPortReadByte(UINT32 a, UINT8 *d)
+ {
+-	if (HsfaMode == 2 && a >= 0x804200 && a <= 0x804205) {
++	if (bCfgPlans && a >= 0x804200 && a <= 0x804205) {		// (decors WS) SFA3 aussi, si l'archive donne « plans= »
+ 		UINT16 v = nPlaneReg[(a - 0x804200) >> 1];
+ 		*d = (a & 1) ? (v & 0xff) : (v >> 8);
+ 		return 1;
+@@ -428,14 +429,14 @@ INT32 HsfaPortReadByte(UINT32 a, UINT8 *d)
+ 
+ INT32 HsfaPortWriteByte(UINT32 a, UINT8 d)
+ {
+-	if (HsfaMode == 2 && a >= 0x804200 && a <= 0x804205) {
++	if (bCfgPlans && a >= 0x804200 && a <= 0x804205) {
+ 		UINT16 *r = &nPlaneReg[(a - 0x804200) >> 1];
+ 		if (a & 1) *r = (*r & 0xff00) | d;
+ 		else *r = (*r & 0x00ff) | (d << 8);
+ 		HsfaUpdateScroll();
+ 		return 1;
+ 	}
+-	if (HsfaMode == 1 && !bHsfaWordWrite && a >= 0x804102 && a <= 0x804107) {
++	if (HsfaMode == 1 && !bCfgPlans && !bHsfaWordWrite && a >= 0x804102 && a <= 0x804107) {
+ 		HsfaBaseWrite(a, (a & 1) ? d : (d << 8));
+ 	}
+ 	return 0;
+@@ -443,7 +444,7 @@ INT32 HsfaPortWriteByte(UINT32 a, UINT8 d)
+ 
+ void HsfaPortWriteWordStart(UINT32 a, UINT16 d)
+ {
+-	if (HsfaMode == 1 && a >= 0x804102 && a <= 0x804107) HsfaBaseWrite(a, d);
++	if (HsfaMode == 1 && !bCfgPlans && a >= 0x804102 && a <= 0x804107) HsfaBaseWrite(a, d);
+ 	bHsfaWordWrite = 1;
+ }
+ 
+@@ -486,9 +487,9 @@ static INT32 HsfaReset()
+ 	nPlanBase[0] = nPlanBase[1] = 0;
+ 	nPlanBase[2] = 0x900000; nPlanBase[3] = 0x904000; nPlanBase[4] = 0x908000;
+ 	nPlaneReg[0] = nPlaneReg[1] = nPlaneReg[2] = 0;
+-	nPlanesPending = (HsfaMode == 2 && bCfgPlans) ? 1 : 0;
++	nPlanesPending = bCfgPlans ? 1 : 0;
+ 	nStatListes = nStatTuiles = nStatRetires = nStatTronques = 0;
+-	if (HsfaMode == 2) HsfaUpdateScroll();
++	if (bCfgPlans) HsfaUpdateScroll();
+ 	return 0;
+ }
+ 
+@@ -501,7 +502,7 @@ static INT32 HsfaScan(INT32 nAction, INT32 *)
+ 		ba.Data = Age;     ba.nLen = 0x8000 * sizeof(INT32);   ba.szName = "HsfaAge";     BurnAcb(&ba);
+ 		ba.Data = Conv;    ba.nLen = 0x8000 * sizeof(UINT16);  ba.szName = "HsfaConv";    BurnAcb(&ba);
+ 		ba.Data = ConvOk;  ba.nLen = 0x8000;                   ba.szName = "HsfaConvOk";  BurnAcb(&ba);
+-		if (HsfaMode == 1) {
++		if (HsfaMode == 1 && !bCfgPlans) {
+ 			ba.Data = Raw90;   ba.nLen = 0x18000 * sizeof(UINT16); ba.szName = "HsfaRaw90";   BurnAcb(&ba);
+ 			ba.Data = Raw90Ok; ba.nLen = 0x18000;                  ba.szName = "HsfaRaw90Ok"; BurnAcb(&ba);
+ 		}
+@@ -512,7 +513,7 @@ static INT32 HsfaScan(INT32 nAction, INT32 *)
+ 		SCAN_VAR(nPlanesPending);
+ 
+ 		if (nAction & ACB_WRITE) {
+-			if (HsfaMode == 2) HsfaUpdateScroll();
++			if (bCfgPlans) HsfaUpdateScroll();
+ 		}
+ 	}
+ 	return 0;
+@@ -567,7 +568,11 @@ static INT32 HsfaLoadData()
+ 			if (HSFA_GFX_BASE + ri.nLen > nCpsGfxLen) return 1;
+ 			UINT8 *tmp = (UINT8*)BurnMalloc(ri.nLen);
+ 			if (tmp == NULL) return 1;
+-			if (BurnLoadRom(tmp, i, 1)) { BurnFree(tmp); return 1; }
++			if (BurnLoadRom(tmp, i, 1)) {
++				BurnFree(tmp);
++				if (ri.nType & BRF_OPT) continue;			// (decors WS) SFA3 : archive sans region etendue
++				return 1;
++			}
+ 			HsfaConvertGfx(tmp, ri.nLen, CpsGfx + HSFA_GFX_BASE);
+ 			BurnFree(tmp);
+ 		}
+@@ -602,8 +607,8 @@ INT32 HsfaInit()
+ 	SekMapHandler(5, 0x700000, 0x70FFFF, MAP_WRITE);
+ 	SekSetWriteByteHandler(5, HsfaObjWriteByte);
+ 	SekSetWriteWordHandler(5, HsfaObjWriteWord);
+-	if (HsfaMode == 1) {
+-		// banc_plans.lua : prise sur la memoire video
++	if (HsfaMode == 1 && !bCfgPlans) {
++		// banc_plans.lua : prise sur la memoire video (SFA3 sans « plans= » : renumerotation par tables)
+ 		SekMapHandler(6, 0x900000, 0x92FFFF, MAP_WRITE);
+ 		SekSetWriteByteHandler(6, HsfaVramWriteByte);
+ 		SekSetWriteWordHandler(6, HsfaVramWriteWord);
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 6c73f85..868c400 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15214,6 +15214,9 @@ static struct BurnRomInfo Sfa3hsfaRomDesc[] = {
+ 
+ 	{ "hsfa_ext.bin",  0x500000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// $A00000-$EFFFFF
+ 	{ "hsfa_tab.bin",  0x400000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// tables de banques
++	// (decors WS) facultatif : memoire de decor du portage rangee pour le mode � bases de plans � (hsfa_plans.bin en
++	// +$1000000) + tuiles des decors widescreen injectes ; avec � plans= � dans la config de hsfa_tab.bin
++	{ "hsfa_gfx.bin",  0x2000000, 0x00000000, CPS2_HSFA_DATA | BRF_OPT | BRF_GRA },	// region $2000000-$3FFFFFF
+ };
+ 
+ STD_ROM_PICK(Sfa3hsfa)
+@@ -15275,6 +15278,7 @@ STD_ROM_FN(Sfa3uhsfa)
+ static INT32 HsfaSfa3Init()
+ {
+ 	HsfaMode = 1;
++	nCpsGfxLenMin = 0x4000000;					// (decors WS) region etendue de 64 Mo (hsfa_gfx.bin facultatif)
+ 	INT32 nRet = PhoenixInit();
+ 	if (!nRet) nRet = HsfaInit();
+ 	return nRet;
+-- 
+2.53.0
+

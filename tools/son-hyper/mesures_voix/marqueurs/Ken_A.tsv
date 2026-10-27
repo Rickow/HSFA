@@ -1,0 +1,11 @@
+# Ken_A : version $61, table $E72500 (redirection), 26 entrees, origine prog+1A9D6A
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	61	0329	018B	3		QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	61	032A	018C	2		DP+HP ; DP+LP
+sfa2	61	032B	018D	3		QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	61	0332	0193	5		projection HK
+sfa2	61	0333	0191	2		projection HP ; projection HP 2
+sfa2	61	0334	0192	2		projection HP ; projection HP 2
+sfa2	61	0335	0194	1		Start
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

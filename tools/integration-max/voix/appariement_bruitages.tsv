@@ -1,0 +1,18 @@
+code_psp	source_psp	duree_psp_s	commande_arcade	onde	vitesse	score_spectre_env	duree_arcade_s	variantes_meme_echantillon	confiance
+$06	sequence MIDI 5 (rendue : instrument I_005, note 60)	0.667	$0206	0.361	1.000	0.833	0.570	-	faible (pas d'equivalent sur)
+$20	echantillon A_000	0.199	$0239	0.732	1.000	0.618	0.230	-	forte
+$22	echantillon A_002	0.244	$0257	0.978	1.000	0.922	0.260	$0230	forte
+$27	echantillon A_006	0.993	$0263	0.537	1.000	0.448	1.020	$0238	moyenne
+$2B	echantillon A_008	0.175	$023E	0.738	1.000	0.738	0.200	$023D	forte
+$2E	type 2 (mot 2 = 0) : ni echantillon ni sequence, non rendu		(aucune)						sans equivalent rendu (type inconnu)
+$30	echantillon A_011	0.428	$022E	0.789	1.000	0.811	0.450	-	forte
+$36	echantillon A_016	1.029	$023B	0.521	1.000	0.933	1.120	$023C	moyenne
+
+# 6 meilleurs par code
+# $06 (sequence MIDI 5 (rendue : instrument I_005, note 60)) : $0206 onde 0.361 (x1.000) spectre+env 0.833, 0.57 s ; $0207 onde 0.376 (x1.000) spectre+env 0.792, 0.57 s ; $0216 onde 0.326 (x1.000) spectre+env 0.685, 1.61 s ; $0217 onde 0.310 (x1.000) spectre+env 0.683, 1.61 s ; $0215 onde 0.229 (x1.000) spectre+env 0.642, 1.60 s ; $025F onde 0.122 (x1.000) spectre+env 0.757, 0.69 s
+# $20 (echantillon A_000) : $0239 onde 0.732 (x1.000) spectre+env 0.618, 0.23 s ; $023A onde 0.623 (x1.000) spectre+env 0.653, 0.35 s ; $0223 onde 0.271 (x1.106) spectre+env 0.475, 0.33 s ; $0200 onde 0.223 (x0.782) spectre+env 0.500, 0.35 s ; $023E onde 0.201 (x1.015) spectre+env 0.493, 0.20 s ; $023D onde 0.200 (x1.015) spectre+env 0.485, 0.20 s
+# $22 (echantillon A_002) : $0257 onde 0.978 (x1.000) spectre+env 0.922, 0.26 s ; $0230 onde 0.979 (x1.000) spectre+env 0.882, 0.25 s ; $0231 onde 0.370 (x1.000) spectre+env 0.796, 0.22 s ; $0261 onde 0.221 (x1.278) spectre+env 0.718, 0.44 s ; $0265 onde 0.220 (x0.891) spectre+env 0.699, 0.44 s ; $0255 onde 0.225 (x1.260) spectre+env 0.666, 0.70 s
+# $27 (echantillon A_006) : $0263 onde 0.537 (x1.000) spectre+env 0.448, 1.02 s ; $0238 onde 0.532 (x1.000) spectre+env 0.317, 0.78 s ; $0231 onde 0.122 (x0.805) spectre+env 0.280, 0.22 s ; $023D onde 0.093 (x1.075) spectre+env 0.308, 0.20 s ; $021A onde 0.110 (x0.944) spectre+env 0.252, 1.60 s ; $0242 onde 0.115 (x0.853) spectre+env 0.236, 1.01 s
+# $2B (echantillon A_008) : $023E onde 0.738 (x1.000) spectre+env 0.738, 0.20 s ; $023D onde 0.738 (x1.000) spectre+env 0.636, 0.20 s ; $0200 onde 0.270 (x1.015) spectre+env 0.506, 0.35 s ; $0239 onde 0.269 (x1.000) spectre+env 0.501, 0.23 s ; $0210 onde 0.238 (x1.015) spectre+env 0.538, 1.55 s ; $023A onde 0.227 (x1.000) spectre+env 0.521, 0.35 s
+# $30 (echantillon A_011) : $022E onde 0.789 (x1.000) spectre+env 0.811, 0.45 s ; $020C onde 0.462 (x0.944) spectre+env 0.824, 0.54 s ; $025C onde 0.087 (x1.000) spectre+env 0.812, 0.52 s ; $0279 onde 0.090 (x1.000) spectre+env 0.778, 0.45 s ; $0252 onde 0.116 (x0.878) spectre+env 0.724, 0.58 s ; $0254 onde 0.097 (x1.278) spectre+env 0.760, 0.58 s
+# $36 (echantillon A_016) : $023B onde 0.521 (x1.000) spectre+env 0.933, 1.12 s ; $023C onde 0.521 (x1.000) spectre+env 0.915, 1.12 s ; $0277 onde 0.172 (x0.878) spectre+env 0.686, 0.82 s ; $0210 onde 0.143 (x1.059) spectre+env 0.699, 1.55 s ; $0211 onde 0.122 (x1.172) spectre+env 0.720, 1.61 s ; $0260 onde 0.092 (x0.794) spectre+env 0.778, 1.22 s

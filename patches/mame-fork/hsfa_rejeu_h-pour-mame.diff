@@ -1,0 +1,110 @@
+--- a/hsfa_rejeu.h
++++ b/hsfa_rejeu.h
+@@ -89,6 +89,15 @@
+ 	bool ouvre(const char *table, const char *xdata, uint8_t *rom, size_t taille_rom)
+ 	{
+ 		if (!lit_table(table)) return false;
++		return charge_xdata(xdata, rom, taille_rom);
++	}
++
++	// table deja en memoire (texte, eventuellement complete par des octets nuls : la lecture s'arrete au premier)
++	bool ouvre_texte(const char *texte, size_t n) { return lit_table_texte(texte, n); }
++
++	// sources (SOURCE de la table) copiees de X_DATA dans la ROM du 2e QSound, CRC controle ; table lue avant
++	bool charge_xdata(const char *xdata, uint8_t *rom, size_t taille_rom)
++	{
+ 		std::string chemin(xdata);
+ 		uint64_t base = 0;
+ 		size_t at = chemin.rfind('@');
+@@ -111,6 +120,21 @@
+ 		return true;
+ 	}
+ 
++	// ROM du 2e QSound deja remplie (image des sources a leur banque, ex. membre hsfa_rejeu.bin du zip) : CRC controle
++	bool verifie_rom(const uint8_t *rom, size_t taille_rom)
++	{
++		if (m_src.empty()) { erreur = "table non lue"; return false; }
++		for (size_t i = 0; i < m_src.size(); i++) {
++			const source &s = m_src[i];
++			size_t o = size_t(s.banque) << 16;
++			if (o + s.taille > taille_rom) { erreur = "ROM du 2e QSound trop petite"; return false; }
++			if (crc32(rom + o, s.taille) != s.crc) { erreur = "ROM du rejeu : CRC different pour " + s.nom; return false; }
++		}
++		return true;
++	}
++	// sources decrites par la table (pour construire l'image hors de l'emulateur)
++	size_t nb_sources() const { return m_src.size(); }
++
+ 	// mise sous tension du 2e QSound : initialisation du pilote d'origine apres 0,1 s (le DSP doit avoir demarre)
+ 	void reset(int64_t maintenant)
+ 	{
+@@ -207,7 +231,8 @@
+ #endif
+ 	{
+ 		if (!m_j) return;
+-		va_list ap; va_start(ap, fmt); vfprintf(m_j, fmt, ap); va_end(ap); fflush(m_j);
++		char t[512]; va_list ap; va_start(ap, fmt); vsnprintf(t, sizeof(t), fmt, ap); va_end(ap);
++		fwrite(t, 1, strlen(t), m_j); fflush(m_j);   // vsnprintf + fwrite : compatible avec la couche fichiers de libretro
+ 	}
+ 	const ecriture *ecr(const instance &x) const
+ 	{
+@@ -257,15 +282,40 @@
+ 	}
+ 	int jeu_de(const char *nom) const { for (size_t i = 0; i < m_src.size(); i++) if (m_src[i].nom == nom) return int(i); return -1; }
+ 
++	// lecteur de lignes (comme fgets) sur un texte en memoire, arret au premier octet nul
++	struct lignes {
++		const char *p, *fin;
++		bool suivante(char *l, size_t n)
++		{
++			if (p >= fin || !*p) return false;
++			size_t k = 0;
++			while (p < fin && *p && k + 1 < n) { char c = *p++; l[k++] = c; if (c == '\n') break; }
++			l[k] = 0;
++			return true;
++		}
++	};
++
+ 	bool lit_table(const char *chemin)
+ 	{
+-		FILE *f = fopen(chemin, "r");
++		FILE *f = fopen(chemin, "rb");
+ 		if (!f) { erreur = std::string("table introuvable : ") + chemin; return false; }
++		std::string t;
++		char b[65536];
++		size_t n;
++		while ((n = fread(b, 1, sizeof(b), f)) > 0) t.append(b, n);
++		fclose(f);
++		return lit_table_texte(t.data(), t.size());
++	}
++
++	bool lit_table_texte(const char *texte, size_t taille)
++	{
++		lignes src; src.p = texte; src.fin = texte + taille;
++		m_sons.clear(); m_ecr.clear(); m_init.clear(); m_stop.clear(); m_src.clear(); vide = 0x0000;
+ 		m_code.assign(65536, -1); m_alias.assign(65536, -1);
+ 		std::vector<std::pair<uint16_t, uint16_t> > refs;
+ 		char l[256], a[64], b[64];
+ 		std::vector<ecriture> *bloc = NULL; int reste = 0; son *cour = NULL;
+-		while (fgets(l, sizeof(l), f)) {
++		while (src.suivante(l, sizeof(l))) {
+ 			if (reste > 0) {
+ 				unsigned t = 0, r = 0, v = 0;
+ 				if (cour) { if (sscanf(l, "%u %x %x", &t, &r, &v) != 3) break; }
+@@ -284,7 +334,7 @@
+ 			else if (sscanf(l, "STOP %63s %d", a, &n) == 2) { bloc = &m_stop; reste = n; cour = NULL; m_stop.clear(); }
+ 			else if (sscanf(l, "CODE %x %63s %x %x %d", &x1, a, &x2, &x3, &n) == 5) {
+ 				int j = jeu_de(a);
+-				if (j < 0 || n <= 0 || x1 > 0xFFFF) { erreur = std::string("table : ligne invalide ") + l; fclose(f); return false; }
++				if (j < 0 || n <= 0 || x1 > 0xFFFF) { erreur = std::string("table : ligne invalide ") + l; return false; }
+ 				son s; memset(&s, 0, sizeof(s)); s.code = uint16_t(x1); s.jeu = uint8_t(j); s.src = uint16_t(x2); s.prio = uint8_t(x3);
+ 				s.debut = uint32_t(m_ecr.size());
+ 				m_code[x1] = int32_t(m_sons.size()); m_sons.push_back(s); cour = &m_sons.back();
+@@ -294,7 +344,6 @@
+ 			else if (sscanf(l, "VIDE %x", &x1) == 1) vide = uint16_t(x1);
+ 			(void)b;
+ 		}
+-		fclose(f);
+ 		if (reste) { erreur = "table tronquee"; return false; }
+ 		for (int passe = 0; passe < 4; passe++)                    // REF vers un REF : resolu en quelques passes
+ 			for (size_t i = 0; i < refs.size(); i++) if (m_code[refs[i].second] >= 0) m_code[refs[i].first] = m_code[refs[i].second];

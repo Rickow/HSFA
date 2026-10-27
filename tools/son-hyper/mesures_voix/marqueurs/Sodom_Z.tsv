@@ -1,0 +1,8 @@
+# Sodom_Z : version $36, table $E71100 (redirection), 33 entrees, origine prog+1F64EE
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	36	03C9	01B8	1		360+HP
+sfa1	36	03CD	01BA	3		projection HK ; projection HP ; projection HP 2
+sfa1	36	03CE	01BC	2		360+HP ; DP+LP
+sfa1	36	03CF	01BB	1		DP+HP
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

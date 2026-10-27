@@ -1,0 +1,6 @@
+# Guy_Z : version $37, table $E71380 (redirection), 24 entrees, origine prog+20EDCA
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	37	03EE	0179	7		super QCBx2+HK
+sfa1	37	03EF	0178	2		super QCBx2+HP ; super demi-cercle x2+HP
+# voix Hyper sans voix d'arcade : 03E9@super QCFx2+HP 03EA@super QCFx2+HK 03EF@super QCFx2+HK 03EF@super QCFx2+HK 03E9@super QCFx2+LP 03EA@super QCFx2+LK 03EF@super QCFx2+LK 03EF@super QCFx2+LK
+# voix d'arcade sans voix Hyper : 0176@super QCFx2+HP 0178@super QCFx2+HP 017A@super QCFx2+HK 017A@super QCFx2+HK 0178@super QCFx2+HK 0178@super QCFx2+HK 0175@super QCFx2+HK 0176@super QCFx2+LP 0178@super QCFx2+LP 017A@super QCFx2+LK 017A@super QCFx2+LK 0178@super QCFx2+LK 0178@super QCFx2+LK 0175@super QCFx2+LK

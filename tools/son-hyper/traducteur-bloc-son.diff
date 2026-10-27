@@ -1,0 +1,60 @@
+--- <workspace>/scripts/untranspile/translate.py	2026-10-10 12:54:50.014545141 +0200
++++ translate.py	2026-10-10 18:12:09.727002217 +0200
+@@ -1361,7 +1361,14 @@
+     a = _addr_to_68k(v)
+     if HW_TAG and a is not None and 0x400000 <= a < 0xF00000: a |= 0x01000000
+     return a
++# (agent_son_hyper_rom, SON-HYPER-ROM.md §13) BLOC DE DONNEES AJOUTE (redirection du son par version) : plage
++# d'execution PS2 [SON_X, SON_X + SON_LEN) hors du module et de sa RAM, servie a la suite du bloc externe de fin des
++# donnees (DATA_EXT + taille de ce bloc)
++SON_X = None; SON_LEN = 0
++def son_y():
++    return (DATA_EXT + (DATA_END_RT - DATA_SPLIT) + 1) & ~1
+ def _addr_to_68k(v):
++    if SON_X is not None and DATA_SPLIT is not None and SON_X <= v < SON_X + SON_LEN: return son_y() + (v - SON_X)
+     rel = v - (RAM_HI<<16)
+     if MEMMODE in ('cps2','type') and rel in HWREG: return HWREG[rel]   # rendu au vrai registre CPS2
+     for a0,a1,k in ADDRMAP:
+--- <workspace>/scripts/untranspile/mame_test.py	2026-10-10 12:54:50.016664064 +0200
++++ mame_test.py	2026-10-10 18:11:00.007164715 +0200
+@@ -105,6 +105,10 @@
+     T.HW_TAG = os.environ.get("DPTR", "runtime") == "runtime"
+     if T.HW_TAG: T.DPTR_FIX = K.build_conv(CONV, [(0, 1, 0)])[1]
+     T.DATA_BASE = 0x200000
++    SON_BLOB = None
++    if os.environ.get("HSFA_SON_DONNEES"):            # (agent_son_hyper_rom) bloc ajoute, cf. translate.SON_X
++        SON_BLOB = open(os.environ["HSFA_SON_DONNEES"], "rb").read(); SON_BLOB += bytes(len(SON_BLOB) & 1)
++        T.SON_X = int(os.environ.get("HSFA_SON_X", "E70000"), 16); T.SON_LEN = len(SON_BLOB)
+     its, words, unres = assemble(buf, CODE0, T.code_end_translate(buf), base=CODE, external=ext, native=NAT)
+     PLAFOND = 0x3C0000 - len(ablob) - 4*len(aperso) - 0x2000   # sous la table de hachage (HANDOFF §98)
+     def coupe():                                         # (HANDOFF §108) donnees trop grandes : la fin part en externe
+@@ -171,6 +175,7 @@
+         NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (len(buf) - end)   # donnees DANS l'image
+         ASSET = (T.DATA_BASE + NDATA + 0xff) & ~0xff      # bloc des tables d'animation, apres les donnees
+         if ablob: ranges.append((AN.VBASE, AN.VBASE + len(ablob), ASSET - AN.VBASE))   # (agent_ro9) ro9 : bloc vide
++        if T.SON_X is not None: ranges.append((T.SON_X, T.SON_X + T.SON_LEN, T.son_y() + TG - T.SON_X))
+         ccode, _ = K.build_conv(CONV, ranges)
+         assert CONV + len(ccode) <= STUB_RTS
+         img[CONV:CONV+len(ccode)] = ccode
+@@ -380,6 +385,10 @@
+     be = bytes(b for i in range(0, len(data), 2) for b in (data[i+1], data[i]))
+     if T.DATA_SPLIT:                                     # (HANDOFF §108) fin des donnees : bloc externe (banc_mem.lua)
+         k_ = T.DATA_SPLIT - T.CODE_END_RT
++        if SON_BLOB is not None:                         # (agent_son_hyper_rom) bloc ajoute a la suite
++            assert T.DATA_EXT + len(be) - k_ == T.son_y()
++            be = be + bytes(b for i in range(0, len(SON_BLOB), 2) for b in (SON_BLOB[i+1], SON_BLOB[i]))
++            print("donnees du son par version : %d octets, exec $%x -> $%x" % (len(SON_BLOB), T.SON_X, T.son_y()))
+         open(os.path.join(W, "ext_%06x.bin" % T.DATA_EXT), "wb").write(be[k_:])
+         print("donnees externes : %d octets -> ext_%06x.bin" % (len(be) - k_, T.DATA_EXT))
+         be = be[:k_]
+--- <workspace>/scripts/untranspile/profils.py	2026-10-04 18:14:18.629464448 +0200
++++ profils.py	2026-10-10 18:03:35.461095318 +0200
+@@ -3,7 +3,7 @@
+ Toute valeur absente d'un profil = fonctionnalite desactivee pour ce module (routine a la main, correctif...)."""
+ import os
+ 
+-EXTRACT = "<workspace>/anthology_extract/decompressed"
++EXTRACT = os.environ.get("EXTRACT_MODULES", "<workspace>/anthology_extract/decompressed")   # (agent_son_hyper_rom)
+ 
+ PROFILS = {
+     'ro3': dict(

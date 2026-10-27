@@ -1,0 +1,11 @@
+--- paquet_fbneo.py	2026-10-10 13:51:45.245833299 +0200
++++ paquet_fbneo.strict_defaut.py	2026-10-10 13:58:14.340965133 +0200
+@@ -52,7 +52,7 @@
+ 
+ DATE_FIXE = os.environ.get("SOURCE_DATE_EPOCH")
+ DATE_FIXE = int(DATE_FIXE) if DATE_FIXE not in (None, "") else None
+-STRICT = os.environ.get("HSFA_STRICT") == "1"
++STRICT = os.environ.get("HSFA_STRICT", "1") != "0"     # (proposition) liste explicite par defaut ; HSFA_STRICT=0 = ancien comportement
+ 
+ 
+ def date_texte(t):

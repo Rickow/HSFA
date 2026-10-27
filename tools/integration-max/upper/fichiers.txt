@@ -1,0 +1,38 @@
+# Publication des crochets MAX=1 (agent_integration_max, 2b18) : fichiers à reprendre dans le dépôt.
+# Chemins source relatifs à work/agent_integration_max/ ; « -> » = destination proposée dans le dépôt.
+
+## 1. Construction d'Upper (scripts/untranspile)
+untranspile/integre_max.py        -> scripts/untranspile/integre_max.py    (données, talons, tables du perso MAX dans l'image)
+untranspile/agrandit_max.py       -> scripts/untranspile/agrandit_max.py   (tables par ID agrandies à 48, rel16 prolongées)
+untranspile/max_cache.py          -> scripts/untranspile/max_cache.py (= src/hsfa du dépôt) : lu par l'entrée upper_max du
+                                     paquet du dépôt (tools/fbneo-hsfa/paquet_fbneo.py, défaut ../../scripts/untranspile,
+                                     ou HSFA_MAX_CACHE_DIR) ; disposition graphique selon SFA3MAX_CACHE
+publication/mame_test_max.diff    -> à appliquer à scripts/untranspile/mame_test.py (crochets « if MAX: », 4 blocs ;
+                                     2 blocs à reporter à la main : mame_test.py partagé a évolué depuis notre copie)
+untranspile/nonreg_ro5_max.sh     -> scripts/untranspile/nonreg_ro5_max.sh (nonreg sur un banc quelconque, MAX ou non)
+
+## 2. Préparation du code MAX (assemblé avant mame_test)
+outils/prepare_max.py             (enveloppes EFFET_W / TIR_W, correctifs locaux, données .s de la session MAX)
+outils/donnees_joueur_max.py      (en-têtes, boîtes, attaques, tables $88 / $C0 / $264)
+outils/fins_integration.py        (scripts, acteurs et textes des fins)
+outils/hud_apercu_max.py          (HUD, aperçu de sélection, jauges)
+outils/persos_max.json            (persos actifs, suffixes, rappels)
+outils/tables_par_id.json         (recensement des tables par ID, lu par agrandit_max)
+conv/convertit_max.py             (traducteur des sources MAX vers l'image d'Upper ; 2b20 : A6 restauré après un appel
+                                   sur un autre objet)
+conv/convertit_frames.py          (frames, décors)
+conv/correspondances_complement.tsv, conv/bases_forcees.tsv, conv/types_complement.tsv
+max_trad/mes_fichiers/psp_1b07bc_main.s (et les autres .s de ce dossier, lus par prepare_max)
+max_trad/rosette_code/            (copie de max/outils/rosette_code + gestionnaires d'Eagle ; les .s du cache
+                                   SFA3MAX_CACHE/s/ remplacent ceux du dossier à la construction)
+
+## 3. Lancement, paquet
+construit_max.sh, lance_max.sh    (variables : SFA3MAX_CACHE, BANC, MAX_FINS=1, MAX_CONTRES=1)
+(paquet : l'entrée upper_max du dépôt, patch 0013, produit sfa3umhsfa.zip ; notre fbneo/paquet_fbneo_depot.py n'est plus à publier)
+
+## 4. Dépendances hors de ce dossier (chemins écrits en dur, à paramétrer avant publication)
+work/agent_typage_max/champs_types_upper.tsv, work/agent_max_upper/correspondances.tsv (convertit_max.py)
+banc_ref/carte_image.txt, banc_ref/roms_ro5/sfa3ud (construction de référence MAX=0)
+work/mame_ro5/banques_hx, work/mame_ro5/hsfa_gfx.bin, hsfa_plans.bin
+~/.cache/sfa3max_v2_etire (fork/, s/, converti/ : session MAX)
+work/agent_son_max/roms_son_max_ko (ROM son)

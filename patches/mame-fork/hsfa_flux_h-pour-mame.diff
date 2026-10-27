@@ -1,0 +1,58 @@
+--- a/hsfa_flux.h
++++ b/hsfa_flux.h
+@@ -89,6 +89,18 @@
+ 	bool ouvre(const char *ydata, const char *table)
+ 	{
+ 		if (!lit_table(table)) return false;
++		return ouvre_y(ydata);
++	}
++	// table deja en memoire (ex. membre hsfa_flux_table.txt du zip du jeu ; arret au premier octet nul)
++	bool ouvre_texte(const char *ydata, const char *texte, size_t n)
++	{
++		lit_table_texte(texte, n);
++		return ouvre_y(ydata);
++	}
++	// ydata : Y_DATA.BIN, ISO, ou 'fichier@decalage' (AFS a ce decalage : membre hsfa_flux.bin stocke dans le zip)
++	bool ouvre_y(const char *ydata)
++	{
++		if (m_f) { fclose(m_f); m_f = NULL; }
+ 		std::string chemin(ydata);
+ 		uint64_t base = 0;
+ 		size_t at = chemin.rfind('@');
+@@ -227,11 +239,25 @@
+ 
+ 	bool lit_table(const char *chemin)
+ 	{
+-		FILE *f = fopen(chemin, "r");
++		FILE *f = fopen(chemin, "rb");
+ 		if (!f) { erreur = std::string("table introuvable : ") + chemin; return false; }
++		std::string t;
++		char b[16384];
++		size_t n;
++		while ((n = fread(b, 1, sizeof b, f)) > 0) t.append(b, n);
++		fclose(f);
++		lit_table_texte(t.data(), t.size());
++		return true;
++	}
++	void lit_table_texte(const char *texte, size_t taille)
++	{
+ 		m_tab.assign(0x1200, entree());
++		const char *p = texte, *fin = texte + taille;
+ 		char l[256];
+-		while (fgets(l, sizeof l, f)) {
++		while (p < fin && *p) {
++			size_t k = 0;
++			while (p < fin && *p && k + 1 < sizeof l) { char c = *p++; l[k++] = c; if (c == '\n') break; }
++			l[k] = 0;
+ 			unsigned code, fid, vol; char dr[32] = "-";
+ 			if (l[0] == '#' || sscanf(l, "%x %u %u %31s", &code, &fid, &vol, dr) < 3 || code >= 0x1200) continue;
+ 			entree &x = m_tab[code];
+@@ -242,8 +268,6 @@
+ 				else if (*c == 'x') x.drap |= DRAP_JAMAIS;
+ 			}
+ 		}
+-		fclose(f);
+-		return true;
+ 	}
+ 
+ 	bool charge_entete(int32_t fid)

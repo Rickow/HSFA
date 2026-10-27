@@ -1,0 +1,9 @@
+# Ryu_Z : version $30, table $E70200 (redirection), 20 entrees, origine prog+1989DC
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	30	0309	0160	3		QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa1	30	030A	0161	2		DP+HP ; DP+LP
+sfa1	30	030B	0162	3		QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa1	30	030D	0165	2		projection HP ; projection HP 2
+sfa1	30	030E	0166	1		projection HK
+# voix Hyper sans voix d'arcade : 030A@DP+HP
+# voix d'arcade sans voix Hyper : 

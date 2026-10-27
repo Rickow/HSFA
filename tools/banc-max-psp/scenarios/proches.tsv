@@ -1,0 +1,85 @@
+C10_d1	normal debout LP (dist 10)	3:1 2:N	10	normal	100
+C10_a1	normal accroupi LP (dist 10)	6:D 3:D+1 2:N	10	normal	100
+C10_d2	normal debout MP (dist 10)	3:2 2:N	10	normal	100
+C10_a2	normal accroupi MP (dist 10)	6:D 3:D+2 2:N	10	normal	100
+C10_d3	normal debout HP (dist 10)	3:3 2:N	10	normal	100
+C10_a3	normal accroupi HP (dist 10)	6:D 3:D+3 2:N	10	normal	100
+C10_d4	normal debout LK (dist 10)	3:4 2:N	10	normal	100
+C10_a4	normal accroupi LK (dist 10)	6:D 3:D+4 2:N	10	normal	100
+C10_d5	normal debout MK (dist 10)	3:5 2:N	10	normal	100
+C10_a5	normal accroupi MK (dist 10)	6:D 3:D+5 2:N	10	normal	100
+C10_d6	normal debout HK (dist 10)	3:6 2:N	10	normal	100
+C10_a6	normal accroupi HK (dist 10)	6:D 3:D+6 2:N	10	normal	100
+C10_f2	normal avant+MP (dist 10)	6:F 3:F+2 2:N	10	normal	100
+C10_f3	normal avant+HP (dist 10)	6:F 3:F+3 2:N	10	normal	100
+C10_f4	normal avant+LK (dist 10)	6:F 3:F+4 2:N	10	normal	100
+C10_f5	normal avant+MK (dist 10)	6:F 3:F+5 2:N	10	normal	100
+C10_f6	normal avant+HK (dist 10)	6:F 3:F+6 2:N	10	normal	100
+C20_d1	normal debout LP (dist 20)	3:1 2:N	20	normal	100
+C20_a1	normal accroupi LP (dist 20)	6:D 3:D+1 2:N	20	normal	100
+C20_d2	normal debout MP (dist 20)	3:2 2:N	20	normal	100
+C20_a2	normal accroupi MP (dist 20)	6:D 3:D+2 2:N	20	normal	100
+C20_d3	normal debout HP (dist 20)	3:3 2:N	20	normal	100
+C20_a3	normal accroupi HP (dist 20)	6:D 3:D+3 2:N	20	normal	100
+C20_d4	normal debout LK (dist 20)	3:4 2:N	20	normal	100
+C20_a4	normal accroupi LK (dist 20)	6:D 3:D+4 2:N	20	normal	100
+C20_d5	normal debout MK (dist 20)	3:5 2:N	20	normal	100
+C20_a5	normal accroupi MK (dist 20)	6:D 3:D+5 2:N	20	normal	100
+C20_d6	normal debout HK (dist 20)	3:6 2:N	20	normal	100
+C20_a6	normal accroupi HK (dist 20)	6:D 3:D+6 2:N	20	normal	100
+C20_f2	normal avant+MP (dist 20)	6:F 3:F+2 2:N	20	normal	100
+C20_f3	normal avant+HP (dist 20)	6:F 3:F+3 2:N	20	normal	100
+C20_f4	normal avant+LK (dist 20)	6:F 3:F+4 2:N	20	normal	100
+C20_f5	normal avant+MK (dist 20)	6:F 3:F+5 2:N	20	normal	100
+C20_f6	normal avant+HK (dist 20)	6:F 3:F+6 2:N	20	normal	100
+C30_d1	normal debout LP (dist 30)	3:1 2:N	30	normal	100
+C30_a1	normal accroupi LP (dist 30)	6:D 3:D+1 2:N	30	normal	100
+C30_d2	normal debout MP (dist 30)	3:2 2:N	30	normal	100
+C30_a2	normal accroupi MP (dist 30)	6:D 3:D+2 2:N	30	normal	100
+C30_d3	normal debout HP (dist 30)	3:3 2:N	30	normal	100
+C30_a3	normal accroupi HP (dist 30)	6:D 3:D+3 2:N	30	normal	100
+C30_d4	normal debout LK (dist 30)	3:4 2:N	30	normal	100
+C30_a4	normal accroupi LK (dist 30)	6:D 3:D+4 2:N	30	normal	100
+C30_d5	normal debout MK (dist 30)	3:5 2:N	30	normal	100
+C30_a5	normal accroupi MK (dist 30)	6:D 3:D+5 2:N	30	normal	100
+C30_d6	normal debout HK (dist 30)	3:6 2:N	30	normal	100
+C30_a6	normal accroupi HK (dist 30)	6:D 3:D+6 2:N	30	normal	100
+C30_f2	normal avant+MP (dist 30)	6:F 3:F+2 2:N	30	normal	100
+C30_f3	normal avant+HP (dist 30)	6:F 3:F+3 2:N	30	normal	100
+C30_f4	normal avant+LK (dist 30)	6:F 3:F+4 2:N	30	normal	100
+C30_f5	normal avant+MK (dist 30)	6:F 3:F+5 2:N	30	normal	100
+C30_f6	normal avant+HK (dist 30)	6:F 3:F+6 2:N	30	normal	100
+C40_d1	normal debout LP (dist 40)	3:1 2:N	40	normal	100
+C40_a1	normal accroupi LP (dist 40)	6:D 3:D+1 2:N	40	normal	100
+C40_d2	normal debout MP (dist 40)	3:2 2:N	40	normal	100
+C40_a2	normal accroupi MP (dist 40)	6:D 3:D+2 2:N	40	normal	100
+C40_d3	normal debout HP (dist 40)	3:3 2:N	40	normal	100
+C40_a3	normal accroupi HP (dist 40)	6:D 3:D+3 2:N	40	normal	100
+C40_d4	normal debout LK (dist 40)	3:4 2:N	40	normal	100
+C40_a4	normal accroupi LK (dist 40)	6:D 3:D+4 2:N	40	normal	100
+C40_d5	normal debout MK (dist 40)	3:5 2:N	40	normal	100
+C40_a5	normal accroupi MK (dist 40)	6:D 3:D+5 2:N	40	normal	100
+C40_d6	normal debout HK (dist 40)	3:6 2:N	40	normal	100
+C40_a6	normal accroupi HK (dist 40)	6:D 3:D+6 2:N	40	normal	100
+C40_f2	normal avant+MP (dist 40)	6:F 3:F+2 2:N	40	normal	100
+C40_f3	normal avant+HP (dist 40)	6:F 3:F+3 2:N	40	normal	100
+C40_f4	normal avant+LK (dist 40)	6:F 3:F+4 2:N	40	normal	100
+C40_f5	normal avant+MK (dist 40)	6:F 3:F+5 2:N	40	normal	100
+C40_f6	normal avant+HK (dist 40)	6:F 3:F+6 2:N	40	normal	100
+C60_d1	normal debout LP (dist 60)	3:1 2:N	60	normal	100
+C60_a1	normal accroupi LP (dist 60)	6:D 3:D+1 2:N	60	normal	100
+C60_d2	normal debout MP (dist 60)	3:2 2:N	60	normal	100
+C60_a2	normal accroupi MP (dist 60)	6:D 3:D+2 2:N	60	normal	100
+C60_d3	normal debout HP (dist 60)	3:3 2:N	60	normal	100
+C60_a3	normal accroupi HP (dist 60)	6:D 3:D+3 2:N	60	normal	100
+C60_d4	normal debout LK (dist 60)	3:4 2:N	60	normal	100
+C60_a4	normal accroupi LK (dist 60)	6:D 3:D+4 2:N	60	normal	100
+C60_d5	normal debout MK (dist 60)	3:5 2:N	60	normal	100
+C60_a5	normal accroupi MK (dist 60)	6:D 3:D+5 2:N	60	normal	100
+C60_d6	normal debout HK (dist 60)	3:6 2:N	60	normal	100
+C60_a6	normal accroupi HK (dist 60)	6:D 3:D+6 2:N	60	normal	100
+C60_f2	normal avant+MP (dist 60)	6:F 3:F+2 2:N	60	normal	100
+C60_f3	normal avant+HP (dist 60)	6:F 3:F+3 2:N	60	normal	100
+C60_f4	normal avant+LK (dist 60)	6:F 3:F+4 2:N	60	normal	100
+C60_f5	normal avant+MK (dist 60)	6:F 3:F+5 2:N	60	normal	100
+C60_f6	normal avant+HK (dist 60)	6:F 3:F+6 2:N	60	normal	100

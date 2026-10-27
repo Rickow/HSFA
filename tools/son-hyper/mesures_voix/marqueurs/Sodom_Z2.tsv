@@ -1,0 +1,8 @@
+# Sodom_Z2 : version $46, table $E73180 (redirection), 33 entrees, origine prog+1F64EE
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	46	03C9	01D4	1		360+HP
+sfa2	46	03CD	01D3	3		projection HK ; projection HP ; projection HP 2
+sfa2	46	03CE	01D4	4		QCF+LP ; projection HK ; projection HP ; projection HP 2
+sfa2	46	03CF	01D5	2		QCF+HP ; demi-cercle avant+HP
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 01CF@360+HP

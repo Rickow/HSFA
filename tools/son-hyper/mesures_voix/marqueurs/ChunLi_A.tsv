@@ -1,0 +1,9 @@
+# ChunLi_A : version $64, table $E72C80 (redirection), 27 entrees, origine prog+1D4354
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	64	0389	01B0	1		demi-cercle avant+HP
+sfa2	64	038C	01B3	1		charge bas-haut+HK
+sfa2	64	0390	01B7	7		HK debout ; HK repete ; QCB+HK ; QCF+HK ; charge arriere-avant+HK ; demi-cercle arriere+HK ; projection HK
+sfa2	64	0394	01BB	1		Start
+sfa2	64	0397	01B8	2		projection HP ; projection HP 2
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

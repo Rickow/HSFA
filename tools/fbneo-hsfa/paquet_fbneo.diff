@@ -1,0 +1,94 @@
+--- <workspace>/work/fbneo/paquet_fbneo.py	2026-10-10 13:53:00.819312624 +0200
++++ paquet_fbneo.py	2026-10-10 14:15:07.630370197 +0200
+@@ -1,19 +1,23 @@
+ #!/usr/bin/env python3
+-"""Construit les archives de jeu du coeur FBNeo HSFA (pilotes sfa3hsfa et sfa3uhsfa) a partir du dossier de travail.
++"""Construit les archives de jeu du coeur FBNeo HSFA (pilotes sfa3hsfa, sfa3uhsfa et sfa3hhsfa) a partir du dossier de
++travail.
+ 
+ Reproduit le banc MAME du projet :
+-  - ROM programme traduite (8 x 512 Ko, mots echanges) : roms_tr/sfa3ud (SFA3), mame_ro5/roms_ro5/sfa3ud (Upper) ;
+-  - hsfa_ext.bin  : image de $A00000-$EFFFFF (5 Mo) avec les blocs ext_<adresse>.bin que sert banc_mem.lua
+-                    (bases fixes + ext_liste.txt du dossier du module), mots echanges comme la ROM programme ;
++  - ROM programme traduite (8 x 512 Ko, mots echanges) : roms_tr/sfa3ud (SFA3), mame_ro5/roms_ro5/sfa3ud (Upper),
++    mame_ro9/roms_ro9/sfa3ud (Hyper) ;
++  - hsfa_ext.bin  : image de $A00000-$EFFFFF (5 Mo ; Hyper : $940000-$EFFFFF, 5,75 Mo) avec les blocs ext_<adresse>.bin
++                    que sert banc_mem.lua (bases fixes + ext_liste.txt du dossier du module), mots echanges comme la ROM
++                    programme ; la fin est fixe ($F00000) : le pilote deduit la base de la taille du fichier ;
+   - hsfa_tab.bin  : tables de banc_sprites.lua / banc_plans.lua (f<N>.bin, plan1, plan2, f312, carte.txt)
+                     + parametres (banque commune, pointeur d'animation, fichier de l'intro, bases des plans) ;
+-  - hsfa_gfx.bin  : (Upper) region graphique $2000000-$3FFFFFF au format interne MAME : hsfa_gfx.bin en +0,
++  - hsfa_gfx.bin  : (Upper, Hyper) region graphique $2000000-$3FFFFFF au format interne MAME : hsfa_gfx.bin en +0,
+                     hsfa_plans.bin en +$1000000 (= HSFA_GFX=...hsfa_gfx.bin,...hsfa_plans.bin@3000000) ;
+-  - son : ROM d'origine de SFA3 (sfa3hsfa) ou ROM hybride d'Upper hx3.* (sfa3uhsfa, QSound 16 Mo) ;
++  - son : ROM d'origine de SFA3 (sfa3hsfa) ou ROM hybride d'Upper hx3.* (sfa3uhsfa et sfa3hhsfa, QSound 16 Mo ;
++    les musiques d'Hyper sont jouees par le lecteur de flux ADX du coeur, depuis le Y_DATA.BIN de l'utilisateur) ;
+   - ROM graphique sz3.13m-20m et cle phoenix.key de sfa3ud.
+ Les archives (donnees de jeu) restent dans le dossier de sortie, jamais dans un depot.
+ 
+-Usage : python3 paquet_fbneo.py [sfa3|upper ...]   (defaut : les deux)
++Usage : python3 paquet_fbneo.py [sfa3|upper|hyper ...]   (defaut : les trois)
+ Variables : HSFA_WORK (dossier work, defaut : dossier parent de ce script), HSFA_SORTIE (defaut : dossier du script).
+   SOURCE_DATE_EPOCH (secondes Unix, convention reproducible-builds.org) : archives DETERMINISTES -- date fixe pour chaque
+       membre du zip et pour « construite le » de hsfa_info.txt (UTC), dates des sources ramenees a cette date au plus ;
+@@ -30,7 +34,8 @@
+ WORK = os.environ.get("HSFA_WORK", os.path.dirname(ICI))
+ SORTIE = os.environ.get("HSFA_SORTIE", ICI)
+ 
+-EXT_BASE, EXT_LEN = 0xA00000, 0x500000
++EXT_FIN = 0xF00000                     # fin fixe de l'image des blocs externes ; base = EXT_FIN - taille (pilote)
++EXT_DEFAUT = (0xA00000, 0x500000)      # SFA3, Upper : $A00000-$EFFFFF (taille fixe dans d_cps2.cpp)
+ TAB_LEN = 0x400000
+ GFX_LEN = 0x2000000
+ # bases fixes de banc_mem.lua (puis celles de ext_liste.txt)
+@@ -46,6 +51,14 @@
+                   son=("agent_son_ro5/hybride/roms_hybride", ["hx3.01", "hx3.02", "hx3.11m", "hx3.12m", "hx3.13m", "hx3.14m"]),
+                   config={"commun": "351", "ptr_anim": "FF40BC", "gfx_intro": "456", "plans": "300,340,3a0"},
+                   gfx=[("mame_ro5/hsfa_gfx.bin", 0x0000000), ("mame_ro5/hsfa_plans.bin", 0x1000000)]),
++    # Hyper (BANQUES-ET-MODES-ro9.md) : BANC_COMMUN=545, BANC_PTR_ANIM=FF40BC, pas de BANC_GFX_INTRO (456 par defaut ;
++    # emplacement 4 jamais utilise), HSFA_PLANS=300,340,3a0, blocs $940000 / $C84000 (ext_liste.txt) ; son : ROM
++    # hybride d'Upper (bruitages, voix, musiques ZERO 3) + flux ADX (DIP "All tracks" par defaut dans le pilote)
++    "hyper": dict(nom="sfa3hhsfa", dossier="mame_ro9", roms="mame_ro9/roms_ro9/sfa3ud", banques="mame_ro9/banques_hx",
++                  son=("agent_son_ro5/hybride/roms_hybride", ["hx3.01", "hx3.02", "hx3.11m", "hx3.12m", "hx3.13m", "hx3.14m"]),
++                  config={"commun": "545", "ptr_anim": "FF40BC", "gfx_intro": "456", "plans": "300,340,3a0"},
++                  gfx=[("mame_ro9/hsfa_gfx.bin", 0x0000000), ("mame_ro9/hsfa_plans.bin", 0x1000000)],
++                  ext=(0x940000, 0x5C0000)),           # taille fixe dans d_cps2.cpp (Sfa3hhsfaRomDesc)
+ }
+ 
+ journal = []
+@@ -81,7 +94,9 @@
+     b[0::2], b[1::2] = d[1::2], d[0::2]
+     return bytes(b)
+ 
+-def image_ext(dossier):
++def image_ext(dossier, ext=None):
++    EXT_BASE, EXT_LEN = ext or EXT_DEFAUT
++    assert EXT_BASE + EXT_LEN == EXT_FIN
+     img = bytearray(EXT_LEN)
+     pris = bytearray(EXT_LEN)
+     bases = [] if STRICT else list(EXT_FIXES)
+@@ -106,7 +121,7 @@
+         d = lit(p)
+         base = int(nom, 16)
+         if base < EXT_BASE or base + len(d) > EXT_BASE + EXT_LEN:
+-            raise SystemExit("bloc hors de $A00000-$EFFFFF : %s ($%x, %d o)" % (p, base, len(d)))
++            raise SystemExit("bloc hors de $%06X-$%06X : %s ($%x, %d o)" % (EXT_BASE, EXT_FIN - 1, p, base, len(d)))
+         o = base - EXT_BASE
+         if any(pris[o:o + len(d)]):
+             print("  ATTENTION : %s chevauche un bloc precedent (le dernier l'emporte)" % p)
+@@ -182,7 +197,7 @@
+     sd, sl = J["son"]
+     for f in sl:
+         fichiers.append((f, lit(os.path.join(WORK, sd, f))))
+-    fichiers.append(("hsfa_ext.bin", image_ext(os.path.join(WORK, J["dossier"]))))
++    fichiers.append(("hsfa_ext.bin", image_ext(os.path.join(WORK, J["dossier"]), J.get("ext"))))
+     fichiers.append(("hsfa_tab.bin", tables(os.path.join(WORK, J["banques"]), J["config"], J.get("tables_en_plus", ()))))
+     if J["gfx"]:
+         fichiers.append(("hsfa_gfx.bin", image_gfx(J["gfx"])))
+@@ -207,5 +222,5 @@
+     print("  -> %s (%.1f Mo)" % (sortie, os.path.getsize(sortie) / 2**20))
+ 
+ if __name__ == "__main__":
+-    for c in (sys.argv[1:] or ["sfa3", "upper"]):
++    for c in (sys.argv[1:] or ["sfa3", "upper", "hyper"]):
+         construit(c)

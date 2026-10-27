@@ -1,0 +1,17 @@
+--- py/paquet_fbneo_copie.py	2026-10-10 13:20:53.720501917 +0200
++++ paquet_fbneo.py (propose)	2026-10-10 13:38:17.574370085 +0200
+@@ -40,6 +40,14 @@
+                   gfx=[("mame_ro5/hsfa_gfx.bin", 0x0000000), ("mame_ro5/hsfa_plans.bin", 0x1000000)]),
+ }
+ 
++# (decors widescreen, INJECTION-FORK.md) sortie de l'etape « decors » (etape_decors.py --sortie mame/decors) : ROM
++# programme corrigee, blocs externes (dont le bloc de decor, liste dans ext/ext_liste.txt), memoire de decor + tuiles
++# neuves en mode « bases de plans » (coeur : branche decors-ws, sfa3hsfa accepte « plans= » et hsfa_gfx.bin)
++if os.path.isdir(os.path.join(WORK, "mame/decors/roms/sfa3hx")):
++    JEUX["sfa3"].update(dossier="mame/decors/ext", roms="mame/decors/roms/sfa3hx",
++                        config={"commun": "254", "ptr_anim": "FF3E48", "gfx_intro": "456", "plans": "300,340,3a0"},
++                        gfx=[("mame/decors/hsfa_plans_decor.bin", 0x1000000)])
++
+ journal = []
+ 
+ def lit(chemin):

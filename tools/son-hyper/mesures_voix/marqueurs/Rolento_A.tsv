@@ -1,0 +1,7 @@
+# Rolento_A : version $6E, table $E74580 (redirection), 37 entrees, origine prog+278A4A
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	6E	04CC	0357	1		projection HK
+sfa2	6E	04CE	0359	8		QCB+HK ; QCB+LK ; QCF+HP ; QCF+LP ; demi-cercle arriere+HK ; demi-cercle avant+HP ; projection HP ; projection HP 2
+sfa2	6E	04D0	035B	1		projection HK
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

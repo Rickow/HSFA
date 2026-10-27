@@ -1,0 +1,93 @@
+--- a/scripts/untranspile/translate.py	2026-10-10 18:58:22.825579563 +0200
++++ b/scripts/untranspile/translate.py	2026-10-11 12:23:25.653559556 +0200
+@@ -790,6 +790,72 @@
+         prev=k
+     return res
+ 
++BYTE_EA=[0]
++BYTE_EA_ON=__import__('os').environ.get('FLUXEA','1')!='0'
++def byte_streams_ea(out, br_targets=()):
++    """(agent_bandeau_A) FLUX D'OCTETS (An)+ HORS REGISTRE DE DONNEES EN MODE cps2 : byte_streams ne reconnait que
++    'ADDQ.W #1,An ; MOVE.B -2(An),Dm' (et l'ecriture Dm,-2(An)). Les autres formes gardaient le deplacement -2
++    (XOR 1 de -1), juste seulement si An etait IMPAIR : MOVE.B -2(A3),$E(A4) (memoire -> memoire), CMP.B/ADD.B
++    -2(An),Dm, TST.B -2(An), CMPI.B #imm,-2(An), MOVE.B d(Ak),-2(An), copie MOVE.B -2(A3),-2(A2)... SFA3 mips
++    0x937B4 (ROM $337E4) : le 1er octet (vitesse) etait lu dans le mot precedent (Y) -> textes « STREET FIGHTER
++    ALPHA » de la transition du gros A lances a $48/$70/$98 px par image au lieu de 0. Adresse exacte a
++    l'execution pour chaque An en attente (+1) dont l'EA vaut -2(An) :
++      (bascule du bit 0 de An via la pile) ; <instr> (An) ; MOVE SR,-(SP) ; (bascule) ; MOVE (SP)+,CCR ; ADDQ.L #1,An
++    (l'instruction pose ses drapeaux, X compris ; ADDQ sur An n'y touche pas). FLUXEA=0 : ancien comportement."""
++    res=list(out)
++    tog=lambda n: [0x2f08|n, 0x0a2f,0x0001,0x0003, 0x205f|(n<<9)]
++    def eas(ws):
++        """[(champ, mode, reg, index du mot d'extension, nb de mots)] des EA d'une instruction OCTET reconnue"""
++        w=ws[0]; top=w>>12
++        if top==1:                                                  # MOVE.B
++            sm,sr,dm,dr=(w>>3)&7,w&7,(w>>6)&7,(w>>9)&7
++            import m68k
++            ks=m68k.ea_words(sm,sr,0); kd=m68k.ea_words(dm,dr,0)
++            if ks is None or kd is None or 1+ks+kd!=len(ws): return None
++            return [('s',sm,sr,1,ks),('d',dm,dr,1+ks,kd)]
++        if top==0 and (w&0xff00) in (0x0000,0x0200,0x0400,0x0600,0x0a00,0x0c00) and (w>>6)&3==0:   # ORI..CMPI .B #imm
++            if len(ws)!=3: return None
++            return [('s',(w>>3)&7,w&7,2,1)]
++        if (w&0xffc0) in (0x4a00,0x4200,0x4400,0x4600) and len(ws)==2:      # TST.B CLR.B NEG.B NOT.B
++            return [('s',(w>>3)&7,w&7,1,1)]
++        if top in (8,9,0xb,0xc,0xd) and (w>>6)&7 in (0,4) and len(ws)==2:   # OR/SUB/CMP(EOR)/AND/ADD .B
++            if top==0xb and (w>>6)&7==4: pass                             # EOR.B Dn,<ea>
++            return [('s',(w>>3)&7,w&7,1,1)]
++        return None
++    for k,(va,mn,ws) in enumerate(res):
++        if not ws or len(ws)<2 or va in br_targets: continue
++        # ADDQ.W #1,An en attente juste avant (1 ou 2 : copie (A3)+ -> (A2)+)
++        pend={}; j=k-1
++        while j>=0 and len(pend)<2:
++            pva,pmn,pws=res[j]
++            if not pws: j-=1; continue
++            if len(pws)==1 and (pws[0]&0xfff8)==0x5248 and (pws[0]&7)!=7 and (pws[0]&7) not in pend:
++                pend[pws[0]&7]=j; j-=1; continue
++            break
++        if not pend: continue
++        e=eas(ws)
++        if not e: continue
++        cible=[x for x in e if x[1]==5 and x[2] in pend and ws[x[3]]==0xfffe]
++        if not cible: continue
++        regs={x[2] for x in cible}
++        # un autre EA qui utilise un des An bascules : on laisse
++        if any(x not in cible and x[1] in (2,3,4,5,6) and x[2] in regs for x in e): continue
++        w=ws[0]; drop=set()
++        for f,m_,r_,ix,nw in cible:
++            if f=='s': w=(w&~0x3f)|0x10|r_
++            else: w=(w&~0x0fc0)|(r_<<9)|(2<<6)
++            drop.add(ix)
++        ins=[w]+[x for i,x in enumerate(ws[1:],1) if i not in drop]
++        pre=[]; post=[]
++        for r_ in sorted(regs): pre+=tog(r_); post+=tog(r_)
++        new=pre+ins+[0x40e7]+post+[0x44df]+[0x5288|r_ for r_ in sorted(regs)]
++        for r_ in regs:
++            pva,pmn,pws=res[pend[r_]]
++            res[pend[r_]]=(pva,"(ADDQ.W #1,A%d : flux d'octets)"%r_,[])
++        res[k]=(va,mn+"  [flux d'octets %s : adresse XOR 1 a l'execution]"%",".join("(A%d)+"%r_ for r_ in sorted(regs)),new)
++        BYTE_EA[0]+=1
++    return res
++
+ BYTE_PRE=[0]
+ BYTE_PRE_ON=__import__('os').environ.get('BYTE_PRE','1')!='0'
+ def byte_streams_pre(out):
+@@ -3777,6 +3843,7 @@
+     if MEMMODE=='cps2': out=vram_shift_const(out, br_targets)
+     if MEMMODE=='cps2' and _os.environ.get("DROP_SR","1")!="0": out=drop_dead_sr(out)
+     if MEMMODE=='cps2': out=byte_streams(out); out=byte_streams_pre(out) if BYTE_PRE_ON else out; out=byte_index_exact(out); out=byte_after_adda(out)   # (agent_ro9) flux decroissant
++    if MEMMODE=='cps2' and BYTE_EA_ON: out=byte_streams_ea(out, br_targets)   # (agent_bandeau_A) flux hors Dn
+     if DPTR_FIX: out=[dptr_fix(e) for e in out]
+     if AUDIT_MEM:                                         # (HANDOFF §107) ecritures memoire sans trace dans la sortie
+         _vas={va for va,mn,ws in out}
+--- a/scripts/untranspile/mame_test.py	2026-10-10 18:58:22.829394678 +0200
++++ b/scripts/untranspile/mame_test.py	2026-10-11 12:23:25.653970925 +0200
+@@ -581,6 +581,7 @@
+     print("aiguillages : %d entrees hors de portee 16 bits -> tremplins (HANDOFF §93)" % sum(len(v) for v in _A.FAR_ENT.values()))
+     print("octets via An apres ADDA Dk,An : %d acces a adresse exacte (HANDOFF §97)" % T.BYTE_ADDA[0])
+     print("flux d'octets decroissants -(An) a adresse exacte : %d (agent_ro9)" % T.BYTE_PRE[0])
++    print("flux d'octets (An)+ hors Dn a adresse exacte : %d (agent_bandeau_A, FLUXEA)" % T.BYTE_EA[0])
+     print("drapeaux rendus places avant un epilogue partage : %d (HANDOFF §126)" % T.FTC_AVANT_N[0])
+     print("sauts terminaux absorbes gardes en RTS (cibles de branchements) : %d (agent_coups, TAILBR)" % T.TAILBR_N[0])
+     print("constantes lui seules gardees en valeur dans Dn : %d %s (agent_coups, LUIDN)" % (len(T.LUIDN_LOG), sorted({"%x:%x->%x" % e for e in T.LUIDN_LOG})))

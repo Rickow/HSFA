@@ -1,0 +1,123 @@
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -501,13 +501,49 @@
+ 
+ static inline void RamWB(UINT32 a, UINT8 v) { CpsRamFF[(a & 0xFFFF) ^ 1] = v; }
+ 
++// (agent_options_hyper, OPTIONS-HYPER-UPPER.md) Upper : reglage BGM de l'ecran RANDOM PLAYER d'Hyper, transpose
++// (Dip E bits 2-3). La greffe BGM_UPPER du traducteur range dans la ROM d'Upper un talon et son descripteur
++// ('HSFABGM1' + adresse du site, en $3FEEF0) ; le site (CMPI.B #7,$C201(A5) du choix de la musique du combat) reste
++// intact. Reglage choisi : JMP talon.L pose sur le site (en VERSUS, TRAINING et VERSUS cache seulement) et $FF43B5 =
++// 1 hasard J1/J2, 2 J1, 3 J2 (theme du perso au lieu de la musique du decor). Â« Game default Â» : CMPI d'origine remis, rien d'ecrit
++// ($FF43B5 n'est lu que par le talon) -> jeu inchange, au cycle pres. A chaque image (pas seulement au menu des modes) :
++// un etat recharge en cours de VERSUS retrouve le meme code. ROM sans descripteur (SFA3, Hyper, ancienne ROM) : rien.
++static void HsfaOptBgm()
++{
++	if (HsfaMode != 2 || HsfaHyper || nCpsRomLen < 0x400000) return;
++	const UINT32 D = 0x3FEEF0, TB = 0x3FEF00;
++	static const UINT16 MAGIC[4] = { 0x4853, 0x4641, 0x4247, 0x4D31 };		// 'HSFABGM1'
++	for (INT32 i = 0; i < 4; i++) if (RdW(CpsRom + D + 2 * i) != MAGIC[i]) return;
++	const UINT32 s = (RdW(CpsRom + D + 8) << 16) | RdW(CpsRom + D + 10);
++	if (s < 0x400 || s > 0x3FFFF0 || (s & 1)) return;
++	static const UINT16 CMPI[3] = { 0x0C2D, 0x0007, 0xC201 };				// CMPI.B #7,$C201(A5)
++	const UINT16 JMP[3] = { 0x4EF9, (UINT16)(TB >> 16), (UINT16)(TB & 0xFFFF) };	// JMP talon.L
++	const UINT8 v = (HsfaOptDip[3] >> 2) & 3;
++	// JMP pose seulement dans les modes ou Upper joue la musique du decor (curseur des modes $FF4201 : 1 VERSUS,
++	// 4 TRAINING, 7 VERSUS cache) : ARCADE, SURVIVAL et DRAMATIC restent inchanges au cycle pres, reglage choisi ou non
++	const UINT8 m = CpsRamFF[0x4201 ^ 1];
++	const bool pose = v && (m == 1 || m == 4 || m == 7);
++	const UINT16 *de = pose ? CMPI : JMP, *vers = pose ? JMP : CMPI;
++	bool a_poser = true;
++	for (INT32 i = 0; i < 3; i++) if (RdW(CpsRom + s + 2 * i) != de[i]) a_poser = false;
++	if (a_poser) {
++		for (INT32 i = 0; i < 3; i++) {
++			WrW(CpsRom + s + 2 * i, vers[i]);
++			if (CpsCode && s + 2 * i + 1 < nCpsCodeLen) WrW(CpsCode + s + 2 * i, vers[i]);
++		}
++	}
++	if (pose) RamWB(0xFF43B5, v);
++}
++
+ static void HsfaOptions()
+ {
+ 	if (nHsfaOptOff < 0) nHsfaOptOff = (getenv("HSFA_OPTIONS") && atoi(getenv("HSFA_OPTIONS")) == 0) ? 1 : 0;
+ 	// seulement au menu des modes : l'initialisation d'un mode (apres le menu) garde ses regles propres (TRAINING force
+ 	// le chrono infini, SURVIVAL coupe le JOIN IN, Hyper recopie MAX ROUND (1P) dans le champ VS) ; ecrire aussi a la
+ 	// selection des persos les ecraserait (essai : chrono du TRAINING d'Hyper repasse a 2 etoiles).
+-	if (nHsfaOptOff || RamW(0xFF8000) != 4) return;
++	if (nHsfaOptOff) return;
++	HsfaOptBgm();
++	if (RamW(0xFF8000) != 4) return;
+ 	const UINT8 *d = HsfaOptDip;
+ 	UINT8 v;
+ 	if ((v = d[0] & 0x0F)) RamWB(0xFF80A1, v - 1);		// DIFFICULTY 0-7 (arcade $A0)
+@@ -746,6 +782,10 @@
+ // commande posee par le 68K ($61801F = 0) : 1 = a remplacer par FF05 pour le Z80
+ INT32 HsfaFluxCommande(UINT16 nCmd, UINT8 nV, UINT16 nP)
+ {
++	// (agent_options_hyper) essais : HSFA_CMD_LOG=<fichier> = journal de toutes les commandes son du 68K (image, code)
++	static FILE *fCmd = (FILE *)-1;
++	if (fCmd == (FILE *)-1) fCmd = (getenv("HSFA_CMD_LOG") && *getenv("HSFA_CMD_LOG")) ? fopen(getenv("HSFA_CMD_LOG"), "w") : NULL;
++	if (fCmd) { fprintf(fCmd, "%d %04X %02X %04X\n", nImage, nCmd, nV, nP); fflush(fCmd); }
+ 	// carte musique d'abord (partitions SFA1 / SFA2) : elle prend ses codes ; une musique d'un autre lecteur l'arrete
+ 	if (HsfaMus) {
+ 		bool mus = HsfaFlux && HsfaFlux->est_musique(nCmd);
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -197,6 +197,38 @@
+ 
+ STDDIPINFO(Hsfa)
+ 
++// (agent_options_hyper, OPTIONS-HYPER-UPPER.md) Upper : memes reglages + BGM de l'ecran RANDOM PLAYER d'Hyper
++// (Dip E bits 2-3 -> $FF43B5, lu par la greffe BGM_UPPER du traducteur ; sans elle, sans effet). En VERSUS, TRAINING
++// et VERSUS cache, Upper joue la musique du decor ; Hyper, le theme d'un des deux persos.
++#define HSFA_OPT_BGM \
++	{0   , 0xfe, 0   ,    4, "Option: BGM (versus, training)"	}, \
++	{0x04, 0x01, 0x0c, 0x00, "Game default (stage music)"		}, \
++	{0x04, 0x01, 0x0c, 0x04, "Random 1P/2P theme (Hyper)"		}, \
++	{0x04, 0x01, 0x0c, 0x08, "1P theme"							}, \
++	{0x04, 0x01, 0x0c, 0x0c, "2P theme"							},
++
++static struct BurnDIPInfo UhsfaDIPList[] =
++{
++	DIP_OFFSET(0x1d)
++	{0x00, 0xff, 0xff, 0x01, NULL								},
++
++	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
++	{0x00, 0x01, 0x03, 0x00, "Off"								},
++	{0x00, 0x01, 0x03, 0x01, "Missing tracks only"				},
++	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
++
++	HSFA_OPT_DEFAUTS
++	HSFA_OPT_JEU
++	HSFA_OPT_MANCHES("Option: Max round (1P)")
++	HSFA_OPT_MANCHES_VS
++	HSFA_OPT_VS
++	HSFA_OPT_JOIN
++	HSFA_OPT_BGM
++	HSFA_OPT_SECRETES
++};
++
++STDDIPINFO(Uhsfa)
++
+ // Hyper : ses musiques (ZERO, ZERO 2, ALPHA, variantes) n'existent qu'en flux ADX sur PS2 -> "All tracks" par defaut
+ static struct BurnDIPInfo HhsfaDIPList[] =
+ {
+@@ -15540,7 +15572,7 @@
+ 	"Street Fighter Alpha 3 Upper (HSFA, Anthology PS2 retraduit" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
+ 	NULL, NULL, NULL, NULL,
+ 	BDF_GAME_WORKING | BDF_HACK, 2, HARDWARE_CAPCOM_CPS2, GBF_VSFIGHT, FBF_SF,
+-	NULL, Sfa3uhsfaRomInfo, Sfa3uhsfaRomName, NULL, NULL, NULL, NULL, HsfaInputInfo, HsfaDIPInfo,
++	NULL, Sfa3uhsfaRomInfo, Sfa3uhsfaRomName, NULL, NULL, NULL, NULL, HsfaInputInfo, UhsfaDIPInfo,
+ 	HsfaUpperInit, HsfaDrvExit, Cps2Frame, CpsRedraw, CpsAreaScan,
+ 	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
+ };
+@@ -16751,7 +16783,7 @@
+ };
+ 
+ // Pocket Fighter (Simplified Chinese plot translation, Hack)
+-// Modifier by: killme(·ï»Ë)
++// Modifier by: killme(ï¿½ï¿½ï¿½)
+ // 20250528
+ 
+ static struct BurnRomInfo PfghtscRomDesc[] = {

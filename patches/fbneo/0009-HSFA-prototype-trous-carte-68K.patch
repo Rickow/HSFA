@@ -1,0 +1,95 @@
+From 1fe5bbc1148feb5ad47f95471f9b8bc377881d0e Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 16:34:12 +0200
+Subject: [PATCH] HSFA (prototype): serve the free holes of the CPS2 68K map as
+ ROM (hsfa_trous.bin)
+
+Optional member hsfa_trous.bin = the 7 free ranges of the 24-bit map, end to
+end ($410000-$617FFF, $61A000-$65FFFF, $668000-$6FFFFF, $710000-$7FFFFF,
+$810000-$8FFFFF, $930000-$93FFFF, $FB0000-$FEFFFF; 5.08 MB), mapped read/fetch
+when present. Only sfa3hahsfa declares it (BRF_OPT): without the member
+nothing is mapped and current games are unchanged.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 30 ++++++++++++++++++++++++++++++
+ src/burn/drv/capcom/d_cps2.cpp   |  1 +
+ 2 files changed, 31 insertions(+)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 0153a20..0710ce0 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -33,6 +33,19 @@ static UINT32 nHsfaExtBase = 0xA00000;
+ static UINT32 nHsfaExtLen = 0x500000;
+ #define HSFA_GFX_BASE	0x2000000					// ROM graphique etendue (code de tuile $40000)
+ 
++// (agent_coeur_banques, patch 0009, prototype) TROUS de la carte CPS2 68K servis en ROM : hsfa_trous.bin (membre
++// FACULTATIF, mots echanges comme hsfa_ext.bin) = image des 7 plages ci-dessous mises bout a bout, dans cet ordre.
++// Aucun pilote actuel ne le declare, et sans le membre rien n'est projete : les jeux actuels sont inchanges. Plages
++// relevees sur dead_cps2_map / hsfa_map (fork MAME) et cps_mem.cpp / cps_rw.cpp (ici), jamais lues ni ecrites par
++// une partie Arcade complete de ro9a (taps MAME) : $400000-$40FFFF (registres d'objets), $618000-$619FFF (QSound),
++// $660000-$667FFF (RAM en plus), $700000-$70FFFF (objets), $800000-$80FFFF (ports, registres HSFA), $900000-$92FFFF
++// (video), $940000-$EFFFFF (blocs externes), $F00000-$FAFFFF (variables du portage, PORT_RAM) restent hors trous.
++static const UINT32 HsfaTrous[7][2] = {
++	{ 0x410000, 0x617FFF }, { 0x61A000, 0x65FFFF }, { 0x668000, 0x6FFFFF }, { 0x710000, 0x7FFFFF },
++	{ 0x810000, 0x8FFFFF }, { 0x930000, 0x93FFFF }, { 0xFB0000, 0xFEFFFF } };
++#define HSFA_TROUS_LEN	0x516000					// somme des 7 plages (5,08 Mo)
++static UINT8 *HsfaTrousMem = NULL;
++
+ // --------------------------------------------------------------------------------------------------------------
+ // Tables (hsfa_tab.bin) : "HSFATAB1", u32 nombre, u32 reserve, puis nombre x { char nom[24]; u32 decalage; u32 long }
+ 
+@@ -1194,6 +1207,12 @@ static INT32 HsfaLoadData()
+ 			if (ri.nLen != nHsfaExtLen) return 1;
+ 			if (BurnLoadRom(HsfaExt, i, 1)) return 1;			// mots deja echanges (format ROM_LOAD16_WORD_SWAP)
+ 		}
++		else if (strcmp(pszName, "hsfa_trous.bin") == 0) {	// (patch 0009) facultatif : absent = rien
++			if (ri.nLen != HSFA_TROUS_LEN) return 1;
++			HsfaTrousMem = (UINT8*)BurnMalloc(HSFA_TROUS_LEN);
++			if (HsfaTrousMem == NULL) return 1;
++			if (BurnLoadRom(HsfaTrousMem, i, 1)) { BurnFree(HsfaTrousMem); HsfaTrousMem = NULL; }
++		}
+ 		else if (strcmp(pszName, "hsfa_tab.bin") == 0) {
+ 			HsfaTab = (UINT8*)BurnMalloc(ri.nLen);
+ 			if (BurnLoadRom(HsfaTab, i, 1)) return 1;
+@@ -1308,6 +1327,16 @@ INT32 HsfaInit()
+ 	// banc_mem.lua / HSFA_EXT : blocs de donnees du portage a adresse fixe
+ 	SekMapMemory(HsfaExt, nHsfaExtBase, HSFA_EXT_FIN - 1, MAP_READ | MAP_FETCH);
+ 	bprintf(0, _T("HSFA : donnees externes $%06X-$%06X\n"), nHsfaExtBase, HSFA_EXT_FIN - 1);
++	if (HsfaTrousMem) {								// (patch 0009) trous de la carte en ROM
++		UINT32 o = 0;
++		for (INT32 t = 0; t < 7; t++) {
++			SekMapMemory(HsfaTrousMem + o, HsfaTrous[t][0], HsfaTrous[t][1], MAP_READ | MAP_FETCH);
++			UINT32 n = HsfaTrous[t][1] + 1 - HsfaTrous[t][0];
++			bprintf(0, _T("HSFA : trou $%06X-$%06X en ROM (lu : %04X ... %04X)\n"), HsfaTrous[t][0], HsfaTrous[t][1],
++				SekReadWord(HsfaTrous[t][0]), SekReadWord(HsfaTrous[t][1] - 1));
++			o += n;
++		}
++	}
+ 	// banc_sprites.lua : toutes les ecritures dans $700000-$70FFFF passent par la conversion
+ 	SekMapHandler(5, 0x700000, 0x70FFFF, MAP_WRITE);
+ 	SekSetWriteByteHandler(5, HsfaObjWriteByte);
+@@ -1351,6 +1380,7 @@ INT32 HsfaExit()
+ 	bHsfaMusZet = 0;
+ 	HsfaRejeuLibere();
+ 	BurnFree(HsfaExt);
++	BurnFree(HsfaTrousMem);
+ 	BurnFree(HsfaTab);
+ 	BurnFree(HsfaEntries);
+ 	BurnFree(HsfaAnims);
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 1a30b57..8ea3577 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15514,6 +15514,7 @@ static struct BurnRomInfo Sfa3hahsfaRomDesc[] = {
+ 	{ "hsfa_ext.bin",  0x5C0000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// $940000-$EFFFFF
+ 	{ "hsfa_tab.bin",  0x400000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// tables de banques
+ 	{ "hsfa_gfx.bin",  0x3000000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_GRA },	// region $2000000-$4FFFFFF (plans d'Upper en $4000000)
++	{ "hsfa_trous.bin", 0x516000, 0x00000000, CPS2_HSFA_DATA | BRF_OPT | BRF_PRG },	// (patch 0009, facultatif) trous de la carte 68K
+ };
+ 
+ STD_ROM_PICK(Sfa3hahsfa)
+-- 
+2.53.0
+

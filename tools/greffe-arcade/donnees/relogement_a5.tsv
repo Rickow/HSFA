@@ -1,0 +1,444 @@
+dep_upper	cps2_upper	etendue	acces	routines	tableau	nature	preuves_hyper(octets)	decision	dep_hyper	cps2_hyper
+$8000	$FF0000	4	7	5		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8000	$FF0000
+$8004	$FF0004	4	9	6		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8004	$FF0004
+$8008	$FF0008	4	6	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8008	$FF0008
+$800C	$FF000C	4	4	4		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$800C	$FF000C
+$8010	$FF0010	2	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8010	$FF0010
+$8012	$FF0012	2	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8012	$FF0012
+$8014	$FF0014	2	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8014	$FF0014
+$8016	$FF0016	2	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8016	$FF0016
+$8018	$FF0018	4	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8018	$FF0018
+$8019	$FF0019	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8019	$FF0019
+$801C	$FF001C	4	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$801C	$FF001C
+$801D	$FF001D	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$801D	$FF001D
+$8020	$FF0020	4	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8020	$FF0020
+$8021	$FF0021	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8021	$FF0021
+$8026	$FF0026	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8026	$FF0026
+$8028	$FF0028	1	2	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8028	$FF0028
+$8029	$FF0029	1	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8029	$FF0029
+$802A	$FF002A	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$802A	$FF002A
+$802C	$FF002C	1	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$802C	$FF002C
+$802D	$FF002D	1	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$802D	$FF002D
+$802E	$FF002E	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$802E	$FF002E
+$8030	$FF0030	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8030	$FF0030
+$8032	$FF0032	1	6	4		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8032	$FF0032
+$8034	$FF0034	4	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8034	$FF0034
+$8038	$FF0038	2	4	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8038	$FF0038
+$803A	$FF003A	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$803A	$FF003A
+$803B	$FF003B	1	8	4		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$803B	$FF003B
+$803C	$FF003C	2	27	6		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$803C	$FF003C
+$803E	$FF003E	2	24	6		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$803E	$FF003E
+$8040	$FF0040	2	21	6		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8040	$FF0040
+$8042	$FF0042	2	18	6		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8042	$FF0042
+$8044	$FF0044	2	14	4		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8044	$FF0044
+$8046	$FF0046	2	12	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8046	$FF0046
+$8048	$FF0048	2	11	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8048	$FF0048
+$804A	$FF004A	2	10	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$804A	$FF004A
+$804C	$FF004C	2	7	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$804C	$FF004C
+$804E	$FF004E	2	6	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$804E	$FF004E
+$8050	$FF0050	2	5	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8050	$FF0050
+$8052	$FF0052	2	4	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8052	$FF0052
+$8054	$FF0054	2	3	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8054	$FF0054
+$8056	$FF0056	2	2	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8056	$FF0056
+$8058	$FF0058	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8058	$FF0058
+$805A	$FF005A	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$805A	$FF005A
+$805B	$FF005B	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$805B	$FF005B
+$805C	$FF005C	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$805C	$FF005C
+$805D	$FF005D	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$805D	$FF005D
+$805E	$FF005E	1	4	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$805E	$FF005E
+$805F	$FF005F	1	11	8		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$805F	$FF005F
+$8060	$FF0060	1	6	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8060	$FF0060
+$8061	$FF0061	1	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8061	$FF0061
+$8062	$FF0062	1	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8062	$FF0062
+$8063	$FF0063	1	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8063	$FF0063
+$8064	$FF0064	1	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8064	$FF0064
+$8065	$FF0065	1	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8065	$FF0065
+$8066	$FF0066	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8066	$FF0066
+$8068	$FF0068	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8068	$FF0068
+$806A	$FF006A	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$806A	$FF006A
+$806C	$FF006C	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$806C	$FF006C
+$806E	$FF006E	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$806E	$FF006E
+$8070	$FF0070	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8070	$FF0070
+$8072	$FF0072	2	3	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8072	$FF0072
+$8074	$FF0074	2	3	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8074	$FF0074
+$8076	$FF0076	2	3	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8076	$FF0076
+$8078	$FF0078	2	3	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8078	$FF0078
+$807A	$FF007A	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$807A	$FF007A
+$807C	$FF007C	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$807C	$FF007C
+$807E	$FF007E	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$807E	$FF007E
+$8080	$FF0080	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8080	$FF0080
+$8082	$FF0082	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8082	$FF0082
+$8084	$FF0084	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8084	$FF0084
+$8086	$FF0086	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8086	$FF0086
+$8088	$FF0088	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8088	$FF0088
+$808A	$FF008A	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$808A	$FF008A
+$808C	$FF008C	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$808C	$FF008C
+$808E	$FF008E	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$808E	$FF008E
+$8090	$FF0090	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8090	$FF0090
+$8092	$FF0092	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8092	$FF0092
+$8094	$FF0094	2	6	5		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8094	$FF0094
+$8096	$FF0096	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8096	$FF0096
+$8098	$FF0098	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8098	$FF0098
+$809A	$FF009A	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$809A	$FF009A
+$809C	$FF009C	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$809C	$FF009C
+$809E	$FF009E	230	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$809E	$FF009E
+$80FE	$FF00FE	134	3	3	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$80FE	$FF00FE
+$811E	$FF011E	102	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$811E	$FF011E
+$813E	$FF013E	70	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$813E	$FF013E
+$815E	$FF015E	38	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$815E	$FF015E
+$817E	$FF017E	2	3	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$817E	$FF017E
+$8182	$FF0182	2	2	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8182	$FF0182
+$8E38	$FF0E38	1	1	1		commun	A5/abs:1 lu:0 ecrit:1	identite	$8E38	$FF0E38
+$8E39	$FF0E39	1	1	1		commun	A5/abs:1 lu:0 ecrit:1	identite	$8E39	$FF0E39
+$8E3A	$FF0E3A	2	1	1		commun	A5/abs:2 lu:0 ecrit:2	identite	$8E3A	$FF0E3A
+$8E3E	$FF0E3E	1	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$8E3E	$FF0E3E
+$8E40	$FF0E40	2	1	1	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$8E40	$FF0E40
+$8E42	$FF0E42	3	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$8E42	$FF0E42
+$8E45	$FF0E45	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$8E45	$FF0E45
+$8E46	$FF0E46	1	1	1	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$8E46	$FF0E46
+$8E4C	$FF0E4C	2	3	2	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$8E4C	$FF0E4C
+$8E4E	$FF0E4E	2	1	1	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$8E4E	$FF0E4E
+$8E50	$FF0E50	2	1	1	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$8E50	$FF0E50
+$8E52	$FF0E52	2	1	1	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$8E52	$FF0E52
+$8E54	$FF0E54	24	1	1	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$8E54	$FF0E54
+$9EA4	$FF1EA4	2	6	6		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$9EA4	$FF1EA4
+$9EAA	$FF1EAA	1	4	2		commun	A5/abs:1 lu:0 ecrit:0	identite	$9EAA	$FF1EAA
+$9EAC	$FF1EAC	1	2	1		commun	A5/abs:1 lu:0 ecrit:0	identite	$9EAC	$FF1EAC
+$9EAD	$FF1EAD	1	4	1		commun	A5/abs:1 lu:0 ecrit:0	identite	$9EAD	$FF1EAD
+$9EB0	$FF1EB0	2	2	1		commun	A5/abs:2 lu:0 ecrit:2	identite	$9EB0	$FF1EB0
+$9EB4	$FF1EB4	2	1	1		commun	A5/abs:2 lu:2 ecrit:2	identite	$9EB4	$FF1EB4
+$9ED8	$FF1ED8	4	2	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$9ED8	$FF1ED8
+$A3B4	$FF23B4	1	1	1	oui	commun	A5/abs:1 lu:1 ecrit:1	identite	$A3B4	$FF23B4
+$A3C0	$FF23C0	2	3	2		commun	A5/abs:2 lu:0 ecrit:0	identite	$A3C0	$FF23C0
+$A3C4	$FF23C4	3584	1	1	oui	commun	A5/abs:0 lu:0 ecrit:420	identite	$A3C4	$FF23C4
+$AA54	$FF2A54	1904	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:210	RELOGE : efface par Hyper	$C3BE	$FF43BE
+$B250	$FF3250	128	1	1	oui	commun	A5/abs:0 lu:16 ecrit:128	identite	$B250	$FF3250
+$B350	$FF3350	4	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B350	$FF3350
+$B354	$FF3354	4	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B354	$FF3354
+$B358	$FF3358	4	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B358	$FF3358
+$B35C	$FF335C	4	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B35C	$FF335C
+$B448	$FF3448	2084	2	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B448	$FF3448
+$B44A	$FF344A	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B44A	$FF344A
+$B44C	$FF344C	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B44C	$FF344C
+$B44E	$FF344E	2078	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B44E	$FF344E
+$B450	$FF3450	2076	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B450	$FF3450
+$B452	$FF3452	2074	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B452	$FF3452
+$B454	$FF3454	2072	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B454	$FF3454
+$B456	$FF3456	2070	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B456	$FF3456
+$B458	$FF3458	2068	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B458	$FF3458
+$B45A	$FF345A	2066	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B45A	$FF345A
+$B45C	$FF345C	2064	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B45C	$FF345C
+$B45E	$FF345E	2062	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B45E	$FF345E
+$B460	$FF3460	2060	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B460	$FF3460
+$B462	$FF3462	2058	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B462	$FF3462
+$B464	$FF3464	2056	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B464	$FF3464
+$B466	$FF3466	2054	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B466	$FF3466
+$B468	$FF3468	2052	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B468	$FF3468
+$B46A	$FF346A	2050	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B46A	$FF346A
+$B46C	$FF346C	2048	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B46C	$FF346C
+$B46E	$FF346E	2046	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B46E	$FF346E
+$B470	$FF3470	2044	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B470	$FF3470
+$B472	$FF3472	2042	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B472	$FF3472
+$B474	$FF3474	2040	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B474	$FF3474
+$B476	$FF3476	2038	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B476	$FF3476
+$B478	$FF3478	2036	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B478	$FF3478
+$B47A	$FF347A	2034	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B47A	$FF347A
+$B47C	$FF347C	2032	1	1	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B47C	$FF347C
+$B47E	$FF347E	2030	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B47E	$FF347E
+$B4E6	$FF34E6	1926	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$B4E6	$FF34E6
+$BA10	$FF3A10	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$BA10	$FF3A10
+$BA12	$FF3A12	2	1	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$BA12	$FF3A12
+$BCC0	$FF3CC0	2	2	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$BCC0	$FF3CC0
+$BCC8	$FF3CC8	4	2	1	oui	commun	A5/abs:0 lu:4 ecrit:4	identite	$BCC8	$FF3CC8
+$C0BC	$FF40BC	4	5	4		commun	A5/abs:4 lu:4 ecrit:0	identite	$C0BC	$FF40BC
+$C0C0	$FF40C0	112	6	3	oui	propre a Upper	A5/abs:0 lu:2 ecrit:0	RELOGE : lu/ecrit par Hyper	$CB2E	$FF4B2E
+$C0C2	$FF40C2	110	1	1	oui	propre a Upper	A5/abs:0 lu:2 ecrit:0	RELOGE : lu/ecrit par Hyper	$CB30	$FF4B30
+$C0C4	$FF40C4	108	2	1	oui	propre a Upper	A5/abs:0 lu:2 ecrit:0	RELOGE : lu/ecrit par Hyper	$CB32	$FF4B32
+$C0C6	$FF40C6	106	1	1	oui	propre a Upper	A5/abs:0 lu:2 ecrit:0	RELOGE : lu/ecrit par Hyper	$CB34	$FF4B34
+$C0C8	$FF40C8	104	2	1	oui	propre a Upper	A5/abs:0 lu:2 ecrit:0	RELOGE : lu/ecrit par Hyper	$CB36	$FF4B36
+$C0C9	$FF40C9	103	2	2	oui	propre a Upper	A5/abs:0 lu:2 ecrit:0	RELOGE : lu/ecrit par Hyper	$CB37	$FF4B37
+$C130	$FF4130	4	7	5		commun	A5/abs:4 lu:4 ecrit:4	identite	$C130	$FF4130
+$C134	$FF4134	4	4	3		commun	A5/abs:4 lu:4 ecrit:4	identite	$C134	$FF4134
+$C138	$FF4138	4	4	3		commun	A5/abs:4 lu:4 ecrit:4	identite	$C138	$FF4138
+$C140	$FF4140	4	34	26		commun	A5/abs:4 lu:4 ecrit:4	identite	$C140	$FF4140
+$C154	$FF4154	4	5	5		commun	A5/abs:4 lu:4 ecrit:4	identite	$C154	$FF4154
+$C170	$FF4170	4	3	1		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$C170	$FF4170
+$C200	$FF4200	1	43	22		commun	A5/abs:1 lu:1 ecrit:1	identite	$C200	$FF4200
+$C30C	$FF430C	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$C30C	$FF430C
+$C30D	$FF430D	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$C30D	$FF430D
+$C310	$FF4310	1	1	1	oui	commun	A5/abs:1 lu:1 ecrit:0	identite	$C310	$FF4310
+$C311	$FF4311	1	1	1	oui	commun	A5/abs:1 lu:1 ecrit:0	identite	$C311	$FF4311
+$C314	$FF4314	2	2	2		commun	A5/abs:2 lu:2 ecrit:2	identite	$C314	$FF4314
+$C320	$FF4320	1	4	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$C320	$FF4320
+$C321	$FF4321	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$C321	$FF4321
+$C322	$FF4322	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$C322	$FF4322
+$C323	$FF4323	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$C323	$FF4323
+$C32B	$FF432B	1	1	1		commun	A5/abs:1 lu:0 ecrit:1	identite	$C32B	$FF432B
+$C32C	$FF432C	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$C32C	$FF432C
+$C330	$FF4330	1	1	1		commun	A5/abs:1 lu:1 ecrit:0	identite	$C330	$FF4330
+$C338	$FF4338	2	1	1		commun	A5/abs:2 lu:2 ecrit:2	identite	$C338	$FF4338
+$C37A	$FF437A	1	3	3		propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$C37A	$FF437A
+$C37C	$FF437C	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$C37C	$FF437C
+$C380	$FF4380	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$C380	$FF4380
+$C384	$FF4384	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$C384	$FF4384
+$C388	$FF4388	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$C388	$FF4388
+$C390	$FF4390	1	1	1		commun	A5/abs:1 lu:0 ecrit:0	identite	$C390	$FF4390
+$C391	$FF4391	1	1	1		collision $C388-$C3BC	A5/abs:1 lu:0 ecrit:0	RELOGE : collision $C388-$C3BC	$CC7D	$FF4C7D
+$C392	$FF4392	2	1	1		commun, deplace par le portage d'Hyper	A5/abs:2 lu:0 ecrit:0	decalage	$C3A2	$FF43A2
+$C394	$FF4394	2	1	1		commun, deplace par le portage d'Hyper	A5/abs:2 lu:0 ecrit:0	decalage	$C3A4	$FF43A4
+$C398	$FF4398	1	1	1		commun, deplace par le portage d'Hyper	A5/abs:1 lu:0 ecrit:0	decalage	$C3A8	$FF43A8
+$C39A	$FF439A	1	1	1		commun, deplace par le portage d'Hyper	A5/abs:1 lu:0 ecrit:0	decalage	$C3AA	$FF43AA
+$C39E	$FF439E	1	10	8		collision $C388-$C3BC	A5/abs:0 lu:0 ecrit:0	RELOGE : collision $C388-$C3BC	$CC80	$FF4C80
+$C39F	$FF439F	1	2	2		collision $C388-$C3BC	A5/abs:0 lu:0 ecrit:0	RELOGE : collision $C388-$C3BC	$CC83	$FF4C83
+$C3A0	$FF43A0	2	1	1		collision $C388-$C3BC	A5/abs:2 lu:0 ecrit:2	RELOGE : collision $C388-$C3BC	$CC68	$FF4C68
+$C3A2	$FF43A2	2	1	1		collision $C388-$C3BC	A5/abs:2 lu:2 ecrit:2	RELOGE : collision $C388-$C3BC	$CC6A	$FF4C6A
+$C3A5	$FF43A5	1	3	3		collision $C388-$C3BC	A5/abs:1 lu:1 ecrit:1	RELOGE : collision $C388-$C3BC	$CC87	$FF4C87
+$C3A6	$FF43A6	1	3	2		collision $C388-$C3BC	A5/abs:1 lu:1 ecrit:1	RELOGE : collision $C388-$C3BC	$CC8A	$FF4C8A
+$C3A7	$FF43A7	1	6	6		commun, deplace par le portage d'Hyper	A5/abs:1 lu:1 ecrit:1	decalage	$C3BA	$FF43BA
+$C3A8	$FF43A8	1	5	5		commun, deplace par le portage d'Hyper	A5/abs:1 lu:1 ecrit:1	decalage	$C3BB	$FF43BB
+$C3A9	$FF43A9	1	5	5		commun, deplace par le portage d'Hyper	A5/abs:1 lu:1 ecrit:1	decalage	$C3BC	$FF43BC
+$0000	$FF8000	2	2	1		commun	A5/abs:2 lu:2 ecrit:2	identite	$0000	$FF8000
+$0004	$FF8004	2	5	5		commun	A5/abs:2 lu:2 ecrit:2	identite	$0004	$FF8004
+$0006	$FF8006	2	2	2		commun	A5/abs:2 lu:0 ecrit:2	identite	$0006	$FF8006
+$0008	$FF8008	4	30	17		commun	A5/abs:4 lu:4 ecrit:4	identite	$0008	$FF8008
+$000A	$FF800A	2	20	6		commun	A5/abs:2 lu:2 ecrit:2	identite	$000A	$FF800A
+$000B	$FF800B	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$000B	$FF800B
+$000C	$FF800C	4	31	16		commun	A5/abs:4 lu:4 ecrit:4	identite	$000C	$FF800C
+$000D	$FF800D	1	2	1		propre a Upper	A5/abs:1 lu:1 ecrit:1	identite (meme mot qu'une variable d'Hyper : a verifier)	$000D	$FF800D
+$000E	$FF800E	2	12	6		commun	A5/abs:2 lu:2 ecrit:2	identite	$000E	$FF800E
+$000F	$FF800F	1	3	1		propre a Upper	A5/abs:1 lu:1 ecrit:1	identite (meme mot qu'une variable d'Hyper : a verifier)	$000F	$FF800F
+$0010	$FF8010	4	29	16		commun	A5/abs:4 lu:4 ecrit:4	identite	$0010	$FF8010
+$0012	$FF8012	2	54	22		commun	A5/abs:2 lu:2 ecrit:2	identite	$0012	$FF8012
+$0013	$FF8013	1	15	15		commun	A5/abs:1 lu:1 ecrit:1	identite	$0013	$FF8013
+$0014	$FF8014	4	42	28		commun	A5/abs:4 lu:4 ecrit:4	identite	$0014	$FF8014
+$0015	$FF8015	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$0015	$FF8015
+$0016	$FF8016	2	32	15		commun	A5/abs:2 lu:2 ecrit:2	identite	$0016	$FF8016
+$0022	$FF8022	2	6	6		commun	A5/abs:2 lu:2 ecrit:2	identite	$0022	$FF8022
+$0024	$FF8024	2	11	8		commun	A5/abs:2 lu:2 ecrit:2	identite	$0024	$FF8024
+$0026	$FF8026	2	6	6		commun	A5/abs:2 lu:2 ecrit:2	identite	$0026	$FF8026
+$0028	$FF8028	2	11	8		commun	A5/abs:2 lu:2 ecrit:2	identite	$0028	$FF8028
+$002A	$FF802A	2	10	10		commun	A5/abs:2 lu:2 ecrit:2	identite	$002A	$FF802A
+$002C	$FF802C	2	11	8		commun	A5/abs:2 lu:2 ecrit:2	identite	$002C	$FF802C
+$002E	$FF802E	2	4	1		commun	A5/abs:2 lu:2 ecrit:2	identite	$002E	$FF802E
+$0032	$FF8032	2	10	7		commun	A5/abs:2 lu:2 ecrit:2	identite	$0032	$FF8032
+$003A	$FF803A	2	4	4		commun	A5/abs:2 lu:2 ecrit:2	identite	$003A	$FF803A
+$0058	$FF8058	2	1	1		commun	A5/abs:2 lu:2 ecrit:2	identite	$0058	$FF8058
+$005C	$FF805C	2	1	1		commun	A5/abs:2 lu:2 ecrit:2	identite	$005C	$FF805C
+$0062	$FF8062	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0062	$FF8062
+$0063	$FF8063	1	6	5		commun	A5/abs:1 lu:1 ecrit:1	identite	$0063	$FF8063
+$0080	$FF8080	1	11	10		commun	A5/abs:1 lu:1 ecrit:1	identite	$0080	$FF8080
+$0081	$FF8081	1	2	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$0081	$FF8081
+$0089	$FF8089	1	5	5		commun	A5/abs:1 lu:1 ecrit:0	identite	$0089	$FF8089
+$008A	$FF808A	1	8	7		commun	A5/abs:1 lu:1 ecrit:1	identite	$008A	$FF808A
+$008B	$FF808B	1	3	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$008B	$FF808B
+$008C	$FF808C	1	13	12		commun	A5/abs:1 lu:1 ecrit:1	identite	$008C	$FF808C
+$008D	$FF808D	1	4	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$008D	$FF808D
+$008E	$FF808E	1	15	8		commun	A5/abs:1 lu:1 ecrit:1	identite	$008E	$FF808E
+$008F	$FF808F	1	25	22		commun	A5/abs:1 lu:1 ecrit:1	identite	$008F	$FF808F
+$0090	$FF8090	2	15	12		commun	A5/abs:2 lu:2 ecrit:0	identite	$0090	$FF8090
+$0092	$FF8092	2	9	6		commun	A5/abs:1 lu:0 ecrit:0	identite	$0092	$FF8092
+$0098	$FF8098	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0098	$FF8098
+$00A0	$FF80A0	1	1	1		commun	A5/abs:1 lu:1 ecrit:0	identite	$00A0	$FF80A0
+$00A2	$FF80A2	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$00A2	$FF80A2
+$00A3	$FF80A3	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$00A3	$FF80A3
+$00A4	$FF80A4	1	3	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$00A4	$FF80A4
+$00A5	$FF80A5	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00A5	$FF80A5
+$00A8	$FF80A8	1	14	8		commun	A5/abs:1 lu:1 ecrit:1	identite	$00A8	$FF80A8
+$00A9	$FF80A9	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00A9	$FF80A9
+$00AB	$FF80AB	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00AB	$FF80AB
+$00AC	$FF80AC	1	32	24		commun	A5/abs:1 lu:1 ecrit:1	identite	$00AC	$FF80AC
+$00AD	$FF80AD	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$00AD	$FF80AD
+$00B0	$FF80B0	4	1	1		commun	A5/abs:4 lu:0 ecrit:4	identite	$00B0	$FF80B0
+$00B4	$FF80B4	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$00B4	$FF80B4
+$00B5	$FF80B5	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00B5	$FF80B5
+$00B8	$FF80B8	1	18	16		commun	A5/abs:1 lu:1 ecrit:1	identite	$00B8	$FF80B8
+$00B9	$FF80B9	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00B9	$FF80B9
+$00BA	$FF80BA	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00BA	$FF80BA
+$00BB	$FF80BB	1	3	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$00BB	$FF80BB
+$00BC	$FF80BC	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00BC	$FF80BC
+$00BD	$FF80BD	1	23	22		commun	A5/abs:1 lu:1 ecrit:1	identite	$00BD	$FF80BD
+$00BE	$FF80BE	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00BE	$FF80BE
+$00DE	$FF80DE	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$00DE	$FF80DE
+$00DF	$FF80DF	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$00DF	$FF80DF
+$00E0	$FF80E0	4	6	6		commun	A5/abs:4 lu:0 ecrit:4	identite	$00E0	$FF80E0
+$0100	$FF8100	2	22	15		commun	A5/abs:2 lu:2 ecrit:2	identite	$0100	$FF8100
+$0102	$FF8102	2	5	4		commun	A5/abs:2 lu:2 ecrit:2	identite	$0102	$FF8102
+$0104	$FF8104	1	4	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$0104	$FF8104
+$0105	$FF8105	1	9	8		commun	A5/abs:1 lu:1 ecrit:1	identite	$0105	$FF8105
+$0106	$FF8106	1	7	7		commun	A5/abs:1 lu:1 ecrit:1	identite	$0106	$FF8106
+$0107	$FF8107	1	5	5		commun	A5/abs:1 lu:1 ecrit:1	identite	$0107	$FF8107
+$0108	$FF8108	1	7	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$0108	$FF8108
+$0109	$FF8109	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0109	$FF8109
+$010B	$FF810B	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$010B	$FF810B
+$010C	$FF810C	1	2	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$010C	$FF810C
+$010D	$FF810D	1	3	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$010D	$FF810D
+$010E	$FF810E	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$010E	$FF810E
+$010F	$FF810F	1	9	9		commun	A5/abs:1 lu:1 ecrit:1	identite	$010F	$FF810F
+$0110	$FF8110	1	3	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0110	$FF8110
+$0111	$FF8111	1	3	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0111	$FF8111
+$0112	$FF8112	2	8	7		propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : efface par Hyper	$CC6C	$FF4C6C
+$0113	$FF8113	1	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:1	RELOGE : efface par Hyper	$CC6D	$FF4C6D
+$0114	$FF8114	2	19	9		commun	A5/abs:2 lu:2 ecrit:2	identite	$0114	$FF8114
+$0116	$FF8116	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0116	$FF8116
+$011C	$FF811C	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$011C	$FF811C
+$011D	$FF811D	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$011D	$FF811D
+$011E	$FF811E	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$011E	$FF811E
+$011F	$FF811F	1	5	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$011F	$FF811F
+$0120	$FF8120	1	6	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$0120	$FF8120
+$0121	$FF8121	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0121	$FF8121
+$0122	$FF8122	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0122	$FF8122
+$0123	$FF8123	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0123	$FF8123
+$0124	$FF8124	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0124	$FF8124
+$0125	$FF8125	1	28	28		commun	A5/abs:1 lu:1 ecrit:1	identite	$0125	$FF8125
+$012A	$FF812A	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$012A	$FF812A
+$012C	$FF812C	1	4	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$012C	$FF812C
+$012D	$FF812D	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$012D	$FF812D
+$0130	$FF8130	1	4	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$0130	$FF8130
+$0132	$FF8132	1	9	5		commun	A5/abs:1 lu:0 ecrit:1	identite	$0132	$FF8132
+$0133	$FF8133	1	4	3		commun	A5/abs:1 lu:0 ecrit:1	identite	$0133	$FF8133
+$0134	$FF8134	1	23	23		commun	A5/abs:1 lu:1 ecrit:1	identite	$0134	$FF8134
+$0137	$FF8137	1	8	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$0137	$FF8137
+$0138	$FF8138	2	17	12		commun	A5/abs:2 lu:2 ecrit:2	identite	$0138	$FF8138
+$013A	$FF813A	2	12	11		commun	A5/abs:2 lu:2 ecrit:2	identite	$013A	$FF813A
+$013C	$FF813C	2	6	5		commun	A5/abs:2 lu:2 ecrit:2	identite	$013C	$FF813C
+$013E	$FF813E	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$013E	$FF813E
+$013F	$FF813F	1	15	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$013F	$FF813F
+$0140	$FF8140	4	3	2		commun	A5/abs:3 lu:4 ecrit:4	identite	$0140	$FF8140
+$0141	$FF8141	1	11	10		commun	A5/abs:1 lu:1 ecrit:1	identite	$0141	$FF8141
+$0143	$FF8143	1	4	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$0143	$FF8143
+$0144	$FF8144	2	4	3		commun	A5/abs:2 lu:0 ecrit:2	identite	$0144	$FF8144
+$0145	$FF8145	1	9	5		commun	A5/abs:1 lu:0 ecrit:1	identite	$0145	$FF8145
+$0146	$FF8146	1	21	9		commun	A5/abs:1 lu:0 ecrit:1	identite	$0146	$FF8146
+$0147	$FF8147	1	2	2		commun	A5/abs:1 lu:0 ecrit:1	identite	$0147	$FF8147
+$0149	$FF8149	1	9	6		commun	A5/abs:1 lu:0 ecrit:1	identite	$0149	$FF8149
+$014A	$FF814A	1	10	8		commun	A5/abs:1 lu:0 ecrit:1	identite	$014A	$FF814A
+$014C	$FF814C	2	16	12		commun	A5/abs:2 lu:0 ecrit:2	identite	$014C	$FF814C
+$0156	$FF8156	2	4	2		commun	A5/abs:2 lu:2 ecrit:2	identite	$0156	$FF8156
+$0158	$FF8158	2	2	1		commun	A5/abs:2 lu:2 ecrit:2	identite	$0158	$FF8158
+$015A	$FF815A	1	3	3		commun	A5/abs:1 lu:1 ecrit:1	identite	$015A	$FF815A
+$015D	$FF815D	1	16	15		commun	A5/abs:1 lu:1 ecrit:1	identite	$015D	$FF815D
+$015E	$FF815E	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$015E	$FF815E
+$015F	$FF815F	1	27	26		commun	A5/abs:1 lu:1 ecrit:1	identite	$015F	$FF815F
+$0160	$FF8160	1	13	12		propre a Upper	A5/abs:0 lu:1 ecrit:1	RELOGE : lu/ecrit par Hyper	$CC8C	$FF4C8C
+$0161	$FF8161	1	5	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$0161	$FF8161
+$0162	$FF8162	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0162	$FF8162
+$0163	$FF8163	1	14	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$0163	$FF8163
+$0168	$FF8168	1	11	11		commun	A5/abs:1 lu:1 ecrit:1	identite	$0168	$FF8168
+$0170	$FF8170	1	1	1		commun	A5/abs:1 lu:1 ecrit:1	identite	$0170	$FF8170
+$0172	$FF8172	2	2	2		commun	A5/abs:2 lu:0 ecrit:2	identite	$0172	$FF8172
+$0174	$FF8174	2	8	3		commun	A5/abs:2 lu:2 ecrit:2	identite	$0174	$FF8174
+$0176	$FF8176	2	4	4		commun	A5/abs:2 lu:2 ecrit:2	identite	$0176	$FF8176
+$0178	$FF8178	1	10	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0178	$FF8178
+$017A	$FF817A	2	2	2		propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : efface par Hyper	$CC6E	$FF4C6E
+$0181	$FF8181	1	2	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$0181	$FF8181
+$0182	$FF8182	1	4	4		commun	A5/abs:1 lu:1 ecrit:1	identite	$0182	$FF8182
+$0184	$FF8184	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$0184	$FF8184
+$0188	$FF8188	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$0188	$FF8188
+$018C	$FF818C	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$018C	$FF818C
+$0190	$FF8190	4	1	1		commun	A5/abs:4 lu:0 ecrit:0	identite	$0190	$FF8190
+$01C8	$FF81C8	2	4	4	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$01C8	$FF81C8
+$01CA	$FF81CA	46	29	29	oui	commun	A5/abs:0 lu:0 ecrit:0	identite	$01CA	$FF81CA
+$01CC	$FF81CC	44	3	3	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$01CC	$FF81CC
+$01CE	$FF81CE	42	5	3	oui	propre a Upper	A5/abs:0 lu:0 ecrit:0	identite (libre dans Hyper)	$01CE	$FF81CE
+$01FC	$FF81FC	2	6	2		commun	A5/abs:2 lu:2 ecrit:2	identite	$01FC	$FF81FC
+$0200	$FF8200	18	2	2	oui	commun	A5/abs:0 lu:10 ecrit:18	identite	$0200	$FF8200
+$0201	$FF8201	17	2	2	oui	propre a Upper	A5/abs:0 lu:9 ecrit:17	RELOGE : lu/ecrit par Hyper	$CC37	$FF4C37
+$0210	$FF8210	2	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : lu/ecrit par Hyper	$CC46	$FF4C46
+$0212	$FF8212	4	6	4	oui	commun	A5/abs:0 lu:2 ecrit:4	identite	$0212	$FF8212
+$0214	$FF8214	2	7	7	oui	propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : efface par Hyper	$CC70	$FF4C70
+$0216	$FF8216	106	11	8	oui	commun	A5/abs:0 lu:32 ecrit:106	identite	$0216	$FF8216
+$0244	$FF8244	60	6	4	oui	propre a Upper	A5/abs:0 lu:14 ecrit:60	RELOGE : lu/ecrit par Hyper	$CBFA	$FF4BFA
+$024C	$FF824C	52	3	3	oui	propre a Upper	A5/abs:0 lu:10 ecrit:52	RELOGE : lu/ecrit par Hyper	$CC02	$FF4C02
+$0252	$FF8252	46	1	1	oui	propre a Upper	A5/abs:0 lu:8 ecrit:46	RELOGE : lu/ecrit par Hyper	$CC08	$FF4C08
+$0280	$FF8280	8	3	2	oui	commun	A5/abs:0 lu:6 ecrit:8	identite	$0280	$FF8280
+$0281	$FF8281	7	2	2	oui	propre a Upper	A5/abs:0 lu:5 ecrit:7	RELOGE : lu/ecrit par Hyper	$CC5F	$FF4C5F
+$0288	$FF8288	2	9	8	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$0288	$FF8288
+$028A	$FF828A	4	3	3	oui	commun	A5/abs:0 lu:2 ecrit:4	identite	$028A	$FF828A
+$028C	$FF828C	2	3	3	oui	propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : efface par Hyper	$CC72	$FF4C72
+$0290	$FF8290	2	3	3	oui	propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : efface par Hyper	$CC74	$FF4C74
+$0292	$FF8292	4	13	11	oui	commun	A5/abs:0 lu:2 ecrit:4	identite	$0292	$FF8292
+$0294	$FF8294	2	4	4	oui	propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : efface par Hyper	$CC76	$FF4C76
+$0296	$FF8296	10	10	8	oui	commun	A5/abs:0 lu:2 ecrit:10	identite	$0296	$FF8296
+$02A0	$FF82A0	2	5	5	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$02A0	$FF82A0
+$02A2	$FF82A2	2	2	2	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$02A2	$FF82A2
+$02A4	$FF82A4	2	3	3	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$02A4	$FF82A4
+$0300	$FF8300	18	1	1	oui	commun	A5/abs:0 lu:10 ecrit:18	identite	$0300	$FF8300
+$0301	$FF8301	17	2	2	oui	propre a Upper	A5/abs:0 lu:9 ecrit:17	RELOGE : lu/ecrit par Hyper	$CC4B	$FF4C4B
+$030C	$FF830C	6	2	2	oui	propre a Upper	A5/abs:0 lu:2 ecrit:6	RELOGE : lu/ecrit par Hyper	$CC56	$FF4C56
+$0310	$FF8310	2	6	6	oui	propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : lu/ecrit par Hyper	$CC5A	$FF4C5A
+$0312	$FF8312	4	10	8	oui	commun	A5/abs:0 lu:2 ecrit:4	identite	$0312	$FF8312
+$0314	$FF8314	2	4	4	oui	propre a Upper	A5/abs:0 lu:0 ecrit:2	RELOGE : efface par Hyper	$CC78	$FF4C78
+$0316	$FF8316	106	8	6	oui	commun	A5/abs:0 lu:16 ecrit:106	identite	$0316	$FF8316
+$0324	$FF8324	92	2	2	oui	propre a Upper	A5/abs:0 lu:12 ecrit:92	RELOGE : lu/ecrit par Hyper	$CB9E	$FF4B9E
+$035B	$FF835B	37	1	1	oui	propre a Upper	A5/abs:0 lu:1 ecrit:37	RELOGE : lu/ecrit par Hyper	$CBD5	$FF4BD5
+$0362	$FF8362	30	2	2	oui	propre a Upper	A5/abs:0 lu:0 ecrit:30	RELOGE : lu/ecrit par Hyper	$CBDC	$FF4BDC
+$0380	$FF8380	26	2	2	oui	commun	A5/abs:0 lu:14 ecrit:26	identite	$0380	$FF8380
+$0398	$FF8398	2	5	5	oui	propre a Upper	A5/abs:0 lu:2 ecrit:2	RELOGE : lu/ecrit par Hyper	$CC7A	$FF4C7A
+$03A0	$FF83A0	96	2	2	oui	commun	A5/abs:0 lu:2 ecrit:96	identite	$03A0	$FF83A0
+$0400	$FF8400	1	29	28	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0400	$FF8400
+$0401	$FF8401	3	7	4	oui	commun	A5/abs:0 lu:1 ecrit:3	identite	$0401	$FF8401
+$0412	$FF8412	10	1	1	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:10 ecrit:10	identite (champ : voir table des champs A6)	$0412	$FF8412
+$0450	$FF8450	14	1	1	oui	commun	A5/abs:0 lu:10 ecrit:14	identite	$0450	$FF8450
+$04B4	$FF84B4	27	1	1	oui	commun	A5/abs:0 lu:19 ecrit:27	identite	$04B4	$FF84B4
+$0500	$FF8500	1	4	3	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0500	$FF8500
+$0502	$FF8502	2	3	2	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$0502	$FF8502
+$0504	$FF8504	16	1	1	oui	commun	A5/abs:0 lu:4 ecrit:16	identite	$0504	$FF8504
+$0515	$FF8515	2	1	1	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$0515	$FF8515
+$0518	$FF8518	2	1	1	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$0518	$FF8518
+$051A	$FF851A	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$051A	$FF851A
+$0524	$FF8524	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0524	$FF8524
+$0525	$FF8525	1	2	2	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0525	$FF8525
+$0528	$FF8528	8	1	1	oui	commun	A5/abs:0 lu:4 ecrit:8	identite	$0528	$FF8528
+$0530	$FF8530	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0530	$FF8530
+$0540	$FF8540	4	2	1	oui	commun	A5/abs:0 lu:4 ecrit:4	identite	$0540	$FF8540
+$0544	$FF8544	6	2	1	oui	commun	A5/abs:0 lu:4 ecrit:6	identite	$0544	$FF8544
+$054A	$FF854A	1	3	3	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$054A	$FF854A
+$054B	$FF854B	14	2	2	oui	commun	A5/abs:0 lu:2 ecrit:14	identite	$054B	$FF854B
+$0554	$FF8554	5	1	1	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:1 ecrit:5	identite (champ : voir table des champs A6)	$0554	$FF8554
+$0559	$FF8559	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0559	$FF8559
+$055B	$FF855B	3	2	2	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:3 ecrit:3	identite (champ : voir table des champs A6)	$055B	$FF855B
+$0560	$FF8560	179	1	1	oui	commun	A5/abs:0 lu:88 ecrit:179	identite	$0560	$FF8560
+$0800	$FF8800	1	31	29	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0800	$FF8800
+$0801	$FF8801	3	7	4	oui	commun	A5/abs:0 lu:1 ecrit:3	identite	$0801	$FF8801
+$0812	$FF8812	10	1	1	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:10 ecrit:10	identite (champ : voir table des champs A6)	$0812	$FF8812
+$0850	$FF8850	14	2	2	oui	commun	A5/abs:0 lu:12 ecrit:14	identite	$0850	$FF8850
+$08B4	$FF88B4	27	1	1	oui	commun	A5/abs:0 lu:21 ecrit:27	identite	$08B4	$FF88B4
+$0900	$FF8900	1	4	3	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0900	$FF8900
+$0902	$FF8902	2	3	2	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$0902	$FF8902
+$0904	$FF8904	16	1	1	oui	commun	A5/abs:0 lu:4 ecrit:16	identite	$0904	$FF8904
+$090B	$FF890B	9	1	1	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:4 ecrit:9	identite (champ : voir table des champs A6)	$090B	$FF890B
+$090D	$FF890D	7	1	1	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:4 ecrit:7	identite (champ : voir table des champs A6)	$090D	$FF890D
+$0915	$FF8915	2	1	1	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$0915	$FF8915
+$0918	$FF8918	2	1	1	oui	commun	A5/abs:0 lu:2 ecrit:2	identite	$0918	$FF8918
+$091A	$FF891A	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$091A	$FF891A
+$0924	$FF8924	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0924	$FF8924
+$0925	$FF8925	1	2	2	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0925	$FF8925
+$0928	$FF8928	8	2	1	oui	commun	A5/abs:0 lu:4 ecrit:8	identite	$0928	$FF8928
+$0930	$FF8930	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0930	$FF8930
+$0940	$FF8940	4	1	1	oui	commun	A5/abs:0 lu:4 ecrit:4	identite	$0940	$FF8940
+$0944	$FF8944	6	1	1	oui	commun	A5/abs:0 lu:4 ecrit:6	identite	$0944	$FF8944
+$094A	$FF894A	1	3	3	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$094A	$FF894A
+$094B	$FF894B	14	2	2	oui	commun	A5/abs:0 lu:2 ecrit:14	identite	$094B	$FF894B
+$0954	$FF8954	5	1	1	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:1 ecrit:5	identite (champ : voir table des champs A6)	$0954	$FF8954
+$0959	$FF8959	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0959	$FF8959
+$095B	$FF895B	3	2	2	oui	champ de structure (J1 $FF8400 / J2 $FF8800 / objets)	A5/abs:0 lu:3 ecrit:3	identite (champ : voir table des champs A6)	$095B	$FF895B
+$0960	$FF8960	179	1	1	oui	commun	A5/abs:0 lu:48 ecrit:179	identite	$0960	$FF8960
+$0C00	$FF8C00	1	3	3	oui	commun	A5/abs:1 lu:1 ecrit:1	identite	$0C00	$FF8C00
+$0C01	$FF8C01	1	2	2	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0C01	$FF8C01
+$0D02	$FF8D02	18	5	4	oui	commun	A5/abs:0 lu:2 ecrit:18	identite	$0D02	$FF8D02
+$0D24	$FF8D24	1	1	1	oui	commun	A5/abs:0 lu:1 ecrit:1	identite	$0D24	$FF8D24
+$0D32	$FF8D32	39	3	2	oui	commun	A5/abs:0 lu:3 ecrit:39	identite	$0D32	$FF8D32
+$0D59	$FF8D59	186	1	1	oui	commun	A5/abs:0 lu:1 ecrit:186	identite	$0D59	$FF8D59
+$1001	$FF9001	3	2	2	oui	commun	A5/abs:0 lu:1 ecrit:3	identite	$1001	$FF9001
+$1102	$FF9102	18	5	4	oui	commun	A5/abs:0 lu:2 ecrit:18	identite	$1102	$FF9102
+$1124	$FF9124	3	1	1	oui	commun	A5/abs:0 lu:2 ecrit:3	identite	$1124	$FF9124
+$1132	$FF9132	39	3	2	oui	commun	A5/abs:0 lu:3 ecrit:39	identite	$1132	$FF9132
+$1159	$FF9159	186	1	1	oui	commun	A5/abs:0 lu:1 ecrit:186	identite	$1159	$FF9159
+$5E0F	$FFDE0F	113	1	1	oui	commun	A5/abs:0 lu:85 ecrit:113	identite	$5E0F	$FFDE0F
+$6E8C	$FFEE8C	2	4	2		commun	A5/abs:2 lu:0 ecrit:2	identite	$6E8C	$FFEE8C
+$6EB9	$FFEEB9	1	7	6		commun	A5/abs:1 lu:1 ecrit:1	identite	$6EB9	$FFEEB9
+$6EBA	$FFEEBA	1	5	2		commun	A5/abs:1 lu:1 ecrit:1	identite	$6EBA	$FFEEBA
+$71B8	$FFF1B8	2	11	8		commun	A5/abs:2 lu:0 ecrit:2	identite	$71B8	$FFF1B8
+$71BC	$FFF1BC	2	11	5		commun	A5/abs:2 lu:0 ecrit:2	identite	$71BC	$FFF1BC
+$71C0	$FFF1C0	2	11	5		commun	A5/abs:2 lu:2 ecrit:2	identite	$71C0	$FFF1C0
+$79C4	$FFF9C4	344	1	1	oui	commun	A5/abs:0 lu:0 ecrit:256	identite	$79C4	$FFF9C4

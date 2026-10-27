@@ -1,0 +1,5 @@
+# Dan_Z : version $3C, table $E72000 (redirection), 29 entrees, origine prog+25D3E2
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	3C	048E	01E5	11		super 360x2+HP ; super QCBx2+HK ; super QCBx2+HP ; super QCFx2+HK ; super QCFx2+HP ; super QCFx2+LK ; super QCFx2+LP ; super charge AR,AV,AR,AV+HK ; super charge AR,AV,AR,AV+HP ; super charge bas,haut-bas+HK ; super demi-cercle x2+HP
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 

@@ -1,0 +1,235 @@
+From edafa33ccdf1174ab668f2207324cf236d6fe6c4 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 11 Oct 2026 14:07:33 +0200
+Subject: [PATCH] HSFA : reglages de l'ecran d'options PS2 en options du coeur
+ (ecrits au menu des modes), HSFA_OPTIONS
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps.h        |   1 +
+ src/burn/drv/capcom/cps_hsfa.cpp |  47 +++++++++++++
+ src/burn/drv/capcom/d_cps2.cpp   | 113 +++++++++++++++++++++++++++++++
+ 3 files changed, 161 insertions(+)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index 91aa170..a7709f7 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -544,6 +544,7 @@ INT32 HsfaInit();
+ INT32 HsfaExit();
+ void HsfaFrameDone();
+ extern UINT8 HsfaFluxDip;
++extern UINT8 HsfaOptDip[7];							// (agent_options) DIP B..H : reglages de l'ecran OPTION
+ INT32 HsfaFluxCommande(UINT16 nCmd, UINT8 nV, UINT16 nP);
+ void HsfaFluxRendu(INT16 *pOut, INT32 nLen);
+ INT32 HsfaRejeuCommande(UINT16 nCmd, UINT16 *pZ80);
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 87b21da..f175813 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -483,6 +483,52 @@ void HsfaPortWriteWordEnd()
+ 	bHsfaWordWrite = 0;
+ }
+ 
++// --------------------------------------------------------------------------------------------------------------
++// (agent_options, OPTIONS.md) Reglages de l'ecran OPTION de l'Anthology, par des DIP (« Options du coeur » de
++// RetroArch). L'ecran d'options du portage est du C natif PS2, sans traduction ; a sa sortie, il recopiait ses
++// reglages dans la RAM du jeu, a la place des octets de configuration de l'EEPROM arcade (memes champs : $A0-$A5,
++// $DE-$DF de A5 = $FF8000, octets a l'adresse XOR 1 dans la traduction). Ici, les octets choisis sont ecrits a chaque
++// fin d'image passee au menu des modes ($FF8000 = 4) : au demarrage et a chaque retour au menu, avant toute partie,
++// comme le faisait le portage au debut de chaque mode. Valeur « Defaut du jeu » (0) = rien n'est ecrit pour ce
++// reglage : avec tous les DIP par defaut, le jeu est inchange. HSFA_OPTIONS=0 (variable d'environnement) : aucune
++// ecriture, quels que soient les DIP (ancien comportement).
++UINT8 HsfaOptDip[7] = { 0, 0, 0, 0, 0, 0, 0 };		// DIP B..H (d_cps2.cpp)
++static INT32 nHsfaOptOff = -1;
++static UINT8 nOptExtra = 0;							// pages d'options secretes ecrites non nulles (a remettre a 0)
++
++static inline void RamWB(UINT32 a, UINT8 v) { CpsRamFF[(a & 0xFFFF) ^ 1] = v; }
++
++static void HsfaOptions()
++{
++	if (nHsfaOptOff < 0) nHsfaOptOff = (getenv("HSFA_OPTIONS") && atoi(getenv("HSFA_OPTIONS")) == 0) ? 1 : 0;
++	// seulement au menu des modes : l'initialisation d'un mode (apres le menu) garde ses regles propres (TRAINING force
++	// le chrono infini, SURVIVAL coupe le JOIN IN, Hyper recopie MAX ROUND (1P) dans le champ VS) ; ecrire aussi a la
++	// selection des persos les ecraserait (essai : chrono du TRAINING d'Hyper repasse a 2 etoiles).
++	if (nHsfaOptOff || RamW(0xFF8000) != 4) return;
++	const UINT8 *d = HsfaOptDip;
++	UINT8 v;
++	if ((v = d[0] & 0x0F)) RamWB(0xFF80A1, v - 1);		// DIFFICULTY 0-7 (arcade $A0)
++	if ((v = (d[0] >> 4) & 7)) RamWB(0xFF80A0, v - 1);	// DAMAGE LEVEL 0-3 (arcade $A1)
++	if ((v = d[1] & 7)) RamWB(0xFF80A3, v - 1);			// TIMER SPEED 0-3, 4 = INFINITY (arcade $A2)
++	if ((v = (d[1] >> 3) & 7)) RamWB(0xFF80A2, v - 1);	// SPEED SELECT 0-4 (arcade $A3)
++	if ((v = d[2] & 3)) RamWB(0xFF80DF, v - 1);			// MAX ROUND (1P) 0-2 = 1/3/5 (arcade $DE)
++	if ((v = (d[2] >> 2) & 3)) RamWB(0xFF80DE, v - 1);	// MAX ROUND (VS) (arcade $DF ; Hyper : recopie de $DF)
++	const UINT32 vs = (HsfaMode == 1) ? 0xFF4110 : 0xFF4310;	// VS MODE : 1P en +1, 2P en +0 (0 HUMAN, 1 COM)
++	if ((v = (d[2] >> 4) & 3)) RamWB(vs + 1, v - 1);
++	if ((v = (d[2] >> 6) & 3)) RamWB(vs, v - 1);
++	if ((v = d[3] & 3)) RamWB(0xFF80A5, v - 1);			// JOIN IN (SFA3, Upper ; arcade $A4)
++	// options secretes (EXTRA OPTION 1-3) : un octet de drapeaux par page, bit = 2e valeur de l'ecran PS2
++	static const UINT32 X[3][3] = { { 0xFF41A4, 0xFF41A7, 0xFF41A6 },		// SFA3
++	                                { 0xFF43A6, 0xFF43A9, 0xFF43A8 },		// Upper
++	                                { 0xFF43BB, 0xFF43BA, 0xFF43BD } };		// Hyper
++	const UINT32 *x = X[(HsfaMode == 1) ? 0 : HsfaHyper ? 2 : 1];
++	for (INT32 p = 0; p < 3; p++) {
++		if (d[4 + p] == 0 && !(nOptExtra & (1 << p))) continue;
++		RamWB(x[p], d[4 + p]);
++		if (d[4 + p]) nOptExtra |= 1 << p; else nOptExtra &= ~(1 << p);
++	}
++}
++
+ // --------------------------------------------------------------------------------------------------------------
+ // Image, remise a zero, etats
+ 
+@@ -495,6 +541,7 @@ void HsfaFrameDone()
+ 		nPlanesPending = 0;
+ 	}
+ 	HsfaSuivre4();
++	HsfaOptions();										// (agent_options) reglages de l'ecran OPTION (DIP)
+ 	// (agent_portraits) fin du chargement differe : aucune liste de l'image n'a plus d'objet de l'emplacement 4 (une
+ 	// image sans liste compte : la liste deja convertie reste affichee telle quelle), ou delai maximal atteint
+ 	if (nAttente4 >= 0 && (nVu4 == 0 || nImage - nDepuis4 >= nCfgLat4Max)) { nFichier4 = nAttente4; nAttente4 = -1; }
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 8a222f4..80a0853 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -74,10 +74,108 @@ static struct BurnInputInfo HsfaInputList[] = {
+ 	{"Volume Up"        , BIT_DIGITAL  , &Cps2VolUp , "volumeup"  },
+ 	{"Volume Down"      , BIT_DIGITAL  , &Cps2VolDwn, "volumedown"},
+ 	{"Dip A"            , BIT_DIPSWITCH, &HsfaFluxDip, "dip"      },
++	{"Dip B"            , BIT_DIPSWITCH, HsfaOptDip + 0, "dip"    },	// (agent_options) reglages de l'ecran OPTION
++	{"Dip C"            , BIT_DIPSWITCH, HsfaOptDip + 1, "dip"    },
++	{"Dip D"            , BIT_DIPSWITCH, HsfaOptDip + 2, "dip"    },
++	{"Dip E"            , BIT_DIPSWITCH, HsfaOptDip + 3, "dip"    },
++	{"Dip F"            , BIT_DIPSWITCH, HsfaOptDip + 4, "dip"    },
++	{"Dip G"            , BIT_DIPSWITCH, HsfaOptDip + 5, "dip"    },
++	{"Dip H"            , BIT_DIPSWITCH, HsfaOptDip + 6, "dip"    },
+ };
+ 
+ STDINPUTINFO(Hsfa)
+ 
++// (agent_options, OPTIONS.md) reglages de l'ecran OPTION de l'Anthology (cps_hsfa.cpp, HsfaOptions) : ecrits dans la
++// RAM du jeu au menu des modes ; « Game default » = rien n'est ecrit. Noms et valeurs de l'ecran PS2.
++#define HSFA_OPT_DEFAUTS \
++	{0x01, 0xff, 0xff, 0x00, NULL								}, \
++	{0x02, 0xff, 0xff, 0x00, NULL								}, \
++	{0x03, 0xff, 0xff, 0x00, NULL								}, \
++	{0x04, 0xff, 0xff, 0x00, NULL								}, \
++	{0x05, 0xff, 0xff, 0x00, NULL								}, \
++	{0x06, 0xff, 0xff, 0x00, NULL								}, \
++	{0x07, 0xff, 0xff, 0x00, NULL								},
++#define HSFA_OPT_JEU \
++	{0   , 0xfe, 0   ,    9, "Option: Difficulty"				}, \
++	{0x01, 0x01, 0x0f, 0x00, "Game default"						}, \
++	{0x01, 0x01, 0x0f, 0x01, "1 star (easiest)"					}, \
++	{0x01, 0x01, 0x0f, 0x02, "2 stars"							}, \
++	{0x01, 0x01, 0x0f, 0x03, "3 stars"							}, \
++	{0x01, 0x01, 0x0f, 0x04, "4 stars"							}, \
++	{0x01, 0x01, 0x0f, 0x05, "5 stars (PS2 default)"			}, \
++	{0x01, 0x01, 0x0f, 0x06, "6 stars"							}, \
++	{0x01, 0x01, 0x0f, 0x07, "7 stars"							}, \
++	{0x01, 0x01, 0x0f, 0x08, "8 stars (hardest)"				}, \
++	{0   , 0xfe, 0   ,    5, "Option: Damage level"				}, \
++	{0x01, 0x01, 0x70, 0x00, "Game default"						}, \
++	{0x01, 0x01, 0x70, 0x10, "1 star (low)"						}, \
++	{0x01, 0x01, 0x70, 0x20, "2 stars (PS2 default)"			}, \
++	{0x01, 0x01, 0x70, 0x30, "3 stars"							}, \
++	{0x01, 0x01, 0x70, 0x40, "4 stars (maximum)"				}, \
++	{0   , 0xfe, 0   ,    6, "Option: Timer speed"				}, \
++	{0x02, 0x01, 0x07, 0x00, "Game default"						}, \
++	{0x02, 0x01, 0x07, 0x01, "1 star (slow)"					}, \
++	{0x02, 0x01, 0x07, 0x02, "2 stars (PS2 default)"			}, \
++	{0x02, 0x01, 0x07, 0x03, "3 stars"							}, \
++	{0x02, 0x01, 0x07, 0x04, "4 stars (fastest)"				}, \
++	{0x02, 0x01, 0x07, 0x05, "Infinity"							}, \
++	{0   , 0xfe, 0   ,    6, "Option: Speed select"				}, \
++	{0x02, 0x01, 0x38, 0x00, "Game default"						}, \
++	{0x02, 0x01, 0x38, 0x08, "Normal"							}, \
++	{0x02, 0x01, 0x38, 0x10, "Turbo 1"							}, \
++	{0x02, 0x01, 0x38, 0x18, "Turbo 2 (PS2 default)"			}, \
++	{0x02, 0x01, 0x38, 0x20, "Free 1"							}, \
++	{0x02, 0x01, 0x38, 0x28, "Free 2"							},
++#define HSFA_OPT_MANCHES(nom1p) \
++	{0   , 0xfe, 0   ,    4, nom1p								}, \
++	{0x03, 0x01, 0x03, 0x00, "Game default"						}, \
++	{0x03, 0x01, 0x03, 0x01, "1"								}, \
++	{0x03, 0x01, 0x03, 0x02, "3 (PS2 default)"					}, \
++	{0x03, 0x01, 0x03, 0x03, "5"								},
++#define HSFA_OPT_MANCHES_VS \
++	{0   , 0xfe, 0   ,    4, "Option: Max round (VS)"			}, \
++	{0x03, 0x01, 0x0c, 0x00, "Game default"						}, \
++	{0x03, 0x01, 0x0c, 0x04, "1"								}, \
++	{0x03, 0x01, 0x0c, 0x08, "3 (PS2 default)"					}, \
++	{0x03, 0x01, 0x0c, 0x0c, "5"								},
++#define HSFA_OPT_VS \
++	{0   , 0xfe, 0   ,    3, "Option: VS mode (1P)"				}, \
++	{0x03, 0x01, 0x30, 0x00, "Game default"						}, \
++	{0x03, 0x01, 0x30, 0x10, "Human"							}, \
++	{0x03, 0x01, 0x30, 0x20, "COM"								}, \
++	{0   , 0xfe, 0   ,    3, "Option: VS mode (2P)"				}, \
++	{0x03, 0x01, 0xc0, 0x00, "Game default"						}, \
++	{0x03, 0x01, 0xc0, 0x40, "Human"							}, \
++	{0x03, 0x01, 0xc0, 0x80, "COM"								},
++#define HSFA_OPT_JOIN \
++	{0   , 0xfe, 0   ,    3, "Option: Join in"					}, \
++	{0x04, 0x01, 0x03, 0x00, "Game default"						}, \
++	{0x04, 0x01, 0x03, 0x01, "Off"								}, \
++	{0x04, 0x01, 0x03, 0x02, "On (PS2 default)"					},
++#define HSFA_OPT_BIT(off, bit, nom, v0, v1) \
++	{0   , 0xfe, 0   ,    2, nom								}, \
++	{off , 0x01, bit , 0x00, v0									}, \
++	{off , 0x01, bit , bit , v1									},
++#define HSFA_OPT_SECRETES \
++	HSFA_OPT_BIT(0x05, 0x01, "Extra option: Vitality 1P", "Normal", "Recover") \
++	HSFA_OPT_BIT(0x05, 0x02, "Extra option: Vitality 2P", "Normal", "Recover") \
++	HSFA_OPT_BIT(0x05, 0x04, "Extra option: SP gauge 1P", "Normal", "Recover") \
++	HSFA_OPT_BIT(0x05, 0x08, "Extra option: SP gauge 2P", "Normal", "Recover") \
++	HSFA_OPT_BIT(0x05, 0x10, "Extra option: SP gauge", "LV3 start", "LV0 start") \
++	HSFA_OPT_BIT(0x05, 0x20, "Extra option: Guard gauge", "On", "Off") \
++	HSFA_OPT_BIT(0x06, 0x01, "Extra option: Guard damage", "On", "Off") \
++	HSFA_OPT_BIT(0x06, 0x02, "Extra option: Counter damage", "On", "Off") \
++	HSFA_OPT_BIT(0x06, 0x04, "Extra option: Ground guard", "On", "Off") \
++	HSFA_OPT_BIT(0x06, 0x08, "Extra option: Mid-air guard", "On", "Off") \
++	HSFA_OPT_BIT(0x06, 0x10, "Extra option: Throw", "On", "Off") \
++	HSFA_OPT_BIT(0x06, 0x20, "Extra option: Throw escape", "On", "Off") \
++	HSFA_OPT_BIT(0x07, 0x01, "Extra option: Break fall", "On", "Off") \
++	HSFA_OPT_BIT(0x07, 0x02, "Extra option: Defensive roll", "On", "Off") \
++	HSFA_OPT_BIT(0x07, 0x04, "Extra option: Command timer", "Arcade", "Long") \
++	HSFA_OPT_BIT(0x07, 0x08, "Extra option: Friendship", "Normal", "Infinity") \
++	HSFA_OPT_BIT(0x07, 0x10, "Extra option: Alpha counter", "On", "Off")
++
++
+ static struct BurnDIPInfo HsfaDIPList[] =
+ {
+ 	DIP_OFFSET(0x1d)
+@@ -87,6 +185,14 @@ static struct BurnDIPInfo HsfaDIPList[] =
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+ 	{0x00, 0x01, 0x03, 0x01, "Missing tracks only"				},
+ 	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
++
++	HSFA_OPT_DEFAUTS
++	HSFA_OPT_JEU
++	HSFA_OPT_MANCHES("Option: Max round (1P)")
++	HSFA_OPT_MANCHES_VS
++	HSFA_OPT_VS
++	HSFA_OPT_JOIN
++	HSFA_OPT_SECRETES
+ };
+ 
+ STDDIPINFO(Hsfa)
+@@ -101,6 +207,13 @@ static struct BurnDIPInfo HhsfaDIPList[] =
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+ 	{0x00, 0x01, 0x03, 0x01, "Missing tracks only"				},
+ 	{0x00, 0x01, 0x03, 0x02, "All tracks"						},
++
++	// Hyper : un seul MAX ROUND sur PS2 (champ 1P, recopie dans le champ VS au debut du match) ; pas de JOIN IN
++	HSFA_OPT_DEFAUTS
++	HSFA_OPT_JEU
++	HSFA_OPT_MANCHES("Option: Max round")
++	HSFA_OPT_VS
++	HSFA_OPT_SECRETES
+ };
+ 
+ STDDIPINFO(Hhsfa)
+-- 
+2.53.0
+

@@ -1,0 +1,34 @@
+role	routines_upper(fichier)	arcade_upper	table_upper(exec)	entrees_upper	routines_hyper(fichier)	table_hyper(exec)	entrees_hyper	etat_hyper
+palettes scroll1	0x4ABB0, 0x4BAD0	$1F9FA, -	0x70E560	40	0x60570, 0x61180	A 0x660240 ($100+$C178)	16	present, 4 decors x 4 variantes
+palettes scroll2	0x4AC50, 0x4BB70	$1FA16, -	0x7147E0	40	0x61240	B 0x661E60 ($100+$C178)	16	present (1 site)
+palettes scroll3	0x4ACF0, 0x4BC10	$1FA3A, -	0x71D420	40	0x61300	C 0x664280 ($100+$C178)	16	present (1 site)
+palettes sprites de decor ($90C1E0)	0x4AA60, 0x4B930	$1F9A6, $1FBF6	0x707D10	40	-	-	-	absent
+type s1 + listes s1	0x14F510	-	0x747EE0 / 0x747F30	40	0x313A80	0x695FF0 / 0x695FF8	4	present
+listes s2	0x151270	$18DC6	0x7480D4	40	0x3157E0	0x696010	4	present
+listes s3	0x151750	-	0x748344	40	0x315C40	0x696048	4	present
+bibliotheques s1 / super-tuiles / s2 / s3	0x14FBA0	$18B36	0x69B830 (119) / 0x69F3B0 (3081) / 0x6CF5F0 (170) / 0x6EF3F0	-	0x314110...	0x63DA20 (6) / 0x63DD20 (177) / 0x640960 (17) / 0x643C60	-	blocs d'Upper absents
+ordre de mise a jour des plans	0x151B80	$17476	T_6147B0 (2 cibles)	40	0x30EC10	T_5C50D0	4	present
+gestionnaire scroll1	0x151EA0	$1751C	T_614850 (16 cibles)	40	0x30EF00	T_5C50E0 (3 cibles)	4	present ; gestionnaires d'Upper sans copie exacte
+gestionnaire scroll2	0x155920	$17C56	T_6149B0 (2 cibles)	40	0x30FEE0	T_5C5100	4	present
+gestionnaire scroll3	0x157300	$17FB8	T_614AD0 (14 cibles)	40	0x311550	T_5C5180	4	present ; idem s1
+init X/Y des plans	0x154280, 0x1586C0	$17A5A, $184DC	T_614600 / T_6146A0	40	0x30F240, 0x311AB0	T_5C50B0 / T_5C50C0	4	present
+controle CPS-B	0x15ACB0	$18862	T_614CD0	40	0x313960	T_5C51F0	4	present
+effet par decor + $C174/$C176	0x13BB10	$19BA0	T_6135A0 (9 cibles) + T_6134E0 / T_613530	40	0x391E50	T_5C9E30 (2 cibles) + T_5C9E00 / T_5C9E08	4	present
+anneau scroll1 (widescreen)	0x14FF50	$18BA4	T_6145F0	4	0x3144C0	T_5C5230	4	identique
+bornes $40/$44	0x14F9B0, 0x151560, 0x1519B0	-, $18E10, -	constantes	-	0x313F20, 0x315A50, 0x315EA0	constantes	-	identique, rien a faire
+init joueurs	0x247D80, 0x247DB0, 0x247E40	-, -, $2BFFA	constantes	-	0x2C75E0, 0x2C7610, 0x2C76A0	constantes	-	identique, rien a faire
+couleur de ROUND	0xF29A0, 0xF2A30	$7CB94, $7CBEC	T_6112D0 + 0x73E330 / 0x73E630	40	0x37BDC0, 0x37BE50	T_5C87D0 + 0x690800 / 0x690B00	40	present, 40 entrees identiques
+animation de palettes (D3 = $100)	0xC8890, 0x1E4530	$1B768, $A5C44	donnees via objet	-	0x38D510	idem	-	lecteur identique
+objets de decor	0x4C1B0	$1A63C	T_950CE0	40	-	-	-	absent
+objet par decor	0x105C70	$AF01C	0x740B70	40	-	-	-	absent
+animations des objets de decor	0xFDC10	-	0x971E70	40	-	-	-	absent
+positions par decor ($172), masque $C0A00400	0x196F50, 0x198A00	$8DB9C, $8DFCE	-	-	-	-	-	absent
+animations par decor ($100 x 4)	0x199530, 0x199DA0	$8E18A, $8E2D4	-	-	-	-	-	absent
+masque $3F60BDB3	0x371920	$69C26	-	-	0x244C10 (modifiee, sans $100)	-	-	absent
+musique par decor (VERSUS), cas $14/$04	0x139AD0	$3A6E	T_613380 / T_613350	40	-	-	-	absent
+defilement du decor dans les scenes Arcade	0x2CAC0	$26458	T_60B400	40	-	-	-	absent (avec les scenes)
+choix du decor Arcade	0x24F020	$B81C	T_61BE10 (perso -> decor, 40)	40	0xA49E0	T_5B6220 (id etendu -> 0/1/2, 128)	128	apparentee 52 %
+decor du rival	0x24F020	$B81C	T_61B6D0	40	0xA49E0	T_5B6030	40	identique
+defi intercale ($2A / $14)	0x2489E0	$D29C	T_61B680	40	-	-	-	absent
+init de match ($100 = $174)	0x2615D0	$90A8	-	-	0x96690 (+ rotation $C178)	-	-	remplacee
+attraction ($100 = T[$C314])	0x263C10, 0x26F680	-, $A5D2	T_61C110 (40)	40	0x98590, 0xA05C0	T_5B5CB0 / T_5B5CC0 (8)	8	modifiee

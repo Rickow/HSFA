@@ -1,0 +1,26 @@
+--- banques.orig.py	2026-10-10 14:13:15.470658732 +0200
++++ untranspile_mod/banques.py	2026-10-10 14:13:15.486251392 +0200
+@@ -97,6 +97,13 @@
+             if c: t[m] = c[0]
+     return t
+ 
++# (agent_build, 2026-10-10) HSFA_PLANS_FENETRE=1 : parmi les indices ROM de meme contenu, preferer ceux de la FENETRE
++# que le banc honore (banc_plans.lua : plan1 = $20000-$2FFFF en unites 8x8, plan2 = $10000-$1FFFF ; hors fenetre, le
++# banc affiche le code BRUT). Sans effet par defaut (tables identiques a l'octet). Utile quand la ROM graphique n'est
++# pas celle de l'arcade (ROM reconstruite depuis l'ISO : tuiles de sprites du quart 0 rangees dans un autre ordre, la
++# regle de continuite choisissait parfois une copie du quart 0, hors fenetre).
++FENETRE = os.environ.get("HSFA_PLANS_FENETRE") == "1"
++
+ def plans256():
+     """memoire de tuiles de DECOR du portage (e256 decompresse MWo3 = ctx+$34, lineaire 4 bpp) :
+     scroll1 = tuiles 8x8 (indice m -> 0x20 o), scroll2 = tuiles 16x16 (indice c -> 0x80 o, 16 lignes de 16 px).
+@@ -116,6 +123,9 @@
+         n = len(px) // (w * w)
+         t = np.full(n, VIDE, np.uint32); prev = None
+         cand = [idx.get(px[m*w*w:(m+1)*w*w].reshape(w, w).astype(np.uint8).tobytes()) for m in range(n)]
++        if FENETRE:                                    # candidats DANS la fenetre du plan d'abord (sinon tous)
++            deb = 0x20000 if nom == "plan1" else 0x10000
++            cand = [([y for y in c if deb <= y <= deb + 0xFFFF] or c) if c else c for c in cand]
+         for m in range(n):
+             c = cand[m]
+             if not c: prev = None; continue

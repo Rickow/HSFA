@@ -1,0 +1,11 @@
+# Dependances Python de HSFA (Python 3.8 ou plus recent ; teste avec 3.14).
+# Releve des imports : python3 scripts/qualite/verifier_imports.py
+numpy>=1.24      # traducteur (banques, graphismes, son), construction depuis l'ISO, la plupart des outils
+capstone>=5.0    # desassemblage 68000 (kernel68k.disasm, diagnostics, tools/max)
+pillow>=10.0     # images (captures, planches, decors, tools/max)
+
+# Facultatif, pour quelques outils seulement :
+#   psd-tools    tools/decors/export/verif_psd*.py (relecture des PSD de decors)
+#   zstandard, pyghidra   legacy/tools (epoque PNACH)
+#   z80, scipy   tools/son-hyper/partitions (bancs Z80, appariement des variantes)
+# Hors Python : MAME 0.285 + fork (patches/mame-fork), Ghidra (legacy), vasm (integration MAX, facultatif).

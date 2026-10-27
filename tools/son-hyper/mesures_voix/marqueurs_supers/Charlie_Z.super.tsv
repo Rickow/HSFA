@@ -1,0 +1,6 @@
+# Charlie_Z : version $33, table $E70980 (redirection), 21 entrees, origine prog+1C5DF4
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	33	0369	0181	1		super charge AR,AV,AR,AV+HP
+sfa1	33	036E	0183	4		super QCBx2+HK ; super QCFx2+HK ; super QCFx2+HP ; super demi-cercle x2+HP
+# voix Hyper sans voix d'arcade : 036A@super charge bas,haut-bas+HK
+# voix d'arcade sans voix Hyper : 0183@super charge AR,AV,AR,AV+HK 0183@super charge AR,AV,AR,AV+HK 0183@super charge AR,AV,AR,AV+HK 0183@super charge AR,AV,AR,AV+HK 0182@super charge bas,haut-bas+HK 0182@super charge bas,haut-bas+HK

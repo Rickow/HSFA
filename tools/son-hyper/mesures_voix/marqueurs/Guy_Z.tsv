@@ -1,0 +1,7 @@
+# Guy_Z : version $37, table $E71380 (redirection), 24 entrees, origine prog+20EDCA
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa1	37	03EB	0175	3		QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa1	37	03EE	0179	6		projection HK
+sfa1	37	03EF	0178	2		projection HP ; projection HP 2
+# voix Hyper sans voix d'arcade : 03F1@Start
+# voix d'arcade sans voix Hyper : 

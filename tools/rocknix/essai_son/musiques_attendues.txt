@@ -1,0 +1,6 @@
+0002 -> flux Y2
+0181 -> flux Y554
+0192 -> flux Y571
+0181 -> flux Y554
+0192 -> flux Y571
+0004 -> flux Y4

@@ -1,0 +1,50 @@
+From bca36de11e38ea7c573a10c51315f801c074338c Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 17 Oct 2026 16:38:54 +0200
+Subject: [PATCH] hsfa_run : HSFA_VARS / HSFA_VARS2 (options du coeur pour les
+ essais, agent_options)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ hsfa/hsfa_run.c | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/hsfa/hsfa_run.c b/hsfa/hsfa_run.c
+index dc7a603..479d61f 100644
+--- a/hsfa/hsfa_run.c
++++ b/hsfa/hsfa_run.c
+@@ -404,9 +404,30 @@ static bool environment(unsigned cmd, void *data)
+ 		v->value = NULL;
+ 		if (getenv("CPUSPEED") && !strcmp(v->key, "fbneo-cpu-speed-adjust")) { v->value = getenv("CPUSPEED"); return true; }
+ 		if (!strcmp(v->key, "fbneo-allow-depth-32")) { v->value = "enabled"; return true; }
++		/* (agent_options) HSFA_VARS="cle=valeur;..." : options du coeur (ex. DIP fbneo-dipswitch-<jeu>-<nom>) ;
++		   HSFA_VARS2 remplace HSFA_VARS a partir de l'image HSFA_VARS2_IMAGE (changement en cours de partie) */
++		const char *vs = (getenv("HSFA_VARS2") && frame >= (getenv("HSFA_VARS2_IMAGE") ? atoi(getenv("HSFA_VARS2_IMAGE")) : 0)) ? getenv("HSFA_VARS2") : getenv("HSFA_VARS");
++		if (vs) {
++			static char val[64][128]; static int nv = 0;
++			size_t lk = strlen(v->key);
++			for (const char *p = vs; *p; ) {
++				const char *e = strchr(p, ';'); if (!e) e = p + strlen(p);
++				if ((size_t)(e - p) > lk && !strncmp(p, v->key, lk) && p[lk] == '=') {
++					char *o = val[nv++ & 63]; size_t n = e - p - lk - 1; if (n > 127) n = 127;
++					memcpy(o, p + lk + 1, n); o[n] = 0; v->value = o; return true;
++				}
++				p = *e ? e + 1 : e;
++			}
++		}
+ 		return false;
+ 	}
+-	case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE: *(bool *)data = false; return true;
++	case RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE: {
++		/* (agent_options) vrai une fois, a l'image HSFA_VARS2_IMAGE */
++		static int fait = 0;
++		*(bool *)data = getenv("HSFA_VARS2") && !fait && frame >= (getenv("HSFA_VARS2_IMAGE") ? atoi(getenv("HSFA_VARS2_IMAGE")) : 0);
++		if (*(bool *)data) fait = 1;
++		return true;
++	}
+ 	case RETRO_ENVIRONMENT_GET_INPUT_BITMASKS: return true;
+ 	case RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION: *(unsigned *)data = 0; return true;
+ 	case RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS: {
+-- 
+2.53.0
+

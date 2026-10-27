@@ -1,0 +1,401 @@
+table	decor	adr_upper	taille	alias_de	dans_hyper	dans_sfa3
+palettes scroll1 (32 x 32 o)	$00	70e5b0	64		-	651650
+palettes scroll1 (32 x 32 o)	$02	70e5f0	800		-	651690
+palettes scroll1 (32 x 32 o)	$04	70e910	192		-	6519b0
+palettes scroll1 (32 x 32 o)	$06	70e9d0	928		-	651a70
+palettes scroll1 (32 x 32 o)	$08	70ed70	864		-	651e10
+palettes scroll1 (32 x 32 o)	$0A	70f0d0	832		-	652170
+palettes scroll1 (32 x 32 o)	$0C	70f410	896		-	6524b0
+palettes scroll1 (32 x 32 o)	$0E	70f790	704		-	652830
+palettes scroll1 (32 x 32 o)	$10	70fa50	672		-	652af0
+palettes scroll1 (32 x 32 o)	$12	70fcf0	736		-	652d90
+palettes scroll1 (32 x 32 o)	$14	70ffd0	32		-	653070
+palettes scroll1 (32 x 32 o)	$16	70fff0	480		-	653090
+palettes scroll1 (32 x 32 o)	$18	7101d0	960		-	653270
+palettes scroll1 (32 x 32 o)	$1A	710590	960		-	653630
+palettes scroll1 (32 x 32 o)	$1C	710950	832		-	6539f0
+palettes scroll1 (32 x 32 o)	$1E	710c90	64		-	653d30
+palettes scroll1 (32 x 32 o)	$20	710cd0	256		-	653d70
+palettes scroll1 (32 x 32 o)	$22	710dd0	544		-	653e70
+palettes scroll1 (32 x 32 o)	$24	70ed70	864	$08	-	651e10
+palettes scroll1 (32 x 32 o)	$26	710dd0	544	$22	-	653e70
+palettes scroll1 (32 x 32 o)	$28	70f410	896	$0C	-	6524b0
+palettes scroll1 (32 x 32 o)	$2A	710ff0	32		-	654090
+palettes scroll1 (32 x 32 o)	$2C	711010	320		-	6540b0
+palettes scroll1 (32 x 32 o)	$2E	711150	192		-	-
+palettes scroll1 (32 x 32 o)	$30	711210	960		-	6541f0
+palettes scroll1 (32 x 32 o)	$32	7115d0	128		-	6545b0
+palettes scroll1 (32 x 32 o)	$34	711650	960		-	654630
+palettes scroll1 (32 x 32 o)	$36	711a10	192		-	6549f0
+palettes scroll1 (32 x 32 o)	$38	711ad0	64		-	654ab0
+palettes scroll1 (32 x 32 o)	$3A	711b10	960		-	654af0
+palettes scroll1 (32 x 32 o)	$3C	710ff0	32	$2A	-	654090
+palettes scroll1 (32 x 32 o)	$3E	710ff0	32	$2A	-	654090
+palettes scroll1 (32 x 32 o)	$40	711ed0	1024		-	-
+palettes scroll1 (32 x 32 o)	$42	7122d0	1024		-	-
+palettes scroll1 (32 x 32 o)	$44	7126d0	1024		-	-
+palettes scroll1 (32 x 32 o)	$46	712ad0	1024		-	-
+palettes scroll1 (32 x 32 o)	$48	712ed0	192		-	-
+palettes scroll1 (32 x 32 o)	$4A	712f90	1024		-	-
+palettes scroll1 (32 x 32 o)	$4C	713390	1024		-	-
+palettes scroll1 (32 x 32 o)	$4E	713790	1024		660660	-
+palettes scroll2	$00	714830	416		-	655b30
+palettes scroll2	$02	7149d0	1024		-	655cd0
+palettes scroll2	$04	714dd0	224		-	6560d0
+palettes scroll2	$06	714eb0	960		-	6561b0
+palettes scroll2	$08	715270	1024		-	656570
+palettes scroll2	$0A	715670	1024		-	656970
+palettes scroll2	$0C	715a70	736		-	656d70
+palettes scroll2	$0E	715d50	992		-	657050
+palettes scroll2	$10	716130	1024		-	657430
+palettes scroll2	$12	716530	1024		-	657830
+palettes scroll2	$14	716930	128		-	657c30
+palettes scroll2	$16	7169b0	992		-	657cb0
+palettes scroll2	$18	716d90	704		-	658090
+palettes scroll2	$1A	717050	1024		-	658350
+palettes scroll2	$1C	717450	1024		-	658750
+palettes scroll2	$1E	717850	1024		-	658b50
+palettes scroll2	$20	717c50	416		-	658f50
+palettes scroll2	$22	717df0	1024		-	6590f0
+palettes scroll2	$24	715270	1024	$08	-	656570
+palettes scroll2	$26	717df0	1024	$22	-	6590f0
+palettes scroll2	$28	715a70	736	$0C	-	656d70
+palettes scroll2	$2A	7181f0	128		-	6594f0
+palettes scroll2	$2C	718270	1024		-	659570
+palettes scroll2	$2E	718670	224		-	-
+palettes scroll2	$30	718750	864		-	659970
+palettes scroll2	$32	718ab0	192		-	659cd0
+palettes scroll2	$34	718b70	1024		-	659d90
+palettes scroll2	$36	718f70	992		-	65a190
+palettes scroll2	$38	719350	1024		-	65a570
+palettes scroll2	$3A	719750	1024		-	65a970
+palettes scroll2	$3C	7181f0	128	$2A	-	6594f0
+palettes scroll2	$3E	7181f0	128	$2A	-	6594f0
+palettes scroll2	$40	719b50	1024		-	-
+palettes scroll2	$42	719f50	1024		-	-
+palettes scroll2	$44	71a350	1024		-	-
+palettes scroll2	$46	71a750	1024		-	-
+palettes scroll2	$48	71ab50	224		-	-
+palettes scroll2	$4A	71ac30	1024		-	-
+palettes scroll2	$4C	71b030	1024		-	-
+palettes scroll2	$4E	71b430	1024		662a80	-
+palettes scroll3 (31 pal.)	$00	71d470	320		-	65c990
+palettes scroll3 (31 pal.)	$02	71d5b0	928		-	65cad0
+palettes scroll3 (31 pal.)	$04	71d950	32		-	65ce70
+palettes scroll3 (31 pal.)	$06	71d970	256		-	65ce90
+palettes scroll3 (31 pal.)	$08	71da70	224		-	65cf90
+palettes scroll3 (31 pal.)	$0A	71db50	576		-	65d070
+palettes scroll3 (31 pal.)	$0C	71dd90	928		-	65d2b0
+palettes scroll3 (31 pal.)	$0E	71e130	160		-	65d650
+palettes scroll3 (31 pal.)	$10	71e1d0	128		-	65d6f0
+palettes scroll3 (31 pal.)	$12	71e250	768		-	65d770
+palettes scroll3 (31 pal.)	$14	71e550	32		-	65da70
+palettes scroll3 (31 pal.)	$16	71e570	256		-	65da90
+palettes scroll3 (31 pal.)	$18	71e670	352		-	65db90
+palettes scroll3 (31 pal.)	$1A	71e7d0	128		-	65dcf0
+palettes scroll3 (31 pal.)	$1C	71e850	256		-	65dd70
+palettes scroll3 (31 pal.)	$1E	71e950	640		-	65de70
+palettes scroll3 (31 pal.)	$20	71ebd0	960		-	65e0f0
+palettes scroll3 (31 pal.)	$22	71ef90	384		-	65e4b0
+palettes scroll3 (31 pal.)	$24	71da70	224	$08	-	65cf90
+palettes scroll3 (31 pal.)	$26	71ef90	384	$22	-	65e4b0
+palettes scroll3 (31 pal.)	$28	71dd90	928	$0C	-	65d2b0
+palettes scroll3 (31 pal.)	$2A	71f110	32		-	65e630
+palettes scroll3 (31 pal.)	$2C	71f130	384		-	65e650
+palettes scroll3 (31 pal.)	$2E	71f2b0	32		-	-
+palettes scroll3 (31 pal.)	$30	71f2d0	256		-	65e7d0
+palettes scroll3 (31 pal.)	$32	71f3d0	256		-	65e8d0
+palettes scroll3 (31 pal.)	$34	71f4d0	384		-	65e9d0
+palettes scroll3 (31 pal.)	$36	71f650	352		-	65eb50
+palettes scroll3 (31 pal.)	$38	71f7b0	256		-	65ecb0
+palettes scroll3 (31 pal.)	$3A	71f8b0	160		-	65edb0
+palettes scroll3 (31 pal.)	$3C	71f110	32	$2A	-	65e630
+palettes scroll3 (31 pal.)	$3E	71f110	32	$2A	-	65e630
+palettes scroll3 (31 pal.)	$40	71f950	1024		-	-
+palettes scroll3 (31 pal.)	$42	71fd50	1024		-	-
+palettes scroll3 (31 pal.)	$44	720150	1024		-	-
+palettes scroll3 (31 pal.)	$46	720550	1024		-	-
+palettes scroll3 (31 pal.)	$48	720950	32		-	-
+palettes scroll3 (31 pal.)	$4A	720970	1024		-	-
+palettes scroll3 (31 pal.)	$4C	720d70	1024		-	-
+palettes scroll3 (31 pal.)	$4E	721170	1024		664ea0	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$00	707d60	192		-	64d590
+palettes sprites de decor ($90C1E0, 6 pal.)	$02	707e20	192		-	64d650
+palettes sprites de decor ($90C1E0, 6 pal.)	$04	707ee0	192		-	64d710
+palettes sprites de decor ($90C1E0, 6 pal.)	$06	707fa0	192		-	64d7d0
+palettes sprites de decor ($90C1E0, 6 pal.)	$08	708060	192		-	64d890
+palettes sprites de decor ($90C1E0, 6 pal.)	$0A	708120	192		-	64d950
+palettes sprites de decor ($90C1E0, 6 pal.)	$0C	7081e0	192		-	64da10
+palettes sprites de decor ($90C1E0, 6 pal.)	$0E	7082a0	192		-	64dad0
+palettes sprites de decor ($90C1E0, 6 pal.)	$10	708360	192		-	64db90
+palettes sprites de decor ($90C1E0, 6 pal.)	$12	708420	192		-	64dc50
+palettes sprites de decor ($90C1E0, 6 pal.)	$14	7084e0	192		-	64dd10
+palettes sprites de decor ($90C1E0, 6 pal.)	$16	7085a0	192		-	64ddd0
+palettes sprites de decor ($90C1E0, 6 pal.)	$18	708660	192		-	64de90
+palettes sprites de decor ($90C1E0, 6 pal.)	$1A	708720	192		-	64df50
+palettes sprites de decor ($90C1E0, 6 pal.)	$1C	7087e0	192		-	64e010
+palettes sprites de decor ($90C1E0, 6 pal.)	$1E	7088a0	192		-	64e0d0
+palettes sprites de decor ($90C1E0, 6 pal.)	$20	708960	192		-	64e190
+palettes sprites de decor ($90C1E0, 6 pal.)	$22	708a20	192		-	64e250
+palettes sprites de decor ($90C1E0, 6 pal.)	$24	708060	192	$08	-	64d890
+palettes sprites de decor ($90C1E0, 6 pal.)	$26	708a20	192	$22	-	64e250
+palettes sprites de decor ($90C1E0, 6 pal.)	$28	7081e0	192	$0C	-	64da10
+palettes sprites de decor ($90C1E0, 6 pal.)	$2A	708ae0	192		-	64e310
+palettes sprites de decor ($90C1E0, 6 pal.)	$2C	708ba0	192		-	64e3d0
+palettes sprites de decor ($90C1E0, 6 pal.)	$2E	708c60	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$30	708d20	192		-	64e490
+palettes sprites de decor ($90C1E0, 6 pal.)	$32	708de0	192		-	64e550
+palettes sprites de decor ($90C1E0, 6 pal.)	$34	708ea0	192		-	64e610
+palettes sprites de decor ($90C1E0, 6 pal.)	$36	708f60	192		-	64e6d0
+palettes sprites de decor ($90C1E0, 6 pal.)	$38	709020	192		-	64e790
+palettes sprites de decor ($90C1E0, 6 pal.)	$3A	7090e0	192		-	64e850
+palettes sprites de decor ($90C1E0, 6 pal.)	$3C	708ae0	192	$2A	-	64e310
+palettes sprites de decor ($90C1E0, 6 pal.)	$3E	708ae0	192	$2A	-	64e310
+palettes sprites de decor ($90C1E0, 6 pal.)	$40	7091a0	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$42	709260	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$44	709320	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$46	7093e0	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$48	7094a0	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$4A	709560	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$4C	709620	192		-	-
+palettes sprites de decor ($90C1E0, 6 pal.)	$4E	707d60	192	$00	-	64d590
+listes scroll1	$00	747f80	4		-	-
+listes scroll1	$02	747f84	8		-	67c6b4
+listes scroll1	$04	747f8c	4		-	-
+listes scroll1	$06	747f90	8		-	67c6c0
+listes scroll1	$08	747f98	8		-	67c6c8
+listes scroll1	$0A	747fa0	8		-	67c6d0
+listes scroll1	$0C	747fa8	8		-	67c6d8
+listes scroll1	$0E	747fb0	8		-	67c6e0
+listes scroll1	$10	747fb8	8		-	67c6e8
+listes scroll1	$12	747fc0	8		-	67c6f0
+listes scroll1	$14	747fc8	4		-	-
+listes scroll1	$16	747fcc	4		-	-
+listes scroll1	$18	747fd0	8		-	67c700
+listes scroll1	$1A	747fd8	8		-	67c708
+listes scroll1	$1C	747fe0	4		-	-
+listes scroll1	$1E	747fe4	4		-	-
+listes scroll1	$20	747fe8	8		-	67c718
+listes scroll1	$22	747ff0	8		-	67c720
+listes scroll1	$24	747f98	8	$08	-	67c6c8
+listes scroll1	$26	747ff0	8	$22	-	67c720
+listes scroll1	$28	747fa8	8	$0C	-	67c6d8
+listes scroll1	$2A	747fc8	4	$14	-	-
+listes scroll1	$2C	747ff8	4		-	-
+listes scroll1	$2E	747f8c	4	$04	-	-
+listes scroll1	$30	747ffc	8		-	67c72c
+listes scroll1	$32	748004	8		-	67c734
+listes scroll1	$34	74800c	8		-	67c73c
+listes scroll1	$36	748014	8		-	67c744
+listes scroll1	$38	74801c	8		-	67c74c
+listes scroll1	$3A	748024	8		-	67c754
+listes scroll1	$3C	747fc8	4	$14	-	-
+listes scroll1	$3E	747fc8	4	$14	-	-
+listes scroll1	$40	74802c	128		-	-
+listes scroll1	$42	7480ac	8		-	-
+listes scroll1	$44	7480b4	8		-	-
+listes scroll1	$46	7480bc	4		-	-
+listes scroll1	$48	747f8c	4	$04	-	-
+listes scroll1	$4A	7480c0	4		-	-
+listes scroll1	$4C	7480c4	8		-	-
+listes scroll1	$4E	7480cc	128		-	-
+listes scroll2	$00	748124	16		-	67c7dc
+listes scroll2	$02	748134	16		-	67c7ec
+listes scroll2	$04	748144	16		-	67c7fc
+listes scroll2	$06	748154	16		-	67c80c
+listes scroll2	$08	748164	16		-	67c81c
+listes scroll2	$0A	748174	16		-	67c82c
+listes scroll2	$0C	748184	16		696038	67c83c
+listes scroll2	$0E	748194	16		-	67c84c
+listes scroll2	$10	7481a4	16		-	67c85c
+listes scroll2	$12	7481b4	16		-	67c86c
+listes scroll2	$14	7481c4	16		-	67c87c
+listes scroll2	$16	7481d4	16		-	67c88c
+listes scroll2	$18	7481e4	16		-	67c89c
+listes scroll2	$1A	7481f4	16		-	67c8ac
+listes scroll2	$1C	748204	16		-	67c8bc
+listes scroll2	$1E	748214	16		696018	67c8cc
+listes scroll2	$20	748224	16		-	67c8dc
+listes scroll2	$22	748234	16		-	67c8ec
+listes scroll2	$24	748164	16	$08	-	67c81c
+listes scroll2	$26	748234	16	$22	-	67c8ec
+listes scroll2	$28	748184	16	$0C	696038	67c83c
+listes scroll2	$2A	748244	16		-	67c8fc
+listes scroll2	$2C	748254	32		-	67c90c
+listes scroll2	$2E	748144	16	$04	-	67c7fc
+listes scroll2	$30	748274	16		-	67c92c
+listes scroll2	$32	748284	16		-	67c93c
+listes scroll2	$34	748294	16		-	67c94c
+listes scroll2	$36	7482a4	16		-	67c95c
+listes scroll2	$38	7482b4	16		-	67c96c
+listes scroll2	$3A	7482c4	16		-	67c97c
+listes scroll2	$3C	748244	16	$2A	-	67c8fc
+listes scroll2	$3E	748244	16	$2A	-	67c8fc
+listes scroll2	$40	7482d4	16		-	-
+listes scroll2	$42	7482e4	16		-	-
+listes scroll2	$44	7482f4	16		-	-
+listes scroll2	$46	748304	16		-	-
+listes scroll2	$48	748144	16	$04	-	67c7fc
+listes scroll2	$4A	748314	16		-	-
+listes scroll2	$4C	748324	16		-	-
+listes scroll2	$4E	748334	128		-	-
+listes scroll3	$00	748394	64		-	67ca0c
+listes scroll3	$02	7483d4	64		-	67ca4c
+listes scroll3	$04	748414	64		-	67ca8c
+listes scroll3	$06	748454	64		-	67cacc
+listes scroll3	$08	748494	64		-	67cb0c
+listes scroll3	$0A	7484d4	64		-	67cb4c
+listes scroll3	$0C	748514	64		-	67cb8c
+listes scroll3	$0E	748554	64		-	67cbcc
+listes scroll3	$10	748594	64		-	67cc0c
+listes scroll3	$12	7485d4	64		-	67cc4c
+listes scroll3	$14	748614	64		-	67cc8c
+listes scroll3	$16	748654	64		-	67cccc
+listes scroll3	$18	748694	64		-	67cd0c
+listes scroll3	$1A	7486d4	64		-	67cd4c
+listes scroll3	$1C	748714	64		-	67cd8c
+listes scroll3	$1E	748754	64		-	67cdcc
+listes scroll3	$20	748794	64		-	67ce0c
+listes scroll3	$22	7487d4	64		-	67ce4c
+listes scroll3	$24	748494	64	$08	-	67cb0c
+listes scroll3	$26	7487d4	64	$22	-	67ce4c
+listes scroll3	$28	748514	64	$0C	-	67cb8c
+listes scroll3	$2A	748614	64	$14	-	67cc8c
+listes scroll3	$2C	748814	64		-	67ce8c
+listes scroll3	$2E	748414	64	$04	-	67ca8c
+listes scroll3	$30	748854	64		-	67cecc
+listes scroll3	$32	748894	64		-	67cf0c
+listes scroll3	$34	7488d4	64		-	67cf4c
+listes scroll3	$36	748914	64		-	67cf8c
+listes scroll3	$38	748954	64		-	67cfcc
+listes scroll3	$3A	748994	64		-	67d00c
+listes scroll3	$3C	748614	64	$14	-	67cc8c
+listes scroll3	$3E	748614	64	$14	-	67cc8c
+listes scroll3	$40	7489d4	64		-	-
+listes scroll3	$42	748a14	64		-	-
+listes scroll3	$44	748a54	64		-	-
+listes scroll3	$46	748a94	64		-	-
+listes scroll3	$48	748414	64	$04	-	67ca8c
+listes scroll3	$4A	748ad4	64		-	-
+listes scroll3	$4C	748b14	64		-	-
+listes scroll3	$4E	748b54	128		-	-
+objet par decor ($105C70)	$00	740bc0	64		-	676530
+objet par decor ($105C70)	$02	740bc0	64	$00	-	676530
+objet par decor ($105C70)	$04	740bc0	64	$00	-	676530
+objet par decor ($105C70)	$06	740c00	512		-	676570
+objet par decor ($105C70)	$08	740c00	512	$06	-	676570
+objet par decor ($105C70)	$0A	740c00	512	$06	-	676570
+objet par decor ($105C70)	$0C	740c00	512	$06	-	676570
+objet par decor ($105C70)	$0E	7413c0	160		-	676d30
+objet par decor ($105C70)	$10	7413c0	160	$0E	-	676d30
+objet par decor ($105C70)	$12	7413c0	160	$0E	-	676d30
+objet par decor ($105C70)	$14	741460	128		-	676dd0
+objet par decor ($105C70)	$16	7414e0	384		-	676e50
+objet par decor ($105C70)	$18	7414e0	384	$16	-	676e50
+objet par decor ($105C70)	$1A	7414e0	384	$16	-	676e50
+objet par decor ($105C70)	$1C	7414e0	384	$16	-	676e50
+objet par decor ($105C70)	$1E	741660	288		-	676fd0
+objet par decor ($105C70)	$20	741660	288	$1E	-	676fd0
+objet par decor ($105C70)	$22	741780	128		-	6770f0
+objet par decor ($105C70)	$24	740c00	512	$06	-	676570
+objet par decor ($105C70)	$26	741780	128	$22	-	6770f0
+objet par decor ($105C70)	$28	740c00	512	$06	-	676570
+objet par decor ($105C70)	$2A	741780	128	$22	-	6770f0
+objet par decor ($105C70)	$2C	741800	512		-	677170
+objet par decor ($105C70)	$2E	741b00	64		-	-
+objet par decor ($105C70)	$30	741b40	512		-	677470
+objet par decor ($105C70)	$32	7420c0	320		-	-
+objet par decor ($105C70)	$34	7420c0	320	$32	-	-
+objet par decor ($105C70)	$36	7420c0	320	$32	-	-
+objet par decor ($105C70)	$38	7420c0	320	$32	-	-
+objet par decor ($105C70)	$3A	7420c0	320	$32	-	-
+objet par decor ($105C70)	$3C	741780	128	$22	-	6770f0
+objet par decor ($105C70)	$3E	741780	128	$22	-	6770f0
+objet par decor ($105C70)	$40	7420c0	320	$32	-	-
+objet par decor ($105C70)	$42	7420c0	320	$32	-	-
+objet par decor ($105C70)	$44	7420c0	320	$32	-	-
+objet par decor ($105C70)	$46	742200	64		-	-
+objet par decor ($105C70)	$48	742200	64	$46	-	-
+objet par decor ($105C70)	$4A	742240	512		-	-
+objet par decor ($105C70)	$4C	742240	512	$4A	-	-
+objet par decor ($105C70)	$4E	742240	512	$4A	-	-
+animations objets de decor ($FDC10)	$00	971ec0	44		-	-
+animations objets de decor ($FDC10)	$02	971eec	512		-	-
+animations objets de decor ($FDC10)	$04	972108	32		-	-
+animations objets de decor ($FDC10)	$06	972128	284		-	-
+animations objets de decor ($FDC10)	$08	972244	248		-	-
+animations objets de decor ($FDC10)	$0A	97233c	44		-	-
+animations objets de decor ($FDC10)	$0C	972368	332		-	-
+animations objets de decor ($FDC10)	$0E	9724b4	216		-	-
+animations objets de decor ($FDC10)	$10	97258c	232		-	-
+animations objets de decor ($FDC10)	$12	972674	64		-	-
+animations objets de decor ($FDC10)	$14	9726b4	320		-	-
+animations objets de decor ($FDC10)	$16	9727f4	248		-	-
+animations objets de decor ($FDC10)	$18	9728ec	188		-	-
+animations objets de decor ($FDC10)	$1A	9729a8	20		-	869188
+animations objets de decor ($FDC10)	$1C	972acc	88		-	-
+animations objets de decor ($FDC10)	$1E	972b24	76		-	-
+animations objets de decor ($FDC10)	$20	972b70	260		-	-
+animations objets de decor ($FDC10)	$22	972c74	168		-	-
+animations objets de decor ($FDC10)	$24	972244	248	$08	-	-
+animations objets de decor ($FDC10)	$26	972c74	168	$22	-	-
+animations objets de decor ($FDC10)	$28	972368	332	$0C	-	-
+animations objets de decor ($FDC10)	$2A	9726b4	320	$14	-	-
+animations objets de decor ($FDC10)	$2C	972d1c	120		-	-
+animations objets de decor ($FDC10)	$2E	972108	32	$04	-	-
+animations objets de decor ($FDC10)	$30	972d94	256		-	-
+animations objets de decor ($FDC10)	$32	972e94	268		-	-
+animations objets de decor ($FDC10)	$34	972fa0	224		-	-
+animations objets de decor ($FDC10)	$36	973080	296		-	-
+animations objets de decor ($FDC10)	$38	9731a8	52		-	-
+animations objets de decor ($FDC10)	$3A	9729bc	272		-	-
+animations objets de decor ($FDC10)	$3C	9726b4	320	$14	-	-
+animations objets de decor ($FDC10)	$3E	9726b4	320	$14	-	-
+animations objets de decor ($FDC10)	$40	9731dc	296		-	-
+animations objets de decor ($FDC10)	$42	973304	512		-	-
+animations objets de decor ($FDC10)	$44	97374c	64		-	-
+animations objets de decor ($FDC10)	$46	97378c	248		-	-
+animations objets de decor ($FDC10)	$48	972108	32	$04	-	-
+animations objets de decor ($FDC10)	$4A	973884	464		-	-
+animations objets de decor ($FDC10)	$4C	973a54	512		-	-
+animations objets de decor ($FDC10)	$4E	971ec0	44	$00	-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$00	950d30	66		-	848840
+palettes par decor (anim. $1E4530 ?) $950CE0	$02	950d72	130		-	848882
+palettes par decor (anim. $1E4530 ?) $950CE0	$04	950df4	50		-	848904
+palettes par decor (anim. $1E4530 ?) $950CE0	$06	950e26	66		-	848936
+palettes par decor (anim. $1E4530 ?) $950CE0	$08	950e68	82		-	848978
+palettes par decor (anim. $1E4530 ?) $950CE0	$0A	950eba	50		-	8489ca
+palettes par decor (anim. $1E4530 ?) $950CE0	$0C	950eec	114		-	8489fc
+palettes par decor (anim. $1E4530 ?) $950CE0	$0E	950f5e	130		-	848a6e
+palettes par decor (anim. $1E4530 ?) $950CE0	$10	950fe0	98		-	848af0
+palettes par decor (anim. $1E4530 ?) $950CE0	$12	951042	130		-	848b52
+palettes par decor (anim. $1E4530 ?) $950CE0	$14	9510c4	82		-	848bd4
+palettes par decor (anim. $1E4530 ?) $950CE0	$16	951116	178		-	848c26
+palettes par decor (anim. $1E4530 ?) $950CE0	$18	9511c8	82		-	848cd8
+palettes par decor (anim. $1E4530 ?) $950CE0	$1A	95121a	114		-	848d2a
+palettes par decor (anim. $1E4530 ?) $950CE0	$1C	95128c	146		-	848d9c
+palettes par decor (anim. $1E4530 ?) $950CE0	$1E	95131e	130		-	848e2e
+palettes par decor (anim. $1E4530 ?) $950CE0	$20	9513a0	114		-	848eb0
+palettes par decor (anim. $1E4530 ?) $950CE0	$22	951412	162		-	848f22
+palettes par decor (anim. $1E4530 ?) $950CE0	$24	950e68	82	$08	-	848978
+palettes par decor (anim. $1E4530 ?) $950CE0	$26	951412	162	$22	-	848f22
+palettes par decor (anim. $1E4530 ?) $950CE0	$28	950eec	114	$0C	-	8489fc
+palettes par decor (anim. $1E4530 ?) $950CE0	$2A	9510c4	82	$14	-	848bd4
+palettes par decor (anim. $1E4530 ?) $950CE0	$2C	9514b4	114		-	848fc4
+palettes par decor (anim. $1E4530 ?) $950CE0	$2E	951526	50		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$30	951558	82		-	849036
+palettes par decor (anim. $1E4530 ?) $950CE0	$32	9515aa	50		-	849088
+palettes par decor (anim. $1E4530 ?) $950CE0	$34	9515dc	82		-	8490ba
+palettes par decor (anim. $1E4530 ?) $950CE0	$36	95162e	130		-	84910c
+palettes par decor (anim. $1E4530 ?) $950CE0	$38	9516b0	82		-	84918e
+palettes par decor (anim. $1E4530 ?) $950CE0	$3A	951702	114		-	8491e0
+palettes par decor (anim. $1E4530 ?) $950CE0	$3C	9510c4	82	$14	-	848bd4
+palettes par decor (anim. $1E4530 ?) $950CE0	$3E	9510c4	82	$14	-	848bd4
+palettes par decor (anim. $1E4530 ?) $950CE0	$40	951774	98		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$42	9517d6	50		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$44	951808	162		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$46	9518aa	98		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$48	95190c	50		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$4A	95193e	130		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$4C	9519c0	114		-	-
+palettes par decor (anim. $1E4530 ?) $950CE0	$4E	951a32	256		-	-

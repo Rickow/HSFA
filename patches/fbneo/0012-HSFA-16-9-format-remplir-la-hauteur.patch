@@ -1,0 +1,192 @@
+From 1f8bc0bd6f7753da7b10eb73747976511783c1b6 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 24 Oct 2026 12:01:07 +0200
+Subject: [PATCH] HSFA widescreen: core option "Screen format (fill height)"
+
+Like the user's Eden and PPSSPP forks: on a screen narrower than 16:9,
+the picture fills the height and both sides are cropped (centered), so
+the part of the widened stage that fits the screen is shown.
+
+- Core option fbneo-hsfa-format (HSFA widescreen core only, HSFA
+  drivers only): Off (default, unchanged: 448 px stretched to 16:9),
+  4:3, 3:2, 14:9 (full width, arcade pixels), 16:10, 5:3, 16:9.
+- Shown width = format x 224 / arcade pixel shape (384 px <-> 4:3, so
+  format x 288), even, capped at the game width (448): 4:3 -> 384,
+  3:2 -> 432, 14:9 -> 448 (no crop, arcade pixels), 16:10 / 5:3 /
+  16:9 -> 448. The crop is done at the video output (offset pointer,
+  same pitch); libretro geometry (base_width, aspect_ratio) follows the
+  format and is updated when the option changes.
+- Off shows 448 px at 16:9, i.e. pixels about 14 % wider than arcade;
+  14:9 keeps the arcade pixel shape over the full width.
+- Off: output identical to the pixel.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burner/libretro/libretro.cpp     | 45 ++++++++++++++++++++++++++++
+ src/burner/libretro/retro_common.cpp | 36 ++++++++++++++++++++++
+ src/burner/libretro/retro_common.h   |  3 ++
+ 3 files changed, 84 insertions(+)
+
+diff --git a/src/burner/libretro/libretro.cpp b/src/burner/libretro/libretro.cpp
+index 2427d2d..15edc8a 100644
+--- a/src/burner/libretro/libretro.cpp
++++ b/src/burner/libretro/libretro.cpp
+@@ -360,6 +360,23 @@ INT32 (__cdecl *bprintf) (INT32 nStatus, TCHAR* szFormat, ...) = libretro_bprint
+ 
+ // libretro globals
+ void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
++
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++// (HSFA, patch 0012) "Screen format (fill height)" : largeur montree = format x 224 / forme du pixel arcade
++// (384 px <-> 4:3, donc format x 288), paire, plafonnee a la largeur du jeu (448) ; rognage centre a la sortie video,
++// geometrie libretro au format choisi. 14:9 = 448 px entiers aux pixels arcade. Off : image entiere, aspect du pilote
++// (16:9, pixels 14 % plus larges que l'arcade).
++static void HsfaFormat(INT32 *pW, INT32 *pAx, INT32 *pAy)
++{
++	static const INT32 F[7][2] = { { 0, 0 }, { 4, 3 }, { 3, 2 }, { 14, 9 }, { 16, 10 }, { 5, 3 }, { 16, 9 } };
++	*pW = nGameWidth;
++	const char *nom = (nBurnDrvActive != ~0U) ? BurnDrvGetTextA(DRV_NAME) : NULL;
++	if (nHsfaFormat < 1 || nHsfaFormat > 6 || nom == NULL || strstr(nom, "hsfa") == NULL) return;
++	INT32 w = (F[nHsfaFormat][0] * 288 / F[nHsfaFormat][1]) & ~1;
++	if (w < nGameWidth) *pW = w;
++	*pAx = F[nHsfaFormat][0]; *pAy = F[nHsfaFormat][1];
++}
++#endif
+ void retro_set_audio_sample(retro_audio_sample_t) {}
+ void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_cb = cb; }
+ 
+@@ -1603,7 +1620,16 @@ void retro_run()
+ 		pBurnDraw = NULL;
+ 	}
+ 
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++	{	// (patch 0012) rognage centre (pointeur decale, meme pas de ligne)
++		INT32 w, ax = 0, ay = 0;
++		HsfaFormat(&w, &ax, &ay);
++		if (w != nGameWidth) video_cb(pBurnDraw ? pBurnDraw + ((nGameWidth - w) / 2) * nBurnBpp : NULL, w, nGameHeight, nBurnPitch);
++		else video_cb(pBurnDraw, nGameWidth, nGameHeight, nBurnPitch);
++	}
++#else
+ 	video_cb(pBurnDraw, nGameWidth, nGameHeight, nBurnPitch);
++#endif
+ 
+ 	bool updated = false;
+ 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+@@ -1612,6 +1638,9 @@ void retro_run()
+ 		UINT32 old_nFrameskipType = nFrameskipType;
+ 		UINT32 old_nNewWidth = nNewWidth;
+ 		UINT32 old_nNewHeight = nNewHeight;
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++		UINT32 old_nHsfaFormat = nHsfaFormat;
++#endif
+ 
+ 		check_variables();
+ 
+@@ -1627,6 +1656,15 @@ void retro_run()
+ 			environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &av_info);
+ 		}
+ 
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++		if (old_nHsfaFormat != nHsfaFormat)			// (patch 0012) nouvelle geometrie
++		{
++			struct retro_system_av_info av_info;
++			retro_get_system_av_info(&av_info);
++			environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &av_info);
++		}
++#endif
++
+ 		// change resolution
+ 		if (old_nNewWidth != nNewWidth && old_nNewHeight != nNewHeight)
+ 		{
+@@ -1681,6 +1719,13 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
+ 		nNextGeometryCall = RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO;
+ 
+ 	geom.aspect_ratio = (float)game_aspect_x / (float)game_aspect_y;
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++	{	// (patch 0012) format "remplir la hauteur"
++		INT32 w, ax = 0, ay = 0;
++		HsfaFormat(&w, &ax, &ay);
++		if (ax) { geom.base_width = (unsigned)w; geom.aspect_ratio = (float)ax / (float)ay; }
++	}
++#endif
+ 
+ 	struct retro_system_timing timing = { (nBurnFPS / 100.0), (nBurnFPS / 100.0) * nAudSegLen };
+ 
+diff --git a/src/burner/libretro/retro_common.cpp b/src/burner/libretro/retro_common.cpp
+index 5bf698d..e61a9bb 100644
+--- a/src/burner/libretro/retro_common.cpp
++++ b/src/burner/libretro/retro_common.cpp
+@@ -96,6 +96,29 @@ static struct retro_core_option_v2_definition var_fbneo_allow_depth_32 = {
+ 	},
+ 	"enabled"
+ };
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++// (HSFA, patch 0012) coeur 16:9 : "remplir la hauteur" d'un ecran moins large que 16:9 (cotes rognes, centre)
++static struct retro_core_option_v2_definition var_fbneo_hsfa_format = {
++	"fbneo-hsfa-format",
++	"Screen format (fill height)",
++	NULL,
++	"HSFA widescreen: the picture fills the height of a screen narrower than 16:9, both sides are cropped (centered), arcade pixel shape. 14:9 = full 448 px with arcade pixels (narrow bars on a 16:9 screen). Off = full 448 px stretched to 16:9 (pixels 14 % wider than arcade).",
++	NULL,
++	"video",
++	{
++		{ "off",   "Off" },
++		{ "4:3",   NULL },
++		{ "3:2",   NULL },
++		{ "14:9",  "14:9 (full width, arcade pixels)" },
++		{ "16:10", NULL },
++		{ "5:3",   NULL },
++		{ "16:9",  NULL },
++		{ NULL,    NULL },
++	},
++	"off"
++};
++UINT32 nHsfaFormat = 0;								// 0 = off, 1..6 = 4:3, 3:2, 14:9, 16:10, 5:3, 16:9
++#endif
+ static struct retro_core_option_v2_definition var_fbneo_vertical_mode = {
+ 	"fbneo-vertical-mode",
+ 	"Vertical mode",
+@@ -1033,6 +1056,9 @@ void set_environment()
+ 	var_fbneo_allow_depth_32.desc                          = RETRO_DEPTH32_CAT_DESC;
+ 	var_fbneo_allow_depth_32.info                          = RETRO_DEPTH32_CAT_INFO;
+ 	vars_systems.push_back(&var_fbneo_allow_depth_32);
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++	vars_systems.push_back(&var_fbneo_hsfa_format);	// (patch 0012)
++#endif
+ 
+ 	var_fbneo_vertical_mode.desc                           = RETRO_VERTICAL_CAT_DESC;
+ 	var_fbneo_vertical_mode.info                           = RETRO_VERTICAL_CAT_INFO;
+@@ -1582,6 +1608,16 @@ void check_variables(void)
+ 			bAllowDepth32 = false;
+ 	}
+ 
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++	var.key = var_fbneo_hsfa_format.key;			// (patch 0012)
++	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
++	{
++		static const char *const f[] = { "off", "4:3", "3:2", "14:9", "16:10", "5:3", "16:9" };
++		nHsfaFormat = 0;
++		for (UINT32 i = 1; i < 7; i++) if (strcmp(var.value, f[i]) == 0) nHsfaFormat = i;
++	}
++#endif
++
+ 	var.key = var_fbneo_vertical_mode.key;
+ 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+ 	{
+diff --git a/src/burner/libretro/retro_common.h b/src/burner/libretro/retro_common.h
+index 5145e28..1abd2d8 100644
+--- a/src/burner/libretro/retro_common.h
++++ b/src/burner/libretro/retro_common.h
+@@ -245,6 +245,9 @@ extern bool bPatchedRomsetsEnabled;
+ extern bool bLibretroSupportsAudioBuffStatus;
+ extern bool bLowPassFilterEnabled;
+ extern UINT32 nVerticalMode;
++#if defined(HSFA_CORE) && defined(HSFA_WS)
++extern UINT32 nHsfaFormat;								// (patch 0012) format "remplir la hauteur", 0 = off
++#endif
+ extern UINT32 nNewWidth;
+ extern UINT32 nNewHeight;
+ extern UINT32 nFrameskip;
+-- 
+2.53.0
+

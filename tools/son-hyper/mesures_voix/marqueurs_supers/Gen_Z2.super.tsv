@@ -1,0 +1,5 @@
+# Gen_Z2 : version $51, table $7CF5DE (module), 19 entrees, origine prog+2B449E
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	51	052A	00C5	4		super QCFx2+HK ; super QCFx2+LK ; super charge AR,AV,AR,AV+HP ; super demi-cercle x2+HP
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 00C5@super QCFx2+HP 00C5@super QCBx2+HP

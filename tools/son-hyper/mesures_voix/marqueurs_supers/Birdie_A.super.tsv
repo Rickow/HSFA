@@ -1,0 +1,5 @@
+# Birdie_A : version $68, table $E73680 (redirection), 37 entrees, origine prog+21BB5C
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	68	0409	01EA	1		super charge AR,AV,AR,AV+HP
+# voix Hyper sans voix d'arcade : 
+# voix d'arcade sans voix Hyper : 01F3@super QCFx2+HP 01F4@super QCFx2+HP 01F3@super QCFx2+HK 01F4@super QCFx2+HK 01F3@super QCFx2+LP 01F4@super QCFx2+LP 01F3@super QCFx2+LK 01F4@super QCFx2+LK

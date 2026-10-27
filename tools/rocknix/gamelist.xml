@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<gameList>
+  <game>
+    <path>./sfa3hsfa.zip</path>
+    <name>Street Fighter Alpha 3 (HSFA)</name>
+    <desc>Street Fighter Alpha 3 de l'Anthology PS2, retraduit pour le CPS2.</desc>
+    <developer>Capcom</developer>
+    <genre>Combat</genre>
+    <players>1-2</players>
+  </game>
+  <game>
+    <path>./sfa3uhsfa.zip</path>
+    <name>Street Fighter Alpha 3 Upper (HSFA)</name>
+    <desc>Street Fighter Alpha 3 Upper de l'Anthology PS2, retraduit pour le CPS2.</desc>
+    <developer>Capcom</developer>
+    <genre>Combat</genre>
+    <players>1-2</players>
+  </game>
+  <game>
+    <path>./sfa3umhsfa.zip</path>
+    <name>Street Fighter Alpha 3 Upper MAX (HSFA)</name>
+    <desc>Street Fighter Alpha 3 Upper de l'Anthology PS2, retraduit pour le CPS2, avec Eagle, Maki, Yun et Ingrid de SFA3 MAX.</desc>
+    <developer>Capcom</developer>
+    <genre>Combat</genre>
+    <players>1-2</players>
+  </game>
+  <game>
+    <path>./sfa3hhsfa.zip</path>
+    <name>Hyper Street Fighter Alpha (HSFA)</name>
+    <desc>Hyper Street Fighter Alpha de l'Anthology PS2, retraduit pour le CPS2.</desc>
+    <developer>Capcom</developer>
+    <genre>Combat</genre>
+    <players>1-2</players>
+  </game>
+</gameList>

@@ -1,0 +1,6 @@
+# Sodom_A : version $66, table $E73180 (redirection), 33 entrees, origine prog+1F64EE
+jeu	version	code_SFA3	arcade	occurrences	autres	gestes
+sfa2	66	03C1	01D9	2		super QCFx2+HK ; super QCFx2+LK
+sfa2	66	03CD	01D3	2		super QCFx2+HK ; super QCFx2+LK
+# voix Hyper sans voix d'arcade : 03CC@super QCFx2+HP 03CC@super QCFx2+LP
+# voix d'arcade sans voix Hyper : 01D2@super QCFx2+HP 01D4@super QCFx2+HP 01D4@super QCFx2+HP 01D3@super QCFx2+HP 01D2@super QCFx2+LP 01D4@super QCFx2+LP 01D4@super QCFx2+LP 01D3@super QCFx2+LP

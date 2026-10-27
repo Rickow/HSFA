@@ -1,0 +1,25 @@
+YG10_5	Yun pied debout MK dist 10	3:5 2:N	10	normal	100
+YG10_6	Yun pied debout HK dist 10	3:6 2:N	10	normal	100
+YG18_5	Yun pied debout MK dist 18	3:5 2:N	18	normal	100
+YG18_6	Yun pied debout HK dist 18	3:6 2:N	18	normal	100
+YG20_5	Yun pied debout MK dist 20	3:5 2:N	20	normal	100
+YG20_6	Yun pied debout HK dist 20	3:6 2:N	20	normal	100
+YG28_5	Yun pied debout MK dist 28	3:5 2:N	28	normal	100
+YG28_6	Yun pied debout HK dist 28	3:6 2:N	28	normal	100
+YG30_5	Yun pied debout MK dist 30	3:5 2:N	30	normal	100
+YG30_6	Yun pied debout HK dist 30	3:6 2:N	30	normal	100
+YG40_5	Yun pied debout MK dist 40	3:5 2:N	40	normal	100
+YG40_6	Yun pied debout HK dist 40	3:6 2:N	40	normal	100
+YH20_4	Yun demi-tour arriere + LK dist 20	3:F 3:D+F 3:D 3:D+B 3:B+4 2:N	20	special	200
+YH20_5	Yun demi-tour arriere + MK dist 20	3:F 3:D+F 3:D 3:D+B 3:B+5 2:N	20	special	200
+YH20_6	Yun demi-tour arriere + HK dist 20	3:F 3:D+F 3:D 3:D+B 3:B+6 2:N	20	special	200
+YH40_4	Yun demi-tour arriere + LK dist 40	3:F 3:D+F 3:D 3:D+B 3:B+4 2:N	40	special	200
+YH40_5	Yun demi-tour arriere + MK dist 40	3:F 3:D+F 3:D 3:D+B 3:B+5 2:N	40	special	200
+YH40_6	Yun demi-tour arriere + HK dist 40	3:F 3:D+F 3:D 3:D+B 3:B+6 2:N	40	special	200
+YH60_4	Yun demi-tour arriere + LK dist 60	3:F 3:D+F 3:D 3:D+B 3:B+4 2:N	60	special	200
+YH60_5	Yun demi-tour arriere + MK dist 60	3:F 3:D+F 3:D 3:D+B 3:B+5 2:N	60	special	200
+YH60_6	Yun demi-tour arriere + HK dist 60	3:F 3:D+F 3:D 3:D+B 3:B+6 2:N	60	special	200
+YQ40_1	Yun QCB + LP dist 40	3:D 3:D+B 3:B+1 2:N	40	special	200
+YQ40_3	Yun QCB + HP dist 40	3:D 3:D+B 3:B+3 2:N	40	special	200
+YQ80_1	Yun QCB + LP dist 80	3:D 3:D+B 3:B+1 2:N	80	special	200
+YQ80_3	Yun QCB + HP dist 80	3:D 3:D+B 3:B+3 2:N	80	special	200

@@ -1,0 +1,159 @@
+jeu	base	perso	code_SFA3	actuel	arcade	votes	versions	statut	gestes
+sfa2	05	Adon	03AA	01C1 (voix 0.208)	01C1	01C1:4	45 65	identique	QCF+HK ; QCF+LK
+sfa2	05	Adon	03AB	01C2 (voix 0.167)	01C2	01C2:2	45 65	identique	demi-cercle arriere+HK
+sfa2	05	Adon	03AE	SFA3	01C5	01C5:4	45 65	identique	demi-cercle arriere+HK ; projection HK
+sfa2	05	Adon	03B1	SFA3	01C8	01C8:4	45 65	identique	projection HP ; projection HP 2
+sfa2	05	Adon	03B2	01C9 (voix 0.188)	01C9	01C9:2	45 65	identique	Start
+sfa1	05	Adon	03AA	SFA3	01AE	01AE:1	35	voix_SFA3	DP inverse+HK
+sfa1	05	Adon	03AB	01AF (voix 0.246)	01AF	01AF:1	35	identique	demi-cercle arriere+HK
+sfa1	05	Adon	03AE	01B1 (voix 0.162)	01B1	01B1:2 01B0:2	35	conflit	demi-cercle arriere+HK ; projection HK ; projection HP ; projection HP 2
+sfa2	05	Adon	03AC	01C3 (voix 0.174)	01C0	01C0:2	45	a_corriger	super QCFx2+HK ; super QCFx2+LK
+sfa2	02	Akuma	0349	SFA3	0199	0199:12	42 62	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP ; projection HK ; super QCBx2+HK ; super QCFx2+HK
+sfa2	02	Akuma	034B	SFA3	019B	019B:8	42 62	identique	projection HP ; projection HP 2 ; super QCBx2+HP ; super demi-cercle x2+HP
+sfa2	02	Akuma	034C	019B (cri 0.271)	019C	019C:6	42 62	a_corriger	projection HK ; super QCBx2+HK ; super QCFx2+HK
+sfa2	02	Akuma	034A	SFA3	019A	019A:12	42 62	identique	DP+HP ; DP+LP ; QCB+HK ; QCB+LK ; Start ; demi-cercle arriere+HK
+sfa1	02	Akuma	034A	SFA3	01CD	01CD:10	32	voix_SFA3	DP+HP ; DP+LP ; QCB+HK ; QCB+LK ; Start ; demi-cercle arriere+HK ; projection HP ; projection HP 2 ; super QCBx2+HP ; super demi-cercle x2+HP
+sfa1	02	Akuma	034C	SFA3	01CF	01CF:3	32	voix_SFA3	projection HK ; super QCBx2+HK ; super QCFx2+HK
+sfa1	02	Akuma	0349	SFA3	01CC	01CC:3	32	voix_SFA3	QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	08	Birdie	0409	01EA (voix 0.202)	01EA	01EA:4	48 68	identique	charge arriere-avant+HP ; super charge AR,AV,AR,AV+HP
+sfa2	08	Birdie	0415	01F1 (voix 0.212)	01F1	01F1:2	48 68	identique	360+HP
+sfa2	08	Birdie	0416	SFA3	01F2	01F2:2	48 68	voix_SFA3	360+HP
+sfa2	08	Birdie	0418	SFA3	01F3	01F3:2	48 68	voix_SFA3	360+HP
+sfa2	08	Birdie	041A	SFA3	01F6	01F6:2	48 68	identique	Start
+sfa1	08	Birdie	0409	01D3 (voix 0.238)	01D3	01D3:2	38	identique	charge arriere-avant+HP ; super charge AR,AV,AR,AV+HP
+sfa1	08	Birdie	0415	01D7 (voix 0.228)	01D7	01D7:1	38	identique	360+HP
+sfa1	08	Birdie	0416	SFA3	01D8	01D8:1	38	voix_SFA3	360+HP
+sfa1	08	Birdie	0417	01D5 (cri 0.353)	01D5	01D5:1	38	identique	360+HP
+sfa1	08	Birdie	0419	SFA3	01D6	01D6:2	38	voix_SFA3	360+HP
+sfa1	08	Birdie	041B	01DC (voix 0.204)	01DC	01DC:1	38	identique	Start
+sfa2	0A	Bison	044D	0314 (cri 0.331)	0314	0314:8	4A 6A	identique	charge arriere-avant+HK ; projection HP ; projection HP 2 ; super charge AR,AV,AR,AV+HK
+sfa2	0A	Bison	044F	SFA3	0316	0316:4	4A 6A	identique	charge arriere-avant+HP ; super charge AR,AV,AR,AV+HP
+sfa2	0A	Bison	0450	SFA3	0317	0317:4	4A 6A	identique	charge bas-haut+HK ; super charge bas,haut-bas+HK
+sfa2	0A	Bison	044E	0315 (voix 0.207)	0315	0315:4	4A 6A	identique	DP inverse+HK ; HK accroupi
+sfa2	0A	Bison	0451	SFA3	0318	0318:2	4A 6A	identique	Start
+sfa1	0A	Bison	044D	01C4 (cri 0.253)	01C4	01C4:2	3A	identique	charge arriere-avant+HK ; super charge AR,AV,AR,AV+HK
+sfa1	0A	Bison	044F	SFA3	01C6	01C6:4	3A	voix_SFA3	charge arriere-avant+HP ; projection HP ; projection HP 2 ; super charge AR,AV,AR,AV+HP
+sfa1	0A	Bison	044E	SFA3	01C5	01C5:2	3A	voix_SFA3	DP inverse+HK ; HK accroupi
+sfa2	03	Charlie	0369	01A4 (voix 0.168)	01A4	01A4:4	43 63	identique	charge arriere-avant+HP ; super charge AR,AV,AR,AV+HP
+sfa2	03	Charlie	036C	01AA (cri 0.356)	01A7	01A7:28	43 63	a_corriger	QCB+HK ; QCF+HK ; QCF+HP ; charge arriere-avant+HK ; demi-cercle arriere+HK ; demi-cercle avant+HP ; projection HK ; super QCBx2+HK ; super QCFx2+HK ; super QCFx2+HP ; super demi-cercle x2+HP
+sfa2	03	Charlie	036A	01A5 (voix 0.120)	01A5	01A5:2	43 63	identique	charge bas-haut+HK
+sfa2	03	Charlie	036D	01A8 (voix 0.191)	01A8	01A8:4	43 63	identique	projection HP ; projection HP 2
+sfa2	03	Charlie	036E	01A9 (cri 0.153)	01A9	01A9:2	43 63	identique	projection HK
+sfa2	03	Charlie	036F	01AA (cri 0.121)	01AA	01AA:2	43 63	identique	Start
+sfa1	03	Charlie	0369	SFA3	0181	0181:2	33	voix_SFA3	charge arriere-avant+HP ; super charge AR,AV,AR,AV+HP
+sfa1	03	Charlie	036E	0183 (cri 0.197)	0183	0183:10	33	identique	QCB+HK ; QCF+HK ; QCF+HP ; charge arriere-avant+HK ; demi-cercle arriere+HK ; demi-cercle avant+HP ; super QCBx2+HK ; super QCFx2+HK ; super QCFx2+HP ; super demi-cercle x2+HP
+sfa1	03	Charlie	036A	0182 (voix 0.162)	0182	0182:1	33	identique	charge bas-haut+HK
+sfa1	03	Charlie	036C	0183 (cri 0.302)	0183	0183:4	33	identique	projection HK
+sfa1	03	Charlie	036D	0184 (voix 0.200)	0184	0184:2	33	identique	projection HP ; projection HP 2
+sfa1	03	Charlie	036F	0185 (cri 0.118)	0185	0185:1	33	identique	Start
+sfa2	04	ChunLi	038B	01B2 (cri 0.187)	01B2	01B2:2	44 64	identique	super charge bas,haut-bas+HK
+sfa2	04	ChunLi	038C	01B3 (voix 0.149)	01B3	01B3:4	44 64	identique	charge bas-haut+HK ; super charge bas,haut-bas+HK
+sfa2	04	ChunLi	0390	01B7 (cri 0.264)	01B7	01B7:20	44 64	identique	HK debout ; HK repete ; QCB+HK ; QCF+HK ; charge arriere-avant+HK ; demi-cercle arriere+HK ; projection HK ; super QCBx2+HK ; super QCFx2+HK ; super charge bas,haut-bas+HK
+sfa2	04	ChunLi	0389	01B0 (voix 0.139)	01B0	01B0:2	44 64	identique	demi-cercle avant+HP
+sfa2	04	ChunLi	0394	01BB (voix 0.127)	01BB	01BB:2	44 64	identique	Start
+sfa2	04	ChunLi	0397	01BC (cri 0.189)	01B8	01B8:4	44 64	a_corriger	projection HP ; projection HP 2
+sfa1	04	ChunLi	0389	0196 (voix 0.212)	0196	0196:2	34	identique	charge arriere-avant+HP ; super charge AR,AV,AR,AV+HP
+sfa1	04	ChunLi	038A	SFA3	0194	0194:1	34	voix_SFA3	super charge AR,AV,AR,AV+HK
+sfa1	04	ChunLi	038B	0198 (cri 0.168)	0198	0198:1	34	identique	super charge bas,haut-bas+HK
+sfa1	04	ChunLi	038C	0197 (voix 0.157)	0197	0197:2	34	identique	charge bas-haut+HK ; super charge bas,haut-bas+HK
+sfa1	04	ChunLi	038F	019A (cri 0.104)	019A	019A:11	34	identique	HK debout ; HK repete ; QCB+HK ; QCF+HK ; charge arriere-avant+HK ; demi-cercle arriere+HK ; projection HK ; super QCBx2+HK ; super QCFx2+HK ; super charge AR,AV,AR,AV+HK ; super charge bas,haut-bas+HK
+sfa1	04	ChunLi	0394	019E (voix 0.131)	019E	019E:1	34	identique	Start
+sfa1	04	ChunLi	0397	019B (cri 0.226)	019B	019B:2	34	identique	projection HP ; projection HP 2
+sfa2	04	ChunLi	038D	01B4 (voix 0.115)	01B4	01B4:2	44	identique	super QCFx2+HP ; super QCFx2+LP
+sfa2	04	ChunLi	038E	01B5 (voix 0.103)	01B5	01B5:2	44	identique	super QCFx2+HP ; super QCFx2+LP
+sfa2	0C	Dan	0489	032C (voix 0.107)	032C	032C:6	4C 6C	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	0C	Dan	048A	SFA3	032D	032D:4	4C 6C	identique	DP+HP ; DP+LP
+sfa2	0C	Dan	048B	SFA3	032E	032E:10	4C 6C	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	0C	Dan	048E	SFA3	0332	0332:4	4C 6C	identique	projection HP ; projection HP 2
+sfa2	0C	Dan	048F	0331 (voix 0.057)	0331	0331:4	4C 6C	identique	QCB+HK ; demi-cercle arriere+HK
+sfa2	0C	Dan	0491	SFA3	0334	0334:2	4C 6C	identique	Start
+sfa1	0C	Dan	048E	01E5 (cri 0.218)	01E5	01E5:22	3C	identique	QCB+HK ; QCB+LK ; QCF+HP ; QCF+LP ; Start ; demi-cercle arriere+HK ; demi-cercle avant+HP ; super 360x2+HP ; super QCBx2+HK ; super QCBx2+HP ; super QCFx2+HK ; super QCFx2+HP ; super QCFx2+LK ; super QCFx2+LP ; super charge AR,AV,AR,AV+HK ; super charge AR,AV,AR,AV+HP ; super charge bas,haut-bas+HK ; super demi-cercle x2+HP
+sfa1	0C	Dan	048A	SFA3	01E6	01E6:2	3C	voix_SFA3	DP+HP ; DP+LP
+sfa1	0C	Dan	048F	SFA3	0174	0174:2	3C	voix_SFA3	projection HP ; projection HP 2
+sfa2	0F	Dhalsim	04F1	SFA3	036C	036C:4	4F 6F	identique	QCB+HP ; super QCBx2+HP
+sfa2	0F	Dhalsim	04EA	SFA3	0365	0365:6	4F 6F	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	0F	Dhalsim	04EC	SFA3	0367	0367:2	4F 6F	identique	demi-cercle arriere+HK
+sfa2	0F	Dhalsim	04F3	SFA3	036E	036E:2	4F 6F	identique	Start
+sfa2	11	Gen	052A	SFA3	00C5	00C5:20	51 71	identique	HP debout ; HP repete ; QCB+HP ; QCF+HP ; charge arriere-avant+HP ; demi-cercle avant+HP ; super QCFx2+HK ; super QCFx2+LK ; super charge AR,AV,AR,AV+HP ; super demi-cercle x2+HP
+sfa2	11	Gen	052B	SFA3	00C6	00C6:2	51 71	identique	projection HK
+sfa2	11	Gen	052D	SFA3	00C8	00C8:6	51 71	identique	projection HK ; projection HP ; projection HP 2
+sfa2	07	Guy	03E9	01DC (cri 0.136)	01DC	01DC:2	67	identique	super QCFx2+HP ; super QCFx2+LP
+sfa2	07	Guy	03EA	01DD (voix 0.124)	01DD	01DD:2	67	identique	super QCFx2+HK ; super QCFx2+LK
+sfa2	07	Guy	03EB	SFA3	01DE	01DE:8	47 67	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK ; super QCFx2+HK ; super QCFx2+LK
+sfa2	07	Guy	03ED	SFA3	01DF	01DF:16	47 67	identique	projection HP ; projection HP 2 ; super QCBx2+HP ; super QCFx2+HK ; super QCFx2+HP ; super QCFx2+LK ; super QCFx2+LP ; super demi-cercle x2+HP
+sfa2	07	Guy	03EE	SFA3	01E1	01E1:30	47 67	identique	QCB+HP ; QCB+LP ; projection HK ; super QCBx2+HK
+sfa1	07	Guy	03EE	0179 (cri 0.269)	0179	0179:13	37	identique	projection HK ; super QCBx2+HK
+sfa1	07	Guy	03EF	SFA3	0178	0178:4	37	voix_SFA3	projection HP ; projection HP 2 ; super QCBx2+HP ; super demi-cercle x2+HP
+sfa1	07	Guy	03EB	0175 (voix 0.159)	0175	0175:3	37	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	01	Ken	032F	0190 (voix 0.123)	0190	0190:2	61	identique	super QCFx2+HK ; super QCFx2+LK
+sfa2	01	Ken	0332	SFA3	0193	0193:22	41 61	identique	projection HK ; super QCBx2+HK
+sfa2	01	Ken	0333	SFA3	0191	0191:8	41 61	identique	projection HP ; projection HP 2 ; super QCBx2+HP ; super demi-cercle x2+HP
+sfa2	01	Ken	0334	0192 (voix 0.211)	0192	0192:10	41 61	identique	projection HP ; projection HP 2 ; super QCBx2+HK ; super QCBx2+HP ; super demi-cercle x2+HP
+sfa2	01	Ken	0329	SFA3	018B	018B:6	41 61	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa2	01	Ken	032A	SFA3	018C	018C:4	41 61	identique	DP+HP ; DP+LP
+sfa2	01	Ken	032B	018D (voix 0.142)	018D	018D:6	41 61	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	01	Ken	0335	SFA3	0194	0194:2	41 61	voix_SFA3	Start
+sfa1	01	Ken	032C	016C (voix 0.184)	016C	016C:2	31	identique	super QCFx2+HP ; super QCFx2+LP
+sfa1	01	Ken	032D	SFA3	016E	016E:2	31	voix_SFA3	super QCFx2+HP ; super QCFx2+LP
+sfa1	01	Ken	0332	0171 (cri 0.219)	0171	0171:4	31	identique	projection HP ; projection HP 2 ; super QCBx2+HK ; super demi-cercle x2+HP
+sfa1	01	Ken	0333	0171 (cri 0.325)	0170	0170:14	31	a_corriger	projection HK ; projection HP ; projection HP 2 ; super QCBx2+HK ; super demi-cercle x2+HP
+sfa1	01	Ken	0329	0169 (voix 0.160)	0169	0169:3	31	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP
+sfa1	01	Ken	032A	016A (voix 0.148)	016A	016A:2	31	identique	DP+HP ; DP+LP
+sfa1	01	Ken	032B	016B (voix 0.233)	016B	016B:3	31	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa1	01	Ken	0335	016F (voix 0.226)	016F	016F:1	31	identique	Start
+sfa2	0E	Rolento	04CF	SFA3	035A	035A:2	4E 6E	identique	super 360x2+HP
+sfa2	0E	Rolento	04CC	0357 (voix 0.135)	0357	0357:2	4E 6E	identique	projection HK
+sfa2	0E	Rolento	04CE	SFA3	0359	0359:16	4E 6E	identique	QCB+HK ; QCB+LK ; QCF+HP ; QCF+LP ; demi-cercle arriere+HK ; demi-cercle avant+HP ; projection HP ; projection HP 2
+sfa2	0E	Rolento	04D0	SFA3	035B	035B:2	4E 6E	identique	projection HK
+sfa2	09	Rose	042C	0303 (voix 0.152)	0303	0303:2	49 69	identique	super QCBx2+HK
+sfa2	09	Rose	0427	0305 (cri 0.269)	0305	0305:4	49 69	identique	projection HP ; projection HP 2
+sfa2	09	Rose	0429	0300 (voix 0.107)	0300	0300:2	49 69	identique	demi-cercle avant+HP
+sfa2	09	Rose	042B	SFA3	0302	0302:4	49 69	voix_SFA3	QCB+HP ; QCB+LP
+sfa2	09	Rose	042F	0307 (cri 0.147)	0307	0307:8	49 69	identique	QCF+HK ; QCF+LK ; projection HP ; projection HP 2
+sfa2	09	Rose	0432	0309 (voix 0.258)	0309	0309:2	49 69	identique	Start
+sfa1	09	Rose	0429	01A2 (voix 0.182)	01A2	01A2:1	39	identique	demi-cercle avant+HP
+sfa1	09	Rose	042B	SFA3	01A4	01A4:2	39	voix_SFA3	QCB+HP ; QCB+LP
+sfa1	09	Rose	042E	01A5 (cri 0.332)	01A5	01A5:2	39	identique	projection HP ; projection HP 2
+sfa1	09	Rose	0430	01A5 (cri 0.367)	01A7	01A7:2	39	a_corriger	projection HP ; projection HP 2
+sfa1	09	Rose	0432	01AA (voix 0.253)	01AA	01AA:1	39	identique	Start
+sfa2	00	Ryu	0309	0180 (voix 0.118)	0180	0180:10	40 60	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP ; super QCFx2+HP ; super QCFx2+LP
+sfa2	00	Ryu	030B	0182 (voix 0.112)	0182	0182:8	40 60	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK ; super QCBx2+HK
+sfa2	00	Ryu	030C	0183 (voix 0.127)	0183	0183:6	40 60	identique	super QCBx2+HK ; super QCFx2+HP ; super QCFx2+LP
+sfa2	00	Ryu	030D	0185 (cri 0.233)	0185	0185:8	40 60	identique	projection HP ; projection HP 2 ; super QCBx2+HP ; super demi-cercle x2+HP
+sfa2	00	Ryu	030E	0186 (cri 0.089)	0186	0186:4	40 60	identique	projection HK ; super QCFx2+HK
+sfa2	00	Ryu	030A	0181 (voix 0.101)	0181	0181:4	40 60	identique	DP+HP ; DP+LP
+sfa1	00	Ryu	0309	0160 (voix 0.119)	0160	0160:5	30	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP ; super QCFx2+HP ; super QCFx2+LP
+sfa1	00	Ryu	030B	0162 (voix 0.116)	0162	0162:4	30	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK ; super QCBx2+HK
+sfa1	00	Ryu	030C	0163 (voix 0.129)	0163	0163:3	30	identique	super QCBx2+HK ; super QCFx2+HP ; super QCFx2+LP
+sfa1	00	Ryu	030D	0165 (cri 0.234)	0165	0165:4	30	identique	projection HP ; projection HP 2 ; super QCBx2+HP ; super demi-cercle x2+HP
+sfa1	00	Ryu	030E	0166 (cri 0.079)	0166	0166:2	30	identique	projection HK ; super QCFx2+HK
+sfa1	00	Ryu	030A	0161 (voix 0.104)	0161	0161:2	30	identique	DP+HP ; DP+LP
+sfa2	0B	Sagat	0469	SFA3	031D	031D:11	4B 6B	identique	QCF+HK ; QCF+HP ; QCF+LK ; QCF+LP ; demi-cercle avant+HP ; super QCBx2+HK
+sfa2	0B	Sagat	046E	0322 (voix 0.191)	0322	0322:1	6B	identique	super QCBx2+HK
+sfa2	0B	Sagat	046A	SFA3	031E	031E:4	4B 6B	identique	DP+HP ; DP+LP
+sfa2	0B	Sagat	046F	SFA3	0323	0323:16	4B 6B	identique	projection HP ; projection HP 2
+sfa2	0B	Sagat	0473	SFA3	0327	0327:4	4B 6B	identique	projection HP ; projection HP 2
+sfa2	0B	Sagat	0476	0324 (cri 0.196)	0324	0324:4	4B 6B	identique	projection HP ; projection HP 2
+sfa1	0B	Sagat	046C	018A (voix 0.167)	018B	018B:2	3B	a_corriger	super QCFx2+HK ; super QCFx2+LK
+sfa1	0B	Sagat	0469	0189 (voix 0.156)	0189	0189:5	3B	identique	QCF+HK ; QCF+HP ; QCF+LK ; QCF+LP ; demi-cercle avant+HP
+sfa1	0B	Sagat	046A	018C (voix 0.129)	018C	018C:2	3B	identique	DP+HP ; DP+LP
+sfa1	0B	Sagat	046F	018E (cri 0.298)	018F	018F:6	3B	a_corriger	projection HP ; projection HP 2
+sfa2	0D	Sakura	04A9	0340 (voix 0.092)	0340	0340:8	4D 6D	identique	QCF+HP ; QCF+LP ; demi-cercle avant+HP ; super QCFx2+HP ; super QCFx2+LP
+sfa2	0D	Sakura	04AA	0341 (voix 0.097)	0341	0341:4	4D 6D	identique	DP+HP ; DP+LP
+sfa2	0D	Sakura	04AB	0342 (voix 0.159)	0342	0342:6	4D 6D	identique	QCB+HK ; QCB+LK ; demi-cercle arriere+HK
+sfa2	0D	Sakura	04AE	0345 (cri 0.227)	0345	0345:12	4D 6D	identique	projection HP ; projection HP 2
+sfa2	0D	Sakura	04B2	0349 (cri 0.200)	0349	0349:2	4D 6D	identique	projection HK
+sfa2	0D	Sakura	04B3	034A (cri 0.272)	034A	034A:2	4D 6D	identique	projection HK
+sfa2	0D	Sakura	04B7	SFA3	034E	034E:2	4D 6D	identique	Start
+sfa2	0D	Sakura	04AC	0343 (voix 0.141)	0343	0343:2	4D	identique	super QCFx2+HP ; super QCFx2+LP
+sfa2	06	Sodom	03CD	SFA3	01D3	01D3:10	46 66	identique	projection HK ; projection HP ; projection HP 2 ; super QCFx2+HK ; super QCFx2+LK
+sfa2	06	Sodom	03C9	SFA3	01D4	01D4:2	46 66	voix_SFA3	360+HP
+sfa2	06	Sodom	03CE	SFA3	01D4	01D4:8	46 66	identique	QCF+LP ; projection HK ; projection HP ; projection HP 2
+sfa2	06	Sodom	03CF	SFA3	01D5	01D5:4	46 66	identique	QCF+HP ; demi-cercle avant+HP
+sfa1	06	Sodom	03C9	01B8 (voix 0.180)	01B8	01B8:1	36	identique	360+HP
+sfa1	06	Sodom	03CD	01BA (cri 0.317)	01BA	01BA:3	36	identique	projection HK ; projection HP ; projection HP 2
+sfa1	06	Sodom	03CE	SFA3	01BC	01BC:2	36	voix_SFA3	360+HP ; DP+LP
+sfa1	06	Sodom	03CF	01BB (voix 0.136)	01BB	01BB:1	36	identique	DP+HP
+sfa2	10	Zangief	050E	SFA3	0378	0378:10	50 70	identique	DP+HP ; DP+LP ; super 360x2+HP ; super QCFx2+HP ; super QCFx2+LP
+sfa2	10	Zangief	050D	SFA3	0377	0377:6	50 70	identique	360+HP ; projection HP ; projection HP 2
+sfa2	10	Zangief	050F	SFA3	0379	0379:2	50 70	identique	360+HP
