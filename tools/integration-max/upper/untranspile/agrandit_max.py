@@ -80,7 +80,9 @@ LEA_50 = [0x12CEF4, 0x12D134, 0x12D1CC, 0x12D400, 0x12D5E0, 0x12D6C8, 0x12D790, 
           0x3DDFD8, 0x3DE020, 0x3E28F8, 0x3E2940]                                               # rangées de 623e50
 # (palier 3) rel16 de N entrées NON indexées par l'ID, prolongées par des entrées MAX (bloc_rel16(t, N + k, octets)) :
 # en-tête de N + K décalages (décalages d'origine + 2K), corps recopié, blocs MAX à la suite
-REL16_N = {0x68DC72: (789, "textes de fin (2 lignes « [x] texte 0 ») : textes MAX à la suite"),
+REL16_N = {0x683C28: (755, "répliques des dialogues Arcade (US) : répliques MAX 756-883 à la suite (N21)"),
+           0x970F40: (154, "scénarios des dialogues Arcade : scénarios MAX 154-173 à la suite (N21)"),
+           0x68DC72: (789, "textes de fin (2 lignes « [x] texte 0 ») : textes MAX à la suite"),
            # (palier 4) homologue d'Upper de la table arcade $81522 (acteurs de décor de classe $48, index $70, pas de 8 o
            # en $50) : 12 entrées (la 12e nulle) ; décors propres aux fins MAX (ND26_4, ND27_4, ND29_4) à la suite
            0x960180: (12, "décors de fin (classe $48, arcade $81522) : décors MAX à la suite"),
@@ -209,7 +211,7 @@ def construit(data, T, orig):
             nb = struct.pack("<%dH" % len(nh), *nh) + corps + suite
         elif s["kind"] == "rel16n":
             N = s["n"]; h = list(struct.unpack_from("<%dH" % N, data, od(p)))
-            assert min(x for x in h if x) == 2 * N, "rel16 %x : en-tête inattendu" % p      # entrées nulles gardées nulles
+            assert min(x for x in h if x) == 2 * N, "rel16 %x : en-tête inattendu (min %x, 2N %x, h0-3 %s)" % (p, min(x for x in h if x), 2 * N, h[:4])      # entrées nulles gardées nulles
             ajout = BLOCS_REL[p]; N2 = max(ajout) + 1
             assert min(ajout) == N and len(ajout) == N2 - N, "rel16 %x : entrées ajoutées non contiguës" % p
             # (2b18) décalages NÉGATIFS (u16 >= $8000 : données d'une table voisine AVANT celle-ci) : la zone [cible min, p)

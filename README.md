@@ -10,7 +10,10 @@
 1. **Download the cores** from the [releases](../../releases) page: `hsfa-v0.1-cores-<platform>.zip` for Android
    (arm64), ROCKNIX (aarch64: RGB10X, R36S…), Windows (x64) or Linux (x86_64). Each archive holds the 4:3 core
    (`fbneo_hsfa`) and the 16:9 core (`fbneo_hsfaws`), with their licence.
-2. **Build the games from your ISO** (Python 3.8+, about 6 minutes):
+2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Easiest: download `hsfa-v0.1-construction.zip`
+   from the release (or this repository), then run **`construire.sh`** (Linux, macOS, WSL) or double-click
+   **`construire.bat`** (Windows, experimental: untested so far) and give it your ISO. It sets up Python, checks for
+   ffmpeg, and builds the three games into `sortie/archives/`. By hand:
    ```bash
    pip install -r requirements.txt
    python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" --sortie hsfa_out

@@ -11,7 +11,10 @@
 1. **Télécharger les cœurs** depuis la page des [releases](../../releases) : `hsfa-v0.1-cores-<plateforme>.zip` pour
    Android (arm64), ROCKNIX (aarch64 : RGB10X, R36S…), Windows (x64) ou Linux (x86_64). Chaque archive contient le
    cœur 4:3 (`fbneo_hsfa`) et le cœur 16:9 (`fbneo_hsfaws`), avec leur licence.
-2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes) :
+2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes). Le plus simple : télécharger
+   `hsfa-v0.1-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
+   double-cliquer sur **`construire.bat`** (Windows, expérimental : pas encore testé) et lui donner votre ISO. Il prépare
+   Python, regarde si ffmpeg est là et construit les trois jeux dans `sortie/archives/`. À la main :
    ```bash
    pip install -r requirements.txt
    python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" --sortie hsfa_sortie

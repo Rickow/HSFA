@@ -5151,3 +5151,20 @@ Alpha Counter = artefact du banc.
   Sakura déjà dans Upper v151 sans MAX (défaut natif, à traiter côté traducteur). La Sardine's Beach saisit les 4 MAX.
 - **Ouvert** : super d'Ingrid (dégâts, flammes, étincelles), lancer vertical du contre QCB+P (9ᵉ variante de `$503A0`),
   onde et demi-tour + K de Yun (spécial reconnu par la table des manips au lieu du rappel +0x40), Eagle +1 dégât sous Mika.
+
+### 177. Lot MAX 2b24 (en pause) : Yun, Ingrid, Eagle, IA et dialogues des MAX ; release publique v0.1
+
+- **Yun** : l'onde du Kobokushi n'attaque pas sur PSP (tir de sous-type 2 qui annule les projectiles) ; les boîtes des
+  tirs étaient échangées par `tir()` → dégâts 16 / 18 comme la PSP, plus de touche à 128 px. Demi-tour arrière + K
+  (Zenpou-tenshin, saisie par la fiche 47) : le retour de `$1BD5C` est un pointeur (A3), pas D0 → plus de téléportation.
+- **Ingrid** : supers LP 24 / MP 36 / HP 48 comme la PSP (dégâts et feu portés par l'orbe `pshl22`) ; lancer vertical
+  du contre QCB+P par prolongement des tables T1-T3 (sans crochet dans `$503A0`) ; contres exacts (`atemi_disable`).
+- **Eagle sous Mika** : la défense par victime était masquée par `& $1F` (ids ≥ $20) → plus d'écart.
+- **IA des MAX** : l'interpréteur IA de la PSP est celui de l'arcade (version Upper) → scripts PSP convertis au format
+  d'Upper ; la condition 40 (aléa ajouté par la PSP) est ajoutée (crochets `$DEE6`, `$F944`). Dialogues Arcade des MAX
+  ajoutés (tables de répliques et de scénarios agrandies).
+- **Banc** (max32, partiel) : natifs identiques, fins 35/35, croisés 46/64 OK à l'arrêt ; reste croisés, Arcade MAX, zip.
+- **Méthode Capcom** (`docs/rapports/recherche/G-METHODE-CAPCOM-MAX.md`) : noms CvS2 / CFE des fonctions des 4 MAX ;
+  chaque défaut se lit d'abord dans la donnée que désigne la phase Capcom (fiche, tir), avant le code.
+- **Release publique v0.1** : dépôt neuf https://github.com/Rickow/HSFA (SFA3 / Upper / Hyper depuis l'ISO, cœurs,
+  patcheurs PS2) ; ce dépôt-ci reste le dépôt de travail. v0.2 : table du rejeu d'Hyper recréée depuis l'ISO.

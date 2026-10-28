@@ -32,3 +32,4 @@ tmp_hdd/
 
 # Configuration locale (chemins du poste)
 config.env
+sortie/

@@ -20,6 +20,7 @@ SRC = os.path.join(RACINE, "max_trad", "rosette_code")
 MAX_ORG = 0xB80000                    # DONNÉES MAX (lues par le moteur via CONV : hors des plages converties)
 CODE_ORG = 0x3A0000                   # CODE MAX : DANS l'image de 4 Mo (le fork n'exécute que $0-$3FFFFF : carte des
 CODE_RESERVE = 0x3C0000 - CODE_ORG    # opcodes déchiffrés) ; mame_test.py (MAX=1) abaisse d'autant le plafond des données
+IA_ORG = 0xD68000                     # (2b24) scripts IA des MAX
 BLOC_EAGLE = 0xE40000                 # bloc des frames / animations d'Eagle DÉPLACÉ ($D40000 -> $E40000) : la fin des
                                       # données d'Upper ($C80000) grandit (code MAX dans l'image) et chevaucherait $D40000
 PERSOS = json.load(open(os.path.join(ICI, "persos_max.json")))
@@ -286,6 +287,66 @@ CORRECTIFS = [("moteur_max_main.s", "psp_cfb6c:\n        movea.l d0, a0\n",
               # session MAX le 18/10 nuit ; bases_forcees.tsv si la passe ne le prend pas)
               # (TYPE_PROJ_YUN / _INGRID = $2D / $2E : repris dans la source MAX le 17/10 -> plus de correctif)
 
+# (2b24) BOÎTES DES TIRS : tables_explicites.py (session MAX) écrit les 12 octets de boîtes des pas de PROJECTILES
+# (tables BOITES_TIRS : Eagle 0x2A017C, Yun 0x2AA05C, Ingrid 0x2AEFDC) ÉCHANGÉS deux à deux (« ordre image ») alors
+# que les pas des persos (anims_*.s) les gardent dans l'ordre PSP ; la conversion échange ensuite tout -> pour les tirs,
+# l'octet lu comme ATTAQUE par Upper ($5D84 : MOVE.B $8(A0) image = octet logique +9) était l'octet PSP 0 (index de la
+# table $88), pas l'octet PSP 1 (attaque : PSP 0x6FF54 / 0x6C944 lisent l'octet 1 pour les tirs comme pour les persos).
+# Mesuré : onde de Yun (PSP 0x2AA98C = 02 00 : aucune attaque, ne touche jamais) touchait dans Upper (attaque 2).
+# Les octets sont recalculés depuis l'EBOOT EU (pas10 à la VA du label : u16 +8 = n° d'entrée de la table du tir).
+BOITES_TIRS = {"eagle": (0x2A017C, 0x2A0184), "yun": (0x2AA05C, 0x2AA4AC), "ingrid": (0x2AEFDC, 0x2AF024)}
+EBOOT_EU = os.environ.get("SFA3MAX_EBOOT", "<workspace>/sfa3max-psp-widescreen/work/eboot/ULES00235_EBOOT.BIN")
+def boites_tirs(src):
+    import struct as _st
+    mode = os.environ.get("MAX_BOITES_TIRS", "verif")      # (R16) tir() supprimé à la source : vérification seule par défaut
+    if mode == "0": return
+    eb = open(EBOOT_EU, "rb").read()[0x74:]
+    total = 0
+    for nom, (tab, btir) in BOITES_TIRS.items():
+        f = os.path.join(src, "tables_explicites_%s.s" % nom); t = open(f).read()
+        lignes = t.split("\n")
+        # labels de chaque table et pas qui suivent chaque label (jusqu'à fin / reprise / suite déjà émise)
+        tables, cur = {}, None
+        for l in lignes:
+            m = re.match(r"^TAB_([0-9a-f]+):", l)
+            if m: cur = int(m.group(1), 16); tables[cur] = []; continue
+            m = re.match(r"^\s+dc\.l\s+P_([0-9a-f]+)\s*$", l)
+            if m and cur is not None: tables[cur].append(int(m.group(1), 16)); continue
+            if l.startswith("P_"): cur = None
+        pos = {int(l[2:l.index(":")], 16): i for i, l in enumerate(lignes) if re.match(r"^P_[0-9a-f]+:", l)}
+        def suite(p):
+            out, i = [], pos[p]
+            while True:
+                lab = int(lignes[i][2:lignes[i].index(":")], 16); out.append(lab)
+                d1 = int(lignes[i + 1].split(",")[1].strip().lstrip("$"), 16)
+                if d1 & 0xC0: break
+                j = i + 4
+                if j >= len(lignes) or not lignes[j].startswith("P_"): break
+                i = j
+            return out
+        tir, autres = set(), set()
+        for tb, labs in tables.items():
+            for p in labs:
+                (tir if tb == tab else autres).update(suite(p))
+        commun = tir & autres
+        assert not commun, "%s : pas communs tir / perso %s" % (nom, sorted(commun)[:5])
+        n = 0
+        for p in sorted(tir):
+            i = pos[p]
+            assert lignes[i + 3].lstrip().startswith("dc.b"), (nom, hex(p))
+            col = _st.unpack_from("<H", eb, p + 8)[0]
+            e = eb[btir + 12 * col: btir + 12 * col + 12]
+            neuf = "        dc.b    " + ", ".join("$%02x" % x for x in e)
+            ancien = lignes[i + 3].split(";")[0].rstrip()
+            av = bytes(int(x.strip().lstrip("$"), 16) for x in ancien.split("dc.b")[1].split(","))
+            assert av in (e, bytes(e[k ^ 1] for k in range(12))), "%s P_%x : octets inattendus %s / PSP %s" % (nom, p, av.hex(), e.hex())
+            if av != e:
+                assert mode == "1", "%s P_%x : boîtes de tir hors ordre PSP (tir() revenu à la source ?) ; MAX_BOITES_TIRS=1 pour corriger" % (nom, p)
+                lignes[i + 3] = neuf + "   ; (agent_integration_max 2b24) ordre PSP (attaque = octet 1)"; n += 1
+        open(f, "w").write("\n".join(lignes)); total += n
+        print("boîtes des tirs %s : %d pas sur %d (ordre PSP vérifié, %d corrigés)" % (nom, len(tir), len(tir), n))
+
+
 def sources(out):
     """copie des sources MAX (max_trad/rosette_code : copie de la session MAX + gestionnaires d'Eagle) -> out/src ;
     bloc d'Eagle déplacé en BLOC_EAGLE (org des 4 fichiers + valeurs des symboles $D40000-$D7FFFF)"""
@@ -367,6 +428,22 @@ def sources(out):
             if t2 != t: open(os.path.join(src, f), "w").write(t2); n248 += a_ + b_ + c_
         print("champ $248 (niveau de super) : %d accès MAX passés en ×2" % n248)
         assert n248 == 13, "champ $248 : %d accès corrigés (13 attendus)" % n248
+    # (2b24) PSP 0x1D330 (plan / caméra de l'objet, rendu en v0) = arcade $1BD5C, qui rend son pointeur en A3 (image
+    # $1A6CC : MOVEA.L (A3,D0.W),A3) ; les brouillons le lisent en D0 (« movea.l d0, a0 ») -> X de caméra quelconque :
+    # bornage de Yun pendant le demi-tour arrière + K (psp_1bddd4) : X = $0A0C puis poussée à +5 px / tour (« téléportation »,
+    # essais/b34/u_yh, écriture de X en $3AB586). 6 appels (Eagle 1, Maki 2, Ingrid 1, Yun 2). MAX_PLAN_A3=0 : sans.
+    if os.environ.get("MAX_PLAN_A3", "verif") in ("1", "verif"):     # (R16) fait à la source : vérification par défaut
+        n_a3 = 0
+        for f in sorted(os.listdir(src)):
+            if f.startswith("brouillon_") and f.endswith(".s"):
+                t = open(os.path.join(src, f)).read()
+                n_a3 += len(re.findall(r"^        jsr     \$1bd5c\.l\n\s+move\.l\s+a3, ?d0", t, flags=re.M))   # (R16) déjà fait à la source
+                t2, k = re.subn(r"^(        jsr     \$1bd5c\.l)\n(?!\s+move\.l\s+a3, ?d0)", r"\1\n        move.l  a3, d0          ; (agent_integration_max) $1BD5C rend le plan en A3\n", t, flags=re.M)
+                if k:
+                    assert os.environ.get("MAX_PLAN_A3") == "1", "%s : jsr $1bd5c sans move.l a3,d0 (MAX_PLAN_A3=1 pour corriger)" % f
+                    open(os.path.join(src, f), "w").write(t2); n_a3 += k
+        assert n_a3 == 6, "appels $1BD5C : %d (6 attendus)" % n_a3
+        print("plan $1BD5C : %d appels MAX lisent A3" % n_a3)
     # (course de Maki : correctif provisoire $3A -> $3B retiré le 17/10 : traducteur MAX corrigé, lectures en mot)
     # (2b22) test « parent dans son coup » cmpi.l -> cmpi.b : corrigé à la source (traduire.py 17b3221, R3) -> retiré
     # (2b22) fiches d'attaque des PROJECTILES MAX (dc.b = octets +$08..+$1F) : type de recul +9 28-32 -> 40-44 (RECUL_MAX)
@@ -538,6 +615,7 @@ def main():
     out = a.sortie; os.makedirs(os.path.join(out, "conv"), exist_ok=True); os.makedirs(os.path.join(out, "blocs"), exist_ok=True)
     carte = os.path.join(a.ref, "carte_image.txt"); roms = os.path.join(a.ref, "roms_ro5", "sfa3ud")
     src = sources(out)
+    boites_tirs(src)
     # 1. conversion du code
     r = subprocess.run([sys.executable, os.path.join(RACINE, "conv", "convertit_max.py"), "--carte", carte, "--roms", roms,
                         "--sortie", os.path.join(out, "conv"), "--sources", src], capture_output=True, text=True)
@@ -574,7 +652,12 @@ def main():
     for f in code_f: tout += ["; ==== %s" % f, lit(f)]
     tout += [ic, "MAX_CODE_FIN:", "        org     $%X" % MAX_ORG]
     for f in donn_f: tout += ["; ==== %s" % f, lit(f)]
-    tout += [idn]
+    tout += [idn, "MAX_DONNEES_FIN:"]
+    # (2b24, N20) scripts IA des MAX (93 Ko, disposition image) : bloc externe propre $D68000-$D7FFFF (trou libre entre les
+    # petits blocs $D60000-$D66FFF et le bloc de Maki $D80000) : les données $B80000 n'ont plus la place (limite $C00000)
+    fia = MC.CV + "ia/ia_max.s"
+    if os.path.exists(fia) and os.environ.get("MAX_IA", "1") == "1":
+        tout += ["        org     $%X" % IA_ORG, "; ==== ia_max.s (session MAX, N20)", open(fia).read(), "        even", "MAX_IA_FIN:"]
     open(os.path.join(out, "tout.s"), "w").write("\n".join(tout))
     bin_, lst = os.path.join(out, "tout.bin"), os.path.join(out, "tout.lst")
     r = subprocess.run([VASM, "-m68000", "-spaces", "-Fbin", "-quiet", "-maxerrors=500", "-L", lst,
@@ -588,7 +671,12 @@ def main():
             S.setdefault(m.group(1), int(m.group(2), 16))
     B = open(bin_, "rb").read()
     fin_code = S["MAX_CODE_FIN"]; assert fin_code <= 0x3C0000, "code MAX trop grand : fin $%X > $3C0000" % fin_code
-    code = B[:fin_code - CODE_ORG]; donnees = B[MAX_ORG - CODE_ORG:]
+    code = B[:fin_code - CODE_ORG]; donnees = B[MAX_ORG - CODE_ORG:S["MAX_DONNEES_FIN"] - CODE_ORG]
+    if "MAX_IA_FIN" in S:
+        assert S["MAX_IA_FIN"] <= 0xD80000, "IA MAX : fin $%X > $D80000" % S["MAX_IA_FIN"]
+        open(os.path.join(out, "blocs", "ext_%06x.bin" % IA_ORG), "wb").write(B[IA_ORG - CODE_ORG:S["MAX_IA_FIN"] - CODE_ORG])
+        blocs = sorted(set(blocs) | {"%06x" % IA_ORG})
+        print("IA MAX : %d octets en $%X" % (S["MAX_IA_FIN"] - IA_ORG, IA_ORG))
     open(os.path.join(out, "code_%06x.bin" % CODE_ORG), "wb").write(code)
     open(os.path.join(out, "blocs", "ext_%06x.bin" % MAX_ORG), "wb").write(donnees)
     assert MAX_ORG + len(donnees) <= 0xC00000, "les données MAX débordent sur le bloc des animations natives ($C00000)"

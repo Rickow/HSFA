@@ -268,16 +268,66 @@ def donnees(buf, data, end, T, W=None):
     # (2b19) répliques de victoire : T_614E20 (index de réplique propre à l'adversaire, chemin $92(A5) = 0) -> $FF pour
     # un PERDANT MAX (réplique au hasard, comme hors table)
     for p in ACTIFS: pose(0x614E20, int(p, 16), b"\xff")
+    # (2b24, N20) IA des persos MAX (session MAX, converti/ia/ia_max.s) : scripts propres en T0-T3 (0x74C0D8 / 0x74C178 /
+    # 0x74C218 / 0x74C2B8) à la place des copies de Ryu (et de l'ancienne entrée 39 de Maki) ; condition 40 : talon_cond40
+    if os.environ.get("MAX_IA", "1") == "1" and "IA_T0_26" in SYM:
+        nia = 0
+        for p in ACTIFS:
+            for k, t in enumerate((0x74C0D8, 0x74C178, 0x74C218, 0x74C2B8)):
+                lab = "IA_T%d_%s" % (k, p.upper())
+                if lab in SYM: pose(t, int(p, 16), p32(S(lab))); nia += 1
+        log("IA MAX : %d pointeurs de scripts posés (T0-T3)" % nia)
+    # (2b24) défense par VICTIME (moteur de coups $51FC : tables 0x697FE0 / 0x6989E0 / 0x698EE0 [ID défenseur × 32 + ...]) :
+    # l'arcade masque l'ID par $1F (Eagle $26 -> ligne 6 de Sodom) ; la PSP a ses propres lignes pour les 4 MAX (EBOOT EU
+    # 0x2190C8 + 32 × id PSP, 0x697FE0 seule ; mesuré : Eagle prend 1 point de plus sur PSP sous Mika). image() passe les
+    # deux ANDI.W #$1F en #$3F (même coût) ; ici, lignes $20-$2F = ligne (id & $1F) pour tout id non MAX (natifs inchangés),
+    # lignes MAX de 0x697FE0 = PSP, de 0x6989E0 / 0x698EE0 = ligne (id & $1F) comme avant.
+    if os.environ.get("MAX_DEF_VICTIME", "1") == "1":
+        eb = open(os.environ.get("SFA3MAX_EBOOT", "<workspace>/sfa3max-psp-widescreen/work/eboot/ULES00235_EBOOT.BIN"), "rb").read()[0x74:]
+        PSPID = {"26": 0x26, "27": 0x27, "2d": 0x28, "2e": 0x29}
+        assert eb[0x2190C8:0x2190C8 + 32 * 0x26] == ORIG[0x697FE0 - RB:0x697FE0 - RB + 32 * 0x26], "défense par victime : table PSP 0x2190C8 inattendue"
+        for t in (0x697FE0, 0x6989E0, 0x698EE0):
+            for i in range(0x20, 0x30):
+                h = "%02x" % i
+                if t == 0x697FE0 and h in ACTIFS: b_ = eb[0x2190C8 + 32 * PSPID[h]:][:32]
+                else: b_ = ORIG[t - RB + 32 * (i & 0x1F):][:32]
+                pose(t, i, b_)
+        log("défense par victime : lignes $20-$2F des 3 tables (0x697FE0 MAX = PSP 0x2190C8) ; ANDI #$1F -> #$3F en image")
     pose_generique(pose)
+    # (2b24, N21) dialogues Arcade des MAX (converti/dialogues/dialogues_upper_max.s, disposition ARCADE) : répliques ->
+    # 0x683C28 (US, rel16n, n° 756+ ; octets tels quels comme les textes de fin), scénarios -> 0x970F40 (rel16n, n° 154+ ;
+    # mots -> ordre PS2) ; choix 0x61B580 / 0x61B600 : rangées de 48 posées en image() (talon_dialogues)
+    fd = MC.CV + "dialogues/dialogues_upper_max.s"
+    if os.path.exists(fd) and os.environ.get("MAX_DIALOGUES", "1") == "1":
+        import re as _re
+        txt = open(fd).read(); nr = ns = 0
+        for m in _re.finditer(r"^DLG_R(\d+):[^\n]*\n((?:\s+dc\.b[^\n]*\n)+)", txt, _re.M):
+            b = bytearray()
+            for l in m.group(2).strip().split("\n"):
+                for tok in _re.findall(r'"[^"]*"|\$[0-9A-Fa-f]+|\b\d+\b', l.split("dc.b", 1)[1]):
+                    if tok.startswith('"'): b += tok[1:-1].encode("latin-1")
+                    elif tok.startswith("$"): b.append(int(tok[1:], 16))
+                    else: b.append(int(tok))
+            AG.bloc_rel16(0x683C28, int(m.group(1)) - 1, bytes(b)); nr += 1      # n° global 1-based : n -> entrée n - 1 (en-tête de 755)
+        for m in _re.finditer(r"^DLG_S(\d+):[^\n]*\n\s+dc\.w\s+([^\n;]+)", txt, _re.M):
+            ws = [int(x.strip().lstrip("$"), 16) if x.strip().startswith("$") else int(x) for x in m.group(2).split(",")]
+            AG.bloc_rel16(0x970F40, int(m.group(1)), struct.pack("<%dH" % len(ws), *ws)); ns += 1
+        global DLG_CHOIX
+        DLG_CHOIX = [(int(t, 16), (int(c) - 8) // 2, int(i, 16), int(v)) for t, c, i, v in
+                     _re.findall(r"; +0x(61B580|61B600)\[\((\d+) - 8\) / 2 \* 40 \+ \$([0-9A-F]{2})\] = (\d+)", txt)]
+        log("dialogues MAX : %d répliques (0x683C28), %d scénarios (0x970F40), %d choix" % (nr, ns, len(DLG_CHOIX)))
     # (2b22, R8 / R9 de la session MAX : converti/tables_id/tables_id_max.s) valeurs physiques par perso et carte du monde
     ft = MC.CV + "tables_id/tables_id_max.s"
     if os.path.exists(ft):
         tt = open(ft).read(); nb = 0
-        for m in re.finditer(r"; (0x[0-9A-F]+)(?: / 0x[0-9A-F]+)? \(([^)]*)\)\[\$([0-9A-F]{2})\] = ([^(\n]+?|\([^)]*\))\s+\(", tt):
+        # (2b24, R9-bis) genres à parenthèses imbriquées (« octet signé -> table … (moteur de coups) ») ; « ID -> … » = octet ;
+        # lignes « probable » laissées de côté (valeurs MAX = défauts tant qu'elles ne sont pas confirmées)
+        for m in re.finditer(r"; (0x[0-9A-F]+)(?: / 0x[0-9A-F]+)? \((.*?)\)\[\$([0-9A-F]{2})\] = (\([^)]*\)|[^\s(]+)\s+\(([^\n]*)", tt):
             t_, genre, idh, val = int(m.group(1), 16), m.group(2), m.group(3).lower(), m.group(4).strip()
             if idh not in ACTIFS or val.startswith("aucune"): continue
+            if "probable" in m.group(5) and os.environ.get("MAX_TABLES_PROBABLES", "0") != "1": continue
             v = [int(x) for x in val.strip("()").split(",")]
-            if genre.startswith("octet"): b_ = bytes([v[0] & 0xFF])
+            if genre.startswith("octet") or genre.startswith("ID ->"): b_ = bytes([v[0] & 0xFF])
             elif genre.startswith("mot"): b_ = struct.pack("<h", v[0])
             else: b_ = struct.pack("<hh", *v)
             rangs = (0,)
@@ -925,6 +975,81 @@ def reactions_psp(img, a):
     log("réactions PSP 34-36 : coup porté $%x / $%x, gestionnaire $%x (talons $%x / $%x)" % (t1, k2 + 10, t, h35, h36))
     return a + 2 * len(w)
 
+def lancer_vertical(img, a):
+    """(2b24, R14) lancer de la victime : tables T1 ($B0FB0, 80 x 4), T2 ($B10F0, 80 paires), T3 ($B1190, rangées $00-$5F
+    de 16 o) lues par le seul lecteur image $525A2 (LEA abs.l x 3, accès directs : pas de CONV) = PSP 0x5F168, qui a 84 /
+    83 / $63 entrées (EBOOT 0x2140C8 / 0x214218 / 0x2142C0 ; 0-79 identiques). Copies prolongées depuis l'EBOOT, LEA
+    redirigés (même instruction : même coût). La réaction 36 (fiche +$A = 83 : contres d'Ingrid) passe par la variante 4
+    ($54 = 8), qui appelle aussi 0x5F130 sur PSP : la variante $10 n'est pas nécessaire pour le vol droit en l'air."""
+    if os.environ.get("MAX_LANCER_VERTICAL", "1") != "1": return a
+    eb = open(os.environ.get("SFA3MAX_EBOOT", "<workspace>/sfa3max-psp-widescreen/work/eboot/ULES00235_EBOOT.BIN"), "rb").read()[0x74:]
+    sw = lambda b: bytes(b[i ^ 1] for i in range(len(b)))
+    tabs = [(0xB0FB0, 0x2140C8, 4 * 80, 4 * 84), (0xB10F0, 0x214218, 2 * 80, 2 * 0x53), (0xB1190, 0x2142C0, 16 * 0x60, 16 * 0x63)]
+    pat = [0x525AE, 0x525CE, 0x525F0]
+    # lecteur repéré par motif (MOVE.B $29E(A6),D0 ; LSL.W #2,D0 ; ADD.B $25E(A6),D0 ; LEA T1,A0)
+    m = bytes.fromhex("102e029ee548d02e025e41f9")
+    k = img.find(m, 0x1000, 0x3A0000); assert k > 0 and img.find(m, k + 2, 0x3A0000) < 0, "lancer : lecteur T1-T3"
+    leas = [k + 10, k + 10 + 0x20, k + 10 + 0x42]
+    a = (a + 0xF) & ~0xF
+    for (adr, psp, n0, n1), l in zip(tabs, leas):
+        assert struct.unpack_from(">HI", img, l) == (0x41F9, adr), "lancer : LEA $%x attendu en $%x" % (adr, l)
+        assert img[adr:adr + n0] == sw(eb[psp:psp + n0]), "lancer : table $%x différente de la PSP" % adr
+        img[a:a + n1] = sw(eb[psp:psp + n1])
+        struct.pack_into(">I", img, l + 2, a)
+        log("lancer : table $%x (%d o) -> copie prolongée $%x (%d o), LEA $%x" % (adr, n0, a, n1, l))
+        a = (a + n1 + 0xF) & ~0xF
+    return a
+
+def talon_cond40(img, a):
+    """(2b24, N20) condition 40 de l'IA PSP (0x75B94 : op = (A0)+ ; op >= aléa & 31 -> suite, sinon saut de bloc). La table
+    des conditions est EN LIGNE ($DEEC : MOVE.W T(PC,D0.W),D1 ; JMP T(PC,D1.W), T = $DEF4, 39 entrées, gestionnaire 0
+    collé derrière) : aucune place pour l'index $50. Crochet en $DEE6 (MOVE.W (A0)+,D0 ; MOVE.W D0,$20A(A6) = 6 octets ->
+    JMP talon) : talon = ces deux instructions, index $50 -> COND40, sinon JMP $DEEC. Suite = $ED48, saut = $E432
+    (comme la condition 0, image $DF52 / $DF58), aléa = $1A720 (condition 2)."""
+    if os.environ.get("MAX_IA", "1") != "1" or "IA_T0_26" not in SYM: return a
+    k = 0xDEE6
+    assert bytes(img[k:k + 14]) == bytes.fromhex("30183d40020a323b00064efb1002"), "IA : motif de l'interpréteur en $DEE6"
+    assert bytes(img[0xDF52:0xDF54]) == bytes.fromhex("6100") and bytes(img[0xDF78:0xDF7A]) == bytes.fromhex("4eb9")
+    w = [0x3018, 0x3D40, 0x020A, 0x0C40, 0x0050, 0x6706, 0x4EF9, 0x0000, 0xDEEC,
+         0x3218, 0x3F01, 0x4EB9, 0x0001, 0xA720, 0x321F, 0x0240, 0x001F, 0xB240, 0x6506,
+         0x4EF9, 0x0000, 0xED48, 0x4EF9, 0x0000, 0xE432]
+    assert not any(img[a:a + 2 * len(w)])
+    struct.pack_into(">%dH" % len(w), img, a, *w)
+    struct.pack_into(">HI", img, k, 0x4EF9, a)
+    log("IA : condition 40 (index $50) : crochet $%x -> talon $%x" % (k, a))
+    a += 2 * len(w)
+    # saut de bloc ($F944 : ADDQ.B #1,$214(A6) ; MOVE.W (A0)+,D0 ; MOVE.W T(PC,D0.W),D1 ; JSR T(PC,D1.W), T = $F956,
+    # 39 entrées : $F9FC = 1 opérande, $FA00 = aucune) : la condition 40 a 1 opérande -> ADDQ.W #2,A0 puis BRA $FB60
+    k2 = 0xF944
+    assert bytes(img[k2:k2 + 18]) == bytes.fromhex("522e02143018323b000a4ebb10066000020c"), "IA : motif du saut de bloc en $F944"
+    w2 = [0x522E, 0x0214, 0x3018, 0x0C40, 0x0050, 0x6608, 0x5448, 0x4EF9, 0x0000, 0xFB60, 0x4EF9, 0x0000, 0xF94A]
+    assert not any(img[a:a + 2 * len(w2)])
+    struct.pack_into(">%dH" % len(w2), img, a, *w2)
+    struct.pack_into(">HI", img, k2, 0x4EF9, a)
+    log("IA : condition 40 dans le saut de bloc : crochet $%x -> talon $%x" % (k2, a))
+    return a + 2 * len(w2)
+
+DLG_CHOIX = []
+def talon_dialogues(img, a):
+    """(2b24, N21) choix des scénarios d'avant / après combat : octet [($13E - 8) / 2 x 40 + ID] de 0x61B580 (image $B18C0)
+    et 0x61B600 ($B1940), lus en $588A6 / $5957C (×16 + ×4 = ×20 : rangées de 40, Yun / Ingrid hors table). Rangées de 48 :
+    LSL.W #2,D1 -> #3 (×24) aux deux sites, copies de 3 x 48 octets (ordre image : index logique j en j ^ 1), LEA redirigés."""
+    if not DLG_CHOIX or os.environ.get("MAX_DIALOGUES", "1") != "1": return a
+    a = (a + 0xF) & ~0xF
+    for site, tab, ps2 in ((0x588A6, 0xB18C0, 0x61B580), (0x5957C, 0xB1940, 0x61B600)):
+        assert bytes(img[site:site + 18]) == bytes.fromhex("102d013e51403200e948e549d041d02e0103"), "dialogues : motif en $%x" % site
+        assert struct.unpack_from(">HI", img, site + 18) == (0x41F9, tab), "dialogues : LEA $%x attendu" % tab
+        lig = [[img[tab + ((r * 40 + i) ^ 1)] for i in range(40)] + [0xFF] * 8 for r in range(3)]
+        for t_, r_, i_, v_ in DLG_CHOIX:
+            if t_ == ps2: lig[r_][i_] = v_
+        flat = [x for r in lig for x in r]
+        for j, v in enumerate(flat): img[a + (j ^ 1)] = v
+        struct.pack_into(">H", img, site + 10, 0xE749)
+        struct.pack_into(">I", img, site + 20, a)
+        log("dialogues : 0x%X (image $%x) -> rangées de 48 en $%x, ×24 en $%x" % (ps2, tab, a, site))
+        a += 0x90
+    return a
+
 def talon_flammes(img, its, a):
     """(2b18) ancrage des flammes (image $32D5C : MOVE.B $10(A2),D1 ; ANDI.W #$F,D1, A4 = victime) : index du pas
     SANS le masque $F pour une victime MAX (PSP : octet +$11 du pas, jusqu'à 21 ; FLAMMES_xx de 22 couples) -> & $1F ;
@@ -1094,6 +1219,11 @@ def image(img, its, T, W, ext_plus, carte_lignes, code_fin=None):
                 k = img.find(pat, k + 2)
         assert n == attendu, "LEA $%x : %d sites (%d attendus)" % (ancien, n, attendu)
         return n
+    if os.environ.get("MAX_DEF_VICTIME", "1") == "1":       # (2b24) défense par victime : ID non masqué (voir plus haut)
+        for pat in ("102901030240001feb48", "182901030244001feb4c"):
+            b_ = bytes.fromhex(pat); k = img.find(b_, 0x1000, 0x3A0000)
+            assert k > 0 and img.find(b_, k + 2, 0x3A0000) < 0, "défense par victime : motif %s" % pat
+            img[k + 7] = 0x3F
     a_eff = T.addr_to_68k(T_EFFETS) & 0xFFFFFF
     lea_abs(a_eff, S("MAX_T_EFFETS"), 1)
     # (2b20) lecteur PROPRE à Rolento ($4479A : LEA de sa ligne 0x76E9FE, indexée par l'ID de la victime) : la copie
@@ -1167,6 +1297,15 @@ def fin(img):
     z_ = (fin_ + 0xF) & ~0xF
     while any(img[z_:z_ + 0x100]): z_ += 0x10
     fin_ = max(fin_, reactions_psp(img, z_))
+    z_ = (fin_ + 0xF) & ~0xF
+    while any(img[z_:z_ + 0x800]): z_ += 0x10
+    fin_ = max(fin_, lancer_vertical(img, z_))
+    z_ = (fin_ + 0xF) & ~0xF
+    while any(img[z_:z_ + 0x100]): z_ += 0x10
+    fin_ = max(fin_, talon_cond40(img, z_))
+    z_ = (fin_ + 0xF) & ~0xF
+    while any(img[z_:z_ + 0x200]): z_ += 0x10
+    fin_ = max(fin_, talon_dialogues(img, z_))
     if "MAX_PALPROPRE" in SYM:                          # (2b21) palette propre des acteurs de fin (générateur $1AA8)
         # site repéré par l'adresse MIPS (va 0x21A2B4 : MOVE.B #$FF,$D(A4) du générateur $2750E) : image $1B1C en v150
         # motif : MOVE.L $1C(A1),$7C(A4) ; MOVE.B #$FF,$D(A4) (fin du générateur, image $1B16 en v150)

@@ -11,7 +11,7 @@
 ; +0x151 (n° de joueur) -> $101.
 ; Approximations (champs PSP sans homologue établi, tests omis) :
 ;  - 11 : attaquant +0xFF ∈ {0, 1} (type de l'objet lancé : 3 = super chez Ryu) -> Eagle contre aussi ces objets-là ;
-;  - 13 / 14 : attaquant +0x47A == 0 (drapeau posé seulement par Chun-Li et Dhalsim) -> Ingrid les contre toujours.
+;  - (13 / 14 : attaquant +0x47A == 0 : rendu EXACT le 2026-10-27, voir contre_super_protegee.)
 ; Routines de contre appelées (brouillons, convention objet = A6, argument D0) :
 ;  - Eagle 11 : psp_1b2174(défenseur, attaquant) ; Eagle 12 : psp_1b24a8(attaquant, défenseur) ;
 ;  - Ingrid 13 / 14 : rappel +0x8C du gabarit d'Ingrid = psp_1c3ec0(défenseur, attaquant) (table 0x2B1EDC).
@@ -70,6 +70,8 @@ CONTRE_MAX_13:                          ; PSP 0x6D0C8 (Ingrid) : attaque SANS le
         bne.s   .non
         btst    #0, $15(a3)
         bne.s   .non
+        bsr.s   contre_super_protegee
+        bne.s   .non
         bra.s   contre_ingrid
 .non:   jsr     COUP_NORMAL
         rts
@@ -84,8 +86,39 @@ CONTRE_MAX_14:                          ; PSP 0x6D15C (Ingrid) : attaque AVEC le
         bne.s   .non
         btst    #0, $15(a3)
         beq.s   .non
+        bsr.s   contre_super_protegee
+        bne.s   .non
         bra.s   contre_ingrid
 .non:   jsr     COUP_NORMAL
+        rts
+
+; PSP +0x47A de l'attaquant (Capcom : atemi_disable, mécanisme de CFE) : « cette super ne se contre pas ». Ajout de MAX :
+; posé seulement au sous-état 0 de la super 8 de Chun-Li (0xFFED4 = arcade $3D466, $AA = $10, anim $22) et de la super 7
+; de Dhalsim (0x13AC94 = arcade $53316, $AA = $0E, anim $19) — l'arcade a les mêmes routines SANS ce drapeau — et remis à 0
+; à la fin du coup (0x69C3C / 0x6331C / 0x607C4). Équivalent sans champ : attaquant joueur, en état de spécial
+; ($4 = 2, $5 = 0, $6 = $10 ou $0E : les deux entrées arcade de chaque super) avec ($102, $AA) = ($04, $10) ou ($0F, $0E). Sortie : Z = 0 (NE) si protégé ; D0 libre.
+contre_super_protegee:
+        cmpi.b  #2, $4(a6)
+        bne.s   .libre
+        tst.b   $5(a6)
+        bne.s   .libre
+        cmpi.b  #$10, $6(a6)            ; entrée A-isme (après le test de jauge $2ECD8)
+        beq.s   .perso
+        cmpi.b  #$0e, $6(a6)            ; autre entrée de la même super (état $0E), même gestionnaire
+        bne.s   .libre
+.perso: cmpi.b  #$04, $102(a6)          ; Chun-Li, super 8
+        bne.s   .dhalsim
+        cmpi.b  #$10, $aa(a6)
+        beq.s   .protege
+.dhalsim:
+        cmpi.b  #$0f, $102(a6)          ; Dhalsim, super 7
+        bne.s   .libre
+        cmpi.b  #$0e, $aa(a6)
+        beq.s   .protege
+.libre: moveq   #0, d0
+        rts
+.protege:
+        moveq   #1, d0
         rts
 
 contre_ingrid:                          ; rappel +0x8C du gabarit d'Ingrid (défenseur, attaquant)
