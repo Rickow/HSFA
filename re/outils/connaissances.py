@@ -24,7 +24,7 @@ ESPACE_DU_FICHIER = {'sfa3_arcade': 'arcade', 'ro3': 'ro3', 'ro5': 'ro5', 'ro9':
                      'ssf2_arcade': 'ssf2_arcade', 'cps1_arcade': 'cps1_arcade', 'z80_son': 'z80_son'}
 ESPACES = {'arcade', 'ro3', 'ro5', 'ro9', 'ro9a', 'psp', 'img_ro3', 'img_ro5', 'img_ro9', 'img_ro9a',
            'cps2', 'sfa1_arcade', 'sfa2_arcade', 'ssf2_arcade', 'cps1_arcade', 'z80_son',
-           'cvs2_ps2', 'cfe_ps2'}  # exécutables PS2 de Capcom vs. SNK 2 et Capcom Fighting Evolution (noms de symboles)
+           'cvs2_ps2', 'cfe_ps2', 'fichier_ro5', 'fichier_ro9'}  # fichier_roN : décalage dans le fichier du module PS2 ; exécutables PS2 de Capcom vs. SNK 2 et Capcom Fighting Evolution (noms de symboles)
 # synonymes tolérés dans adresse_autres (nom canonique à droite)
 ALIAS = {'upper': 'ro5', 'hyper': 'ro9', 'sfa3': 'arcade', 'max': 'psp', 'image68k_ro5': 'img_ro5',
          'image68k_ro9a': 'img_ro9a'}

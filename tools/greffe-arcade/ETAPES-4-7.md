@@ -1,4 +1,4 @@
-> **État au 2026-10-25 : greffe en pause.** Le balayage sur la base v151 régresse (fins 04 Z/Z2/Z3, 09 Z2, 03 Z). Pistes, dans cet ordre : e9s, puis `D2=0`, puis `TEXTES_LU` / `BLOC_RESTES`. La priorité du projet est aux défauts MAX.
+> **État au 2026-10-28 :** construction ro9a9 (81/85 fins, intermèdes d'Upper), traducteur v153. Restent Sakura, Karin, Evil Ryu, progression de l'IA (HANDOFF §178-§180).
 
 # Greffe Arcade (voie B) — étapes 4 à 7 : fichiers à verser au dépôt
 
@@ -8,7 +8,7 @@ Ce dossier contient ce que la session greffe propose d'ajouter au dépôt. Aucun
 
 | chemin | contenu |
 |---|---|
-| `patches/traducteur/greffe-arcade-v151.patch` | Copie du traducteur de la greffe (`untranspile3`) sous forme de diff contre l'étiquette `v151` de `scripts/untranspile` (`b9e0271`). Sans les variables `HSFA_GREFFE_*` ni `RESERVE_MAX`, le traducteur patché redonne les références v151 (Hyper `39985037`, Upper `0b8ecca2`). |
+| `patches/traducteur/greffe-arcade-v153.patch` | Copie du traducteur de la greffe (`untranspile3`) sous forme de diff contre l'étiquette `v153` de `scripts/untranspile` (`b9e0271`). Sans les variables `HSFA_GREFFE_*` ni `RESERVE_MAX`, le traducteur patché redonne les références v151 (Hyper `39985037`, Upper `0b8ecca2`). |
 | `tools/greffe-arcade/` | Outils modifiés ou ajoutés depuis la dernière publication (mêmes dossiers que dans le dépôt ; les fichiers identiques au dépôt sont omis). |
 | `tools/fbneo-hsfa/paquet_fbneo-ro9a.diff` | Entrée `ro9a` (pilote `sfa3hahsfa`, patchs 0008/0009 du cœur) pour `paquet_fbneo.py` du dépôt (`7b44980`) : `hsfa_trous.bin`, région graphique de 48 Mo, chemins des outils par `HSFA_OUTILS`. |
 

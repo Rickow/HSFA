@@ -1720,6 +1720,9 @@ CMPMM=__import__('os').environ.get('CMPMM','1')!='0'; CMPMM_N=[]
 # Apres le masque, si la valeur tombe dans un bloc 68K etiquete ET dans la plage convertie, on remet l'etiquette.
 # RETAG_FN (pose par mame_test) rend les plages [lo, hi) concernees ; vide (SFA3, Upper) -> rien d'emis.
 RETAG24=__import__('os').environ.get('RETAG24','1')!='0'; RETAG_FN=None; RETAG24_N=set()
+RETAG_BRAW=__import__('os').environ.get('RETAG_BRAW','1')!='0'   # (v152) BRA.W quand le saut vers la fin depasse 127 o
+AIG_BRANCHE=__import__('os').environ.get('AIG_BRANCHE','1')!='0'   # (v153) aiguillage : copie d'index partagee par deux chemins (AIG_BRANCHE=0 : v152)
+_RE_BRANCHE=__import__('re').compile(r'^(B(RA|EQ|NE|CC|CS|PL|MI|GE|GT|LE|LT|HI|LS|VC|VS)\b|DB|JMP\b)')
 def retag_seq(n, plages):
     """MOVE SR,-(SP) ; pour chaque plage : CMPI.L #lo,Dn ; BCS.S suiv ; CMPI.L #hi,Dn ; BCC.S suiv ;
     ORI.L #$01000000,Dn ; BRA.S fin ; suiv: ... ; fin: MOVE (SP)+,CCR (drapeaux du ANDI gardes)"""
@@ -1730,6 +1733,19 @@ def retag_seq(n, plages):
         if not der: b+=[0x6000]
         blocs.append(b)
     ws=[0x40e7]
+    if RETAG_BRAW:                                     # (v152, greffe_arcade) BRA.S -> BRA.W au-dela de 127 o :
+        # avec 9 plages (fenetres de la greffe ro9a), 2*reste depassait 127 et le BRA.S du 1er bloc repartait EN ARRIERE
+        # (disp $BE = -66) au milieu de l'instruction precedente. Sans debordement (SFA3, Upper, Hyper : <= 5 plages),
+        # octets identiques a l'ancienne sequence. RETAG_BRAW=0 : sequence v151.
+        res=[]; reste=0
+        for k in range(len(blocs)-1,-1,-1):
+            b=list(blocs[k])
+            if len(b)==12:
+                if 2*reste<=127: b[11]=0x6000|(2*reste)
+                else: b[11:12]=[0x6000,2*reste+2]
+            b[3]=0x6500|((2*(len(b)-4))&0xff); b[7]=0x6400|((2*(len(b)-8))&0xff)
+            res=b+res; reste+=len(b)
+        return ws+res+[0x44df]
     for k,b in enumerate(blocs):
         reste=sum(len(x) for x in blocs[k+1:])
         b=list(b)
@@ -3337,6 +3353,10 @@ def translate(buf, start, end, verbose=False):
             # (registre d'arrivee de la lecture, ecrase de toute facon) avant la lecture de la table de mots
             for k in range(len(out)-1, max(-1,len(out)-6), -1):
                 mn=out[k][1]
+                # (v153, AIG_BRANCHE) un branchement entre la copie de l'index et ce saut : la copie sert aussi a un autre
+                # chemin (Guy, Hyper 0x121CAC : 2e table T_5B8C90 si le bit 4 de $D2 est pose, indexee par la MEME copie D1)
+                # -> ne pas la remplacer sur place (elle ecraserait l'index de l'autre chemin) : forme sur le meme registre
+                if AIG_BRANCHE and _RE_BRANCHE.match(mn): break
                 if mn.startswith("MOVE.W D") and mn.endswith(",D%d"%ix):
                     src=int(mn.split()[1].split(',')[0][1:])
                     # remplacee SUR PLACE (a l'adresse de la copie), pas deplacee au jalr :

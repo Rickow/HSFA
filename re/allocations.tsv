@@ -362,3 +362,6 @@ hsfa_gfx	$3002A80	$3048FFF	max_portraits_gfx (version étirée, codes $60055-$60
 ext_ro5_max	$D68000	$D7EC7B	scripts IA des persos MAX (ia_max.s, N20)	utilisé	agent_integration_max lot 2b24	93 308 o ; trou libre entre $D66D60 et le bloc de Maki $D80000
 ext_ro5_max	$E80000	$EC4C43	copies agrandies (dont répliques 0x683C28 et scénarios 0x970F40 des dialogues MAX, N21)	utilisé	agent_integration_max lot 2b24	281 668 o (204 096 en 2b23)
 img_ro5	$3B7E70	$3B880F	talons 2b24 : copies T1-T3 du lancer, conditions 40 de l IA, rangées de 48 des dialogues	utilisé	agent_integration_max lot 2b24	dans la réserve du code MAX $3A0000-$3C0000
+ext_ro9a	$C60000	$C83FFF	greffe voie B (greffe_arcade)	utilisé	<workspace>/work/greffe_arcade/GREFFE-ETAPE4.md §3	2e fenêtre du bloc de la greffe (FENETRES) ; remplace la réservation $C30000 ; (28/10, ro9a8_fige) 2e fenêtre déplacée en $C60000 par D3
+image68k_ro9a	$355C00	$39584F	greffe voie B (greffe_arcade)	utilisé	<workspace>/work/greffe_arcade/constructions/e9n/construction.log	(28/10, ro9a8_fige, v151) tables d'animation natives : 67 fichiers, 261 200 o en $355C00 ; zone MAX $3A0000-$3BFFFF vide (RESERVE_MAX)
+image68k_ro9a	$940000	$C5B20F	données d'Hyper (ext_940000) + son	utilisé	<workspace>/work/greffe_arcade/constructions/e9n/construction.log	(28/10, ro9a8_fige, v151) ext_940000 : 3 256 848 o

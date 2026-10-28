@@ -1,6 +1,6 @@
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assemble.py b/assemble.py
---- a/assemble.py	2026-10-25 09:18:38.853022929 +0100
-+++ b/assemble.py	2026-10-25 09:18:38.866650551 +0100
+--- a/assemble.py	2026-10-28 11:08:24.000000000 +0100
++++ b/assemble.py	2026-10-28 11:08:43.624771838 +0100
 @@ -362,10 +362,15 @@
              if k_=='p1': x.nofix='natif'
              else: x.ws=x.ws[:2]+x.ws[7:]
@@ -46,8 +46,8 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assemble.py b/assemble.py
          if it.kind=='jump': it.choice='none' if inside else ('bra_s' if it.ext is not None else 'jmp')
      for _ in range(30):
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assets_natifs.py b/assets_natifs.py
---- a/assets_natifs.py	2026-10-25 09:18:38.853069189 +0100
-+++ b/assets_natifs.py	2026-10-25 09:18:38.866723861 +0100
+--- a/assets_natifs.py	2026-10-28 11:08:24.000000000 +0100
++++ b/assets_natifs.py	2026-10-28 11:08:43.618809295 +0100
 @@ -69,6 +69,22 @@
      FIXES = {547: 0xC84000}              # frames de sprites (en-tete d1ff f2ff.. comme 289/390), 553 352 o :
                                           # 39 656 longs alignes des donnees dans [$C84000, $D0B188)
@@ -89,8 +89,8 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assets_natifs.py b/assets_na
      for i in range(N_FIN):
          g, a = struct.unpack_from('<hh', buf, T_FIN - rtbase + 4*i)
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/extra_regs.py b/extra_regs.py
---- a/extra_regs.py	2026-10-25 09:18:38.854049847 +0100
-+++ b/extra_regs.py	2026-10-25 09:18:38.866777311 +0100
+--- a/extra_regs.py	2026-10-28 11:08:24.000000000 +0100
++++ b/extra_regs.py	2026-10-28 11:08:43.387320877 +0100
 @@ -26,10 +26,11 @@
  
  def analyse(buf, runtime_base=0x1f0000):
@@ -134,8 +134,8 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/extra_regs.py b/extra_regs.p
      used = collections.defaultdict(set); acc = collections.defaultdict(list); usedva = collections.defaultdict(list)
      calls = collections.defaultdict(list); brs = collections.defaultdict(list); l7 = set()
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
---- a/mame_test.py	2026-10-25 09:18:38.854993065 +0100
-+++ b/mame_test.py	2026-10-25 09:18:38.866864611 +0100
+--- a/mame_test.py	2026-10-28 11:08:24.000000000 +0100
++++ b/mame_test.py	2026-10-28 11:08:43.220898449 +0100
 @@ -52,6 +52,10 @@
      buf = open(module_chemin(), "rb").read()
      os.makedirs(W, exist_ok=True)
@@ -225,7 +225,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
          blocs = []
          if P.get('data_ext'): blocs.append((T.DATA_EXT, T.DATA_EXT + (T.DATA_END_RT - T.DATA_SPLIT)))
          if T.SON_X is not None: blocs.append((T.son_y(), T.son_y() + T.SON_LEN))
-+        if T.GRF_FEN is not None and os.environ.get("RETAG_GREFFE", "1") == "1":   # (greffe_arcade) fenetres 68K du bloc
++        if T.GRF_FEN is not None and os.environ.get("RETAG_GREFFE", "0") == "1":   # (greffe_arcade) fenetres 68K du bloc ; defaut 0 (28/10) : les 2 sites greffes (Upper 0x155D28, 0x16F058) ne sont pas reetiquetes dans Upper (fin 03 Z bloquee avec 1)
 +            for lo_, hi_, y_ in T.GRF_FEN: blocs.append((y_, y_ + hi_ - lo_))
          res = []
          for b0, b1 in blocs:
@@ -339,8 +339,8 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
      sw = bytes(b for i in range(0, len(img), 2) for b in (img[i+1], img[i]))
      out = os.path.join(W, P['sortie'], "sfa3ud"); os.makedirs(out, exist_ok=True)
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mips.py b/mips.py
---- a/mips.py	2026-10-25 09:18:38.855389824 +0100
-+++ b/mips.py	2026-10-25 09:18:38.866945000 +0100
+--- a/mips.py	2026-10-28 11:08:24.000000000 +0100
++++ b/mips.py	2026-10-28 11:08:43.192233457 +0100
 @@ -74,6 +74,26 @@
  #                       (200 774 acces). Premier acces 68K 0x22b0c, dernier Z80 0x22ae8.
  Z80_0, Z80_1 = 0x20, 0x22b00
@@ -369,8 +369,8 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mips.py b/mips.py
  def code_bounds(buf):
      import struct
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/profils.py b/profils.py
---- a/profils.py	2026-10-25 09:18:38.855670814 +0100
-+++ b/profils.py	2026-10-25 09:18:38.866992900 +0100
+--- a/profils.py	2026-10-28 11:08:24.000000000 +0100
++++ b/profils.py	2026-10-28 11:08:43.120676448 +0100
 @@ -65,4 +65,4 @@
  NOM = os.environ.get("MODULE", "ro3")
  P = PROFILS[NOM]
@@ -378,8 +378,8 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/profils.py b/profils.py
 -def chemin(): return os.path.join(EXTRACT, P['fichier'])
 +def chemin(): return os.environ.get("MODULE_FICHIER") or os.path.join(EXTRACT, P['fichier'])   # (greffe_arcade) module augmente
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
---- a/translate.py	2026-10-25 09:18:38.857242360 +0100
-+++ b/translate.py	2026-10-25 09:18:38.867210620 +0100
+--- a/translate.py	2026-10-28 11:08:24.000000000 +0100
++++ b/translate.py	2026-10-28 11:08:43.030560462 +0100
 @@ -164,7 +164,8 @@
          from mips import decode, CODE0
          CODE1=_st.unpack_from('<I',buf,12)[0]             # fin du code DU MODULE (pas celle de SFA3)
@@ -441,7 +441,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
              ins=[x for x in _dec(buf,s0,s0+0x20) if not (x.m=='sll' and x.w==0)]
              body=[x for x in ins[:6] if not (x.rs==29 and x.m in ('addiu','sd','ld','sw','lw'))]
              if body and body[0].m=='jr' and body[0].rs==31: E.add(s0)
-@@ -1882,10 +1901,11 @@
+@@ -1898,10 +1917,11 @@
      if _CODE_STARTS.get('id')!=id(buf):
          import struct as _st
          from mips import decode as _dec
@@ -455,7 +455,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
          for _k in range(len(_L)-1):
              _x=_L[_k]
              if _x.m=='addiu' and _x.rs==29 and _x.rt==29 and _x.simm<0 and _L[_k+1].m=='sd' and _L[_k+1].rt==31:
-@@ -4028,6 +4048,7 @@
+@@ -4048,6 +4068,7 @@
      if L[z].m=='lh' and sa==16 and st_.m=='sw': return 'L'
      return None
  
@@ -463,7 +463,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
  def lea_table_index(L, i):
      """L[i] = sw r,An : r = addu(sext16(Dk), T) avec T adresse de DONNEES -> (T, k), sinon None"""
      j=_producer(L, i, L[i].rt, 8)
-@@ -4051,7 +4072,14 @@
+@@ -4071,7 +4092,14 @@
              if not sn or sn[0]!='D': return None
              dk=sn[1]; continue
          return None

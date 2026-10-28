@@ -107,6 +107,13 @@ for _i, _f in enumerate(CONT_GREFFE):
 FIN05_GREFFE = (0x2139C0, 0x21AB10, 0x20FFF0, 0x2100C0, 0x2101E0)   # + 0x21AB10 (creation de l objet $4D) -> Hyper 0x327510 (j)
 if os.environ.get("FIN05_GREFFE", "1") == "1":
     for _f in FIN05_GREFFE: ARCADE[_f] = ('GREFFE',)
+# (2026-10-28) INTERMEDES=1 : scenes d'Upper AVANT le combat (sous-etat 2 du combat, 0x266280 : aiguillage
+# T_61C2C0[$13E(A5)]) : rival, intrusion (perso 19 : BSET #5,$148(J1) + J2 = $15 en 0x266B9C, puis Final Battle). Hyper
+# 0x9B350 a le MEME code mais sa table T_5B5F60 renvoie toutes les entrees sur 0x9B4F0 (rien) -> dans ro9a les bits de
+# progression $148(joueur) ne sont jamais poses, l'adversaire special n'est jamais insere et la fin chargee est la
+# mauvaise ($148 = 2 -> fichier de fin $0A). Copies d'Upper : l'aiguilleur, ses tetes d'automate (tables differentes de
+# celles d'Hyper : 0x2664F0 et 0x266EB0 etaient appariees toutes deux a Hyper 0x9B5C0) et les scenes.
+INTERMEDES = (0x266280, 0x2664F0, 0x266560, 0x266950, 0x266990, 0x266A00, 0x266EB0, 0x266F20, 0x267770, 0x2677B0, 0x267820)
 def force():
     d = dict(F2.FORCE); d.update(ARCADE)
     # (etape 4) choix du decor d'Upper (0x24F020 : T_61BE10, boss $14, rival) au lieu de celui d'Hyper (etape 2) : $174/$100
@@ -114,6 +121,8 @@ def force():
     if os.environ.get("DECOR_UPPER_CHOIX", "1") == "1": d.pop(0x24F020, None)
     if os.environ.get("COMBAT_HYPER", "1") == "1":
         d.update(COMBAT); d.update(COMBAT_SYNTH)
+        if os.environ.get("INTERMEDES", "0") == "1":
+            for _f in INTERMEDES: d[_f] = ('GREFFE',)
         if os.environ.get("VS_UPPER", "1") != "1": d.update(VS_HYPER)
     return d
 FORCE = force()

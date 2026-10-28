@@ -69,13 +69,13 @@ They run in two environments:
 | Hyper (`ro9`) | VERSUS without exceptions (151-match tour); supers of the ZERO / ZERO 2 / ALPHA versions no longer crash; super gauge and TRAINING fixed; ZERO / ZERO 2 / ALPHA music in the zip (Ogg Vorbis); per-version SFA1 / SFA2 voices replayed on a 2nd QSound when the replay table is present (see below) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
 | Menus | OPTION and EXIT return to the mode menu; the PS2 option-screen settings (difficulty, damage, timer, speed, rounds) are core options | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
 | FBNeo HSFA core | Android, Linux, ROCKNIX, Windows; 4:3 and 16:9 (with "Screen format (fill height)" for 4:3 to 16:10 screens); PSP-style transparent shadows; taunt on Select in fights; tested by the user on RG477M and RGB10X | [patches](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
-| Build from the ISO | `hsfa_build.py` builds the three games from your ISO alone; program ROMs identical (md5) to the official v151 archives (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `39985037` with the replay table); zips identical from one build to the next | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
+| Build from the ISO | `hsfa_build.py` builds the three games from your ISO alone; program ROMs identical (md5) to the official v153 archives (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `a5f7fae0` with the replay table); zips identical from one build to the next | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
 
 **Known limits of v0.1**
 
 - **Hyper's per-version voices** need the QSound replay table of SFA1 / SFA2 (`--rejeu-table`, see the
   [build guide](docs/guide/construction-iso.md)). Without it,
-  `hsfa_build.py` keeps Hyper's SFA3 voices for every version (program `e21ebb89` instead of `39985037`) and the zip
+  `hsfa_build.py` keeps Hyper's SFA3 voices for every version (program `f3641d03` instead of `a5f7fae0`) and the zip
   has no replay. Planned for v0.2: the build will regenerate the table from your own ISO.
 - Chun-Li's Kikosho: the big arcs are still invisible (SFA3 drawing issue being tracked).
 - One Hyper music stream (Y27) stays in ADX inside the zip (no quality check yet).

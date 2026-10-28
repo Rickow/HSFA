@@ -4,6 +4,13 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Le 
 version : les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
 
+## v0.1.1 (2026-10-28)
+
+- Traducteur v153 : Guy se figeait au milieu d'une figure de sa Bushin dans Hyper (index d'état écrasé avant un test de
+  version), ce qui pouvait bloquer une manche indéfiniment. SFA3 et Upper sont inchangés ; le programme d'Hyper vaut
+  maintenant `f3641d03` (construit depuis l'ISO, voix de SFA3) ou `a5f7fae0` (avec la table du rejeu).
+- Lanceurs en une étape `construire.sh` / `construire.bat`.
+
 ## [Non publié]
 
 ### Préparation de la release publique v0.1 (2026-10-27)

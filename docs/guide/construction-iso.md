@@ -56,10 +56,10 @@ Chaque étape est **idempotente** : elle est sautée si ses entrées, ses outils
 - Archives du cœur : `archives/sfa3hsfa.zip`, `sfa3uhsfa.zip`, `sfa3hhsfa.zip`. Elles sont déterministes : deux
   constructions donnent les mêmes octets, Ogg compris (`ffmpeg -fflags +bitexact`, contrôle du 2026-10-27).
 
-Ce qui est garanti (rapport BUILD §0, §3, §5 ; contrôle du 2026-10-27 contre les zips officiels v151, ISO « All
+Ce qui est garanti (rapport BUILD §0, §3, §5 ; contrôle du 2026-10-27 contre les zips officiels v151, refait le 2026-10-28 en v153, ISO « All
 Unlocked », `--arcade`) :
 - les ROM programme sont **identiques (md5)** à celles des zips officiels : SFA3 `e0f1cfdc…`, Upper `0b8ecca2…`, Hyper
-  `39985037…` (avec la table du rejeu) ;
+  `a5f7fae0…` (avec la table du rejeu) ;
 - avec `--arcade`, les archives aussi, membre à membre, hors `hsfa_info.txt` (journal de construction) et
   `hsfa_flux.bin` : ses flux Ogg ont le même audio, paquet Vorbis par paquet Vorbis, et seul leur en-tête de
   commentaires change (chaîne d'encodeur sans version depuis `+bitexact`) ;
@@ -74,9 +74,9 @@ Unlocked », `--arcade`) :
   `ids_102.tsv` (versions), `correspondance.tsv` (code SFA3 → commande SFA1 / SFA2).
 - La **table du rejeu** (traces QSound des pilotes SFA1 / SFA2, 3,2 Mo) est une entrée à part : `--rejeu-table` ou
   `tools/son-hyper/rejeu/hsfa_rejeu_table.txt`. La construction y ajoute la section des cris par version. Avec elle,
-  le programme d'Hyper est celui de la v151 (`39985037…`) et le zip contient `hsfa_rejeu.bin` (8 Mo, copiés depuis le
+  le programme d'Hyper est celui de la v153 (`a5f7fae0…`) et le zip contient `hsfa_rejeu.bin` (8 Mo, copiés depuis le
   `X_DATA.BIN` de l'ISO, CRC contrôlés) et `hsfa_rejeu_table.txt`.
-- Sans table, Hyper garde les voix de SFA3 pour toutes ses versions (programme `e21ebb89…`) et le zip n'a pas de
+- Sans table, Hyper garde les voix de SFA3 pour toutes ses versions (programme `f3641d03…`) et le zip n'a pas de
   rejeu : sans table, les codes de rejeu n'auraient pas de son.
 
 Pas encore couvert : le contenu MAX.

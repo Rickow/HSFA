@@ -5168,3 +5168,42 @@ Alpha Counter = artefact du banc.
   chaque défaut se lit d'abord dans la donnée que désigne la phase Capcom (fiche, tir), avant le code.
 - **Release publique v0.1** : dépôt neuf https://github.com/Rickow/HSFA (SFA3 / Upper / Hyper depuis l'ISO, cœurs,
   patcheurs PS2) ; ce dépôt-ci reste le dépôt de travail. v0.2 : table du rejeu d'Hyper recréée depuis l'ISO.
+
+### 178. Greffe Arcade : régressions v151 levées, 77 fins sur 85 (ro9a8)
+
+- **Cause** : défaut latent de v151 dans `retag_seq` (règle RETAG24). Avec les 9 plages des fenêtres de la greffe, le
+  `BRA.S` du premier bloc vaut 190 octets → `$BE` = −66 : saut en arrière au milieu de l'instruction précédente
+  (`$82CCA`), d'où les exceptions des fins 04 et 09. Correctif `RETAG_BRAW` (BRA.W au-delà de 127 octets ; SFA3, Upper
+  et Hyper identiques à l'octet, au plus 5 plages chez eux) ; `RETAG_GREFFE` passe à 0 (03 Z se bloquait).
+- **Fins** : 77/85 (64 en f13), 13 gagnées, aucune perdue. Restent Guy ×4 (comme Upper au banc), Blanka, Karin, Juli,
+  T. Hawk. Evil Ryu ×3 : fin d'Upper à l'image près ; fin d'export et Final Battle perdue non vérifiées.
+- **Fin de Blanka** : la table d'Hyper T_5B5F60 renvoie les 8 intermèdes d'Upper (dialogues avant les rivaux, combats
+  spéciaux) sur une routine vide → `$148` jamais posé, pas de combat contre Balrog, fichier de fin `$0A`. Les
+  intermèdes (`INTERMEDES=1`, `DIALOGUES_ENTIERS=1`) rendent Blanka et Juli, mais changent d'autres fins : à l'essai.
+- **Livrable** : construction figée `ro9a8_fige` (03c `7286058b`), zip `sfa3hahsfa.zip` (CRC `BADEE64F`, 196,9 Mo),
+  essai FBNeo OK (Ken et Vega battent Bison, fin, nouvelle partie).
+
+### 179. Traducteur v152 (RETAG_BRAW) ; greffe : blocage en combat et fin de Sakura
+
+- **v152** = v151 + `RETAG_BRAW` (§178) : SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `39985037` identiques à l'octet, nonreg
+  ro3 et ro5 vertes ; références `work/references/v152`. Patch de la greffe rebasé : `patches/traducteur/greffe-arcade-v152.patch`.
+- **Greffe, défaut le plus grave connu** : selon le hasard de la partie, le combat reste bloqué en état 8 / sous-état 4
+  après une manche (Upper 0x26BD50 / 0x26C140, Hyper 0x9E920 / 0x9ED70), aussi dans ro9a8.
+- **Fin de Sakura (0D)** : dans ro9a8, elle sortait d'un script faussé (le long 0x92103C, `$2700 $0078`, relogé comme un
+  pointeur) : comptée comme cassée. Une fois corrigée, la fin suit Upper puis plante sur un acteur dessiné par la chaîne
+  d'Hyper (objet de type 9 : Hyper 0x34930 au lieu d'Upper 0x12F400).
+- **Intermèdes d'Upper** (décision utilisateur : à viser) : Blanka et Juli aboutissent ; Sakura, R.Mika et Cody à reprendre.
+
+### 180. v153 (AIG_BRANCHE) : gel de Guy en Bushin, défaut de traduction d'Hyper ; greffe ro9a9 81/85
+
+- **Gel de Guy** : dans son gestionnaire (Hyper 0x121C24), deux tables d'états partagent la même copie de l'index ; la
+  seconde ne sert que si le bit 4 de `$D2` est posé. Le traducteur remplaçait la copie par la lecture de la première
+  table AVANT le test : sur l'autre chemin, saut hors table (`$342D2`), Guy figé, `$10A` jamais posé, fin de manche
+  bloquée (état 8 / 4). Le MIPS d'origine relit l'index sur chaque chemin : Hyper 2006 n'a pas le défaut.
+- **Preuve** (idée de l'utilisateur) : VERSUS d'Hyper seul en VS COM des deux côtés (`$FF4310` = `$FF4311` = 1), Guy Z3
+  contre 8 adversaires, 150 000 images : v152 se fige dès la 1re manche, v153 joue 44 manches sans gel.
+- **v153** = v152 + `AIG_BRANCHE` (si un branchement sépare la copie de l'index du saut, la copie n'est plus remplacée) :
+  SFA3 `e0f1cfdc`, Upper `0b8ecca2` identiques ; Hyper `a5f7fae0` (un seul site) ; `AIG_BRANCHE=0` redonne 39985037.
+  **Le défaut est dans la release publique v0.1** (Hyper) → v0.1.1.
+- **Greffe ro9a9** : 81/85 (Guy ×4, Blanka, Juli, T. Hawk gagnés ; intermèdes d'Upper adoptés ; textes de fin entiers,
+  la banque 0x68DC72 était coupée). Restent Sakura ×3 et Karin. Zip CRC `463D0456`.

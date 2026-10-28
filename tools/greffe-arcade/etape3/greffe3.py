@@ -641,6 +641,7 @@ def main():
         struct.pack_into('<I', blob, o7, g.synth_place['etat7'] + BASE)
         for i_, h_ in enumerate(H_COMBAT):
             v_ = struct.unpack_from('<I', blob, e7 - GRF_X - 28 + 4 * i_)[0]
+            if i_ == 1 and os.environ.get("INTERMEDES", "0") == "1": continue   # (28/10) sous-etat 2 = copie d'Upper (force3)
             assert v_ == h_ + BASE, "T_61C2A0[%d] = %x (attendu Hyper %x)" % (i_, v_, h_ + BASE)
         # sous-table de la scene 4/4 d'Upper copiee : entree 1 (ecran VS + decor d'Hyper) -> talon vs_decor
         e1 = exec_donnee(g, U_T_VS + 4); o1 = e1 - GRF_X

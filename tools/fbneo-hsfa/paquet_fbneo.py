@@ -103,12 +103,12 @@ JEUX = {
                   ext=(0x940000, 0x5C0000),            # taille fixe dans d_cps2.cpp (Sfa3hhsfaRomDesc)
                   flux="codes_hyper", rejeu=True),
     # (agent_coeur_banques, patch 0008 du coeur) ro9a = Hyper + mode Arcade d'Upper greffe (voie B,
-    # greffe_arcade/GREFFE-ETAPE4.md), construction figee ro9a7c_fige (etape 7 de la greffe, 64/85 fins, entree ARCADE du menu) : memes reglages qu'Hyper (lance_ro9a.sh :
+    # greffe_arcade/GREFFE-ETAPE4.md), construction figee ro9a8_fige (rebase v151, 77/85 fins, entree ARCADE du menu) : memes reglages qu'Hyper (lance_ro9a.sh :
     # BANC_COMMUN=545, HSFA_PLANS=300,340,3a0, banques_hx de la construction), region graphique de 48 Mo : plans d'Upper
     # (mame_ro5/hsfa_plans.bin) en +$2000000 = $4000000 (HSFA_GFX=...,hsfa_plans.bin@4000000 du banc) ; pilote sfa3hahsfa
-    "ro9a": dict(nom="sfa3hahsfa", dossier="greffe_arcade/constructions/ro9a7c_fige/b9",
-                 roms="greffe_arcade/constructions/ro9a7c_fige/b9/roms_ro9/sfa3ud",
-                 banques="greffe_arcade/constructions/ro9a7c_fige/banques_hx",
+    "ro9a": dict(nom="sfa3hahsfa", dossier="greffe_arcade/constructions/ro9a8_fige/b9",
+                 roms="greffe_arcade/constructions/ro9a8_fige/b9/roms_ro9/sfa3ud",
+                 banques="greffe_arcade/constructions/ro9a8_fige/banques_hx",
                  son=("agent_son_ro5/hybride/roms_hybride", ["hx3.01", "hx3.02", "hx3.11m", "hx3.12m", "hx3.13m", "hx3.14m"]),
                  config={"commun": "545", "ptr_anim": "FF40BC", "gfx_intro": "456", "plans": "300,340,3a0"},
                  gfx=[("mame_ro9/hsfa_gfx.bin", 0x0000000), ("mame_ro9/hsfa_plans.bin", 0x1000000),

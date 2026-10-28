@@ -71,13 +71,13 @@ Ils tournent dans deux environnements :
 | Hyper (`ro9`) | VERSUS sans exception (tournée de 151 combats) ; les supers des versions ZERO / ZERO 2 / ALPHA ne plantent plus ; jauge de super et TRAINING corrigés ; musiques ZERO / ZERO 2 / ALPHA dans le zip (Ogg Vorbis) ; voix SFA1 / SFA2 par version, rejouées sur un 2ᵉ QSound, quand la table du rejeu est là (voir plus bas) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
 | Menus | OPTION et EXIT ramènent au menu des modes ; les réglages de l'écran d'options PS2 (difficulté, dégâts, chrono, vitesse, manches) sont des options du cœur | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
 | Cœur FBNeo HSFA | Android, Linux, ROCKNIX, Windows ; 4:3 et 16:9 (avec « Screen format (fill height) » pour les écrans de 4:3 à 16:10) ; ombres transparentes comme sur PSP ; provocation sur Select en combat ; essayé par l'utilisateur sur RG477M et RGB10X | [patchs](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
-| Construction depuis l'ISO | `hsfa_build.py` construit les trois jeux depuis votre ISO seule ; ROM programme identiques (md5) aux archives officielles v151 (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `39985037` avec la table du rejeu) ; zips identiques d'une construction à l'autre | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
+| Construction depuis l'ISO | `hsfa_build.py` construit les trois jeux depuis votre ISO seule ; ROM programme identiques (md5) aux archives officielles v153 (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `a5f7fae0` avec la table du rejeu) ; zips identiques d'une construction à l'autre | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
 
 **Limites connues de la v0.1**
 
 - **Voix d'Hyper par version** : il faut la table du rejeu QSound de SFA1 / SFA2 (`--rejeu-table`, voir le
-  [guide de construction](docs/guide/construction-iso.md)). Sans elle, `hsfa_build.py` garde les voix de SFA3 pour toutes les versions d'Hyper (programme `e21ebb89` au lieu de
-  `39985037`) et le zip n'a pas de rejeu. Prévu en v0.2 : la construction recréera la table depuis votre ISO.
+  [guide de construction](docs/guide/construction-iso.md)). Sans elle, `hsfa_build.py` garde les voix de SFA3 pour toutes les versions d'Hyper (programme `f3641d03` au lieu de
+  `a5f7fae0`) et le zip n'a pas de rejeu. Prévu en v0.2 : la construction recréera la table depuis votre ISO.
 - Kikosho de Chun-Li : les grands arcs restent invisibles (défaut de dessin de SFA3, en cours).
 - Un flux musique d'Hyper (Y27) reste en ADX dans le zip (pas encore de contrôle de qualité).
 - Le patcheur PS2 16:9 n'est validé que sur Upper et Hyper ; quelques écrans hors combat sont décalés.

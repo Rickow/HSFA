@@ -198,6 +198,24 @@ class Fermeture:
                         while k_ + 1 < len(lus_) and lus_[k_ + 1] - e_ <= 8: k_ += 1; e_ = lus_[k_]
                         fin = max(fin, min(e_ + 0x10, lim))
                 if fin: self.tx_ext.append((base, fin))
+        # (2026-10-28) DIALOGUES_ENTIERS=1 : banques des repliques d'Arcade (T_61B570 : base + decalage 16 bits, par langue ;
+        # 0x683C28 en langue 2) copiees EN ENTIER : les intermedes (INTERMEDES=1) lisent des repliques qu'aucun journal
+        # d'Upper n'a lues (05 contre Ken : texte a 0x683C28 + $A0xx, copie arretee a 0x685C28 -> texte sans fin, objet
+        # d'Hyper voisin ecrase en $FFD400)
+        if os.environ.get("DIALOGUES_ENTIERS", "0") == "1":
+            TD = sorted(set(x for x in struct.unpack('<4I', octets(0x61B570, 16)) if source(x) == 'module'))
+            for base in TD:
+                w0 = struct.unpack('<H', octets(base, 2))[0]
+                if w0 & 1 or not 0x10 <= w0 <= 0x1000: continue
+                fin = 0
+                for x_ in struct.unpack('<%dH' % (w0 // 2), octets(base, w0)):
+                    t_ = base + x_
+                    if not (x_ and base + w0 <= t_ < fin_source(base)): continue
+                    b_ = octets(t_, min(0x400, fin_source(base) - t_)); z_ = b_.find(b'\x00')
+                    fin = max(fin, t_ + (z_ + 1 if z_ >= 0 else len(b_)))
+                if fin:
+                    old_ = [e for e in self.tx_ext if e[0] == base]
+                    self.tx_ext = [e for e in self.tx_ext if e[0] != base] + [(base, max([fin] + [e[1] for e in old_]))]
         todo = sorted(depart); vus = set()
         Fl = sorted(front)
         while todo:
