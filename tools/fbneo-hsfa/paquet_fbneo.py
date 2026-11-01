@@ -338,6 +338,12 @@ def membres_flux(J):
     if not J.get("flux") and os.environ.get("HSFA_FLUX_ZERO3") != "1": return None
     y = os.environ.get("HSFA_YDATA")
     if not y:
+        # (musique_max, 01/11) en HSFA_STRICT, une archive dont le jeu demande des flux (Upper, Upper MAX : musiques
+        # 0030-0036 de Guile, Fei-Long, Dee Jay, T. Hawk... absentes du Z80) ne se construit plus sans eux : combats
+        # muets sinon (lots MAX 2b-2b29). HSFA_SANS_FLUX=1 (teste plus haut) garde l'ancien comportement.
+        if STRICT and J.get("flux"):
+            raise SystemExit("HSFA_STRICT : HSFA_YDATA manquant, archive %s sans ses flux musicaux "
+                             "(donner l'ISO ou Y_DATA.BIN, ou HSFA_SANS_FLUX=1 pour s'en passer)" % J["nom"])
         print("  (pas de HSFA_YDATA : archive sans flux ADX)")
         return None
     codes = codes_flux(J)

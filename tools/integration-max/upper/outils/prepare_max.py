@@ -69,6 +69,34 @@ def palpropre():
             "        bcs.s   .b", "        subq.b  #5, d0", ".b:     cmp.b   $7e(a4), d0", "        rts",
             ".n:     moveq   #1, d0", "        rts"]
 
+# (2b27, R22) RÉMANENCES D'INGRID : ses 3 copies (classe $03, créées par le natif $804DA via psp_cf560, écrite à la main par
+# la session MAX) portent les palettes ABSOLUES REM_CLAIR (10, haut / 11, jambes) et REM_FONCE (13 / 14). Ces 4 palettes OBJ
+# ne sont employées par aucun objet en combat (relevé essais/b35/pal) : MAX_REM_PAL les recopie dans le tampon de palettes
+# du combat ($90C000 : la base de la passe de palettes en combat, relevé essais/b37/pal) à CHAQUE création des copies (le
+# fondu de début de manche et le chargement des palettes de manche, $5490A, y repassent). Teintes = PSP 4-7 du groupe
+# d'Ingrid, identiques dans les 6 couleurs (converti/pl29/palettes_cps2_remanence.bin, luminosité F). Appelé seulement depuis
+# la branche Ingrid de psp_cf560 : aucun chemin natif touché. MAX_REM_PAL=0 : sans (copies sur OBJ 10-14 telles quelles).
+REM_PAL_MD5 = "307d78efeb3fce8eb9cb4c328b27f155"
+def rem_pal():
+    return ["MAX_REM_PAL:", "        movem.l d0/a0-a1, -(sp)", "        lea     MAX_REM_PALETTES, a0",
+            "        lea     $90c000+32*REM_CLAIR, a1", "        moveq   #15, d0",
+            ".c1:    move.l  (a0)+, (a1)+", "        dbra    d0, .c1",
+            "        lea     $90c000+32*REM_FONCE, a1", "        moveq   #15, d0",
+            ".c2:    move.l  (a0)+, (a1)+", "        dbra    d0, .c2",
+            "        movem.l (sp)+, d0/a0-a1", "        rts"]
+
+def rem_pal_donnees():
+    import hashlib, struct
+    d = open(MC.CV + "pl29/palettes_cps2_remanence.bin", "rb").read()
+    assert len(d) == 128 and hashlib.md5(d).hexdigest() == REM_PAL_MD5, "palettes_cps2_remanence.bin : md5 inattendu (R22)"
+    L = ["        even", "; (2b27, R22) palettes des rémanences d'Ingrid : OBJ REM_CLAIR, +1, REM_FONCE, +1 (mots CPS2, luminosité F)",
+         "MAX_REM_PALETTES:"]
+    for k, slot in enumerate(("REM_CLAIR", "REM_CLAIR+1", "REM_FONCE", "REM_FONCE+1")):
+        w = list(struct.unpack_from("<16H", d, 32 * k))
+        w[15] = 0xF000                                 # stylo 15 transparent ; n° de palette posé ci-dessous comme les natives
+        L.append("        dc.w    " + ", ".join("$%04X" % x for x in w[:15]) + ", $F000+" + slot)
+    return L
+
 def integration():
     """source vasm (disposition IMAGE, non convertie) des points d'entrée et des données propres à l'intégration"""
     D = ["; ==== integration_max.s, DONNÉES (agent_integration_max, prepare_max.py) — disposition IMAGE, NON convertie"]
@@ -141,6 +169,7 @@ def integration():
     import integre_max as _IM
     L += flammes_aj()
     if os.environ.get("MAX_PALPROPRE", "1") == "1": L += palpropre()
+    if os.environ.get("MAX_REM_PAL", "1") == "1": L += rem_pal(); D += rem_pal_donnees()
     L.append("; enveloppes des classes d'effets MAX (table MAX_T_EFFETS)")
     for pid_, cl_ in _IM.CLASSES.items():
         for c_, r_ in sorted(cl_.items()):
@@ -389,6 +418,16 @@ def sources(out):
                             "        bsr     psp_raz_alloc       ; champs remis à zéro par l'allocateur PSP 0x1EFE4\n"
                             "        move.w  $1a(a6), $1a(a4)    ; (agent_integration_max) banque de l'objet créé = celle du créateur\n")
             if t2 != t: open(os.path.join(src, f), "w").write(t2)
+    # (2b28 -> 2b29) TEST D'ATTERRISSAGE : PSP 0x5E004 rend v0 = posé, arcade $2AA08 rend la RETENUE (D0 jamais nul).
+    # Corrigé localement en 2b28 (MAX_ATTERRIT, 8 sites « jsr $2aa08 ; tst.w d0 » -> « scs d0 ; andi.w #1,d0 ») ; corrigé
+    # À LA SOURCE en 2b29 (R29, dépôt MAX dd6f722 : traduire.py RET_CS -> « scs d0 ; andi.l #1,d0 » ; gestionnaires_main.s
+    # « bcc.s .fin »). Correctif local RETIRÉ ; garde-fou : plus aucun « jsr $2aa08 » suivi directement de « tst.w d0 ».
+    import re as _rea
+    for f in sorted(os.listdir(src)):
+        if not f.endswith(".s"): continue
+        t = open(os.path.join(src, f)).read()
+        k_ = len(_rea.findall(r"^\s+jsr\s+(?:\$2aa08\.l|\(UP_2AA08\)\.l)[^\n]*\n\s+tst\.w\s+d0", t, flags=_rea.M))
+        assert k_ == 0, "atterrissage : %s a encore %d « jsr $2aa08 ; tst.w d0 » (source MAX antérieure à R29 ?)" % (f, k_)
     # PROVISOIRE (palier 3, en attente de la session MAX) : acteurs de fin, « move.b #n,$9(a4) » avec n impair (1, 3) ->
     # Upper/arcade lit $9 comme index de table de saut ($19EDC) : erreur d'adresse (fin d'Eagle, image 45065). Valeur
     # PSP probablement un rang (arcade = 2 × rang, cf. « champ ×2 ») : n -> 2n
@@ -469,6 +508,20 @@ def sources(out):
         f = os.path.join(src, fc); t = open(f).read()
         assert t.count(av) == 1, "correctif introuvable dans %s : %r" % (fc, av)
         open(f, "w").write(t.replace(av, ap))
+    # (2b27, R22) psp_cf560 ÉCRITE À LA MAIN (session MAX, 5259a0e) : 1) le drapeau « 3 copies créées » $2A0 (octet arcade)
+    # n'est pas typé pour la conversion -> laissé à $2A0 alors que $804DA (image $32678) écrit « MOVE.B #8,$2A1(A6) » : la
+    # branche .copies n'était jamais prise -> écrit ici en disposition IMAGE ($2A1, comme le $103 de psp_78408) ; 2) appel de
+    # MAX_REM_PAL (palettes OBJ REM_CLAIR / REM_FONCE, integration_max.s) APRÈS les écritures des copies (A3 / A2 restent
+    # typés « objet » pour la passe : bases_forcees.tsv psp_cf560.copies). MAX_REM_PAL=0 : sans l'appel.
+    f = os.path.join(src, "moteur_max_main.s"); t = open(f).read()
+    a_ = t.index("psp_cf560:"); b_ = t.index(".suite:", a_)
+    seg = t[a_:b_]
+    assert seg.count("$2a0(a6)") == 4 and seg.count("        bra.s   .suite\n.natif:") == 1, "psp_cf560 (R22) inattendue"
+    seg = seg.replace("$2a0(a6)", "$2a1(a6)")
+    if os.environ.get("MAX_REM_PAL", "1") == "1":
+        seg = seg.replace("        bra.s   .suite\n.natif:", "        jsr     MAX_REM_PAL           ; (agent_integration_max 2b27) palettes OBJ 10/11/13/14\n"
+                          "        bra.s   .suite\n.natif:")
+    open(f, "w").write(t[:a_] + seg + t[b_:])
     # octet $0D des pas d'animation (arcade : type de réaction quand le perso est touché) : Upper n'accepte que 0-9 et
     # $FF (aiguillage EN LIGNE de 6 entrées pour 4-9, image $40D4) ; Eagle a des pas à $0B/$0C, Ingrid à $0D/$0E
     # (valeurs PSP propres) -> saut hors table, exception (Arcade Eagle, image 73305). Ramenés à 0 (réaction normale)

@@ -50,7 +50,7 @@ def classify(items, buf):
             # sans 'MOVE.W T(PC,Dn),Dm' devant : forme d'origine JSR/JMP T(PC,Dn) sur une table de BRA.S
             # (HANDOFF §75) la lecture peut preceder de quelques instructions (ex. mips 0x7baac :
             # MOVE.W T(PC,D0),D1 ; MOVE.B 1(A0),D0 ; ADDQ.W #2,A0 ; JSR T(PC,D1)) : on remonte jusqu'a 4
-            lu=any(o.mn.startswith('MOVE.W T_%06x'%it.table) for o in out[-4:])
+            lu=any(o.mn.startswith('MOVE.W T_%06x'%it.table) for o in out[-4:]) or aigd1(it)   # (AIG_D1) lecture au saut
             if not lu: BRAS_TABLES.add(it.table)
         elif (w&0xfff8)==0x51c8 and len(ws)==2 and m:
             it.kind='bcc'; it.cond=None; it.tgt=int(m.group(1),16); it.choice='dbcc'   # DBRA
@@ -137,8 +137,32 @@ def dtab_fix(it):
     if (it.ws[0] & 0xf1c0)!=0x2040 or it.nofix: return None     # nofix : table de code relogee (etape B)
     return T.DPTR_FIX.get((it.ws[0]>>9)&7)
 
+# (sakura_hadoken, AIG_D1) aiguillage « [index PS2] » : la table est lue AU SAUT sans modifier le registre d'index Dm
+# (sur PS2, Dm.W = index a l'entree du gestionnaire) :
+#   [BSR.S *+4 ; BRA.S suite]                          (forme JSR seulement : retour vers 'suite')
+#   MOVE.W Dm,-(SP) ; MOVE.W T(PC,Dm.W),Dm ; PEA T(PC,Dm.W) ; MOVE.W 4(SP),Dm ; MOVE.L (SP),2(SP) ; ADDQ.L #2,SP ; RTS
+# suite: [BRA par-dessus la table si 'skip'] ; la table suit (JMP) ou est hebergee plus loin (JSR), comme avant.
+AIGD1_SEQ=22
+def aigd1(it): return it.kind=='switch' and '[index PS2]' in it.mn
+def aigd1_ext(it):
+    """positions (relatives a it.off) des deux mots d'extension PC+index de la sequence AIG_D1"""
+    p=0 if it.ws[0]==0x4efb else 4
+    return (p+4, p+8)
+def aigd1_words(it, tb):
+    m=(it.ws[1]>>12)&7; o=it.off; e1,e2=aigd1_ext(it)
+    d1=tb-(o+e1); d2=tb-(o+e2)
+    ok=-128<=d1<=127 and -128<=d2<=127
+    w=[] if it.ws[0]==0x4efb else [0x6102, 0x6000|AIGD1_SEQ]
+    w+=[0x3f00|m, 0x303b|(m<<9), (m<<12)|(d1&0xff), 0x487b, (m<<12)|(d2&0xff), 0x302f|(m<<9), 0x0004,
+        0x2f57, 0x0002, 0x548f, 0x4e75]
+    return w, ok
+
 def base_size(it):
     k=it.kind
+    if k=='switch' and aigd1(it):
+        n=AIGD1_SEQ+(0 if it.ws[0]==0x4efb else 4)
+        if it.choice=='skip': n+=(2 if table_size(it.table)<=126 else 4)
+        return n
     if k=='bcc':
         if it.choice=='far': return 6 if it.cond==0 else 8     # (HANDOFF §70) B!cc.S +6 ; JMP abs.L
         return 4 if it.choice=='dbcc' else (2 if it.choice=='short' else 4)
@@ -403,7 +427,8 @@ def assemble(buf, start, end, base=0, external=None, native=()):
                 h=it.host if it.host is not None else it
                 tb=h.off+base_size(h)
                 ref=[x for x in its[max(0,n_-3):n_] if x.kind=='tblref' and x.table==it.table]
-                far= not (-128<=tb-(it.off+2)<=127) or any(not (-128<=tb-(x.off+2)<=127) for x in ref)
+                exts=[it.off+e for e in aigd1_ext(it)] if aigd1(it) else [it.off+2]
+                far= any(not (-128<=tb-e<=127) for e in exts) or any(not (-128<=tb-(x.off+2)<=127) for x in ref)
                 if far:
                     it.host.hosted=None; it.host=it; it.hosted=it.table; it.choice='skip'; changed=True
         # (HANDOFF §93) entree d'aiguillage a plus de 32 Ko de sa table (routine commune, ex. mips 0x3CE600 depuis
@@ -486,6 +511,15 @@ def assemble(buf, start, end, base=0, external=None, native=()):
         return h.off+base_size(h) if h is not None else table_start(it.table)
     for n_,it in enumerate(its):
         k=it.kind; o=it.off
+        if k=='switch' and aigd1(it):
+            tb=switch_copy(n_,it)
+            w_,ok=aigd1_words(it, tb if tb is not None else o)
+            if tb is None or not ok: unresolved+=1
+            words+=w_
+            if it.choice=='skip':
+                ts=table_size(it.table)
+                words+= [0x6000|ts] if ts<=126 else [0x6000, ts+2]
+            put_table(it); continue
         if k in ('switch','tblref'):
             tb=switch_copy(n_,it); d=(tb-(o+2)) if tb is not None else None
             if d is None or not (-128<=d<=127): unresolved+=1; d=0

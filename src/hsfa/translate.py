@@ -1722,6 +1722,117 @@ CMPMM=__import__('os').environ.get('CMPMM','1')!='0'; CMPMM_N=[]
 RETAG24=__import__('os').environ.get('RETAG24','1')!='0'; RETAG_FN=None; RETAG24_N=set()
 RETAG_BRAW=__import__('os').environ.get('RETAG_BRAW','1')!='0'   # (v152) BRA.W quand le saut vers la fin depasse 127 o
 AIG_BRANCHE=__import__('os').environ.get('AIG_BRANCHE','1')!='0'   # (v153) aiguillage : copie d'index partagee par deux chemins (AIG_BRANCHE=0 : v152)
+# (sakura_hadoken, AIG_D1) aiguillage d'etat Capcom 'MOVE.W T(PC,Ds.W),Dm ; JMP/JSR T(PC,Dm.W)' : sur PS2 le recompilateur a
+# remplace la lecture de table par la COPIE Dm.W = Ds.W et saute par SA table de pointeurs : a l'entree du gestionnaire,
+# Dm.W = INDEX (et non le decalage de table). La forme d'origine retablie laissait Dm = decalage de NOTRE table : un
+# gestionnaire qui lit Dm sans l'ecrire divergeait (Hyper, Sakura ZERO 3 S-ISM rouge, 68K $037B4A / mips 0x181F0C :
+# D0 = $12 + D1 -> anim $3E au lieu de $14). AIG_D1=1 : la copie est GARDEE et le saut lit la table sans toucher Dm
+# (sauvegarde par la pile, sequence de l'assembleur, marque « [index PS2] »). AIG_D1=0 : v153 a l'octet pres.
+# (v154) actif par defaut, limite aux sites AIG_D1_SEUL (defaut 181d20,2ef020 : Hyper seulement, voir plus bas).
+AIG_D1=__import__('os').environ.get('AIG_D1','1')!='0'; AIG_D1_N=[0,0,0]   # [convertis, formes laissees, sans lecteur]
+# AIG_D1_TOUS=1 : tous les aiguillages de forme Capcom (sinon : seulement ceux dont un gestionnaire LIT l'index avant de
+# l'ecrire, d'apres le MIPS : code plus court, la greffe ro9a n'a pas la place de convertir les 1 643 sites)
+AIG_D1_TOUS=__import__('os').environ.get('AIG_D1_TOUS','0')!='0'; AIG_D1_SITES=[]
+# AIG_D1_SEUL : sites retenus (adresse MIPS fichier du jalr, en hexadecimal, separes par des virgules). (v154) defaut
+# '181d20,2ef020' (Hyper : Hadoken de Sakura ZERO 3 en S-ISM rouge ; index de palette des boules de type 0 hors X-ism ;
+# sakura_hadoken RAPPORT §6.4) ; ces adresses ne sont pas des aiguillages dans SFA3 ni dans Upper (ROM inchangees).
+# AIG_D1_SEUL=tous (ou vide) : tous les sites retenus par l'analyse (11 dans Hyper, 13 SFA3, 11 Upper).
+_s=__import__('os').environ.get('AIG_D1_SEUL','181d20,2ef020').lower()
+AIG_D1_SEUL=set(x.strip() for x in ('' if _s.strip() in ('tous','*') else _s).split(',') if x.strip())   # sites MIPS du jalr
+def aig_d1_lit_index(buf, ents, reg, pas_max=40000):
+    """(AIG_D1) un des gestionnaires (adresses d'execution ents) lit-il Dreg (case $1124+4*reg du banc de registres
+    0x7000_1100) avant de l'ecrire ? Parcours du MIPS en profondeur : branchements suivis des deux cotes ; 'jr' = fin du
+    chemin ; appel (jal, ou jalr precede de lui/addiu) : l'appele est parcouru comme un chemin (il peut lire l'index
+    en argument), puis le chemin continue apres l'appel SAUF si l'appele peut ecrire Dreg (resume memoise) ; jalr
+    calcule : fin du chemin. Une lecture suivie d'une simple recopie en memoire (sauvegarde MOVEM / MOVE.L Dn,(An))
+    n'est pas un usage. Renvoie l'adresse MIPS (fichier) de la 1re lecture trouvee ou None."""
+    import struct
+    lo=0x1124+4*reg; LD={0x20,0x21,0x23,0x24,0x25}; ST={0x28,0x29,0x2b}; n=[0]
+    def dec(o):
+        w=struct.unpack_from('<I',buf,o)[0]; op=w>>26; rs=(w>>21)&31; rt=(w>>16)&31; im=w&0xffff
+        return w,op,rs,rt,im,(im-0x10000 if im&0x8000 else im)
+    def appele(o):                                   # cible d'un appel en o (fichier) ou None (jalr calcule)
+        w,op,rs,rt,im,si=dec(o)
+        if op==3: return ((w&0x3ffffff)<<2)-RUNTIME_BASE
+        if op==0 and (w&0x3f)==0x09 and o>=8:
+            wa=dec(o-8); wb=dec(o-4)
+            if wa[1]==0x0f and wb[1]==0x09 and wa[3]==rs and wb[2]==rs and wb[3]==rs: return ((wa[4]<<16)+wb[5])-RUNTIME_BASE
+        return None
+    def est_appel(w,op): return op==3 or (op==0 and (w&0x3f)==0x09)
+    def sauvegarde(o, rt):                           # la valeur lue est-elle seulement recopiee en memoire ?
+        for q in range(o+4, min(o+36, len(buf)-4), 4):
+            wq,oq,rsq,rtq,imq,siq=dec(q)
+            if oq in ST and rtq==rt: return not (0x1100<=siq<0x1180)
+            if oq==0 and rt in (rsq,rtq): return False
+            if oq not in (0x0f,) and rsq==rt: return False
+            if oq in LD and rtq==rt: return False
+        return False
+    ECRIT={}
+    def ecrit(e, prof=0):                            # l'appele e peut-il ecrire Dreg ? (prudent : oui si incertain)
+        if e in ECRIT: return ECRIT[e]
+        ECRIT[e]=True                                 # recursion : prudence
+        pile=[(e, frozenset())]; vu=set(); res=False
+        while pile and not res:
+            o,hi=pile.pop()
+            while 0<=o<=len(buf)-8:
+                if (o,hi) in vu: break
+                vu.add((o,hi)); n[0]+=1
+                if n[0]>pas_max or len(vu)>6000: res=True; break
+                w,op,rs,rt,im,si=dec(o)
+                if op==0x0f: hi=frozenset((hi-{rt})|({rt} if im==0x7000 else set())); o+=4; continue
+                if op in ST and rs in hi and lo<=si<lo+4: res=True; break
+                if op in LD or op in (0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e): hi=frozenset(hi-{rt})
+                elif op==0 and (w&0x3f) not in (0x08,0x09,0x18,0x19,0x1a,0x1b): hi=frozenset(hi-{(w>>11)&31})
+                if est_appel(w,op):
+                    c=appele(o)
+                    if c is None or prof>6 or ecrit(c, prof+1): res=True; break
+                    o+=4; continue
+                if op==0x04 and rs==0 and rt==0: o=o+4+si*4; continue
+                if op in (0x04,0x05,0x06,0x07,0x14,0x15) or (op==1 and rt in (0,1)): pile.append((o+4+si*4, hi)); o+=4; continue
+                if op==2: o=((w&0x3ffffff)<<2)-RUNTIME_BASE; continue      # (creneau de retard ignore : rare)
+                if op==0 and (w&0x3f)==0x08: break
+                o+=4
+        ECRIT[e]=res; return res
+    def ecrit_sur(e):                                # l'appele ecrit-il Dreg dans son 1er bloc (avant tout saut/appel) ?
+        hi=set()
+        for o in range(e, min(e+0x800, len(buf)-4), 4):
+            w,op,rs,rt,im,si=dec(o)
+            if op==0x0f: hi=(hi-{rt})|({rt} if im==0x7000 else set()); continue
+            if op in ST and rs in hi and lo<=si<lo+4: return True
+            if op in LD and rs in hi and lo<=si<lo+4: return False
+            if op in (2,3,0x04,0x05,0x06,0x07,0x14,0x15,1) or (op==0 and (w&0x3f) in (0x08,0x09)): return False
+            if op in LD or op in (0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e): hi=hi-{rt}
+            elif op==0: hi=hi-{(w>>11)&31}
+        return False
+    vu=set(); pile=[(e-RUNTIME_BASE, frozenset()) for e in ents if e]
+    while pile and n[0]<pas_max:
+        o,hi=pile.pop()
+        while 0<=o<=len(buf)-8 and n[0]<pas_max:
+            if (o,hi) in vu: break
+            vu.add((o,hi)); n[0]+=1
+            w,op,rs,rt,im,si=dec(o)
+            if op==0x0f: hi=frozenset((hi-{rt})|({rt} if im==0x7000 else set())); o+=4; continue
+            if op in LD and rs in hi and lo<=si<lo+4 and not sauvegarde(o, rt): return o
+            if op in ST and rs in hi and lo<=si<lo+4: break                 # ecrit d'abord : chemin sain
+            if op in LD or op in (0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e): hi=frozenset(hi-{rt})
+            elif op==0 and (w&0x3f) not in (0x08,0x09,0x18,0x19,0x1a,0x1b): hi=frozenset(hi-{(w>>11)&31})
+            if est_appel(w,op):
+                c=appele(o)
+                if c is None: break
+                pile.append((c, frozenset()))                                # l'appele lit-il l'index ?
+                if ecrit_sur(c): break                                       # l'appele l'ecrase a coup sur : fin du chemin
+                o+=4; continue                                               # (creneau de retard : instruction suivante)
+            if op==0x04 and rs==0 and rt==0:                                 # 'beq zero,zero' = BRA : pas de chemin direct
+                w2,op2,rs2,rt2,im2,si2=dec(o+4)                               # (creneau de retard d'abord)
+                if op2 in LD and rs2 in hi and lo<=si2<lo+4 and not sauvegarde(o+4, rt2): return o+4
+                if op2 in ST and rs2 in hi and lo<=si2<lo+4: break
+                o=o+4+si*4; continue
+            if op in (0x04,0x05,0x06,0x07,0x14,0x15) or (op==1 and rt in (0,1)):
+                pile.append((o+4+si*4, hi)); o+=4; continue                  # creneau de retard vu par le chemin direct
+            if op==2: o=((w&0x3ffffff)<<2)-RUNTIME_BASE; continue
+            if op==0 and (w&0x3f)==0x08: break
+            o+=4
+    return None
 _RE_BRANCHE=__import__('re').compile(r'^(B(RA|EQ|NE|CC|CS|PL|MI|GE|GT|LE|LT|HI|LS|VC|VS)\b|DB|JMP\b)')
 def retag_seq(n, plages):
     """MOVE SR,-(SP) ; pour chaque plage : CMPI.L #lo,Dn ; BCS.S suiv ; CMPI.L #hi,Dn ; BCC.S suiv ;
@@ -3347,7 +3458,7 @@ def translate(buf, start, end, verbose=False):
             #   MOVE.W tbl(PC,D0.W),D1 ; JMP tbl(PC,D1.W) ; tbl: dc.w h0-tbl, h1-tbl...
             # Le recompilateur a remplace la lecture de table par une COPIE D0->D1 et
             # un saut par SA table de pointeurs. On remet la forme d'origine.
-            src=None; name="T_%06x"%tbl
+            src=None; name="T_%06x"%tbl; aig_d1=False
             # (HANDOFF §102) echelle 4 ('sll 2' sur l'index) : index BRUT (code ajoute par le portage, ex. aiguillage
             # des modes par l'octet $C001) et non deja double comme chez Capcom ('sll 1') -> doubler dans Dix
             # (registre d'arrivee de la lecture, ecrase de toute facon) avant la lecture de la table de mots
@@ -3371,6 +3482,8 @@ def translate(buf, start, end, verbose=False):
                         out[k:k+1]=[(va_k,"MOVE.W D%d,D%d"%(src,ix),[0x3000|(ix<<9)|src]),
                                     (va_k,"LSR.W #1,D%d  [index deja x4 : moitie]"%ix,[0xe248|ix]),
                                     (va_k,"MOVE.W %s(PC,D%d.W),D%d"%(name,ix,ix),[0x303b|((ix&7)<<9), 0x0006|(ix<<12)])]
+                    elif AIG_D1:
+                        aig_d1=True; k_aig=k            # (AIG_D1) copie Dm.W = Ds.W gardee (semantique PS2) ; table lue au saut
                     else:
                         out[k]=(out[k][0],"MOVE.W %s(PC,D%d.W),D%d"%(name,src,ix),[0x323b|0, 0x0006 | (src<<12)])
                     break
@@ -3388,6 +3501,8 @@ def translate(buf, start, end, verbose=False):
                     SW_X4_N[0]+=1
                     out.append((ins.va,"LSR.W #1,D%d  [index deja x4 : moitie]"%ix,[0xe248|ix]))
                     out.append((ins.va,"MOVE.W %s(PC,D%d.W),D%d"%(name,ix,ix),[0x303b|((ix&7)<<9), 0x0006|(ix<<12)]))
+                elif AIG_D1:
+                    aig_d1=True                         # (AIG_D1) PS2 : 'MOVE.W D0,D0' -> l'index reste dans Dm
                 else:
                     out.append((ins.va,"MOVE.W %s(PC,D%d.W),D%d"%(name,ix,ix),[0x303b|((ix&7)<<9), 0x0006|(ix<<12)]))
             tr=tail_return(ins_list, i)
@@ -3396,8 +3511,20 @@ def translate(buf, start, end, verbose=False):
             # terminal -> JMP par table (la table suit le JMP) ; sinon -> JSR par table
             # (ROM : 323b 000c 4ebb 1008 4ef9 ... : la table suit l'instruction SUIVANTE)
             op = 0x4efb if terminal else 0x4ebb
-            out.append((ins.va,"%s %s(PC,D%d.W)   [table de %d entrees]"%("JMP" if terminal else "JSR",name,ix,
-                        len(TABLES.setdefault(tbl, read_jump_table(buf,tbl)))),
+            if aig_d1 and AIG_D1_SEUL and ('%x' % ins.va) not in AIG_D1_SEUL:   # (controle) sites choisis seulement
+                aig_d1=False
+                if src is not None: out[k_aig]=(out[k_aig][0],"MOVE.W %s(PC,D%d.W),D%d"%(name,src,ix),[0x323b|0, 0x0006 | (src<<12)])
+                else: out.append((ins.va,"MOVE.W %s(PC,D%d.W),D%d"%(name,ix,ix),[0x303b|((ix&7)<<9), 0x0006|(ix<<12)]))
+            if aig_d1 and not AIG_D1_TOUS:
+                _lu=aig_d1_lit_index(buf, TABLES.setdefault(tbl, read_jump_table(buf,tbl)), ix)
+                if _lu is None:                    # aucun gestionnaire ne lit l'index : forme v153 (copie remplacee)
+                    aig_d1=False; AIG_D1_N[2]+=1
+                    if src is not None: out[k_aig]=(out[k_aig][0],"MOVE.W %s(PC,D%d.W),D%d"%(name,src,ix),[0x323b|0, 0x0006 | (src<<12)])
+                    else: out.append((ins.va,"MOVE.W %s(PC,D%d.W),D%d"%(name,ix,ix),[0x303b|((ix&7)<<9), 0x0006|(ix<<12)]))
+                else: AIG_D1_SITES.append((ins.va, tbl, ix, _lu))
+            if AIG_D1: AIG_D1_N[0 if aig_d1 else 1]+=1
+            out.append((ins.va,"%s %s(PC,D%d.W)   [table de %d entrees]%s"%("JMP" if terminal else "JSR",name,ix,
+                        len(TABLES.setdefault(tbl, read_jump_table(buf,tbl))), "  [index PS2]" if aig_d1 else ""),
                         [op, 0x0002 | (ix<<12)]))
             if tr is not None: no_rts_ind.add(tr)
             if tb is not None: absorbed.add(tb); tail_abs.add(tb)

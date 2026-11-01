@@ -5384,3 +5384,58 @@ Alpha Counter = artefact du banc.
   la distance de départ (Hyper en turbo fait un pas de plus pendant la manip), 18 à la cadence, 2 retouches de
   l'Anthology (octet d'attaque d'arrière + MK de Chun-Li X), 9 indéterminés. Leçon pour le banc des coups : imposer la
   distance au début du coup.
+
+### 195. Traducteur v154 : AIG_D1
+
+- **Défaut** (agent sakura_hadoken, `work/sakura_hadoken/RAPPORT.md`) : aiguillage d'état Capcom
+  `MOVE.W T(PC,Ds.W),Dm ; JMP/JSR T(PC,Dm.W)`. Sur PS2, le recompilateur copie `Dm.W = Ds.W` et saute par SA table de
+  pointeurs : à l'entrée du gestionnaire, Dm vaut l'**index**. La forme d'origine rétablie par le traducteur y laissait
+  le **décalage** de notre table. Un gestionnaire qui lit Dm sans l'écrire divergeait.
+- **Deux sites corrigés, propres à Hyper** :
+  - `0x181D20` : Hadoken de Sakura ZERO 3 en **S-ISM rouge**. L'anim passe de `$3E` à `$14` ; démarrage / récupération
+    / total : 15/24/39 → **19/36/55** tours, comme la sémantique PS2. Les autres modes restent à 18/36/54.
+  - `0x2EF020` : index de palette des boules de type 0 hors X-ism. Le champ `$71` passe de `$FF` à **08/09/0A**, comme
+    l'arcade sfa3ud. La couleur de la boule renvoyée par la Soul Reflect de Rose est donc corrigée.
+- **v154** = v153 + `AIG_D1`. Aux sites retenus, la copie est gardée et le saut lit la table sans toucher Dm (séquence
+  par la pile, marque « [index PS2] »).
+  - Défauts : `AIG_D1=1`, `AIG_D1_SEUL=181d20,2ef020`.
+  - `AIG_D1_SEUL=tous` : tous les sites que l'analyse MIPS `aig_d1_lit_index` retient (Hyper : 11 sites, `62e78e07`).
+    Leurs écarts au banc sont des artefacts de cadence (§6.3 du rapport), et les autres sites viennent de l'arcade.
+  - `AIG_D1=0` : v153 à l'octet.
+- **Empreintes** de `sz3ud.03c` (références `work/references/v154`) :
+  - SFA3 `e0f1cfdc` et Upper `0b8ecca2` : tous les fichiers sont identiques à v153 ; aucun aiguillage n'est converti
+    dans ces deux jeux.
+  - Hyper `b8e699cf` (avec les données de la redirection des voix, comme valide_tout et le zip) ; `ro9_sans`
+    `dda35430`.
+  - `AIG_D1=0` : `a5f7fae0` / `f3641d03`, identiques à v153 dans les deux cas.
+- **Bancs** :
+  - banc_coups, plans complets (219 essais) contre v153 : **0 différent**, aucune exception.
+  - Sakura, 7 modes : S-ISM rouge 19/36/55, autres modes 18/36/54.
+  - Champ `$71` : A/V 08/09/0A, X 19/1A/1B ; boule renvoyée par Rose : `0A`, contre `FF` en v153.
+  - VERSUS d'Hyper : journal identique à v153, aucune exception.
+  - nonreg ro3 : 3 × aucune exception, 42 / 0 différente. nonreg ro5 : Ryu, Chun-Li et Akuma
+    vont jusqu'à fin=finie.
+- **Reste ouvert** : `0x2CF610`, le reconnaisseur de commandes PP/KK d'Hyper. Il lirait D1 comme un masque de touches,
+  mais il n'a jamais été atteint au banc.
+- **Zip « Hyper seul »** `sfa3hhsfa.zip` : `work/livraison_v154`, CRC `CBCEB762`. Seuls `03c`, `04c`, `06c`, `10b` et
+  `hsfa_info` changent. Dans le cœur FBNeo du 02/11, le journal et les flux sont identiques à ceux du zip v153. Le zip
+  n'a pas été copié sur kDrive.
+
+### 196. Upper MAX 2b27-2b29 ; musiques en flux ; boîtes des MAX ; banc des données d'images
+
+- **2b27** (zip 1470ac68) : logo d'origine d'Upper (« ALPHA 3 », logo « ZERO 3 ↑↑ » abandonné par décision de
+  l'utilisateur) et rémanences d'Ingrid (R22).
+- **Banc des données d'images** (`work/frame_data_max/`) : le premier relevé avait mesuré **max6** (`banc_coups/lance.sh`
+  ignorait `MAXDIR`, corrigé) ; refait : Q24 (supers niv. 2) et Q26 (victime relâchée) INFIRMÉS ; Q25 / Q27 confirmés.
+  Leçon : les bancs vérifient désormais l'empreinte du module chargé (`work/outils/empreinte.*`, arrêt code 86).
+- **Boîtes des MAX** : prouvé à l'exécution, les pointeurs de boîtes des 4 MAX tombent sur leurs propres tables (blocs
+  externes), jamais sur celles de Ryu (gabarit de la Rosette) ; tirs : tables propres, ordre PSP.
+- **2b28** (32d536f5) : prises des MAX (masques de prise d'Upper $52A18-$52AC2 étendus aux ids ≥ $20 : sol KK, air PP /
+  KK) ; R28 de la session MAX (PSP +0x122 = arcade $83 : commandes direction + bouton ; `psp_1c627c` : LP debout V
+  d'Ingrid) ; atterrissage (API PSP 0x5E004 ↔ arcade $2AA08 : résultat dans les drapeaux).
+- **2b29** (2f9cd7d0) : R29 (atterrissage corrigé à la source ; compteur de coups de la victime PSP +0x7E = arcade $5E
+  rétabli : prise KK d'Ingrid = PSP). Banc MAX max49 = max48, seule la prise KK d'Ingrid bouge.
+- **Musiques en flux** : tous les zips Upper MAX depuis 2b étaient faits SANS `HSFA_YDATA` → silence en Arcade contre
+  Dee Jay ($32), T. Hawk ($33), Guile ($30), Fei-Long ($31) (signalé par l'utilisateur sur Retroid). 2b28 refait
+  (2330e54c), 2b29 avec flux ; `paquet_fbneo.py` refuse désormais (HSFA_STRICT) une archive qui demande des flux sans
+  `HSFA_YDATA` (`HSFA_SANS_FLUX=1` : ancien comportement).

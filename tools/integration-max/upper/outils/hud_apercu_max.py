@@ -79,7 +79,7 @@ def prepare(out, persos, conv_dir):
     #     plan2 prolongé) ; tuiles brutes alignées sur 16 (codes locaux 0-228 de titre_zero3_k8_frame.json) ; la frame et
     #     les palettes sont posées par integre_max.titre(). MAX_LOGO=0 : sans (fichier identique à l'octet).
     ft_ = CV + "titre/titre_zero3_k8_tuiles.bin"
-    if os.environ.get("MAX_LOGO", "1") == "1":
+    if os.environ.get("MAX_LOGO", "0") == "1":   # (2b27) 0 par défaut
         assert os.path.exists(ft_), "logo du titre absent : %s (MAX_LOGO=0 pour s'en passer)" % ft_
         TT = tuiles(ft_); k = (len(gfx) + 15) & ~15
         for j, t in enumerate(TT): pose(k + j, t)

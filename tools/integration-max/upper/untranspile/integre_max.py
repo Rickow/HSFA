@@ -460,7 +460,7 @@ LOGO_PAL_OFF = None                                   # palettes 4-7 dans le blo
 LOGO_ANIMS = 0x6483D0                                 # table rel16 des animations des acteurs du titre
 LOGO_SOUS_TYPES = {0: 7, 1: 8, 2: 9, 3: 10, 5: 6, 7: 11}   # sous-type -> n° d'animation ($88(A5) = 1)
 def titre(data, o):
-    if os.environ.get("MAX_LOGO", "1") != "1": return
+    if os.environ.get("MAX_LOGO", "0") != "1": return   # (2b27) logo abandonné : 0 par défaut
     HP = json.load(open(os.path.join(DIR, "max_plus.json")))
     assert "titre" in HP, "max_plus.json sans logo (prepare_max avec MAX_LOGO=1)"
     fj = json.load(open(MC.CV + "titre/titre_zero3_k8_frame.json"))
@@ -1115,6 +1115,50 @@ def talon_cond40(img, a):
     log("IA : condition 40 dans le saut de bloc : crochet $%x -> talon $%x" % (k2, a))
     return a + 2 * len(w2)
 
+# (2b28, Q25 / N28) ids PSP des persos MAX (EBOOT : Eagle $26, Maki $27, Yun $28, Ingrid $29 ; ids Upper $26 $27 $2D $2E)
+ID_PSP = {"26": 0x26, "27": 0x27, "2d": 0x28, "2e": 0x29}
+def talon_prises(img, a):
+    """(2b28, Q25) masques de prise par id (image $52A18-$52AC8 = PSP 0x5FB40) : bit [id] d'un masque 32 bits (ids < $20)
+    ou d'un MOVEQ (ids $20-$3F, id - $20), lu par BTST.L D3,D0 en $52A32. Les MOVEQ (sol KK #$17, air PP #$29, air KK
+    #$17) n'ont pas les ids MAX : prise KK au sol et prises aériennes jamais reconnues. Masques PSP (48 bits petit-boutistes,
+    0x213F68 sol KK, 0x213F7A air PP, 0x213F80 air KK) : bit [id PSP] de chaque perso MAX actif -> bit [id Upper - $20].
+    Sites « ADDI.B #$E0,D3 ; MOVEQ #m,D0 ; BSR $52A32 » -> JMP talon (+ NOP) ; talon = ADDI.B #$E0,D3 ; MOVE.L #m',D0 ;
+    JMP $52A32 (le RTS de $52A32 / $52ACA rend la main à l'appelant, comme le BSR suivi du RTS). Ids natifs : mêmes bits
+    (vérifié), ids < $20 : chemin inchangé. Sol avant-arrière ($371 bit 2, 0x213F6E / 74) : PSP = Upper, rien.
+    MAX_PRISES=0 : sans."""
+    if os.environ.get("MAX_PRISES", "1") != "1": return a
+    eb = open(os.environ.get("SFA3MAX_EBOOT", "<workspace>/sfa3max-psp-widescreen/work/eboot/ULES00235_EBOOT.BIN"), "rb").read()[0x74:]
+    m48 = lambda va: int.from_bytes(eb[va:va + 6], "little")
+    lec = 0x52A32
+    assert bytes(img[lec:lec + 8]) == bytes.fromhex("0700660000946002"), "prises : lecteur BTST.L D3,D0 en $%x" % lec
+    # (site, octets d origine remplacés, masque PSP 48 bits, nom)
+    sites = ((0x52A28, "060300e070176102", 0x213F68, "sol KK"),
+             (0x52AA2, "060300e070296188", 0x213F7A, "air PP"),
+             (0x52ABE, "060300e070176100ff6c", 0x213F80, "air KK"))
+    a = (a + 0xF) & ~0xF
+    for site, orig, psp, nom in sites:
+        o_ = bytes.fromhex(orig)
+        assert bytes(img[site:site + len(o_)]) == o_, "prises : motif %s en $%x" % (nom, site)
+        m0 = o_[5]                                       # MOVEQ #m (m < $80 aux 3 sites : bits 8-31 nuls)
+        assert m0 < 0x80
+        aj = 0
+        for p in ACTIFS:
+            u = int(p, 16); q = ID_PSP[p]
+            assert 0x20 <= u < 0x40
+            if (m48(psp) >> q) & 1: aj |= 1 << (u - 0x20)
+        m1 = m0 | aj
+        nat = ~sum(1 << (int(p, 16) - 0x20) for p in ID_PSP) & 0xFFFFFFFF
+        assert m1 & nat == m0, "prises : %s, bits natifs changés" % nom
+        w = [0x0603, 0x00E0, 0x203C, m1 >> 16, m1 & 0xFFFF, 0x4EF9, lec >> 16, lec & 0xFFFF]
+        assert not any(img[a:a + 2 * len(w)])
+        struct.pack_into(">%dH" % len(w), img, a, *w)
+        struct.pack_into(">HI", img, site, 0x4EF9, a)
+        for k in range(site + 6, site + len(o_), 2): struct.pack_into(">H", img, k, 0x4E71)
+        log("prises : %s, ids >= $20 : #$%x -> #$%x (%s) ; $%x -> talon $%x" % (nom, m0, m1, ", ".join(
+            "$%s" % p.upper() for p in ACTIFS if (aj >> (int(p, 16) - 0x20)) & 1) or "aucun", site, a))
+        a += 2 * len(w)
+    return a
+
 DLG_CHOIX = []
 def talon_dialogues(img, a):
     """(2b24, N21) choix des scénarios d'avant / après combat : octet [($13E - 8) / 2 x 40 + ID] de 0x61B580 (image $B18C0)
@@ -1325,7 +1369,7 @@ def image(img, its, T, W, ext_plus, carte_lignes, code_fin=None):
         log("garde pendant un contre : types >= 9 sans garde (BEQ -> BCC en $%x)" % k_)
     # (2b26) logo du titre : le chargement de la palette OBJ 8 de l'init du titre lit les palettes 4-7 du logo (bloc
     # LOGO_BLOC) dans OBJ 8-11 (même taille d'instructions ; 3 palettes de plus copiées une fois, hors combat)
-    if os.environ.get("MAX_LOGO", "1") == "1":
+    if os.environ.get("MAX_LOGO", "0") == "1":   # (2b27) 0 par défaut
         pat_ = bytes.fromhex("43f90190c1007e00")             # LEA $90C100,A1 ; MOVEQ #0,D7 (précédé de LEA src,A0)
         ks_ = [k for k in range(0x1000, 0x3A0000, 2) if img[k:k + 8] == pat_ and img[k - 6:k] == bytes.fromhex("41f9001cfc30")]
         assert len(ks_) == 2 and LOGO_PAL_OFF is not None, "chargements de OBJ 8 du logo : %s" % [hex(k - 6) for k in ks_]
@@ -1445,6 +1489,10 @@ def fin(img):
         z_ = (fin_ + 0xF) & ~0xF
         while any(img[z_:z_ + 0x100]): z_ += 0x10
         fin_ = max(fin_, talons_entree0(img, its, z_))
+    # (2b28) en DERNIER : les talons précédents gardent leurs adresses (max45)
+    z_ = (fin_ + 0xF) & ~0xF
+    while any(img[z_:z_ + 0x100]): z_ += 0x10
+    fin_ = max(fin_, talon_prises(img, z_))
     assert fin_ <= 0x3C0000
     AG.journal(W)
     open(os.path.join(W, "max_journal.txt"), "a").write("\n".join(AG.JOURNAL) + "\n")

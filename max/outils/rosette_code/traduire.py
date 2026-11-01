@@ -1198,6 +1198,11 @@ class Trad:
                 elif t68 in RET_A3:                  # (2026-10-27, Q16.2) valeur rendue en A3, pas en D0
                     s.emit("jsr     $%x.l" % t68); s.emit("move.l  a3, d0          ; $%X rend sa valeur en A3" % t68)
                     if jx == "jmp": s.emit("rts")
+                elif t68 in RET_CS and _vivant(s, i.va + 8, 2):   # (2026-11-01, Q28) valeur rendue dans la RETENUE
+                    s.emit("jsr     $%x.l" % t68)
+                    s.emit("scs     d0                  ; $%X : retenue = posé (PSP %#x : v0 = 0 / 1)" % (t68, i.tgt))
+                    s.emit("andi.l  #1, d0")
+                    if jx == "jmp": s.emit("rts")
                 elif t68: s.emit("%s     $%x.l" % (jx, t68))
                 else:
                     s.emit("%s     psp_%x" % ("bra" if jx == "jmp" else "bsr", i.tgt)); s.sous.add(i.tgt)
@@ -1292,6 +1297,10 @@ class Trad:
         return nettoyer(s.out)
 
 A0_SANS_OBJET = {0x1D368} # aléa (void, = arcade $1BDA6) : a0 résiduel, sans objet
+# (2026-11-01, Q28) fonctions arcade qui rendent un booléen dans la RETENUE (CMP.W, appelants natifs BCC / BCS) et un D0
+# jamais nul : PSP 0x5E004 (intègre les vitesses, v0 = Y + décalage < sol) = arcade $2AA08 (D0 = Y + décalage + $100).
+# Après l'appel, si v0 est lu : SCS D0 ; ANDI.L #1,D0 (« tst.w d0 ; beq » prenait J1 pour posé dès le 1er tour)
+RET_CS = {0x2AA08}
 RET_A3 = {0x1BD5C}                 # (2026-10-27, Q16.2) fonctions arcade qui rendent leur valeur en A3 (PSP 0x1D330 : en v0)
 def a0_objet(f):
     """a0 est un objet si son PREMIER emploi (avant d'être écrasé) est une base d'accès ou une copie (or rX,a0,zero)
@@ -1363,6 +1372,10 @@ def _vivant(t, va, r):
                     pile.append(a + 8)                                        # chemin non pris
                 break
             if r in ecrit: break
+            if x.m == "jal" and r == 2:                # (2026-11-01, Q28) l'appel réécrit v0 (après son créneau de délai)
+                sl = par.get(a + 4)
+                if sl is not None and r in _lit_ecrit(sl)[0]: return True
+                break
             a += 4
     return False
 def conflits(t, avant=None):

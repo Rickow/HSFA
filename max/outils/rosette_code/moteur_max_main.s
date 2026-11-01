@@ -690,11 +690,19 @@ psp_672dc:
         move.l  d1, d0
         jmp     $2e7f2.l
 
-; ---- psp_6f35c (Maki, 1 appel, après un coup direct $2E7F2) — compteur de combo PSP (0x7E, plafond 99) et record par
-; camp (0x165 des joueurs, écrans console). L'arcade n'appelle rien de tel après $2E7F2 (119 sites) : son compte de
-; coups est tenu par son propre moteur. -> neutralisée (à revoir au banc si l'affichage « HITS » manque sur ce coup).
+; ---- psp_6f35c — compteur de coups de l'objet a0 PSP (= A6 ici ; 0x7E = arcade $5E, plafond 99) et record par camp
+; (0x165 des joueurs, écrans console : non repris). Appelée par psp_ceee0 (A6 = victime, avant chaque coup de prise
+; maintenue $2E96C : prise avant + KK d'Ingrid) et par Yun (psp_1bdd48, a0 PSP = Yun lui-même, tel quel).
+; (2026-11-01, Q28) était neutralisée (« l'arcade tient son compte ») : faux, $2E96C / $2E7F2 n'incrémentent pas $5E ;
+; le compteur entre dans l'atténuation de défense (Upper $51FC, table $A2240 ; PSP 0x6ED20) -> coup final de la prise
+; KK d'Ingrid 10 au lieu de 9 (4 coups de maintien non comptés). Mesuré au banc : compteur 1..4 -> 3/3/3/3 + 9 = PSP.
 psp_6f35c:
-        rts
+        move.b  $5e(a6), d0          ; arcade $5E (image $5F) : compteur de coups (PSP 0x7E)
+        cmpi.b  #99, d0
+        beq.s   .fin
+        addq.b  #1, d0
+        move.b  d0, $5e(a6)
+.fin:   rts
 
 ; Types d'objet des projectiles MAX ($2 de l'objet, index de $32F46 = TYPE d'objet) — valeurs fixées par l'intégration
 ; HSFA (2026-10-17) : Eagle $26, Yun $2D, Ingrid $2E (Maki : pas de projectile)

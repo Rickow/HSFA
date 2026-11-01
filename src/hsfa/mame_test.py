@@ -710,6 +710,11 @@ def main():
     print("valeurs de table seulement testees : %d (HANDOFF §126)" % T.TBL_TST_N[0])
     print("echanges An<->Am par la pile MIPS : %d (HANDOFF §126)" % T.EXG_PILE_N[0])
     print("aiguillages a index deja x4 : %d (HANDOFF §126)" % T.SW_X4_N[0])
+    if T.AIG_D1:   # (sakura_hadoken, AIG_D1) aiguillages Capcom dont le saut garde l'index (semantique PS2)
+        print("aiguillages a index garde (PS2) : %d convertis, %d sans gestionnaire lecteur, %d formes laissees (AIG_D1)"
+              % (T.AIG_D1_N[0], T.AIG_D1_N[2], T.AIG_D1_N[1]))
+        with open(os.path.join(P['travail'], 'aig_d1_sites.txt'), 'w') as f:
+            for va, tb, ix, lu in sorted(set(T.AIG_D1_SITES)): f.write("%x T_%06x D%d lecture mips %x\n" % (va, tb, ix, lu))
     print("comparaisons exactes a constante lui seule : %d (HANDOFF §126)" % T.LUI_IMM_N[0])
     open(os.path.join(W, 'audit_exacts.txt'), 'w').write(''.join('%07x %s dst=%s src=%s\n' % e for e in T.EXACT_MISS)); print('blocs exacts sans operande (audit_exacts.txt) : %d (HANDOFF §126)' % len(T.EXACT_MISS))
     print('lectures signees etendues (MOVE + EXT) : %d (HANDOFF §128)' % T.EXT_MEM_N[0])

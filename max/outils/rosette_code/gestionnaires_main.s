@@ -88,9 +88,8 @@ psp_1b33c8:                          ; (agent_integration_max) écrite à la mai
 .l504:  clr.b   $35(a6)
 .l508:  tst.b   $31(a6)
         beq.s   .fin
-        jsr     $2aa08.l             ; PSP 0x5E004 : au sol ?
-        tst.w   d0
-        beq.s   .fin
+        jsr     $2aa08.l             ; PSP 0x5E004 : au sol ? ($2AA08 : retenue = posé, D0 jamais nul)
+        bcc.s   .fin                 ; (2026-11-01, Q28) était « tst.w d0 ; beq.s .fin » : toujours pris pour posé
         clr.b   $31(a6)
         move.w  $64(a6), d3          ; PSP 0x84
         swap    d3
