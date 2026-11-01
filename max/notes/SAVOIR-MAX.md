@@ -169,6 +169,9 @@ pour la session principale ; je n'édite pas `AGENTS.md`) :
 | Ghidra perd les arguments des appels indirects (et n'affiche pas les échanges de registres) | sens des arguments inversé (rappel +0x8C des contres) | relire le MIPS (capstone) avant de conclure |
 | rangées de 40 par id dans les tables PSP aussi (0x262A6C, 0x20B64C…) | Yun / Ingrid lisent la rangée suivante sur PSP | valeurs PSP « par débordement » sans sens : choisir un natif proche |
 | dialogues : `0x61B570[$92]` = table des répliques par langue (US = 0x683C28 pour $92 = 1-3) | textes de citations au lieu de répliques | 0x67E2A0 ($92 = 0) n'est PAS la table des répliques US |
+| champs appris par vote (`appris.json`) : PSP +0x122 donné pour $34 | « direction + bouton » jamais reconnus (Senpuu Kyaku, Sunbright…) | +0x122 = entrées tenues copiées au départ du normal (0x5FA50 = arcade $2B1FC `move.b $371,$83`) -> **$83** ; un vote isolé se vérifie sur la routine écrivain (N28) |
+| vivacité d'un registre aux jonctions (`_vivant`) calculée en ligne droite | jonction manquée après `b L` : n° d'animation jamais posé (LP debout V d'Ingrid, `psp_1c627c`) | parcours qui suit les branchements (corrigé le 01/11, N28) ; un écart de sortie après correction = registres d5/d6 permutés |
+| essai de frame data posé pile sur un seuil (Sun Delta niv. 3 à 192 px) | 110 -> 88 tours, « défaut » sans cause dans le code | Ingrid part à x 526,8 (PSP) / 526,0 (Upper) : balayer ±8 px avant de chercher un défaut (N28) |
 | `grep "\$3ec("` entre guillemets doubles | aucune occurrence trouvée, conclusion fausse | `grep -F '$3ec(a'` |
 | régénération des brouillons : le compteur d'étiquettes `L_alpha_*` est global | diffs « parasites » chez les autres persos | normal ; ne comparer que les lignes hors étiquettes |
 | scratchpad de session vidé entre deux sessions | fichiers d'essai introuvables | ré-extraire depuis l'ISO (lecture seule) ; les outils durables vont dans `max/outils/` |

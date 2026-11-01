@@ -84,6 +84,10 @@ HORS.update({0x2F0 + 2 * _k: 0x370 + 2 * _k for _k in range(8)})
 HORS[0x27E] = 0x28E
 # (2026-10-07) rosette $2EDC2 / PSP 0x68380 : « $3F = $254 ; clr $2C8 ; clr $D6 » <-> « … ; clr 0x10E » -> 0x10E = $D6
 HORS[0x10E] = 0xD6
+# (2026-11-01, N28) PSP +0x122 = entrées tenues (mot 0x2F0) copiées au départ d'un normal (0x5FA50 = arcade $2B1FC :
+# « move.b $371(a6),$83(a6) ») ; le code MAX n'en teste que les directions (andi 1-6) -> arcade $83 (octet ; image
+# d'Upper $82, routines $4E73E / $52934 / $962B6). Le vote d'appris.json (-> $34, octet du pas d'animation) était faux.
+HORS[0x122] = 0x83
 # (2026-10-07) zones +$10 (rosette $2E4C2 / 0x66BB4 et $251F0 / 0x70C90) : PSP 0x270-0x27F -> $280-$28F, 0x2B0-0x2BF -> $2C0-$2CF
 for _p in range(0x270, 0x280): HORS.setdefault(_p, _p + 0x10)
 for _p in range(0x2B0, 0x2C0): HORS.setdefault(_p, _p + 0x10)
@@ -1337,13 +1341,29 @@ def _lit_ecrit(i):
     else: lit = {i.rs}; ecrit = {i.rt}
     return lit - {0}, ecrit - {0}
 def _vivant(t, va, r):
-    """r est-il lu après l'adresse va avant d'être réécrit (parcours linéaire jusqu'au retour) ?"""
-    for x in t.ins:
-        if x.va < va: continue
-        lit, ecrit = _lit_ecrit(x)
-        if r in lit: return True
-        if r in ecrit: return False
-        if x.m == "jr" and x.rs == 31: return r == 2           # v0 = valeur de retour
+    """r est-il lu après l'adresse va avant d'être réécrit ? (2026-11-01, N28) parcours qui SUIT les branchements (les deux
+    chemins d'un saut conditionnel, la cible d'un saut inconditionnel ; créneau de délai : chemin pris seul si « likely ») ;
+    avant : parcours linéaire, qui ne suivait pas « b L » et manquait une jonction (psp_1c627c : s1 = n° d'animation en V)"""
+    par = {x.va: x for x in t.ins}; vus = set(); pile = [va]
+    while pile:
+        a = pile.pop()
+        while a in par and a not in vus:
+            vus.add(a); x = par[a]; m = mnem(x)
+            lit, ecrit = _lit_ecrit(x)
+            if r in lit: return True
+            if m in BR or (x.m == "jr" and x.rs == 31):
+                sl = par.get(a + 4); lsl, esl = _lit_ecrit(sl) if sl is not None else (set(), set())
+                if r in lsl: return True
+                if x.m == "jr":
+                    if r == 2: return True                     # v0 = valeur de retour
+                    break
+                likely = m.endswith("l") and m not in ("bltz",)
+                if r not in esl: pile.append(a + 4 + 4 * x.simm)              # chemin pris (créneau exécuté)
+                if not (m in ("beq", "beql") and x.rs == 0 and x.rt == 0) and (likely or r not in esl):
+                    pile.append(a + 8)                                        # chemin non pris
+                break
+            if r in ecrit: break
+            a += 4
     return False
 def conflits(t, avant=None):
     """par étiquette : registres MIPS vivants dont la valeur diffère selon le chemin d'arrivée -> registre 68K
