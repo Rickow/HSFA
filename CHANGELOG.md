@@ -4,6 +4,14 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Le 
 version : les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
 
+## v0.1.4 (2026-11-04)
+
+- Cœurs plus rapides (patchs 0019-0021c) : option « Skip idle loops (faster) », activée par défaut, qui saute les
+  boucles d'attente du 68000 et du Z80 du son ; crochets Z80 / Musashi et filtre QSound plus rapides. 33 à 41 % de calcul
+  en moins par image (sur PC ; davantage sur ARM), image, son et parties identiques. Recalbox et ROCKNIX : compilation
+  -O3, LTO, sans -ffloat-store. Essayé sur Raspberry Pi 3 : Hyper + Arcade ne ralentit plus.
+- Jeux inchangés (mêmes empreintes que la v0.1.3).
+
 ## v0.1.3 (2026-11-03)
 
 - Option du cœur « Blood » (patch 0018) : sang rouge, non censuré, par défaut ; « blanc » = censuré, comme l'arcade US et

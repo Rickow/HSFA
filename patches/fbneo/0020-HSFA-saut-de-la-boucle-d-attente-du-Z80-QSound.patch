@@ -1,0 +1,168 @@
+From 3ef9c43702b7db986c50c0d5bb954f81d8844116 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 1 Nov 2026 20:42:42 +0100
+Subject: [PATCH 20/21] HSFA: "Skip idle loops" also skips the QSound Z80
+ timer-wait loop (exact)
+
+The QSound sound driver (sz3.01 / hx3.01, the arcade one) waits for the 250 Hz timer
+interrupt in LD HL,$F001 / LD A,(HL) / OR A / JR Z,+4 / ... / LD HL,$F002 /
+LD A,(HL) / OR A / JR Z,$01C7 (70-90 % of the Z80 instructions). $F001 and $F002
+only change in the interrupt, which FBNeo raises between Z80 slices only.
+
+z80.cpp gets a generic exact skip (Z80SetIdleLoop): when the loop head is reached
+through its back jump, with no interrupt that could be taken and a check callback
+confirming the loop cannot exit, the whole turns before the last one of the slice
+are removed; ICount, R and the T-state counter advance as if they had run, so the
+slice ends on the same PC, registers and cycle. cps_hsfa.cpp finds the loop by
+signature in the Z80 ROM (one site expected, otherwise nothing is done) and enables
+it with the same option (bit 3 of Dip A, off by default) for the QSound Z80 only.
+HSFA_IDLE_Z80=0 keeps only the 68000 skip (tests).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 44 +++++++++++++++++++++++++++++++-
+ src/burn/drv/capcom/d_cps2.cpp   |  1 +
+ src/cpu/z80/z80.cpp              | 23 +++++++++++++++++
+ src/cpu/z80/z80.h                |  2 ++
+ 4 files changed, 69 insertions(+), 1 deletion(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 7f78229..172a127 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -824,16 +824,57 @@ static UINT16 __fastcall HsfaIdleReadWord(UINT32 a)
+ 	return d;
+ }
+ 
++// (patch 0020) meme option pour le Z80 du QSound : le pilote son (sz3.01 / hx3.01, celui de la borne) attend
++// l'interruption du minuteur (250 Hz) dans
++//     $01C7 : LD HL,$F001 ; LD A,(HL) ; OR A ; JR Z,+4 ; (DEC (HL) ; CALL ...) ; LD HL,$F002 ; LD A,(HL) ; OR A ;
++//     $01D7 : JR Z,$01C7          21 01 F0 7E B7 28 04 35 CD xx xx 21 02 F0 7E B7 28 EE
++// (70 a 90 % des instructions du Z80). $F001 / $F002 ne changent que dans l'interruption, que FBNeo ne pose
++// qu'entre deux tranches du Z80 (BurnTimer). Le saut est fait par le coeur Z80 (Z80SetIdleLoop) a la tete de la
++// boucle, quand on y revient par le JR de $01D7 et que $F001 et $F002 valent 0 : tours de 66 T-states
++// (10 + 7 + 4 + 12, deux fois), 8 instructions. HSFA_IDLE_Z80=0 (essais) ne garde que le saut du 68000.
++static INT32 nIdleZ80Force = -2;
++static UINT64 nIdleSautsZ80 = 0;
++
++static int HsfaIdleZ80Check()
++{
++	if (!HsfaIdleActif() || nIdleZ80Force == 0 || ZetGetActive() != 0 || CpsZRamF0 == NULL) return 0;
++	if (CpsZRamF0[0x001] != 0 || CpsZRamF0[0x002] != 0) return 0;
++	nIdleSautsZ80++;
++	return 1;
++}
++
++static void HsfaIdleZ80Init()
++{
++	Z80SetIdleLoop(-1, -1, 0, 0, NULL);
++	nIdleSautsZ80 = 0;
++	if (nIdleZ80Force == -2) nIdleZ80Force = getenv("HSFA_IDLE_Z80") ? atoi(getenv("HSFA_IDLE_Z80")) : -1;
++	if (CpsZRom == NULL || nCpsZRomLen < 0x8000) return;
++	static const INT16 sig[18] = { 0x21, 0x01, 0xF0, 0x7E, 0xB7, 0x28, 0x04, 0x35, 0xCD, -1, -1, 0x21, 0x02, 0xF0, 0x7E, 0xB7, 0x28, 0xEE };
++	INT32 n = 0, nSite = -1;
++	for (INT32 a = 0; a + 18 <= 0x8000; a++) {			// $0000-$7FFF : ROM fixe du Z80 (CpsZRom)
++		INT32 i = 0;
++		while (i < 18 && (sig[i] < 0 || CpsZRom[a + i] == sig[i])) i++;
++		if (i == 18) { nSite = a; n++; }
++	}
++	if (n != 1) {
++		bprintf(PRINT_ERROR, _T("HSFA : saut d'attente : boucle du Z80 trouvee %d fois (attendu 1) : inactif\n"), n);
++		return;
++	}
++	Z80SetIdleLoop(nSite, nSite + 16, 66, 8, HsfaIdleZ80Check);
++	bprintf(0, _T("HSFA : saut d'attente du Z80 possible (boucle $%04X)\n"), nSite);
++}
++
+ static void HsfaIdleStats()
+ {
+ 	if (bIdleStats && (nImage % 600) == 0) {
+-		bprintf(0, _T("HSFA image %d : saut d'attente 68000 : %llu tours retires en %llu sauts\n"), nImage, (unsigned long long)nIdleTours68k, (unsigned long long)nIdleSauts68k);
++		bprintf(0, _T("HSFA image %d : saut d'attente 68000 : %llu tours retires en %llu sauts ; Z80 : %llu sauts\n"), nImage, (unsigned long long)nIdleTours68k, (unsigned long long)nIdleSauts68k, (unsigned long long)nIdleSautsZ80);
+ 	}
+ }
+ 
+ static void HsfaIdleInit()
+ {
+ 	nIdle68kPC = 0;
++	HsfaIdleZ80Init();									// (patch 0020)
+ 	if (nIdleForce == -2) nIdleForce = getenv("HSFA_IDLE") ? atoi(getenv("HSFA_IDLE")) : -1;
+ 	bIdleStats = getenv("HSFA_IDLE_STATS") && atoi(getenv("HSFA_IDLE_STATS")) == 1;
+ 	nIdleTours68k = nIdleSauts68k = 0;
+@@ -1673,6 +1714,7 @@ INT32 HsfaInit()
+ 
+ INT32 HsfaExit()
+ {
++	Z80SetIdleLoop(-1, -1, 0, 0, NULL);					// (patch 0020)
+ 	if (HsfaPlansLog) fclose(HsfaPlansLog);
+ 	HsfaPlansLog = NULL; nPlansLog = -1;
+ 	if (HsfaMixLog) fclose(HsfaMixLog);
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 082652b..bf9d6bb 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -191,6 +191,7 @@ STDINPUTINFO(Hsfa)
+ 	{0x00, 0x01, 0x04, 0x04, "White (censored)"					},
+ 
+ // (patch 0019) bit 3 du Dip A : saut exact de la boucle d'attente d'image du 68000 (cps_hsfa.cpp, HsfaIdleInit) ;
++// (patch 0020) et de la boucle d'attente du minuteur du Z80 QSound (HsfaIdleZ80Init, z80.cpp Z80SetIdleLoop) ;
+ // meme image et meme son, moins de calcul pour l'hote. Desactive par defaut.
+ #define HSFA_OPT_ATTENTE \
+ 	{0   , 0xfe, 0   ,    2, "Skip idle loops (faster)"			}, \
+diff --git a/src/cpu/z80/z80.cpp b/src/cpu/z80/z80.cpp
+index 3a4c264..15b1b18 100644
+--- a/src/cpu/z80/z80.cpp
++++ b/src/cpu/z80/z80.cpp
+@@ -4043,6 +4043,22 @@ void Z80Exit()
+ 	z80edfe_callback = NULL;
+ }
+ 
++// (HSFA, patch 0020) saut EXACT d'une boucle d'attente. La boucle commence en nIdleHead et revient a sa tete par un
++// saut en nIdleBack ; un tour coute nIdleCycles T-states et nIdleInstr instructions (sans prefixe), ne lit que de la
++// memoire sans effet et n'ecrit rien. Quand on arrive a la tete par ce saut (PRVPC == nIdleBack : registres et
++// drapeaux sont ceux d'un tour quelconque), sans interruption prenable (ligne IRQ basse ou IFF1 a 0 : rien ne la
++// change au milieu d'une tranche) et que pIdleCheck() confirme que la boucle ne sortira pas (memoire lue), on retire
++// les tours entiers qui precedent le dernier de la tranche : ICount, R et le compteur de T-states avancent comme si
++// les tours avaient ete executes ; la fin de tranche (PC, registres, cycles) est la meme. nIdleHead < 0 : inactif.
++static int nIdleHead = -1, nIdleBack = -1, nIdleCycles = 0, nIdleInstr = 0;
++static int (*pIdleCheck)() = NULL;
++
++void Z80SetIdleLoop(int nHead, int nBack, int nCycles, int nInstr, int (*pCheck)())
++{
++	if (nHead < 0 || nCycles <= 0 || pCheck == NULL) { nIdleHead = -1; pIdleCheck = NULL; return; }
++	nIdleHead = nHead; nIdleBack = nBack; nIdleCycles = nCycles; nIdleInstr = nInstr; pIdleCheck = pCheck;
++}
++
+ int Z80Execute(int cycles)
+ {
+ 	Z80.ICount = cycles;
+@@ -4081,6 +4097,13 @@ int Z80Execute(int cycles)
+ 			Z80.after_retn = FALSE;
+ 		}
+ 
++		if ((int)PCD == nIdleHead && (int)PRVPC == nIdleBack && Z80.ICount > nIdleCycles
++		    && (Z80.irq_state == Z80_CLEAR_LINE || !IFF1) && pIdleCheck()) {	// (HSFA, patch 0020)
++			const int k = (Z80.ICount - 1) / nIdleCycles;
++			Z80.ICount -= k * nIdleCycles;
++			m_tstate_counter += k * nIdleCycles;
++			R += (UINT8)(k * nIdleInstr);
++		}
+ 		PRVPC = PCD;
+ //		CALL_DEBUGGER(PCD);
+ 		R++;
+diff --git a/src/cpu/z80/z80.h b/src/cpu/z80/z80.h
+index 11e932e..c652be4 100644
+--- a/src/cpu/z80/z80.h
++++ b/src/cpu/z80/z80.h
+@@ -82,6 +82,8 @@ int Z80Scan(int nAction);
+ INT32 z80TotalCycles();
+ INT32 z80TstateCounter();
+ void Z80StopExecute();
++// (HSFA, patch 0020) saut exact d'une boucle d'attente (z80.cpp) ; nHead < 0 : aucun
++void Z80SetIdleLoop(int nHead, int nBack, int nCycles, int nInstr, int (*pCheck)());
+ void z80_set_spectrum_tape_callback(int (*tape_cb)());
+ void z80_set_cycle_tables_msx();
+ void z80_set_cycle_tables(const UINT8 *op, const UINT8 *cb, const UINT8 *ed, const UINT8 *xy, const UINT8 *xycb, const UINT8 *ex);
+-- 
+2.53.0
+

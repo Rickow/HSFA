@@ -1,0 +1,111 @@
+From 0c05d60c7e5fc40a023e345f367e6e907fe02690 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 1 Nov 2026 22:14:49 +0100
+Subject: [PATCH] HSFA: "Skip idle loops" on by default, option state logged
+ once the DIPs are set
+
+The Raspberry Pi 3 test core (patches 0019-0021 with the option on) runs Hyper and
+the graft without slowdown, and the skip is exact (same picture, sound and logs as
+with the option off, 5 games in 4:3 and 16:9). The option is therefore on by
+default: bit 3 is set in the default Dip A byte of both HSFA DIP lists
+(HsfaDIPList 0xc1 -> 0xc9: SFA3, Upper, Upper MAX; HhsfaDIPList 0xc2 -> 0xca:
+Hyper, graft). The RetroArch key is unchanged
+(fbneo-dipswitch-<driver>-Skip_idle_loops_(faster) = On / Off); Off gives the
+behaviour from before 0019.
+
+The init message reported "inactive (option)" because HsfaIdleInit runs before the
+DIPs are applied. It now only reports the loop site; the real state of the option
+is logged at the first frame and whenever it changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 14 +++++++++++---
+ src/burn/drv/capcom/d_cps2.cpp   |  7 ++++---
+ 2 files changed, 15 insertions(+), 6 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 172a127..96a5aaa 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -784,13 +784,16 @@ static void HsfaSang()
+ // cycles restant les tours entiers (16 + 4 + 10 = 30 cycles de Musashi) qui precedent le dernier. Le 68000 finit donc
+ // la tranche au meme cycle, au meme PC, avec les memes registres et drapeaux : seules disparaissent des lectures
+ // sans effet de $663888. Site cherche par signature dans la ROM programme (1 attendu, sinon rien n'est fait).
+-// Option : bit 3 du Dip A ("Skip idle loops", desactivee par defaut), lue a chaque passage (changement immediat) ;
+-// HSFA_IDLE=0/1 (essais) l'impose ; HSFA_IDLE_STATS=1 : tours retires, au journal toutes les 600 images.
++// Option : bit 3 du Dip A ("Skip idle loops", activee par defaut depuis 0021b), lue a chaque passage (changement
++// immediat) ; HSFA_IDLE=0/1 (essais) l'impose ; HSFA_IDLE_STATS=1 : tours retires, au journal toutes les 600 images.
++// L'etat de l'option est ecrit au journal a la 1re image et a chaque changement (a l'init, les DIP ne sont pas encore
++// poses : HsfaFluxDip y vaut encore sa valeur d'avant).
+ extern UINT8 *CpsRam660;
+ static UINT32 nIdle68kPC = 0;						// adresse du MOVE.W $663888.L,D5 (0 = pas de site)
+ static INT32 nIdleForce = -2;
+ static INT32 bIdleStats = 0;
+ static UINT64 nIdleTours68k = 0, nIdleSauts68k = 0;
++static INT32 nIdleEtat = -1;								// etat ecrit au journal (-1 : rien encore)
+ #define HSFA_IDLE_ADR		0x663888
+ #define HSFA_IDLE_TOUR68K	30							// MOVE.W abs.L,Dn 16 + CMP.W Dn,Dn 4 + Bcc.W pris 10
+ 
+@@ -866,6 +869,10 @@ static void HsfaIdleZ80Init()
+ 
+ static void HsfaIdleStats()
+ {
++	if (nIdle68kPC && HsfaIdleActif() != nIdleEtat) {	// (patch 0021b) etat reel, DIP poses
++		nIdleEtat = HsfaIdleActif();
++		bprintf(0, _T("HSFA image %d : saut des boucles d'attente (option Skip idle loops) : %s\n"), nImage, nIdleEtat ? _T("actif") : _T("inactif"));
++	}
+ 	if (bIdleStats && (nImage % 600) == 0) {
+ 		bprintf(0, _T("HSFA image %d : saut d'attente 68000 : %llu tours retires en %llu sauts ; Z80 : %llu sauts\n"), nImage, (unsigned long long)nIdleTours68k, (unsigned long long)nIdleSauts68k, (unsigned long long)nIdleSautsZ80);
+ 	}
+@@ -874,6 +881,7 @@ static void HsfaIdleStats()
+ static void HsfaIdleInit()
+ {
+ 	nIdle68kPC = 0;
++	nIdleEtat = -1;
+ 	HsfaIdleZ80Init();									// (patch 0020)
+ 	if (nIdleForce == -2) nIdleForce = getenv("HSFA_IDLE") ? atoi(getenv("HSFA_IDLE")) : -1;
+ 	bIdleStats = getenv("HSFA_IDLE_STATS") && atoi(getenv("HSFA_IDLE_STATS")) == 1;
+@@ -905,7 +913,7 @@ static void HsfaIdleInit()
+ 	SekMapHandler(8, HSFA_IDLE_ADR & ~0x3FF, (HSFA_IDLE_ADR & ~0x3FF) + 0x3FF, MAP_READ);
+ 	SekSetReadByteHandler(8, HsfaIdleReadByte);
+ 	SekSetReadWordHandler(8, HsfaIdleReadWord);
+-	bprintf(0, _T("HSFA : saut d'attente du 68000 possible (boucle $%06X) : %s\n"), nSite, HsfaIdleActif() ? _T("actif") : _T("inactif (option)"));
++	bprintf(0, _T("HSFA : saut d'attente du 68000 possible (boucle $%06X) ; etat de l'option a la 1re image\n"), nSite);
+ }
+ 
+ static INT32 HsfaReset()
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index bf9d6bb..2fd59b2 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -192,7 +192,8 @@ STDINPUTINFO(Hsfa)
+ 
+ // (patch 0019) bit 3 du Dip A : saut exact de la boucle d'attente d'image du 68000 (cps_hsfa.cpp, HsfaIdleInit) ;
+ // (patch 0020) et de la boucle d'attente du minuteur du Z80 QSound (HsfaIdleZ80Init, z80.cpp Z80SetIdleLoop) ;
+-// meme image et meme son, moins de calcul pour l'hote. Desactive par defaut.
++// meme image et meme son, moins de calcul pour l'hote. Active par defaut (patch 0021b : bit 3 pose dans l'octet
++// par defaut du Dip A, 0xc1 -> 0xc9 et 0xc2 -> 0xca) ; Off = comportement d'avant 0019.
+ #define HSFA_OPT_ATTENTE \
+ 	{0   , 0xfe, 0   ,    2, "Skip idle loops (faster)"			}, \
+ 	{0x00, 0x01, 0x08, 0x00, "Off"								}, \
+@@ -206,7 +207,7 @@ STDINPUTINFO(Hsfa)
+ static struct BurnDIPInfo HsfaDIPList[] =
+ {
+ 	DIP_OFFSET(0x1d)
+-	{0x00, 0xff, 0xff, 0xc1, NULL								},
++	{0x00, 0xff, 0xff, 0xc9, NULL								},
+ 
+ 	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+@@ -233,7 +234,7 @@ STDDIPINFO(Hsfa)
+ static struct BurnDIPInfo HhsfaDIPList[] =
+ {
+ 	DIP_OFFSET(0x1d)
+-	{0x00, 0xff, 0xff, 0xc2, NULL								},
++	{0x00, 0xff, 0xff, 0xca, NULL								},
+ 
+ 	{0   , 0xfe, 0   ,    3, "PS2 music (ADX streams, Y_DATA.BIN)"	},
+ 	{0x00, 0x01, 0x03, 0x00, "Off"								},
+-- 
+2.53.0
+

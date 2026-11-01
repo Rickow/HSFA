@@ -1,0 +1,179 @@
+From 8c9e246f5bda816b90084c8e87ee4e1dbcd0735f Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 1 Nov 2026 20:47:51 +0100
+Subject: [PATCH 21/21] HSFA: faster Z80 contention hooks, Musashi instruction
+ callback and QSound FIR (same results)
+
+Measured on the HSFA drivers, without changing any result:
+- z80.cpp: store_rwinfo(), run_script() and eat_cycles() are called for every
+  memory access or instruction, for the ZX Spectrum memory contention only. When it
+  is off (every other driver), inline fast paths do exactly what the full functions
+  do in that case (return 0 / 0xff; eat the cycles; the frame raster callback is
+  the empty dummy and m_cycles_per_frame is 0), without the calls.
+- m68kcpu.c: the per-instruction callback is not called when it is the empty dummy.
+- qs_c.cpp and hsfa_qsound.h (2nd QSound of Hyper): the FIR filter walks its delay
+  line as two linear segments instead of testing the wrap-around at every tap (same
+  products, same order); the original loop is kept for an out-of-range position.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/hsfa_qsound.h | 13 ++++++++++
+ src/burn/drv/capcom/qs_c.cpp      | 15 +++++++++++
+ src/cpu/m68k/m68kcpu.c            |  2 +-
+ src/cpu/z80/z80.cpp               | 41 ++++++++++++++++++++++++++-----
+ 4 files changed, 64 insertions(+), 7 deletions(-)
+
+diff --git a/src/burn/drv/capcom/hsfa_qsound.h b/src/burn/drv/capcom/hsfa_qsound.h
+index d371663..6ff4e5d 100644
+--- a/src/burn/drv/capcom/hsfa_qsound.h
++++ b/src/burn/drv/capcom/hsfa_qsound.h
+@@ -275,6 +275,19 @@ private:
+ 	static int32_t applique_fir(fir *f, int16_t input)
+ 	{
+ 		int32_t output = 0, tap = 0;
++		// (patch 0021) meme calcul en deux segments lineaires (voir fir() de qs_c.cpp) ; boucle d'origine sinon
++		const int32_t n = f->tap_count - 1;
++		const int32_t p = f->delay_pos;
++		if (n > 0 && p >= 0 && p < n) {
++			const int16_t *t = f->taps, *d = f->delay_line;
++			const int32_t m = n - p;
++			for (int32_t j = 0; j < m; j++) output -= (t[j] * d[p + j]) << 2;
++			for (int32_t j = 0; j < p; j++) output -= (t[m + j] * d[j]) << 2;
++			output -= (t[n] * input) << 2;
++			f->delay_line[p] = input;
++			f->delay_pos = (p + 1 >= n) ? 0 : p + 1;
++			return output;
++		}
+ 		for (; tap < (f->tap_count - 1); tap++) {
+ 			output -= (f->taps[tap] * f->delay_line[f->delay_pos++]) << 2;
+ 			if (f->delay_pos >= f->tap_count - 1) f->delay_pos = 0;
+diff --git a/src/burn/drv/capcom/qs_c.cpp b/src/burn/drv/capcom/qs_c.cpp
+index c3335b7..f692ef0 100644
+--- a/src/burn/drv/capcom/qs_c.cpp
++++ b/src/burn/drv/capcom/qs_c.cpp
+@@ -673,6 +673,21 @@ INLINE INT32 fir(struct qsound_fir *f, INT16 input)
+ {
+ 	INT32 output = 0, tap = 0;
+ 
++	// (HSFA, patch 0021) meme calcul en deux segments lineaires de la ligne a retard (sans test de bouclage par prise,
++	// vectorisable) quand la position est dans [0, n) ; sinon (jamais vu), la boucle d'origine ci-dessous
++	const INT32 n = f->tap_count - 1;
++	const INT32 p = f->delay_pos;
++	if (n > 0 && p >= 0 && p < n) {
++		const INT16 *t = f->taps, *d = f->delay_line;
++		const INT32 m = n - p;
++		for (INT32 j = 0; j < m; j++) output -= (t[j] * d[p + j]) << 2;
++		for (INT32 j = 0; j < p; j++) output -= (t[m + j] * d[j]) << 2;
++		output -= (t[n] * input) << 2;
++		f->delay_line[p] = input;
++		f->delay_pos = (p + 1 >= n) ? 0 : p + 1;
++		return output;
++	}
++
+ 	for(; tap < (f->tap_count-1); tap++)
+ 	{
+ 		output -= (f->taps[tap] * f->delay_line[f->delay_pos++])<<2;
+diff --git a/src/cpu/m68k/m68kcpu.c b/src/cpu/m68k/m68kcpu.c
+index 2ce5da7..df311c5 100644
+--- a/src/cpu/m68k/m68kcpu.c
++++ b/src/cpu/m68k/m68kcpu.c
+@@ -868,7 +868,7 @@ int m68k_execute(int num_cycles)
+ 			/* Trace m68k_exception, if necessary */
+ 			m68ki_exception_if_trace(); /* auto-disable (see m68kcpu.h) */
+ 
+-			insn_cb(insn_cycles - GET_CYCLES()); // dink
++			if (insn_cb != dummy_insn_cb) insn_cb(insn_cycles - GET_CYCLES()); // dink ; (HSFA, patch 0021) sans appel du rappel vide
+ 		} while(GET_CYCLES() > 0 && !m68ki_cpu.end_run);
+ 
+ 		/* set previous PC to current PC for the next entry into the loop */
+diff --git a/src/cpu/z80/z80.cpp b/src/cpu/z80/z80.cpp
+index 15b1b18..c438580 100644
+--- a/src/cpu/z80/z80.cpp
++++ b/src/cpu/z80/z80.cpp
+@@ -128,17 +128,17 @@ static Z80ReadOpArgHandler Z80CPUReadOpArg;
+ #define BUSY_LOOP_HACKS     0
+ 
+ // SpecZ80
+-static void eat_cycles(int type, int cycles);
++static void eat_cycles_full(int type, int cycles);
+ static void capture_opcode_history_start(UINT16 reg_bc, UINT16 reg_ir);
+ static void capture_opcode_history_finish();
+ static void parse_script(const char *script_desc, CM_SCRIPT_BREAKDOWN *breakdown);
+ static bool find_script();
+-static UINT8 run_script();
++static UINT8 run_script_full();
+ static int  get_ula_delay();
+ static void make_ula_delay_lut();
+ static int  get_memory_access_delay(UINT16 pc_address);
+ static int  get_memory_is_contended(UINT16 pc_address);
+-static UINT8 store_rwinfo(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg);
++static UINT8 store_rwinfo_full(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg);
+ 
+ static int		m_ula_variant;			// ULA_VARIANT_SINCLAIR  | ULA_VARIANT_AMSTRAD
+ static const char*	m_ula_delay_sequence;		// "654321200"           | "10765432"
+@@ -223,6 +223,35 @@ static int Z80lastop; // for snow effect
+ #define HALT Z80.halt
+ 
+ static Z80_Regs Z80;
++
++// (HSFA, patch 0021) chemin rapide des crochets de contention (ZX Spectrum) quand elle est coupee (tous les autres
++// pilotes) : memes effets que les fonctions completes dans ce cas, sans appel de fonction par acces ni par instruction
++// (store_rwinfo_full rend 0 et run_script_full 0xff sans rien faire ; eat_cycles_full appelle deux fois le rappel de
++// trame factice a chaque instruction, puisque m_cycles_per_frame vaut 0, et en retire 0).
++static void raster_dummy_callback(int);
++
++static inline UINT8 store_rwinfo(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg)
++{
++	if (m_ula_variant == ULA_VARIANT_NONE) return 0;
++	return store_rwinfo_full(addr, val, flags, dbg);
++}
++
++static inline UINT8 run_script()
++{
++	if (m_ula_variant == ULA_VARIANT_NONE) return 0xff;
++	return run_script_full();
++}
++
++static inline void eat_cycles(int type, int cycles)
++{
++	if (m_ula_variant == ULA_VARIANT_NONE && m_cycles_per_frame == 0 && m_raster_cb == raster_dummy_callback) {
++		if (type == CYCLES_UNCONTENDED) m_opcode_history.uncontended_cycles_eaten += cycles;
++		Z80.ICount -= cycles;
++		m_tstate_counter += cycles;
++		return;
++	}
++	eat_cycles_full(type, cycles);
++}
+ #define EA Z80.EA
+ 
+ void (*z80edfe_callback)(Z80_Regs *Regs) = NULL;
+@@ -4551,7 +4580,7 @@ static bool find_script()
+ }
+ 
+ 
+-static UINT8 run_script()
++static UINT8 run_script_full()
+ {
+ 	UINT8 retval = 0xff;
+ 
+@@ -5040,7 +5069,7 @@ static int get_memory_is_contended(UINT16 pc_address)
+ 	return 0;
+ }
+ 
+-static void eat_cycles(int type, int cycles)
++static void eat_cycles_full(int type, int cycles)
+ {
+ 	// When this function is called and type CYCLES_CONTENDED or CYCLES_UNCONTENDED is set,
+ 	// it means the run_script function is processing the opcode history and that cycles are
+@@ -5084,7 +5113,7 @@ static void eat_cycles(int type, int cycles)
+ }
+ 
+ 
+-static UINT8 store_rwinfo(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg)
++static UINT8 store_rwinfo_full(UINT16 addr, UINT8 val, UINT16 flags, const char *dbg)
+ {
+ 	RWINFO *rw;
+ 	UINT8 retval = 0xff;
+-- 
+2.53.0
+

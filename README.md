@@ -7,11 +7,11 @@
 > **No game data is provided.** You need your own copy of *Street Fighter Alpha Anthology* (PS2, USA, `SLUS-21317`).
 > Not in this release: **Upper MAX** (the four SFA3 MAX characters) and the **Arcade-mode graft** onto Hyper.
 
-1. **Download the cores** from the [releases](../../releases) page: `hsfa-v0.1.3-cores-<platform>.zip` for Android
+1. **Download the cores** from the [releases](../../releases) page: `hsfa-v0.1.4-cores-<platform>.zip` for Android
    (arm64), ROCKNIX (aarch64: RGB10X, R36S…), Windows (x64), Linux (x86_64) or Recalbox 10 (Raspberry Pi; tested on
    a Pi 3B). Each archive holds the 4:3 core
    (`fbneo_hsfa`) and the 16:9 core (`fbneo_hsfaws`), with their licence.
-2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Easiest: download `hsfa-v0.1.3-construction.zip`
+2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Easiest: download `hsfa-v0.1.4-construction.zip`
    from the release (or this repository), then run **`construire.sh`** (Linux, macOS, WSL) or double-click
    **`construire.bat`** (Windows, experimental: untested so far) and give it your ISO. It sets up Python, checks for
    ffmpeg, and builds the three games into `sortie/archives/`. By hand:
@@ -62,7 +62,7 @@ They run in two environments:
 
 > **Picking the project up** (human or agent): read [AGENTS.md](AGENTS.md) (in French): rules, method, findings and open work, updated with every discovery.
 
-## Status (2026-11-03, release v0.1.3)
+## Status (2026-11-04, release v0.1.4)
 
 **Working**
 
@@ -72,7 +72,7 @@ They run in two environments:
 | Upper (`ro5`) | playable end to end, **40/40 endings**; hybrid sound ROM (SFA3 music + Upper voices); the music that exists only as streams on the disc is packed in the zip as Ogg Vorbis | [§122-§128](docs/journal/HANDOFF.md), [FLUX](docs/rapports/FLUX.md) |
 | Hyper (`ro9`) | VERSUS without exceptions (151-match tour); supers of the ZERO / ZERO 2 / ALPHA versions no longer crash; super gauge and TRAINING fixed; ZERO / ZERO 2 / ALPHA music in the zip (Ogg Vorbis); per-version SFA1 / SFA2 voices replayed on a 2nd QSound when the replay table is present (see below) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
 | Menus | OPTION and EXIT return to the mode menu; the PS2 option-screen settings (difficulty, damage, timer, speed, rounds) are core options | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
-| FBNeo HSFA core | Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, tested on a Pi 3B); "Blood" option (v0.1.3: red, uncensored, by default; white = censored); 4:3 and 16:9 (with "Screen format (fill height)" for 4:3 to 16:10 screens); PSP-style transparent shadows; taunt on Select in fights; Upper's hidden characters (v0.1.2: hold Start + a button on Akuma / Balrog for Shin Akuma / EX Balrog, Coin for the roulette); tested by the user on RG477M and RGB10X | [patches](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
+| FBNeo HSFA core | Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, tested on a Pi 3B); "Blood" option (red, uncensored, by default); "Skip idle loops" option (v0.1.4, on by default: 33-41 % less work per frame, same result); 4:3 and 16:9 (with "Screen format (fill height)" for 4:3 to 16:10 screens); PSP-style transparent shadows; taunt on Select in fights; Upper's hidden characters (v0.1.2: hold Start + a button on Akuma / Balrog for Shin Akuma / EX Balrog, Coin for the roulette); tested by the user on RG477M and RGB10X | [patches](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
 | Build from the ISO | `hsfa_build.py` builds the three games from your ISO alone; program ROMs identical (md5) to the official v154 archives (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `b8e699cf` with the replay table); zips identical from one build to the next | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
 
 **Known limits of v0.1.x**

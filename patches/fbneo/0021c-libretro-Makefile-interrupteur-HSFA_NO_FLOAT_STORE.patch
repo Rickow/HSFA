@@ -1,0 +1,38 @@
+From d84c7f5212e5707893d02b56b6be27c434b865e8 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 1 Nov 2026 22:14:58 +0100
+Subject: [PATCH] libretro Makefile: HSFA_NO_FLOAT_STORE=1 drops -ffloat-store
+
+-ffloat-store (added for every gcc build) only matters on FPUs with extended
+precision (x87, 68881): it forces each float variable through memory to round it.
+VFP / NEON (armhf) and AArch64 compute in IEEE single / double precision, so
+dropping it changes no value, only spills; checked on the armhf assembly (same
+floating-point operations, same fused operations). The HSFA ARM builds (Recalbox,
+ROCKNIX) pass HSFA_NO_FLOAT_STORE=1; without it nothing changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burner/libretro/Makefile | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/burner/libretro/Makefile b/src/burner/libretro/Makefile
+index 0f097af..c4448e1 100644
+--- a/src/burner/libretro/Makefile
++++ b/src/burner/libretro/Makefile
+@@ -621,8 +621,11 @@ endif
+ 
+ # gcc specific flags
+ ifeq ($(shell $(CC) -v 2>&1 | grep -c "gcc version"), 1)
+-	CFLAGS += -ffloat-store
+-	CXXFLAGS += -ffloat-store
++	# HSFA : -ffloat-store only matters for extended-precision FPUs (x87) ; HSFA_NO_FLOAT_STORE=1 drops it (ARM builds)
++	ifneq ($(HSFA_NO_FLOAT_STORE), 1)
++		CFLAGS += -ffloat-store
++		CXXFLAGS += -ffloat-store
++	endif
+ 	ifeq ($(shell expr `$(CC) -dumpversion | cut -f1 -d.` \>= 5), 1)
+ 		CFLAGS += -finline-limit=1200 -fcheck-new
+ 		CXXFLAGS += -finline-limit=1200 -fcheck-new
+-- 
+2.53.0
+
