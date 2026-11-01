@@ -9,6 +9,11 @@ local ops = cpu.spaces["opcodes"] or mem
 local ports = manager.machine.ioport.ports
 local VS = os.getenv("VS") == "1"
 local PERDRE = os.getenv("PERDRE") == "1"
+-- (28/10) PERDRE_ETAPE=n / PERDRE_N (defaut 2) : comme tournee_arcade.lua (manches perdues a partir de l'etape n)
+local PERDRE_ETAPE = tonumber(os.getenv("PERDRE_ETAPE") or "")
+local PERDRE_N = tonumber(os.getenv("PERDRE_N") or "2")
+local PERDRE_J2 = tonumber(os.getenv("PERDRE_J2") or "", 16)   -- (e25) seulement contre cet adversaire ($103 de J2)
+local perdues, PERDRE_ICI = 0, false
 local VSBOUCLE = os.getenv("VSBOUCLE") == "1"   -- VERSUS en boucle : boutons J1/J2 hors combat (ecran RESULT -> nouvelle selection)
 local out = io.open(os.getenv("OUT"), "w")
 out:write("ESPACE " .. (cpu.spaces["opcodes"] and "opcodes" or "program") .. "\n")
@@ -70,9 +75,15 @@ emu.register_frame_done(function()
   if VS and combats == 0 and k >= 2000 and k % 24 >= 4 and k % 24 < 8 and not combat then on(":IN0", "P1 Button 1") end
   if VS and combats == 0 and k >= 2000 and k % 24 >= 12 and k % 24 < 16 and not combat then on(":IN0", "P2 Button 1") end
   if combats == 0 and k >= 2000 and k % 24 < 4 and jeu & 1 == 1 and not combat and (not PERSO or not ecran_sel or sel >= 120) then on(":IN0", "P1 Button 1") end
-  if jeu & 1 == 1 and not PERDRE then mem:write_u16(J1 + 0x50, 0x90); mem:write_u16(J1 + 0x52, 0x90) end
+  if jeu & 1 == 1 and not (PERDRE or PERDRE_ICI) then mem:write_u16(J1 + 0x50, 0x90); mem:write_u16(J1 + 0x52, 0x90) end
   if combat then
     stable = stable + 1
+    if stable == 1 then
+      PERDRE_ICI = false
+      if PERDRE_ETAPE and mem:read_u16(0xFF8114) >= PERDRE_ETAPE and perdues < PERDRE_N
+         and (not PERDRE_J2 or u8(J2 + 0x102) == PERDRE_J2) then   -- u8 : adresse ^ 1 (id 68K $103)
+        perdues = perdues + 1; PERDRE_ICI = true; out:write(string.format("PERDUE %d image %d\n", perdues, k)) end
+    end
     if stable == 60 then
       combats = combats + 1
       local la = tonumber(os.getenv("LISTE_ADV") or "FF40C0", 16); local t = {}
@@ -80,7 +91,7 @@ emu.register_frame_done(function()
       out:write(string.format("COMBAT %d %d J2 %02x etape %04x decor %04x liste %s\n", combats, k, u8(J2 + 0x102), mem:read_u16(0xFF8114),
         mem:read_u16(0xFF8100), table.concat(t, "")))
     end
-    if stable > 60 and PERDRE then
+    if stable > 60 and (PERDRE or PERDRE_ICI) then
       local v1 = mem:read_u16(J1 + 0x50)
       if v1 > 1 and v1 < 0x100 then mem:write_u16(J1 + 0x50, 1); mem:write_u16(J1 + 0x52, 1) end
     elseif stable > 60 then

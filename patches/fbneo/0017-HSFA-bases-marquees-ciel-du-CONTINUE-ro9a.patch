@@ -1,0 +1,71 @@
+From 00c95f67f4f4de879a0c63d705dcaa1d88cfc7ee Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 31 Oct 2026 20:34:10 +0100
+Subject: [PATCH] HSFA: marked plane bases, Hyper scroll1 under Upper's common
+ bank (ro9a CONTINUE sky)
+
+New config key marque_upper (hex bit mask, e.g. 8000). The marker bits of the plane base registers
+($804200-$804205) are ignored when addressing tiles; a marked scroll1 base also gives slot 0 Upper's common
+bank (commun_upper), like base_upper. The arcade graft can then show the Hyper stage sky (scroll1 base 0x300,
+Hyper tile codes) behind Upper's CONTINUE bars (objects in Upper's common bank) by writing 0x8300.
+Without the key, nothing changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index d2007b7..630e23b 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -69,6 +69,10 @@ static INT32 nIdxPlan1 = -1, nIdxPlan2 = -1, nIdxF312 = -1;
+ static INT32 nCfgCommun = 254;						// banque commune (emplacement 0) : SFA3 e254, Upper e351
+ static INT32 nCfgCommunUpper = 0;					// (greffe ro9a) banque commune des ecrans d'Upper (351), 0 = sans
+ static INT32 nCfgBaseUpper = 0x400;					// ... quand la base scroll1 ($804200) vaut celle des plans d'Upper
++// (greffe ro9a, patch 0017) bits de marquage des registres de plans ($804200-$804205), 0 = sans. Une base marquee
++// (ex. 0x8300 avec marque_upper=8000) adresse les tuiles sans ses bits de marquage (0x300 : plans d'Hyper) ; marquee
++// sur scroll1, elle donne aussi a l'emplacement 0 la banque commune d'Upper (commun_upper), comme base_upper
++static UINT16 nCfgMarqueUpper = 0;
+ static UINT32 nCfgPtrAnim = 0xFF3E48;				// pointeur d'animation de l'emplacement 4 (SFA3) / $FF40BC (Upper)
+ static INT32 nCfgGfxIntro = 456;					// fichier de l'emplacement 4 tant que le pointeur est nul
+ static INT32 bCfgPlans = 0;							// 1 = bases de plans du fork (Upper), 0 = renumerotation (SFA3)
+@@ -220,6 +224,7 @@ static void HsfaParseConfig(const char *s, UINT32 n)
+ 		if (strcmp(k, "commun") == 0) nCfgCommun = strtol(v, NULL, 10);
+ 		else if (strcmp(k, "commun_upper") == 0) nCfgCommunUpper = strtol(v, NULL, 10);
+ 		else if (strcmp(k, "base_upper") == 0) nCfgBaseUpper = strtoul(v, NULL, 16);
++		else if (strcmp(k, "marque_upper") == 0) nCfgMarqueUpper = (UINT16)strtoul(v, NULL, 16);
+ 		else if (strcmp(k, "ptr_anim") == 0) nCfgPtrAnim = strtoul(v, NULL, 16);
+ 		else if (strcmp(k, "gfx_intro") == 0) nCfgGfxIntro = strtol(v, NULL, 10);
+ 		else if (strcmp(k, "lat4") == 0) nCfgLat4 = strtol(v, NULL, 10);
+@@ -351,6 +356,8 @@ static void HsfaEmplacements(const HsfaEntry **e)
+ 	e[0] = HsfaBanque(nCfgCommun);
+ 	// (greffe ro9a) ecrans d'Upper (CONTINUE, GAME OVER, fins, planisphere) : objets en codes de la banque commune d'Upper
+ 	if (nCfgCommunUpper && nPlaneReg[0] == nCfgBaseUpper) e[0] = HsfaBanque(nCfgCommunUpper);
++	// (patch 0017) base scroll1 marquee (ciel du decor d'Hyper sous le CONTINUE d'Upper) : tuiles d'Hyper, objets d'Upper
++	if (nCfgCommunUpper && (nPlaneReg[0] & nCfgMarqueUpper)) e[0] = HsfaBanque(nCfgCommunUpper);
+ 	e[1] = (nIdxPlan2 >= 0) ? &HsfaEntries[nIdxPlan2] : NULL;
+ 	e[2] = HsfaBanque(HsfaPerso[RamB(0xFF8503)]);
+ 	e[3] = HsfaBanque(HsfaPerso[RamB(0xFF8903)]);
+@@ -545,7 +552,8 @@ static void HsfaBaseWrite(UINT32 a, UINT16 d)
+ static void HsfaUpdateScroll()
+ {
+ 	for (INT32 k = 0; k < 3; k++) {
+-		nCpsGfxScroll[k + 1] = nPlaneReg[k] ? ((UINT32)nPlaneReg[k] << 16) : 0x800000;
++		UINT16 b = nPlaneReg[k] & ~nCfgMarqueUpper;	// (patch 0017) sans les bits de marquage
++		nCpsGfxScroll[k + 1] = b ? ((UINT32)b << 16) : 0x800000;
+ 	}
+ }
+ 
+@@ -1546,7 +1554,7 @@ INT32 HsfaExit()
+ 	BurnFree(Raw90Ok);
+ 	nHsfaEntries = nHsfaAnims = 0;
+ 	nIdxPlan1 = nIdxPlan2 = nIdxF312 = -1;
+-	nCfgCommun = 254; nCfgCommunUpper = 0; nCfgBaseUpper = 0x400; nCfgPtrAnim = 0xFF3E48; nCfgGfxIntro = 456; bCfgPlans = 0;
++	nCfgCommun = 254; nCfgCommunUpper = 0; nCfgBaseUpper = 0x400; nCfgMarqueUpper = 0; nCfgPtrAnim = 0xFF3E48; nCfgGfxIntro = 456; bCfgPlans = 0;
+ 	nCfgLat4 = 1; nCfgLat4Max = 10;
+ 	nCfgPlans[0] = nCfgPlans[1] = nCfgPlans[2] = 0;
+ 	HsfaMode = 0;
+-- 
+2.53.0
+

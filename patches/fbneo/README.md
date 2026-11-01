@@ -35,6 +35,9 @@ Patchs contre [libretro/FBNeo](https://github.com/libretro/FBNeo), commit `af5d3
 | 16 | `0012-HSFA-16-9-format-remplir-la-hauteur.patch` | cœur 16:9 : option « Screen format (fill height) » (Off, 4:3, 3:2, 14:9, 16:10, 5:3, 16:9) ; largeur = format × 288 (pixels arcade : 384 px ↔ 4:3), paire, plafonnée à 448 ; rognage centré, géométrie libretro suivie | montrer sur un écran moins large que 16:9 la part du décor élargi qui y tient (forks « remplir la hauteur ») | [TRANSPARENCE](../../docs/rapports/TRANSPARENCE.md) §13 |
 | 17 | `0013-HSFA-pilote-sfa3umhsfa-Upper-MAX.patch` | pilote `sfa3umhsfa` « Street Fighter Alpha 3 Upper MAX (HSFA) » : mêmes ROM, init et options que `sfa3uhsfa`, `hsfa_trous.bin` facultatif, sans parent ; paquet : entrée `upper_max` → `sfa3umhsfa.zip` | Upper et Upper + MAX côte à côte (zips, états, réglages séparés), comparaison à l'œil des régressions | décision du 2026-10-24 |
 | 18 | `0014-HSFA-provocation-sur-Select-en-combat.patch` | option « Taunt on Select (in fight) » (DIP A bit 6, par défaut ; `HSFA_PROVOC`) : en combat (`$FF8000` = 2, `$FF8004` = 4), Pièce du joueur N ajoute le bit 15 aux écritures de `$378` (sans crédit) ; gestionnaire `$FF8400-$FF8BFF` installé pour tous les pilotes HSFA | le portage pose Start dans `$370` ET `$372` à la même image : le front `$378` n'existe jamais, la provocation par Start est impossible | décision du 2026-10-24 |
+| 19 | `0015-HSFA-banque-commune-Upper-greffe-ro9a.patch` | clés `commun_upper` / `base_upper` du `config` (pilote `sfa3hahsfa`) : quand la base scroll1 (`$804200`) vaut celle des plans d'Upper, l'emplacement 0 prend la banque commune d'Upper (e351) ; sans les clés, rien ne change | les écrans d'Upper greffés dans Hyper (CONTINUE, GAME OVER, portraits des fins, « NEXT STAGE ») codent leurs objets pour e351, Hyper range e545 dans l'emplacement 0 | greffe ro9a11, 2026-10-28 |
+| 20 | `0016-HSFA-roulette-sur-piece-Upper.patch` | pilotes `sfa3uhsfa` / `sfa3umhsfa` (mode 2 sans Hyper) : les écritures de `$FF84F3` / `$FF88F3` (drapeau de roulette d'Upper, recopie de Start par l'image 68K `$055404`) prennent la touche Pièce du joueur, sur la grille seulement (phases 2/2/4, état 0), comme `$D3` d'Hyper (patch 11) ; `HSFA_NOROUL=1` vaut aussi pour Upper ; Hyper et la greffe (`$D3`, déjà couverts) inchangés | Start tenu sur la grille lançait la roulette : Start + bouton sur Akuma / Balrog (Shin Akuma `$24`, EX Balrog `$25`, routine `$0570BE`) donnait un perso au hasard | étude « persos cachés d'Upper », décision du 2026-11-01 |
+| 21 | `0017-HSFA-bases-marquees-ciel-du-CONTINUE-ro9a.patch` | clé `marque_upper` du `config` (masque hexa, ex. `8000` ; pilote `sfa3hahsfa`) : les bits de marquage des registres de plans `$804200-$804205` sont ignorés pour adresser les tuiles ; une base scroll1 marquée donne aussi à l'emplacement 0 la banque commune d'Upper (`commun_upper`), comme `base_upper` ; la greffe pose `$8300` (plans d'Hyper + banque d'Upper) ; sans la clé, rien ne change | à la citation du vaincu et au CONTINUE, le ciel du décor d'Hyper est sur scroll1 en codes d'Hyper, mais la base d'Upper (`$400`) sert de signal à 0015 pour les barres CONTINUE : taches, puis ciel noir (`CONT_S1_MASQUE`, ro9a16) | greffe ro9a18, 2026-11-02 |
 
 **Numérotation.** « # » est le rang dans la chaîne ; les rapports disent « patch 8 » pour la ligne 8. Le patch 11b
 a été extrait du commit `bca36de` de l'arbre de référence. Il garde le préfixe `0007b` pour ne pas renuméroter 0008
@@ -66,7 +69,10 @@ for p in fbneo-hsfa-ws-flux.patch hyper-HSFA-pilote-sfa3hhsfa-Hyper-Street-Fight
          0009-HSFA-prototype-trous-carte-68K.patch 0010-HSFA-melange-des-objets-transparence.patch \
          0011-HSFA-option-ombres-transparentes-PSP.patch 0012-HSFA-16-9-format-remplir-la-hauteur.patch \
          0013-HSFA-pilote-sfa3umhsfa-Upper-MAX.patch \
-         0014-HSFA-provocation-sur-Select-en-combat.patch; do
+         0014-HSFA-provocation-sur-Select-en-combat.patch \
+         0015-HSFA-banque-commune-Upper-greffe-ro9a.patch \
+         0016-HSFA-roulette-sur-piece-Upper.patch \
+         0017-HSFA-bases-marquees-ciel-du-CONTINUE-ro9a.patch; do
   git apply --exclude=gamelist.txt --exclude='src/dep/generated/*' $P/$p
 done
 cd src/burner/libretro
@@ -84,6 +90,7 @@ nice -n 19 make -j4 SUBSET=hsfaws REGEN_HEADERS=1     # 16:9 -> fbneo_hsfaws_lib
   `make SUBSET=hsfa generate-files` dans `src/burner/libretro`, puis
   `NDK=<ndk> FBNEO=<arbre> tools/android/build_android.sh <sortie>` (les deux cœurs).
 - **ROCKNIX** (aarch64, glibc ≤ 2.38) : `FBNEO=<arbre> tools/rocknix/build.sh hsfa` (puis `hsfaws`).
+- **Recalbox 10** (Raspberry Pi 3 = armhf 32 bits, Pi 4 / 5 = aarch64 ; glibc 2.39, cœurs liés à ≤ 2.27) : `FBNEO=<arbre> tools/recalbox/build.sh armhf|aarch64 hsfa|hsfaws` ; installation : [docs/guide/installation-recalbox.md](../../docs/guide/installation-recalbox.md).
 - **Windows x64** (MinGW-w64, depuis Linux) : `tools/windows/build_win.sh <arbre> tous`.
 - **Lanceur d'essai** : `gcc -O2 -Isrc/burner/libretro/libretro-common/include -o hsfa_run hsfa/hsfa_run.c -ldl -lm`.
 

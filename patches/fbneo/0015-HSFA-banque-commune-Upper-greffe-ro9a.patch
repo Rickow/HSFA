@@ -1,0 +1,58 @@
+From 4bcdd946e3f76ec19645f7e9f651c7a6e28ec89b Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Wed, 28 Oct 2026 19:31:26 +0100
+Subject: [PATCH] HSFA: Upper common bank for Upper screens in the arcade graft
+ (ro9a)
+
+When config keys commun_upper / base_upper are set and the scroll1 base register ($804200) holds the Upper plane base,
+slot 0 uses Upper's common bank (e351): CONTINUE bars, GAME OVER letters, ending portraits and NEXT STAGE banner of the
+grafted Arcade mode. Without the keys, nothing changes.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 5974043..536627c 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -67,6 +67,8 @@ static INT32 nIdxPlan1 = -1, nIdxPlan2 = -1, nIdxF312 = -1;
+ 
+ // parametres (entree "config")
+ static INT32 nCfgCommun = 254;						// banque commune (emplacement 0) : SFA3 e254, Upper e351
++static INT32 nCfgCommunUpper = 0;					// (greffe ro9a) banque commune des ecrans d'Upper (351), 0 = sans
++static INT32 nCfgBaseUpper = 0x400;					// ... quand la base scroll1 ($804200) vaut celle des plans d'Upper
+ static UINT32 nCfgPtrAnim = 0xFF3E48;				// pointeur d'animation de l'emplacement 4 (SFA3) / $FF40BC (Upper)
+ static INT32 nCfgGfxIntro = 456;					// fichier de l'emplacement 4 tant que le pointeur est nul
+ static INT32 bCfgPlans = 0;							// 1 = bases de plans du fork (Upper), 0 = renumerotation (SFA3)
+@@ -216,6 +218,8 @@ static void HsfaParseConfig(const char *s, UINT32 n)
+ 		*eq = 0;
+ 		const char *k = line, *v = eq + 1;
+ 		if (strcmp(k, "commun") == 0) nCfgCommun = strtol(v, NULL, 10);
++		else if (strcmp(k, "commun_upper") == 0) nCfgCommunUpper = strtol(v, NULL, 10);
++		else if (strcmp(k, "base_upper") == 0) nCfgBaseUpper = strtoul(v, NULL, 16);
+ 		else if (strcmp(k, "ptr_anim") == 0) nCfgPtrAnim = strtoul(v, NULL, 16);
+ 		else if (strcmp(k, "gfx_intro") == 0) nCfgGfxIntro = strtol(v, NULL, 10);
+ 		else if (strcmp(k, "lat4") == 0) nCfgLat4 = strtol(v, NULL, 10);
+@@ -345,6 +349,8 @@ static void HsfaEmplacements(const HsfaEntry **e)
+ 	HsfaSuivre4();
+ 	for (INT32 i = 0; i < 8; i++) e[i] = NULL;
+ 	e[0] = HsfaBanque(nCfgCommun);
++	// (greffe ro9a) ecrans d'Upper (CONTINUE, GAME OVER, fins, planisphere) : objets en codes de la banque commune d'Upper
++	if (nCfgCommunUpper && nPlaneReg[0] == nCfgBaseUpper) e[0] = HsfaBanque(nCfgCommunUpper);
+ 	e[1] = (nIdxPlan2 >= 0) ? &HsfaEntries[nIdxPlan2] : NULL;
+ 	e[2] = HsfaBanque(HsfaPerso[RamB(0xFF8503)]);
+ 	e[3] = HsfaBanque(HsfaPerso[RamB(0xFF8903)]);
+@@ -1531,7 +1537,7 @@ INT32 HsfaExit()
+ 	BurnFree(Raw90Ok);
+ 	nHsfaEntries = nHsfaAnims = 0;
+ 	nIdxPlan1 = nIdxPlan2 = nIdxF312 = -1;
+-	nCfgCommun = 254; nCfgPtrAnim = 0xFF3E48; nCfgGfxIntro = 456; bCfgPlans = 0;
++	nCfgCommun = 254; nCfgCommunUpper = 0; nCfgBaseUpper = 0x400; nCfgPtrAnim = 0xFF3E48; nCfgGfxIntro = 456; bCfgPlans = 0;
+ 	nCfgLat4 = 1; nCfgLat4Max = 10;
+ 	nCfgPlans[0] = nCfgPlans[1] = nCfgPlans[2] = 0;
+ 	HsfaMode = 0;
+-- 
+2.53.0
+

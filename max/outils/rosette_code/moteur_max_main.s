@@ -621,8 +621,8 @@ psp_5df68:
 
 ; ---- psp_77e00 / psp_5fd4c : appelées par psp_5df68 ; traduction automatique recopiée (traduire.py, 2026-10-07)
 psp_77e00:
-        move.b    #$5, $362(a6)
-        move.b    #$1, $3f3(a6)
+        move.b    #$a, $202(a6)         ; PSP +0x1E2 = 5 (×2) ; Q20.1 : bloc IA = arcade $2xx
+        move.b    #$2, $203(a6)         ; PSP +0x1E3 = 1 (×2)
         move.b    #$2, $4(a6)
         move.b    #$10, $6(a6)
         clr.b     $7(a6)
@@ -631,11 +631,11 @@ psp_77e00:
         clr.b     $2c5(a6)
         clr.b     $2c8(a6)
         clr.b     $5b(a6)
-        move.b    $3f2(a6), $aa(a6)
-        clr.b     $365(a6)
-        tst.b     $364(a6)
+        move.b    $20b(a6), $aa(a6)     ; PSP octet +0x1EA (bas du mot $20A)
+        clr.b     $20d(a6)              ; PSP octet +0x1EC
+        tst.b     $20a(a6)              ; PSP octet +0x1EB (haut du mot $20A)
         bgt     L_77e74
-        tst.b     $364(a6)
+        tst.b     $20a(a6)              ; PSP octet +0x1EB (haut du mot $20A)
         bmi     L_77ec8
         clr.b     $244(a6)
         move.w    #$f, $2a6(a6)
@@ -643,9 +643,9 @@ psp_77e00:
         move.b    #$1, $d6(a6)
         rts
 L_77e74:
-        cmpi.b    #$2, $364(a6)
+        cmpi.b    #$2, $20a(a6)
         blt     L_77e90
-        cmpi.b    #$3, $364(a6)
+        cmpi.b    #$3, $20a(a6)
         blt     L_77eb0
         bra     L_77ec8
 L_77e90:
@@ -1220,3 +1220,41 @@ psp_1c3e60:
         clr.b   $5d(a0)
         jmp     $2baf2.l
 .x:     rts
+
+; ---- psp_cf560 (PSP 0xCF560 = 0x79144 + 0x7BD2C) : rémanences + suite ; ÉCRITE À LA MAIN pour Ingrid (R22, 2026-10-31)
+; PSP 0x79144 = arcade $804DA (3 copies du joueur, classe $03, délais 8 / 16 / 24, palette = $D du parent + décalage) ; le
+; décalage dépend de +0x251 (arcade $271, table 0x215633[id × 4 + isme]) : 3 -> +3/+3/+3, 4 -> +3/+4/+4 et $C = 1,
+; 5 -> +4/+6/+6, sinon +3/+4/+4 (arcade : $271 = 6 / 8 seulement). Ingrid seule a +0x251 = 5 (les 3 ismes) : sur PSP, 1re copie =
+; palettes 4 / 5 du groupe (bleu clair haut / jambes), 2e et 3e = 6 / 7 (bleu foncé). Upper n'a que 5 palettes par joueur (le
+; +5 des jambes tombait sur la palette 0 de J2 : jambes vertes) -> pour Ingrid, palette ABSOLUE des copies : REM_CLAIR
+; (paire bleu clair) et REM_FONCE (paire bleu foncé), mêmes pour J1 et J2 (teintes identiques dans les 6 variantes de couleur).
+; Autres persos MAX : +0x251 = 0 sur PSP = cas par défaut de $804DA, inchangés.
+psp_cf560:
+        movem.l d0-d2, -(sp)
+        cmpi.b  #$2e, $102(a6)
+        bne.s   .natif
+        move.b  $2a0(a6), -(sp)         ; $804DA pose $2A0 = 8 seulement s'il crée les 3 copies (A4, A3, A2)
+        clr.b   $2a0(a6)
+        jsr     $804da.l
+        cmpi.b  #8, $2a0(a6)
+        beq.s   .copies
+        move.b  (sp)+, $2a0(a6)         ; rien de créé : $2A0 rendu
+        bra.s   .suite
+.copies:
+        addq.l  #2, sp
+        move.b  #REM_CLAIR, $d(a4)
+        move.b  #REM_FONCE, $d(a3)
+        move.b  #REM_FONCE, $d(a2)
+        move.b  $c(a6), $c(a4)          ; pas de mélange ($C = 1 du cas $271 = 8) : comme la PSP pour +0x251 = 5
+        move.b  $c(a6), $c(a3)
+        move.b  $c(a6), $c(a2)
+        bra.s   .suite
+.natif: jsr     $804da.l
+.suite: move.w  2(sp), d3               ; suite = traduction automatique : 0x7BD2C (= $82E36) avec les arguments 2 / 3
+        ext.l   d3
+        move.l  d3, d0
+        move.w  6(sp), d3
+        ext.l   d3
+        move.l  d3, d1
+        lea     12(sp), sp
+        jmp     $82e36.l

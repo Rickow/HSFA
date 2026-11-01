@@ -75,6 +75,15 @@ def prepare(out, persos, conv_dir):
         J["apercu"][pid] = dict(local=loc, g=G_PLUS + k, n=len(TA))
         L += source_apercu(out, pid, A + "apercu.s", loc, CF)
         loc += len(TA)
+    # 3b. (2b26, R20.4 de la session MAX) LOGO DU TITRE « ZERO 3 » : frame de type 8 (route des portraits : emplacement 1,
+    #     plan2 prolongé) ; tuiles brutes alignées sur 16 (codes locaux 0-228 de titre_zero3_k8_frame.json) ; la frame et
+    #     les palettes sont posées par integre_max.titre(). MAX_LOGO=0 : sans (fichier identique à l'octet).
+    ft_ = CV + "titre/titre_zero3_k8_tuiles.bin"
+    if os.environ.get("MAX_LOGO", "1") == "1":
+        assert os.path.exists(ft_), "logo du titre absent : %s (MAX_LOGO=0 pour s'en passer)" % ft_
+        TT = tuiles(ft_); k = (len(gfx) + 15) & ~15
+        for j, t in enumerate(TT): pose(k + j, t)
+        J["titre"] = dict(code=code_plan2(G_PLUS + k), g=G_PLUS + k, n=len(TT))
     assert len(gfx) < 0x2000 - 2100, "plan2 prolongé : %d tuiles" % len(gfx)
     # 4. BIO (écran d'histoire, session MAX : converti/plXX/bio/) : tuiles neuves rangées à la suite ; table du fichier
     #    (format banques_hx/f<N>.bin) : 0x40000000 | code local -> tuile globale G_PLUS + k

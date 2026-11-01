@@ -107,6 +107,23 @@ for _i, _f in enumerate(CONT_GREFFE):
 FIN05_GREFFE = (0x2139C0, 0x21AB10, 0x20FFF0, 0x2100C0, 0x2101E0)   # + 0x21AB10 (creation de l objet $4D) -> Hyper 0x327510 (j)
 if os.environ.get("FIN05_GREFFE", "1") == "1":
     for _f in FIN05_GREFFE: ARCADE[_f] = ('GREFFE',)
+# (28/10) CONT_JOUEUR=1 : Upper 0x24AA40 (rend en A0 le joueur qui continue : LEA $0400(A5),A0...) etait envoyee par le tri
+# (regle d) a Hyper 0x2D90D0, une routine de joueur sans rapport : $9EA4 recevait $FC78 au lieu de $8400 -> l'objet du
+# grand chiffre de CONTINUE lisait $10C d'un faux joueur (chiffre fige sur 0). Copie d'Upper.
+if os.environ.get("CONT_JOUEUR", "1") == "1":
+    ARCADE[0x24AA40] = ('GREFFE',)
+# (01/11, essai) CHALLENGER=1 : Upper 0x1353A0 (arrivee d'un 2e joueur en cours de partie : (A5) = 2, $2-$F(A5) = 0 ->
+# scene de selection) etait envoyee par la regle j) (non vue en Arcade) a Hyper 0x9A570 (ADDQ.W #2,$8(A5) a chaque appel)
+# -> A5+8 = 8, A, ..., $14 hors de la table de la scene 4 d'Upper -> plantage (pc $A08) des le « nouveau challenger ».
+if os.environ.get("CHALLENGER", "1") == "1":   # (e25) defaut 1
+    ARCADE[0x1353A0] = ('GREFFE',)
+# (28/10) FIN0D_GREFFE=1 : Upper 0x21AE40 (appelee par le gestionnaire du type d'objet $50, 0x21ADD0, acteur de la fin de
+# Sakura) et 0x20F3A0 etaient envoyees toutes deux a Hyper 0x4CF60 par la regle j) (homologue NON injectif) : code de
+# joueur d'Hyper ($67 / $26A de A1) sur un pointeur faux -> octets $01 semes dans la reserve d'objets ($FFDA00) -> le dessin
+# d'Hyper plante ($2B8). Copies d'Upper.
+FIN0D_GREFFE = (0x21AE40, 0x1B8B20)
+if os.environ.get("FIN0D_GREFFE", "0") == "1":   # (28/10) essai : cascade (type $26, puis table des types) -> 0
+    for _f in FIN0D_GREFFE: ARCADE[_f] = ('GREFFE',)
 # (2026-10-28) INTERMEDES=1 : scenes d'Upper AVANT le combat (sous-etat 2 du combat, 0x266280 : aiguillage
 # T_61C2C0[$13E(A5)]) : rival, intrusion (perso 19 : BSET #5,$148(J1) + J2 = $15 en 0x266B9C, puis Final Battle). Hyper
 # 0x9B350 a le MEME code mais sa table T_5B5F60 renvoie toutes les entrees sur 0x9B4F0 (rien) -> dans ro9a les bits de
@@ -116,13 +133,27 @@ if os.environ.get("FIN05_GREFFE", "1") == "1":
 INTERMEDES = (0x266280, 0x2664F0, 0x266560, 0x266950, 0x266990, 0x266A00, 0x266EB0, 0x266F20, 0x267770, 0x2677B0, 0x267820)
 def force():
     d = dict(F2.FORCE); d.update(ARCADE)
+    # (28/10) DECISIONS_ANCIENNES=<json {routine: decision}> : bissection (decisions de ro9a9 remises sur une liste)
+    _da = os.environ.get("DECISIONS_ANCIENNES", "<workspace>/work/greffe_arcade/donnees/decisions_anciennes_e12.json")   # (ro9a10) defaut : 182 decisions de ro9a9 gardees ; "" : aucune
+    if _da:
+        import json as _js
+        for _k, _v in _js.load(open(_da)).items():
+            d[int(_k, 16)] = ('HYPER', int(_v[1], 16)) if _v[0] == 'HYPER' else ('GREFFE',)
     # (etape 4) choix du decor d'Upper (0x24F020 : T_61BE10, boss $14, rival) au lieu de celui d'Hyper (etape 2) : $174/$100
     # en numerotation d'Upper ; le talon vs_decor ramene le combat a un decor d'Hyper et sauve la valeur pour la fin
     if os.environ.get("DECOR_UPPER_CHOIX", "1") == "1": d.pop(0x24F020, None)
     if os.environ.get("COMBAT_HYPER", "1") == "1":
         d.update(COMBAT); d.update(COMBAT_SYNTH)
-        if os.environ.get("INTERMEDES", "0") == "1":
+        if os.environ.get("INTERMEDES", "1") == "1":
             for _f in INTERMEDES: d[_f] = ('GREFFE',)
         if os.environ.get("VS_UPPER", "1") != "1": d.update(VS_HYPER)
+    # (e27) FIN_ACTEURS_GREFFE (defaut 213110,2138b0) : gestionnaires d'ACTEURS DE FIN d'Upper (table des classes T_619D30,
+    # 25 entrees, aiguillage 0x2119B8) gardes par DECISIONS_ANCIENNES (regle j, « non vue en Arcade ») sur des homologues
+    # d'Hyper SANS RAPPORT : classe $10 (0x213110 -> 0x393CD0, interpreteur de script d'Hyper : lit $1C = 0, puis les
+    # vecteurs de la ROM) et classe $18 (0x2138B0 -> 0x2B7A60, routine de joueur d'Hyper) : fins de Bison (0a) et de
+    # Rose (09) ; aboutissaient par hasard dans ro9a18, exception $A08 dans ro9a19 (code et donnees decales). Copies d'Upper.
+    # Vide -> comme ro9a19.
+    for _x in os.environ.get("FIN_ACTEURS_GREFFE", "213110,2138b0").split(','):
+        if _x: d[int(_x, 16)] = ('GREFFE',)
     return d
 FORCE = force()

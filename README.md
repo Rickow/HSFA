@@ -7,10 +7,11 @@
 > **No game data is provided.** You need your own copy of *Street Fighter Alpha Anthology* (PS2, USA, `SLUS-21317`).
 > Not in this release: **Upper MAX** (the four SFA3 MAX characters) and the **Arcade-mode graft** onto Hyper.
 
-1. **Download the cores** from the [releases](../../releases) page: `hsfa-v0.1-cores-<platform>.zip` for Android
-   (arm64), ROCKNIX (aarch64: RGB10X, R36S…), Windows (x64) or Linux (x86_64). Each archive holds the 4:3 core
+1. **Download the cores** from the [releases](../../releases) page: `hsfa-v0.1.2-cores-<platform>.zip` for Android
+   (arm64), ROCKNIX (aarch64: RGB10X, R36S…), Windows (x64), Linux (x86_64) or Recalbox 10 (Raspberry Pi; not yet
+   tried on a real Pi). Each archive holds the 4:3 core
    (`fbneo_hsfa`) and the 16:9 core (`fbneo_hsfaws`), with their licence.
-2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Easiest: download `hsfa-v0.1-construction.zip`
+2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Easiest: download `hsfa-v0.1.2-construction.zip`
    from the release (or this repository), then run **`construire.sh`** (Linux, macOS, WSL) or double-click
    **`construire.bat`** (Windows, experimental: untested so far) and give it your ISO. It sets up Python, checks for
    ffmpeg, and builds the three games into `sortie/archives/`. By hand:
@@ -28,8 +29,11 @@
      [docs/guide/construction-iso.md](docs/guide/construction-iso.md) (in French).
 3. **Install and play**: copy the core into RetroArch's `cores` folder and the three zips into your ROM folder (keep
    their names), then load a zip with "FinalBurn Neo HSFA" (4:3) or "FinalBurn Neo HSFA Widescreen" (16:9). Guides
-   (in French): [Android](docs/guide/installation-android.md), [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md),
+   (in French): [Android](docs/guide/installation-android.md), [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md), [Recalbox](docs/guide/installation-recalbox.md),
    [Windows](tools/windows/LISEZMOI-windows.md); on Linux, copy the `.so` files into `~/.config/retroarch/cores/`.
+
+**Feedback**: bugs and questions in the [Issues](../../issues) (English or French), especially for Recalbox,
+not yet tried on a real Raspberry Pi.
 
 Prefer the PS2 game itself? Two ISO patchers (all unlocked, native 16:9) are described
 [below](#playing-the-anthology-on-ps2--pcsx2).
@@ -58,7 +62,7 @@ They run in two environments:
 
 > **Picking the project up** (human or agent): read [AGENTS.md](AGENTS.md) (in French): rules, method, findings and open work, updated with every discovery.
 
-## Status (2026-10-27, release v0.1)
+## Status (2026-11-02, release v0.1.2)
 
 **Working**
 
@@ -68,10 +72,10 @@ They run in two environments:
 | Upper (`ro5`) | playable end to end, **40/40 endings**; hybrid sound ROM (SFA3 music + Upper voices); the music that exists only as streams on the disc is packed in the zip as Ogg Vorbis | [§122-§128](docs/journal/HANDOFF.md), [FLUX](docs/rapports/FLUX.md) |
 | Hyper (`ro9`) | VERSUS without exceptions (151-match tour); supers of the ZERO / ZERO 2 / ALPHA versions no longer crash; super gauge and TRAINING fixed; ZERO / ZERO 2 / ALPHA music in the zip (Ogg Vorbis); per-version SFA1 / SFA2 voices replayed on a 2nd QSound when the replay table is present (see below) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
 | Menus | OPTION and EXIT return to the mode menu; the PS2 option-screen settings (difficulty, damage, timer, speed, rounds) are core options | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
-| FBNeo HSFA core | Android, Linux, ROCKNIX, Windows; 4:3 and 16:9 (with "Screen format (fill height)" for 4:3 to 16:10 screens); PSP-style transparent shadows; taunt on Select in fights; tested by the user on RG477M and RGB10X | [patches](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
+| FBNeo HSFA core | Android, Linux, ROCKNIX, Windows, Recalbox 10 (v0.1.2, Raspberry Pi; untested on hardware); 4:3 and 16:9 (with "Screen format (fill height)" for 4:3 to 16:10 screens); PSP-style transparent shadows; taunt on Select in fights; Upper's hidden characters (v0.1.2: hold Start + a button on Akuma / Balrog for Shin Akuma / EX Balrog, Coin for the roulette); tested by the user on RG477M and RGB10X | [patches](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
 | Build from the ISO | `hsfa_build.py` builds the three games from your ISO alone; program ROMs identical (md5) to the official v153 archives (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `a5f7fae0` with the replay table); zips identical from one build to the next | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
 
-**Known limits of v0.1**
+**Known limits of v0.1.x**
 
 - **Hyper's per-version voices** need the QSound replay table of SFA1 / SFA2 (`--rejeu-table`, see the
   [build guide](docs/guide/construction-iso.md)). Without it,

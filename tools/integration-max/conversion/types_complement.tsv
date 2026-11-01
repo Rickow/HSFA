@@ -47,3 +47,7 @@ objet	$127	1	u8	$126	mesuré (agent_integration_max) : agent_typage_max/q.py A6:
 objet	$1A	2	s16	$1A	mesuré (agent_integration_max) : mot (emplacement de banque x $2000) écrit en mot au même déplacement par Upper (image $31F66 « MOVE.W D1,$1A(A6) », BANQUE-1A §2.1) ; le code MAX le lit en mot (move.w $1a(a1),$18(a6), 25 sites)
 acteur	$1A	2	s16	$1A	idem (acteurs de fin : MOVE.W #$8000,$1A(A6) en image $4B530)
 objet	$EA	1	u8	$EB	session MAX (contres_max.s, 17/10) : PSP +0xC3 -> $EA (image $EB), pierre de Rosette = gestionnaire de contre 4 d'Upper (image $40EC)
+objet	$202	1	u8	$203	(2b25, R20.1) bloc IA : action ×2 (PSP +0x1E2) ; natif image $DE64 MOVE.W #$020A,$202
+objet	$203	1	u8	$202	(2b25, R20.1) bloc IA : sous-action ×2 (PSP +0x1E3)
+objet	$20A	2	s16	$20A	(2b25, R20.1) bloc IA : mot d'opérande (PSP +0x1EA) ; natif BTST #3,$020A / MOVE.B $020B
+objet	$20C	2	s16	$20C	(2b25, R20.1) bloc IA : 2e mot (PSP +0x1EC) ; natif CLR.B $020D

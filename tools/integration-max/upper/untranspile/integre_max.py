@@ -325,7 +325,11 @@ def donnees(buf, data, end, T, W=None):
         for m in re.finditer(r"; (0x[0-9A-F]+)(?: / 0x[0-9A-F]+)? \((.*?)\)\[\$([0-9A-F]{2})\] = (\([^)]*\)|[^\s(]+)\s+\(([^\n]*)", tt):
             t_, genre, idh, val = int(m.group(1), 16), m.group(2), m.group(3).lower(), m.group(4).strip()
             if idh not in ACTIFS or val.startswith("aucune"): continue
-            if "probable" in m.group(5) and os.environ.get("MAX_TABLES_PROBABLES", "0") != "1": continue
+            # (2b25) probables posées par table : MAX_TABLES_PROBABLES = liste de tables (défaut 615570,620E30 : valeurs PSP
+            # lues ; 0x623E50 laissée : R9-bis ne donne que la 1re de ses 3 rangées, Eagle / Maki = 0 et rien pour Yun /
+            # Ingrid -> Q20), « 1 » = toutes, « 0 » = aucune (2b24)
+            prob_ = os.environ.get("MAX_TABLES_PROBABLES", "615570,620E30").upper()
+            if "probable" in m.group(5) and prob_ != "1" and ("%X" % t_)[-6:] not in prob_.split(","): continue
             v = [int(x) for x in val.strip("()").split(",")]
             if genre.startswith("octet") or genre.startswith("ID ->"): b_ = bytes([v[0] & 0xFF])
             elif genre.startswith("mot"): b_ = struct.pack("<h", v[0])
@@ -333,6 +337,18 @@ def donnees(buf, data, end, T, W=None):
             rangs = (0,)
             for r in rangs: pose(t_, int(idh, 16), b_, rang=r)
             nb += 1
+        # (2b25, R20.3) 0x623E50 = PSP 0x262A6C (3 rangées de 40 mots : en l'air / accroupi / debout ; hauteur visée par
+        # l'attaque plongeante 0x11D2A8 selon l'ID ADVERSE). Sur PSP : Eagle / Maki = 0 (bourrage), Yun / Ingrid = lecture
+        # par débordement -> natif de gabarit proche (session MAX) : Eagle <- Sagat, Maki <- Guy, Yun <- Ryu, Ingrid <-
+        # Chun-Li. MAX_623E50 = proche (défaut) | psp (fidélité stricte) | 0 (aucune pose : copie de Ryu).
+        m6 = os.environ.get("MAX_623E50", "proche")
+        V6 = {"proche": {"26": (80, 64, 92), "27": (56, 56, 81), "2d": (57, 50, 76), "2e": (56, 56, 72)},
+              "psp": {"26": (0, 0, 0), "27": (0, 0, 0), "2d": (50, 76, 10), "2e": (48, 74, 0)}}.get(m6)
+        if V6:
+            for idh, vs in V6.items():
+                if idh in ACTIFS:
+                    for r_, v_ in enumerate(vs): pose(0x623E50, int(idh, 16), struct.pack("<h", v_), rang=r_); nb += 1
+            log("0x623E50 (attaque plongeante, 3 rangées) : MAX = %s" % m6)
         # Ingrid : « FROM: ? » sur PSP (aucune origine) -> position de Ryu en attendant le relevé PPSSPP (R8-bis)
         if "2e" in ACTIFS: pose(0x616B30, 0x2E, struct.pack("<hh", 373, 910)); nb += 1
         log("tables par id (R8 / R9) : %d valeurs posées (demi-largeur, jauges, étoiles, positions, carte)" % nb)
@@ -388,6 +404,15 @@ def donnees(buf, data, end, T, W=None):
     log("RESULT du VERSUS : noms %s (0x97AF50, 2 rangées)" % ", ".join(PERSOS[p]["nom"].upper() for p in ACTIFS))
     portraits(buf, data, end, pose)
     hud_apercu(pose)
+    titre(data, o)
+    # (2b26, R21 de la session MAX) décors « maison » des MAX (homologue PSP 0x20B3A8, même numérotation que T_61BE10 =
+    # décor / 2 d'Upper) : Eagle 8 (Birdie), Maki 7 (Guy), Yun 33 (Fei-Long), Ingrid 0 (Ryu) ; T_61BE10 (copie agrandie
+    # à 48) et sa variante T_61BE40 ($C3A4(A5) ≠ 0 ; prolongée à 48 : agrandit_max.AJOUTEES) ; natifs inchangés.
+    # MAX_DECORS_MAISON=0 : valeurs d'avant (copies de Ryu / Juli).
+    if os.environ.get("MAX_DECORS_MAISON", "1") == "1":
+        for t_ in (0x61BE10, 0x61BE40):
+            for p in ACTIFS: pose(t_, int(p, 16), bytes([DECOR_MAISON[p]]))
+        log("décors maison (R21) : %s -> T_61BE10 / T_61BE40" % ", ".join("%s %d" % (PERSOS[p]["nom"], DECOR_MAISON[p]) for p in ACTIFS))
     # grille de sélection : Eagle (0,2), Maki (0,4), Yun (6,4), Ingrid (6,2) ; les « ? » restantes renumérotées au-delà
     # du seuil ($30), mêmes drapeaux
     g = o(T_GRILLE)
@@ -413,6 +438,67 @@ MUSIQUE = {"26": 0x11, "27": 0x10, "2d": 0x1A, "2e": 0x12}   # thèmes QSound d'
                                      # (thème à flux), [$2D/$2E] hors de la table de 45 -> $00)
 JAUGES = {"26": (40, 72), "27": (40, 68), "2d": (40, 64), "2e": (40, 68)}   # (garde $2CC, seuil d'étourdissement $24D) :
                                      # session MAX (tables PSP = Upper 0x74C680 / 0x74C6A8, ordre brut du fichier)
+DECOR_MAISON = {"26": 8, "27": 7, "2d": 33, "2e": 0}   # (R21) décor / 2 : Birdie, Guy, Fei-Long, Ryu
+
+# ------------------------------------------------------------------------------------------------- logo du titre (2b26)
+# Relevé (essais/b35/titre, b36/titre) : le logo « ALPHA 3 » = 6 acteurs de classe $37 (sous-types 0, 1, 2, 3, 5, 7 ; init
+# image $4394A / $4397A : position T $AED70, animation = mot +2 de 0x96F710[(2·sous-type + $88(A5))·4] dans la table
+# rel16 0x6483D0 = anims 7, 8, 9, 10, 6, 11), chacun charge SA palette ($1A120) : OBJ 1 ← 0x7396F0 (image $1CFA30),
+# 2 ← +$80, 3 ← +$100, 4 ← +$180, 8 ← +$200 ; plaque blanche (plan 1) = plans $52 + $53 de T_60c850[0] (00 00 52 53,
+# 0 = aucun ; image $A376 ; moitiés gauche / droite, essais/b36/titre/plan1*.txt). Remplacement (MAX=1) : frame de type 8 (R20.4, ancre (192, 112)) sur le sous-type 1, posé en
+# (160, 143), Y vers le haut = écran (160, 97) -> objets décalés de (+32, +15) ; frame vide (1 tuile transparente) sur les 5 autres
+# (le sous-type 6, anim 14, acteur $FFBC80, n'est pas le ® vert : celui-ci est un objet de texte, palette 31, code $DF96) ; plan $52 -> 0 ;
+# palettes ABSOLUES (attributs) : relatives 0-3 -> OBJ 1, 2, 3, 4 (sources chargées par l'init du titre, image $9A08-$9A52 :
+# remplacées dans les données), 4-7 -> OBJ 8-11 (le chargement de OBJ 8, image $9A58 « LEA $1CFC30,A0 ; LEA $90C100,A1 ;
+# MOVEQ #0,D7 ; JSR $1A0FE », lit nos 4 palettes du bloc : LEA -> bloc, MOVEQ #3 ; fait dans image()). Les palettes 12-19
+# du jeu OBJ ne sont PAS rechargées au titre (écrasées par l'attraction : essais/b36/titre/pal39b.txt). MAX_LOGO=0 : sans.
+LOGO_BLOC = 0xEF0000
+LOGO_PAL_SLOTS = (1, 2, 3, 4, 8, 9, 10, 11)
+LOGO_PAL_SRC = {1: (0x7396F0, 0x739690), 2: (0x739770, 0x739710), 3: (0x7397F0, 0x739790), 4: (0x739870,)}   # sources
+                                   # chargées par l'init du titre (image $9A08-$9A52) et par la 2e init du logo ($746C-$74B6)
+LOGO_PAL_OFF = None                                   # palettes 4-7 dans le bloc (OBJ 8-11), posé par titre()
+LOGO_ANIMS = 0x6483D0                                 # table rel16 des animations des acteurs du titre
+LOGO_SOUS_TYPES = {0: 7, 1: 8, 2: 9, 3: 10, 5: 6, 7: 11}   # sous-type -> n° d'animation ($88(A5) = 1)
+def titre(data, o):
+    if os.environ.get("MAX_LOGO", "1") != "1": return
+    HP = json.load(open(os.path.join(DIR, "max_plus.json")))
+    assert "titre" in HP, "max_plus.json sans logo (prepare_max avec MAX_LOGO=1)"
+    fj = json.load(open(MC.CV + "titre/titre_zero3_k8_frame.json"))
+    pal = open(MC.CV + "titre/titre_zero3_k8_palettes.bin", "rb").read()
+    assert fj["palettes"] == 8 and len(pal) == 8 * 32 and tuple(fj["ancre"]) == (192, 112)
+    # plaque blanche (plan 1) : plan $52 retiré de la liste du titre
+    a = o(0x60C850); assert bytes(data[a:a + 4]) == bytes([0, 0, 0x52, 0x53]), "T_60c850[0] inattendue"
+    data[a + 2] = data[a + 3] = 0                     # plans $52 / $53 = moitiés gauche / droite de la plaque (plan 1)
+    # frames : logo (sous-type 1) et frame vide (une tuile transparente, code local 15)
+    c0 = HP["titre"]["code"]; dx, dy = 192 - 160, 112 - (240 - 143)   # acteur en (160, 143), Y vers le haut : écran (160, 97)
+    blk = bytearray(struct.pack("<HHH", 8, fj["T"], len(fj["objs"]) - 1))
+    for L, at, x, y in fj["objs"]:
+        assert (at & 0x1F) < 8 and L < HP["titre"]["n"]
+        blk += struct.pack("<HHhh", (c0 + L) & 0xFFFF, (at & ~0x1F) | LOGO_PAL_SLOTS[at & 0x1F], x + dx, y + dy)
+    while len(blk) & 3: blk += b"\0"                  # frames alignées sur 4 (piège cnop 0,4)
+    vide = len(blk)
+    blk += struct.pack("<HHHHHhh", 8, 1, 0, (c0 + 15) & 0xFFFF, LOGO_PAL_SLOTS[0], 0, 0)
+    while len(blk) & 0x1F: blk += b"\0"
+    global LOGO_PAL_OFF; LOGO_PAL_OFF = len(blk)       # palettes 4-7 (format module, mots 0-14 ; mot 15 = n° d'OBJ)
+    for r in range(4, 8):
+        ws = list(struct.unpack_from("<16H", pal, 32 * r)); ws[15] = LOGO_PAL_SLOTS[r]
+        blk += struct.pack("<16H", *[w & 0x0FFF for w in ws])
+    open(os.path.join(os.environ.get("MAX_W"), "ext_%06x.bin" % LOGO_BLOC), "wb").write(
+        bytes(b for j in range(0, len(blk), 2) for b in (blk[j + 1], blk[j])))
+    BLOCS_PLUS.append("%06x" % LOGO_BLOC)
+    # pas des 6 acteurs : pointeur de frame (+4) -> logo / vide
+    for st, n in LOGO_SOUS_TYPES.items():
+        pas = LOGO_ANIMS + struct.unpack_from("<H", data, o(LOGO_ANIMS + 2 * n))[0]
+        av = struct.unpack_from("<I", data, o(pas + 4))[0]
+        assert 0x64E000 <= av < 0x64F000, "pas du titre (sous-type %d) : frame $%x inattendue" % (st, av)
+        struct.pack_into("<I", data, o(pas + 4), LOGO_BLOC + (0 if st == 1 else vide))
+    # palettes : mots 0-14 du module (stylo 15 = transparent), mot 15 (n° de palette du jeu) gardé
+    for r, s in enumerate(LOGO_PAL_SLOTS[:4]):
+        ws = struct.unpack_from("<15H", pal, 32 * r)
+        for a_ in LOGO_PAL_SRC[s]: struct.pack_into("<15H", data, o(a_), *[w & 0x0FFF for w in ws])
+    log("logo du titre : frame type 8 (%d objets, T=%d) en $%x, vide en $%x ; 6 pas des acteurs $37 ; plans $52 / $53 retirés ; "
+        "palettes -> OBJ %s" % (len(fj["objs"]), fj["T"], LOGO_BLOC, LOGO_BLOC + vide, ", ".join(map(str, LOGO_PAL_SLOTS))))
+
 def hud_apercu(pose):
     """noms et visages de la barre de vie, petit sprite d'aperçu de la sélection, jauges (outils/hud_apercu_max.py)"""
     HP = json.load(open(os.path.join(DIR, "max_plus.json")))
@@ -1224,6 +1310,28 @@ def image(img, its, T, W, ext_plus, carte_lignes, code_fin=None):
             b_ = bytes.fromhex(pat); k = img.find(b_, 0x1000, 0x3A0000)
             assert k > 0 and img.find(b_, k + 2, 0x3A0000) < 0, "défense par victime : motif %s" % pat
             img[k + 7] = 0x3F
+    # (2b25, R16.4) GARDE pendant une pose de contre : la PSP (0x718E8, appelé par 0x717CC avec l'octet 5 du jeu de boîtes
+    # du défenseur = type de contre) refuse la garde pour les types 4 et 7 à 14 ; Upper ($4D6A, appelé par $4082 via
+    # $244DE ; types 1-127, $FF exclu par BLE) ne la refuse que pour 4, 7, 8, 9 -> Ingrid en pose QCB+K / QCB+P (types
+    # $0D / $0E) GARDAIT les coups non contrés (sous-état 0004 Upper / 0002 PSP, banc mode B IC4 / IC6 ; dégâts de garde
+    # 1 par touche sous le Kikosho). « CMPI.B #9,D0 ; BEQ » -> « BCC » (types >= 9) : même taille, mêmes cycles, aucun
+    # type natif >= 10 (Upper : 0-9 et $FF) -> chemin natif identique. MAX_GARDE_CONTRE=0 : sans.
+    if os.environ.get("MAX_GARDE_CONTRE", "1") == "1":
+        import re as _reg
+        m_ = list(_reg.finditer(rb"\x0c\x00\x00\x04\x67.\x0c\x00\x00\x07\x67.\x0c\x00\x00\x08\x67.\x0c\x00\x00\x09\x67.", bytes(img[:0x3A0000]), _reg.S))
+        assert len(m_) == 1, "garde des contres : motif ($4D6A) trouvé %d fois" % len(m_)
+        k_ = m_[0].start() + 22
+        assert img[k_] == 0x67; img[k_] = 0x64
+        log("garde pendant un contre : types >= 9 sans garde (BEQ -> BCC en $%x)" % k_)
+    # (2b26) logo du titre : le chargement de la palette OBJ 8 de l'init du titre lit les palettes 4-7 du logo (bloc
+    # LOGO_BLOC) dans OBJ 8-11 (même taille d'instructions ; 3 palettes de plus copiées une fois, hors combat)
+    if os.environ.get("MAX_LOGO", "1") == "1":
+        pat_ = bytes.fromhex("43f90190c1007e00")             # LEA $90C100,A1 ; MOVEQ #0,D7 (précédé de LEA src,A0)
+        ks_ = [k for k in range(0x1000, 0x3A0000, 2) if img[k:k + 8] == pat_ and img[k - 6:k] == bytes.fromhex("41f9001cfc30")]
+        assert len(ks_) == 2 and LOGO_PAL_OFF is not None, "chargements de OBJ 8 du logo : %s" % [hex(k - 6) for k in ks_]
+        for k in ks_:                                    # init du titre ($9A58) et 2e init du logo ($74BC)
+            struct.pack_into(">I", img, k - 4, LOGO_BLOC + LOGO_PAL_OFF); img[k + 7] = 3
+        log("logo du titre : chargements de OBJ 8 (%s) -> 4 palettes du bloc $%x (OBJ 8-11)" % (", ".join("$%x" % (k - 6) for k in ks_), LOGO_BLOC + LOGO_PAL_OFF))
     a_eff = T.addr_to_68k(T_EFFETS) & 0xFFFFFF
     lea_abs(a_eff, S("MAX_T_EFFETS"), 1)
     # (2b20) lecteur PROPRE à Rolento ($4479A : LEA de sa ligne 0x76E9FE, indexée par l'ID de la victime) : la copie

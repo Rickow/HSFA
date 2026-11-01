@@ -142,7 +142,7 @@ def a5_reloge(L):
     return out
 
 def main():
-    L = pickle.load(open(os.path.join(G, 'donnees', 'liste_arcade.pkl'), 'rb'))
+    L = pickle.load(open(os.environ.get('LISTE_ARCADE', os.path.join(G, 'donnees', 'liste_arcade.pkl')), 'rb'))
     core = set(pickle.load(open(os.path.join(G, 'donnees', 'coeur_greffe.pkl'), 'rb')))
     by = {l['r']: l for l in L['lignes']}
     absent5 = {r for r, c in CK.items() if c < 0.5} if isinstance(CK, dict) else set()

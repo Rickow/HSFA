@@ -103,14 +103,17 @@ JEUX = {
                   ext=(0x940000, 0x5C0000),            # taille fixe dans d_cps2.cpp (Sfa3hhsfaRomDesc)
                   flux="codes_hyper", rejeu=True),
     # (agent_coeur_banques, patch 0008 du coeur) ro9a = Hyper + mode Arcade d'Upper greffe (voie B,
-    # greffe_arcade/GREFFE-ETAPE4.md), construction figee ro9a8_fige (rebase v151, 77/85 fins, entree ARCADE du menu) : memes reglages qu'Hyper (lance_ro9a.sh :
+    # greffe_arcade/GREFFE-ETAPE4.md), construction figee ro9a20_fige (v153, intermedes, couverture complete, 85/85 fins, joueur du CONTINUE, repli D4 par famille, donnees au trou T1b, retours du 31/10 (objets d intermede, manche perdue), objets propres a Upper (encadre d histoire, bandeaux ISM), fichiers du portage sans relogement, HUD d Hyper a la 1re manche, picto AUTO apres CONTINUE corrige, table D4 en T1b, nouveau challenger et regle D4 du challenger, decors d Upper en combat (moteur de decor d Upper, scroll1 en $4400), ciel du CONTINUE par base marquee (coeur 0017), acteurs de fin de Rose et de Bison copies d Upper, palettes des scenes relogees, entree ARCADE du menu) : memes reglages qu'Hyper (lance_ro9a.sh :
     # BANC_COMMUN=545, HSFA_PLANS=300,340,3a0, banques_hx de la construction), region graphique de 48 Mo : plans d'Upper
     # (mame_ro5/hsfa_plans.bin) en +$2000000 = $4000000 (HSFA_GFX=...,hsfa_plans.bin@4000000 du banc) ; pilote sfa3hahsfa
-    "ro9a": dict(nom="sfa3hahsfa", dossier="greffe_arcade/constructions/ro9a8_fige/b9",
-                 roms="greffe_arcade/constructions/ro9a8_fige/b9/roms_ro9/sfa3ud",
-                 banques="greffe_arcade/constructions/ro9a8_fige/banques_hx",
+    "ro9a": dict(nom="sfa3hahsfa", dossier="greffe_arcade/constructions/ro9a20_fige/b9",
+                 roms="greffe_arcade/constructions/ro9a20_fige/b9/roms_ro9/sfa3ud",
+                 banques="greffe_arcade/constructions/ro9a20_fige/banques_hx",
                  son=("agent_son_ro5/hybride/roms_hybride", ["hx3.01", "hx3.02", "hx3.11m", "hx3.12m", "hx3.13m", "hx3.14m"]),
-                 config={"commun": "545", "ptr_anim": "FF40BC", "gfx_intro": "456", "plans": "300,340,3a0"},
+                 # (28/10) ecrans d'Upper (base scroll1 = 400) : banque commune d'Upper e351 (patch 0010 du coeur ;
+                 # un coeur sans 0010 ignore les deux cles)
+                 config={"commun": "545", "commun_upper": "351", "base_upper": "400", "marque_upper": "8000", "ptr_anim": "FF40BC", "gfx_intro": "456", "plans": "300,340,3a0"},
+                 tables_en_plus=("f351",),
                  gfx=[("mame_ro9/hsfa_gfx.bin", 0x0000000), ("mame_ro9/hsfa_plans.bin", 0x1000000),
                       ("mame_ro5/hsfa_plans.bin", 0x2000000)],
                  gfx_len=0x3000000,                   # taille fixe dans d_cps2.cpp (Sfa3hahsfaRomDesc)

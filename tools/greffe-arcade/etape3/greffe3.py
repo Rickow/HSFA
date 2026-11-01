@@ -68,7 +68,12 @@ D3 = os.environ.get("D3", "1") == "1"
 EXT_FIN = 0xC32000
 if D3:
     os.environ.setdefault("RESERVE_MAX", "20000"); EXT_FIN = 0xC32000 + int(os.environ["RESERVE_MAX"], 16)
-    FEN_68K = [(0xD0C000, 0xF00000), (0xC60000, 0xC84000)]
+    FEN_68K = [(0xD0C000, 0xF00000), (int(os.environ.get('FEN2_DEBUT', 'C70000'), 16), 0xC84000)]   # (28/10) FEN2_DEBUT : ext_940000 plus long
+# (31/10, ossature des decors etape 2, conflit C4) DONNEES_TROU=1 : la coupure d'ext_940000 reste en PS2 $850CF0
+# (ext_940000 inchange), l'image de ro9a rend $3C000 octets au code, la tranche de donnees d'Hyper qui en sort va dans
+# la fin de T1b ($5D4000, borne $618000 = RAM QSound) : traducteur HSFA_DONNEES_TROU=y:n:coupure:borne
+if os.environ.get("DONNEES_TROU", "1") == "1":
+    os.environ.setdefault("HSFA_DONNEES_TROU", "5d4000:3c000:850cf0:618000")
 # (etape 5) TROUS=1 : TROUS de la carte 68K CPS2 servis en ROM (agent_coeur_banques, COEUR-BANQUES.md §B : banc =
 # banc_mem.lua / cps2f_trous HSFA_TROUS, coeur = patch 0009 hsfa_trous.bin) : fenetres 68K en plus ; cote PS2, morceaux
 # sans lui de ro5/ro9 sous $D20000 (lui utilises entre $C0 et $FF : $C0 $C3 $CC $D3 $DA $E7 $F0 $FF ; VBASE des fichiers
@@ -79,7 +84,45 @@ if FENETRES and TROUS:
     FEN_PS2 = [(0xC10000, 0xC30000), (0xC40000, 0xC80000), (0xD10000, 0xD20000)] + FEN_PS2
     FEN_68K = FEN_68K + [(0x410000, 0x618000), (0x710000, 0x800000), (0x810000, 0x900000), (0x668000, 0x700000),
                          (0x61A000, 0x660000), (0x930000, 0x940000)]
+    # (28/10) TROUS_PLAN=1 : plan d'allocation commun (re/allocations.tsv, 0c47636) : la greffe n'a que T1a $410000-$4D7FFF
+    # et T2 $61A000-$65FFFF (T1b, T3 : decors ; T4, T5 : MAX dans Hyper ; T6, T7 : decors / 16:9)
+    if os.environ.get("TROUS_PLAN", "1") == "1":
+        FEN_68K = FEN_68K[:2] + [(0x410000, 0x4D8000), (0x61A000, 0x660000)]
+# (01/11, ro9a17, decors etape 1) D4_TABLE=1 : table perso -> decor de 128 octets (regle D4, id etendu $103) dans T1b.
+# Le dernier morceau PS2 du bloc ($FE0000-$FF0000, jusqu'ici promis a T2 et jamais atteint : le bloc finit vers
+# $FC2000) devient la FENETRE DES DECORS, servie en 68K a $4D8000 (debut de T1b, plan d'allocation) ; le bloc de donnees
+# est complete de zeros jusqu'a $FE0000, puis la table y est posee. D4_TABLE=0 : ro9a16.
+D4_TABLE = os.environ.get("D4_TABLE", "1") == "1"
+FEN_DECORS = (0xFE0000, 0xFF0000, 0x4D8000)          # PS2 [lo, hi) -> 68K y (T1b $4D8000-$5D3FFF)
+if FENETRES and TROUS and D4_TABLE and os.environ.get("TROUS_PLAN", "1") == "1":
+    assert FEN_PS2[-1] == (0xE80000, 0xFF0000), FEN_PS2
+    FEN_PS2 = FEN_PS2[:-1] + [(0xE80000, FEN_DECORS[0]), FEN_DECORS[:2]]
+    FEN_68K = FEN_68K[:-1] + [(FEN_DECORS[2], FEN_DECORS[2] + FEN_DECORS[1] - FEN_DECORS[0])]
+def table_d4():
+    """128 octets : decor D4 (numerotation unique) par id etendu $00-$7F (decors/d4/regle_d4_decidee.tsv).
+    (e25) D4_ORDRE=1 (defaut) : octet i du bloc = D4[i] : la lecture traduite MOVE.B T_fe0000(PC,D0.W) rend l'octet i du
+    bloc (mesure e25a : avec l'ordre « i ^ 1 » de ro9a17, J2 $19 donnait $30 = D4[$18] et $00 donnait $02 = D4[$01]).
+    D4_ORDRE=0 : ordre de ro9a17 (t[i ^ 1] = D4[i])."""
+    t = bytearray(128); x = 0 if os.environ.get("D4_ORDRE", "1") == "1" else 1
+    for l in open(os.path.join(G, 'decors', 'd4', 'regle_d4_decidee.tsv')).read().splitlines()[1:]:
+        c = l.split('\t'); t[int(c[0][1:], 16) ^ x] = int(c[5][1:], 16)
+    return bytes(t)
 if FENETRES: GRF_X = FEN_PS2[0][0]
+# (01/11 soir, e25) D4_CHALLENGER=1 : regle D4 sur le VRAI trajet du nouveau challenger (et sur le choix du decor de
+# l'adversaire suivant, meme code) : Upper 0x24EA30 (fin de selection) lit $103 de A1 (perso de l'adversaire ou du
+# challenger) puis 0x24F020 : $174 = 2 x T_61BE10[id] (0x251950). Dans la copie : (a) la lecture 0x24EFD8 revient a $103
+# (id ETENDU, ecrit juste avant en 0x24EF8C ; TOUT_116 la passait a $117, PERIME a ce moment : perso de l'adversaire
+# PRECEDENT) ; (b) jal 0x251950 -> talon d4_choix (EXT.W D0 ; MOVE.B T_D4(D0.W),D0) et ADD.W D0,D0 (7 mots) -> nop
+# (D4 est deja en numerotation unique = 2 x T_61BE10 pour les ids $00-$25) ; (c) Hyper 0x31D6A0 (arrivee du challenger,
+# $100 = 2 x $103 de J2, garde dans $172) : ADD.W D0,D0 (0x31D880-0x31D894) -> MOVE.B T_D4(D0.W),D0. =0 : comme avant.
+D4_CHALLENGER = os.environ.get("D4_CHALLENGER", "1") == "1"
+D4_CHOIX = D4_CHALLENGER and D4_TABLE and FENETRES and TROUS     # talon d4_choix present
+def stub_d4_choix(t_d4):
+    """EXT.W D0 (copie de 0x251950) ; MOVE.B T_D4(D0.W),D0 (forme du recompilateur reconnue : lh/lui/addiu/addu/lb/sb) ; RTS"""
+    w = [0x3c037000, 0x80631124, 0x0003263c, 0x0004263f, 0x3c037000, 0xa4641124]
+    w += [0x3c027000, 0x84441124, 0x3c030000 | (((t_d4 + 0x8000) >> 16) & 0xffff), 0x24630000 | (t_d4 & 0xffff),
+          0x00831821, 0x80640000, 0xa0441124]
+    return w + [0x03e00008, 0x00000000]
 def fenetres():
     """morceaux (lo, hi, y) : PS2 [lo, hi) -> 68K y ; trous et coupures pour Fermeture.bloc"""
     fen = []; wi = 0; wy = FEN_68K[0][0]
@@ -169,6 +212,10 @@ def banques(A, dossier):
             lignes.append("anim %d %d" % (sw(va[a]), g_))
             src = os.path.join(W5, "f%d.bin" % g_); dst = os.path.join(dossier, "f%d.bin" % g_)
             if os.path.exists(src) and not os.path.exists(dst): os.symlink(src, dst)
+    # (28/10) banque commune d'Upper (e351) : objets des ecrans d'Upper (CONTINUE, GAME OVER, fins), commutee par le banc
+    # (BANC_COMMUN_UPPER=351) quand la base scroll1 du fork vaut 400
+    src, dst = os.path.join(W5, "f351.bin"), os.path.join(dossier, "f351.bin")
+    if os.path.exists(src) and not os.path.exists(dst): os.symlink(src, dst)
     open(os.path.join(dossier, 'carte.txt'), 'w').write('\n'.join(lignes) + '\n')
 
 def stub_fin_selection(prep, natif_perso):
@@ -295,6 +342,25 @@ DECOR_BOSS_FIN = os.environ.get("DECOR_BOSS_FIN", "0") == "1"
 EFFACE_FIN = os.environ.get("EFFACE_FIN", "0") == "1"   # (etape 6) effacer scroll2/3 a l'entree de la fin
 PLANS_CONT = os.environ.get("PLANS_CONT", "1") == "1"
 PLANS_S68 = (0x400, 0x340, 0x3A0) if PLANS_CONT else None
+# (31/10, e23) CONT_S1_HYPER=1 (essai, defaut 0) : scene 6 avec la base scroll1 d'Hyper : fond propre, mais la base 0x400
+# est aussi le signal de la banque commune d'Upper des objets (banc BANC_BASE_UPPER, coeur 0015 base_upper) -> barres
+# « CONTINUE » illisibles. Remplace par CONT_S1_MASQUE.
+CONT_S1_HYPER = os.environ.get("CONT_S1_HYPER", "0") == "1"
+# (31/10, e23) CONT_S1_MASQUE=1 : scene 6 (citation du vaincu + CONTINUE) : scroll1 masque (bit 1 de $32(A5), registre de
+# couches $804166 ; Hyper 0x313960 garde ces bits) a chaque image, retabli quand la scene est quittee. Les decors
+# d'Hyper ont une partie de scroll1 (ciel du decor 4) en codes d'Hyper, dessinee avec la base d'Upper -> « taches » du
+# fond grise. Les textes scroll1 d'Upper du CONTINUE etaient deja absents.
+# (02/11, e26, coeur 0017 « bases marquees » : work/coeur_0017/POUR-LA-GREFFE.md) CONT_S1_MARQUE=1 : scenes 6 (citation +
+# CONTINUE) et 8 (GAME OVER) avec scroll1 = $8300 : tuiles d'Hyper ($300 : ciel du decor 4) ET banque commune d'Upper
+# (bit de marquage $8000, cle marque_upper=8000 du zip) ; remplace CONT_S1_MASQUE (plus de scroll1 masque). Exige les
+# coeurs du 02/11 (patch 0017) ; avec un coeur plus ancien : barres CONTINUE cassees, sans plantage. Le banc MAME ne
+# connait pas la marque (ciel faux en scene 6, logique inchangee).
+CONT_S1_MARQUE = os.environ.get("CONT_S1_MARQUE", "1") == "1"
+CONT_S1_MASQUE = os.environ.get("CONT_S1_MASQUE", "0" if CONT_S1_MARQUE else "1") == "1"
+if CONT_S1_MARQUE and PLANS_S68: PLANS_S68 = (0x8300,) + PLANS_S68[1:]
+PLANS_S6 = PLANS_HYPER if CONT_S1_HYPER else PLANS_S68
+# (28/10) PLANS_GO=1 : GAME OVER (scene 8) avec les bases de plans d'Upper (lettres « GAME OVER » / « TRY AGAIN » de scroll2/3)
+PLANS_GO = os.environ.get("PLANS_GO", "0") == "1"
 PLANS = os.environ.get("HSFA_GREFFE_PLANS", "1") != "0"
 # (etape 4) DECOR_FIN=1 : pendant la fin (scene A), $100 = $174, decor choisi par Upper (0x24F020 greffee : $14 pour le
 # boss ; vs_decor ne borne que $100) : la fin d'Upper fait tourner le moteur de decor d'Upper sur $100
@@ -304,6 +370,14 @@ def _bases(b):
     w = []
     for k, v in enumerate(b): w += [0x24030000 | v, 0x3c0200c0, 0xa4430000 | ((-0x100 + 2 * k) & 0xffff)]   # sh v1,$BFFF00+2k
     return w
+def _bases_flag(bases_u, bases_h):
+    """(e26) drapeau « decor d'Upper » ($FE10) -> bases bases_u, sinon bases_h (branchements relatifs internes)"""
+    if not DECORS_UPPER: return _bases(bases_h)
+    w = _test_octet(FLAG_DECOR); i = len(w); w += [0x10600000, 0]
+    w += _bases(bases_u); j = len(w); w += [0x10000000, 0]
+    L = len(w); w += _bases(bases_h)
+    w[i] |= (L - i - 1) & 0xffff; w[j] |= (len(w) - j - 1) & 0xffff
+    return w
 def stub_plans(bases, cible):
     """bases des plans puis JSR cible (adresse d'EXECUTION ; 0 = sans appel)"""
     w = [0x27bdfff0, 0xffbf0000] + (_bases(bases) if PLANS else []) + ([j_(3, cible), 0x00000000] if cible else [])
@@ -312,18 +386,23 @@ DECOR_SAUVE = 0xFF02                                   # (etape 4) mot $FF02(A5)
 def _copie_mot(src, dst):
     """MOVE.W src(A5),dst(A5) (deplacements 68K de MOTS = PS2)"""
     return [0x3c027000, 0x8c421114, 0x84430000 | (src & 0xffff), 0xa4430000 | (dst & 0xffff)]
-def stub_plans_scene(cible, restaure=False, bases=None, efface=()):
+def stub_plans_scene(cible, restaure=False, bases=None, efface=(), masque_s1=False):
     """scenes 6/8/A d'Upper (CONTINUE, GAME OVER, fin) : plans d'Upper, JSR cible, puis si la scene est quittee vers
     A5+4 = 0 (continue accepte -> selection d'Hyper) ou $C (sortie -> titre d'Hyper) : plans d'Hyper. Aucun talon sur
     les scenes 0 et C d'Hyper : le VERSUS garde exactement son minutage."""
-    w = [0x27bdfff0, 0xffbf0000] + _bases(bases or PLANS_UPPER) + (_copie_mot(0x174, 0x100) if restaure else [])
+    w = [0x27bdfff0, 0xffbf0000] + (_bases_flag(PLANS_UPPER, bases) if bases else _bases(PLANS_UPPER)) + (_copie_mot(0x174, 0x100) if restaure else [])
     # (etape 6) EFFACE_FIN=1 : 1re image de la fin (A5+8 = 0) : pages scroll2/scroll3 effacees comme a la selection
     # d'Upper (le decor du boss d'Upper n'est pas en VRAM : le dernier combat etait sur un decor d'Hyper)
     if efface:
         w += forme_cmpi_w(0x0008, 0) + [0x3c037000, 0x8c631150]; ie = len(w); w += [0x14600000, 0]   # bne RES -> suite
         for e_ in efface: w += [j_(3, e_), 0x00000000]
         w[ie] |= (len(w) - ie - 1) & 0xffff
+    if masque_s1: w += [0x3c027000, 0x8c421114, 0x94430032, 0x3063fffd, 0xa4430032]   # ANDI.W #$FFFD,$32(A5)
     w += [j_(3, cible), 0x00000000]
+    if masque_s1:                                                                    # scene quittee : ORI.W #2,$32(A5)
+        w += forme_cmpi_w(0x0004, 6) + [0x3c037000, 0x8c631150]; im = len(w); w += [0x10600000, 0]   # beq (encore 6) -> suite
+        w += [0x3c027000, 0x8c421114, 0x94430032, 0x34630002, 0xa4430032]
+        w[im] |= (len(w) - im - 1) & 0xffff
     w += forme_cmpi_w(0x0004, 0) + [0x3c037000, 0x8c631150]; i1 = len(w); w += [0x10600000, 0]   # beq RES -> Lh
     w += forme_cmpi_w(0x0004, 0xC) + [0x3c037000, 0x8c631150]; i2 = len(w); w += [0x10600000, 0]   # beq RES -> Lc
     j1 = len(w); w += [0x10000000, 0]                                                              # -> fin
@@ -333,17 +412,49 @@ def stub_plans_scene(cible, restaure=False, bases=None, efface=()):
     for i, L in ((i1, Lh), (i2, Lc), (j1, Lf)): w[i] |= (L - i - 1) & 0xffff
     return w
 
+# (31/10, retour 3 de l'utilisateur : portraits de l'intermede entiers, sur le decor, restes pendant la 1re manche)
+TYPE14 = os.environ.get("TYPE14", "1") == "1"
+RESULTAT_CPU = os.environ.get("RESULTAT_CPU", "1") == "1"   # (31/10) voir stub_plans_auto   # (31/10) voir le patch de T_5C5720[14]
+INTERMEDE_PLANS = os.environ.get("INTERMEDE_PLANS", "0") == "1"   # essai du 31/10 : sans effet utile (portraits toujours entiers, decor du combat casse) -> 0
 def stub_plans_auto(couches=0):
     """scene 4 (Arcade), a chaque image : A5+8 >= 6 (combat, victoire) ou (A5+8 = 4 et A5+C >= 4 : entree dans le
     decor) -> plans d'Hyper ; sinon (init, presentation / carte, face-a-face, VS) -> plans d'Upper"""
     if not PLANS: return [0x03e00008, 0x00000000]
     w = [0x27bdfff0, 0xffbf0000]
     w += forme_cmpi_w(0x0008, 6) + [0x3c037000, 0x8c631158]; i1 = len(w); w += [0x04600000, 0]   # bltz C -> L1 (< 6)
-    w += _bases(PLANS_HYPER); j1 = len(w); w += [0x10000000, 0]                                    # -> fin
+    br_ = []
+    if RESULTAT_CPU:
+        # (31/10, retour 7) manche gagnee par l'ORDINATEUR (gagnant $13A(A5) = $8800 et octet $924(A5) = $124 de J2 non
+        # nul) : phase de resultat A5+C = $A sautee (A5+C = $C, A5+$10 = 0) comme dans Upper (pas de « WIN » ni de bonus)
+        w += forme_cmpi_w(0x000C, 0xA) + [0x3c037000, 0x8c631150]; ir1 = len(w); w += [0x14600000, 0]   # bne -> Lr
+        w += forme_cmpi_w(0x013A, 0x8800) + [0x3c037000, 0x8c631150]; ir2 = len(w); w += [0x14600000, 0]   # bne -> Lr
+        w += _test_octet(0x0924); ir3 = len(w); w += [0x10600000, 0]                                      # beq -> Lr
+        w += [0x2403000c, 0x3c027000, 0x8c421114, 0xa443000c, 0xa4400010]
+        Lr = len(w)
+        br_ += [(ir1, Lr), (ir2, Lr), (ir3, Lr)]
+    if INTERMEDE_PLANS:
+        # (31/10, retour 3) A5+C = 4 et A5+$10 = 0 (1re image de l'entree de la manche) : objets de la reserve $FFD000
+        # ($5000-$5C00(A5)) remis a zero comme a l'entree en combat (vs_decor) : les portraits de l'intermede y restaient
+        # SEULEMENT apres un intermede (octet $FE02(A5) pose pendant l'intermede) : la reserve porte aussi les objets
+        # de l'entree de manche d'Hyper (ROUND / FIGHT), qu'il ne faut pas effacer dans un combat ordinaire
+        w += forme_cmpi_w(0x000C, 4) + [0x3c037000, 0x8c631150]; ia = len(w); w += [0x14600000, 0]   # bne -> Lb
+        w += forme_cmpi_w(0x0010, 0) + [0x3c037000, 0x8c631150]; ib = len(w); w += [0x14600000, 0]   # bne -> Lb
+        w += _test_octet(0xFE02); ie_ = len(w); w += [0x10600000, 0]                                   # beq (pas d'intermede) -> Lb
+        w += [0x3c027000, 0x8c421114] + [0xac400000 | (0x5000 + 0x200 * i) for i in range(7)]
+        w += [0x24030000, 0x3c027000, 0x8c421114, 0xa0430000 | ((0xFE02 ^ 1) & 0xffff)]              # MOVE.B #0,$FE02(A5)
+        Lb = len(w)
+        # intermede (A5+C = 2, A5+$10 != 0 : sous-etats de l'intermede d'Upper) : plans d'Upper (bandeaux du regard)
+        w += forme_cmpi_w(0x000C, 2) + [0x3c037000, 0x8c631150]; ic = len(w); w += [0x14600000, 0]   # bne -> LH
+        w += forme_cmpi_w(0x0010, 0) + [0x3c037000, 0x8c631150]; idd = len(w); w += [0x10600000, 0]  # beq -> LH
+        w += [0x24030001, 0x3c027000, 0x8c421114, 0xa0430000 | ((0xFE02 ^ 1) & 0xffff)]              # MOVE.B #1,$FE02(A5)
+        w += _bases(PLANS_UPPER); ju = len(w); w += [0x10000000, 0]                                    # -> fin
+        LH = len(w)
+        br_ += [(ia, Lb), (ib, Lb), (ie_, Lb), (ic, LH), (idd, LH)]
+    w += _bases_flag(PLANS_DECOR_U, PLANS_HYPER); j1 = len(w); w += [0x10000000, 0]                # -> fin
     L1 = len(w)
     w += forme_cmpi_w(0x0008, 4) + [0x3c037000, 0x8c631150]; i2 = len(w); w += [0x14600000, 0]   # bne RES -> Lu (!= 4)
     w += forme_cmpi_w(0x000C, 4) + [0x3c037000, 0x8c631158]; i3 = len(w); w += [0x04600000, 0]   # bltz C -> Lu (< 4)
-    w += _bases(PLANS_HYPER); j2 = len(w); w += [0x10000000, 0]
+    w += _bases_flag(PLANS_DECOR_U, PLANS_HYPER); j2 = len(w); w += [0x10000000, 0]
     Lu = len(w); w += _bases(PLANS_UPPER)
     # (etape 4) COUCHES_UPPER=1 : ordre des couches CPS-B des ecrans d'Upper ($32/$3A(A5) <- T_614CD0[$100], copie de
     # 0x15ACB0), qu'Upper calcule dans 0x2654B0 (remplacee par Hyper 0x9A6F0, combat = Hyper) : sans lui, $32 = $1B0E
@@ -351,19 +462,83 @@ def stub_plans_auto(couches=0):
     if couches: w += [j_(3, couches), 0x00000000]
     Lf = len(w); w += [0xdfbf0000, 0x27bd0010, 0x03e00008, 0x00000000]
     for i, L in ((i1, L1), (i2, Lu), (i3, Lu), (j1, Lf), (j2, Lf)): w[i] |= (L - i - 1) & 0xffff
+    for i, L in br_: w[i] |= (L - i - 1) & 0xffff
+    if INTERMEDE_PLANS: w[ju] |= (Lf - ju - 1) & 0xffff
     return w
 
+# (28/10, ossature des decors, etape 1) D4_REPLI=1 : le decor demande en numerotation unique (regle D4 : Upper $00-$4E,
+# SFA2 $50-$72, SFA1 $A0-$B8) n'existant pas encore dans ro9a, repli sur le decor d'Hyper de la MEME famille
+# (ZERO 3 -> 4, ZERO 2 / ALPHA -> 2, ZERO -> 0) au lieu de « < 8 garde, sinon 4 » (Ryu $00, Ken $02, Charlie $06
+# tombaient par coincidence sur les decors 0 / 2 / 6 d'Hyper). decors/d4/regle_d4_decidee.tsv
+D4_REPLI = os.environ.get("D4_REPLI", "1") == "1"
 def stub_decor(cible, decor=4):
     """(etape 3) decors d'Hyper en Arcade (alternative minimale de DECORS.md) : CMPI.W #8,$100(A5) ; BCS -> appel ;
     sinon (rival $14, Bison, decors d'Upper) MOVE.W #decor,$100(A5) ; puis JSR cible (adresse d'EXECUTION)"""
-    w = [0x27bdfff0, 0xffbf0000] + forme_cmpi_w(0x100, 8)
-    w += [0x3c037000, 0x8c631158, 0x04600006, 0x00000000]          # lw v1,C ; bltz v1 -> appel (BCS)
-    w += [0x24030000 | decor, 0x3c027000, 0x8c421114, 0xa4430100, 0x00000000]   # MOVE.W #decor,$100(A5)
+    w = [0x27bdfff0, 0xffbf0000]
+    # (e26) decors d'Upper actives : $100 garde, drapeau $FE10 = 1 ; sinon drapeau 0 puis repli
+    bu = []
+    for v in DECORS_UPPER:
+        if v == 'tous':                                                                      # CMPI.W #$50 ; BCS -> Lu
+            w += forme_cmpi_w(0x100, 0x50) + [0x3c037000, 0x8c631158]; bu.append(len(w)); w += [0x04600000, 0x00000000]
+            continue
+        w += forme_cmpi_w(0x100, v) + [0x3c037000, 0x8c631150]; bu.append(len(w)); w += [0x10600000, 0x00000000]   # beq -> Lu
+    w += _pose_octet(FLAG_DECOR, 0)
+    if D4_REPLI:
+        sets = []
+        for borne, v in ((0x50, 4), (0xA0, 2)):
+            w += forme_cmpi_w(0x100, borne) + [0x3c037000, 0x8c631158]; sets.append((len(w), v)); w += [0x04600000, 0x00000000]   # BCS -> pose v
+        w += [0x24030000, 0x3c027000, 0x8c421114, 0xa4430100]; fins = [len(w)]; w += [0x10000000, 0x00000000]   # SFA1 -> 0
+        poses = []
+        for i, v in sets:
+            poses.append((i, len(w))); w += [0x24030000 | v, 0x3c027000, 0x8c421114, 0xa4430100]; fins.append(len(w)); w += [0x10000000, 0x00000000]
+        L = len(w)
+        for i, l in poses: w[i] |= (l - i - 1) & 0xffff
+        for i in fins: w[i] |= (L - i - 1) & 0xffff
+        w += [0x00000000]
+    else:
+        w += forme_cmpi_w(0x100, 8)
+        w += [0x3c037000, 0x8c631158, 0x04600006, 0x00000000]          # lw v1,C ; bltz v1 -> appel (BCS)
+        w += [0x24030000 | decor, 0x3c027000, 0x8c421114, 0xa4430100, 0x00000000]   # MOVE.W #decor,$100(A5)
+    if bu:
+        jr = len(w); w += [0x10000000, 0x00000000]                                       # -> suite
+        Lu = len(w); w += _pose_octet(FLAG_DECOR, 1)
+        for i in bu: w[i] |= (Lu - i - 1) & 0xffff
+        w[jr] |= (len(w) - jr - 1) & 0xffff
     # entree en combat : en-tetes ($0000-$0003) des 7 emplacements d'objets $5000-$5C00 (moteur 0x3A45F0 / Upper
     # 0x1196E0) remis a zero : les objets texte d'Upper des ecrans Arcade y laissaient leur type (1), et le combat
     # d'Hyper reutilise l'emplacement $5C00 (pointeur $0156) en n'ecrivant que $0000-$0001 -> objet texte fantome
     w += [0x3c027000, 0x8c421114] + [0xac400000 | (0x5000 + 0x200 * i) for i in range(7)]   # CLR.L $5x00(A5)
     w += [j_(3, cible), 0x00000000, 0xdfbf0000, 0x27bd0010, 0x03e00008, 0x00000000]
+    return w
+
+# (02/11, e26, etape 3 des decors) DECORS D'UPPER EN COMBAT. DECORS_UPPER = liste (hexa, numerotation unique = $100 d'Upper)
+# des decors d'Upper actives ; vide -> comme ro9a18. vs_decor : $100 dans la liste -> garde $100 et pose le drapeau
+# « decor d'Upper » (octet $FE10(A5) = $FF7E10, zone des decors C10), sinon drapeau 0 et repli D4_REPLI. Talons moteur_* :
+# partie Arcade ($FE00) ET decor d'Upper ($FE10) -> copie d'Upper (0x151B80 plans, 0x4B270 palettes), sinon Hyper
+# (0x30EC10, 0x60A20) : site Hyper 0x9A8F0 (combat, a chaque image) et appels de l'ecran VS (DECOR_VS).
+# DECORS_UPPER=tous : tous les decors d'Upper ($00-$4E, test de plage : $100 < $50)
+_DU = os.environ.get("DECORS_UPPER", "tous")
+DECORS_UPPER = ['tous'] if _DU == 'tous' else [int(x, 16) for x in _DU.split(',') if x]
+FLAG_DECOR = 0xFE10
+# Bases du combat sur un decor d'Upper : scroll1 = $4400 (S1_ALIAS=1) : le coeur FBNeo masque l'adresse de tuile par
+# nCpsGfxMask ($7FFFFFF pour 80 Mo) -> $44000000 adresse les plans d'Upper comme $0400, sans etre le signal de la banque
+# commune d'Upper (0015 : egalite a $0400 ; 0017 : bit $8000) -> decor complet, objets d'Hyper. S1_ALIAS=0 : scroll1
+# masque ($32 bit 1) et base d'Hyper $300 (ciel noir).
+S1_ALIAS = os.environ.get("S1_ALIAS", "1") == "1"
+S1_MASQUE = os.environ.get("S1_MASQUE", "0" if S1_ALIAS else "1") == "1"
+PLANS_DECOR_U = tuple(int(x, 16) for x in os.environ.get("PLANS_DECOR_U", "4400,440,4a0" if S1_ALIAS else "300,440,4a0").split(','))
+def _pose_octet(d68, v): return [0x24030000 | (v & 0xffff), 0x3c027000, 0x8c421114, 0xa0430000 | ((d68 ^ 1) & 0xffff)]
+MASQUE_S1 = [0x3c027000, 0x8c421114, 0x94430032, 0x3063fffd, 0xa4430032]   # ANDI.W #$FFFD,$32(A5)
+def stub_moteur(si, sinon, masque=False):
+    """partie Arcade ($FE00) ET decor d'Upper ($FE10) -> JSR si (copie d'Upper) [+ scroll1 masque], sinon JSR sinon"""
+    w = [0x27bdfff0, 0xffbf0000]; br = []
+    for d in (FLAG, FLAG_DECOR):
+        w += _test_octet(d); br.append(len(w)); w += [0x10600000, 0]                 # beq -> sinon
+    w += _appels(si) + (MASQUE_S1 if masque else []); j = len(w); w += [0x10000000, 0]
+    Ls = len(w); w += _appels(sinon)
+    Lf = len(w); w += [0xdfbf0000, 0x27bd0010, 0x03e00008, 0x00000000]
+    for i in br: w[i] |= (Ls - i - 1) & 0xffff
+    w[j] |= (Lf - j - 1) & 0xffff
     return w
 
 class Greffe2(GR.Greffe):
@@ -403,8 +578,12 @@ class Greffe2(GR.Greffe):
     PAR_APPELANT = {}                              # (etape 3) {routine d'Upper greffee: (homologue d'Hyper, appelants
                                                    # qui gardent la copie)} : les autres references vont a Hyper
     PAR_APPELANT_HYPER = {}                        # {routine d'Upper : (homologue d'Hyper, appelants envoyes a Hyper)}
+    PAR_APPELANT_SYNTH = {}                        # (e26) {routine d'Upper : (talon synthetique, appelants envoyes au talon)}
     def code(self, v, ctx):
         f = v - BASE
+        if f in self.PAR_APPELANT_SYNTH and isinstance(ctx, int):
+            nom_, vers_ = self.PAR_APPELANT_SYNTH[f]
+            if PL.routine_de(ctx) in vers_: self.rap['par_appelant_vers_talon'].append((ctx, v)); return self.synth_place[nom_] + BASE
         if f in self.PAR_APPELANT_HYPER and isinstance(ctx, int):
             h_, vers_ = self.PAR_APPELANT_HYPER[f]
             if PL.routine_de(ctx) in vers_: self.rap['par_appelant_vers_hyper'].append((ctx, v)); return h_ + BASE
@@ -560,9 +739,16 @@ def main():
     P_ = os.path.join(G, 'constructions', nom); os.makedirs(P_, exist_ok=True)
     rac = [int(x, 16) for x in os.environ.get("RACINES", "4E1C0,24EA30,261560,2614A0,2614D0,261500,1346A0").split(',')]
     if COMBAT_HYPER: rac += [x for x in KO_ARCADE + (0x269340, 0x26E900) if x not in rac]
+    if COMBAT_HYPER and TYPE14 and 0x17FD50 not in rac: rac.append(0x17FD50)
     if AFFICHAGE_UPPER:
         rac += [x for x in AFFICHAGE if x not in rac]; Greffe2.PAR_APPELANT = dict(AFFICHAGE)
     if COMBAT_HYPER and VS_UPPER: Greffe2.PAR_APPELANT_HYPER = dict(DECOR_VS)
+    # (31/10, e23) JAUGE_HYPER=1 : HUD de la 1re manche. L'entree en combat d'Upper (0x2651C0 / 0x265310) appelle 0x295F0
+    # (objets $1C 6, 9, 2, 5 : copie d'Upper) puis 0x4C1B0, envoyee par DECOR_VS a Hyper 0xAC050 (HUD d'Hyper : 5 objets,
+    # + sous-type 7 = jauge ISM / super de J1) qui exige 5 places libres ($6EBD) et n'en trouve plus que 3 -> jauge absente
+    # en 1re manche (Hyper la cree lui-meme ensuite). 0x295F0 va aussi a Hyper 0xAC050 pour ces appelants (le 2e appel ne
+    # trouve plus de place et ne cree rien).
+    if COMBAT_HYPER and VS_UPPER and os.environ.get("JAUGE_HYPER", "1") == "1": Greffe2.PAR_APPELANT_HYPER[0x295F0] = (0xAC050, _VS)
     TC = PL.tables_a_completer() if os.environ.get("TABLES_OBJETS", "1") == "1" else []
     Pl = PL.ferme(rac + sorted({u for _, u, _, _, _ in TC}), FO.force())
     routines = Pl.greffe
@@ -579,6 +765,10 @@ def main():
     # donnees : fermeture bornee par les lectures d'Upper (etape2/donnees2.py)
     import donnees2 as D2, glob
     lj = sorted(glob.glob(os.path.join(G, 'traces', 'u_lu*', 'lu.txt')))
+    # (01/11 soir, e25) JOURNAUX_DEFI=1 : + donnees lues par Upper pendant un NOUVEAU CHALLENGER (lua/donnees_lues3.lua :
+    # selection du 2e joueur, victoire 4/8 du combat de defi, reprise) : l'objet $12 sous-type 4 de la victoire (Upper
+    # 0x193950, animation 35 de T_D01C60) lisait des frames d'Upper jamais copiees (0x9672EC...) -> plantage du dessin
+    if os.environ.get("JOURNAUX_DEFI", "1") == "1": lj += sorted(glob.glob(os.path.join(G, 'traces', 'defi_lu', '*', 'lu.txt')))
     # BORNES : fermeture statique des pointeurs (segments identiques chez Hyper reutilises) ; regions prolongees jusqu'aux
     # lectures d'Upper voisines (tables de decalages) ; DONNEES_LUES=1 : seulement les segments lus par Upper
     Pl.donnees.add(U_PERSO_TABLE)                    # table perso -> index du chargeur par perso (talons d'animation)
@@ -593,8 +783,14 @@ def main():
     if COMBAT_HYPER:
         SYN += [('ko_compte', stub_arcade([0], [0])),
                 ('etat7', stub_si([0], [0], octets=ETAT7_OCTETS, avant=[0] * len(KO_ARCADE))), ('vs_decor', stub_decor(0)),
+                ('type14', stub_arcade([0], [0])),
                 ('remap_ids', stub_remap_ids(4 if FOND_ARCADE else 0, ((4,) if CARTE_S1 else ()) + (4, 4) if FOND_ARCADE and CARTE_EFFACE else ())), ('plans_auto', stub_plans_auto(4 if COUCHES_UPPER else 0))]
-        if PLANS: SYN += [('plans_s%X' % k, stub_plans_scene(4, k == 0xA and DECOR_FIN, PLANS_S68 if k in (6, 8) else None, ((4, 4, 4) if DECOR_BOSS_FIN else (4, 4)) if k == 0xA and EFFACE_FIN else ())) for k in (6, 8, 0xA)]
+        if PLANS: SYN += [('plans_s%X' % k, stub_plans_scene(4, k == 0xA and DECOR_FIN, (PLANS_S6 if k == 6 else PLANS_S68) if (k == 6 or (k == 8 and not PLANS_GO)) else None, ((4, 4, 4) if DECOR_BOSS_FIN else (4, 4)) if k == 0xA and EFFACE_FIN else (), k == 6 and CONT_S1_MASQUE)) for k in (6, 8, 0xA)]
+        if D4_CHOIX: SYN += [('d4_choix', stub_d4_choix(FEN_DECORS[0]))]
+        if DECORS_UPPER and VS_UPPER:
+            SYN += [('moteur_plans', stub_moteur([0], [0], S1_MASQUE)), ('moteur_plans_vs', stub_moteur([0], [0])), ('moteur_pal', stub_moteur([0], [0])),
+                    ('moteur_effet', stub_moteur([0], [0]))]
+            Greffe2.PAR_APPELANT_SYNTH = {0x151B80: ('moteur_plans_vs', _VS), 0x4B270: ('moteur_pal', _VS)}
     g = Greffe2(routines, Pl.dec, a5, synth=SYN)
     FEN, TROUS = fenetres() if FENETRES else (None, TROU_SON)
     if FENETRES:
@@ -603,6 +799,27 @@ def main():
         import donnees2 as D2_
         f547 = (D2_.F547, D2_.F547 + len(D2_.B547))
         assert all(y + hi - lo <= f547[0] or y >= f547[1] for lo, hi, y in FEN), "fenetre 68K sur ext_c84000"
+    # (02/11, e26, decision de l'utilisateur) TABLES_DECOR=1 : les tables de decor d'Upper sont COMPLETEES SUR PLACE dans
+    # leurs regions du bloc (seules les fins coutent de la place PS2) : bibliotheques s1 (blocs 0x69B830, 119 x $80),
+    # super-tuiles s1 (0x69F3B0, 3 081 x $40), blocs s2 / s3 (0x6CF5F0-0x707D10) ; palettes et listes : deja entieres.
+    # DECOR_SANS_PTR=1 : ces tables (et les palettes 0x707D10-0x7220CA, les listes 0x747EE0-0x748B94) ne contiennent
+    # AUCUN pointeur (indices, codes de tuiles, couleurs, decalages 16 bits) : jamais relogees (e26c : 236 mots « reloges »
+    # a tort -> tuiles et couleurs fausses, scroll3 de Rose $12 et de Karin $4C)
+    if os.environ.get("TABLES_DECOR", "1") == "1":
+        for a_, b_ in ((0x69B830, 0x69F3B0), (0x69F3B0, 0x6CF5F0), (0x6CF5F0, 0x707D10)):
+            FD.segments[a_] = max(FD.segments.get(a_, 0), b_ - a_)
+    if os.environ.get("DECOR_SANS_PTR", "1") == "1":
+        import donnees2 as D2x
+        for a_, b_ in ((0x69B830, 0x707D10), (0x707D10, 0x7220CA), (0x747EE0, 0x748B94)):
+            D2x.PTR_EXCLUS.update(range(a_, b_, 4))
+        # (e27) DECOR_PTR_GARDES (defaut 7097a0-7098e0) : VRAIES tables de pointeurs logees dans ces plages, relogees comme
+        # dans ro9a18 : 0x7097A0-0x7098DF = 80 pointeurs de palettes des scenes de FIN (lus par Upper 0x2463A0, 0x2463F4,
+        # 0x246EBC, 0x2477A4, 0x308A54, 0x3DDCF4) vers 0x7098E0-0x70DC00 ; laisses bruts dans ro9a19 -> fins de Rose (09)
+        # et de Bison (0a) : exception $A08 (lien d'animation 8(A0) faux). Vide -> comme ro9a19.
+        for s_ in os.environ.get("DECOR_PTR_GARDES", "7097a0-7098e0").split(','):
+            if s_:
+                a_, b_ = (int(x_, 16) for x_ in s_.split('-'))
+                D2x.PTR_EXCLUS.difference_update(range(a_, b_, 4))
     blob, ptr_code, plages = FD.bloc(g, GRF_X, trou=TROUS); blob = bytearray(blob)
     if FENETRES:
         assert GRF_X + len(blob) <= FEN[-1][1], "bloc de donnees trop grand pour les fenetres (%d o)" % len(blob)
@@ -630,9 +847,16 @@ def main():
         X = lambda f: a_exec(g, f)
         g.synth += [('ko_compte', stub_arcade([X(0x269340)], [H_KO_COMPTE + BASE])),
                     ('etat7', stub_si([X(0x26E900)], [H_ETAT7 + BASE], octets=ETAT7_OCTETS, avant=[X(f) for f in KO_ARCADE])),
+                    ('type14', stub_arcade([X(0x17FD50)], [0x3310F0 + BASE])),
                     ('vs_decor', stub_decor(VS_CIBLE(g))), ('remap_ids', stub_remap_ids(a_exec(g, 0x253A80) if FOND_ARCADE else 0, ((0x38AE50 + BASE,) if CARTE_S1 else ()) + (a_exec(g, 0xC5C10), a_exec(g, 0xC5C60)) if FOND_ARCADE and CARTE_EFFACE else ())), ('plans_auto', stub_plans_auto(a_exec(g, 0x15ACB0) if COUCHES_UPPER else 0))]
         SC = {6: a_exec(g, 0x2614A0), 8: a_exec(g, 0x2614D0), 0xA: a_exec(g, 0x261500)}
-        if PLANS: g.synth += [('plans_s%X' % k, stub_plans_scene(SC[k], k == 0xA and DECOR_FIN, PLANS_S68 if k in (6, 8) else None, ((a_exec(g, 0x4C1B0), a_exec(g, 0x151B80), a_exec(g, 0x4B270)) if DECOR_BOSS_FIN else (a_exec(g, 0xC5C10), a_exec(g, 0xC5C60))) if k == 0xA and EFFACE_FIN else ())) for k in (6, 8, 0xA)]
+        if PLANS: g.synth += [('plans_s%X' % k, stub_plans_scene(SC[k], k == 0xA and DECOR_FIN, (PLANS_S6 if k == 6 else PLANS_S68) if (k == 6 or (k == 8 and not PLANS_GO)) else None, ((a_exec(g, 0x4C1B0), a_exec(g, 0x151B80), a_exec(g, 0x4B270)) if DECOR_BOSS_FIN else (a_exec(g, 0xC5C10), a_exec(g, 0xC5C60))) if k == 0xA and EFFACE_FIN else (), k == 6 and CONT_S1_MASQUE)) for k in (6, 8, 0xA)]
+        if D4_CHOIX: g.synth += [('d4_choix', stub_d4_choix(FEN_DECORS[0]))]
+        if DECORS_UPPER and VS_UPPER:
+            g.synth += [('moteur_plans', stub_moteur([X(0x151B80)], [0x30EC10 + BASE], S1_MASQUE)),
+                        ('moteur_plans_vs', stub_moteur([X(0x151B80)], [0x30EC10 + BASE])),
+                        ('moteur_pal', stub_moteur([X(0x4B270)], [0x60A20 + BASE])),
+                        ('moteur_effet', stub_moteur([X(0x13BB10)], [0x391E50 + BASE]))]
         g.synth[0] = ('scene4_mode', stub_arcade([g.synth_place['plans_auto'] + BASE, a_exec(g, 0x261560)], [0x96620 + BASE]))
         for nom_, mots_ in g.synth: assert len(mots_) * 4 <= ((4 * len(dict(SYN)[nom_]) + 15) & ~15), nom_
         # sous-table de combat d'Upper copiee : entree 7 (fin de match) -> talon etat7
@@ -641,13 +865,17 @@ def main():
         struct.pack_into('<I', blob, o7, g.synth_place['etat7'] + BASE)
         for i_, h_ in enumerate(H_COMBAT):
             v_ = struct.unpack_from('<I', blob, e7 - GRF_X - 28 + 4 * i_)[0]
-            if i_ == 1 and os.environ.get("INTERMEDES", "0") == "1": continue   # (28/10) sous-etat 2 = copie d'Upper (force3)
+            if i_ == 1 and os.environ.get("INTERMEDES", "1") == "1": continue   # (28/10) sous-etat 2 = copie d'Upper (force3)
             assert v_ == h_ + BASE, "T_61C2A0[%d] = %x (attendu Hyper %x)" % (i_, v_, h_ + BASE)
         # sous-table de la scene 4/4 d'Upper copiee : entree 1 (ecran VS + decor d'Hyper) -> talon vs_decor
         e1 = exec_donnee(g, U_T_VS + 4); o1 = e1 - GRF_X
         assert struct.unpack_from('<I', blob, o1)[0] == VS_CIBLE(g), hex(struct.unpack_from('<I', blob, o1)[0])
         struct.pack_into('<I', blob, o1, g.synth_place['vs_decor'] + BASE)
     SITE_PERSO_J1 = g.synth_place['fin_selection'] + 4 * stub_fin_selection(0, 0)[1]
+    T_D4 = None
+    if FENETRES and TROUS and D4_TABLE:                   # fenetre des decors (T1b) : table D4 en tete
+        assert GRF_X + len(blob) <= FEN_DECORS[0], "bloc de donnees sur la fenetre des decors (%x)" % (GRF_X + len(blob))
+        blob += bytes(FEN_DECORS[0] - GRF_X - len(blob)); T_D4 = GRF_X + len(blob); blob += table_d4()
     src = open(MODULE_SOURCE, 'rb').read()
     mod = bytearray(g.module(src, blob))
     # ---------------- points d'entree (exec des tables d'Hyper -> fichier) ----------------
@@ -701,6 +929,94 @@ def main():
             assert (w & 0xffff) == 0x102, hex(lbva)
             struct.pack_into('<I', mod, n_, (w & 0xffff0000) | 0x116)
             p116.append(dict(routine=hex(a), mips_upper=hex(lbva), copie=hex(n_ + BASE), classe=c, detail=det))
+    # (31/10, retour 2 de l'utilisateur sur ro9a11 : picto « AUTO » sous la barre de J1) CHAMP_POSE=1 : l'octet 68K $119
+    # du joueur est, dans Upper (et SFA3), le type d'entree en scene (2 ; $1A / $1C : Upper 0x24BCC0), mais dans Hyper le
+    # choix MANUAL / AUTO de la selection (0x31B54C) : le code greffe ecrivait 2 -> garde AUTO affichee (et active). Les
+    # acces JOUEUR d'Upper a $119 (ecritures 0x24BF1C, 0x1355B8, 0x260DA0 ; lectures 0x134DFC, 0x134EC4) passent a l'octet
+    # $30D (decalage MIPS $30C, jamais adresse dans Upper ni Hyper) ; 0x13B8DC ($119(A5)) est garde.
+    # (31/10, retour 8 : meme musique (theme de J1) a tous les combats) MUSIQUE_J2=1 : choix de la musique d'Hyper
+    # 0x3890D0 (68K : LEA $400(A5),A4 ; CMPI.B #1 / #4,$C201 -> hasard ; sinon TST.B $C3B5 : 0 -> J1, > 0 -> J2). Notre
+    # Arcade a $C201 = 0 et $C3B5 = 0 : toujours J1. Le BEQ de 0x3892F4 ($C3B5 = 0) va maintenant a A4 = J2 (0x389360),
+    # l'adversaire CPU comme dans Upper. VERSUS ($C201 = 1) et TRAINING (4) ne passent pas par ce branchement.
+    # (31/10, retours 3 et 4) TYPE14=1 : objets de type 14 (table des types T_5C5720, homologue d'Upper T_615100) : Upper
+    # 0x17FD50 (portraits des intermedes, fenetre du regard) contre Hyper 0x3310F0 (autre objet au meme numero) ; en
+    # ARCADE (drapeau $FE00) la copie d'Upper, sinon Hyper : les portraits etaient entiers et jamais liberes
+    if COMBAT_HYPER and TYPE14:
+        long_(0x5C5758, g.synth_place['type14'] + BASE, "table des types d'objets T_5C5720[14] : ARCADE -> Upper 0x17FD50 (portraits d'intermede), sinon Hyper 0x3310F0")
+        assert int(patchs[-1]['avant'], 16) == 0x3310F0 + BASE, patchs[-1]['avant']
+    if COMBAT_HYPER and DECORS_UPPER and VS_UPPER:
+        const_(0x9A8E8, g.synth_place['moteur_plans'] + BASE, "combat d'Hyper 0x9A6F0 : JSR 0x30EC10 (plans) -> talon moteur_plans (decor d'Upper : copie de 0x151B80)")
+        assert int(patchs[-1]['avant'], 16) == 0x30EC10 + BASE, patchs[-1]['avant']
+        # (e26) autres appels d'Hyper au moteur de decor (constantes lui/addiu) : reprise de manche 0x9EB30 (0x9FFEC palettes,
+        # 0x9FFFC plans : plantage pc $A08 a la fin de la 1re manche, table de palettes d'Hyper lue a $100 = $32), challenger
+        # 0x9A570, VS d'Hyper 0x9A430, 0x3BCE50 ; le drapeau $FE00 laisse le VERSUS et l'attraction a Hyper
+        for f9_, h_, nom_ in ((0x9FFEC, 0x60A20, 'moteur_pal'), (0x9FFFC, 0x30EC10, 'moteur_plans_vs'), (0x9A650, 0x30EC10, 'moteur_plans_vs'),
+                              (0x9A4D0, 0x30EC10, 'moteur_plans_vs'), (0x9A4E0, 0x60A20, 'moteur_pal'), (0x3BCF80, 0x60A20, 'moteur_pal')):
+            const_(f9_, g.synth_place[nom_] + BASE, "appel d'Hyper 0x%X -> talon %s (decor d'Upper : copie d'Upper)" % (h_, nom_))
+            assert int(patchs[-1]['avant'], 16) == h_ + BASE, patchs[-1]['avant']
+        # (e26) EFFET PAR DECOR (objet d'Hyper : table d'etats 0x3D9E20, etat 2 = 0x391E50, aussi JMP depuis l'init 0x391E38) :
+        # $C174 / $C176 et gestionnaire par T_5C9E00/08/30 (4 entrees) -> sur un decor d'Upper, copie d'Upper 0x13BB10
+        # (T_6134E0 / T_613530 / T_6135A0, 40 entrees) ; e26e : palettes de Gen ($22) toutes blanches
+        jal_(0x391E38, g.synth_place['moteur_effet'] + BASE, "objet d'effet de decor d'Hyper 0x391DD0 : JMP 0x391E50 -> talon moteur_effet")
+        long_(0x3D9E24 + BASE, g.synth_place['moteur_effet'] + BASE, "table d'etats de l'objet d'effet de decor (etat 2 = 0x391E50) -> talon moteur_effet")
+        assert int(patchs[-1]['avant'], 16) == 0x391E50 + BASE, patchs[-1]['avant']
+    if os.environ.get("MUSIQUE_J2", "1") == "1":
+        w = struct.unpack_from('<I', mod, 0x3892F4)[0]; assert w == 0x1060001F, hex(w)
+        struct.pack_into('<I', mod, 0x3892F4, 0x10600000 | ((0x389360 - 0x3892F8) >> 2))
+        patchs.append(dict(type='branchement', site=hex(0x3892F4 + BASE), avant=hex(w), apres='0x1060001a', quoi="musique du combat hors VERSUS / TRAINING : J2 (adversaire) au lieu de J1"))
+    if os.environ.get("CHAMP_POSE", "1") == "1":
+        for va_ in (0x24BF1C, 0x1355B8, 0x260DA0, 0x134DFC, 0x134EC4):
+            n_ = g.neuf(va_)
+            if n_ is None: continue
+            w = struct.unpack_from('<I', mod, n_)[0]; assert (w & 0xffff) == 0x118, hex(va_)
+            struct.pack_into('<I', mod, n_, (w & 0xffff0000) | 0x30C)
+            patchs.append(dict(type='champ', site=hex(n_ + BASE), avant='0x118', apres='0x30c', quoi="Upper 0x%X : $119 du joueur (entree en scene) -> $30D (Hyper : MANUAL/AUTO)" % va_))
+    # (01/11, ro9a17) CHAMP_POSE_A5=1 : meme champ ecrit PAR LA BASE A5 a la reprise apres un CONTINUE accepte (Upper
+    # 0x26B0B0, 68K MOVE.B #2,$0519(A5) / $0919(A5) = « addiu v1,v1,$518 / $918 ; sb a0,0(v1) » en 0x26B768 / 0x26B77C) :
+    # picto « AUTO » sous la vie de J1 apres un CONTINUE (vu sur ro9a15/16 : ecriture PC $0B7730 a l'image 4245)
+    if os.environ.get("CHAMP_POSE", "1") == "1" and os.environ.get("CHAMP_POSE_A5", "1") == "1":
+        for va_, av_, ap_ in ((0x26B768, 0x518, 0x70C), (0x26B77C, 0x918, 0xB0C)):
+            n_ = g.neuf(va_)
+            if n_ is None: continue
+            w = struct.unpack_from('<I', mod, n_)[0]; assert (w & 0xffff) == av_ and (w >> 26) == 9, hex(va_)
+            struct.pack_into('<I', mod, n_, (w & 0xffff0000) | ap_)
+            patchs.append(dict(type='champ', site=hex(n_ + BASE), avant=hex(av_), apres=hex(ap_), quoi="Upper 0x%X : $%X(A5) (entree en scene apres CONTINUE) -> $%X(A5)" % (va_, av_ + 1, ap_ + 1)))
+    # (01/11, ro9a17, decors etape 1) D4_TABLE=1 : NOUVEAU CHALLENGER (copie d'Upper 0x258450) : $100 = 2 x $103 de J2
+    # (MOVEQ #0,D0 ; MOVE.B $103(A6),D0 ; ADD.W D0,D0 ; MOVE.W D0,$100(A5)) -> $100 = D4[$103] (id ETENDU : la lecture
+    # 0x258620, passee a $117 par TOUT_116, revient a $103) ; ADD.W D0,D0 (6 mots 0x258630-0x258644) remplace par
+    # MOVE.B T_D4(D0.W),D0 dans la forme du recompilateur (Upper 0x251978 : lui/addiu/addu/lb 0) ; D0 = $000000xx.
+    if T_D4 is not None:
+        b5_ = C.load('ro5')
+        av6 = struct.unpack_from('<6I', b5_, 0x258630)
+        assert av6 == (0x84431124, 0x3c027000, 0x84421124, 0x00621821, 0x3c027000, 0xa4431124), [hex(x) for x in av6]
+        n0 = g.neuf(0x258620); w0 = struct.unpack_from('<I', mod, n0)[0]
+        assert (w0 >> 16) == 0x8043 and (w0 & 0xffff) in (0x102, 0x116), hex(w0)
+        struct.pack_into('<I', mod, n0, 0x80430102)
+        n_ = g.neuf(0x258630); assert struct.unpack_from('<6I', mod, n_) == av6
+        struct.pack_into('<6I', mod, n_, 0x84441124, 0x3c030000 | (((T_D4 + 0x8000) >> 16) & 0xffff),
+                         0x24630000 | (T_D4 & 0xffff), 0x00831821, 0x80640000, 0xa0441124)
+        patchs.append(dict(type='mips', site=hex(n0 + BASE), quoi="nouveau challenger 0x258620 : MOVE.B $103(A6),D0 (id etendu, au lieu de $117)"))
+        patchs.append(dict(type='mips', site=hex(n_ + BASE), quoi="nouveau challenger 0x258630 : ADD.W D0,D0 -> MOVE.B T_D4(D0.W),D0 (table D4 PS2 %#x, T1b $4D8000)" % T_D4))
+    if T_D4 is not None and D4_CHOIX:
+        assert T_D4 == FEN_DECORS[0], hex(T_D4)
+        # lectures MOVE.B $0103(A1),D0 juste avant JSR 0x24F020 : 0x24EFD8 (0x24EA30 : 1er adversaire, defi) et 0x2512D4
+        # (0x250EF0 : adversaire suivant apres une victoire ; avant : decor de l'adversaire PRECEDENT)
+        for va_ in (0x24EFD8, 0x2512D4):
+            n_ = g.neuf(va_); w = struct.unpack_from('<I', mod, n_)[0]; assert w == 0x80430116, (hex(va_), hex(w))
+            struct.pack_into('<I', mod, n_, 0x80430102)
+            patchs.append(dict(type='champ', site=hex(n_ + BASE), avant='0x116', apres='0x102', quoi="Upper 0x%X : $103 de A1 (id etendu, ecrit juste avant) au lieu de $117 (perime) avant 0x24F020" % va_))
+        n_ = g.neuf(0x24F2BC); w = struct.unpack_from('<I', mod, n_)[0]; assert (w >> 26) == 3, hex(w)
+        struct.pack_into('<I', mod, n_, j_(3, g.synth_place['d4_choix'] + BASE))
+        patchs.append(dict(type='jal', site=hex(n_ + BASE), avant=hex((w & 0x3ffffff) << 2), apres=hex(g.synth_place['d4_choix'] + BASE), quoi="Upper 0x24F2BC : JSR 0x251950 (T_61BE10) -> talon d4_choix (table D4)"))
+        n_ = g.neuf(0x24F2C8); av7 = struct.unpack_from('<7I', mod, n_)
+        assert av7 == (0x3c037000, 0x84641124, 0x3c037000, 0x84631124, 0x00832021, 0x3c037000, 0xa4641124), [hex(x) for x in av7]
+        struct.pack_into('<7I', mod, n_, *([0] * 7))
+        patchs.append(dict(type='mips', site=hex(n_ + BASE), quoi="Upper 0x24F2C8 : ADD.W D0,D0 -> rien (D4 deja doublee)"))
+        av7 = struct.unpack_from('<7I', mod, 0x31D87C)
+        assert av7 == (0x3c027000, 0x84431124, 0x3c027000, 0x84421124, 0x00621821, 0x3c027000, 0xa4431124), [hex(x) for x in av7]
+        struct.pack_into('<7I', mod, 0x31D87C, 0x3c027000, 0x84441124, 0x3c030000 | (((T_D4 + 0x8000) >> 16) & 0xffff),
+                         0x24630000 | (T_D4 & 0xffff), 0x00831821, 0x80640000, 0xa0441124)
+        patchs.append(dict(type='mips', site=hex(0x31D87C + BASE), quoi="Hyper 0x31D880 (arrivee du challenger) : ADD.W D0,D0 -> MOVE.B T_D4(D0.W),D0"))
     for e9, u, d5, d9, i in TC:
         long_(e9, a_exec(g, u), "table 0x%X[%d] (homologue d'Upper 0x%X) : entree nulle -> gestionnaire d'Upper 0x%X" % (d9, i, d5, u))
     # (etape 3) 0x269340 (comptage des victoires d'Upper) : son 1er test, CMPI.W #6,$0138(A5) (combat a 3), est calcule

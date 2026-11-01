@@ -1,4 +1,4 @@
-> **État au 2026-10-28 :** construction ro9a9 (81/85 fins, intermèdes d'Upper), traducteur v153. Restent Sakura, Karin, Evil Ryu, progression de l'IA (HANDOFF §178-§180).
+> **État au 2026-10-28 :** construction ro9a10, **85 fins sur 85**, traducteur v153. Restent Evil Ryu (fin d'export, Final Battle perdue) et la progression de l'IA ; puis les décors (HANDOFF §178-§181).
 
 # Greffe Arcade (voie B) — étapes 4 à 7 : fichiers à verser au dépôt
 

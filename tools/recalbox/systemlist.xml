@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Systeme « HSFA » pour Recalbox 10.x (fichier utilisateur de l'interface).
+     A copier dans /recalbox/share/system/.emulationstation/systemlist.xml (partage reseau : system/.emulationstation/).
+     Si ce fichier existe deja chez vous, ajoutez seulement le bloc <system> ci-dessous dans son <systemList>.
+     Les jeux vont dans /recalbox/share/roms/hsfa/ (partage : roms/hsfa/).
+     Coeurs : fbneo_hsfa (4:3, par defaut) et fbneo_hsfaws (16:9), dans /usr/lib/libretro/.
+     L'uuid est propre a HSFA : il ne doit pas etre celui d'un systeme de Recalbox. -->
+<systemList>
+  <system uuid="813874de-fca3-4332-8d7b-f415e6feea42" name="hsfa" fullname="Street Fighter Alpha HSFA">
+    <descriptor path="%ROOT%/hsfa" theme="fbneo" extensions=".zip! .7z!" extension.types="*=pcb" icon="$F253" downloader="0"/>
+    <scraper screenscraper="0"/>
+    <properties type="arcade" pad="mandatory" keyboard="no" mouse="no" lightgun="no" releasedate="2026-10" manufacturer="Capcom" retroachievements="0" crt.multiresolution="0" crt.multiregion="0" ignoredfiles=""/>
+    <emulatorList>
+      <emulator name="libretro">
+        <core name="fbneo_hsfa" priority="1" extensions=".zip! .7z!" netplay="0" softpatching="0" compatibility="high" speed="high" crt.available="0" video.backend="default"/>
+        <core name="fbneo_hsfaws" priority="2" extensions=".zip! .7z!" netplay="0" softpatching="0" compatibility="high" speed="high" crt.available="0" video.backend="default"/>
+      </emulator>
+    </emulatorList>
+  </system>
+</systemList>

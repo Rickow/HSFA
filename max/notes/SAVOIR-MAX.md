@@ -1,6 +1,6 @@
 # SAVOIR-MAX — passation de la session MAX (SFA3 MAX PSP → Upper / Hyper)
 
-État au 2026-10-25. Ce fichier rassemble ce qui n'est écrit **nulle part ailleurs** ; pour le reste, il renvoie aux
+État au 2026-10-28 (mise à jour Q18 : §5, §6, §8 ; avant : 2026-10-25). Ce fichier rassemble ce qui n'est écrit **nulle part ailleurs** ; pour le reste, il renvoie aux
 notes existantes (liens relatifs au dépôt). Conventions de chemins :
 
 | marque | chemin réel chez l'utilisateur |
@@ -148,39 +148,51 @@ pour la session principale ; je n'édite pas `AGENTS.md`) :
 | pose finale du générique $4E/00 : rang de liste = ID | pose de Ryu avec les tuiles de la fin MAX | +3 = ID (Yun : $2D et $3D) ; `pose_generique_max.s` aux rangs ID des listes $E / $F de $301FA2 |
 | décor des fins : les classes $48/$49/$4A lisent **+$118 de la fin chargée** | images natives à la place des images MAX (soupçon) | n° voté sur les fins natives valable seulement si l'image arcade est la même ; sinon n° symbolique `ND<fin>_<n>` (règle préparée, non appliquée, §6) |
 | étirement ×19/16 (+0x57) par OBJET | Eagle trop étroit ; Ingrid à moitié | voir Q1 (§6) : chez Ingrid, haut étiré et jambes non |
-| tirs : boîtes dans la table **du tir** (+0x164), pas du perso | coups de tir sans effet | `tables_explicites.py` `BOITES_TIRS`, ordre image |
-| octet $0D du pas = type de contre (>3 → 0x21DC10[n]) | contres inactifs (désactivés au lot 2b) | prolonger la table d'Upper + traduire 0x6CFA4 / 0x6D040 / 0x6D0C8 / 0x6D15C |
+| tirs : boîtes dans la table **du tir** (+0x164), pas du perso | coups de tir sans effet | `tables_explicites.py` `BOITES_TIRS`, **ordre PSP** (l'ancien échange `tir()`, supprimé le 27/10, faisait lire l'octet $88 comme attaque) |
+| octet $0D du pas = type de contre (>3 → 0x21DC10[n]) | contres inactifs (désactivés au lot 2b) | fait : `contres_max.s` (11-14, écrits à la main, conformes au MIPS ; voir les lignes « contres » ci-dessous) |
 | répliques de victoire : 8 par gagnant ; chemin « par adversaire » de l'arcade ($92 = 0, une fois sur deux) | bulle vide | index borné à 0-7 pour les MAX |
 | flammes : la PSP n'applique pas de masque | flamme mal placée pour un index ≥ 16 | 22 couples par perso MAX ; masque $1F seulement pour une victime MAX |
 | voix d'Ingrid n° 40-51 = banque A commune de `se_mid` | voix absentes | importées dans la ROM QSound (`commandes_son_max.s`, `CMD_VOIX_29_A_095…`) |
+| adresses natives d'Upper figées pour une version (`COUP_NORMAL` $23A3C en v149) | contre MAX raté = coup jamais appliqué (v151 : $23A3C est devenu un tirage aléatoire) | relever chaque adresse dans l'image de la version visée ; dans `carte_image.txt`, l'opérande d'un `JSR` est l'adresse d'ORIGINE, la vraie cible est la colonne MIPS (v151 : `COUP_NORMAL` = $3FBE) |
+| niveau de super $248 (PSP 0x228) = champ ×2 | super d'Ingrid MP aux dégâts faux | `ETATS` de `traduire.py` est indexé par décalage **68K** ($248, pas 0x228) |
+| $1BD5C (homologue de PSP 0x1D330) rend sa valeur en **A3** | « téléportation » du demi-tour arrière + K de Yun | `traduire.py` `RET_A3` : `move.l a3, d0` après l'appel |
+| PSP +0x305 (« en l'air depuis un saut ») | branche jamais prise contre un natif (psp_1bc300 de Yun) | c'est le champ MOTEUR arcade **$32D** (image Upper $32C), pas une case MAX |
+| tables PAR PERSO d'Upper lues par le code PS2 (`lbu` / `lhu`) | homologues PSP introuvables, valeurs fausses | octets **tels quels** (pas k^1), mots petit-boutistes ; le k^1 ne vaut que pour les données de l'image 68K |
+| objet neuf d'un projectile (réservoir $1C1C8, objets courts) | octet écrit dans un AUTRE objet (`$34E(a4)` chez Ingrid) | un champ PSP au-delà de la taille de l'objet fils est sans objet (`PROJ_SANS`, 0x118) ; vérifier toute écriture ≥ $100 sur un objet neuf |
+| bloc IA PSP +0x1E0..+0x1EF = arcade $200..$20F | rappel 17 de Maki / Yun toujours faux, psp_77e00 sans effet | `IA_OCTETS` / `IA_MOTS` : mots en place, octets échangés dans le mot ; jamais dans la zone MAX |
+| états PSP = arcade / 2 (état d'action +0x1E2/3, sous-états, certains tests de +4) | conditions d'IA et sous-états décalés | doubler (`ETATS`) ; ex. PSP 1/0/8 = arcade 2/0/$10 (super) |
+| n° de spécial : PSP +0xEC × 2 = $AA ; numérotation des natifs = arcade | test d'un spécial natif à côté | Chun-Li super 8 = $AA $10, Dhalsim super 7 = $0E ; deux entrées par super (états $10 et $0E) |
+| condition 40 de l'IA (probabilité (op + 1) / 32) absente d'Upper | scripts MAX bloqués / faux | gestionnaire à ajouter à la table des conditions d'Upper (image $DEF0, index $50) ; voir `ia-psp-arcade.md` |
+| PSP +0x47A = `atemi_disable` (nom Capcom, CFE) | Ingrid contre le Kikosho de Chun-Li | ajout propre à MAX ; reproduit sans champ dans `contres_max.s` (`contre_super_protegee`) |
+| bit 0 de +$15 d'une fiche d'attaque = coup BAS (bit 1 aérien, bit 2 au sol) | « contre QCB+K d'Ingrid reste en pose » | le contre 14 ne prend que les coups bas : comportement PSP |
+| garde en pose de contre : la PSP refuse la garde pour les types de pas 4 et 7-14, Upper pour 4 et 7-9 | Ingrid gardait les coups non contrés | correctif d'intégration `MAX_GARDE_CONTRE` (`BCC` au lieu de `BEQ` #9) |
+| Ghidra perd les arguments des appels indirects (et n'affiche pas les échanges de registres) | sens des arguments inversé (rappel +0x8C des contres) | relire le MIPS (capstone) avant de conclure |
+| rangées de 40 par id dans les tables PSP aussi (0x262A6C, 0x20B64C…) | Yun / Ingrid lisent la rangée suivante sur PSP | valeurs PSP « par débordement » sans sens : choisir un natif proche |
+| dialogues : `0x61B570[$92]` = table des répliques par langue (US = 0x683C28 pour $92 = 1-3) | textes de citations au lieu de répliques | 0x67E2A0 ($92 = 0) n'est PAS la table des répliques US |
+| `grep "\$3ec("` entre guillemets doubles | aucune occurrence trouvée, conclusion fausse | `grep -F '$3ec(a'` |
+| régénération des brouillons : le compteur d'étiquettes `L_alpha_*` est global | diffs « parasites » chez les autres persos | normal ; ne comparer que les lignes hors étiquettes |
+| scratchpad de session vidé entre deux sessions | fichiers d'essai introuvables | ré-extraire depuis l'ISO (lecture seule) ; les outils durables vont dans `max/outils/` |
 
-## 6. État au 2026-10-25
+## 6. État au 2026-10-28
 
-**Fait et intégré** (lots 2b10-2b21) : code des 4 persos (brouillons, moteur), frames, animations, palettes,
-étirement, fins (scripts, acteurs, décor, jeux de palettes, fenêtre de texte), sons par pas et voix, portraits, noms,
-icônes, HUD, carte, WINNER, citations, frises 1P/2P (horizontales et colonnes), projections natifs × MAX, flammes
-(22 couples), recul des types 28-32, liens d'effets à l'allocation, typage de a0 (super d'Ingrid), pose du générique.
+**Fait et intégré** (lots 2b10-2b25) : tout ce qui suit l'était déjà le 25/10 (code des 4 persos, frames, animations,
+palettes, étirement, fins, sons, voix, portraits, noms, icônes, HUD, carte, WINNER, citations, frises, projections,
+flammes, recul, liens d'effets, typage de a0, pose du générique), plus :
+- boîtes des tirs dans l'ordre PSP, $1BD5C → A3, PSP +0x305 = $32D (Q16) ; bloc IA rangé en $202-$20D (Q20.1) ;
+- contres d'Eagle et d'Ingrid (11-14) conformes, avec `atemi_disable` (N18, N22-bis) ;
+- tables par perso d'Upper (R9, R9-bis : 17 tables) ; lancer vertical (R14) ; combat secret (R19).
 
-**Livré, à vérifier à l'écran** : colonnes de sélection `frises_verticales_max.s` (6b10927), pose du générique
-`pose_generique_max.s` + `acteurs_fin_26-29.s` (3554b83).
+**Livré, à brancher côté intégration** :
+- IA des 4 MAX au format d'Upper (`converti/ia/ia_max.s`, N20) : **bloquée tant que la condition 40 manque à Upper** ;
+- dialogues Arcade (`converti/dialogues/dialogues_upper_max.s`, N21) : agrandir 0x683C28 / 0x970F40, rangées de 48 pour
+  0x61B580 / 0x61B600 (fait en 2b24 pour ces deux-là) ;
+- logo de titre japonais « ZERO 3 ↑↑ » en frame type 8, 8 palettes (`converti/titre/`, N23, R20.4) ;
+- palettes de rémanence d'Ingrid (`converti/pl29/palettes_*_remanence.bin`, R20.5) ;
+- décors « maison » PSP des MAX (R21) ; 0x623E50 rangées 2 et 3 (R20.3).
 
-**Questions ouvertes** (`work/echanges/MAX.md`) :
-- **Q1 (Ingrid, haut étiré ×19/16, jambes non)** : les frames d'Ingrid sont COMPOSITES (haut + jambes, fusionnées par
-  la conversion : `tools/max/sprites.py --ingrid`, `convert/README.md` § Ingrid ; aperçu : corps 1026-1067 + jambes
-  n+42). À établir dans PPSSPP : point d'arrêt sur FUN_0000D2A8 / FUN_0000CD84 pendant un combat d'Ingrid, relever
-  +0x57 du sprite pour chaque calque. Puis convertir avec l'étirement sur le seul calque du haut, **avant** la fusion.
-- **Q2 (rémanences d'Ingrid, jambes vertes)** : rémanences = classe $35 / 0, palette 0 comme J1 ; les frames de combat
-  portent les sous-palettes 1 et 2 (2 = 28 objets sur 600 frames, vraisemblablement les jambes). Hypothèse : la
-  sous-palette 2 n'est pas réglée pour la rémanence. À vérifier sur PSP : palette de chaque calque d'une rémanence.
-- **Retours console** (note du 25/10 dans `MAX.md`) : Yun (intro suivie de celle d'Ingrid, QCB+P sans onde de choc,
-  gros pied proche, demi-tour arrière + K) ; Ingrid (super 2×QCF+P qui doit enflammer, contres QCB+P/K).
-- **Visages des fins** : vérifier la sous-palette 0 (§5) ; si des images natives restent à la place d'images MAX, appliquer la
-  règle ND du décor (patch prêt mais non poussé : la reprendre dans `rosette_donnees.py`, branche « classes de décor
-  lisent +$118 », puis régénérer `acteurs_fin_*.s` et étendre `decor_nouveaux_max.md`).
-
-**Ensuite, dans l'ordre** : Q1 (mesure PPSSPP puis conversion) → Q2 → retours console Yun / Ingrid → visages des fins
-→ pilote unique `construire_max.py` (une commande de l'ISO à la racine v2, md5 de référence v2) → contres (octet $0D)
-→ voie B (Hyper : `anims_hyper_max.py`, `$2B8` 3 × 48).
+**Ouvert** : voie B (Hyper : `anims_hyper_max.py`, `$2B8` 3 × 48) ; pilote unique `construire_max.py` ; visages des fins
+(règle ND du décor, non appliquée) ; 3 tables R9-bis « probables » ; l'IA en mode 0xD1E4C (tables +0x9C-+0xAC) n'est
+pas convertie (mode absent d'Upper).
 
 ## 7. Vérifier sans la session MAX
 
@@ -257,3 +269,20 @@ confiance, score, outil). Source commune : cette note et `work/echanges/MAX.md`.
   D2A8 (cases 32) / CD84 (cases 16), étirés si +0x57 ; sprite attaché 0x968C (octet 6 du jeu de boîtes → espace +0x20 →
   banque commune 0x671AEC, dx non étiré) ; chemins sans étirement 0xA150(…, 1) → D7D0 / DBCC (0x8C08, 0x8CEC composite
   par table 0xADFE78[+0x94], 0x8E74, 0x9988) : effets et objets de types $2D-$30.
+
+## 8. Outils et livrables ajoutés les 27-28/10
+
+| outil (dépôt) | rôle | contrôle intégré |
+|---|---|---|
+| `max/outils/convert/ia_max.py` | scripts d'IA PSP (gabarit mots 12-15) → tables T0-T3 d'Upper | `--natifs` : Ryu identique sur 4 tables, 13 natifs sur 29 identiques en contenu |
+| `max/outils/convert/dialogues_max.py` | dialogues Arcade (gabarit mot 38 + `bdXX_e.pac`) → répliques 0x683C28 / scénarios 0x970F40 | `--controle` : Ryu = scénarios 0-3 et répliques 1-20 d'Upper |
+| `max/outils/convert/tables_id_max.py` | valeurs MAX des tables par perso d'Upper (R9 / R9-bis) | accord natif recalculé à chaque génération |
+| `max/outils/convert/titre_max.py` | logo de titre PSP → frame d'objets type 8 | aperçu rendu depuis la frame ; relecture des fichiers = aperçu |
+| `max/outils/convert/palettes_ingrid_upper.py` | + palettes de rémanence (8 g + 5) | anciennes sorties inchangées (md5) |
+| `max/outils/rosette_code/traduire.py` | `RET_A3`, `PROJ_SANS` 0x118, `HORS[0x305]`, `IA_OCTETS` / `IA_MOTS` | régénération en copie : seules les lignes visées changent |
+| `max/outils/rosette_code/contres_max.s` | `contre_super_protegee` (atemi_disable exact) | assemblage 0 erreur |
+| `max/notes/ia-psp-arcade.md` | interpréteur IA PSP = arcade (version Upper), règle de conversion, compléments §7 | — |
+
+Données de référence : ISO JP « Street Fighter Zero 3 Double Upper (Japan) » (redump, fournie par l'utilisateur, lecture
+seule) pour `jpn/data/title_j.pac` ; CFE (`<hsfa>/work/etude_capcom_max/donnees/cfe/` : symboles, DWARF `playerwork.txt`)
+pour les noms Capcom (ex. `atemi_disable`).

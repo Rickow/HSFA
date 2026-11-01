@@ -120,10 +120,15 @@ REUTIL_STRICT = os.environ.get("REUTIL_STRICT", "0") == "1"   # (etape 6) reutil
 BANQUES_LU = os.environ.get("BANQUES_LU", "1") == "1"
 TEXTES_LU = os.environ.get("TEXTES_LU", "1") == "1"
 BLOC_RESTES = os.environ.get("BLOC_RESTES", "1") == "1"   # (etape 7) place laissee avant une coupure reutilisee   # (etape 7) banques de textes copiees jusqu'au dernier texte lu
+# (31/10, e22) NON_REUTIL=<fichier> : segments d'Upper (exec PS2) jamais remplaces par leur « homologue » d'Hyper (contenu egal
+# au masque des pointeurs pres, mais sous-donnees differentes : lettres « US » de la barre VERSUS du face-a-face)
+_NR = os.environ.get("NON_REUTIL", "<workspace>/work/greffe_arcade/donnees/non_reutil.txt")
+NON_REUTIL = set(int(l.split()[0], 16) for l in open(_NR) if l.strip() and not l.startswith('#')) if os.path.exists(_NR) else set()
 REUTIL_VOISIN = os.environ.get("REUTIL_VOISIN", "0") == "1"   # (etape 7) cible non suivie reutilisee au decalage du voisin
 FE_TABLE = os.environ.get("FE_TABLE", "1") == "1"   # (etape 6) pointeurs $xxxxFExx en table acceptes
 PTR_BAS = os.environ.get("PTR_BAS", "1") == "1"   # (etape 6) pointeurs de code a moitie basse < $100 : seulement en table
 PTR_ALIGNE = os.environ.get("PTR_ALIGNE", "1") == "1"   # (etape 4) pointeurs de code alignes seulement
+FICHIERS_BRUTS = os.environ.get("FICHIERS_BRUTS", "1") == "1"   # (31/10, e23) fichiers du portage : aucun pointeur
 PREUVES = set(int(l, 16) for l in open(os.environ["PREUVES"])) if os.environ.get("PREUVES") else set()
 FILTRE3 = os.environ.get("FILTRE3") == "1"
 OU3 = os.environ.get("OU3") == "1"
@@ -202,8 +207,18 @@ class Fermeture:
         # 0x683C28 en langue 2) copiees EN ENTIER : les intermedes (INTERMEDES=1) lisent des repliques qu'aucun journal
         # d'Upper n'a lues (05 contre Ken : texte a 0x683C28 + $A0xx, copie arretee a 0x685C28 -> texte sans fin, objet
         # d'Hyper voisin ecrase en $FFD400)
-        if os.environ.get("DIALOGUES_ENTIERS", "0") == "1":
-            TD = sorted(set(x for x in struct.unpack('<4I', octets(0x61B570, 16)) if source(x) == 'module'))
+        # (28/10) TEXTES_ENTIERS=1 : meme chose pour les banques de textes de FIN (T_614E10 ; 0x68DC72 copiee jusqu'a
+        # 0x6968C0 sur 0x696BA9) : fins « Final Battle » apres un intermede (R.Mika : texte hors copie, rendu sans fin qui
+        # ecrase la tache $FFDE00)
+        TD = []
+        if os.environ.get("DIALOGUES_ENTIERS", "1") == "1": TD += list(struct.unpack('<4I', octets(0x61B570, 16)))
+        if os.environ.get("TEXTES_ENTIERS", "1") == "1": TD += list(struct.unpack('<4I', octets(0x614E10, 16)))
+        self.tx_entiers = set()
+        if TD:
+            TD = sorted(set(x for x in TD if source(x) == 'module'))
+            # (28/10) ENTIERS_SANS_CREUX=1 : une banque copiee EN ENTIER n'a pas de creux (ses textes non lus par les journaux
+            # sont justement ceux qu'on veut garder ; avant, d'autres regions y etaient logees : replique d'Evil Ryu ecrasee)
+            if os.environ.get("ENTIERS_SANS_CREUX", "1") == "1": self.tx_entiers = set(TD)
             for base in TD:
                 w0 = struct.unpack('<H', octets(base, 2))[0]
                 if w0 & 1 or not 0x10 <= w0 <= 0x1000: continue
@@ -224,7 +239,7 @@ class Fermeture:
             vus.add(v)
             k = bisect.bisect_right(Fl, v)
             fin = min(Fl[k] if k < len(Fl) else fin_source(v), v + PLAFOND, fin_source(v))
-            if reutil and v not in self.bq_cibles:
+            if reutil and v not in self.bq_cibles and v not in NON_REUTIL:
                 h = homologue_donnee(v, fin - v)
                 if h is not None: self.reutil[v] = (h, fin - v); continue
             if v not in depart and not lu_dans(v, fin) and v not in self.cibles_prouvees:
@@ -391,6 +406,7 @@ class Fermeture:
             cov = sorted((v, v + n) for v, n in self.segments.items())
             lus_ = sorted(self.lu) if self.lu else []
             for base, fin in ext:
+                if base in getattr(self, 'tx_entiers', ()): continue
                 k = next(i for i, (a, b) in enumerate(R) if a <= base < b); ra = R[k][0]
                 w0 = struct.unpack('<H', octets(base, 2))[0]
                 occ = [(a, b) for a, b in cov if b > base and a < fin]
@@ -485,6 +501,10 @@ class Fermeture:
                 if en_creux and dans_creux(a_r + i): continue
                 p = struct.unpack_from('<I', b, i)[0]
                 if (a_r + i) in PTR_EXCLUS: stat['exclu (script)'] += 1; continue   # (etape 5) aussi les pointeurs de donnees
+                # (31/10, e23) FICHIERS_BRUTS=1 : les fichiers charges par le portage (Upper exec PS2 >= $A00000, bloc 0xB04000...)
+                # ne contiennent aucun pointeur (535 longs « reloges » = couples de positions (x, y) des frames : lettre « S »
+                # de la barre VERSUS hors place, 0xB09348/0xB0934C/0xB09374/0xB09378)
+                if FICHIERS_BRUTS and a_r + i >= GR.H5['ram']: stat['fichier brut'] += 1; continue
                 if est_pointeur(a_r + i, p, REFS):
                     q = ou(p)
                     if q is None: stat['donnee non suivie'] += 1; continue

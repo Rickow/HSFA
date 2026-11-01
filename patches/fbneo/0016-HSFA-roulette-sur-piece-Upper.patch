@@ -1,0 +1,78 @@
+From 8a45a7f6cceea001762656f06e8a8310a8a274fd Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 31 Oct 2026 13:21:18 +0100
+Subject: [PATCH] HSFA: Upper / Upper MAX select-screen roulette on Coin (Start
+ kept for Shin Akuma / EX Balrog)
+
+Upper's PS2 port copies Start (bit 15 of the player's input word) into the
+player's roulette flag $F3 ($FF84F3, $FF88F3) every frame (68K image
+$055404, same mechanism as Hyper's $D3, patch 0007). Holding Start on the
+character grid therefore spun the roulette ($055C7C), so Start + button on
+Akuma / Balrog (routine $0570BE: Shin Akuma $24, EX Balrog $25) gave a
+random character instead.
+
+- For the Upper and Upper MAX drivers (mode 2 without HsfaHyper), writes of
+  $FF84F3 / $FF88F3 now take the player's Coin (Select on the RetroPad), on
+  the character grid only (phases 2/2/4, player state 0), as for Hyper.
+- HSFA_NOROUL=1 (tests) now also forces Upper's roulette flag to 0.
+- Hyper (sfa3hhsfa) and the Hyper + Arcade graft (sfa3hahsfa, Hyper's
+  selection, $D3) are unchanged; the taunt on Coin (patch 0014) only acts in
+  fights and is unaffected.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 536627c..d2007b7 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -1386,10 +1386,17 @@ void HsfaProvocEntrees(UINT8 *pInp020)				// appele par CpsRwGetInp (cps_rw.cpp)
+ 	}
+ }
+ 
++// (patch 0016) Upper et Upper MAX (mode 2 sans HsfaHyper) : meme mecanisme, octet $F3 des joueurs ($FF84F3, $FF88F3),
++// recopie de Start par le portage a chaque image (image 68K $055404, homologue de celle d'Hyper). Start tenu sur la
++// grille lancait la roulette ($055C7C) au lieu de garder la case : Start + bouton sur Akuma / Balrog (Shin Akuma $24,
++// EX Balrog $25, routine $0570BE) donnait un perso au hasard. Comme pour Hyper : Piece du joueur sur la grille.
++#define HSFA_ROUL_UPPER(a)	(HsfaMode == 2 && !HsfaHyper && ((a) == 0x84F3 || (a) == 0x88F3))
++
+ static void __fastcall HsfaRouletteWriteByte(UINT32 a, UINT8 d)
+ {
+ 	a &= 0xFFFF;
+ 	if (HsfaHyper && (a == 0x84D3 || a == 0x88D3)) d = HsfaRoulette(a);
++	if (HSFA_ROUL_UPPER(a)) d = HsfaRoulette(a);			// (patch 0016)
+ 	if ((a == 0x8778 && nProvocAttente[0]) || (a == 0x8B78 && nProvocAttente[1])) d |= 0x80;	// (patch 0014)
+ 	CpsRamFF[a ^ 1] = d;
+ }
+@@ -1398,6 +1405,7 @@ static void __fastcall HsfaRouletteWriteWord(UINT32 a, UINT16 d)
+ {
+ 	a &= 0xFFFE;
+ 	if (HsfaHyper && (a == 0x84D2 || a == 0x88D2)) d = (d & 0xFF00) | HsfaRoulette(a);
++	if (HSFA_ROUL_UPPER(a + 1)) d = (d & 0xFF00) | HsfaRoulette(a + 1);	// (patch 0016)
+ 	if ((a == 0x8778 && nProvocAttente[0]) || (a == 0x8B78 && nProvocAttente[1])) d |= 0x8000;	// (patch 0014)
+ 	WrW(CpsRamFF + a, d);
+ }
+@@ -1490,14 +1498,15 @@ INT32 HsfaInit()
+ 	}
+ 	// sorties Phoenix ($FFFFF0) : seule la derniere page de RAM passe par le gestionnaire (vitesse)
+ 	SekMapMemory(CpsRamFF, 0xFF0000, 0xFFFBFF, MAP_WRITE);
+-	// joueurs ($FF8400-$FF8BFF) : roulette d'Hyper (patch 0007) et provocation sur Piece (patch 0014, tous les pilotes)
++	// joueurs ($FF8400-$FF8BFF) : roulette d'Hyper (patch 0007), d'Upper / Upper MAX (patch 0016) et provocation sur Piece
++	// (patch 0014, tous les pilotes)
+ 	nProvocAttente[0] = nProvocAttente[1] = 0;
+ 	SekMapHandler(7, 0xFF8400, 0xFF8BFF, MAP_WRITE);
+ 	SekSetWriteByteHandler(7, HsfaRouletteWriteByte);
+ 	SekSetWriteWordHandler(7, HsfaRouletteWriteWord);
+-	if (HsfaHyper) {
++	if (HsfaMode == 2) {								// Hyper : $D3 (patch 0007) ; Upper, Upper MAX : $F3 (patch 0016)
+ 		nHsfaNoroul = getenv("HSFA_NOROUL") && atoi(getenv("HSFA_NOROUL")) == 1;
+-		if (nHsfaNoroul) bprintf(0, _T("HSFA : HSFA_NOROUL (essais) : $FF84D3 / $FF88D3 ecrits a 0\n"));
++		if (nHsfaNoroul) bprintf(0, _T("HSFA : HSFA_NOROUL (essais) : roulette de la selection toujours a 0\n"));
+ 		else bprintf(0, _T("HSFA : roulette de la selection sur la touche Piece (Start garde pour EX / S-ISM)\n"));
+ 	}
+ 	SekClose();
+-- 
+2.53.0
+

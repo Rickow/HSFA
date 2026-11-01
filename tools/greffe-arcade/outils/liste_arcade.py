@@ -11,6 +11,12 @@ INV = pickle.load(open(os.path.join(EU, "inverse_ro5.pkl"), "rb"))
 CK = pickle.load(open(os.path.join(EU, "couv_k.pkl"), "rb"))
 A5 = pickle.load(open(os.path.join(EU, "a5.pkl"), "rb")); D5, D9 = A5['D5'], A5['D9']
 ARC = [x for x in ('gagne00', 'gagne04', 'gagne02', 'perdu00', 'perdu_go') if os.path.exists(os.path.join(G, 'traces', x, 'couv.txt'))]
+# (28/10) COUV_TOUS=1 : + les parties Arcade de TOUS les persos (traces/gagneXX, outils/couv_tous.sh) : les routines des
+# fins et des intermedes jamais vues dans les 3 parties d'origine etaient envoyees a Hyper par la regle j) (fins 0D, 1D)
+if os.environ.get("COUV_TOUS", "0") == "1":
+    import glob as _gl
+    ARC += sorted(os.path.basename(os.path.dirname(f)) for f in _gl.glob(os.path.join(G, 'traces', 'gagne??', 'couv.txt'))
+                  if os.path.basename(os.path.dirname(f)) not in ARC)
 VS = [x for x in ('versus',) if os.path.exists(os.path.join(G, 'traces', x, 'couv.txt'))]
 H9 = [x for x in ('h_versus', 'h_training') if os.path.exists(os.path.join(G, 'traces', x, 'couv.txt'))]
 SCENE = {'0002': 'selection', '0004': 'VS/combat/entre-combats', '0006': 'continue', '0008': 'game over / apres fin',

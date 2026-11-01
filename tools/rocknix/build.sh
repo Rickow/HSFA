@@ -2,7 +2,7 @@
 # Compilation croisee du coeur FBNeo HSFA pour ROCKNIX (RK3326, Cortex-A35, aarch64 glibc)
 # usage : build.sh hsfa|hsfaws   (nettoie les objets avant : les deux coeurs partagent l'arbre)
 # FBNEO=<arbre FBNeo patche> pour un autre arbre (libretro/FBNeo af5d3f3 + chaine complete de patches/fbneo/README.md :
-#   patchs 0001-0014 et 0007b). Licence du coeur : patches/fbneo/LICENSE-FBNeo.txt, a joindre a toute archive (NOTICE.md).
+#   patchs 0001-0017 et 0007b). Licence du coeur : patches/fbneo/LICENSE-FBNeo.txt, a joindre a toute archive (NOTICE.md).
 set -e
 SUB=${1:-hsfa}
 D=${HSFA_WORKSPACE}/work/agent_rocknix

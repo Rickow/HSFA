@@ -73,11 +73,22 @@ emu.register_frame_done(function()
   if LISTE_LOG and LISTE_H then LISTE_LOG:write(IMAGE, " ", LISTE_H, "\n"); LISTE_H = nil end
   VU4, LISTES4 = 0, 0
 end)
+COMMUN_UPPER = tonumber(os.getenv("BANC_COMMUN_UPPER") or "")
+BASE_UPPER = tonumber(os.getenv("BANC_BASE_UPPER") or "400", 16)
+PLAN2_UPPER = os.getenv("BANC_PLAN2_UPPER")
+BASE2_UPPER = tonumber(os.getenv("BANC_BASE2_UPPER") or "440", 16)
 local function emplacements()
   suivre4()
   local e = {}
   e[0] = banque(tonumber(os.getenv("BANC_COMMUN") or "254"))   -- (HANDOFF §121) banque commune : SFA3 e254, Upper e351
+  -- (greffe ro9a, 28/10) BANC_COMMUN_UPPER=351 : ecrans d'Upper greffes (base scroll1 du fork $804200 = BANC_BASE_UPPER,
+  -- defaut 400 : CONTINUE, GAME OVER, fin, presentation...) -> banque commune d'Upper (leurs objets ont des codes d'e351)
+  if COMMUN_UPPER and mem:read_u16(0x804200) == BASE_UPPER then e[0] = banque(COMMUN_UPPER) end
   e[1] = banque(os.getenv("SLOT1") or "plan2")          -- (§83) ctx+$34 : memoire de tuiles du decor e256 (HUD...)
+  -- (greffe ro9a, 31/10) BANC_PLAN2_UPPER=<table> : ecrans d'Upper dont les TROIS plans sont ceux d'Upper (base scroll2
+  -- $804202 = BANC_BASE2_UPPER, defaut 440 : face-a-face, carte, fins ; pas CONTINUE / GAME OVER, qui gardent le decor
+  -- du combat) -> emplacement 1 = memoire de decor d'Upper (e353 : bandeaux ISM du face-a-face, images de fin)
+  if PLAN2_UPPER and mem:read_u16(0x804202) == BASE2_UPPER then e[1] = banque(PLAN2_UPPER) end
   -- (HANDOFF §99) BANQUE_J1 / BANQUE_J2 = banque imposee (ex. pl26 : Eagle, table banques/pl26.bin) ; sinon par l'ID
   e[2] = banque(os.getenv("BANQUE_J1") or perso[mem:read_u8(0xFF8503)])   -- octet perso ($102 ROM, octet XOR 1)
   e[3] = banque(os.getenv("BANQUE_J2") or perso[mem:read_u8(0xFF8903)])

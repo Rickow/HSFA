@@ -14,6 +14,13 @@ local out = io.open(os.getenv("OUT"), "w")
 local NF = tonumber(os.getenv("NF") or "40000")
 local SNAPETAT = os.getenv("SNAPETAT") == "1"
 local PERDRE = os.getenv("PERDRE") == "1"
+-- (28/10) PERDRE_ETAPE=n : J1 gagne jusqu'a l'etape n ($114), puis PERD les PERDRE_N premieres manches de cette etape
+-- (defaut 2 = un combat) ; ensuite il rejoue normalement (CONTINUE accepte sauf NOCONT=1). PERDRE_J2=id : seulement
+-- contre cet adversaire ($103 de J2).
+local PERDRE_ETAPE = tonumber(os.getenv("PERDRE_ETAPE") or "")
+local PERDRE_N = tonumber(os.getenv("PERDRE_N") or "2")
+local PERDRE_J2 = tonumber(os.getenv("PERDRE_J2") or "", 16)
+local perdues = 0
 local GRAINE = tonumber(os.getenv("GRAINE") or "", 16)
 local LISTE_ADV = tonumber(os.getenv("LISTE_ADV") or "FF4B2E", 16)
 local SN = {}
@@ -159,13 +166,17 @@ emu.register_frame_done(function()
   local combat = p0 == 2 and p4 == 4 and p8 == 6 and u8(J[1] + 5) == 2 and #adv > 0
   if combat then
     stable = stable + 1
+    if stable == 1 and PERDRE_ETAPE and u16(0xFF8114) >= PERDRE_ETAPE and perdues < PERDRE_N
+       and (not PERDRE_J2 or u8(J[2] + 0x103) == PERDRE_J2) then perdues = perdues + 1; PERDRE_ICI = true
+       out:write(string.format("PERDUE %d image %d\n", perdues, k))
+    elseif stable == 1 then PERDRE_ICI = false end
     if stable == 1 then combats = combats + 1
       out:write(string.format("MANCHE %d image %d J1 %02x/%02x/%02x J2 %02x/%02x/%02x etape %04x decor %04x liste %s\n", combats, k,
         u8(J[1] + 0x103), u8(J[1] + 0x117), u8(J[1] + 0x116), u8(J[2] + 0x103), u8(J[2] + 0x117), u8(J[2] + 0x116),
         u16(0xFF8114), u16(0xFF8100), liste())) end
-    if not PERDRE then mem:write_u16(J[1] + 0x50, 0x90); mem:write_u16(J[1] + 0x52, 0x90) end
+    if not (PERDRE or PERDRE_ICI) then mem:write_u16(J[1] + 0x50, 0x90); mem:write_u16(J[1] + 0x52, 0x90) end
     if stable > 60 then
-      if PERDRE then
+      if PERDRE or PERDRE_ICI then
         local v1 = u16(J[1] + 0x50)
         if v1 > 1 and v1 < 0x100 then mem:write_u16(J[1] + 0x50, 1); mem:write_u16(J[1] + 0x52, 1) end
       else
@@ -188,7 +199,8 @@ emu.register_frame_done(function()
     if p0 == 2 and p4 ~= 2 and p4 ~= 0 and not (os.getenv("NOCONT") == "1" and p4 == 6)
        and not (os.getenv("SCENEA_PASSIF") == "1" and p4 == 0xA)
        and not (PERDRE and combats > 0) then   -- (etape 6) PERDRE : aucune touche apres le 1er combat (sinon Start abrege la defaite, comme un 2e joueur)
-      if k % 30 < 3 then on(":IN2", "1 Player Start") end
+      -- (31/10) HIST_PASSIF=1 : pas de Start pendant l'histoire (scene 4/2) : Start l'abrege (Upper 0x24B670)
+      if k % 30 < 3 and not (os.getenv("HIST_PASSIF") == "1" and p4 == 4 and p8 == 2) then on(":IN2", "1 Player Start") end
       if k % 30 >= 15 and k % 30 < 18 then on(":IN0", "P1 Button 1") end
     end
   end
@@ -242,7 +254,13 @@ emu.register_frame_done(function()
   end
   -- (etape 5) ARRET_FIN=1 : arret des que la partie revient en scene C (ou 0/2) APRES la fin (scene A) : balayage des fins
   if os.getenv("ARRET_FIN") == "1" then
-    if p0 == 2 and p4 == 0xA and not _VU_A then _VU_A = k; out:write(string.format("SCENE_A %d\n", k)) end
+    if p0 == 2 and p4 == 0xA and not _VU_A then _VU_A = k; out:write(string.format("SCENE_A %d\n", k))
+      -- (e27) drapeaux de la greffe a l'entree de la fin ; FORCE_A="ff7e10=0,..." (octets 68K) ecrits a cette image
+      out:write(string.format("DRAPEAUX_A FE00=%02x FE10=%02x 100=%04x 174=%04x\n", u8(0xFF7E00), u8(0xFF7E10), u16(0xFF8100), u16(0xFF8174)))
+      if os.getenv("FORCE_A") then
+        for a, v in string.gmatch(os.getenv("FORCE_A"), "(%x+)=(%x+)") do mem:write_u8(tonumber(a, 16), tonumber(v, 16)) end
+      end
+    end
     if _VU_A and p4 ~= 0xA and not _FIN_A then _FIN_A = k; out:write(string.format("FIN_A %d duree %d scene %x\n", k, k - _VU_A, p4)) end
     if _FIN_A and k >= _FIN_A + 300 then FINI = true; out:write(string.format("FIN %d manches %d\n", k, combats)); out:close(); ecrit_couv(); manager.machine:exit(); return end
   end
@@ -261,6 +279,11 @@ if os.getenv("SURV") then
       local pl = {}
       for i = 0, 15 do pl[#pl + 1] = string.format("%04x", mem:read_u16(sp + 2 * i)) end
       out:write(string.format("ECRIT %d pc=%06x %06x %04x %04x pile %s\n", k, cpu.state["PC"].value & 0xffffff, o, d, m, table.concat(pl, " ")))
+      if os.getenv("SURV_REGS") == "1" then   -- (e27) registres au moment de l'ecriture
+        local rr = {}
+        for _, n in ipairs({"D0", "D1", "D2", "A0", "A1", "A2", "A3", "A6"}) do rr[#rr + 1] = string.format("%s=%08x", n, cpu.state[n].value) end
+        out:write("  REGS " .. table.concat(rr, " ") .. "\n")
+      end
     end
   end)
 end

@@ -4,6 +4,15 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Le 
 version : les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
 
+## v0.1.2 (2026-11-02)
+
+- Cœurs FBNeo HSFA avec les patchs 0001-0017 (et 0007b), construits le 2026-11-02. 0016 : dans Upper, Start tenu + un
+  bouton sur Akuma / Balrog redonne Shin Akuma / EX Balrog (la roulette passe sur Pièce / Select, sur la grille
+  seulement). 0015 et 0017 ne servent qu'à la greffe du mode Arcade (rien ne change pour SFA3, Upper et Hyper).
+- Cœurs Recalbox 10 (Raspberry Pi 3 armhf, Pi 4 / 5 aarch64), script d'installation et guide
+  ([installation-recalbox](docs/guide/installation-recalbox.md)) ; pas encore essayés sur le matériel.
+- Jeux inchangés : `scripts/construction` est identique à la v0.1.1, mêmes empreintes.
+
 ## v0.1.1 (2026-10-28)
 
 - Traducteur v153 : Guy se figeait au milieu d'une figure de sa Bushin dans Hyper (index d'état écrasé avant un test de

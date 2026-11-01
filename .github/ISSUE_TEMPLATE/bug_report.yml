@@ -1,0 +1,75 @@
+name: Bug report / Signaler un bug
+description: Something wrong in a game or a core / Un problème dans un jeu ou un cœur
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! English or French, as you like. / Merci ! En anglais ou en français, au choix.
+        **Never attach game files** (ISO, zips, ROMs, save states). / **Ne joignez jamais de fichiers de jeu**
+        (ISO, zips, ROM, sauvegardes d'état).
+  - type: input
+    id: version
+    attributes:
+      label: HSFA version / Version d'HSFA
+      placeholder: v0.1.2
+    validations:
+      required: true
+  - type: dropdown
+    id: game
+    attributes:
+      label: Game / Jeu
+      options:
+        - SFA3 (sfa3hsfa.zip)
+        - Upper (sfa3uhsfa.zip)
+        - Hyper (sfa3hhsfa.zip)
+        - Build from the ISO / Construction depuis l'ISO
+        - PS2 ISO patchers / Patcheurs de l'ISO PS2
+        - Other / Autre
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform / Plateforme
+      options:
+        - Android
+        - ROCKNIX
+        - Recalbox
+        - Windows
+        - Linux
+        - macOS
+        - Other / Autre
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and frontend / Appareil et interface
+      placeholder: "e.g. Raspberry Pi 3 + Recalbox 10.0, RGB10X + ROCKNIX, RetroArch 1.19 on Windows 11"
+  - type: dropdown
+    id: core
+    attributes:
+      label: Core / Cœur
+      options:
+        - FinalBurn Neo HSFA (4:3)
+        - FinalBurn Neo HSFA Widescreen (16:9)
+        - Both / Les deux
+        - Not relevant / Sans objet
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens / Ce qui se passe
+      description: Mode, characters, versions (ZERO, ZERO 2…), stage, when it happens. / Mode, persos, versions, décor, à quel moment.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce / Comment le reproduire
+      placeholder: "1. Upper, ARCADE\n2. Ryu vs. Ken, 2nd round\n3. ..."
+  - type: textarea
+    id: logs
+    attributes:
+      label: Messages or screenshots / Messages ou captures
+      description: Build output (hsfa_build.py), RetroArch log, screenshots. / Sortie de la construction, journal de RetroArch, captures.

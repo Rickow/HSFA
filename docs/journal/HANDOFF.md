@@ -5207,3 +5207,180 @@ Alpha Counter = artefact du banc.
   **Le défaut est dans la release publique v0.1** (Hyper) → v0.1.1.
 - **Greffe ro9a9** : 81/85 (Guy ×4, Blanka, Juli, T. Hawk gagnés ; intermèdes d'Upper adoptés ; textes de fin entiers,
   la banque 0x68DC72 était coupée). Restent Sakura ×3 et Karin. Zip CRC `463D0456`.
+
+### 181. Greffe Arcade ro9a10 : 85 fins sur 85
+
+- **Cause de fond** : la règle j) du plan (routine non vue en Arcade → homologue d'Hyper) s'appuyait sur la couverture
+  de 3 parties d'Upper (Ryu, Akuma, Chun-Li) : le code des fins et des intermèdes des autres persos partait vers des
+  routines d'Hyper inadaptées. Couverture relevée sur les 36 persos (`outils/couv_tous.sh`) : 1 995 → 2 710 routines ;
+  182 anciennes décisions gardées par bissection (Zangief, Honda).
+- **Faux pointeurs** : la table des répliques d'intermède 0x970F40 (532 numéros de réplique pris pour des pointeurs),
+  139 paires « $0200 + paramètre » dans les scripts de fin, les mots 0x92103C (Sakura) et 0x99E3DC (T. Hawk). Banques de
+  textes copiées entières sans données dans leurs creux (la réplique d'Evil Ryu était écrasée).
+- **Mémoire** : greffe cantonnée à T1a / T2 du plan d'allocation (`TROUS_PLAN`), aucune réserve touchée.
+- **Résultat** : 85/85, Sakura et Ken à l'image près d'Upper ; zip `sfa3hahsfa.zip` CRC `F9D62F14`. Restent Evil Ryu
+  (fin d'export, Final Battle perdue), progression de l'IA, puis le chantier des décors. Construire depuis l'ISO
+  demandera de refaire la liste Arcade à partir des 36 couvertures d'Upper.
+
+### 182. Lot MAX 2b25 (traducteur v153)
+
+- Rebase v153 : la construction est identique à l'octet au lot 2b24 (natif d'Upper inchangé).
+- **Garde en pose de contre** : la PSP (0x718E8) refuse la garde aux types de contre 4 et 7-14, Upper ($4D6A) à 4 et 7-9
+  seulement → Ingrid gardait les coups non contrés (Kikosho : 10 au lieu de 57). Un octet en $4D80 (`BEQ` → `BCC`, même
+  taille, mêmes cycles) ; banc mode B : contres de 20 DIFFÉRENT à 36 IDENTIQUE / 12 PROCHE.
+- **Bloc IA** (+0x1E2..+0x1ED = arcade $202..$20D) corrigé à la source par la session MAX ; spécial 8 de Yun inaccessible
+  au CPU sur PSP aussi (0x1FD830[8] « rendre 0 ») : conforme.
+- **Tables R9-bis** complètes (0x623E50 : natifs proches pour Yun et Ingrid, débordement PSP) ; Skull Diver 12 sur Ryu,
+  Sakura et les 4 MAX. Dialogues vérifiés à l'écran.
+- Banc max37 (REFS v153) vert ; zip CRC `73d20b1f`. Restent : logo « ZERO 3 ↑↑ », rémanences d'Ingrid, décors maison (R21).
+
+### 183. Greffe : Evil Ryu et progression de l'IA vérifiés (rien à greffer)
+
+- Banc : `PERDRE_ETAPE=n` (J1 gagne jusqu'à l'étape n puis perd). Défaite au dernier combat : Upper comme ro9a10
+  enchaînent sur la fin de Bison ; le défaut MAX / CFC2 (fin de Birdie) ne peut pas se produire, Upper n'ayant pas de
+  mode « Final Battle ». Fin d'export d'Evil Ryu (SFA2 USA) : hors du mode Arcade d'Upper (une fin par perso).
+- **Progression de l'IA d'Upper** : difficulté courante `$BF` = option `$A1` ; niveau initial T_60AE00[$BF] × 8 → `$9EB0` ;
+  niveau visé par étape T_60AE10[$BF × 16 + $114] × 8 (T_60AF10 si `$15C`) ; variations en combat `$9EB2` / `$9EB4` ;
+  ism des CPU par étape `$FF0E4C`. Hyper a le même code et les mêmes tables : la progression marche déjà dans ro9a
+  (Ryu, difficulté 4 : mêmes niveaux qu'Upper par étape, à 3 points près aux deux premières).
+
+### 184. Greffe ro9a11 : CONTINUE, banque commune d'Upper (patch 0015 du cœur)
+
+- **Décompte du CONTINUE** : Upper 0x24AA40 (joueur qui continue, `$9EA4`) était renvoyée par le tri vers Hyper
+  0x2D90D0, d'un autre rôle ; greffée (`CONT_JOUEUR`). 85/85 conservé ; zip `sfa3hahsfa.zip` CRC `CFBEAC0B`.
+- **Cause commune** des barres CONTINUE, des lettres du GAME OVER et des portraits des fins : les objets des écrans
+  d'Upper sont codés pour la banque commune d'Upper (e351), alors qu'Hyper range e545 dans l'emplacement 0. Banc :
+  `BANC_COMMUN_UPPER` ; cœur : **patch 0015** (clés `commun_upper` / `base_upper` du `config`, sans effet hors ro9a).
+  Les cœurs ne sont pas encore recompilés : le zip contient déjà les clés, ignorées par un cœur sans 0015.
+- Restent : textes du haut du CONTINUE et du GAME OVER, rectangles du fond du GAME OVER, blocs du portrait de Bison,
+  scène 1 des fins (décor du boss : chantier des décors).
+
+### 185. Greffe ro9a12 : ossature des décors (règle D4), 1re partie
+
+- Table D4 décidée (128 ids : Cammy Z2 / ALPHA → `$64` ; décors imposés d'Upper seulement si J2 est en ZERO 3 ; MAX :
+  Eagle `$10`, Maki `$0E`, Yun `$42`, Ingrid `$00`). `D4_REPLI` : un décor pas encore présent dans ro9a est remplacé par
+  le décor d'Hyper de sa famille (ZERO 3 → 4, ZERO 2 / ALPHA → 2, ZERO → 0).
+- **Mesures** : en VERSUS, Hyper garde toujours `$100` = 0 (seule la variante `$C178` tourne) ; en Arcade, les
+  adversaires CPU sont toujours des ids ZERO 3 d'Upper (< `$28`) → D4 = T_61BE10 pour eux. D4 en VERSUS (décision de
+  l'utilisateur) sera activée avec les décors d'Upper (étape 3).
+- Preuve : 85/85, VERSUS d'Hyper identique à ro9a11 à l'image près ; zip CRC `61A284F2`. Index : 13 réservations
+  périmées retirées de `re/allocations.tsv`. Banc : `BANC_COMMUN_UPPER` dans `banc_sprites.lua`.
+- Suite : étape 2 (données de l'image vers les trous, conflit C4), puis décors d'Upper.
+
+### 186. Greffe ro9a13 (place C4, retours utilisateur) ; persos cachés d'Upper
+
+- **Place C4** : `HSFA_DONNEES_TROU` (greffe3 `DONNEES_TROU=1`) sort 272 816 octets de données de l'image vers le bloc
+  `ext_5d4000` (fin de T1b), chargé par `hsfa_trous.bin` du patch 0009 : 291 Ko rendus au code, T1b garde 1 008 Ko pour
+  les décors. Sans l'interrupteur, ro9a12 à l'octet ; ro9a13 : 85/85, VERSUS d'Hyper identique ; zip CRC `29C501C3`.
+- **Retours de l'utilisateur** (9 points, LIVRAISONS) : picto « AUTO » = Upper écrit le type d'entrée en scène dans
+  l'octet `$119`, qui est le choix MANUAL / AUTO dans Hyper (garde automatique active à tort) → accès d'Upper déplacés en
+  `$30D` (`CHAMP_POSE`) ; musique de J1 à tous les combats → choix d'Hyper 0x3890D0 orienté vers J2 (`MUSIQUE_J2`).
+  Ouverts : jauge de Sakura ALPHA, portraits d'intermède (réserve `$FFD000` dessinée par Hyper, jamais libérée),
+  caractères de l'écran de victoire, portrait gauche décalé, « WIN » sur défaite.
+- **Persos cachés d'Upper** : aucun drapeau de déblocage ; Start tenu + bouton sur Akuma / Balrog donne `$24` / `$25`
+  (validation `$0570BE`, bit 15 de `$11A`), mais Start lance aussi la roulette (`$055404` recopie Start dans `$F3`). Le
+  patch 0007 ne couvrait que Hyper → patch cœur 0016 (roulette sur Pièce pour Upper et Upper MAX). Final Bison = S-ISM
+  (écran de mode : Start tenu + Haut / Bas). Hyper : Start tenu fonctionne (vraies entrées, cœur du 31/10).
+
+### 187. Greffe ro9a14 : portraits d'intermède, résultat de manche
+
+- **Portraits d'intermède et de l'histoire** : la table des types d'objets d'Hyper T_5C5720 range en 14 un autre objet
+  (0x3310F0) que celui d'Upper (0x17FD50 : portraits d'intermède et d'histoire, en `$FFBE00` / `$FFBE80`) → `TYPE14`
+  (talon : copie d'Upper en Arcade, Hyper sinon). Bandeau du regard comme Upper, objets libérés avant le combat,
+  portrait de l'histoire centré.
+- **« WIN » sur une défaite** : Hyper seul en VS COM affiche aussi « WIN » pour l'ordinateur ; ro9a ajoutait le bonus.
+  Upper n'a pas de phase de résultat → `RESULTAT_CPU` saute la phase A5+C = `$A` quand le gagnant (`$13A(A5)` = `$8800`)
+  est l'ordinateur.
+- 85/85, VERSUS d'Hyper identique ; zip CRC `EF65973D`. Ouverts : encadré de texte de l'histoire (fin de sélection
+  d'Upper 0x196810 non greffée), bandeaux ISM du face-à-face (emplacement 1 : e353 d'Upper contre e546 d'Hyper), taches
+  dans le fond du CONTINUE, jauge de Sakura ALPHA, caractères de l'écran de victoire.
+
+### 188. Lot MAX 2b26 : provocations des MAX, logo « ZERO 3 ↑↑ », décors maison
+
+- **Provocation** : la PSP teste le bit `$4000` de +0x2F8 (0x662D8). `MAX_ENTREES` recalculait le miroir `$3E2` depuis
+  `$370` et perdait le bit 15 de `$378` que pose le patch cœur 0014 (Pièce en combat) → bit 15 recopié en `$4000` de
+  `$3E2` (`MAX_PROVOC`) ; les 4 MAX provoquent (A et V).
+- **Logo** (`MAX_LOGO`) : frame type 8 sur l'acteur de sous-type 1 de l'écran titre, plaque des plans `$52` / `$53`
+  retirée, palettes du logo en OBJ 1-4 et 8-11 (12-19 écrasées par l'attraction). Reste le ® vert natif et le fondu.
+- **Décors maison** (R21, `MAX_DECORS_MAISON`) : T_61BE10 / T_61BE40 (prolongée à 48) → Eagle 8, Maki 7, Yun 33,
+  Ingrid 0 en Arcade.
+- Banc max39 vert ; zip CRC `7f6a1b4b`. Rémanences d'Ingrid : non faites (créateurs PSP 0x78E20 / 0x78F24 non traduits).
+
+### 189. Greffe ro9a15 : objets propres à Upper greffés (écran d'histoire, bandeaux ISM)
+
+- **Règle `OBJ_UPPER`** (etape2/plan.py) : le plan envoyait le code des types d'objets propres à Upper (12, 13, 18, 19,
+  35, 46, 47, sans entrée chez Hyper, et 14, autre objet chez Hyper) vers de faux homologues d'Hyper (ex. l'encadré de
+  l'histoire, Upper 0x1937A0, partait vers Hyper 0x300490 qui le fait tomber puis le détruit) → greffés (+21 routines).
+  Rétablit l'encadré de l'histoire et les bandeaux A-ISM / V-ISM du face-à-face (tuiles d'e546 = e353 − `$C00`).
+- **Portrait décalé** : 10 longs (X, vitesse) de la table T_615F20 pris pour des pointeurs → exclus.
+- **Piège du banc** : appuyer sur Start toutes les 30 images abrège l'histoire (Upper 0x24B670) → `HIST_PASSIF=1`.
+- 85/85, VERSUS identique ; zip CRC `3E24C97A`. Ouverts : lettre « S » mal placée au face-à-face, fond du CONTINUE,
+  jauge de Sakura ALPHA, caractères de l'écran de victoire, décors.
+
+### 190. Greffe ro9a16 : barre VERSUS, jauge ALPHA, fond du CONTINUE
+
+- **Barre VERSUS** (`FICHIERS_BRUTS`) : dans les fichiers de données chargés par le portage d'Upper (≥ `$A00000`), 535
+  couples (x, y) de pièces d'image étaient relogés comme des pointeurs ; ces fichiers n'en contiennent aucun.
+- **Jauge ALPHA de J1** (`JAUGE_HYPER`) : l'entrée en combat d'Upper créait d'abord les 4 objets du HUD d'Upper ; le HUD
+  d'Hyper (0xAC050) exige 5 places libres → jauge jamais créée. Les deux appels vont au HUD d'Hyper.
+- **Fond du CONTINUE** (`CONT_S1_MASQUE`) : le ciel du décor 4 d'Hyper est sur scroll1, en codes d'Hyper, sous la base
+  scroll1 d'Upper (0x400) qui sert aussi de signal au patch 0015 → scroll1 masqué pendant la citation et le CONTINUE
+  (décor grisé propre, ciel noir). Le décor entier demanderait une 2e valeur `base_upper` dans le cœur.
+- 85/85, VERSUS identique ; zip CRC `C000DB52`. Ouverts : picto « AUTO » après un CONTINUE, écran de victoire, décors
+  (nouveau challenger : copie d'Upper 0x258450, `$100 = 2 × $103`, à passer par D4).
+
+### 191. Greffe ro9a17 : picto « AUTO » après un CONTINUE, table D4 ; le nouveau challenger plante
+
+- **« AUTO » après un CONTINUE** (`CHAMP_POSE_A5`) : la reprise d'Upper (0x26B0B0) écrit `$0519(A5)` / `$0919(A5)` par la
+  base A5, que `CHAMP_POSE` ne voyait pas → `$70C` / `$B0C`.
+- **Table D4** (`D4_TABLE`) : 128 octets en `$4D8000` (T1b), servie par une fenêtre PS2 `$FE0000`. Piège : une table posée
+  dans le bloc de la greffe s'écrit en ordre PS2 (octet 68K i = octet PS2 i^1).
+- **Nouveau challenger** (2e joueur en cours d'Arcade) : plante dans toutes les ro9a (Upper 0x1353A0 envoyé vers Hyper
+  0x9A570). `CHALLENGER=1` (à l'essai) : sélection et combat de J2 passent, plantage après le combat. Le vrai trajet du
+  challenger passe par Hyper 0x31D6A0 puis Upper 0x24F020 : c'est là que D4 devra porter.
+- **Décors d'Upper** : un décor complet demande ≈ 0,6 Mo, alors qu'il ne reste qu'≈ 64 Ko d'espace PS2 pour les données
+  de la greffe → les données de décor doivent aller directement côté 68K (T1b / blocs externes). scroll2 / scroll3 peuvent
+  prendre les bases d'Upper sans toucher au cœur.
+- 85/85, VERSUS identique ; zip CRC `DBB8D791`.
+
+### 192. Greffe ro9a18 : le nouveau challenger marche
+
+- **Cause du plantage après le combat de défi** : l'écran de victoire d'un combat à deux joueurs crée l'objet `$12`
+  sous-type 4 (Upper 0x193950, animation 35 de T_D01C60), dont les frames n'avaient jamais été copiées : aucun journal de
+  lecture ne contenait de défi → journaux de défi (`JOURNAUX_DEFI`) + `CHALLENGER` (arrivée d'un joueur).
+- Prouvé dans MAME contre Upper, les deux issues : J1 gagne → reprise contre l'adversaire interrompu ; le challenger gagne
+  → il part sur sa propre liste, comme Upper.
+- D4 sur le trajet du challenger (`D4_CHALLENGER`, `D4_ORDRE`) ; `$174` était calculé sur le perso de l'adversaire
+  précédent (lectures 0x24EFD8 / 0x2512D4 relisent `$103`). Banc : les commandes de J2 sont sur `:IN0`, pas `:IN1`.
+- 85/85, VERSUS identique ; zip CRC `D6315426`. Suite : 1er décor d'Upper (`$32` contre `$19`), tables de décor
+  complétées dans leurs réserves PS2 déjà allouées (527 Ko dont 166 Ko remplis).
+
+### 193. Greffe ro9a19 (décors d'Upper en combat, en cours) ; banc des dégâts ; logo MAX ; patch 0017
+
+- **ro9a19** : tous les décors d'Upper (`$00-$4E`) en combat Arcade. Moteur de décor choisi par décor (drapeau
+  `$FF7E10`, talons `moteur_*` vers les copies d'Upper 0x151B80 / 0x4B270 / 0x13BB10) ; tables complétées sur place
+  (`TABLES_DECOR`), 236 faux pointeurs écartés (`DECOR_SANS_PTR`) ; scroll1 par l'alias de base `$4400` (le cœur masque
+  l'adresse de tuile : plans d'Upper sans le signal 0015) ; 41 combats sur 49 identiques au pixel à Upper.
+  **Régression : 77/85** (fins de 09 et 0a : exception pendant la fin) → non livrée, en correction.
+- **Patch cœur 0017** : bases de plans marquées (`marque_upper`), ciel du CONTINUE avec la banque commune d'Upper ;
+  cœurs du 02/11 (toutes plateformes, Recalbox compris).
+- **Banc des dégâts** (`docs/rapports/BANC-GREFFE-UPPER.md`) : greffe = Hyper sur 5 656 essais ZERO 3 ; Hyper ≠ Upper
+  sur 50 coups robustes → tri en cours (défaut de traduction contre retouche de l'Anthology), avec la règle du
+  traducteur en cause pour chaque défaut. Piège du banc : cadence turbo (4 tours pour 3 images), fenêtre à compter en
+  tours, pas en images.
+- **Logo « ZERO 3 ↑↑ »** d'Upper MAX refait depuis le logo HD de l'utilisateur (N26), variante sans plaque choisie ;
+  **rémanences d'Ingrid** expliquées (créateur natif `$804DA`, cas +0x251 = 5 propre à Ingrid) : lot MAX 2b27 à faire.
+
+### 194. Greffe ro9a20 : décors d'Upper en combat (85/85) ; tri des écarts Hyper / Upper
+
+- **Fins de Rose et de Bison** : deux acteurs de fin d'Upper (classes `$10` / `$18`) étaient confiés par une ancienne
+  décision de la règle j) à des routines d'Hyper sans rapport (0x213110 → interpréteur de script 0x393CD0, 0x2138B0 →
+  routine de joueur 0x2B7A60). ro9a18 aboutissait par hasard ; le décalage de ro9a19 a révélé l'exception →
+  `FIN_ACTEURS_GREFFE` (copies d'Upper) et `DECOR_PTR_GARDES` (80 vrais pointeurs de palettes relogés).
+  Même défaut d'homologue latent pour les classes 6, 7, 10, 14 (0x2125A0, 0x212630, 0x2127C0, 0x212FC0).
+- **ro9a20** : 85/85 (durées égales à ro9a18), VERSUS identique, décors d'Upper en combat Arcade, CONTINUE / GAME OVER
+  avec le patch 0017 ; zip CRC `7CC4CC53` ; exige les cœurs du 02/11.
+- **Tri des 50 écarts Hyper / Upper** (`docs/rapports/TRI-ECARTS-HYPER-UPPER.md`) : 0 défaut de traduction ; 21 dus à
+  la distance de départ (Hyper en turbo fait un pas de plus pendant la manip), 18 à la cadence, 2 retouches de
+  l'Anthology (octet d'attaque d'arrière + MK de Chun-Li X), 9 indéterminés. Leçon pour le banc des coups : imposer la
+  distance au début du coup.

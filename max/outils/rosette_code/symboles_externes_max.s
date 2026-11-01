@@ -11,3 +11,8 @@ ACTEUR_PALPROPRE_CHAMP equ $18  ; champ de l'objet où le générateur recopie l
 ; à chaque construction : l'image bouge) :
 COUP_NORMAL equ $003FBE         ; gestionnaire « pas de contre » d'Upper, appelé par les gestionnaires 4-9 : v151 (relevé max23 de l'intégration, qui le relève désormais dans l'image native ; v149 : $23A3C, devenu un tirage aléatoire en v151)
 CONTRE_DECLENCHE equ -$7454     ; = $8BAC non signé : mot A5 « contre déclenché » (MOVE.W #1,$8BAC(A5) des gestionnaires d'Upper ; PSP octet 0x87F50D)
+; rémanences d'Ingrid (R22, 2026-10-31) : palettes OBJ ABSOLUES des copies (paires consécutives : haut = n, jambes = n + 1),
+; libres en combat d'après le relevé de l'intégration (OBJ 10, 11, 13, 14 jamais employées) ; à confirmer / changer côté HSFA.
+; Contenu : converti/pl29/palettes_*_remanence.bin (bleu clair haut / bas, bleu foncé haut / bas).
+REM_CLAIR equ 10
+REM_FONCE equ 13

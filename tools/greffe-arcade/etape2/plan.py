@@ -29,7 +29,7 @@ HOM = pickle.load(open(os.path.join(G, 'donnees', 'homologues.pkl'), 'rb'))
 HOMC, HOMD = HOM['code'], HOM['donnees']
 HOMDT = HOM.get('donnees_tous', {})
 TRI = pickle.load(open(os.path.join(G, 'donnees', 'tri_modifiees.pkl'), 'rb'))
-LA = pickle.load(open(os.path.join(G, 'donnees', 'liste_arcade.pkl'), 'rb'))
+LA = pickle.load(open(os.environ.get('LISTE_ARCADE', os.path.join(G, 'donnees', 'liste_arcade.pkl')), 'rb'))
 BY = {l['r']: l for l in LA['lignes']}
 COURTES = set(LA['courtesA'])          # routines courtes (relais...) vues en Arcade, indecidables par la couverture
 CK = pickle.load(open(os.path.join(GR.EU, 'couv_k.pkl'), 'rb'))
@@ -146,6 +146,22 @@ def refs_routine(r):
         elif cl == 'data': out.append(('data', v, L[k].va))
     return out
 
+# (31/10, e22) zones de code des types d'objets d'Upper sans equivalent chez Hyper (table des types Upper T_615100 /
+# Hyper T_5C5720) : [debut du gestionnaire, debut du gestionnaire suivant dans l'image d'Upper)
+OBJ_TYPES_UPPER = (12, 13, 14, 18, 19, 35, 46, 47)
+def _zones_obj_upper():
+    t5 = [struct.unpack_from('<I', b5, 0x615100 - BASE + 4 * i)[0] - BASE for i in range(64)]
+    t9 = [struct.unpack_from('<I', b9, 0x5C5720 - BASE + 4 * i)[0] for i in range(48)]
+    assert t9[14] - BASE == 0x3310F0 and t5[14] == 0x17FD50 and all(t9[i] == 0 for i in OBJ_TYPES_UPPER if i != 14)
+    debuts = sorted(set(x for x in t5 if 0 < x < 0x400000))
+    z = []
+    for i in OBJ_TYPES_UPPER:
+        a = t5[i]; k = bisect.bisect_right(debuts, a); z.append((a, debuts[k] if k < len(debuts) else a + 0x100))
+    return z
+ZONES_OBJ_UPPER = _zones_obj_upper() if os.environ.get("OBJ_UPPER", "1") == "1" else []
+def obj_upper(x): return any(a <= x < b for a, b in ZONES_OBJ_UPPER)
+def obj_hyper14(p): return bool(ZONES_OBJ_UPPER) and p is not None and 0x3310F0 <= p < 0x335180   # type 14 d'Hyper (suivant : T_5C5720[15])
+
 class Plan:
     def __init__(self, force=None):
         self.force = dict(force or {})
@@ -218,6 +234,14 @@ class Plan:
             d = self.force[x]; r = 'impose'
         else:
             d, r = self._regle(x)
+            # (31/10, e22) OBJ_UPPER=1 : routine du code d'un TYPE D'OBJET propre a Upper (entree nulle chez Hyper, ou autre
+            # objet au meme numero : 14) -> l'« homologue » d'Hyper (tri, couverture, service partage) est un autre objet :
+            # GREFFE, sauf code equivalent (e). Ex. encadre de l'histoire (type $12, Upper 0x1937A0 -> Hyper 0x300490 :
+            # chute puis destruction au lieu de s'arreter en Y = $30).
+            # type 14 : Hyper range a ce numero un AUTRE objet (0x3310F0) ; ses routines « equivalentes » (e) sont du code de
+            # cet autre objet (tables de sauts PC-relatives differentes : portrait de l'histoire jamais arrive en X = $C0)
+            if d[0] == 'HYPER' and obj_upper(x) and (not r.startswith('e)') or obj_hyper14(d[1])):
+                d, r = ('GREFFE',), 'k) objet propre a Upper (' + r + ')'
         if not peek or d[0] != 'GREFFE':
             pass
         self.dec[x] = d; self.raison[x] = r

@@ -63,6 +63,10 @@ AJOUTEES = [  # (ps2, e, n d'origine, rôle)
     (0x95CB80, 8, 42, "visage HUD (3e variante)"),
     (0x95CCD0, 8, 42, "visage HUD (4e variante, J2 + 16 ; audit 2b22)"),
 ]
+# (2b26, R21) T_61BE40 = variante de T_61BE10 (id -> décor / 2, lue quand $C3A4(A5) ≠ 0, va 0x441AA8) : prolongée à 48
+# pour le décor maison de Yun / Ingrid (sinon 0 = Ryu) ; MAX_DECORS_MAISON=0 : table d'origine
+if os.environ.get("MAX_DECORS_MAISON", "1") == "1":
+    AJOUTEES.append((0x61BE40, 1, 40, "ID -> décor / 2, variante $C3A4(A5) ≠ 0 (va 0x441AA8 ; R21, 2b26)"))
 # tables à rangées : (ps2, e, rangées, [(va, ancien, nouveau) des « ADDI.W #rangée,Dn »], rôle)
 MULTI = [
     (0x616850, 1, 2, [(0x194B54, 0x0028, 0x0030)], "noms graphiques (ID, ID+$28 selon $90(A5))"),

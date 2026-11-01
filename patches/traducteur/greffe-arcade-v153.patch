@@ -1,6 +1,6 @@
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assemble.py b/assemble.py
 --- a/assemble.py	2026-10-28 11:08:24.000000000 +0100
-+++ b/assemble.py	2026-10-28 11:08:43.624771838 +0100
++++ b/assemble.py	2026-11-01 10:35:27.797009984 +0100
 @@ -362,10 +362,15 @@
              if k_=='p1': x.nofix='natif'
              else: x.ws=x.ws[:2]+x.ws[7:]
@@ -47,7 +47,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assemble.py b/assemble.py
      for _ in range(30):
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assets_natifs.py b/assets_natifs.py
 --- a/assets_natifs.py	2026-10-28 11:08:24.000000000 +0100
-+++ b/assets_natifs.py	2026-10-28 11:08:43.618809295 +0100
++++ b/assets_natifs.py	2026-11-01 10:35:27.788715778 +0100
 @@ -69,6 +69,22 @@
      FIXES = {547: 0xC84000}              # frames de sprites (en-tete d1ff f2ff.. comme 289/390), 553 352 o :
                                           # 39 656 longs alignes des donnees dans [$C84000, $D0B188)
@@ -90,7 +90,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/assets_natifs.py b/assets_na
          g, a = struct.unpack_from('<hh', buf, T_FIN - rtbase + 4*i)
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/extra_regs.py b/extra_regs.py
 --- a/extra_regs.py	2026-10-28 11:08:24.000000000 +0100
-+++ b/extra_regs.py	2026-10-28 11:08:43.387320877 +0100
++++ b/extra_regs.py	2026-11-01 10:35:27.460086444 +0100
 @@ -26,10 +26,11 @@
  
  def analyse(buf, runtime_base=0x1f0000):
@@ -135,7 +135,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/extra_regs.py b/extra_regs.p
      calls = collections.defaultdict(list); brs = collections.defaultdict(list); l7 = set()
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
 --- a/mame_test.py	2026-10-28 11:08:24.000000000 +0100
-+++ b/mame_test.py	2026-10-28 11:08:43.220898449 +0100
++++ b/mame_test.py	2026-11-01 10:35:27.229317699 +0100
 @@ -52,6 +52,10 @@
      buf = open(module_chemin(), "rb").read()
      os.makedirs(W, exist_ok=True)
@@ -177,7 +177,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
      T.CODE_CONV = CCE
      KORG = 0xB00
      _, KL = K.build(KORG, 0)                             # adresses des points d'entree du noyau
-@@ -111,6 +116,20 @@
+@@ -111,9 +116,26 @@
      if os.environ.get("HSFA_SON_DONNEES"):            # (agent_son_hyper_rom) bloc ajoute, cf. translate.SON_X
          SON_BLOB = open(os.environ["HSFA_SON_DONNEES"], "rb").read(); SON_BLOB += bytes(len(SON_BLOB) & 1)
          T.SON_X = int(os.environ.get("HSFA_SON_X", "E70000"), 16); T.SON_LEN = len(SON_BLOB)
@@ -197,13 +197,20 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
 +            T.HWREG.update({0x7FF00: 0x804200, 0x7FF02: 0x804202, 0x7FF04: 0x804204})
      def plages_conv():                                   # (agent_defauts_banc) plages du talon CONV (HANDOFF §63)
          R = T.RAM_HI << 16; PR = T.PORT_RAM; TG = 0x01000000
-         ranges = ([(T.CODE_END_RT, T.DATA_SPLIT, T.DATA_BASE - T.CODE_END_RT),
-@@ -124,16 +143,30 @@
+-        ranges = ([(T.CODE_END_RT, T.DATA_SPLIT, T.DATA_BASE - T.CODE_END_RT),
++        ranges = ([(T.CODE_END_RT, T.DATA_T0, T.DATA_BASE - T.CODE_END_RT),
++                   (T.DATA_T0, T.DATA_SPLIT, T.DATA_TROU_Y + TG - T.DATA_T0),
++                   (T.DATA_SPLIT, T.DATA_END_RT, T.DATA_EXT - T.DATA_SPLIT + (TG if P.get('data_ext') else 0))] if T.DATA_T0 is not None else
++                  [(T.CODE_END_RT, T.DATA_SPLIT, T.DATA_BASE - T.CODE_END_RT),
+                    (T.DATA_SPLIT, T.DATA_END_RT, T.DATA_EXT - T.DATA_SPLIT + (TG if P.get('data_ext') else 0))] if T.DATA_SPLIT else
+                   [(T.CODE_END_RT, T.DATA_END_RT, T.DATA_BASE - T.CODE_END_RT)]) + [
+                   (T.DATA_END_RT, R, PR - T.DATA_END_RT),
+@@ -124,16 +146,31 @@
                    (R + 0x50000, R + 0x60000, PR + 0x80000 - (R + 0x50000)),
                    (R + 0x60000, R + 0x62000, TG + 0x618000 - (R + 0x60000)),
                    (R + 0x62000, R + 0x80000, PR + 0x80000 + 0x12000 - (R + 0x62000))]
 -        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (len(buf) - end)   # donnees DANS l'image
-+        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (FIN_FICHIER - end)   # donnees DANS l'image
++        NDATA = ((T.DATA_T0 if T.DATA_T0 is not None else T.DATA_SPLIT) - T.CODE_END_RT) if T.DATA_SPLIT else (FIN_FICHIER - end)   # donnees DANS l'image
          ASSET = (T.DATA_BASE + NDATA + 0xff) & ~0xff      # bloc des tables d'animation, apres les donnees
          if ablob: ranges.append((AN.VBASE, AN.VBASE + len(ablob), ASSET - AN.VBASE))   # (agent_ro9) ro9 : bloc vide
          if T.SON_X is not None: ranges.append((T.SON_X, T.SON_X + T.SON_LEN, T.son_y() + TG - T.SON_X))
@@ -224,13 +231,14 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
          if not T.HW_TAG or not T.DATA_SPLIT: return []
          blocs = []
          if P.get('data_ext'): blocs.append((T.DATA_EXT, T.DATA_EXT + (T.DATA_END_RT - T.DATA_SPLIT)))
++        if T.DATA_T0 is not None: blocs.append((T.DATA_TROU_Y, T.DATA_TROU_Y + (T.DATA_SPLIT - T.DATA_T0)))   # (etape 2 des decors)
          if T.SON_X is not None: blocs.append((T.son_y(), T.son_y() + T.SON_LEN))
 +        if T.GRF_FEN is not None and os.environ.get("RETAG_GREFFE", "0") == "1":   # (greffe_arcade) fenetres 68K du bloc ; defaut 0 (28/10) : les 2 sites greffes (Upper 0x155D28, 0x16F058) ne sont pas reetiquetes dans Upper (fin 03 Z bloquee avec 1)
 +            for lo_, hi_, y_ in T.GRF_FEN: blocs.append((y_, y_ + hi_ - lo_))
          res = []
          for b0, b1 in blocs:
              for r0, r1, add in plages_conv():
-@@ -146,8 +179,13 @@
+@@ -146,11 +183,21 @@
              else: m.append((lo, hi))
          return m
      T.RETAG_FN = plages_retag
@@ -242,28 +250,50 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
 +    # le bloc externe $940000 ; les tables d'animation natives (ASSET) descendent avec elles
 +    RESERVE_MAX = int(os.environ.get("RESERVE_MAX", "0"), 16)
 +    PLAFOND -= RESERVE_MAX
++    # (greffe_arcade, ossature des decors etape 2, conflit C4) HSFA_DONNEES_TROU="y:n:ext0" (hexa) : la coupure du bloc
++    # externe ($940000) reste FIXE en PS2 ext0 (ext_940000 inchange) ; la place de l'image est reduite de n octets
++    # (plafond des donnees abaisse) ; la tranche [T0, ext0) qui ne tient plus va dans un TROU de la carte 68K en y
++    # (ext_<y>.bin, servi par banc_mem / hsfa_trous.bin). Sans la variable : rien ne change.
++    DTROU = tuple(int(z_, 16) for z_ in os.environ["HSFA_DONNEES_TROU"].split(':')) if os.environ.get("HSFA_DONNEES_TROU") else None
      COUPE_BLOCS = os.environ.get('COUPE_BLOCS', '1') != '0'   # (agent_defauts_banc)
-     def coupe():                                         # (HANDOFF §108) donnees trop grandes : la fin part en externe
-         lim = T.CODE_END_RT + (PLAFOND - T.DATA_BASE)
-@@ -184,7 +222,7 @@
+-    def coupe():                                         # (HANDOFF §108) donnees trop grandes : la fin part en externe
+-        lim = T.CODE_END_RT + (PLAFOND - T.DATA_BASE)
++    def coupe(plaf=None):                                # (HANDOFF §108) donnees trop grandes : la fin part en externe
++        lim = T.CODE_END_RT + ((PLAFOND if plaf is None else plaf) - T.DATA_BASE)
+         if lim >= T.DATA_END_RT: return None
+         if P.get('blocs'):
+             # (HANDOFF §126) coupure au DEBUT d'un bloc de perso : le code fait 'table d'animation + decalage 16 bits'
+@@ -182,10 +229,17 @@
+         return lim & ~0xfff
+     for _ in range(4):                                   # base des donnees STABLE (la taille du code en depend)
          nb = (CODE + 2*len(words) + 0xfff) & ~0xfff
-         if nb == T.DATA_BASE and coupe() == T.DATA_SPLIT: break
-         T.DATA_BASE = nb; T.DATA_SPLIT = coupe()
+-        if nb == T.DATA_BASE and coupe() == T.DATA_SPLIT: break
+-        T.DATA_BASE = nb; T.DATA_SPLIT = coupe()
 -        its, words, unres = assemble(buf, CODE0, T.code_end_translate(buf), base=CODE, external=ext, native=NAT)
++        if DTROU is None:
++            if nb == T.DATA_BASE and coupe() == T.DATA_SPLIT: break
++            T.DATA_BASE = nb; T.DATA_SPLIT = coupe()
++        else:                                            # (etape 2 des decors) coupure externe fixe + tranche au trou
++            if nb == T.DATA_BASE and coupe(PLAFOND - DTROU[1]) == T.DATA_T0: break
++            T.DATA_BASE = nb; T.DATA_SPLIT = DTROU[2]; T.DATA_T0 = coupe(PLAFOND - DTROU[1]); T.DATA_TROU_Y = DTROU[0]
++            assert T.DATA_T0 is not None and T.CODE_END_RT < T.DATA_T0 <= T.DATA_SPLIT, "tranche du trou : $%s" % T.DATA_T0
++            assert len(DTROU) < 4 or T.DATA_TROU_Y + (T.DATA_SPLIT - T.DATA_T0) <= DTROU[3], "tranche du trou au-dela de $%x" % DTROU[3]
 +        its, words, unres = assemble(buf, CODE0, T.code_end_translate(buf), base=CODE, external=ext, native=NAT, extra=Z2)
      if T.DATA_SPLIT: print("donnees : fin du segment ($%x-$%x) en bloc externe $%x (HANDOFF §108)" % (T.DATA_SPLIT, T.DATA_END_RT, T.DATA_EXT))
++    if T.DATA_T0 is not None: print("donnees : tranche ($%x-$%x, %d octets) dans le trou $%x (HSFA_DONNEES_TROU, conflit C4)" % (T.DATA_T0, T.DATA_SPLIT, T.DATA_SPLIT - T.DATA_T0, T.DATA_TROU_Y))
      assert CODE + 2*len(words) <= T.DATA_BASE, "code (%x) chevauche les donnees (%x)" % (CODE+2*len(words), T.DATA_BASE)
      vas = [it.va for it in its]
-@@ -218,7 +256,7 @@
+     lab = lambda va: its[bisect.bisect_left(vas, va)].off
+@@ -218,7 +272,7 @@
      img[STUB_RTS:STUB_RTS+4] = bytes.fromhex('4e754e73')
      if T.HW_TAG:
          ranges = plages_conv()
 -        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (len(buf) - end)   # donnees DANS l'image
-+        NDATA = (T.DATA_SPLIT - T.CODE_END_RT) if T.DATA_SPLIT else (FIN_FICHIER - end)   # donnees DANS l'image
++        NDATA = ((T.DATA_T0 if T.DATA_T0 is not None else T.DATA_SPLIT) - T.CODE_END_RT) if T.DATA_SPLIT else (FIN_FICHIER - end)   # donnees DANS l'image
          ASSET = (T.DATA_BASE + NDATA + 0xff) & ~0xff      # bloc des tables d'animation, apres les donnees
          ccode, _ = K.build_conv(CONV, ranges)
          assert CONV + len(ccode) <= STUB_RTS
-@@ -313,7 +351,7 @@
+@@ -313,7 +367,7 @@
          assert d1_ - d0_ >= 2 * len(MUS), "repere musique : place"
          struct.pack_into('>%dH' % len(MUS), img, d0_, *MUS)
          print("intro : repere de musique arcade en $%x (au lieu de la table de ticks PS2)" % d0_)
@@ -272,7 +302,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
      demo = os.environ.get("MAX_DEMO")                    # (HANDOFF §99) ex. pl26 : garde de Ryu -> frames 0-5 du perso MAX
      if demo:
          import json
-@@ -471,6 +509,34 @@
+@@ -471,9 +525,42 @@
              assert T.DATA_EXT + len(be) - k_ == T.son_y()
              be = be + bytes(b for i in range(0, len(SON_BLOB), 2) for b in (SON_BLOB[i+1], SON_BLOB[i]))
              print("donnees du son par version : %d octets, exec $%x -> $%x" % (len(SON_BLOB), T.SON_X, T.son_y()))
@@ -307,7 +337,15 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
          open(os.path.join(W, "ext_%06x.bin" % T.DATA_EXT), "wb").write(be[k_:])
          print("donnees externes : %d octets -> ext_%06x.bin" % (len(be) - k_, T.DATA_EXT))
          be = be[:k_]
-@@ -542,7 +608,9 @@
++        if T.DATA_T0 is not None:                        # (etape 2 des decors) tranche [T0, coupure) -> ext_<trou>.bin
++            t_ = T.DATA_T0 - T.CODE_END_RT
++            open(os.path.join(W, "ext_%06x.bin" % T.DATA_TROU_Y), "wb").write(be[t_:]); GRF_EXT.append("%06x" % T.DATA_TROU_Y)
++            print("donnees dans le trou : %d octets -> ext_%06x.bin" % (len(be) - t_, T.DATA_TROU_Y))
++            be = be[:t_]
+     img[T.DATA_BASE:T.DATA_BASE+len(be)] = be
+     if por and MODULE == 'ro5' and pid is not None:
+         # (HANDOFF §131) deviation du rendu des palettes de selection pour l'ID MAX (index pid x 2 dans D0) :
+@@ -542,7 +629,9 @@
                  def B(op, cible): fix.append((len(w), cible)); w.append(op)      # Bcc.S, deplacement resolu apres
                  E(0x48e7, 0xc0c0)                                   # MOVEM.L D0-D1/A0-A1,-(SP)
                  E(0x43f9, base >> 16, base & 0xffff)                # LEA base,A1
@@ -318,7 +356,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
                  E(0x0c2d, 0x0004, 0x013e); B(0x6600, 'tbl')         # CMPI.B #4,$13E(A5) ; BNE tbl
                  E(0x4a29, 0x0124); B(0x6700, 'tbl')                 # TST.B $124(A1) ; BEQ tbl
                  E(0x0c00, 0x000a); B(0x6600, 'tbl')                 # CMPI.B #$A,D0 ; BNE tbl
-@@ -596,6 +664,10 @@
+@@ -596,6 +685,10 @@
                  patch_call(img, it, stub_site[AN.SITES[it.va]])
          print("tables d'animation natives : %d fichiers, %d octets en $%x" % (len(ava), len(ablob), ASSET))
          assert (tperso_fin if stub_pj else tperso + 4*len(aperso)) <= (HASH or CODEMAP), "donnees + blocs chevauchent la table des adresses de code"
@@ -329,7 +367,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
          cible = {v: lab(v - T.RUNTIME_BASE) for v in keys}
          # (agent_options, OPTIONS.md) OPTION du menu des modes : la tache de l'ecran d'options du portage est du C
          # natif (affichage PS2, reglages dans la sauvegarde de l'Anthology) -> sans traduction : ecran noir.
-@@ -679,7 +751,7 @@
+@@ -679,7 +772,7 @@
              open(os.path.join(W, "ext_%06x.bin" % base), "wb").write(bytes(b for i in range(0, len(d), 2) for b in (d[i+1], d[i])))
              print("fichier %d : %d octets a adresse fixe $%x (banc_mem.lua)" % (n, len(d), base))
          # (agent_ro9) liste des blocs externes pour banc_mem_liste.lua (banc_mem.lua ne connait que des bases fixes)
@@ -340,7 +378,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mame_test.py b/mame_test.py
      out = os.path.join(W, P['sortie'], "sfa3ud"); os.makedirs(out, exist_ok=True)
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mips.py b/mips.py
 --- a/mips.py	2026-10-28 11:08:24.000000000 +0100
-+++ b/mips.py	2026-10-28 11:08:43.192233457 +0100
++++ b/mips.py	2026-11-01 10:35:27.188263696 +0100
 @@ -74,6 +74,26 @@
  #                       (200 774 acces). Premier acces 68K 0x22b0c, dernier Z80 0x22ae8.
  Z80_0, Z80_1 = 0x20, 0x22b00
@@ -370,7 +408,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/mips.py b/mips.py
      import struct
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/profils.py b/profils.py
 --- a/profils.py	2026-10-28 11:08:24.000000000 +0100
-+++ b/profils.py	2026-10-28 11:08:43.120676448 +0100
++++ b/profils.py	2026-11-01 10:35:27.089343252 +0100
 @@ -65,4 +65,4 @@
  NOM = os.environ.get("MODULE", "ro3")
  P = PROFILS[NOM]
@@ -379,7 +417,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/profils.py b/profils.py
 +def chemin(): return os.environ.get("MODULE_FICHIER") or os.path.join(EXTRACT, P['fichier'])   # (greffe_arcade) module augmente
 diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
 --- a/translate.py	2026-10-28 11:08:24.000000000 +0100
-+++ b/translate.py	2026-10-28 11:08:43.030560462 +0100
++++ b/translate.py	2026-11-01 10:35:26.962754166 +0100
 @@ -164,7 +164,8 @@
          from mips import decode, CODE0
          CODE1=_st.unpack_from('<I',buf,12)[0]             # fin du code DU MODULE (pas celle de SFA3)
@@ -399,7 +437,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
          ent.append(v); o+=4
      while ent and ent[-1]==0: ent.pop()
      return ent
-@@ -1510,8 +1511,25 @@
+@@ -1510,14 +1511,33 @@
  SON_X = None; SON_LEN = 0
  def son_y():
      return (DATA_EXT + (DATA_END_RT - DATA_SPLIT) + 1) & ~1
@@ -425,7 +463,23 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
      rel = v - (RAM_HI<<16)
      if MEMMODE in ('cps2','type') and rel in HWREG: return HWREG[rel]   # rendu au vrai registre CPS2
      for a0,a1,k in ADDRMAP:
-@@ -1651,11 +1669,12 @@
+         if a0 <= rel < a1: return k + (rel - a0)
+     if DATA_BASE is not None and DATA_SPLIT is not None and DATA_SPLIT <= v < DATA_END_RT:
+         return DATA_EXT + (v - DATA_SPLIT)                   # (HANDOFF §108) fin des donnees -> bloc externe
++    if DATA_T0 is not None and DATA_T0 <= v < DATA_SPLIT:
++        return DATA_TROU_Y + (v - DATA_T0)                   # (greffe_arcade, etape 2 des decors) tranche dans un trou
+     if DATA_BASE is not None and CODE_END_RT <= v < DATA_END_RT:
+         return DATA_BASE + (v - CODE_END_RT)                 # donnees du module -> ROM
+     if DATA_BASE is not None and DATA_END_RT <= v < (RAM_HI<<16):
+@@ -1526,6 +1546,7 @@
+         return PORT_RAM + 0x80000 + (rel - 0x50000)          # variables du portage apres la video ($96xxxx)
+     return None
+ DATA_SPLIT = None                      # (HANDOFF §108) donnees au-dela : bloc externe (programme CPS2 limite a 4 Mo)
++DATA_T0 = None; DATA_TROU_Y = None     # (greffe_arcade, etape 2 des decors) [DATA_T0, DATA_SPLIT) -> trou DATA_TROU_Y
+ DATA_EXT = 0xC80000
+ CODE_END_RT = 0x1f0000 + 0x393c40      # debut des donnees (fin du code) ; relu dans l'en-tete du module
+ DATA_END_RT = 0x88c700                 # fin des donnees (mot 6 de l'en-tete) ; relu par module
+@@ -1651,11 +1672,12 @@
          import struct as _st
          from mips import decode as _dec
          end=_st.unpack_from('<I',buf,12)[0]
@@ -441,7 +495,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
              ins=[x for x in _dec(buf,s0,s0+0x20) if not (x.m=='sll' and x.w==0)]
              body=[x for x in ins[:6] if not (x.rs==29 and x.m in ('addiu','sd','ld','sw','lw'))]
              if body and body[0].m=='jr' and body[0].rs==31: E.add(s0)
-@@ -1898,10 +1917,11 @@
+@@ -1898,10 +1920,11 @@
      if _CODE_STARTS.get('id')!=id(buf):
          import struct as _st
          from mips import decode as _dec
@@ -455,7 +509,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
          for _k in range(len(_L)-1):
              _x=_L[_k]
              if _x.m=='addiu' and _x.rs==29 and _x.rt==29 and _x.simm<0 and _L[_k+1].m=='sd' and _L[_k+1].rt==31:
-@@ -4048,6 +4068,7 @@
+@@ -4048,6 +4071,7 @@
      if L[z].m=='lh' and sa==16 and st_.m=='sw': return 'L'
      return None
  
@@ -463,7 +517,7 @@ diff -ruN -x __pycache__ -x '*.pyc' -x .gitignore a/translate.py b/translate.py
  def lea_table_index(L, i):
      """L[i] = sw r,An : r = addu(sext16(Dk), T) avec T adresse de DONNEES -> (T, k), sinon None"""
      j=_producer(L, i, L[i].rt, 8)
-@@ -4071,7 +4092,14 @@
+@@ -4071,7 +4095,14 @@
              if not sn or sn[0]!='D': return None
              dk=sn[1]; continue
          return None

@@ -153,7 +153,14 @@ for _p, _t in _ALLOC:
 for _o in (0x332, 0x336, 0x33A, 0x33E): TAILLE[_o] = 2       # liens 16 bits du joueur (LIENS_JOUEUR)
 for _o in (0x3E0, 0x3E2, 0x3E6, 0x3E8): TAILLE[_o] = 2      # miroir des entrées (mots)
 TAILLE[0x3EC] = 4                                            # options de console PSP (long, nul)
-ETATS = {4, 5, 6, 7, 0x80, 0x82, 0xAA, 0x248, 0x2A0, 0x2C4}   # (2026-10-25, Q12 : $248 = PSP 0x228, niveau de super ; clés = décalages 68K) champs « ×2 » (PSP n = 68K 2n), mesurés sur les paires (≥ 3 votes)
+# (2026-10-28, Q20.1 de l'intégration) BLOC IA PSP +0x1E0..+0x1EF = arcade $200..$20F (PSP = arcade − $20, max/notes/
+# ia-psp-arcade.md §2). Octets +0x1E2 / +0x1E3 = état d'action $202 / $203 (indices PSP, valeurs ×2 : voir ETATS) ;
+# mots +0x1EA (mot de commande) / +0x1EC au même endroit ($20A / $20C), mais leurs OCTETS sont échangés (la PSP garde
+# les mots 68K en petit-boutiste) : octet 0x1EA = $20B, 0x1EB = $20A, 0x1EC = $20D, 0x1ED = $20C. Avant : zone MAX
+# ($362 / $3F3 / $3F2 / $364-$366), que l'interpréteur IA NATIF d'Upper n'écrit jamais (rappel 17, psp_77e00…).
+IA_OCTETS = {0x1E2: 0x202, 0x1E3: 0x203, 0x1EA: 0x20B, 0x1EB: 0x20A, 0x1EC: 0x20D, 0x1ED: 0x20C}
+IA_MOTS = {0x1EA: 0x20A, 0x1EC: 0x20C}
+ETATS = {4, 5, 6, 7, 0x80, 0x82, 0xAA, 0x202, 0x203, 0x248, 0x2A0, 0x2C4}   # (2026-10-25, Q12 : $248 = PSP 0x228, niveau de super ; clés = décalages 68K) champs « ×2 » (PSP n = 68K 2n), mesurés sur les paires (≥ 3 votes)
 # (2026-10-07) facteur d'échelle par champ ; $E (plan de caméra) ×4 : PSP indexe la table 0x20A05C par $E×4 (0x1D330),
 # l'arcade lit la table $1BD96 par $E directement (valeurs 0/4/8/12) ; parallaxe PSP $E = 2 <-> arcade $E = 8 ($1BD68)
 FACTEUR = {o: 2 for o in ETATS}; FACTEUR[0xE] = 4
@@ -325,6 +332,9 @@ def _champ(p, sz=None, proj=None):
         if p in PROJ: return "$%x(a6)" % PROJ[p], PROJ[p]
         if p in PROJ_SANS: return SANS_OBJET, None
     elif MODE_MAX and p in JOUEUR_SANS: return SANS_OBJET, None
+    if MODE_MAX and p in IA_OCTETS:                 # (2026-10-28, Q20.1) bloc IA = arcade $2xx (mots en place, octets échangés)
+        o = IA_MOTS[p] if sz in (2, 4) and p in IA_MOTS else IA_OCTETS[p]
+        return "$%x(a6)" % o, o
     if MODE_MAX and p in PRIORITE_MAX: return "$%x(a6)" % PRIORITE_MAX[p], PRIORITE_MAX[p]   # avant les segments
     if sz == 4:                                   # long dans la zone « +2 » : même décalage (petit-boutiste)
         for o0, o1, p0, d in SEGS:

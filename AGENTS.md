@@ -154,6 +154,18 @@ Options, son, cœur
 | répliques de victoire : 8 par gagnant ; chemin « par adversaire » de l'arcade ($92 = 0, une fois sur deux) | bulle vide | index borné à 0-7 pour les MAX |
 | flammes : la PSP n'applique pas de masque | flamme mal placée pour un index ≥ 16 | 22 couples par perso MAX ; masque $1F seulement pour une victime MAX |
 | voix d'Ingrid n° 40-51 = banque A commune de `se_mid` | voix absentes | importées dans la ROM QSound (`commandes_son_max.s`, `CMD_VOIX_29_A_095…`) |
+| adresse native d'Upper relevée sur une AUTRE version (`COUP_NORMAL` = $23A3C en v149) | contre MAX raté = coup jamais appliqué (en v151, $23A3C est un tirage aléatoire) | relever chaque adresse native dans l'image de la version construite ; dans `carte_image.txt`, l'opérande d'un `JSR` est l'adresse d'ORIGINE, la vraie cible est la colonne MIPS |
+| fonction arcade qui rend sa valeur ailleurs qu'en D0 ($1BD5C → A3) | « téléportation » du demi-tour arrière + K de Yun | la session MAX tient la liste (`traduire.py` `RET_A3`) ; signaler tout cas nouveau plutôt que corriger après conversion |
+| champ PSP pris pour une case « propre à MAX » alors que c'est un champ du moteur (+0x305 = $32D, bloc IA +0x1E2-+0x1ED = $202-$20D) | branche jamais prise contre un natif ; rappel IA 17 toujours faux | un champ lu chez un adversaire natif, ou écrit par l'interpréteur natif, ne peut pas être dans la zone MAX : le demander à la session MAX |
+| bloc IA : la PSP garde les mots 68K en petit-boutiste | octets du mot de commande inversés ($AA faux) | mots au même décalage, octets échangés dans le mot (0x1EA → $20B, 0x1EB → $20A) |
+| tables PAR PERSO d'Upper lues par le code PS2 (`lbu`) | valeurs ou homologues faux | octets tels quels (pas k^1) ; le k^1 ne vaut que pour les données de l'image 68K |
+| écriture sur un objet neuf au-delà de sa taille (projectiles courts) | octet corrompu dans un AUTRE objet ($34E(a4) chez Ingrid) | refuser toute écriture ≥ $100 sur un objet du réservoir des projectiles ; la session MAX la rend « sans objet » à la source |
+| condition 40 de l'IA (probabilité (op + 1) / 32), ajout PSP | IA MAX bloquée ou fausse | ajouter le gestionnaire à la table des conditions d'Upper (image $DEF0, index $50) avant de brancher `ia_max.s` |
+| garde en pose de contre : la PSP refuse la garde pour les types de pas 4 et 7-14, Upper pour 4 et 7-9 | Ingrid garde les coups non contrés (Kikosho : 10 dégâts au lieu de 57) | `MAX_GARDE_CONTRE` (`BCC` au lieu de `BEQ` sur #9) |
+| bit 0 de +$15 d'une fiche d'attaque = coup BAS | « contre QCB+K d'Ingrid inactif » | normal contre un coup non bas : tester avec les pieds accroupis |
+| `atemi_disable` (PSP +0x47A) : ajout MAX, sans champ arcade | Ingrid contre le Kikosho / la super à objet de Dhalsim | déjà reproduit dans `contres_max.s` ; ne pas l'« optimiser » en retirant le test d'état ($6 = $10 ou $0E) |
+| tables par id de 40 entrées AUSSI sur PSP (0x262A6C…) | « valeur PSP » de Yun / Ingrid sans sens | ce sont des lectures par débordement : prendre un natif proche, pas la valeur PSP |
+| `grep "\$xxx("` entre guillemets doubles | 0 occurrence, conclusion fausse | `grep -F '$xxx(a'` |
 
 Passation complète de la session MAX : `max/notes/SAVOIR-MAX.md`. Échanges avec la session MAX : `work/echanges/MAX.md` (hors dépôt). Avant toute livraison : banc de non-régression MAX.
 

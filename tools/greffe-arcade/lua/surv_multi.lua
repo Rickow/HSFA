@@ -11,6 +11,11 @@ for a, l in string.gmatch(os.getenv("SURVS"), "(%x+):(%x+)") do
   _G.SURVS[#_G.SURVS + 1] = mw:install_write_tap(a0, a0 + tonumber(l, 16) - 1, "survs" .. a, function(o, d, m)
     if im < f0 or n >= nmax then return end
     if os.getenv("SURV_NZ") == "1" and (d & m) == 0 then return end
+    if os.getenv("SURV_CHG") == "1" then                        -- seulement quand la valeur change (par adresse et masque)
+      local cle = o * 65536 + m; _G.SURV_DER = _G.SURV_DER or {}
+      if _G.SURV_DER[cle] == (d & m) then return end
+      _G.SURV_DER[cle] = d & m
+    end
     n = n + 1
     local t = {}
     for _, r in ipairs({"D0","D1","A0","A1","A6"}) do t[#t + 1] = r .. "=" .. string.format("%08x", cw.state[r].value) end

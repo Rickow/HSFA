@@ -201,3 +201,24 @@ Opérandes = mots lus après le mot de condition.
   des règles.
 - Les scripts MAX emploient massivement la **condition 40** (« vrai si op ≥ aléa & 31 », ajout PSP, Eagle 174 fois) :
   la table des conditions d'Upper (image $DEF0, T_60DF10) n'a que 39 entrées → à étendre (index 2k = $50).
+
+## 7. Compléments (2026-10-27/28)
+
+- **Où sont les scripts** : gabarit du perso (39 mots, recopié par son init dans l'espace de travail +0x1A0) ; mots
+  12-15 → tables w12-w15 (§6). Ryu : gabarit 0x23F8FC, w12 = 0x23E58C ; Eagle 0x2A3198, Maki 0x2A6268, Yun 0x2AD6DC,
+  Ingrid 0x2B1EE0. Choix d'un script à l'entrée d'un créneau : 0x771B8 (créneau 0, +0x30[+0x1E5]), 0x7825C (1, +0x34 :
+  paires aléa / scripts), 0x77308 (2, +0x38 selon +0x133 de l'adversaire), 0x77418 (3, +0x3C[+0x1FE]).
+- **Mode particulier ignoré** : si 0xD1E4C ≠ 0 (mode 0x671982 = $0C ou drapeau 0xD1F9A2), la PSP prend d'autres tables
+  (+0x9C-+0xAC, choisies par l'ID adverse). Upper n'a pas ce mode : seules w12-w15 sont converties.
+- **Rangement du bloc IA dans la traduction** (Q20.1, traduire.py `IA_OCTETS` / `IA_MOTS`) : +0x1E2 / +0x1E3 → $202 /
+  $203 (×2) ; MOTS +0x1EA / +0x1EC → $20A / $20C ; OCTETS échangés dans le mot (0x1EA → $20B, 0x1EB → $20A, 0x1EC →
+  $20D, 0x1ED → $20C) : la PSP garde les mots 68K en petit-boutiste. Ne JAMAIS ranger ce bloc dans la zone MAX :
+  l'interpréteur d'Upper est natif et n'écrit que $2xx (rappel 17 `btst #3,$20A`, psp_77e00).
+- **Condition 40** (PSP 0x75B94, `op ≥ aléa & 31`) et **39** (adversaire en état 1/0/8) : absentes d'Upper (table de
+  conditions 39 entrées, image $DEF0). Les scripts MAX emploient la 40 (Eagle 174, Ingrid 159, Maki 116, Yun 73) ; la 39
+  n'est pas employée. Gestionnaire à ajouter côté intégration (N20).
+- **Spécial 8 de Yun** (Raishin Mahhaken) : inaccessible au CPU sur PSP aussi. Le rappel 0x1BD178 (gabarit +0x54)
+  aiguille sur +0xEC par 0x1FD830 ; l'entrée 8 = 0x1BD27C rend 0. Il est appelé avant toute pose d'état (psp_1bc7c4,
+  0x77504).
+- **Conditions 24 / 25** : bogue probable de la PSP (lit +0xE4 du joueur IA au lieu de l'adversaire) ; la conversion
+  garde le n° de condition, donc Upper applique sa version (adversaire).

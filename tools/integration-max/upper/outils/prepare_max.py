@@ -120,7 +120,15 @@ def integration():
          "        or.w    d1, d0",
          "        andi.w  #$7000, d2",
          "        lsr.w   #5, d2",
-         "        or.w    d2, d0",
+         "        or.w    d2, d0"] + ([
+         # (2b26, retour utilisateur) PROVOCATION : le test PSP 0x662D8 (appelé par 0xCF0E0, les 4 persos) lit le bit
+         # $4000 des appuis PSP 0x2F8 (miroir $3E2) ; ni psp_entrees ni ce front ne le posaient : provocation jamais
+         # sortie. Upper : nouvel appui Start = bit 15 de $378 (arcade $2E0CC ; le coeur FBNeo le pose sur Pièce en
+         # combat, patch 0014 ; $370 ne l'a pas) -> $4000. MAX_PROVOC=0 : sans.
+         "        tst.w   $378(a6)",
+         "        bpl.s   .np",
+         "        ori.w   #$4000, d0",
+         ".np:"] if os.environ.get("MAX_PROVOC", "1") == "1" else []) + [
          "        move.w  d0, $3e2(a6)",
          ".e1:",
          "        movem.l (sp)+, d0-d2",
@@ -553,6 +561,35 @@ def renumerote(d):
     t, k = re.subn(r"cmpi\.b\s+#\$29, \(\$ff8[59]02\)\.l", lambda m: m.group(0).replace("#$29", "#$2E"), t)
     open(os.path.join(d, f), "w").write(t); print("%s : %d test(s) « perso = Ingrid » $29 -> $2E" % (f, k))
 
+def champs_ia(d):
+    """(2b25, Q17) champs du BLOC IA (PSP +0x1E2..+0x1ED = arcade $202..$20D, bloc PSP = arcade - $20) rangés par la
+    traduction MAX dans la zone propre à MAX ($362, $3F3, $3F2, $364-$366) : l'interpréteur IA NATIF d'Upper (commande
+    $0A00, image $DD5C : MOVE.W (A0)+,$20A puis décodage $F5F0) écrit le mot d'opérande en $20A, jamais en $3F2 / $364.
+    Effet : le rappel n° 17 (table 0x749298, psp_1bf63c de Yun, psp_1b9ef8 de Maki) testait le bit 3 de $364 (PSP +0x1EB,
+    toujours 0) -> spécial 8 de Yun (Raishin Mahhaken, opérande $0880 des scripts N20) jamais lancé par le CPU.
+    Homologues natifs (image) : « TST.B $124 ; BTST #3,$020A » (Ryu $16C1C…), « MOVE.B $020B,$00AB ; CLR.B $020D ;
+    TST.B $020A » (PSP 0x77E00 = image $DE64), « MOVE.W #$020A,$0202 » (PSP +0x1E2 = 5, +0x1E3 = 1, ×2, octets u8 échangés).
+    Appliqué aux sources CONVERTIES (adresses image) ; MAX_CHAMPS_IA=0 : sans."""
+    if os.environ.get("MAX_CHAMPS_IA", "0") != "1": return   # (2b25, R20.1) fait à la source : 0 par défaut
+    R = [(r"(btst\s+#3, |tst\.b\s+|cmpi\.b\s+#\$[0-9a-f]+, )\$364\(a6\)", r"\1$20a(a6)"),   # +0x1EB = octet haut du mot $20A
+         (r"(move\.w\s+)\$3f2\(a6\)", r"\1$20a(a6)"),                                # +0x1EA (mot) = $20A
+         (r"(subq\.w\s+#3, )\$3f2\(a6\)", r"\1$20a(a6)"),
+         (r"(move\.b\s+)\$3f2\(a6\)(, \$ab\(a6\))", r"\1$20b(a6)\2"),                  # +0x1EA (octet bas) = $20B
+         (r"(clr\.b\s+)\$365\(a6\)", r"\1$20d(a6)"),                                 # +0x1EC = $20D
+         (r"(clr\.b\s+)\$366\(a6\)", r"\1$20c(a6)"),                                 # +0x1ED = $20C
+         (r"move\.b\s+#\$5, \$362\(a6\)", "move.b  #$a, $203(a6)"),                     # +0x1E2 = 5 -> $203 image (×2)
+         (r"move\.b\s+#\$1, \$3f3\(a6\)", "move.b  #$2, $202(a6)")]                     # +0x1E3 = 1 -> $202 image (×2)
+    tot = {}
+    for f in ("brouillon_maki.s", "brouillon_yun.s", "moteur_max_main.s"):
+        t = open(os.path.join(d, f)).read(); n = 0
+        for a, b in R:
+            t, k = re.subn(a, b, t); n += k
+        sans_c = "\n".join(l.split(";")[0] for l in t.splitlines())
+        assert not re.search(r"\$(364|365|366|3f2)\(a6\)|#\$5, \$362\(a6\)|\$3f3\(a6\)", sans_c), "%s : champ IA MAX restant" % f
+        open(os.path.join(d, f), "w").write(t); tot[f] = n
+    print("champs IA (PSP +0x1E2..+0x1ED -> $202..$20D) : %s" % ", ".join("%s %d" % kv for kv in tot.items()))
+    assert tot == {"brouillon_maki.s": 22, "brouillon_yun.s": 5, "moteur_max_main.s": 8}, tot
+
 RECUL_MAX = {28: 40, 29: 41, 30: 42, 31: 43, 32: 44}   # (2b22) types de recul MAX (fiche +9) -> rangs libres de la table
 def recul_types():
     """(2b22) table des types de recul (T_61B460 d'Upper) prolongée SANS toucher ce que lisent les natifs. Lecteur (image
@@ -622,6 +659,7 @@ def main():
     open(os.path.join(out, "conversion.txt"), "w").write(r.stdout + r.stderr)
     if r.returncode: sys.exit("convertit_max.py : échec (%s/conversion.txt)" % out)
     renumerote(os.path.join(out, "conv"))
+    champs_ia(os.path.join(out, "conv"))
     st = json.load(open(os.path.join(out, "conv", "stats.json")))
     print("conversion : %s réécrites, %s NON RÉSOLUES, %s/%s adresses du moteur" % (st.get("réécrit"), st.get("NON RÉSOLU"),
           st.get("adresses_resolues"), st.get("adresses_resolues", 0) + st.get("adresses_non_resolues", 0)))
