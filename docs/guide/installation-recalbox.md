@@ -2,8 +2,9 @@
 
 Full French guide, with sources: [tools/recalbox/LISEZMOI-recalbox.md](../../tools/recalbox/LISEZMOI-recalbox.md).
 
-> **Not yet tried on real Recalbox hardware.** The cores were built and checked on a PC (architecture, linkage,
-> glibc symbol versions ≤ 2.27), but have not been run on a Pi.
+> **Tested by the user on a Raspberry Pi 3B (Recalbox 10, 32-bit `armhf` core): it works.** Launching from
+> Recalbox's game list does not work yet: open RetroArch's menu, load the core ("Load Core"), then the game.
+> Hyper + Arcade slows down a little on a Pi 3 (Frameskip "Auto" and Samplerate 32000 in the core options help).
 
 | Machine | `uname -m` | Folder |
 |---|---|---|

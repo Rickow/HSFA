@@ -3,9 +3,10 @@
 Ce guide installe les cœurs **FinalBurn Neo HSFA** sous Recalbox 10.x et y range les cinq jeux HSFA
 (`sfa3hsfa`, `sfa3uhsfa`, `sfa3umhsfa`, `sfa3hhsfa`, `sfa3hahsfa`).
 
-> **État au 31/10/2026 : les cœurs n'ont pas encore été essayés sur un vrai Recalbox.** Ils ont été compilés
-> et vérifiés sur PC : architecture, liens, versions de glibc. Si quelque chose ne marche pas, la partie
-> « En cas de problème » dit quels fichiers renvoyer.
+> **Essayé par l'utilisateur sur un Raspberry Pi 3B (Recalbox 10, cœur 32 bits `armhf`) : ça marche.** Le lancement
+> depuis la liste de jeux de Recalbox ne marche pas encore : ouvrir le menu de RetroArch, charger le cœur (« Load
+> Core ») puis le jeu. Hyper + Arcade rame un peu sur Pi 3 (options du cœur : Frameskip « Auto », Samplerate 32000).
+> Si quelque chose ne marche pas, la partie « En cas de problème » dit quels fichiers renvoyer.
 
 ## 1. En bref
 

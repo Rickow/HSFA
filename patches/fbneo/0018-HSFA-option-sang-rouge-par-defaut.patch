@@ -1,0 +1,132 @@
+From d1d1ac57d006ebcfe8ee7d0d501d1de3d0a90261 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 1 Nov 2026 19:37:06 +0100
+Subject: [PATCH] HSFA: core option "Blood" (red by default), REGULATION
+ immediate in the program ROM
+
+The arcade test-menu setting REGULATION (byte A5+$BB, $FF80BB; $FF80BA in
+the translations) selects the hit blood (OBJ palette 25, colours 13-14:
+red or white), alternate portraits and poses (Zangief, Sodom) and some
+ending objects. The PS2 port sets it in its options function; the
+translation kept both assignments without the condition:
+    MOVE.B #1,$BA(A5) ; BRA.S +4 ; CLR.B $BA(A5)
+so the byte is always 1 (censored, like the export arcade boards). The
+function runs again at the mode menu and at the start of each fight,
+which reload the palettes in the same frame: a RAM write comes too late.
+
+- Core option (bit 2 of DIP A, "Blood (applies on load or restart)"):
+  "Red (uncensored)" by default, "White (censored)" = previous behaviour.
+  The default value of DIP A is unchanged (bit 2 = 0).
+- On load and on every reset (HsfaReset), the immediate is set to 0 (red)
+  or 1 (white) in the program ROM, read side and opcode copy (CpsRom and
+  CpsCode).
+- The site is found by its signature (1B7C 000x 00BA 6004 422D 00BA, x = 0
+  or 1, even addresses), never at a fixed address: 1 site expected, 2 in
+  the arcade graft sfa3hahsfa (Hyper's function and the copy of Upper's).
+  Any other count: the ROM is left untouched and an error is logged.
+- Sites in the current archives: SFA3 $091ACE, Upper and Upper MAX
+  $09E2CC, Hyper $001A88, graft $00807E and $0B8D58.
+- Hyper's ZERO / ZERO 2 / ALPHA versions use the same byte and palette:
+  covered by the same site.
+- Test helper: HSFA_SANG=0/1 forces the option (0 = white).
+- Option "White (censored)": ROM and output identical to before.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 43 ++++++++++++++++++++++++++++++++
+ src/burn/drv/capcom/d_cps2.cpp   |  9 +++++++
+ 2 files changed, 52 insertions(+)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 630e23b..183daea 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -728,8 +728,51 @@ void HsfaFrameDone()
+ 
+ static void HsfaRejeuReset();
+ 
++// (patch 0018) option "sang". Le reglage REGULATION du menu de test de l'arcade (octet A5+$BB, $FF80BB ; traduction :
++// $FF80BA) choisit le sang des coups (palette OBJ 25, couleurs 13-14 : rouge ou blanc), des variantes de portraits et de
++// poses (Zangief, Sodom) et des objets de fin. Le portage PS2 le pose dans sa fonction d'application des options, et
++// la traduction n'en a garde que les deux affectations sans la condition :
++//     MOVE.B #1,$BA(A5) ; BRA.S +4 ; CLR.B $BA(A5)        -> toujours 1 (censure, comme l'arcade d'export)
++// Cette fonction est rappelee au menu des modes et au debut des combats, qui rechargent les palettes dans la meme image :
++// une ecriture en RAM arrive trop tard. Le coeur corrige donc l'immediat dans la ROM programme (lecture et opcodes),
++// au chargement et a chaque remise a zero : 0 = sang rouge (non censure), 1 = blanc (censure, ROM d'origine).
++// Le site est cherche par sa signature (12 octets, immediat 0 ou 1), jamais a une adresse fixe : 1 site attendu, 2 dans
++// la greffe sfa3hahsfa (fonction d'Hyper + copie de celle d'Upper). Nombre different : ROM laissee telle quelle et
++// message au journal. Option : bit 2 du Dip A ("Blood", 0 = rouge par defaut) ; HSFA_SANG=0/1 (essais) l'impose.
++static INT32 nHsfaSangForce = -2;
++
++static void HsfaSang()
++{
++	if (CpsRom == NULL || nCpsRomLen < 12) return;
++	if (nHsfaSangForce == -2) nHsfaSangForce = getenv("HSFA_SANG") ? atoi(getenv("HSFA_SANG")) : -1;
++	const UINT16 nImm = ((nHsfaSangForce >= 0) ? (nHsfaSangForce == 0) : ((HsfaFluxDip & 0x04) != 0)) ? 1 : 0;
++	const char *pszDrv = BurnDrvGetTextA(DRV_NAME);
++	const INT32 nAttendu = (pszDrv && strcmp(pszDrv, "sfa3hahsfa") == 0) ? 2 : 1;
++	UINT32 nSite[4] = { 0, 0, 0, 0 };
++	INT32 n = 0;
++	for (UINT32 a = 0; a + 12 <= nCpsRomLen; a += 2) {
++		if (RdW(CpsRom + a) != 0x1B7C || RdW(CpsRom + a + 2) > 1) continue;
++		if (RdW(CpsRom + a + 4) != 0x00BA || RdW(CpsRom + a + 6) != 0x6004) continue;
++		if (RdW(CpsRom + a + 8) != 0x422D || RdW(CpsRom + a + 10) != 0x00BA) continue;
++		if (n < 4) nSite[n] = a;
++		n++;
++	}
++	if (n != nAttendu) {
++		bprintf(PRINT_ERROR, _T("HSFA : option Blood : signature REGULATION trouvee %d fois (attendu %d) : ROM laissee telle quelle\n"), n, nAttendu);
++		return;
++	}
++	for (INT32 i = 0; i < n; i++) {
++		const UINT32 a = nSite[i] + 2;
++		WrW(CpsRom + a, nImm);
++		if (CpsCode && CpsCode != CpsRom && a + 2 <= nCpsCodeLen) WrW(CpsCode + a, nImm);	// opcodes (fetch)
++	}
++	if (n == 1) bprintf(0, _T("HSFA : sang %s (REGULATION %d, $%06X)\n"), nImm ? _T("blanc (censure)") : _T("rouge"), nImm, nSite[0]);
++	else bprintf(0, _T("HSFA : sang %s (REGULATION %d, $%06X et $%06X)\n"), nImm ? _T("blanc (censure)") : _T("rouge"), nImm, nSite[0], nSite[1]);
++}
++
+ static INT32 HsfaReset()
+ {
++	HsfaSang();										// (patch 0018) au chargement et a chaque remise a zero
+ 	if (HsfaMus) HsfaMus->arrete();					// carte musique : plus de morceau en cours
+ 	memset(Ombre, 0, 0x8000 * sizeof(UINT16));
+ 	for (INT32 i = 0; i < 0x8000; i++) Age[i] = -99;
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index aa05562..94d4e1d 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -183,6 +183,13 @@ STDINPUTINFO(Hsfa)
+ 	{0x00, 0x01, 0x40, 0x00, "Off"								}, \
+ 	{0x00, 0x01, 0x40, 0x40, "On"								},
+ 
++// (patch 0018) bit 2 du Dip A : reglage REGULATION des jeux (cps_hsfa.cpp, HsfaSang), pose dans la ROM programme au
++// chargement et a la remise a zero seulement ; 0 = sang rouge (defaut), 1 = blanc (censure, comportement d'avant 0018)
++#define HSFA_OPT_SANG \
++	{0   , 0xfe, 0   ,    2, "Blood (applies on load or restart)"	}, \
++	{0x00, 0x01, 0x04, 0x00, "Red (uncensored)"					}, \
++	{0x00, 0x01, 0x04, 0x04, "White (censored)"					},
++
+ #define HSFA_OPT_OMBRES \
+ 	{0   , 0xfe, 0   ,    2, "Transparent shadows (PSP)"			}, \
+ 	{0x00, 0x01, 0x80, 0x00, "Off"								}, \
+@@ -200,6 +207,7 @@ static struct BurnDIPInfo HsfaDIPList[] =
+ 
+ 	HSFA_OPT_OMBRES
+ 	HSFA_OPT_PROVOC
++	HSFA_OPT_SANG
+ 
+ 	HSFA_OPT_DEFAUTS
+ 	HSFA_OPT_JEU
+@@ -225,6 +233,7 @@ static struct BurnDIPInfo HhsfaDIPList[] =
+ 
+ 	HSFA_OPT_OMBRES
+ 	HSFA_OPT_PROVOC
++	HSFA_OPT_SANG
+ 
+ 	// Hyper : un seul MAX ROUND sur PS2 (champ 1P, recopie dans le champ VS au debut du match) ; pas de JOIN IN
+ 	HSFA_OPT_DEFAUTS
+-- 
+2.53.0
+

@@ -4,6 +4,17 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Le 
 version : les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
 
+## v0.1.3 (2026-11-03)
+
+- Option du cœur « Blood » (patch 0018) : sang rouge, non censuré, par défaut ; « blanc » = censuré, comme l'arcade US et
+  la PS2. Elle porte sur les coups, les portraits (Zangief) et les fins, dans les 5 jeux et toutes les versions d'Hyper ;
+  prise en compte au chargement ou au redémarrage du jeu. Les zips des jeux ne changent pas.
+- Traducteur v154 (Hyper seulement ; SFA3 et Upper identiques à l'octet) : récupération du Hadoken de Sakura ZERO 3 en
+  S-ISM rouge (39 → 55 images, comme la PS2) ; couleur des boules de feu de type Hadoken hors X-ism (visible quand Rose
+  les renvoie). Programme d'Hyper : `dda35430` (depuis l'ISO), `b8e699cf` (avec la table du rejeu). Reconstruire Hyper.
+- Recalbox : essayé sur Raspberry Pi 3B (cœur 32 bits) ; le lancement depuis la liste de jeux de Recalbox ne marche pas
+  encore (charger le cœur depuis le menu de RetroArch).
+
 ## v0.1.2 (2026-11-02)
 
 - Cœurs FBNeo HSFA avec les patchs 0001-0017 (et 0007b), construits le 2026-11-02. 0016 : dans Upper, Start tenu + un
