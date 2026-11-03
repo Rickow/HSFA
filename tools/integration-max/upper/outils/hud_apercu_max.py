@@ -113,6 +113,25 @@ def prepare(out, persos, conv_dir):
         tab = [G_PLUS + k0 + j for j in range(len(TD))]
         open(os.path.join(out, "decor_%s_hx.bin" % pid), "wb").write(_st.pack("<%dI" % len(tab), *tab))
         J["decor"][pid] = dict(table="decor_%s_hx.bin" % pid, tuiles=len(TD), g=G_PLUS + k0)
+    # 6. (2b30, R30 bis de la session MAX, dépôt 91d3930) FRAMES D'EFCT.PAC ajoutées à la banque d'un perso (onde au sol du
+    #    QCB+P de Yun : F28_870-876) : la table du fork fork/plXX_hx.bin (prolongée) porte 0x40000000 | j pour les tuiles
+    #    neuves (j = rang dans converti/plXX/efct_tuiles.bin) -> tuiles placées ici, table résolue écrite dans out/
+    #    (efct_plXX_hx.bin), que construit_max.sh copie dans banques_hx à la place de celle du cache.
+    J["efct"] = {}
+    for pid, pl in persos:
+        f = CV + "%s/efct_tuiles.bin" % pl
+        if not os.path.exists(f): continue
+        TE = tuiles(f); nom_ = MC.FORK + "%s_hx.bin" % pl
+        tab = list(_st.unpack("<%dI" % (os.path.getsize(nom_) // 4), open(nom_, "rb").read()))
+        k0 = len(gfx); place = {}; n_ = 0
+        for i, v in enumerate(tab):
+            if v != 0xFFFFFFFF and v & 0x40000000:
+                j_ = v & 0xFFFFFF
+                if j_ not in place: place[j_] = len(gfx); pose(len(gfx), TE[j_])
+                tab[i] = G_PLUS + place[j_]; n_ += 1
+        assert len(place) == len(TE), "efct %s : %d tuiles employées sur %d" % (pl, len(place), len(TE))
+        open(os.path.join(out, "efct_%s_hx.bin" % pl), "wb").write(_st.pack("<%dI" % len(tab), *tab))
+        J["efct"][pid] = dict(pl=pl, table="efct_%s_hx.bin" % pl, tuiles=len(place), entrees=n_, g=G_PLUS + k0, longueur=len(tab))
     assert 128 * len(gfx) <= MC.PLUS_MAX, "max_plus_gfx déborde sur hsfa_plans"
     open(os.path.join(out, "max_plus_gfx.bin"), "wb").write(b"".join(gfx))
     J["tuiles"] = len(gfx); J["L_fin"] = loc

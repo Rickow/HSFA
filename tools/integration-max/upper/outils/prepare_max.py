@@ -170,6 +170,32 @@ def integration():
     L += flammes_aj()
     if os.environ.get("MAX_PALPROPRE", "1") == "1": L += palpropre()
     if os.environ.get("MAX_REM_PAL", "1") == "1": L += rem_pal(); D += rem_pal_donnees()
+    # (max_retours, 01/11, lot 2b30) MAX_FILS_PAS : les routines de pas du JOUEUR (UP_2A770 pose, UP_2A7EA avance) écrivent
+    # $8C, $C4-$CB (et lisent $88 / $C0) de A6 ; appelées par le code MAX (psp_cfb6c / cfb90 / cfde0 / cfec8...) sur un objet
+    # de $80 o ($FFB000-$FFDFFF), elles écrasent l'objet SUIVANT (+$0C-$0F palette / sens, +$44-$4B). Constaté : fils $32/03
+    # de Yun (et de Maki) en $FFCE00 -> objet attaché de Vega en $FFCE80 (masque blanc) : palette 0 et X faux (retour
+    # utilisateur 01/11, « masque de Balrog décalé »). Objet : pose minimale UP_1B6EE ($1C, $32) et avance équivalente à
+    # $51B6E sans les champs du joueur ; joueurs / tirs ($100 o) inchangés. Signalé à la session MAX (Q31).
+    # (agent_integration_max, 2b30) R31 LIVRÉ À LA SOURCE (dépôt MAX a305a9c, cache s/ du 02/11 19:53) : défaut 0 ; =1 : gardes.
+    if os.environ.get("MAX_FILS_PAS", "0") == "1":
+        L += ["GARDE_2A7EA:", "        move.l  a6, -(sp)", "        cmpi.w  #$b000, 2(sp)", "        addq.l  #4, sp",
+              "        bcc.s   FILS_AVANCE", "        jmp     UP_2A7EA",
+              "GARDE_2A770:", "        move.l  a6, -(sp)", "        cmpi.w  #$b000, 2(sp)", "        addq.l  #4, sp",
+              "        bcc.s   .f", "        jmp     UP_2A770", ".f:     jmp     UP_1B6EE",
+              "FILS_AVANCE:", "        subq.b  #1, $33(a6)", "        bne.s   .r", "        movea.l $1c(a6), a0",
+              "        exg     d0, a0", "        move    sr, -(sp)", "        swap    d0", "        move    (sp)+, ccr", "        exg     d0, a0",
+              "        jsr     $400.w", "        move.b  (a0), d0", "        bmi.s   .rep", "        btst    #6, d0", "        bne.s   .fin",
+              "        lea     $14(a0), a0", "        jmp     UP_1B6EE",
+              ".rep:   movea.l $14(a0), a0", "        exg     d0, a0", "        move    sr, -(sp)", "        swap    d0",
+              "        move    (sp)+, ccr", "        exg     d0, a0", "        jsr     $400.w", "        jmp     UP_1B6EE",
+              ".fin:   move.b  #$ff, $32(a6)", ".r:     rts",
+              # psp_cfb90 (objets à petits pas) : psp_cfec8, mais FILS_AVANCE pour un objet de $80 o
+              "GARDE_CFEC8:", "        move.l  a6, -(sp)", "        cmpi.w  #$b000, 2(sp)", "        addq.l  #4, sp",
+              "        bcc.s   .fils", "        jmp     psp_cfec8",
+              ".fils:  movea.l $1c(a6), a0", "        exg     d0, a0", "        move    sr, -(sp)", "        swap    d0",
+              "        move    (sp)+, ccr", "        exg     d0, a0", "        jsr     $400.w", "        btst    #6, (a0)",
+              "        bne.s   .fin", "        bsr     FILS_AVANCE", "        bra.s   .ret", ".fin:   move.b  #$ff, $32(a6)",
+              ".ret:   moveq   #0, d0", "        tst.b   $32(a6)", "        bpl.s   .x", "        moveq   #-128, d0", ".x:     rts"]
     L.append("; enveloppes des classes d'effets MAX (table MAX_T_EFFETS)")
     for pid_, cl_ in _IM.CLASSES.items():
         for c_, r_ in sorted(cl_.items()):
@@ -418,6 +444,23 @@ def sources(out):
                             "        bsr     psp_raz_alloc       ; champs remis à zéro par l'allocateur PSP 0x1EFE4\n"
                             "        move.w  $1a(a6), $1a(a4)    ; (agent_integration_max) banque de l'objet créé = celle du créateur\n")
             if t2 != t: open(os.path.join(src, f), "w").write(t2)
+    # (max_retours, 01/11, lot 2b30) MAX_ONDE_SOL : le script 71 de la table MOTEUR 0x220120 (objet fils $32/04 de Yun,
+    # psp_1c0414 -> psp_79f88 : onde de choc au sol du QCB+P, etc.) désigne les frames 492-498 du pac COMMUN efct.pac (champ
+    # PSP +0x56 = 5), résolues à tort dans pl28 (F28_492-498 = poses de Yun) : 2e Yun dessiné à +32 px. En attendant les
+    # frames converties (Q30), ces 7 pas sont sans image (durées / fin / reprise inchangées). MAX_ONDE_SOL=0 : tel quel.
+    # (2b30) R30 bis LIVRÉ (dépôt MAX 91d3930) : P_21fe80-P_21feb0 -> F28_870-876 (frames d'efct.pac) : défaut 0, vérifié.
+    if os.environ.get("MAX_ONDE_SOL", "0") == "0":
+        t = open(os.path.join(src, "tables_explicites_yun.s")).read()
+        a_ = t.index("\nP_21fe80:"); b_ = t.index("\nP_21feb8:", a_)
+        k_ = re.findall(r"dc\.l\s+F28_(\d+)", t[a_:b_])
+        assert k_ == [str(x) for x in range(870, 877)], "R30 absent de la source (P_21fe80 : %s) : MAX_ONDE_SOL=1" % k_
+        print("MAX_ONDE_SOL=0 : R30 à la source (P_21fe80-P_21feb0 -> F28_870-876)")
+    if os.environ.get("MAX_ONDE_SOL", "0") == "1":
+        f = os.path.join(src, "tables_explicites_yun.s"); t = open(f).read()
+        a_ = t.index("\nP_21fe80:"); b_ = t.index("\nP_21feb8:", a_)
+        seg, k_ = re.subn(r"(        dc\.l    )F28_49[2-8]( [^\n]*)", r"\g<1>0\2 (max_retours : MAX_ONDE_SOL, pas d'image)", t[a_:b_])
+        assert k_ == 7, "MAX_ONDE_SOL : %d frames dans P_21fe80-P_21feb0 (7 attendues)" % k_
+        open(f, "w").write(t[:a_] + seg + t[b_:])
     # (2b28 -> 2b29) TEST D'ATTERRISSAGE : PSP 0x5E004 rend v0 = posé, arcade $2AA08 rend la RETENUE (D0 jamais nul).
     # Corrigé localement en 2b28 (MAX_ATTERRIT, 8 sites « jsr $2aa08 ; tst.w d0 » -> « scs d0 ; andi.w #1,d0 ») ; corrigé
     # À LA SOURCE en 2b29 (R29, dépôt MAX dd6f722 : traduire.py RET_CS -> « scs d0 ; andi.l #1,d0 » ; gestionnaires_main.s
@@ -749,7 +792,53 @@ def main():
     fia = MC.CV + "ia/ia_max.s"
     if os.path.exists(fia) and os.environ.get("MAX_IA", "1") == "1":
         tout += ["        org     $%X" % IA_ORG, "; ==== ia_max.s (session MAX, N20)", open(fia).read(), "        even", "MAX_IA_FIN:"]
-    open(os.path.join(out, "tout.s"), "w").write("\n".join(tout))
+    tout_s = "\n".join(tout)
+    if os.environ.get("MAX_FILS_PAS", "0") == "0":      # (2b30) R31 à la source : vérifier qu'il est bien là
+        a_ = tout_s.index("\npsp_cfb6c:"); b_ = tout_s.index("\npsp_1d96c:", a_)
+        assert "UP_2A770" not in tout_s[a_:b_] and "UP_1B6EE" in tout_s[a_:b_], "R31 absent de la source (psp_cfb6c) : MAX_FILS_PAS=1"
+        a_ = tout_s.index("\npsp_cfb90:"); b_ = tout_s.index("\n\n", a_ + 2)
+        assert "psp_cfec8" not in tout_s[a_:b_] and "psp_1d9b0" in tout_s[a_:b_], "R31 absent de la source (psp_cfb90) : MAX_FILS_PAS=1"
+        print("MAX_FILS_PAS=0 : R31 à la source (psp_cfb6c -> $1B6EE, psp_cfb90 -> psp_1d9b0)")
+    if os.environ.get("MAX_1D9B0_SANS_RESTE", "0") == "1":  # (2b30, ESSAI) psp_1d9b0 : sans la fin anticipée (.reste, compteur = 1)
+        a_ = tout_s.index("\npsp_1d9b0:"); b_ = tout_s.index(".x:     rts", a_)
+        seg = tout_s[a_:b_]; i_ = seg.index(".reste:\n"); seg = seg[:i_] + ".reste:\n"
+        tout_s = tout_s[:a_] + seg + tout_s[b_:]; print("MAX_1D9B0_SANS_RESTE=1 (essai)")
+    if os.environ.get("MAX_CFB90_JOUEUR", "0") == "1":  # (2b30, ESSAI) psp_cfb90 : objets de $100 o (A6.w < $B000) -> ancien psp_cfec8
+        tout_s, n5 = re.subn(r"(\npsp_cfb90:\n)", r"\1        move.l  a6, -(sp)\n        cmpi.w  #$b000, 2(sp)\n        addq.l  #4, sp\n        bcs     psp_cfec8\n", tout_s)
+        assert n5 == 1; print("MAX_CFB90_JOUEUR=1 (essai) : psp_cfb90 -> psp_cfec8 pour A6.w < $B000")
+    if os.environ.get("MAX_FILS_PAS", "0") == "1":      # (max_retours, 2b30) voir integration() : 4 fonctions moteur gardées
+        # SEULEMENT les entrées des objets fils (psp_cfd9c / psp_cfb6c / psp_cfde0 = psp_1d9b0 / psp_cfb90) : garder aussi les
+        # 225 appels de psp_cfec8 par les joueurs ajoutait des cycles (palettes Eagle P65 / P66, Ingrid : 1 image d'écart)
+        a_ = tout_s.index("\npsp_cfd9c:"); b_ = tout_s.index("\npsp_1d96c:", a_)
+        seg, n1 = re.subn(r"^(\s+)jmp(\s+)\(UP_2A770\)\.l", r"\1jmp\2GARDE_2A770", tout_s[a_:b_], flags=re.M)
+        tout_s = tout_s[:a_] + seg + tout_s[b_:]
+        tout_s, n2 = re.subn(r"(\npsp_1d9b0:\npsp_cfde0:\n\s+)jmp(\s+)\(UP_2A7EA\)\.l", r"\1jmp\2GARDE_2A7EA", tout_s)
+        tout_s, n3 = re.subn(r"(\npsp_cfb90:\n\s+)bra(\s+)psp_cfec8", r"\1jmp\2GARDE_CFEC8", tout_s)
+        assert (n1, n2, n3) == (2, 1, 1), "MAX_FILS_PAS : psp_cfd9c/cfb6c %d, cfde0 %d, cfb90 %d (2 / 1 / 1 attendus)" % (n1, n2, n3)
+        print("MAX_FILS_PAS : psp_cfd9c, psp_cfb6c, psp_cfde0, psp_cfb90 gardés (objets de $80 o)")
+    # (max_retours, 01/11, lot 2b30) MAX_PROVOC_POSE : psp_24c04 (« pose de victoire terminée » : BSET $101,$10B(A5) arcade,
+    # image $10A) est appelée par la PROVOCATION des MAX (Yun psp_1bd06c, Eagle psp_1b16e4, Maki psp_1b5b58, Ingrid
+    # psp_1c2ee0 ; provocation sur Select, cœur 0014) : le drapeau posé en plein combat fait couper la pose de victoire
+    # suivante (fin de manche ~107 images plus tôt, fondu de musique et morceau suivant en avance : retour utilisateur
+    # « musique qui change trop tôt »). N'agit plus que si le joueur est en victoire (octet logique $5 = 8, image $4).
+    # (agent_integration_max, 2b30) R32 (session MAX, MAX.md) : PSP 0x39CA67 est un drapeau d'UNE image (posé par 0x24C04,
+    # effacé dans la même image par 0x249A4 ; 0x24AF4 saute le joueur à la détection de K.O.) ; le vrai $10B arcade = PSP
+    # 0x818303, posé par psp_cfb34 (fin de pose des MAX). Correctif de source LIVRÉ (dépôt MAX a305a9c,
+    # cache s/ 02/11 19:53) : psp_24c04 = rts. MAX_PROVOC_POSE=0 (défaut) = source R32 (vérifiée) ; =1 / =garde : seulement
+    # pour une source antérieure (rts forcé / provisoire max_retours « en victoire seulement »).
+    pp_ = os.environ.get("MAX_PROVOC_POSE", "0")   # (2b30) R32 livré à la source (a305a9c) : défaut 0
+    if pp_ == "0":
+        assert re.search(r"\npsp_24c04:\n\s+rts", tout_s), "R32 absent de la source (psp_24c04) : MAX_PROVOC_POSE=1"
+        print("MAX_PROVOC_POSE=0 : R32 à la source (psp_24c04 = rts)")
+    if pp_ in ("1", "garde"):
+        rem_ = (r"\1        rts                                 ; (2b30, R32) drapeau PSP d'une image ; $10B = psp_cfb34\n"
+                if pp_ == "1" else
+                r"\1        cmpi.b  #8, $4(a6)          ; (max_retours 2b30) seulement en victoire\n        bne.s   .pas\n\2.pas:\3")
+        tout_s, n4 = re.subn(r"(\npsp_24c04:\n)(\s+move\.b\s+\$100\(a6\), d0[^\n]*\n\s+bset\s+d0, \$10a\(a5\)[^\n]*\n)(\s+rts)",
+                            rem_, tout_s)
+        assert n4 == 1, "MAX_PROVOC_POSE : psp_24c04 inattendue (%d)" % n4
+        print("MAX_PROVOC_POSE=%s : psp_24c04 %s" % (pp_, "= rts (R32)" if pp_ == "1" else "gardée (victoire seulement)"))
+    open(os.path.join(out, "tout.s"), "w").write(tout_s)
     bin_, lst = os.path.join(out, "tout.bin"), os.path.join(out, "tout.lst")
     r = subprocess.run([VASM, "-m68000", "-spaces", "-Fbin", "-quiet", "-maxerrors=500", "-L", lst,
                         "-o", bin_, os.path.join(out, "tout.s")], capture_output=True, text=True)

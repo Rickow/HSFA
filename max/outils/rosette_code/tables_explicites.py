@@ -15,7 +15,10 @@ NOMS = {0x26: "eagle", 0x27: "maki", 0x28: "yun", 0x29: "ingrid"}
 CIBLES = {0xCFD9C: 5, 0xCFB6C: 5}              # fonction -> registre de l'argument « table » (a1)
 FORMAT = {0xCFD9C: "pas10", 0xCFB6C: "pas8"}   # pas standard (10 o) / petit pas d'objet fils (8 o, lu par 0x1D96C)
 # (2026-10-07) tables désignées DANS une fonction moteur (et non passées par le module) : 0x79F88 (Yun) -> 0x220120
+# (2026-11-02, Q30) table MOTEUR : ses frames sont celles du pac COMMUN efct.pac (objet fils +0x56 = 5), pas du perso ;
+# n° convertis par convert_max.efct_numero (frames efct ajoutées après celles du perso), sinon pas d'image.
 EXTRA = {0x28: [(0x220120, "pas8")]}
+BANQUE_EFCT = {0x220120}
 def appels_tables(cid):
     a0, e0 = modules.module_bounds()[cid]; ins = list(decode(img, a0, e0)); R = {}; out = set()
     for k, i in enumerate(ins):
@@ -59,6 +62,10 @@ def convertir(cid):
     pas + écart (validé 166/166 sur Ryu pour le format standard)"""
     b6, bx = boites(cid); refs = refs_code()
     rm = remap_ingrid() if cid == 0x29 else {}
+    sys.path.insert(0, "../convert")
+    from convert_max import efct_numero
+    from frames import frames as _frames
+    nF = len(_frames(split(open(os.path.join(paths.pac_dir(), "pl%02x_e.pac" % cid), "rb").read())[0][1]))
     lignes, js, scripts, alertes = [], {}, {}, collections.Counter()
     for t, fmt in appels_tables(cid) + EXTRA.get(cid, []):
         ent, k = [], 0
@@ -66,9 +73,9 @@ def convertir(cid):
         js["%x" % t] = {"format": fmt, "scripts": ["%x" % e for e in ent]}
         lignes.append("TAB_%x:                ; table PSP %#x (%d scripts, %s)" % (t, t, len(ent), fmt))
         lignes += ["        dc.l    P_%x" % e for e in ent]
-        for e in ent: scripts[e] = (fmt, BOITES_TIRS.get(t))
+        for e in ent: scripts[e] = (fmt, BOITES_TIRS.get(t), t in BANQUE_EFCT)
     faits = set()
-    for s0, (fmt, btir) in sorted(scripts.items()):
+    for s0, (fmt, btir, efct) in sorted(scripts.items()):
         taille = 10 if fmt == "pas10" else 8
         a = s0
         for n in range(120):
@@ -84,6 +91,10 @@ def convertir(cid):
             lignes.append("P_%x:" % a)
             lignes.append("        dc.b    $%02x, $%02x, $%02x, $%02x" % (d & 0xFF, d >> 8, fl & 0xFF, fl >> 8))
             if fr == 0xFFFF: lignes.append("        dc.l    0                  ; pas d'image (PSP 0xFFFF)")
+            elif efct:
+                ne = efct_numero("pl%02x" % cid, fr, nF)
+                if ne is None: lignes.append("        dc.l    0                  ; frame %d d'efct.pac non convertie : pas d'image" % fr)
+                else: lignes.append("        dc.l    F%02X_%d                ; frame %d d'efct.pac (pac commun), ajoutée après les frames du perso" % (cid, ne, fr))
             else: lignes.append("        dc.l    F%02X_%d                ; frame PSP %d (index frames.json du perso $%02X)" % (cid, rm.get(fr, fr), fr, cid))
             lignes.append("        dc.b    " + ", ".join("$%02x" % x for x in abc) + ("" if fmt == "pas10" else "   ; ⚠ boîtes A/B/C absentes du format PSP"))
             if d & 0x8000: lignes.append("        dc.l    P_%x                ; reprise (écart %d)" % (a + taille * ecart, ecart)); break

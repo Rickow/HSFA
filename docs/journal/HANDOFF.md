@@ -5439,3 +5439,46 @@ Alpha Counter = artefact du banc.
   Dee Jay ($32), T. Hawk ($33), Guile ($30), Fei-Long ($31) (signalé par l'utilisateur sur Retroid). 2b28 refait
   (2330e54c), 2b29 avec flux ; `paquet_fbneo.py` refuse désormais (HSFA_STRICT) une archive qui demande des flux sans
   `HSFA_YDATA` (`HSFA_SANS_FLUX=1` : ancien comportement).
+
+### 197. Releases v0.1.3 / v0.1.4 ; sang ; cœur plus rapide ; greffe ro9a22-ro9a23 ; réorganisation (pause)
+
+- **Sang** (`work/sang/`) : réglage arcade REGULATION (`$FF80BB`, défaut d'usine 0 au Japon, 1 ailleurs) ; la PS2 met 1
+  sauf bit 39 de la grille CUSTOMIZE ; nos conversions posaient 1 sans condition. Patch cœur **0018** : option « Blood »,
+  rouge par défaut, immédiat corrigé au chargement par signature (`1B7C 000x 00BA 6004 422D 00BA`) ; toutes les versions
+  d'Hyper (un seul chargeur de palette du sang). Zips inchangés. **v0.1.3** publique (cœurs 0018 + traducteur v154).
+- **Cœur plus rapide** (`work/coeur_perf/`) : profil (Z80 du QSound 23-28 %, 68000 18-23 %, rendu 19-30 %, QSound
+  11-14 %, 2e QSound d'Hyper 12-13 %, Ogg ~6 %) ; patchs **0019** (saut de la boucle d'attente du 68000 `$000BF8`, par
+  signature), **0020** (boucle d'attente du Z80 `$01C7`), **0021** (crochets Z80 / Musashi, FIR QSound vectorisable),
+  **0021b** (option On par défaut), **0021c** (`HSFA_NO_FLOAT_STORE`) ; −33 à −41 % par image, résultats identiques ;
+  Recalbox / ROCKNIX en -O3 + LTO une partition. Essayé sur Raspberry Pi 3 : Hyper + Arcade ne ralentit plus.
+  **v0.1.4** publique.
+- **Greffe** : ro9a22 (indicateur PRESS START d'Upper en emplacement 1, plans des écrans de victoire, 161 fins de
+  citations relogées à tort) ; ro9a23 (v154, sol du décor de Cammy : `VRAM_TABLE_GRF`). Shin Akuma = sélection
+  d'Hyper (Start tenu à la validation de la version). Zone de décors extensible (tête $FE0000 → 68K $4D8000, corps
+  $4E8000-$5D3FFF, 944 Ko ; `LEATAB_ZONE`, `ZONE_SANS_CODE`) ; objets de décor encore désactivés (5 plantages).
+- **Upper MAX** : 2b27-2b29 (§196) ; retours du soir (masque de Vega écrasé par les objets fils de Yun / Maki, onde
+  du QCB+P de Yun prise dans pl28 au lieu d'efct.pac, provocation qui pose « pose de victoire terminée ») : correctifs
+  prêts pour 2b30, Q30-Q32 à la session MAX.
+- **Réorganisation des données** : phase 1 portée sur v154 (étiquette `v155-reorg-p1`), phase 2 premier jalon
+  (`v156-reorg-p2`) ; gain −3 à −6 % du travail du 68000, non activées, EN PAUSE jusqu'aux MAX dans la greffe.
+- **Outillage** (`work/outils/`) : empreintes des bancs (arrêt code 86), lanceur commun `lance_emu`, tableau de bord
+  `etat_hsfa.sh`, « banc de jour », hooks git (anonymat, re/), index du fichier d'échange MAX.
+
+### 198. Vrai 16:9 (patch 0022) ; greffe ro9a25 et e34 ; Upper MAX 2b30
+
+- **16:9 exact** : l'ancien 448 px déclaré 16:9 était étiré de ~14 % (448 px arcade = 14:9). Patch **0022** : 512 × 224,
+  rapport exact, `nCpsGlobalXOffset` = 64 ; options « Screen format » (16:9 = 512, 14:9 = ancien 448 au pixel près) et
+  « Widescreen edges » (mirror par défaut / repeat / black / raw). Mesures (76 décors) : butées de caméra scroll2 X = 0 /
+  $180 partout ; le décor arcade s'arrête au bord 4:3 aux butées (bande manquante jusqu'à 64 px) ; scroll1 = anneau de
+  512 px recomposé (colonnes périmées au-delà de 448) ; HUD dans la fenêtre 4:3 ; écrans hors combat en 384 px (côtés
+  noirs). Miroir par tuile, plan par plan, limité aux bandes : surcoût +6 à +10 %. Cœurs du 05/11.
+- **Greffe ro9a25** : objets de décor d'Upper actifs sur tous les décors (classes $26/$2E vers un gestionnaire d'Hyper,
+  libérations vers d'autres réservoirs, T_611E50 = $2F classes ; en-têtes `$00TT0001` relogés ; paires de mots de la
+  zone ; $100 = $174 seulement à la 1re image des fins), E. Honda (acteur $4B / $1C), GAME OVER d'Upper. **e34** (non
+  livré, arrêt pour le quota) : portraits de la sélection (talon tuile_e1 mal traduit, `TUILES_E1_FORME`), fin de
+  Zangief (`FIN_ID_BASE`), libellé du classement (`RANG_E1` : pictos du GAME OVER et champ du pseudo), 6 constantes
+  (`CONST_OBJET_PLUS`) ; palette du portrait de victoire (copies limitées à la couleur 0, `COPIES_ENTIERES`, à construire).
+- **Upper MAX 2b30** : R30-R32 bis de la session MAX à la source (onde au sol du QCB+P de Yun = efct 492-498, palette
+  $19 ; objets fils en pose / avance minimales : masque de Vega, 0 débordement ; provocation : 0x39CA67 = drapeau d'une
+  image). R33 : l'écart du Sunshine niv. 2 d'Ingrid était une image de ralentissement du 68000 (tour de jeu $FF851C
+  arrêté), pas une régression ; le banc des données d'images doit compter en tours de jeu, ralentissements à part.

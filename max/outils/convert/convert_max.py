@@ -61,6 +61,52 @@ def etirer_banque(bank, ncell):
             y, x = divmod(i, 3); out[q] = e[16 * y:16 * y + 16, 16 * x:16 * x + 16].tobytes()
     return out
 
+# (2026-11-02, Q30 : onde au sol du QCB+P de Yun) frames du pac COMMUN efct.pac employées par un perso MAX : l'objet fils
+# de Yun (type 0x32/4, psp_1c0414) joue le script 71 de la table MOTEUR 0x220120 avec la banque d'images +0x56 = 5 = efct.pac
+# (entrée 0 = 581 frames, entrée 1 = tuiles), pas pl28. Ajoutées APRÈS les frames du perso (n° len(frames) + rang dans la
+# liste, voir efct_numero ; tables_explicites.py en tient compte) et dans sa banque, après ses cases. Non étirées (PSP :
+# +0xAB = 0 sur cet objet). Palette mesurée au banc PSP : palette commune « blanc -> cyan -> bleu », tracé OPAQUE ; la même
+# palette est la palette d'objets CPS2 $19 de l'arcade (bloc 0x33BB14 chargé en $90C2A0) : posée par psp_79f88 ($C / $D).
+EFCT = {"pl28": list(range(492, 499))}
+def efct_pac():
+    for d in (os.environ.get("SFA3MAX_EFCT_DIR"), paths.pac_dir(), os.path.join(os.path.dirname(paths.pac_dir()), "data")):
+        if d and os.path.exists(os.path.join(d, "efct.pac")): return os.path.join(d, "efct.pac")
+    sys.exit("efct.pac introuvable (SFA3MAX_EFCT_DIR, %s, ../data)" % paths.pac_dir())
+def efct_numero(pl, n, nframes):
+    """n° de frame (index frames.json du perso) d'une frame n d'efct.pac, None si elle n'est pas convertie"""
+    L = EFCT.get(pl, [])
+    return nframes + L.index(n) if n in L else None
+def ajouter_efct(bank, out_frames, ncell, etire, nums):
+    import numpy as np
+    E = split(open(efct_pac(), "rb").read()); g = E[1][1]; T = tiles(g); F = frames(E[0][1])
+    cases = {}
+    for n in nums:
+        fr = F[n]; objs = []
+        ax = fr["a"] | fr["b"] << 8; ax -= 0x10000 if ax & 0x8000 else 0
+        for k, cell in enumerate(fr["cells"]):
+            if cell is None: continue
+            if cell[0] not in cases:
+                j = ncell + len(cases); cases[cell[0]] = j
+                img = np.full((32, 32), 15, np.uint8)
+                for q, (x0, y0) in enumerate(((0, 0), (0, 16), (16, 0), (16, 16))):     # ordre PSP en colonnes TL, BL, TR, BR
+                    t = decode(g, T[4 * cell[0] + q][0])[0]
+                    px = [v for b in t for v in (b & 0xF, b >> 4)]
+                    img[y0:y0 + 16, x0:x0 + 16] = np.array([15 - ((16 - i) % 16) for i in px], np.uint8).reshape(16, 16)
+                if etire:                                            # case 3×2 de la banque étirée, colonnes 32-47 transparentes
+                    e = np.full((32, 48), 15, np.uint8); e[:, :32] = img
+                    _, locs = bank_code_etire(j); w = 3
+                else:
+                    e = img; _, (tl, bl, tr, br) = bank_code(j); locs = [tl, tr, bl, br]; w = 2
+                while max(locs) >= len(bank): bank.extend([None] * 32)
+                for i, q in enumerate(locs):
+                    y, x = divmod(i, w); bank[q] = e[16 * y:16 * y + 16, 16 * x:16 * x + 16].tobytes()
+            cx, cy = (k % fr["w"]) * 32 - ax, (k // fr["w"]) * 32 - fr["c"]
+            b, _ = bank_code_etire(cases[cell[0]]) if etire else bank_code(cases[cell[0]])
+            attr = (0x1200 if etire else 0x1100) | (0x20 if cell[1] & 0x40 else 0) | (0x40 if cell[1] & 0x80 else 0) | (cell[1] & 3)
+            if etire and cell[1] & 0x40: cx -= 48 - 32
+            objs.append((cx, cy, b, attr))
+        out_frames.append({"objs": objs, "T": (6 if etire else 4) * len(objs)})
+
 def convert(pl, boxset_off="auto", etire=None):
     etire = (pl in ETIRE) if etire is None else etire
     E = split(open(os.path.join(paths.pac_dir(), f"{pl}_e.pac"), "rb").read())
@@ -111,6 +157,7 @@ def convert(pl, boxset_off="auto", etire=None):
             objs.append((cx, cy, b, attr))
         out_frames.append({"objs": objs, "T": (6 if etire else 4) * len(objs)})
     if etire: bank = etirer_banque(bank, ncell)
+    if pl in EFCT: ajouter_efct(bank, out_frames, ncell, etire, EFCT[pl])
     H = struct.unpack_from(f"<{len(b6)//2}H", b6)
     ok = lambda i: i + 4 < len(H) and H[i+2] < len(F) and (H[i] <= 0xFF or H[i] & 0x8000) and H[i+3] in (0, 1)
     scripts, i = [], 0

@@ -1,0 +1,695 @@
+From f490551cd6e4bc1cd283598ca05f2e1061d1decd Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Mon, 2 Nov 2026 22:17:02 +0100
+Subject: [PATCH] HSFA: widescreen core in 512x224 (exact 16:9), "Widescreen
+ edges" option (mirror)
+
+The widescreen core drew 448x224 and declared 16:9: at the arcade pixel
+shape (384 px <-> 4:3) 448 px is 14:9, so the picture was stretched by
+about 14 %. 512 px = 16/9 x 288 is exact 16:9 with arcade pixels.
+
+- d_cps2.cpp: HSFA_WS drivers are 512x224, aspect 512:288 (16:9);
+  nCpsGlobalXOffset = 64. HSFA_WS_W sets another width for tests.
+- "Screen format (fill height)" (patch 0012) is capped at 512: Off =
+  16:9 = full 512 px (no stretch), 14:9 = 448 px (the former picture),
+  5:3 = 480, 16:10 = 460, 3:2 = 432, 4:3 = 384. The shown width is
+  passed to the renderer (nHsfaWsVisible): nothing is computed for
+  cropped bands.
+- New core option "Widescreen edges" (fbneo-hsfa-ws-edges): what the
+  side bands show in fights, where many stages have no art beyond the
+  arcade 4:3 view (camera at the end of the stage, slow planes):
+  * mirror (default): each stage plane is continued as its mirror image
+    at the edge of its art, tile by tile, row of tiles by row of tiles
+    (flipped tiles of the other side of the edge); the game picture is
+    drawn over it, so the mirror only shows where no plane and no sprite
+    is drawn; sprites are never mirrored;
+  * repeat: the last tile of art is repeated;
+  * black: nothing behind the planes (stale scroll1 columns removed);
+  * raw: picture as drawn by the game (black and stale columns), i.e.
+    the former 448 px core (14:9 + raw = former core, to the pixel).
+  Outside fights ($FF8000 = 2, $FF8004 = 4, $FF8008 = 6 false: menus,
+  map, VS, quotes, CONTINUE, endings, 384 px screens) the bands are
+  black, except in raw.
+- How: before the planes, background passes limited to the bands (the
+  screen width and the plane X offset are changed for the pass, drawing
+  in place in pBurnDraw, clipped to the band; no sprites, no
+  CpsObjDrawInit):
+  * passes 3 / 4: lines fully covered by a row of opaque tiles of any
+    plane (the background would not show there: skipped);
+  * passes 5 / 6: planes whose last tile of art (window side) is partly
+    transparent (silhouette: statue, tree, lantern) are mirrored first,
+    so they only show where nothing else does;
+  * passes 1 / 2: planes whose edge is a cut (opaque last tile) are
+    mirrored on top.
+  The edge of a plane in a row of tiles is the first empty tile from the
+  4:3 window outwards (transparent tile, or scroll1 column whose last
+  rewrite does not match the world column shown: scroll1 is a 512 px
+  ring recomposed by the game around the camera, tracked each frame by
+  comparing its 64 columns with a copy). Rows with row scroll (scroll2)
+  are mirrored with the same line shifts. Tile states (empty / opaque)
+  are cached (the graphics do not change after loading).
+- The 4:3 window (x 64-447) is never touched: identical to the pixel to
+  the 4:3 core in every mode. The 4:3 core does not change (all code
+  under HSFA_WS).
+- Cost (x86 Linux core, CPU time per frame, min of 4-5 runs, against the
+  former 448 px core): 512 px alone +3 to +6 %, 512 mirror +6 to +10 %
+  (fights with the camera at the ends 2/3 of the time, and automatic
+  games); the prototype with a second full render of the planes: +27 to
+  +32 %.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps.h            |  27 ++++
+ src/burn/drv/capcom/cps_draw.cpp     |  27 ++++
+ src/burn/drv/capcom/cps_hsfa.cpp     | 195 +++++++++++++++++++++++++++
+ src/burn/drv/capcom/cps_scr.cpp      |  94 +++++++++++++
+ src/burn/drv/capcom/cpsrd.cpp        |  66 +++++++++
+ src/burn/drv/capcom/d_cps2.cpp       |  14 +-
+ src/burner/libretro/libretro.cpp     |  11 +-
+ src/burner/libretro/retro_common.cpp |  28 +++-
+ 8 files changed, 453 insertions(+), 9 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index 32468ff..d897a1e 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -565,6 +565,33 @@ static inline INT32 HsfaEstOmbre(UINT32 t)				// (patch 0011) code global d'une
+ 	return t == 0x0284A || (t >= 0x305DF && t <= 0x30613) || (t >= 0x50888 && t <= 0x5088A);
+ }
+ void HsfaPortWriteWordEnd();
++#ifdef HSFA_WS
++// (HSFA, patch 0022) bords du 16:9 (cps_hsfa.cpp) : fond des bandes hors de la fenetre 4:3 en combat
++extern INT32 nHsfaWsBords;								// option "Widescreen edges" : 0 miroir, 1 repetition, 2 noir, 3 brut
++extern INT32 nHsfaWsVisible;							// largeur montree (option "Screen format"), 0 = toute l'image
++extern INT32 nHsfaWsPasse;								// 0 = image ; 1 / 2 = fond de la bande gauche / droite ;
++														// 3 / 4 = lignes couvertes par un plan opaque, gauche / droite ;
++														// 5 / 6 = fond de secours (plans a bord en silhouette)
++extern INT32 bHsfaWsS1Filtre, nHsfaWsS1U, nHsfaWsX0;	// scroll1 : colonnes perimees de l'anneau retirees des bandes
++#define HSFA_WS_AUCUN	(-0x10000)
++void HsfaWsAvantDessin();
++void HsfaWsApresDessin();
++void HsfaWsSortie();
++void HsfaWsPasse(INT32 nPasse, INT32 x0, INT32 w);		// cps_draw.cpp
++INT32 HsfaWsS1Perime(INT32 fxU, INT32 px);
++INT32 HsfaWsEtat(UINT32 nTile, INT32 nSize);				// 1 = tuile transparente, 2 = opaque, 0 = autre
++static inline INT32 HsfaWsVide(UINT32 nTile, INT32 nSize) { return HsfaWsEtat(nTile, nSize) == 1; }
++INT32 HsfaWsBord(const UINT8 *pVide, INT32 xMin, INT32 xMax, INT32 xs);
++INT32 HsfaWsRangee(INT32 y0, INT32 n, INT32 bOpaque);
++static inline INT32 HsfaWsDivB(INT32 a, INT32 b) { return (a >= 0) ? a / b : -((-a + b - 1) / b); }
++// colonne source (indice de boucle) de la colonne x du fond, wb = 1re colonne vide depuis la fenetre 4:3
++static inline INT32 HsfaWsSource(INT32 x, INT32 wb)
++{
++	if (nHsfaWsPasse & 1) { if (x > wb) return HSFA_WS_AUCUN; return (nHsfaWsBords == 1) ? wb + 1 : 2 * wb + 1 - x; }
++	if (x < wb) return HSFA_WS_AUCUN;
++	return (nHsfaWsBords == 1) ? wb - 1 : 2 * wb - 1 - x;
++}
++#endif
+ 
+ extern INT32 Cps2Volume;
+ extern UINT16 Cps2VolumeStates[40];
+diff --git a/src/burn/drv/capcom/cps_draw.cpp b/src/burn/drv/capcom/cps_draw.cpp
+index 3d7b0b7..a386056 100644
+--- a/src/burn/drv/capcom/cps_draw.cpp
++++ b/src/burn/drv/capcom/cps_draw.cpp
+@@ -323,6 +323,9 @@ static void Cps2Layers()
+ 	INT32 Prio[MAX_RASTER][4];
+ 	INT32 nDrawMask[MAX_RASTER];
+ 
++#ifdef HSFA_WS
++	if (nHsfaWsPasse == 0)								// (patch 0022) pas d'objets dans le fond des bandes
++#endif
+ 	CpsObjDrawInit();
+ 
+ 	INT32 nSlice = 0;
+@@ -503,9 +506,33 @@ static void DoDraw(INT32 Recalc)
+ 	if (Recalc || bCpsUpdatePalEveryFrame) CpsPalUpdate(CpsSavePal);		// recalc whole palette if needed
+ 
+ 	CpsClearScreen();
++#ifdef HSFA_WS
++	HsfaWsAvantDessin();								// (patch 0022) suivi de scroll1, fond des bandes du 16:9
++#endif
++
++	CpsLayersDoX();
++#ifdef HSFA_WS
++	HsfaWsApresDessin();								// (patch 0022) bandes noires hors combat
++#endif
++}
+ 
++#ifdef HSFA_WS
++// (HSFA, patch 0022) fond d'une bande du 16:9 : plans seuls (sans objets), colonnes [x0, x0 + w) de l'image, dessines
++// en place dans pBurnDraw. La largeur d'ecran et le decalage X des plans sont changes le temps du rendu : les
++// dessinateurs (cps_scr.cpp, cpsrd.cpp) coupent a [0, w) et, avec nHsfaWsPasse, ne posent que les tuiles en miroir
++// au-dela du bord du decor. w multiple de 32 (couverture des tuiles de 32 px), x0 >= 0.
++void HsfaWsPasse(INT32 nPasse, INT32 x0, INT32 w)
++{
++	UINT8 *pOld = pBurnDraw;
++	const INT32 nOldW = nCpsScreenWidth, nOldX = nCpsGlobalXOffset;
++	const UINT8 nOldL = nBurnLayer;
++	pBurnDraw += x0 * nBurnBpp; nCpsScreenWidth = w; nCpsGlobalXOffset -= x0; nBurnLayer &= ~1;
++	nHsfaWsPasse = nPasse; nHsfaWsX0 = x0;
+ 	CpsLayersDoX();
++	nHsfaWsPasse = 0; nHsfaWsX0 = 0;
++	pBurnDraw = pOld; nCpsScreenWidth = nOldW; nCpsGlobalXOffset = nOldX; nBurnLayer = nOldL;
+ }
++#endif
+ 
+ INT32 CpsDraw()
+ {
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 96a5aaa..bd7ad62 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -1722,6 +1722,9 @@ INT32 HsfaInit()
+ 
+ INT32 HsfaExit()
+ {
++#ifdef HSFA_WS
++	HsfaWsSortie();										// (patch 0022)
++#endif
+ 	Z80SetIdleLoop(-1, -1, 0, 0, NULL);					// (patch 0020)
+ 	if (HsfaPlansLog) fclose(HsfaPlansLog);
+ 	HsfaPlansLog = NULL; nPlansLog = -1;
+@@ -1754,3 +1757,195 @@ INT32 HsfaExit()
+ 	nHsfaExtBase = 0xA00000; nHsfaExtLen = 0x500000;
+ 	return 0;
+ }
++
++#ifdef HSFA_WS
++// --------------------------------------------------------------------------------------------------------------
++// (HSFA, patch 0022) bords du 16:9. Au-dela de la fenetre 4:3 (x < nCpsGlobalXOffset ou >= nCpsGlobalXOffset + 384),
++// le decor n'existe souvent pas (butees de camera, plans lents) et scroll1, anneau de 512 px recompose par le jeu autour
++// de la camera, montre des colonnes perimees. Option "Widescreen edges" (nHsfaWsBords) :
++//   0 miroir (defaut) : en combat, le fond des bandes est fait des plans (sans objets) prolonges en miroir au bord du
++//     decor, plan par plan et rangee de tuiles par rangee (cps_scr.cpp, cpsrd.cpp) ; l'image du jeu est dessinee
++//     par-dessus : le miroir ne se voit que la ou aucun plan ni objet n'est dessine ;
++//   1 repetition : la derniere tuile du decor est repetee ;
++//   2 noir : rien en fond (colonnes perimees de scroll1 retirees) ;
++//   3 brut : image du jeu telle quelle (comme l'ancien coeur 448 : noir et colonnes perimees).
++// Hors combat ($FF8000 = 2, $FF8004 = 4, $FF8008 = 6 faux : menus, carte, VS, citations, CONTINUE, fins, ecrans de
++// 384 px) : bandes noires, sauf en brut. Rien n'est fait pour les bandes que le format d'ecran rogne (nHsfaWsVisible).
++// L'interieur de la fenetre 4:3 n'est jamais touche (identique au pixel au coeur 4:3 dans tous les modes).
++INT32 nHsfaWsBords = 0;
++INT32 nHsfaWsVisible = 0;
++INT32 nHsfaWsPasse = 0;
++INT32 bHsfaWsS1Filtre = 0;							// scroll1 : colonnes perimees retirees dans les bandes
++INT32 nHsfaWsS1U = 0;								// defilement X de scroll1 deroule (meme repere que sx de Cps2Scr1Draw)
++INT32 nHsfaWsX0 = 0;								// pendant une passe de fond : 1re colonne de l'image dessinee
++static UINT8 WsCouvert[2][256];						// lignes de chaque bande couvertes par un plan opaque (passes 3 / 4)
++static INT32 bWsCombat = 0, bWsS1Init = 0, nWsS1Prec = 0, nWsE1 = 0, nWsBande = 0;
++static UINT32 nWsS1Base = 0;
++static INT32 WsS1Col[64];							// colonne de monde (deroulee) ecrite dans chaque colonne de l'anneau
++static UINT8 *WsS1Copie = NULL;						// copie de la tilemap scroll1 (detection des colonnes reecrites)
++
++// colonne de monde la plus proche du centre de la vue (biais vers le bord ou le jeu compose quand la camera bouge)
++static INT32 WsS1Monde(INT32 c, INT32 nU, INT32 nBiais)
++{
++	INT32 nCentre = nU + nCpsScreenWidth / 2 + nBiais - 4;
++	return c + 64 * HsfaWsDivB(nCentre - 8 * c + 256, 512);
++}
++
++static INT32 HsfaWsEnCombat()
++{
++	return RamW(0xFF8000) == 2 && RamW(0xFF8004) == 4 && RamW(0xFF8008) == 6;
++}
++
++// suivi de l'anneau scroll1 : chaque image, les 64 colonnes de la tilemap sont comparees a une copie ; une colonne
++// reecrite recoit la colonne de monde la plus proche du centre de la vue
++static void WsS1Suivi()
++{
++	if (WsS1Copie == NULL) { WsS1Copie = (UINT8*)BurnMalloc(0x4000); if (!WsS1Copie) return; }
++	UINT32 nOff = ((UINT32)RdW(CpsSaveReg[0] + 0x02) << 8) & 0xffc000;
++	UINT8 *Base = CpsFindGfxRam(nOff, 0x4000);
++	if (Base == NULL) { bWsS1Init = 0; return; }
++	INT32 sx = (INT32)RdW(CpsSaveReg[0] + 0x0c) + 0x40 - nCpsGlobalXOffset + CpsLayer1XOffs;
++	if (!bWsS1Init || nOff != nWsS1Base) {
++		nHsfaWsS1U = sx;
++		for (INT32 c = 0; c < 64; c++) WsS1Col[c] = WsS1Monde(c, nHsfaWsS1U, 0);
++		memcpy(WsS1Copie, Base, 0x4000);
++		nWsS1Base = nOff; bWsS1Init = 1;
++	} else {
++		INT32 d = (sx - nWsS1Prec) & 0x1ff;
++		if (d >= 0x100) d -= 0x200;
++		nHsfaWsS1U += d;
++		INT32 nBiais = (d > 0) ? 32 : (d < 0) ? -32 : 0;
++		for (INT32 c = 0; c < 64; c++) {
++			UINT8 *a = Base + (c << 7), *b = Base + 0x2000 + (c << 7);
++			if (memcmp(a, WsS1Copie + (c << 7), 128) || memcmp(b, WsS1Copie + 0x2000 + (c << 7), 128)) {
++				WsS1Col[c] = WsS1Monde(c, nHsfaWsS1U, nBiais);
++				memcpy(WsS1Copie + (c << 7), a, 128); memcpy(WsS1Copie + 0x2000 + (c << 7), b, 128);
++			}
++		}
++	}
++	nWsS1Prec = sx;
++	bHsfaWsS1Filtre = 1;
++}
++
++// appele apres l'effacement de l'image, avant les plans et les objets
++void HsfaWsAvantDessin()
++{
++	bHsfaWsS1Filtre = 0;
++	nWsE1 = nCpsGlobalXOffset; nWsBande = 0;
++	if (HsfaMode && nWsE1 > 0 && nHsfaWsBords != 3) {
++		INT32 v = (nHsfaWsVisible > 0 && nHsfaWsVisible < nCpsScreenWidth) ? nHsfaWsVisible : nCpsScreenWidth;
++		nWsBande = (v - 384) / 2;									// largeur montree de chaque bande
++		if (nWsBande > nWsE1) nWsBande = nWsE1;
++	}
++	bWsCombat = nWsBande > 0 && HsfaWsEnCombat();
++	if (!bWsCombat) { bWsS1Init = 0; return; }
++	WsS1Suivi();
++	if (nHsfaWsBords <= 1) {										// miroir / repetition : fond des deux bandes
++		INT32 w = (nWsBande + 31) & ~31;
++		if (w > (nWsE1 & ~31)) w = nWsE1 & ~31;
++		if (w > 0) {
++			memset(WsCouvert, 0, sizeof(WsCouvert));
++			HsfaWsPasse(3, nWsE1 - w, w);							// lignes deja couvertes par un plan opaque
++			HsfaWsPasse(4, nWsE1 + 384, w);
++			HsfaWsPasse(5, nWsE1 - w, w);							// secours : plans a bord en silhouette
++			HsfaWsPasse(6, nWsE1 + 384, w);
++			HsfaWsPasse(1, nWsE1 - w, w);							// fond en miroir des plans a bord coupe
++			HsfaWsPasse(2, nWsE1 + 384, w);
++		}
++	}
++}
++
++// appele apres les plans et les objets : hors combat, bandes noires (ecrans de 384 px)
++void HsfaWsApresDessin()
++{
++	if (nWsBande <= 0 || bWsCombat || pBurnDraw == NULL) return;
++	const INT32 nE2 = nWsE1 + 384, nD = nCpsScreenWidth - nE2;
++	for (INT32 y = 0; y < nCpsScreenHeight; y++) {
++		UINT8 *l = pBurnDraw + y * nBurnPitch;
++		memset(l, 0, nWsE1 * nBurnBpp);
++		if (nD > 0) memset(l + nE2 * nBurnBpp, 0, nD * nBurnBpp);
++	}
++}
++
++// scroll1 : tuile de la colonne de monde fxU, posee a l'ecran (image entiere) en [px, px + 8) ; 1 = a retirer
++// (perimee, dans une bande)
++INT32 HsfaWsS1Perime(INT32 fxU, INT32 px)
++{
++	if (px + 8 > nWsE1 && px < nWsE1 + 384) return 0;
++	return WsS1Col[fxU & 63] != fxU;
++}
++
++// etat d'une tuile : 1 = entierement transparente (ou hors des graphismes charges), 2 = entierement opaque, 0 = autre ;
++// nSize = 8, 16 ou 32. Les graphismes ne changent pas apres le chargement : petit cache direct par taille.
++#define WS_CACHE	4096
++static UINT32 *WsCacheTuile = NULL;					// [3][WS_CACHE] : adresse + 1 (0 = libre)
++static UINT8 *WsCacheEtat = NULL;
++static INT32 WsEtatCalcul(UINT32 nTile, INT32 nSize)
++{
++	if (nTile >= nCpsGfxLen) return 1;
++	const UINT8 *p = CpsGfx + nTile;
++	const INT32 nAdd = (nSize == 32) ? 16 : 8, nMots = (nSize == 8) ? 1 : (nSize >> 3);
++	UINT32 nOu = 0, nTrou = 0;
++	for (INT32 y = 0; y < nSize; y++, p += nAdd) {
++		for (INT32 i = 0; i < nMots; i++) {
++			const UINT32 w = ((const UINT32 *)p)[i];
++			nOu |= w;
++			nTrou |= (w - 0x11111111) & ~w & 0x88888888;			// un quartet nul (pixel transparent)
++		}
++	}
++	return (nOu == 0) ? 1 : (nTrou == 0) ? 2 : 0;
++}
++
++INT32 HsfaWsEtat(UINT32 nTile, INT32 nSize)
++{
++	nTile &= nCpsGfxMask;
++	if (WsCacheTuile == NULL) {
++		WsCacheTuile = (UINT32*)BurnMalloc(3 * WS_CACHE * sizeof(UINT32));
++		WsCacheEtat = (UINT8*)BurnMalloc(3 * WS_CACHE);
++		if (WsCacheTuile == NULL || WsCacheEtat == NULL) { BurnFree(WsCacheTuile); BurnFree(WsCacheEtat); WsCacheTuile = NULL; WsCacheEtat = NULL; return WsEtatCalcul(nTile, nSize); }
++		memset(WsCacheTuile, 0, 3 * WS_CACHE * sizeof(UINT32));
++	}
++	const INT32 k = (nSize == 8) ? 0 : (nSize == 16) ? 1 : 2;
++	const INT32 i = k * WS_CACHE + (((nTile >> (6 + k + (k == 2))) ^ (nTile >> 18)) & (WS_CACHE - 1));
++	if (WsCacheTuile[i] != nTile + 1) { WsCacheTuile[i] = nTile + 1; WsCacheEtat[i] = (UINT8)WsEtatCalcul(nTile, nSize); }
++	return WsCacheEtat[i];
++}
++
++// 1re colonne vide en partant de xs (colonne qui touche la fenetre 4:3) vers l'exterieur : vers la gauche pour les
++// passes impaires (bande gauche), vers la droite pour les paires ; pVide[x - xMin] pour xMin <= x <= xMax ;
++// HSFA_WS_AUCUN si aucune
++INT32 HsfaWsBord(const UINT8 *pVide, INT32 xMin, INT32 xMax, INT32 xs)
++{
++	if (xs < xMin) xs = xMin;
++	if (xs > xMax) xs = xMax;
++	if (nHsfaWsPasse & 1) { for (INT32 x = xs; x >= xMin; x--) if (pVide[x - xMin]) return x; }
++	else { for (INT32 x = xs; x <= xMax; x++) if (pVide[x - xMin]) return x; }
++	return HSFA_WS_AUCUN;
++}
++
++// rangee de tuiles posee aux lignes [y0, y0 + n) (bornees a la tranche et a l'ecran). Passe 3 / 4 : si bOpaque (toutes
++// les tuiles de la rangee qui touchent la bande sont opaques et dessinees par l'image), ses lignes sont couvertes.
++// Passe 1 / 2 : rend 1 si toutes ses lignes sont couvertes (le fond n'y serait pas vu : rien a dessiner).
++INT32 HsfaWsRangee(INT32 y0, INT32 n, INT32 bOpaque)
++{
++	INT32 a = y0, b = y0 + n;
++	if (a < nStartline) a = nStartline;
++	if (a < 0) a = 0;
++	if (b > nEndline) b = nEndline;
++	if (b > nCpsScreenHeight) b = nCpsScreenHeight;
++	if (b > 256) b = 256;
++	UINT8 *c = WsCouvert[(nHsfaWsPasse & 1) ? 0 : 1];
++	if (nHsfaWsPasse == 3 || nHsfaWsPasse == 4) {
++		if (bOpaque) for (INT32 y = a; y < b; y++) c[y] = 1;
++		return 1;
++	}
++	for (INT32 y = a; y < b; y++) if (!c[y]) return 0;
++	return 1;
++}
++
++void HsfaWsSortie()
++{
++	BurnFree(WsS1Copie); BurnFree(WsCacheTuile); BurnFree(WsCacheEtat);
++	WsS1Copie = NULL; WsCacheTuile = NULL; WsCacheEtat = NULL; bWsS1Init = 0; bHsfaWsS1Filtre = 0; bWsCombat = 0; nWsBande = 0;
++}
++#endif
+diff --git a/src/burn/drv/capcom/cps_scr.cpp b/src/burn/drv/capcom/cps_scr.cpp
+index 2f96179..d4fb35f 100644
+--- a/src/burn/drv/capcom/cps_scr.cpp
++++ b/src/burn/drv/capcom/cps_scr.cpp
+@@ -74,6 +74,89 @@ INT32 Cps1Scr1Draw(UINT8 *Base,INT32 sx,INT32 sy)
+   return 0;
+ }
+ 
++#ifdef HSFA_WS
++// (HSFA, patch 0022) fond des bandes du 16:9 (passes 1 / 2 de HsfaWsPasse, largeur d'ecran = bande) : par rangee de
++// tuiles, depuis la tuile qui touche la fenetre 4:3 et vers l'exterieur, la 1re colonne vide (tuile transparente, ou
++// colonne perimee de l'anneau scroll1) est le bord du decor du plan ; au-dela, chaque colonne recoit la tuile en miroir
++// de l'autre cote du bord (retournee en X ; option repetition : la derniere tuile du decor, non retournee).
++// La fenetre 4:3 (hors de [0, largeur)) n'est jamais touchee.
++#define WS_MAXT 72
++static inline UINT32 WsScr3Tuile(INT32 t)
++{
++	if (HsfaMode) t &= 0x3fff;
++	if (Xmcota && t >= 0x5800) t -= 0x4000;
++	else if (Ssf2t && t < 0x5600) t += 0x4000;
++	t <<= 9;
++	if (Cps2Turbo) t &= ~nCpsGfxScroll[3];
++	return t + nCpsGfxScroll[3];
++}
++
++static INT32 WsScrFond(UINT8 *Base, INT32 sx, INT32 sy, INT32 nTaille)
++{
++	const INT32 nLog = (nTaille == 8) ? 3 : 5, m = nTaille - 1;
++	const INT32 nXTile = nCpsScreenWidth >> nLog;
++	if (nXTile + 1 > WS_MAXT) return 1;
++	const INT32 bS1 = (nTaille == 8) && bHsfaWsS1Filtre;
++	const INT32 nIxU = (HsfaWsDivB(nHsfaWsS1U + nHsfaWsX0, 8)) + 1;	// scroll1 : colonne de monde de la tuile x = 0
++	INT32 ix = (sx >> nLog) + 1, iy = (sy >> nLog) + 1;
++	sx &= m; sx = nTaille - sx;
++	sy &= m;
++	const INT32 nLastY = (nEndline + sy) >> nLog, nFirstY = (nStartline + sy) >> nLog;
++	sy = nTaille - sy;
++	const INT32 xs = (nHsfaWsPasse & 1) ? HsfaWsDivB(nCpsScreenWidth - sx, nTaille) : HsfaWsDivB(-1 - sx, nTaille);
++	UINT8 Vide[WS_MAXT];
++
++	for (INT32 y = nFirstY - 1; y < nLastY; y++) {
++		const INT32 fy = iy + y;
++		#define WS_ENTREE(fx) ((UINT16 *)(Base + ((nTaille == 8) \
++			? ((((fy) & 0x20) << 8) | (((fx) & 0x3F) << 7) | (((fy) & 0x1F) << 2)) \
++			: ((((fy) & 0x38) << 8) | (((fx) & 0x3F) << 5) | (((fy) & 0x07) << 2))) ))
++		#define WS_TUILE(pst) ((nTaille == 8) ? (((UINT32)BURN_ENDIAN_SWAP_INT16((pst)[0]) << 6) + nCpsGfxScroll[1]) \
++			: WsScr3Tuile(BURN_ENDIAN_SWAP_INT16((pst)[0])))
++		const INT32 y0 = sy + (y << nLog);
++		if (nHsfaWsPasse == 3 || nHsfaWsPasse == 4) {				// couverture : rangee entierement opaque ?
++			INT32 bOpaque = 1;
++			for (INT32 x = -1; x < nXTile && bOpaque; x++) {
++				bOpaque = !(bS1 && HsfaWsS1Perime(nIxU + x, sx + (x << 3) + nHsfaWsX0)) && HsfaWsEtat(WS_TUILE(WS_ENTREE(ix + x)), nTaille) == 2;
++			}
++			HsfaWsRangee(y0, nTaille, bOpaque);
++			continue;
++		}
++		if (HsfaWsRangee(y0, nTaille, 0)) continue;					// lignes deja couvertes : le fond n'y serait pas vu
++		for (INT32 x = -1; x < nXTile; x++) {
++			Vide[x + 1] = (bS1 && HsfaWsS1Perime(nIxU + x, sx + (x << 3) + nHsfaWsX0)) || HsfaWsVide(WS_TUILE(WS_ENTREE(ix + x)), nTaille);
++		}
++		const INT32 wb = HsfaWsBord(Vide, -1, nXTile - 1, xs);
++		if (wb == HSFA_WS_AUCUN) continue;
++		{	// derniere tuile du decor (cote fenetre) opaque : bord coupe des donnees du decor, prolonge en passe 1 / 2 ; en
++			// partie transparente : silhouette (statue, arbre, lanterne), prolongee seulement en passe de secours 5 / 6,
++			// dessinee avant : elle ne se voit que la ou aucun bord coupe ne donne de decor
++			const INT32 d = (nHsfaWsPasse & 1) ? wb + 1 : wb - 1;
++			const INT32 bCoupe = !(bS1 && HsfaWsS1Perime(nIxU + d, sx + (d << 3) + nHsfaWsX0)) && HsfaWsEtat(WS_TUILE(WS_ENTREE(ix + d)), nTaille) == 2;
++			if (bCoupe == (nHsfaWsPasse >= 5)) continue;
++		}
++		for (INT32 x = -1; x < nXTile; x++) {
++			const INT32 s = HsfaWsSource(x, wb);
++			if (s == HSFA_WS_AUCUN) continue;
++			if ((s >= -1 && s < nXTile) ? Vide[s + 1] : (bS1 && HsfaWsS1Perime(nIxU + s, sx + (s << 3) + nHsfaWsX0))) continue;
++			UINT16 *pst = WS_ENTREE(ix + s);
++			if (!(s >= -1 && s < nXTile) && HsfaWsVide(WS_TUILE(pst), nTaille)) continue;	// source vide : rien a poser
++			const INT32 a = BURN_ENDIAN_SWAP_INT16(pst[1]);
++			CpstSetPal(((nTaille == 8) ? 0x20 : 0x60) | (a & 0x1F));
++			nCpstX = sx + (x << nLog);
++			nCpstY = y0;
++			nCpstTile = WS_TUILE(pst);
++			nCpstFlip = ((a >> 5) & 3) ^ ((nHsfaWsBords == 1) ? 0 : 1);
++			nCpstType = ((nTaille == 8) ? CTT_8X8 : CTT_32X32) | CTT_CARE;
++			CpstOneDoX[2]();
++		}
++		#undef WS_ENTREE
++		#undef WS_TUILE
++	}
++	return 0;
++}
++#endif
++
+ INT32 Cps2Scr1Draw(UINT8 *Base, INT32 sx, INT32 sy)
+ {
+ 	INT32 x, y;
+@@ -82,6 +165,10 @@ INT32 Cps2Scr1Draw(UINT8 *Base, INT32 sx, INT32 sy)
+ 	INT32 nKnowBlank = -1; // The tile we know is blank
+ 	INT32 nXTile = nCpsScreenWidth>>3; // 8x8 tiles
+ 
++#ifdef HSFA_WS
++	if (nHsfaWsPasse) return WsScrFond(Base, sx, sy, 8);	// (patch 0022) fond des bandes
++	const INT32 nWsIxU = HsfaWsDivB(nHsfaWsS1U, 8) + 1;		// (patch 0022) colonne de monde (deroulee) de la tuile x = 0
++#endif
+ 	ix = (sx >> 3) + 1;
+ 	sx &= 7;
+ 	sx = 8 - sx;
+@@ -102,6 +189,10 @@ INT32 Cps2Scr1Draw(UINT8 *Base, INT32 sx, INT32 sy)
+ 			INT32 fx, fy, p;
+ 			fx = ix + x;
+ 			fy = iy + y;								// 0 <= fx/fy <= 63
++#ifdef HSFA_WS
++			// (patch 0022) colonnes perimees de l'anneau scroll1 retirees des bandes du 16:9
++			if (bHsfaWsS1Filtre && HsfaWsS1Perime(nWsIxU + x, sx + (x << 3))) continue;
++#endif
+ 
+ 			// Find tile address
+ 			p = ((fy & 0x20) << 8) | ((fx & 0x3F) << 7) | ((fy & 0x1F) << 2);
+@@ -207,6 +298,9 @@ INT32 Cps2Scr3Draw(UINT8 *Base, INT32 sx, INT32 sy)
+ 	INT32 nKnowBlank = -1; // The tile we know is blank
+ 	INT32 nXTile = nCpsScreenWidth>>5; // 32x32 tiles
+ 
++#ifdef HSFA_WS
++	if (nHsfaWsPasse) return WsScrFond(Base, sx, sy, 32);	// (patch 0022) fond des bandes
++#endif
+ 	ix = (sx >> 5) + 1;
+ 	sx &= 31;
+ 	sx = 32 - sx;
+diff --git a/src/burn/drv/capcom/cpsrd.cpp b/src/burn/drv/capcom/cpsrd.cpp
+index af1fb80..ff29b43 100644
+--- a/src/burn/drv/capcom/cpsrd.cpp
++++ b/src/burn/drv/capcom/cpsrd.cpp
+@@ -216,6 +216,69 @@ INT32 Cps1rRender()
+   return 0;
+ }
+ 
++#ifdef HSFA_WS
++// (HSFA, patch 0022) fond des bandes du 16:9 pour scroll2 (meme regle que WsScrFond de cps_scr.cpp) ; avec le
++// defilement par ligne, les tuiles x = 0.. sont posees a (x << 4) + Rows[ligne] : le bord est cherche sur la ligne du
++// milieu de la rangee, et le miroir, pose avec les memes decalages de ligne, reste exact ligne par ligne.
++#define WS_MAXT2 144
++static void WsScr2Fond(INT32 y, struct CpsrLineInfo *pli)
++{
++	INT32 sx, ix, xMin, xMax, xs;
++	INT32 bRows = (pli->nWidth != 0);
++	UINT8 Vide[WS_MAXT2];
++	const INT32 sy = 16 - (nCpsrScrY & 15), iy = (nCpsrScrY >> 4) + 1;
++	if (bRows) {
++		ix = pli->nTileStart; sx = 0;
++		xMin = -1; xMax = pli->nTileEnd - pli->nTileStart;
++		const INT32 r = pli->Rows[8];
++		xs = (nHsfaWsPasse & 1) ? HsfaWsDivB(nCpsScreenWidth - r, 16) : HsfaWsDivB(-1 - r, 16);
++	} else {
++		sx = pli->nStart;
++		ix = (sx >> 4) + 1; sx &= 15; sx = 16 - sx;
++		xMin = -1; xMax = nXTiles - 1;
++		xs = (nHsfaWsPasse & 1) ? HsfaWsDivB(nCpsScreenWidth - sx, 16) : HsfaWsDivB(-1 - sx, 16);
++	}
++	if (xMax - xMin + 1 > WS_MAXT2) return;
++	if (nHsfaWsPasse == 3 || nHsfaWsPasse == 4) {						// couverture : rangee entierement opaque ?
++		INT32 bOpaque = 1;
++		for (INT32 x = xMin; x <= xMax && bOpaque; x++) {
++			UINT16 *pst = FindTile(ix + x, iy + y);
++			bOpaque = HsfaWsEtat(((UINT32)BURN_ENDIAN_SWAP_INT16(pst[0]) << 7) + nCpsGfxScroll[2], 16) == 2;
++		}
++		HsfaWsRangee(sy + (y << 4), 16, bOpaque);
++		return;
++	}
++	if (HsfaWsRangee(sy + (y << 4), 16, 0)) return;					// lignes deja couvertes
++	for (INT32 x = xMin; x <= xMax; x++) {
++		UINT16 *pst = FindTile(ix + x, iy + y);
++		Vide[x - xMin] = HsfaWsVide(((UINT32)BURN_ENDIAN_SWAP_INT16(pst[0]) << 7) + nCpsGfxScroll[2], 16);
++	}
++	const INT32 wb = HsfaWsBord(Vide, xMin, xMax, xs);
++	if (wb == HSFA_WS_AUCUN) return;
++	{	// derniere tuile du decor opaque (bord coupe : passe 1 / 2), sinon silhouette (passe de secours 5 / 6), voir cps_scr.cpp
++		UINT16 *pst = FindTile(ix + ((nHsfaWsPasse & 1) ? wb + 1 : wb - 1), iy + y);
++		const INT32 bCoupe = HsfaWsEtat(((UINT32)BURN_ENDIAN_SWAP_INT16(pst[0]) << 7) + nCpsGfxScroll[2], 16) == 2;
++		if (bCoupe == (nHsfaWsPasse >= 5)) return;
++	}
++	nCpstY = sy + (y << 4);
++	for (INT32 x = xMin; x <= xMax; x++) {
++		const INT32 s = HsfaWsSource(x, wb);
++		if (s == HSFA_WS_AUCUN) continue;
++		UINT16 *pst = FindTile(ix + s, iy + y);
++		if ((s >= xMin && s <= xMax) ? Vide[s - xMin] : HsfaWsVide(((UINT32)BURN_ENDIAN_SWAP_INT16(pst[0]) << 7) + nCpsGfxScroll[2], 16)) continue;
++		const INT32 a = BURN_ENDIAN_SWAP_INT16(pst[1]);
++		CpstSetPal(0x40 | (a & 0x1F));
++		nCpstX = bRows ? (x << 4) : sx + (x << 4);
++		nCpstTile = ((UINT32)BURN_ENDIAN_SWAP_INT16(pst[0]) << 7) + nCpsGfxScroll[2];
++		nCpstFlip = ((a >> 5) & 3) ^ ((nHsfaWsBords == 1) ? 0 : 1);
++		nCpstType = bRows ? (CTT_16X16 | CTT_ROWS | CTT_CARE) : (CTT_16X16 | CTT_CARE);
++		if (bRows) CpstRowShift = pli->Rows;
++		nCpstY = sy + (y << 4);
++		CpstOneDoX[2]();
++	}
++}
++#endif
++
+ INT32 Cps2rRender()
+ {
+ 	INT32 y;
+@@ -229,6 +292,9 @@ INT32 Cps2rRender()
+ 	nLastY = (nEndline + (nCpsrScrY & 15)) >> 4;
+ 	nFirstY = (nStartline + (nCpsrScrY & 15)) >> 4;
+ 	for (y = nFirstY - 1, pli = CpsrLineInfo + nFirstY; y < nLastY; y++, pli++) {
++#ifdef HSFA_WS
++		if (nHsfaWsPasse) { WsScr2Fond(y, pli); continue; }	// (patch 0022) fond des bandes du 16:9
++#endif
+ 
+ 		bVCare = ((y << 4) < nStartline) | (((y << 4) + 16) >= nEndline);
+ 
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 2fd59b2..b09b391 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15603,11 +15603,17 @@ STD_ROM_PICK(Sfa3hahsfa)
+ STD_ROM_FN(Sfa3hahsfa)
+ 
+ // Variante widescreen (coeur fbneo_hsfaws, -DHSFA_WS) : memes noms de pilotes et memes archives, image elargie a
+-// 448x224 (16:9). Le decor existe au-dela des 384 px ; FBNeo recentre plans et objets (nCpsGlobalXOffset = 32).
++// 512x224 (16:9). Le decor existe au-dela des 384 px ; FBNeo recentre plans et objets (nCpsGlobalXOffset = 64).
+ #ifdef HSFA_WS
+-#define HSFA_SCRW	448
+-#define HSFA_ASPX	16
+-#define HSFA_ASPY	9
++// (HSFA, patch 0022) 512 x 224 = 16:9 exact aux pixels de l'arcade (384 px <-> 4:3, donc 16/9 x 288) : plus d'etirement.
++// L'ancienne image de 448 px (14:9 aux pixels arcade) est le format 14:9 de l'option "Screen format" (rognage
++// centre, identique au pixel). HSFA_WS_W permet une autre largeur aux essais (ex. -DHSFA_WS_W=448).
++#ifndef HSFA_WS_W
++#define HSFA_WS_W	512
++#endif
++#define HSFA_SCRW	HSFA_WS_W
++#define HSFA_ASPX	HSFA_WS_W				// rapport W / 288 (512 -> 16:9)
++#define HSFA_ASPY	288
+ #define HSFA_SUFFIXE	", 16:9"
+ #else
+ #define HSFA_SCRW	384
+diff --git a/src/burner/libretro/libretro.cpp b/src/burner/libretro/libretro.cpp
+index 15edc8a..ac8d0fa 100644
+--- a/src/burner/libretro/libretro.cpp
++++ b/src/burner/libretro/libretro.cpp
+@@ -363,17 +363,20 @@ void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
+ 
+ #if defined(HSFA_CORE) && defined(HSFA_WS)
+ // (HSFA, patch 0012) "Screen format (fill height)" : largeur montree = format x 224 / forme du pixel arcade
+-// (384 px <-> 4:3, donc format x 288), paire, plafonnee a la largeur du jeu (448) ; rognage centre a la sortie video,
+-// geometrie libretro au format choisi. 14:9 = 448 px entiers aux pixels arcade. Off : image entiere, aspect du pilote
+-// (16:9, pixels 14 % plus larges que l'arcade).
++// (384 px <-> 4:3, donc format x 288), paire, plafonnee a la largeur du jeu (512 depuis le patch 0022) ; rognage centre
++// a la sortie video, geometrie libretro au format choisi. Off = 16:9 = 512 px aux pixels arcade ; 14:9 = 448 px
++// (l'ancienne image du coeur 16:9, maintenant aux pixels arcade). La largeur montree est passee au rendu
++// (nHsfaWsVisible, patch 0022) : rien n'est calcule pour les bords rognes.
++extern INT32 nHsfaWsVisible;
+ static void HsfaFormat(INT32 *pW, INT32 *pAx, INT32 *pAy)
+ {
+ 	static const INT32 F[7][2] = { { 0, 0 }, { 4, 3 }, { 3, 2 }, { 14, 9 }, { 16, 10 }, { 5, 3 }, { 16, 9 } };
+ 	*pW = nGameWidth;
++	nHsfaWsVisible = 0;
+ 	const char *nom = (nBurnDrvActive != ~0U) ? BurnDrvGetTextA(DRV_NAME) : NULL;
+ 	if (nHsfaFormat < 1 || nHsfaFormat > 6 || nom == NULL || strstr(nom, "hsfa") == NULL) return;
+ 	INT32 w = (F[nHsfaFormat][0] * 288 / F[nHsfaFormat][1]) & ~1;
+-	if (w < nGameWidth) *pW = w;
++	if (w < nGameWidth) *pW = nHsfaWsVisible = w;
+ 	*pAx = F[nHsfaFormat][0]; *pAy = F[nHsfaFormat][1];
+ }
+ #endif
+diff --git a/src/burner/libretro/retro_common.cpp b/src/burner/libretro/retro_common.cpp
+index e61a9bb..6ed6e68 100644
+--- a/src/burner/libretro/retro_common.cpp
++++ b/src/burner/libretro/retro_common.cpp
+@@ -102,7 +102,7 @@ static struct retro_core_option_v2_definition var_fbneo_hsfa_format = {
+ 	"fbneo-hsfa-format",
+ 	"Screen format (fill height)",
+ 	NULL,
+-	"HSFA widescreen: the picture fills the height of a screen narrower than 16:9, both sides are cropped (centered), arcade pixel shape. 14:9 = full 448 px with arcade pixels (narrow bars on a 16:9 screen). Off = full 448 px stretched to 16:9 (pixels 14 % wider than arcade).",
++	"HSFA widescreen: the picture fills the height of a screen narrower than 16:9, both sides are cropped (centered), arcade pixel shape. Off = 16:9 = full 512 px with arcade pixels (no stretch). 14:9 = 448 px (the former widescreen picture, now at arcade pixel shape).",
+ 	NULL,
+ 	"video",
+ 	{
+@@ -118,6 +118,23 @@ static struct retro_core_option_v2_definition var_fbneo_hsfa_format = {
+ 	"off"
+ };
+ UINT32 nHsfaFormat = 0;								// 0 = off, 1..6 = 4:3, 3:2, 14:9, 16:10, 5:3, 16:9
++// (HSFA, patch 0022) bords du 16:9 : ce que montrent les bandes ou le decor n'existe pas (butees de camera, plans lents)
++static struct retro_core_option_v2_definition var_fbneo_hsfa_ws_bords = {
++	"fbneo-hsfa-ws-edges",
++	"Widescreen edges",
++	NULL,
++	"HSFA widescreen: what the side bands show where the stage has no art beyond the arcade 4:3 view (camera at the end of the stage, slow background planes), in fights. Mirror = each stage plane is continued as its mirror image at the edge of its art, tile by tile (characters and effects are not mirrored). Repeat = the last tile of art is repeated. Black = black (stale columns of the game removed). Raw = the picture drawn by the game (black and stale columns, like the former 448 px core). Outside fights (menus, VS, quotes, CONTINUE, endings: 384 px screens) the bands are black, except in Raw. The 4:3 view is never changed.",
++	NULL,
++	"video",
++	{
++		{ "mirror", "Mirror" },
++		{ "repeat", "Repeat" },
++		{ "black",  "Black" },
++		{ "raw",    "Raw" },
++		{ NULL,     NULL },
++	},
++	"mirror"
++};
+ #endif
+ static struct retro_core_option_v2_definition var_fbneo_vertical_mode = {
+ 	"fbneo-vertical-mode",
+@@ -1058,6 +1075,7 @@ void set_environment()
+ 	vars_systems.push_back(&var_fbneo_allow_depth_32);
+ #if defined(HSFA_CORE) && defined(HSFA_WS)
+ 	vars_systems.push_back(&var_fbneo_hsfa_format);	// (patch 0012)
++	vars_systems.push_back(&var_fbneo_hsfa_ws_bords);	// (patch 0022)
+ #endif
+ 
+ 	var_fbneo_vertical_mode.desc                           = RETRO_VERTICAL_CAT_DESC;
+@@ -1616,6 +1634,14 @@ void check_variables(void)
+ 		nHsfaFormat = 0;
+ 		for (UINT32 i = 1; i < 7; i++) if (strcmp(var.value, f[i]) == 0) nHsfaFormat = i;
+ 	}
++	var.key = var_fbneo_hsfa_ws_bords.key;			// (patch 0022)
++	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
++	{
++		extern INT32 nHsfaWsBords;
++		static const char *const b[] = { "mirror", "repeat", "black", "raw" };
++		nHsfaWsBords = 0;
++		for (INT32 i = 1; i < 4; i++) if (strcmp(var.value, b[i]) == 0) nHsfaWsBords = i;
++	}
+ #endif
+ 
+ 	var.key = var_fbneo_vertical_mode.key;
+-- 
+2.53.0
+

@@ -18,7 +18,13 @@ L = open(B + "/carte.txt").read().splitlines()
 for p in act:
     i = int(p, 16); n = 3800 + i
     L = [l for l in L if l.split()[:2] != ["perso", str(i)]] + ["perso %d %d" % (i, n)]
-    shutil.copy(os.path.join(os.path.expanduser(os.environ.get("SFA3MAX_CACHE", "~/.cache/sfa3max")), "fork", "pl%s_hx.bin" % P[p]["suffixe"]), B + "/f%d.bin" % n)
+    src_ = os.path.join(os.path.expanduser(os.environ.get("SFA3MAX_CACHE", "~/.cache/sfa3max")), "fork", "pl%s_hx.bin" % P[p]["suffixe"])
+    # (2b30, R30 bis) table résolue par hud_apercu_max (tuiles efct.pac neuves 0x40000000|j -> max_plus_gfx) si le perso en a
+    MP = os.path.join(I, os.environ.get("MAX_DIR", "prep"), "max_plus.json")
+    EF = json.load(open(MP)).get("efct", {}) if os.path.exists(MP) else {}
+    for e_ in EF.values():
+        if e_["pl"] == "pl" + P[p]["suffixe"]: src_ = os.path.join(I, os.environ.get("MAX_DIR", "prep"), e_["table"]); print("banque %s : %s" % (p, src_))
+    shutil.copy(src_, B + "/f%d.bin" % n)
 open(B + "/carte.txt", "w").write("\n".join(L) + "\n")
 print("banques : " + ", ".join("perso %d -> %d" % (int(p, 16), 3800 + int(p, 16)) for p in act))
 PY

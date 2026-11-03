@@ -38,6 +38,8 @@ Raspberry Pi 3B; launching from Recalbox's game list does not work yet, load the
 Prefer the PS2 game itself? Two ISO patchers (all unlocked, native 16:9) are described
 [below](#playing-the-anthology-on-ps2--pcsx2).
 
+**Credits**: everyone whose work HSFA builds on, in [CREDITS.md](CREDITS.md).
+
 ## What HSFA is
 
 *Street Fighter Alpha Anthology* (PS2, `SLUS-21317`, CRC `72CE7A78`) does not emulate the arcade boards. Its games

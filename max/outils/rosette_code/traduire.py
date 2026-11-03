@@ -63,6 +63,8 @@ try:
     API.update({int(p, 16): int(o, 16) for p, o in _AP.get("fonction", {}).items()})
     GLOB.update({int(p, 16): int(o, 16) for p, o in _AP.get("globale", {}).items()})
 except FileNotFoundError: pass
+# (2026-11-01, Q32) FAUX, retiré de GLOB : 0x39CA67 = drapeau d'une image (pas de K.O. pour ce joueur pendant cette image,
+# effacé par 0x249A4), posé par 0x24C04 au départ des provocations ; $10B(A5) arcade = PSP 0x818303 (psp_cfb34).
 # (2026-10-07) rosette Ryu : 0x39CA67 (structure d'état PSP +0x87) = $10B(A5) « pose de victoire terminée », un bit par
 # joueur ; arcade : 2 BSET Dn,$10B(A5) par perso (Ryu 0x3415C/0x341DC), lu une fois (0xA0F8) ; PSP : 0x24C04 seul
 # écrivain, appelé 2 fois par Ryu.
@@ -94,7 +96,7 @@ for _p in range(0x2B0, 0x2C0): HORS.setdefault(_p, _p + 0x10)
 BOUTONS = {0x370 + 2 * _k for _k in range(8)} | {0x371 + 2 * _k for _k in range(8)}
 def conv_boutons(c):
     return (c & 0xF) | ((c & 0x70) << 8) | ((c & 0x380) << 1) | (c & ~0x3FF & 0xFFFF0000)
-GLOB.update({0x39CA67: 0x10B, 0xA3E7C2: 0x6EB8, 0xA3E7C3: 0x6EB9, 0xA3E7C4: 0x6EBC, 0xA3E7C5: 0x6EBA, 0xA3E7C6: 0x6EBB})   # + compteurs des réservoirs (types)
+GLOB.update({0xA3E7C2: 0x6EB8, 0xA3E7C3: 0x6EB9, 0xA3E7C4: 0x6EBC, 0xA3E7C5: 0x6EBA, 0xA3E7C6: 0x6EBB})   # + compteurs des réservoirs (types)
 SON = {0x6a3cc}                                  # son du PSP (table 0x217FD8 + pilote audio) : pas d'équivalent direct
 # champs PROPRES À MAX : 0xAA -> $3F0, 0x1EA -> $3F2 (dans HORS_MAX) logés en fin de structure (HSFA : jamais écrits en combat ;
                                              # code arcade : aucun accès d(An) à $3F0-$3F3). ⚠ $380-$397 est pris (MOVEM 0x6EFD2)

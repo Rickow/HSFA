@@ -58,13 +58,16 @@ psp_cfd9c:
 
 ; ---- psp_cfb6c (15 appels) — charger le pas n (D1) d'une table de petits pas d'objet fils (D0 = TAB_xxxxxx, format
 ; « pas8 » converti en pas 68K de 20 o, boîtes A/B/C à zéro : ⚠ à vérifier pour les projectiles).
+; (2026-11-01, Q31) PSP : 0xCFB6C -> 0x1D96C = POSE MINIMALE ($1C, $32-$35), comme l'arcade $1B6EE. Était « jmp $2A770 »
+; (chargement du JOUEUR : $8C, $C8, $C4, $3C/$3D, son) : sur un objet fils de $80 o, ces écritures tombaient dans l'objet
+; SUIVANT (masque de Vega décalé, retours 2b29). Banc PSP : les objets fils ne passent que par 0x1D96C / 0x1D9B0.
 psp_cfb6c:
         movea.l d0, a0
         andi.w  #$ff, d1                ; index = octet NON signé (appelants PSP : lbu ou constantes 5..$1E ; relevé agent_integration_max, 2026-10-17)
         add.w   d1, d1
         add.w   d1, d1
         movea.l 0(a0,d1.w), a0
-        jmp     $2a770.l
+        jmp     $1b6ee.l                ; PSP 0x1D96C : $1C <- pas, $32 <- 4 premiers octets
 
 ; ---- psp_1d9b0 (19 appels, Ingrid) / psp_cfde0 (18 appels) — avancer l'animation (variantes PSP des formats pas8 /
 ; table explicite ; reprise par écart signé) = avance arcade, la reprise étant portée par le pointeur après le dernier pas.
@@ -79,13 +82,51 @@ psp_1da64:
         jmp     $1b6ee.l
 .rien:  rts
 
-psp_1d9b0:
 psp_cfde0:
         jmp     $2a7ea.l
 
-; ---- psp_cfb90 (20 appels) — comme psp_cfec8 mais pour les objets à petits pas (même corps une fois convertis).
+; ---- psp_1d9b0 — (2026-11-01, Q31) avance des PETITS PAS (objets fils) : comme l'arcade $2A7EA (pas 68K de 20 o
+; convertis : suivant à +$14, saut par le long en +$14 si l'octet 1 est négatif, fin = bit 6 de l'octet 1), mais la pose
+; du pas suivant est la pose MINIMALE ($1B6EE = PSP 0x1D96C) : ni $8C, $C4-$CB, $3C/$3D, ni son (champs du joueur, hors
+; d'un objet de $80 o). Était partagée avec psp_cfde0 (« jmp $2A7EA »).
+psp_1d9b0:
+        subq.b  #1, $32(a6)
+        bne.s   .reste
+        movea.l $1c(a6), a0
+        move.b  1(a0), d0
+        beq.s   .suivant
+        bmi.s   .saut
+        btst    #6, d0
+        bne.s   .fin
+.suivant:
+        lea     $14(a0), a0
+        jmp     $1b6ee.l
+.saut:  movea.l $14(a0), a0
+        jmp     $1b6ee.l
+.fin:   st      $33(a6)
+.reste: cmpi.b  #1, $32(a6)
+        bne.s   .x
+        movea.l $1c(a6), a0
+        btst    #6, 1(a0)
+        beq.s   .x
+        st      $33(a6)
+.x:     rts
+
+; ---- psp_cfb90 (20 appels) — comme psp_cfec8 mais pour les objets à petits pas. (2026-11-01, Q31) PSP : 0xCFB90 avance
+; par 0x1D9B0 (avance minimale), pas par l'avance du joueur : était « bra psp_cfec8 » ($2A7EA, débordement sur l'objet suivant).
 psp_cfb90:
-        bra     psp_cfec8
+        movea.l $1c(a6), a0
+        btst    #6, 1(a0)
+        bne.s   .fin
+        bsr     psp_1d9b0
+        bra.s   .retour
+.fin:   move.b  #$ff, $33(a6)
+.retour:
+        moveq   #0, d0
+        tst.b   $33(a6)
+        bpl.s   .x
+        moveq   #-128, d0
+.x:     rts
 
 ; ---- FICHES (pas encore portées : dépendent d'un point ouvert)
 ; psp_1ef54 (14) : allocation d'un objet dans le réservoir d'EFFETS (42 places, compteur global 0xA4E7C6) ; a0 = type,
@@ -307,13 +348,14 @@ TAB_SONS_CLES:
         dc.l    84, -1
 
 
-; ---- psp_24c04 (3 appels : Eagle, Maki, Yun) — « pose de victoire terminée » : bit du joueur ($101) dans $10B(A5)
-; (PSP : octet 0x39CA67 de la structure d'état). ROSETTE RYU : l'arcade fait BSET $101,$10B(A5) deux fois par perso
-; (fin des deux poses de victoire, Ryu 0x3415C/0x341DC, Ken 0x35C68/0x35CE8…), le moteur l'attend en 0xA0F8 ; le PSP
-; passe par 0x24C04, seul écrivain, appelé 2 fois par Ryu (0xEAD1C, 0xEB0E0).
+; ---- psp_24c04 (4 appels : provocation d'Eagle, Maki, Yun, Ingrid) — (2026-11-01, Q32) NEUTRALISÉE : ce n'est PAS
+; « pose de victoire terminée ». PSP : bit du joueur (0x151) dans 0x39CA67, drapeau d'UNE image : 0x249A4 (tour de manche)
+; saute la détection de K.O. (0x24AF4) des joueurs marqués puis l'efface à chaque passage (0x24AD0 ; mesuré au banc PSP :
+; posé par la provocation de Yun en 0x24C20, effacé dans la même image). Posé au départ des provocations ; pas
+; d'équivalent arcade. Le vrai $10B(A5) arcade (« pose de victoire terminée ») est PSP 0x818303, posé par psp_cfb34
+; (fin des poses de victoire des MAX, déjà traduit). L'ancienne traduction (BSET $101,$10B(A5)) posait ce drapeau en
+; plein combat : fin de manche suivante sans attendre la pose du vainqueur, morceaux et fondus en avance.
 psp_24c04:
-        move.b  $101(a6), d0
-        bset    d0, $10b(a5)
         rts
 
 ; ---- psp_cfbf4 (4 appels : Eagle 1, Yun 3) — « l'objet est-il à l'écran ? » : D0 = 1 si 0 <= X écran + $40 < $200.
@@ -332,7 +374,20 @@ psp_cfbf4:
 
 ; ---- psp_79f88 (1 appel, Yun) — charger le petit pas n (D0) de la table d'objets fils PSP 0x220120 (désignée dans la
 ; fonction moteur elle-même), convertie dans tables_explicites_yun.s (TAB_220120).
+; (2026-11-02, Q30) seul appelant : l'objet fils de Yun (psp_1c0414, script 71 = onde au sol du QCB+P), dont les frames
+; viennent du pac COMMUN efct.pac (492-498, converties après les frames de Yun). Palette mesurée au banc PSP : palette
+; commune « blanc -> cyan -> bleu », tracé opaque = palette d'objets CPS2 $19 de l'arcade (bloc $33BB14 chargé en
+; $90C2A0 ; vérifié au banc Upper MAX : $90C320). L'objet a copié $C / $D de Yun (palette relative au perso) : les
+; émetteurs arcade prennent $D comme palette ABSOLUE quand $C > 0 ($C < 0 : $D + palette de la frame ; 0 : celle de la frame).
+; (2026-11-03, Q34) onde dessinée DEVANT Yun (retour 2b30) : l'objet (réservoir d'effets, enveloppe EFFET_W de
+; l'intégration = classe d'affichage $10) s'inscrit dans la sous-liste choisie par l'octet $9 (arcade $1B5F8 ; Upper $19ED0,
+; octet image $8) ; laissé à 0 : liste $6EC8, dessinée APRÈS les joueurs (Upper $2C45A : $2C5C8 après $2C4DE). Sous-liste
+; 4 = liste $6ECA, dessinée juste AVANT les joueurs ($2C5F0) : l'onde passe derrière Yun et son adversaire (banc Upper
+; max51, image $8 de l'objet forcée à 4 : jambes de Yun devant l'onde). Conversion : type « objet $9 1 u8 -> image $8 » requis.
 psp_79f88:
+        move.b  #4, $9(a6)
+        move.b  #1, $c(a6)
+        move.b  #$19, $d(a6)
         move.w  d0, d1
         move.l  #TAB_220120, d0
         bra     psp_cfb6c
