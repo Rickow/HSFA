@@ -32,6 +32,17 @@ MOD = {'ro3': dict(out=OUT, perso=0x59C0B0, n=0x20, commun=254, decor=256, n_sit
        'ro9': dict(out="<workspace>/work/mame_ro9/banques", perso=0x5AF1B0, n=0x80, commun=545, decor=546,
                    n_site=0, b32=548)}[MODULE]
 OUT = MOD['out']
+# (ciel_ryu) BANQUES_OUT : dossier de sortie des tables (essais hors du dossier partage)
+OUT = os.environ.get("BANQUES_OUT") or OUT
+# (ciel_ryu, OBJ_MIROIR) tuiles d'objets que le portage range RETOURNEES : sans correspondance exacte dans la ROM
+# d'arcade mais egales au miroir X / Y / XY d'une tuile de la ROM. Sans cela la table les laisse VIDES et le banc les
+# RETIRE (trous dans les objets de SFA3). OBJ_MIROIR=1 : entree = code | DRAPEAU de retournement (bit 29 = X, bit 30 = Y)
+# que le pilote XORe dans l'attribut de la tuile (bits 5-6) ; un pilote qui ignore les bits hauts affiche la tuile
+# NON retournee. (v157) Defaut 1 : le pilote lit le drapeau (cps_hsfa.cpp, patch FBNeo 0024 ; banc_sprites.lua) ;
+# OBJ_MIROIR=0 : tables d'origine (v154) a l'octet. SFA3 seul (MODULE=ro3) : Upper / Hyper ajoutent les tuiles absentes
+# a l'identique en ROM etendue (hsfa_gfx.py) et gardent leurs tables a l'octet.
+OBJ_MIROIR = os.environ.get("OBJ_MIROIR", "1") == "1" and MODULE == 'ro3'
+MIR_X, MIR_Y = 0x20000000, 0x40000000
 
 _INDEX = None
 def index_rom():
@@ -74,6 +85,14 @@ def table(n):
             nxt = cand.get(m + 1)
             v = next((x for x in c if nxt and x + 1 in nxt), c[0])
         t[m] = v; prev = v
+    if OBJ_MIROIR:
+        for k, m, px in anthgfx.tiles(buf):
+            if k != 1 or px is None or t[m] != VIDE: continue
+            px = px.astype(np.uint8)
+            if (px == 15).all(): continue
+            for drap, q in ((MIR_X, px[:, ::-1]), (MIR_Y, px[::-1, :]), (MIR_X | MIR_Y, px[::-1, ::-1])):
+                c = idx.get(np.ascontiguousarray(q).tobytes())
+                if c: t[m] = c[0] | drap; break
     return t, None
 
 _INDEX32 = None
@@ -134,6 +153,18 @@ def plans256():
                 nxt = cand[m + 1] if m + 1 < n else None
                 v = next((y for y in c if nxt and y + 1 in nxt), c[0])
             t[m] = v; prev = v
+        if nom == "plan1" and MODULE == 'ro3':
+            # (v157, S1_MIROIR ; ciel_ryu) tuiles scroll1 que le portage range en MIROIR (ciel de Ryu $00 / $2E...) :
+            # plan1[L] = tuile de la ROM dont le retournement T est la tuile du portage ; le traducteur (mame_test.py)
+            # XORe T dans les attributs des super-tuiles. S1_MIROIR=0 : table d'origine (v154) a l'octet.
+            import s1_miroir as S1M
+            if S1M.ACTIF:
+                res = S1M.corrige_plan1(t, px, S, idx)
+                for L, T, k, d in res:
+                    if k is None: print("!! plan1 : local %04x (miroir %02x) SANS tuile dans la ROM" % (L, T))
+                print("plan1 : %d tuiles en miroir du portage (S1_MIROIR), %d par la liste, %d par recherche, %d absentes"
+                      % (len(res), sum(d == "liste" for *_, d in res), sum(d == "recherche" for *_, d in res),
+                         sum(d == "absente" for *_, d in res)))
         t.astype('<u4').tofile(os.path.join(OUT, nom + ".bin"))
         print("%s : %d tuiles, %d trouvees" % (nom, n, int((t != VIDE).sum())))
 

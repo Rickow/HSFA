@@ -5482,3 +5482,67 @@ Alpha Counter = artefact du banc.
   $19 ; objets fils en pose / avance minimales : masque de Vega, 0 débordement ; provocation : 0x39CA67 = drapeau d'une
   image). R33 : l'écart du Sunshine niv. 2 d'Ingrid était une image de ralentissement du 68000 (tour de jeu $FF851C
   arrêté), pas une régression ; le banc des données d'images doit compter en tours de jeu, ralentissements à part.
+
+### 199. SFA3 : tuiles rangées en miroir par le portage (traducteur v157, patch 0024)
+
+- **Défaut** (agent ciel_ryu, `work/ciel_ryu/RAPPORT.md`) : les tables qui relient une tuile LOCALE du portage à la ROM
+  graphique de la borne (banques.py : `plan1` pour scroll1, `f<N>` pour les objets) n'apparient que le contenu
+  **exact**. Le portage range certaines tuiles **retournées** : elles n'avaient pas d'entrée.
+  - scroll1 : le pilote gardait le code local brut, c'est-à-dire une AUTRE tuile de la ROM, retournée. Résultat : les
+    traînées du ciel de Ryu (`$00` / `$2E`, 59 cellules) et 156 cellules sur 18 décors.
+  - objets : la tuile était retirée. Il manquait 1 084 tuiles non vides pendant 17 parties Arcade, par exemple les
+    jambes de Dhalsim dans l'intro.
+  - Upper, Upper MAX, Hyper et la greffe ne sont pas concernés : leurs tuiles absentes sont ajoutées telles quelles en
+    ROM étendue.
+- **Traducteur v157** (= v154 + S1_MIROIR + OBJ_MIROIR, actifs par défaut, SFA3 seul). v155 / v156 sont des étiquettes
+  des branches de réorganisation.
+  - `S1_MIROIR` : mame_test.py XORe le retournement dans les 95 cases de super-tuiles scroll1 des 21 locaux
+    (`s1_miroir.py`). banques.py `plans` écrit plan1[L] = la tuile de la ROM dont le retournement est la tuile du
+    portage. La table est contrôlée sur les deux moitiés dans la ROM employée ; la liste est confirmée sur la ROM
+    d'arcade et sur la ROM reconstruite depuis l'ISO. La correction suit donc toute chaîne qui écrit plan1.bin,
+    `hsfa_build.py` compris.
+  - `OBJ_MIROIR` : une entrée d'objet vaut `code | bit 29 (X) / bit 30 (Y)` (1 311 entrées dans 44 tables avec la ROM
+    d'arcade, 418 dans 9 tables avec la ROM reconstruite depuis l'ISO).
+  - `=0` : v154 à l'octet.
+- **Empreintes** :
+  - SFA3 : `sz3ud.03c` `e0f1cfdc` inchangé, `sz3.05c` `effc7536` → `eaec4f67`, plan1 (atelier) `cdda604e` →
+    `e46651da`.
+  - Upper `0b8ecca2` et Hyper `b8e699cf` : identiques à v154, tous fichiers et toutes tables.
+  - Références : `work/references/v157`.
+- **Cœur FBNeo, patch 0024** (`HsfaEclater`) : le code est masqué sur 20 bits et le drapeau est XORé dans l'attribut
+  de la tuile émise. Même lecture dans `banc_sprites.lua`. Aucune table des zips existants n'a ces bits, donc la
+  sortie est la même qu'avant.
+- **Bancs** :
+  - nonreg SFA3 : 3 × aucune exception, 42 / 0.
+  - 32 fins finies (manches et captures identiques au passage ro3b de ciel_ryu, à ±1 capture de l'arcade).
+  - Tuiles d'objets retirées en jeu (32 parties) : X / Y / XY 0 (v154 : 595 distinctes). Il reste 489 tuiles dont le
+    contenu n'existe dans la ROM ni à l'identique ni en miroir. Elles sont dans les fichiers de fin f405 / f407 /
+    f409 / f410 (et f280), et la ROM reconstruite depuis l'ISO ne les contient pas non plus : autre cause, à étudier.
+  - Cœur 0024 contre le 06/11, zips en service (Upper, Upper MAX, Hyper, greffe, SFA3 ; 4:3 On / Off, 16:9 défaut,
+    x86 aux drapeaux ARM) : **25/25 identiques** (images, journaux, son).
+  - FBNeo, zip construit depuis l'ISO : jambes de Dhalsim affichées (image 1190) ; ciel de `$00` sans traînées.
+- **Livraisons** :
+  - zip SFA3 depuis l'ISO (`hsfa_build.py`) : md5 `345ead54`, CRC `05901E3F`.
+  - cœurs du 07/11 (0001-0024, arbre `590e367`) : `work/livraison_coeurs_2026-11-07`.
+  - Il faut le zip v157 avec un cœur 0024 : un ancien cœur affiche ces tuiles sans les retourner.
+
+### 200. Greffe ro9a26 → ro9a28 ; vrai 16:9 calé (0023) ; SFA3 tuiles en miroir (v157, 0024) ; décors SFA1 / SFA2 préparés
+
+- **Greffe** : ro9a26 (portraits de la sélection, portrait de victoire de Shin Akuma en couleur 2, libellé du classement :
+  pictos du GAME OVER et champ du pseudo), ro9a27 (fin de Zangief, carré gris de la carte), ro9a28 intermédiaire (fin de
+  Sagat : routine d'Upper 0x2046C0 écartée → 50 acteurs de fin). Ouverts : Ryu et sa boule dans la scène de Bison (la
+  routine 0x20E410 lit la table d'animation dans T_619B50 d'Upper, pointeur faux pour Bison : renvoyer l'acteur vers la
+  table d'animation d'Hyper), fin de Ken (bateau blanc ; Upper 0x27ED9C écrit sa palette), losanges magenta du générique
+  de Zangief ALPHA (déjà dans ro9a27). Aperçu des palettes à la sélection laissé de côté (décision du porteur).
+- **Cœur** : 0023 « Stage-locked view » par défaut (idée de cps2recomp, sans code repris) : aux bouts de l'arène, décor,
+  persos et effets glissent, le HUD reste centré (séparé par plage de codes / emplacement 1) ; jeu inchangé. 0024 :
+  tuiles d'objets de SFA3 rangées en miroir par le portage (1 311 tuiles retirées, ex. jambes de Dhalsim dans l'intro).
+- **SFA3, traducteur v157** : S1_MIROIR (tuiles de scroll1 rangées en miroir par la PS2 : 156 cellules sur 18 décors, dont
+  les traînées du ciel de Ryu) ; correction faite dans `banques.py` pour qu'elle vaille aussi depuis l'ISO. Reste : 489
+  tuiles d'objets des fins absentes de la ROM d'arcade (piste : les ajouter telles quelles, comme Upper).
+- **Décors SFA1 / SFA2 préparés** (atelier `decors_sfa1/`, `decors_sfa2_iso/`) : extraction depuis l'ISO (ro1 ; ro2, ro4 /
+  ro6 identiques à l'écran), contrôles contre MAME ; animations de SFA1 localisées (9 tables, comptage en tics : 8 tics
+  pour 7 images). Index : espaces `ro1`, `ro2` (+ `ro4`, `ro6`, `ro8`). Options de construction décidées : décors SF2
+  (ROM SSF2T) et persos MAX (ISO PSP) seulement si le joueur les fournit.
+- **Upper MAX** : 2b31 (onde de Yun derrière ses jambes). Banc des données d'images en tours de jeu : derniers écarts
+  natifs ou de mesure.

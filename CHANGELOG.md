@@ -4,6 +4,17 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Le 
 version : les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
 
+## v0.1.5 (2026-11-07)
+
+- **Vrai 16:9** (patchs 0022-0023) : le cœur 16:9 dessine 512 × 224 au rapport exact (l'ancien 448 px était étiré de
+  ~14 %) ; aux bouts de l'arène, où le décor peint s'arrête, la vue se cale sur le décor (« Stage-locked view », par
+  défaut) : décor, persos et effets glissent, le HUD reste centré, le jeu ne change pas. Option « Widescreen edges » :
+  mirror / repeat / black / raw ; « Screen format » 14:9 = ancien rendu 448.
+- **SFA3** (traducteur v157 + patch 0024) : tuiles rangées en miroir par le portage PS2 et perdues à la conversion :
+  ciel du décor de Ryu (traînées) et 155 autres cases sur 18 décors, 1 311 tuiles de sprites (ex. jambes de Dhalsim
+  dans l'intro). Reconstruire SFA3 ; Upper et Hyper inchangés.
+- Crédits (`CREDITS.md`).
+
 ## v0.1.4 (2026-11-04)
 
 - Cœurs plus rapides (patchs 0019-0021c) : option « Skip idle loops (faster) », activée par défaut, qui saute les

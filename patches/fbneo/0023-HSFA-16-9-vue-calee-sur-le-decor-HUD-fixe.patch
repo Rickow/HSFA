@@ -1,0 +1,348 @@
+From 0d4a03d6e3357cdf03e999c128281a638512d54d Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Tue, 3 Nov 2026 10:11:56 +0100
+Subject: [PATCH] HSFA: "Stage-locked view" widescreen edges (default): the
+ view slides to the stage ends, HUD stays centered
+
+At the ends of a stage the arcade camera stops (scroll2 X = 0 / $180 on every
+stage of the 5 games) and the stage art ends at the edge of the 4:3 view, so
+the 64 px side bands of the 512 px picture had little real art there (21 to
+32 % of the bands had to be invented by the mirror of patch 0022).
+
+- New value of "Widescreen edges" (fbneo-hsfa-ws-edges): "stage"
+  (Stage-locked view), now the default; mirror / repeat / black / raw kept.
+  The game is unchanged (logic, camera, memory, sound). In fights the 4:3
+  game view is no longer always centered: with m the shown band width,
+  x = m in the middle of the camera course, x = camera near the left end
+  (camera < m), x = camera - $180 + 2m near the right end, so the picture
+  stays on the painted stage. x follows the camera, so it never jumps
+  unless the camera does. Out of fights: centered, as before.
+- Stage planes and scene sprites (characters, shadows, effects, stage
+  sprites) are moved together: nCpsGlobalXOffset = x while drawing, sprites
+  get the difference (nHsfaWsObjDx); their 10-bit X is read in [-256, 768)
+  of the screen so that sprites of the right band beyond 512 do not wrap.
+- The HUD stays centered (HsfaWsHud), measured on games of the 5 modules
+  (screen-fixed while the camera moves) and checked with HUD-only /
+  HUD-less renders: SFA3, system graphics (codes $16000-$19FFF); Upper,
+  Upper MAX, Hyper, graft: sprites of list slot 1 (table plan2, system
+  graphics), marked by HsfaEclater with bit 12 of the Y word (unused after
+  the conversion; under HSFA_WS); all games: palette $1D, and palette $1E
+  with codes $02xxx / $3Exxx / $3Fxxx (K.O., PERFECT, ROUND n banners).
+  Life bars, timer, portraits, names, gauges (whole Hyper P2 gauge), GO!,
+  combo texts, SUPER, isms stay in place.
+- What is still missing (slow planes narrower than the picture, stale
+  scroll1 columns, shorter rows): mirror of patch 0022, on bands of any
+  width (0 to 2m). HSFA_WS_REPLI=black: black instead (tests).
+- scroll1 (all modes but raw): a slow plane kept still in the 512 px ring
+  also holds columns that the arcade never shows at any camera position
+  (SFA3 $00: 461 px of sky and 51 px of other tiles, seen as an orange
+  block at the left of the picture). In the bands a column is now shown
+  only if the game rewrote it, if it was already seen in the 4:3 view, or
+  if it lies in the range the view covers over the whole camera course
+  (scroll1 X = a + k x camera, k measured once the camera moved 48 px,
+  kept for the stage $FF8100; automatic scrolling: no restriction).
+- Measured (camera forced to both ends and to the middle, all stages of SFA3
+  and Upper, 4 Hyper, 5 Upper MAX, 3 graft): share of the bands without
+  real art (ends and middle), centered 0022 -> stage-locked: SFA3 21 -> 5 %,
+  Upper 21 -> 7 %, Upper MAX 32 -> 15 %, Hyper 32 -> 26 %, graft 32 -> 12 %.
+- Checks: 4:3 core unchanged (all under HSFA_WS); 14:9 + raw = former
+  448 px core to the pixel; mirror / black / repeat: 4:3 view unchanged
+  (bands: scroll1 filter); stage-locked view without the HUD: 4:3 view
+  identical to the 4:3 core, only moved (252 captures, all stages); logs
+  and sound identical; Skip idle loops On and Off. Cost: same as mirror
+  within the noise of the test machine.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps.h            |  14 ++++
+ src/burn/drv/capcom/cps_hsfa.cpp     | 101 ++++++++++++++++++++++++---
+ src/burn/drv/capcom/cps_obj.cpp      |  10 +++
+ src/burn/drv/capcom/cps_scr.cpp      |   2 +-
+ src/burn/drv/capcom/cpsrd.cpp        |   2 +-
+ src/burner/libretro/retro_common.cpp |   8 ++-
+ 6 files changed, 124 insertions(+), 13 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index d897a1e..cdc4d49 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -573,6 +573,20 @@ extern INT32 nHsfaWsPasse;								// 0 = image ; 1 / 2 = fond de la bande gauche
+ 														// 3 / 4 = lignes couvertes par un plan opaque, gauche / droite ;
+ 														// 5 / 6 = fond de secours (plans a bord en silhouette)
+ extern INT32 bHsfaWsS1Filtre, nHsfaWsS1U, nHsfaWsX0;	// scroll1 : colonnes perimees de l'anneau retirees des bandes
++// (HSFA, patch 0023) vue calee sur le decor : en combat, la fenetre 4:3 est posee a x = nCpsGlobalXOffset (0 a 2 x la
++// marge) le temps du dessin ; les objets de la scene (decalage X pris a la lecture de la liste) recoivent l'ecart
++// nHsfaWsObjDx, pas ceux du HUD
++extern INT32 nHsfaWsCale, nHsfaWsObjDx;
++// objet du HUD (barres, chrono, jauges, portraits, noms, textes GO! / combos / SUPER / K.O. / PERFECT...), releve sur
++// les 5 jeux (fixe a l'ecran quand la camera bouge) : SFA3, graphismes systeme (codes $16000-$19FFF) ; Upper, Upper MAX,
++// Hyper, greffe : objet de l'emplacement 1 (table plan2 : graphismes systeme), marque par HsfaEclater (bit 12 du mot Y,
++// libre apres la conversion) ; dans les 5 jeux, palette $1D, et palette $1E avec un code $02xxx, $3Exxx ou $3Fxxx (textes et bandeaux
++// d'annonce : K.O., PERFECT, ROUND n...)
++static inline INT32 HsfaWsHud(UINT32 n, INT32 nPal, UINT32 nY)
++{
++	if ((HsfaMode == 1) ? (n - 0x16000 < 0x4000) : ((nY & 0x1000) != 0)) return 1;
++	return nPal == 0x1D || (nPal == 0x1E && ((n >> 12) == 0x02 || (n >> 13) == 0x1F));
++}
+ #define HSFA_WS_AUCUN	(-0x10000)
+ void HsfaWsAvantDessin();
+ void HsfaWsApresDessin();
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index bd7ad62..ae92075 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -395,6 +395,9 @@ static UINT16 HsfaEclater(UINT32 nPage, UINT32 nFin, UINT32 nCourante)
+ 						// (patch 0010) bit 12 = objet marque (melange), garde avec la priorite
+ 						Out[n * 4 + 0] = (UINT16)((((x & 0x3ff) + 16 * nxs) & 0x3ff) | (x & 0xf000) | (((g >> 18) & 3) << 10));
+ 						Out[n * 4 + 1] = (UINT16)((((y & 0x3ff) + 16 * nys) & 0x3ff) | (((g >> 16) & 3) << 13));
++#ifdef HSFA_WS
++						if (((y >> 13) & 7) == 1) Out[n * 4 + 1] |= 0x1000;	// (patch 0023) emplacement 1 (graphismes systeme : HUD)
++#endif
+ 						Out[n * 4 + 2] = (UINT16)(g & 0xffff);
+ 						Out[n * 4 + 3] = (UINT16)(at & 0x00ff);
+ 						n++;
+@@ -1781,6 +1784,17 @@ INT32 nHsfaWsX0 = 0;								// pendant une passe de fond : 1re colonne de l'imag
+ static UINT8 WsCouvert[2][256];						// lignes de chaque bande couvertes par un plan opaque (passes 3 / 4)
+ static INT32 bWsCombat = 0, bWsS1Init = 0, nWsS1Prec = 0, nWsE1 = 0, nWsBande = 0;
+ static UINT32 nWsS1Base = 0;
++static INT32 nWsS1Track = 0;							// (patch 0023) suivi de l'anneau, repere de la fenetre centree
++// (patch 0023) colonnes de scroll1 jamais recomposees par le jeu (plan lent fixe dans l'anneau) : l'anneau de 512 px
++// contient aussi des colonnes que la borne ne montre a aucune position de camera (ex. SFA3 $00 : ciel de 461 px, 51 px
++// d'autres tuiles). Une colonne n'est montree dans les bandes que si le jeu l'a recomposee, si elle a deja ete vue dans
++// la fenetre 4:3, ou si elle est dans l'etendue que la fenetre parcourt sur toute la course de la camera (scroll1 X =
++// a + k x camera, k mesure des que la camera a bouge de 48 px, garde pour le decor $FF8100 ; plan a defilement
++// automatique : pas de restriction).
++static UINT8 WsS1Ok[64];
++static INT32 nWsBase = 0;							// nCpsGlobalXOffset du pilote (fenetre centree), retabli apres le dessin
++static INT32 nWsKDecor = -1, nWsK = 0, bWsK = 0, bWsAuto = 0, nWsKCam0 = 0, nWsKU0 = 0, nWsKCamPrec = 0, nWsAutoN = 0;
++static INT32 nWsExtG = 0, nWsExtD = 0, bWsExt = 0, nWsS1D = 0;	// etendue parcourue (repere deroule du suivi) quand k est connu
+ static INT32 WsS1Col[64];							// colonne de monde (deroulee) ecrite dans chaque colonne de l'anneau
+ static UINT8 *WsS1Copie = NULL;						// copie de la tilemap scroll1 (detection des colonnes reecrites)
+ 
+@@ -1804,34 +1818,86 @@ static void WsS1Suivi()
+ 	UINT32 nOff = ((UINT32)RdW(CpsSaveReg[0] + 0x02) << 8) & 0xffc000;
+ 	UINT8 *Base = CpsFindGfxRam(nOff, 0x4000);
+ 	if (Base == NULL) { bWsS1Init = 0; return; }
+-	INT32 sx = (INT32)RdW(CpsSaveReg[0] + 0x0c) + 0x40 - nCpsGlobalXOffset + CpsLayer1XOffs;
++	INT32 sx = (INT32)RdW(CpsSaveReg[0] + 0x0c) + 0x40 - nCpsGlobalXOffset + CpsLayer1XOffs;	// fenetre centree
+ 	if (!bWsS1Init || nOff != nWsS1Base) {
+-		nHsfaWsS1U = sx;
+-		for (INT32 c = 0; c < 64; c++) WsS1Col[c] = WsS1Monde(c, nHsfaWsS1U, 0);
++		nWsS1Track = sx;
++		for (INT32 c = 0; c < 64; c++) WsS1Col[c] = WsS1Monde(c, nWsS1Track, 0);
++		memset(WsS1Ok, 0, sizeof(WsS1Ok)); nWsS1D = 0;
++		nWsKCam0 = nWsKCamPrec = (INT16)RdW(CpsSaveReg[0] + 0x10); nWsKU0 = sx; nWsAutoN = 0;
+ 		memcpy(WsS1Copie, Base, 0x4000);
+ 		nWsS1Base = nOff; bWsS1Init = 1;
+ 	} else {
+ 		INT32 d = (sx - nWsS1Prec) & 0x1ff;
+ 		if (d >= 0x100) d -= 0x200;
+-		nHsfaWsS1U += d;
++		nWsS1Track += d; nWsS1D = d;
+ 		INT32 nBiais = (d > 0) ? 32 : (d < 0) ? -32 : 0;
+ 		for (INT32 c = 0; c < 64; c++) {
+ 			UINT8 *a = Base + (c << 7), *b = Base + 0x2000 + (c << 7);
+ 			if (memcmp(a, WsS1Copie + (c << 7), 128) || memcmp(b, WsS1Copie + 0x2000 + (c << 7), 128)) {
+-				WsS1Col[c] = WsS1Monde(c, nHsfaWsS1U, nBiais);
++				WsS1Col[c] = WsS1Monde(c, nWsS1Track, nBiais); WsS1Ok[c] = 1;
+ 				memcpy(WsS1Copie + (c << 7), a, 128); memcpy(WsS1Copie + 0x2000 + (c << 7), b, 128);
+ 			}
+ 		}
+ 	}
+ 	nWsS1Prec = sx;
++	{	// (patch 0023) colonnes vues dans la fenetre 4:3 ; pente k de scroll1 par rapport a la camera ; etendue parcourue
++		const INT32 nCam = (INT16)RdW(CpsSaveReg[0] + 0x10), Pw = nWsS1Track + nWsBase;
++		for (INT32 w = HsfaWsDivB(Pw, 8); w <= HsfaWsDivB(Pw + 383, 8); w++) if (WsS1Col[w & 63] == w) WsS1Ok[w & 63] = 1;
++		const INT32 nDecor = RamW(0xFF8100) | (nOff & 0xffff0000);
++		if (nDecor != nWsKDecor) { nWsKDecor = nDecor; bWsK = 0; bWsAuto = 0; nWsKCam0 = nCam; nWsKU0 = nWsS1Track; nWsAutoN = 0; }
++		if (nCam == nWsKCamPrec && nWsS1D != 0 && ++nWsAutoN >= 8) bWsAuto = 1;		// scroll1 bouge seul : automatique
++		nWsKCamPrec = nCam;
++		if (!bWsAuto) {
++			if (nCam - nWsKCam0 >= 48 || nCam - nWsKCam0 <= -48) {
++				nWsK = (INT32)(((INT64)(nWsS1Track - nWsKU0) << 16) / (nCam - nWsKCam0)); bWsK = 1;
++			}
++		}
++		bWsExt = bWsK && !bWsAuto;
++		if (bWsExt) {
++			nWsExtG = Pw - (INT32)(((INT64)nWsK * nCam) >> 16);
++			nWsExtD = Pw + 384 + (INT32)(((INT64)nWsK * (0x180 - nCam)) >> 16);
++		}
++	}
++	nHsfaWsS1U = nWsS1Track;							// repere de dessin (fenetre centree)
+ 	bHsfaWsS1Filtre = 1;
+ }
+ 
++// --------------------------------------------------------------------------------------------------------------
++// (HSFA, patch 0023) vue calee sur le decor (option "Widescreen edges" = "Stage-locked view", par defaut ; nHsfaWsCale).
++// Le jeu est inchange (logique, camera, memoire) ; en combat, la fenetre de jeu 4:3 n'est plus toujours au centre de
++// l'image : pres d'un bout de l'arene, elle glisse vers ce bout (jusqu'a toute la marge) et l'image reste sur le decor
++// peint. La camera (scroll2 X, butees 0 et $180 dans tous les decors des 5 jeux) donne sa position x = o + sv : marge
++// montree m de chaque cote, sv = m au milieu de la course, sv = camera pres de la butee gauche (camera < m),
++// sv = camera - $180 + 2m pres de la butee droite ; sv suit la camera, sans saut tant que la camera n'en fait pas.
++// Plans et objets de la scene (persos, ombres, effets, objets de decor) sont deplaces ensemble (nCpsGlobalXOffset =
++// position le temps du dessin, nHsfaWsObjDx pour les objets) ; le HUD (objets de graphismes systeme, HsfaWsHud : barres,
++// chrono, portraits, noms, jauges, textes) reste a sa place, fenetre 4:3 au centre. Sans le HUD, la fenetre 4:3 est
++// identique au pixel a celle du coeur 4:3, seule sa position change. Ce qui reste sans decor (plans lents plus etroits
++// que l'image, colonnes de scroll1 perimees ou jamais montrees, rangees plus courtes) : miroir du patch 0022 dans les
++// bandes, de largeur quelconque (HSFA_WS_REPLI=black : noir, pour les essais). Hors combat : comme avant (centre).
++INT32 nHsfaWsCale = 1;
++INT32 nHsfaWsObjDx = 0;
++static INT32 nWsRepli = -1;
++
++// position de la fenetre 4:3 (vue calee) ; appele en combat seulement
++static void WsCale()
++{
++	const INT32 m = nWsBande, o = nWsBase - nWsBande;					// marge montree ; 1re colonne montree
++	const INT32 nCam = (INT16)RdW(CpsSaveReg[0] + 0x10);				// scroll2 X : 0 a $180 (butees)
++	INT32 sv = m;
++	if (nCam < m) sv = (nCam > 0) ? nCam : 0;
++	else if (nCam > 0x180 - m) sv = (nCam - 0x180 + 2 * m < 2 * m) ? nCam - 0x180 + 2 * m : 2 * m;
++	nWsE1 = o + sv; nCpsGlobalXOffset = nWsE1; nHsfaWsObjDx = nWsE1 - nWsBase;
++}
++
+ // appele apres l'effacement de l'image, avant les plans et les objets
+ void HsfaWsAvantDessin()
+ {
+ 	bHsfaWsS1Filtre = 0;
+-	nWsE1 = nCpsGlobalXOffset; nWsBande = 0;
++	nWsBase = nCpsGlobalXOffset;
++	nWsE1 = nWsBase; nWsBande = 0;
++	nHsfaWsObjDx = 0;
++	if (nWsRepli < 0) { const char *e = getenv("HSFA_WS_REPLI"); nWsRepli = (e && strcmp(e, "black") == 0) ? 1 : 0; }
+ 	if (HsfaMode && nWsE1 > 0 && nHsfaWsBords != 3) {
+ 		INT32 v = (nHsfaWsVisible > 0 && nHsfaWsVisible < nCpsScreenWidth) ? nHsfaWsVisible : nCpsScreenWidth;
+ 		nWsBande = (v - 384) / 2;									// largeur montree de chaque bande
+@@ -1840,6 +1906,20 @@ void HsfaWsAvantDessin()
+ 	bWsCombat = nWsBande > 0 && HsfaWsEnCombat();
+ 	if (!bWsCombat) { bWsS1Init = 0; return; }
+ 	WsS1Suivi();
++	if (nHsfaWsCale) {
++		WsCale();
++		nHsfaWsS1U += nWsBase - nWsE1;								// repere de dessin de scroll1 (fenetre deplacee)
++		if (nWsRepli) return;
++		const INT32 o = nWsBase - nWsBande, wg = nWsE1 - o, wd = o + 384 + 2 * nWsBande - (nWsE1 + 384);
++		memset(WsCouvert, 0, sizeof(WsCouvert));
++		if (wg > 0) HsfaWsPasse(3, o, wg);							// memes passes que le miroir, sur des bandes de
++		if (wd > 0) HsfaWsPasse(4, nWsE1 + 384, wd);				// largeur quelconque (0 a 2 x la marge)
++		if (wg > 0) HsfaWsPasse(5, o, wg);
++		if (wd > 0) HsfaWsPasse(6, nWsE1 + 384, wd);
++		if (wg > 0) HsfaWsPasse(1, o, wg);
++		if (wd > 0) HsfaWsPasse(2, nWsE1 + 384, wd);
++		return;
++	}
+ 	if (nHsfaWsBords <= 1) {										// miroir / repetition : fond des deux bandes
+ 		INT32 w = (nWsBande + 31) & ~31;
+ 		if (w > (nWsE1 & ~31)) w = nWsE1 & ~31;
+@@ -1855,9 +1935,12 @@ void HsfaWsAvantDessin()
+ 	}
+ }
+ 
+-// appele apres les plans et les objets : hors combat, bandes noires (ecrans de 384 px)
++// appele apres les plans et les objets : hors combat, bandes noires (ecrans de 384 px) ; vue calee : fenetre remise au
++// centre pour la suite
+ void HsfaWsApresDessin()
+ {
++	if (nWsBande > 0) nCpsGlobalXOffset = nWsBase;				// (patch 0023) fenetre remise au centre
++	nHsfaWsObjDx = 0;
+ 	if (nWsBande <= 0 || bWsCombat || pBurnDraw == NULL) return;
+ 	const INT32 nE2 = nWsE1 + 384, nD = nCpsScreenWidth - nE2;
+ 	for (INT32 y = 0; y < nCpsScreenHeight; y++) {
+@@ -1872,7 +1955,9 @@ void HsfaWsApresDessin()
+ INT32 HsfaWsS1Perime(INT32 fxU, INT32 px)
+ {
+ 	if (px + 8 > nWsE1 && px < nWsE1 + 384) return 0;
+-	return WsS1Col[fxU & 63] != fxU;
++	if (WsS1Col[fxU & 63] != fxU) return 1;
++	if (WsS1Ok[fxU & 63] || bWsAuto) return 0;									// (patch 0023)
++	return !(bWsExt && 8 * fxU >= nWsExtG - 4 && 8 * fxU + 8 <= nWsExtD + 4);
+ }
+ 
+ // etat d'une tuile : 1 = entierement transparente (ou hors des graphismes charges), 2 = entierement opaque, 0 = autre ;
+diff --git a/src/burn/drv/capcom/cps_obj.cpp b/src/burn/drv/capcom/cps_obj.cpp
+index e063094..887427e 100644
+--- a/src/burn/drv/capcom/cps_obj.cpp
++++ b/src/burn/drv/capcom/cps_obj.cpp
+@@ -435,6 +435,16 @@ INT32 Cps2ObjDraw(INT32 nLevelFrom, INT32 nLevelTo)
+ 		if (HsfaMode == 2) {
+ 			n |= (BURN_ENDIAN_SWAP_INT16(ps[0]) & 0x0c00) << 8;	// HSFA : bits 18-19 du code = bits 10-11 de X
+ 		}
++#ifdef HSFA_WS
++		if (nHsfaWsObjDx && !HsfaWsHud(n, a & 0x1F, BURN_ENDIAN_SWAP_INT16(ps[1]))) {
++			// (HSFA, patch 0023) vue calee : la scene (persos, effets, objets de decor) suit la fenetre de jeu deplacee de
++			// nHsfaWsObjDx ; le HUD reste a sa place (fenetre 4:3 au centre). X sur 10 bits relu dans [-256, 768) de l'ecran
++			// (objets de 256 px au plus) au lieu de [-512, 512), sinon les objets de la bande droite au-dela de 512
++			// (fenetre a gauche) reviendraient a gauche, hors de l'ecran
++			x += nHsfaWsObjDx;
++			x = ((x + 256) & 0x3FF) - 256;
++		}
++#endif
+ 		
+ 		// Find the palette for the tiles on this sprite
+ 		CpstPal = CpsPal + ((a & 0x1F) << 4);
+diff --git a/src/burn/drv/capcom/cps_scr.cpp b/src/burn/drv/capcom/cps_scr.cpp
+index d4fb35f..b52b478 100644
+--- a/src/burn/drv/capcom/cps_scr.cpp
++++ b/src/burn/drv/capcom/cps_scr.cpp
+@@ -94,7 +94,7 @@ static inline UINT32 WsScr3Tuile(INT32 t)
+ static INT32 WsScrFond(UINT8 *Base, INT32 sx, INT32 sy, INT32 nTaille)
+ {
+ 	const INT32 nLog = (nTaille == 8) ? 3 : 5, m = nTaille - 1;
+-	const INT32 nXTile = nCpsScreenWidth >> nLog;
++	const INT32 nXTile = (nCpsScreenWidth + m) >> nLog;				// (patch 0023) bande de largeur quelconque
+ 	if (nXTile + 1 > WS_MAXT) return 1;
+ 	const INT32 bS1 = (nTaille == 8) && bHsfaWsS1Filtre;
+ 	const INT32 nIxU = (HsfaWsDivB(nHsfaWsS1U + nHsfaWsX0, 8)) + 1;	// scroll1 : colonne de monde de la tuile x = 0
+diff --git a/src/burn/drv/capcom/cpsrd.cpp b/src/burn/drv/capcom/cpsrd.cpp
+index ff29b43..cbebe48 100644
+--- a/src/burn/drv/capcom/cpsrd.cpp
++++ b/src/burn/drv/capcom/cpsrd.cpp
+@@ -235,7 +235,7 @@ static void WsScr2Fond(INT32 y, struct CpsrLineInfo *pli)
+ 	} else {
+ 		sx = pli->nStart;
+ 		ix = (sx >> 4) + 1; sx &= 15; sx = 16 - sx;
+-		xMin = -1; xMax = nXTiles - 1;
++		xMin = -1; xMax = ((nCpsScreenWidth + 15) >> 4) - 1;			// (patch 0023) bande de largeur quelconque
+ 		xs = (nHsfaWsPasse & 1) ? HsfaWsDivB(nCpsScreenWidth - sx, 16) : HsfaWsDivB(-1 - sx, 16);
+ 	}
+ 	if (xMax - xMin + 1 > WS_MAXT2) return;
+diff --git a/src/burner/libretro/retro_common.cpp b/src/burner/libretro/retro_common.cpp
+index 6ed6e68..fc1b26a 100644
+--- a/src/burner/libretro/retro_common.cpp
++++ b/src/burner/libretro/retro_common.cpp
+@@ -123,17 +123,18 @@ static struct retro_core_option_v2_definition var_fbneo_hsfa_ws_bords = {
+ 	"fbneo-hsfa-ws-edges",
+ 	"Widescreen edges",
+ 	NULL,
+-	"HSFA widescreen: what the side bands show where the stage has no art beyond the arcade 4:3 view (camera at the end of the stage, slow background planes), in fights. Mirror = each stage plane is continued as its mirror image at the edge of its art, tile by tile (characters and effects are not mirrored). Repeat = the last tile of art is repeated. Black = black (stale columns of the game removed). Raw = the picture drawn by the game (black and stale columns, like the former 448 px core). Outside fights (menus, VS, quotes, CONTINUE, endings: 384 px screens) the bands are black, except in Raw. The 4:3 view is never changed.",
++	"HSFA widescreen: what the side bands show where the stage has no art beyond the arcade 4:3 view (camera at the end of the stage, slow background planes), in fights. Stage-locked view = near an end of the stage, the stage, characters and effects slide towards that end (up to the whole band) so that the picture stays on the painted stage, while the HUD stays centered; the game itself is unchanged (same camera, same picture); what is still missing (slow background planes) is mirrored. Mirror = each stage plane is continued as its mirror image at the edge of its art, tile by tile (characters and effects are not mirrored). Repeat = the last tile of art is repeated. Black = black (stale columns of the game removed). Raw = the picture drawn by the game (black and stale columns, like the former 448 px core). Outside fights (menus, VS, quotes, CONTINUE, endings: 384 px screens) the bands are black, except in Raw. The 4:3 view is never changed (Stage-locked view: only moved, HUD excepted).",
+ 	NULL,
+ 	"video",
+ 	{
++		{ "stage",  "Stage-locked view" },
+ 		{ "mirror", "Mirror" },
+ 		{ "repeat", "Repeat" },
+ 		{ "black",  "Black" },
+ 		{ "raw",    "Raw" },
+ 		{ NULL,     NULL },
+ 	},
+-	"mirror"
++	"stage"
+ };
+ #endif
+ static struct retro_core_option_v2_definition var_fbneo_vertical_mode = {
+@@ -1637,10 +1638,11 @@ void check_variables(void)
+ 	var.key = var_fbneo_hsfa_ws_bords.key;			// (patch 0022)
+ 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+ 	{
+-		extern INT32 nHsfaWsBords;
++		extern INT32 nHsfaWsBords, nHsfaWsCale;
+ 		static const char *const b[] = { "mirror", "repeat", "black", "raw" };
+ 		nHsfaWsBords = 0;
+ 		for (INT32 i = 1; i < 4; i++) if (strcmp(var.value, b[i]) == 0) nHsfaWsBords = i;
++		nHsfaWsCale = (strcmp(var.value, "stage") == 0);	// (patch 0023) vue calee sur le decor (bords restants : miroir)
+ 	}
+ #endif
+ 
+-- 
+2.53.0
+

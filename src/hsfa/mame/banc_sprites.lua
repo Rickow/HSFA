@@ -139,12 +139,14 @@ local function eclater(page, fin, adr_courante)
         local cx = fx and (nx - 1 - nxs) or nxs
         local cy = fy and (ny - 1 - nys) or nys
         local g = global(t, code + cx + 16 * cy)
+        local fl = 0      -- (v157, OBJ_MIROIR ; patch FBNeo 0024) tuile rangee en miroir : bit 29 = X, bit 30 = Y
+        if g then fl = (g >> 24) & 0x60; g = g & 0xFFFFF end
         if g then
           -- (HANDOFF §116) code de tuile sur 20 bits : bits 16-17 -> Y 13-14 ; bits 18-19 -> X 10-11 (fork sfa3hx,
           -- ROM graphique etendue ; le bit 15 de Y reste le marqueur de fin)
           out[#out + 1] = {((x & 0x3ff) + 16 * nxs) & 0x3ff | (x & 0xe000) | (((g >> 18) & 3) << 10),
                            ((y & 0x3ff) + 16 * nys) & 0x3ff | (((g >> 16) & 3) << 13),
-                           g & 0xffff, at & 0x00ff}
+                           g & 0xffff, (at ~ fl) & 0x00ff}
         else STATS.retires = STATS.retires + 1
           if RETSTAT then local c = string.format("e%d c=%04x at=%04x x=%03x y=%03x", (y >> 13) & 7, code, at, x & 0x3ff, y & 0x3ff); RETSTAT[c] = (RETSTAT[c] or 0) + 1 end
         end

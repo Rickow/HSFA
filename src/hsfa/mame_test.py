@@ -681,6 +681,16 @@ def main():
         # (agent_ro9) liste des blocs externes pour banc_mem_liste.lua (banc_mem.lua ne connait que des bases fixes)
         exts = sorted(["%06x" % b_ for b_ in AN.FIXES.values()] + (["%06x" % T.DATA_EXT] if T.DATA_SPLIT else []) + EXT_PLUS)
         open(os.path.join(W, "ext_liste.txt"), "w").write("\n".join(exts) + "\n")
+    if MODULE == 'ro3':
+        # (ciel_ryu, S1_MIROIR ; v157) tuiles scroll1 rangees en miroir par le portage : attributs des super-tuiles ici ;
+        # les entrees de plan1 sont ecrites par banques.py plans256 (tables de l'atelier et de hsfa_build.py)
+        import s1_miroir as S1M
+        if S1M.ACTIF:
+            faits = S1M.corrige_image(img, T._addr_to_68k)
+            with open(os.path.join(W, "s1_miroir.txt"), "w") as f:
+                for o, c, a, b in faits: f.write("%06x local %04x attr %04x -> %04x\n" % (o, c, a, b))
+            print("tuiles scroll1 en miroir du portage : %d cases de super-tuiles retournees (S1_MIROIR ; plan1 : banques.py plans)"
+                  % len(faits))
     sw = bytes(b for i in range(0, len(img), 2) for b in (img[i+1], img[i]))
     out = os.path.join(W, P['sortie'], "sfa3ud"); os.makedirs(out, exist_ok=True)
     names = ["sz3ud.03c", "sz3ud.04c", "sz3.05c", "sz3.06c", "sz3.07c", "sz3.08c", "sz3.09c", "sz3.10b"]

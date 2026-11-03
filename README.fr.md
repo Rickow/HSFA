@@ -8,12 +8,12 @@
 > `SLUS-21317`). Pas dans cette release : **Upper MAX** (les quatre persos de SFA3 MAX) et la **greffe du mode
 > Arcade** sur Hyper.
 
-1. **Télécharger les cœurs** depuis la page des [releases](../../releases) : `hsfa-v0.1.4-cores-<plateforme>.zip` pour
+1. **Télécharger les cœurs** depuis la page des [releases](../../releases) : `hsfa-v0.1.5-cores-<plateforme>.zip` pour
    Android (arm64), ROCKNIX (aarch64 : RGB10X, R36S…), Windows (x64), Linux (x86_64) ou Recalbox 10 (Raspberry Pi ;
    essayé sur un Pi 3B). Chaque archive contient le
    cœur 4:3 (`fbneo_hsfa`) et le cœur 16:9 (`fbneo_hsfaws`), avec leur licence.
 2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes). Le plus simple : télécharger
-   `hsfa-v0.1.4-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
+   `hsfa-v0.1.5-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
    double-cliquer sur **`construire.bat`** (Windows, expérimental : pas encore testé) et lui donner votre ISO. Il prépare
    Python, regarde si ffmpeg est là et construit les trois jeux dans `sortie/archives/`. À la main :
    ```bash
@@ -67,7 +67,7 @@ Ils tournent dans deux environnements :
 
 > **Reprendre le projet** (personne ou agent) : lire [AGENTS.md](AGENTS.md), qui condense règles, méthode, acquis et chantiers, tenu à jour à chaque découverte.
 
-## État (2026-11-04, release v0.1.4)
+## État (2026-11-07, release v0.1.5)
 
 **Ce qui marche**
 
@@ -77,7 +77,7 @@ Ils tournent dans deux environnements :
 | Upper (`ro5`) | jouable de bout en bout, **40/40 fins** ; ROM son hybride (musiques de SFA3 + voix d'Upper) ; les musiques qui n'existent qu'en flux sur le disque sont rangées dans le zip en Ogg Vorbis | [§122-§128](docs/journal/HANDOFF.md), [FLUX](docs/rapports/FLUX.md) |
 | Hyper (`ro9`) | VERSUS sans exception (tournée de 151 combats) ; les supers des versions ZERO / ZERO 2 / ALPHA ne plantent plus ; jauge de super et TRAINING corrigés ; musiques ZERO / ZERO 2 / ALPHA dans le zip (Ogg Vorbis) ; voix SFA1 / SFA2 par version, rejouées sur un 2ᵉ QSound, quand la table du rejeu est là (voir plus bas) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
 | Menus | OPTION et EXIT ramènent au menu des modes ; les réglages de l'écran d'options PS2 (difficulté, dégâts, chrono, vitesse, manches) sont des options du cœur | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
-| Cœur FBNeo HSFA | Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, essayé sur un Pi 3B) ; option « Blood » (sang rouge, non censuré, par défaut) ; option « Skip idle loops » (v0.1.4, activée par défaut : 33 à 41 % de calcul en moins par image, même résultat) ; 4:3 et 16:9 (avec « Screen format (fill height) » pour les écrans de 4:3 à 16:10) ; ombres transparentes comme sur PSP ; provocation sur Select en combat ; persos cachés d'Upper (v0.1.2 : Start tenu + un bouton sur Akuma / Balrog pour Shin Akuma / EX Balrog, Pièce pour la roulette) ; essayé par l'utilisateur sur RG477M et RGB10X | [patchs](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
+| Cœur FBNeo HSFA | Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, essayé sur un Pi 3B) ; option « Blood » (sang rouge, non censuré, par défaut) ; option « Skip idle loops » (activée par défaut : 33 à 41 % de calcul en moins par image, même résultat) ; vrai 16:9 (v0.1.5 : 512 × 224, rapport exact, vue calée sur le décor aux bouts de l'arène, HUD centré) ; 4:3 et 16:9 (avec « Screen format (fill height) » pour les écrans de 4:3 à 16:10) ; ombres transparentes comme sur PSP ; provocation sur Select en combat ; persos cachés d'Upper (v0.1.2 : Start tenu + un bouton sur Akuma / Balrog pour Shin Akuma / EX Balrog, Pièce pour la roulette) ; essayé par l'utilisateur sur RG477M et RGB10X | [patchs](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
 | Construction depuis l'ISO | `hsfa_build.py` construit les trois jeux depuis votre ISO seule ; ROM programme identiques (md5) aux archives officielles v154 (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `b8e699cf` avec la table du rejeu) ; zips identiques d'une construction à l'autre | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
 
 **Limites connues de la v0.1.x**

@@ -1,0 +1,54 @@
+From 590e36795245a4abff2e29b53ce82858eb5bd566 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Tue, 3 Nov 2026 11:24:25 +0100
+Subject: [PATCH] HSFA: SFA3 mirrored sprite tiles (flip flag in the object
+ tables)
+
+The SFA3 object tables (f<N>, built by banques.py) turn a local tile of the
+PS2 port into a code of the arcade graphics ROM by matching the content
+EXACTLY. The port stores some tiles flipped: they have no exact match, the
+entry stayed empty and HsfaEclater dropped the tile (holes in sprites:
+1,084 non-empty tiles over 17 Arcade runs, e.g. Dhalsim's legs in the
+intro).
+
+Translator v157 (OBJ_MIROIR, on by default, SFA3 only) now fills these
+entries with the ROM tile and the flip to apply: bit 29 = X, bit 30 = Y
+(1,311 entries in 44 tables). HsfaEclater masks the code to 20 bits and
+XORs the flag into the attribute of the 16x16 tile it emits (bits 5-6).
+
+Tables without the flag bits (Upper, Upper MAX, Hyper, graft, SFA3 before
+v157) give exactly the same output as before. A core without this patch
+shows these tiles unflipped: ship the tables with this patch.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index ae92075..6fc77e6 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -389,6 +389,10 @@ static UINT16 HsfaEclater(UINT32 nPage, UINT32 nFin, UINT32 nCourante)
+ 				INT32 cx = fx ? (nx - 1 - nxs) : nxs;
+ 				INT32 cy = fy ? (ny - 1 - nys) : nys;
+ 				INT32 g = HsfaGlobal(t, code + cx + 16 * cy);
++				// (patch 0024) SFA3 : tuile que le portage range en MIROIR (absente de la ROM a l'identique) : la table
++				// donne la tuile de la ROM et le retournement a appliquer (bit 29 = X, bit 30 = Y), XORe dans l'attribut
++				UINT16 fl = 0;
++				if (g >= 0) { fl = (UINT16)((g >> 24) & 0x60); g &= 0xFFFFF; }
+ 				if (g >= 0) {
+ 					if (n < 1023) {
+ 						// (HANDOFF §116) bits 16-17 -> Y 13-14 ; bits 18-19 -> X 10-11
+@@ -399,7 +403,7 @@ static UINT16 HsfaEclater(UINT32 nPage, UINT32 nFin, UINT32 nCourante)
+ 						if (((y >> 13) & 7) == 1) Out[n * 4 + 1] |= 0x1000;	// (patch 0023) emplacement 1 (graphismes systeme : HUD)
+ #endif
+ 						Out[n * 4 + 2] = (UINT16)(g & 0xffff);
+-						Out[n * 4 + 3] = (UINT16)(at & 0x00ff);
++						Out[n * 4 + 3] = (UINT16)((at ^ fl) & 0x00ff);
+ 						n++;
+ 					}
+ 					nTotal++;
+-- 
+2.53.0
+
