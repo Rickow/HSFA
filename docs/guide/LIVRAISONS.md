@@ -7,6 +7,9 @@ cœur et quel zip sont en circulation ? » ([POINT-ETAPE-2026-10-21](../rapports
   sont ici. Chacun reconstruit les siennes depuis son ISO ([construction-iso.md](construction-iso.md)).
 - Un md5 terminé par « … » est le seul connu (abrégé dans le registre d'origine).
 - Le plus récent en haut. Une nouvelle livraison ajoute une ligne en tête du tableau concerné.
+- **Registre arrêté au 2026-10-24.** Depuis la v0.1 (2026-10-27), les cœurs et le paquet de construction publiés sont
+  sur la page des releases, avec leurs sommes (`SHA256SUMS`) ; les journaux §177 et suivants disent ce que chaque
+  release contient.
 - « Patchs » renvoie à la chaîne de [`patches/fbneo/`](../../patches/fbneo/README.md) ; « v149 », « v150 » aux
   versions validées du traducteur (journal §162, §163).
 

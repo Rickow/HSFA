@@ -55,8 +55,9 @@ program ROM and runs it on an emulated CPS2. Three games are covered:
 
 They run in two environments:
 - a **MAME fork**: development bench, game `sfa3hx`;
-- a **FBNeo libretro core "HSFA"** for RetroArch: Android (arm64), Linux (x86_64) and ROCKNIX (RGB10X, aarch64), in
-  4:3 and 16:9.
+- a **FBNeo libretro core "HSFA"** for RetroArch: Android (arm64), Linux (x86_64), Windows (x64), ROCKNIX (RGB10X,
+  aarch64) and Recalbox 10 (Raspberry Pi: armhf and aarch64), in 4:3 and 16:9 (12 cores per release). The cores also
+  hold two test drivers not built from the ISO yet: `sfa3umhsfa` (Upper MAX) and `sfa3hahsfa` (Hyper + Arcade).
 
 > **No game data here.** This repository only contains tools, patches and documentation. Everything that comes from
 > the game (programs, graphics, sound) is rebuilt **from your own ISO** of the Anthology.
@@ -115,27 +116,31 @@ They run in two environments:
        --sortie hsfa_sortie --jeux sfa3,upper,hyper
    ```
    Options and expected fingerprints: [docs/guide/construction-iso.md](docs/guide/construction-iso.md).
-4. **Install the cores**: build them from [`patches/fbneo/`](patches/fbneo/README.md), then follow the
-   [Android](docs/guide/installation-android.md) or [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md) guide.
+4. **Install the cores**: download them from the releases or build them from [`patches/fbneo/`](patches/fbneo/README.md),
+   then follow the [Android](docs/guide/installation-android.md), [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md),
+   [Recalbox](docs/guide/installation-recalbox.md) or [Windows](tools/windows/LISEZMOI-windows.md) guide.
 
 Full walkthrough (MAME bench, diagnosis, non-regression): [docs/guide/demarrage.md](docs/guide/demarrage.md).
 
 ## Repository layout
 
 ```
-README.md, README.fr.md, CHANGELOG.md
+README.md, README.fr.md, CHANGELOG.md, CREDITS.md, NOTICE.md, LICENSE
+AGENTS.md, CLAUDE.md    picking the project up (rules, method, findings; in French)
+construire.sh/.bat      one-click build from the ISO
 config.example.env      local paths (HSFA_WORKSPACE, HSFA_EXTRACT...); requirements.txt
 docs/
-  guide/                getting started, build from the ISO, Android and ROCKNIX install
+  guide/                getting started, build from the ISO, Android / ROCKNIX / Recalbox install, deliveries
   architecture/         translator, CPS2 memory, MAME bench, FBNeo core, data relayout, route B
   reference/            symbols, formats, module map, addresses
   methodes/             oracle and non-regression, translator pitfalls
-  journal/              HANDOFF.md (journal §1-§146) and its index
+  journal/              HANDOFF.md (journal §1-§201) and its index
   rapports/             detailed study reports
 src/hsfa/               MIPS -> 68000 translator and build chain (mame/: bench Lua scripts)
 scripts/                construction/ (from the ISO), validation/ (non-regression), qualite/, localiser.py
 tools/                  tools by topic (stages, Hyper sound, graft, relayout, streams, ROCKNIX...)
-patches/                mame-fork/ (sfa3hx game), fbneo/ (HSFA core)
+patches/                mame-fork/ (sfa3hx game), fbneo/ (HSFA core), traducteur/ (graft translator diff)
+re/                     knowledge index: addresses, fields, memory allocations (tools in re/outils/)
 max/, tools/max/        SFA3 MAX (PSP) session work
 legacy/                 PNACH era (PCSX2): patches, old tools, old documents
 ```

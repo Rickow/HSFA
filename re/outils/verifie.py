@@ -29,6 +29,8 @@ FORME = {
     'max_psp': r'0x[0-9A-F]{1,8}',
     'sfa1_arcade': r'\$[0-9A-F]{6}', 'sfa2_arcade': r'\$[0-9A-F]{6}', 'ssf2_arcade': r'\$[0-9A-F]{6}',
     'cps1_arcade': r'\$[0-9A-F]{6}', 'z80_son': r'\$[0-9A-F]{4}',
+    # ro1 / ro2 (SFA1 / SFA2 de l'Anthology) : adresse PS2 en mémoire, ou élément de X_DATA (eNNN) pour une donnée de fichier
+    'ro1': r'(?:0x[0-9A-F]{1,8}|e[0-9]{3})', 'ro2': r'(?:0x[0-9A-F]{1,8}|e[0-9]{3})',
 }
 ANONYMAT = re.compile(r'/home/[A-Za-z]|/run/m[e]dia|/Users/[A-Za-z]|/tmp/claude-\d|@gmail\.|C:\\\\Users', re.I)
 OCTETS = re.compile(r'\b(?:[0-9A-Fa-f]{2}[ ,]){12,}[0-9A-Fa-f]{2}\b|\b[0-9A-Fa-f]{32,}\b')

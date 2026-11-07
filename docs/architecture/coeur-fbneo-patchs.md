@@ -5,7 +5,8 @@ Complète [coeur-fbneo.md](coeur-fbneo.md) (fonctionnement) et [`patches/fbneo/R
 leur source), les fichiers touchés, et comment couper ou vérifier le patch. « § » renvoie au journal
 `docs/journal/HANDOFF.md`. Quand une source ne cite aucune alternative, la fiche le dit.
 
-Les numéros sont ceux du tableau du README (colonne « # »). Les rapports anciens disent « patch 8 » pour la ligne 8
+Les numéros sont ceux du tableau du README (colonne « # »). Les fiches s'arrêtent à la ligne 16 (`0012`) : pour les
+lignes 17 à 29 (`0013`-`0025`, `0021b`, `0021c`), le tableau du README tient lieu de fiche (contenu, raison, source). Les rapports anciens disent « patch 8 » pour la ligne 8
 (`0004-…`), « patch 10 » pour `0006-…`, etc.
 
 Vérification commune à tous : `scripts/validation/nonreg_coeur.sh` contre un cœur de référence (`IDENTIQUE` attendu

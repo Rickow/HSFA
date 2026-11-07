@@ -1,7 +1,8 @@
 # Index thématique de `docs/journal/HANDOFF.md`
 
-> Journal indexé : `docs/journal/HANDOFF.md` (5 078 lignes, état du 2026-10-24, jusqu'à §172). Les sections §116 à §172
-> ont une ligne chacune au §13 ; numéros de ligne recalés le 2026-10-24.
+> Journal indexé : `docs/journal/HANDOFF.md` (5 583 lignes, état du 2026-11-07, jusqu'à §201). Les sections §116 à §201
+> ont une ligne chacune au §13 (§173-§201 : titre seul, ajoutées le 2026-11-07) ; numéros de ligne recalés le 2026-11-07 pour
+> §173-§201 ; la grille de fin s'arrête à §172.
 > Les numéros de ligne renvoient aux **titres** de section (`sed -n 'L,+40p' HANDOFF.md`, ou `Read` avec `offset=L`).
 > ⚠ Ils changent dès qu'on insère du texte au-dessus. Pour les recalculer : `grep -n '^#' HANDOFF.md`.
 
@@ -13,7 +14,7 @@ Le journal mélange **trois séries de numéros**. Un « §5 » peut désigner t
 |---|---|---|---|
 | **R§0 … R§8** (+ R§6bis) | chapitres « racine » `## N.` | 13–617 | les plus anciens ; ordre 0,1,2,3,4,5,**8**,6,6bis,7 ; beaucoup sont **dépassés** |
 | **C1 … C5** | chapitre « Carte MIPS↔68K… » (l. 618), `### N.` | 620–713 | métrique et impasses de la carte |
-| **§1 … §172** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–5078 | **série canonique** : §1-§21 puis §22-§172 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
+| **§1 … §201** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–5583 | **série canonique** : §1-§21 puis §22-§201 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
 
 La ligne 1543 commence par `#imm,…` : ce n'est pas un titre (faux positif de `grep '^#'`).
 
@@ -319,7 +320,7 @@ Légende : ⛔ = **dépassé** (lire la section qui corrige) · ⭐ = section cl
 
 ---
 
-## 13. Suite du journal, §116-§172 (une ligne par section)
+## 13. Suite du journal, §116-§201 (une ligne par section)
 
 Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au §8 bis ; les rapports cités sont dans
 `docs/rapports/`.
@@ -383,6 +384,35 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §170 | 5015 | Matrice des coups : Hyper Z3 contre l'arcade | `banc_matrice.py`, 203 coups, 22 écarts |
 | ⭐ §171 | 5033 | Killer Bee Assault de Cammy | aide `roxr`, `EXG` et `BCLR` perdus ; `EXG_PILE_D`, `AIDE_ROXR`, `BITOP_DN`, `paires_exg.py` |
 | ⭐ §172 | 5058 | Point d'étape transverse du 2026-10-21 | code en retard sur le savoir, archives périmées, `valide_tout.sh`, décisions D1-D7 |
+| §173 | 5080 | v151 | six règles du traducteur issues du banc des coups |
+| §174 | 5101 | Outils MAX | passation, oracle PPSSPP, comparateur de traces, audit des tables par id |
+| §175 | 5118 | Banc MAX mode B (oracle PSP), crochets MAX=1 et greffe versés au dépôt | — |
+| §176 | 5136 | Lot MAX 2b23 | plantages $A08, contres ratés, persos MAX en CPU |
+| §177 | 5155 | Lot MAX 2b24 (en pause) | Yun, Ingrid, Eagle, IA et dialogues des MAX ; release publique v0.1 |
+| §178 | 5172 | Greffe Arcade | régressions v151 levées, 77 fins sur 85 (ro9a8) |
+| §179 | 5186 | Traducteur v152 (RETAG_BRAW) ; greffe | blocage en combat et fin de Sakura |
+| §180 | 5197 | v153 (AIG_BRANCHE) | gel de Guy en Bushin, défaut de traduction d'Hyper ; greffe ro9a9 81/85 |
+| §181 | 5211 | Greffe Arcade ro9a10 | 85 fins sur 85 |
+| §182 | 5225 | Lot MAX 2b25 (traducteur v153) | — |
+| §183 | 5237 | Greffe | Evil Ryu et progression de l'IA vérifiés (rien à greffer) |
+| §184 | 5247 | Greffe ro9a11 | CONTINUE, banque commune d'Upper (patch 0015 du cœur) |
+| §185 | 5258 | Greffe ro9a12 | ossature des décors (règle D4), 1re partie |
+| §186 | 5270 | Greffe ro9a13 (place C4, retours utilisateur) ; persos cachés d'Upper | — |
+| §187 | 5285 | Greffe ro9a14 | portraits d'intermède, résultat de manche |
+| §188 | 5298 | Lot MAX 2b26 | provocations des MAX, logo « ZERO 3 ↑↑ », décors maison |
+| §189 | 5309 | Greffe ro9a15 | objets propres à Upper greffés (écran d'histoire, bandeaux ISM) |
+| §190 | 5320 | Greffe ro9a16 | barre VERSUS, jauge ALPHA, fond du CONTINUE |
+| §191 | 5332 | Greffe ro9a17 | picto « AUTO » après un CONTINUE, table D4 ; le nouveau challenger plante |
+| §192 | 5346 | Greffe ro9a18 | le nouveau challenger marche |
+| §193 | 5358 | Greffe ro9a19 (décors d'Upper en combat, en cours) ; banc des dégâts ; logo MAX ; patch 0017 | — |
+| §194 | 5374 | Greffe ro9a20 | décors d'Upper en combat (85/85) ; tri des écarts Hyper / Upper |
+| §195 | 5388 | Traducteur v154 | AIG_D1 |
+| §196 | 5424 | Upper MAX 2b27-2b29 ; musiques en flux ; boîtes des MAX ; banc des données d'images | — |
+| §197 | 5443 | Releases v0.1.3 / v0.1.4 ; sang ; cœur plus rapide ; greffe ro9a22-ro9a23 ; réorganisation (pause) | — |
+| §198 | 5467 | Vrai 16:9 (patch 0022) ; greffe ro9a25 et e34 ; Upper MAX 2b30 | — |
+| §199 | 5486 | SFA3 | tuiles rangées en miroir par le portage (traducteur v157, patch 0024) |
+| §200 | 5529 | Greffe ro9a26 → ro9a28 ; vrai 16:9 calé (0023) ; SFA3 tuiles en miroir (v157, 0024) ; décors SFA1 / SFA2 préparés | — |
+| §201 | 5550 | SFA3 | tuiles d'objets dessinées par le portage (poupées de Shadaloo) ; traducteur v158, patch 0025 |
 
 ---
 

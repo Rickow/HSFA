@@ -24,7 +24,14 @@ Outils d'étude et de production écrits au fil des chantiers. Chaque dossier co
 | [`son-hyper/partitions/`](son-hyper/partitions/README.md) | musique d'Hyper en partitions : pilotes v1.0x, bancs Z80, appariement des variantes | [PARTITIONS-HYPER](../docs/rapports/PARTITIONS-HYPER.md) |
 | [`symboles/`](symboles/) | carte des symboles de SFA3 (`symboles_ro3.csv`) et ses outils | [SYMBOLES](../docs/reference/SYMBOLES.md) |
 | [`max/`](max/README.md) | outils de la session SFA3 MAX (PSP) — **ne pas déplacer** : la session MAX les importe par ce chemin | [MAX-Etude-Contenu-Persos](../docs/MAX-Etude-Contenu-Persos.md) |
-| `untranspile` | **lien** vers `../src/hsfa` (ancien emplacement du traducteur, utilisé par `max/paths.py`) | — |
+| [`android/`](android/README.md) | construction des deux cœurs Android (arm64-v8a, NDK r28c) | [installation-android](../docs/guide/installation-android.md) |
+| [`windows/`](windows/LISEZMOI-windows.md) | cœurs Windows x64 (MinGW-w64 depuis Linux) et notice | [LISEZMOI-windows](windows/LISEZMOI-windows.md) |
+| [`recalbox/`](recalbox/LISEZMOI-recalbox.md) | cœurs Recalbox 10 (armhf / aarch64), installation | [installation-recalbox](../docs/guide/installation-recalbox.md) |
+| [`ps2-patchs/`](ps2-patchs/README.md) | patcheurs de l'ISO PS2 : tout débloqué, 16:9 natif | [README](ps2-patchs/README.md) |
+| [`options/`](options/) | écran OPTION et retour au menu (diffs du traducteur et du cœur), BGM d'Hyper dans Upper | [OPTIONS](../docs/rapports/OPTIONS.md), [OPTIONS-HYPER-UPPER](../docs/rapports/OPTIONS-HYPER-UPPER.md) |
+| [`sondes-recherche/`](sondes-recherche/README.md) | sonde de PC du cœur, déchiffreur CPS2, désassembleur, banc des coups FBNeo | [D-SONDES](../docs/rapports/recherche/D-SONDES.md) |
+| [`guide-coups/`](guide-coups/README.md) | relevé des commandes du guide officiel (sans son texte) et vérification SuperCombo | [BANC-COUPS](../docs/rapports/BANC-COUPS.md) |
+| [`ppsspp-banc/`](ppsspp-banc/PPSSPP-BANC.md), [`banc-max-psp/`](banc-max-psp/BANC-PSP.md) | PPSSPP comme oracle des persos MAX ; mode B du banc des coups (PSP contre Upper MAX) | [PPSSPP-BANC](ppsspp-banc/PPSSPP-BANC.md), [BANC-PSP](banc-max-psp/BANC-PSP.md) |
 
 ## Chemins
 

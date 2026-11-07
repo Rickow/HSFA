@@ -7,14 +7,15 @@ HSFA mixes code of its own with modifications to two emulators. Each part keeps 
 |---|---|---|
 | HSFA's own code and documentation (translator, build scripts, tools, docs) | `src/`, `scripts/`, `tools/`, `docs/`, `max/`, `legacy/`, `re/` | **MIT**, see [LICENSE](LICENSE) |
 | FBNeo HSFA libretro cores (4:3 `fbneo_hsfa`, 16:9 `fbneo_hsfaws`) | patches in `patches/fbneo/`; binaries attached to releases | **FinalBurn Neo licence**, full text verbatim in [patches/fbneo/LICENSE-FBNeo.txt](patches/fbneo/LICENSE-FBNeo.txt) |
-| stb_vorbis 1.22 (Ogg Vorbis decoder, patch `0004`) | `src/dep/libs/stb_vorbis/` once patched | **public domain or MIT**, your choice (Sean Barrett), see below |
+| stb_vorbis 1.22 (Ogg Vorbis decoder, patch `0004`) | `src/dep/libs/stb_vorbis/` once patched; copy in `tools/flux/stb_vorbis.c` | **public domain or MIT**, your choice (Sean Barrett), see below |
 | 2nd QSound HLE (`hsfa_qsound.h`, patch `0001`) | `src/burn/drv/capcom/hsfa_qsound.h` once patched | **BSD-3-Clause**: derived from the DL-1425 HLE of `qs_c.cpp` (superctr, Valley Bell), see below |
+| Z80 emulator `z80.h` (Ivan Kosarev), test bench of the music board only | `tools/son-hyper/tests/z80.h` | **MIT**, text in `tools/son-hyper/tests/z80.LICENSE` |
 | MAME fork of the bench (game `sfa3hx`) | patches in `patches/mame-fork/` | **MAME licence**: GPL-2.0-or-later for MAME as a whole; each modified file keeps its own SPDX header (often BSD-3-Clause) |
 
 ## FinalBurn Neo HSFA cores
 
 The cores are FinalBurn Neo built from libretro/FBNeo commit `af5d3f3` with the patches of `patches/fbneo/` (chain
-`0001`-`0022` (with `0021b`, `0021c`) plus `0007b`, see [patches/fbneo/README.md](patches/fbneo/README.md)). They are distributed under the
+`0001`-`0025` (with `0021b`, `0021c`) plus `0007b`, see [patches/fbneo/README.md](patches/fbneo/README.md)). They are distributed under the
 FinalBurn Neo licence, which is reproduced verbatim in `patches/fbneo/LICENSE-FBNeo.txt` and in every core archive.
 In short:
 

@@ -12,14 +12,14 @@ Langue de travail : **français** (documentation, rapports, échanges). Messages
 **recompilation statique du 68000 d'origine vers le MIPS R5900**. HSFA fait le chemin inverse : il reconnaît les
 idiomes du recompilateur, **réémet le 68000**, assemble une ROM programme CPS2 et la fait tourner sur une CPS2 émulée.
 
-| module PS2 | jeu | état (2026-10-17) |
+| module PS2 | jeu | état (2026-11-07) |
 |---|---|---|
 | `ro3` | Street Fighter Alpha 3 | complet : 32/32 fins = arcade, 42/42 commandes, cadence turbo 133,3 % |
-| `ro5` | SFA3 **Upper** | complet : 40/40 fins ; persos MAX en cours d'intégration (option `MAX=1`) |
-| `ro9` | **Hyper** SFA (versions ZERO / ZERO 2 / ALPHA / ZERO 3) | VERSUS complet ; mode Arcade d'Upper en cours de greffe (« voie B ») |
+| `ro5` | SFA3 **Upper** | complet : 40/40 fins ; **Upper MAX** (persos MAX, option `MAX=1`, pilote `sfa3umhsfa`) : lot 2b31 validé, versions d'essai |
+| `ro9` | **Hyper** SFA (versions ZERO / ZERO 2 / ALPHA / ZERO 3) | VERSUS complet ; **Hyper + Arcade** (mode Arcade d'Upper greffé, « voie B », pilote `sfa3hahsfa`) : ro9a28 livré, versions d'essai |
 
 Environnements : **fork MAME** (banc de développement, jeu `sfa3hx`) et **cœur FBNeo libretro « HSFA »** (Android,
-Linux, Windows, ROCKNIX ; 4:3 et 16:9). Tout se reconstruit **depuis l'ISO de l'utilisateur** (`docs/guide/construction-iso.md`).
+Linux, Windows, ROCKNIX, Recalbox armhf / aarch64 : 12 cœurs ; 4:3 et 16:9). Tout se reconstruit **depuis l'ISO de l'utilisateur** (`docs/guide/construction-iso.md`).
 
 Lire ensuite, dans l'ordre : `README.fr.md` → `docs/journal/ETAT-DES-LIEUX.md` → `docs/journal/INDEX-HANDOFF.md` →
 les dernières sections de `docs/journal/HANDOFF.md` → `docs/methodes/`. État transverse le plus récent : §5 ci-dessous et
@@ -118,8 +118,8 @@ Options, son, cœur
 - Son d'Hyper : ROM QSound pleine → **rejeu** (2ᵉ QSound qui rejoue les sons SFA1 / SFA2), redirection des voix par
   version dans le programme traduit, cris et voix mesurés sur les arcades ; musique en **Ogg Vorbis** dans le zip ;
   « carte musique » optionnelle (pilotes Z80 d'origine). Rapports `SON-HYPER-ROM.md`, `REJEU-FBNEO.md`, `PLAN-*`.
-- Chaîne de patchs FBNeo : `patches/fbneo/README.md` (16 patchs plus le 11b ; une fiche par patch :
-  `docs/architecture/coeur-fbneo-patchs.md`). Ce qui a été livré, avec les md5 : `docs/guide/LIVRAISONS.md`. Zips :
+- Chaîne de patchs FBNeo : `patches/fbneo/README.md` (32 lignes : les 4 patchs de base, 0001-0025, 0007b, 0021b, 0021c ;
+  une fiche par patch pour les lignes 1-16 : `docs/architecture/coeur-fbneo-patchs.md`). Ce qui a été livré, avec les md5 : `docs/guide/LIVRAISONS.md`. Zips :
   `tools/fbneo-hsfa/paquet_fbneo.py`
   (déterministe avec `SOURCE_DATE_EPOCH`, liste stricte avec `HSFA_STRICT=1`).
 
@@ -170,6 +170,14 @@ Options, son, cœur
 Passation complète de la session MAX : `max/notes/SAVOIR-MAX.md`. Échanges avec la session MAX : `work/echanges/MAX.md` (hors dépôt). Avant toute livraison : banc de non-régression MAX.
 
 ## 5. Chantiers ouverts (2026-10-24)
+
+> **Mise à jour du 2026-11-07** (le tableau ci-dessous date du 2026-10-24 ; ses lignes Traducteur, Voie B, MAX, Cœur et
+> Conflits sont dépassées) : traducteur **v158** (§201 ; v157 : tuiles en miroir de SFA3, §199) ; greffe **ro9a28**
+> livrée (§200), ro9a29 en cours ; décors SFA1 / SFA2 extraits de l'ISO (préparés, animations en cours) ; Upper MAX
+> **2b31** validé, script de construction Upper MAX à l'étude (ISO PSP en option) ; cœur FBNeo **0001-0025**, 12 cœurs
+> (lot du 2026-11-08), release publique **v0.1.6** ; réorganisation des données en pause (`v155-reorg-p1`,
+> `v156-reorg-p2`, non activées) ; **36** conflits dans `zones.py --verifie`. Décisions du porteur :
+> `docs/ATTENTES-ET-DECISIONS.md` (dépôt privé).
 
 > Point d'étape transverse : [`docs/rapports/POINT-ETAPE-2026-10-21.md`](docs/rapports/POINT-ETAPE-2026-10-21.md)
 > (§172) et [`docs/journal/TRANSMISSION-2026-10-21.md`](docs/journal/TRANSMISSION-2026-10-21.md). Une partie du code

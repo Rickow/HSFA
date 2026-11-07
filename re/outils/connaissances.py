@@ -21,7 +21,8 @@ COLS_ALLOC = ['cible', 'debut', 'fin', 'occupant', 'etat', 'source', 'remarque']
 # fichier -> nom de l'espace tel qu'il s'écrit dans adresse_autres
 ESPACE_DU_FICHIER = {'sfa3_arcade': 'arcade', 'ro3': 'ro3', 'ro5': 'ro5', 'ro9': 'ro9', 'ro9a': 'ro9a',
                      'max_psp': 'psp', 'sfa1_arcade': 'sfa1_arcade', 'sfa2_arcade': 'sfa2_arcade',
-                     'ssf2_arcade': 'ssf2_arcade', 'cps1_arcade': 'cps1_arcade', 'z80_son': 'z80_son'}
+                     'ssf2_arcade': 'ssf2_arcade', 'cps1_arcade': 'cps1_arcade', 'z80_son': 'z80_son',
+                     'ro1': 'ro1', 'ro2': 'ro2'}
 ESPACES = {'arcade', 'ro1', 'ro2', 'ro3', 'ro4', 'ro6', 'ro8', 'ro5', 'ro9', 'ro9a', 'psp', 'img_ro3', 'img_ro5', 'img_ro9', 'img_ro9a',
            'cps2', 'sfa1_arcade', 'sfa2_arcade', 'ssf2_arcade', 'cps1_arcade', 'z80_son',
            'cvs2_ps2', 'cfe_ps2', 'fichier_ro5', 'fichier_ro9'}  # fichier_roN : décalage dans le fichier du module PS2 ; exécutables PS2 de Capcom vs. SNK 2 et Capcom Fighting Evolution (noms de symboles)

@@ -1,8 +1,16 @@
 # Journal des modifications
 
-Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Le projet n'a pas encore de numéros de
-version : les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
+Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Depuis la v0.1 (2026-10-27), une entrée
+par release publique ; avant, les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
+
+## v0.1.6 (2026-11-07)
+
+- **SFA3** (traducteur v158 + patch 0025) : tuiles d'objets redessinées par le portage PS2, absentes de la ROM d'arcade
+  (poupées de Shadaloo dans les fins de Cammy, E. Honda, R. Mika et Cody : 684 tuiles) ajoutées telles quelles en ROM
+  graphique étendue (`hsfa_gfx.bin`, facultatif pour le pilote `sfa3hsfa`). Reconstruire SFA3 ; Upper et Hyper
+  inchangés. Cœurs 0001-0025.
+- README : état des chantiers (greffe Hyper + Arcade, Upper MAX, réorganisation en pause) ; crédits et index `re/`.
 
 ## v0.1.5 (2026-11-07)
 

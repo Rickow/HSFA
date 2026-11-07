@@ -1,14 +1,14 @@
 # Rapports d'agents (anonymisés)
 
-Rapports complets des études menées en parallèle (2026-10-07 au 2026-10-11). Le [journal](../journal/HANDOFF.md)
-(§138-§146) en donne la synthèse ; les outils correspondants sont dans `tools/` (dossier indiqué, voir
+Rapports complets des études menées en parallèle (depuis le 2026-10-07). Le [journal](../journal/HANDOFF.md)
+(§138 et suivants) en donne la synthèse ; les outils correspondants sont dans `tools/` (dossier indiqué, voir
 [tools/README.md](../../tools/README.md)). Les chemins `<workspace>/work/…`
 désignent le dossier de travail local (données de jeu, jamais publiées).
 
 | Rapport | Sujet | Outils |
 |---|---|---|
 | [POINT-ETAPE-2026-10-21.md](POINT-ETAPE-2026-10-21.md) | **point d'étape transverse** : état des chantiers, code en retard sur le savoir, archives périmées, conflits, décisions à prendre | — |
-| [GREFFE-ETAT.md](GREFFE-ETAT.md) | **voie B, état à lire en premier** : `ro9a7_fige` (60/85 fins), étape 7, fins restantes, place mémoire | `tools/greffe-arcade` |
+| [GREFFE-ETAT.md](GREFFE-ETAT.md) | **voie B**, état publié le 2026-10-24 : `ro9a7_fige` (60/85 fins), étape 7, fins restantes, place mémoire ; la suite (ro9a10 → ro9a28, 85/85 fins) est au journal §181-§200 | `tools/greffe-arcade` |
 | [BANC-COUPS.md](BANC-COUPS.md) | banc MAME des coups (SFA3, Upper, Hyper) : méthode, taux, défauts trouvés, frame data, non-régression MAX (sans le tableau du guide, hors dépôt) | non versés (`tools/sondes-recherche` pour le banc FBNeo) |
 | [REORG-ETAPES-CD.md](REORG-ETAPES-CD.md) | réorganisation des données, étapes C et D (pointeurs des tables ROM, retrait des talons) ; mise de côté | non versés |
 | [COUVERTURE-ARCADE.md](COUVERTURE-ARCADE.md) | couverture ROM arcade SFA3 ↔ traduction, zones système, pistes | non versés |
@@ -58,3 +58,10 @@ désignent le dossier de travail local (données de jeu, jamais publiées).
 | `OPTIONS-HYPER-UPPER.md` | options d'Hyper comparées à Upper ; BGM de Hyper greffé dans Upper (option du cœur, `BGM_UPPER`) | `tools/options/hyper-upper` |
 | `COEUR-BANQUES.md` | cœur FBNeo : registre des plans pour ro9a (patch 0008) ; place 68K : 7 trous libres de la carte CPS2 (5,08 Mo, patch 0009), banque commutée chiffrée | `patches/fbneo` |
 | `DECOR-CAMMY.md` | décor de Cammy d'Upper et de SFA3 : scroll2 perdu (adresses vidéo hôte décalées de 8 dans une table, règle `VRAM_TABLE`) ; balayage des 40 décors | `src/hsfa` |
+| [AUDIT-TABLES-ID.md](AUDIT-TABLES-ID.md) | Upper `MAX=1` : audit des tables indexées par l'id du perso (40 → 48 entrées) | `tools/integration-max` |
+| [INTEGRATION-MAX-UPPER.md](INTEGRATION-MAX-UPPER.md) | intégration des persos MAX dans Upper (`ro5`), option de construction `MAX=1` | `tools/integration-max/upper` |
+| [DEFAUTS-BANC.md](DEFAUTS-BANC.md), [DEFAUTS-BANC-SITES.md](DEFAUTS-BANC-SITES.md) | défauts trouvés par le banc des coups : causes, correctifs du traducteur (v151) et sites touchés par règle | `tools/sondes-recherche` |
+| [GREFFE-ETAPE4.md](GREFFE-ETAPE4.md), [GREFFE-ETAPE5.md](GREFFE-ETAPE5.md), [GREFFE-ETAPE6.md](GREFFE-ETAPE6.md) | voie B, étapes 4 à 6 de la greffe de l'Arcade d'Upper dans Hyper | `tools/greffe-arcade` |
+| [BANC-GREFFE-UPPER.md](BANC-GREFFE-UPPER.md) | dégâts de la greffe (ro9a18) contre Upper, persos en version ZERO 3 | `tools/greffe-arcade` |
+| [TRI-ECARTS-HYPER-UPPER.md](TRI-ECARTS-HYPER-UPPER.md) | tri des 50 écarts robustes Hyper ≠ Upper (ZERO 3), 01/11 | — |
+| [TRANSPARENCE.md](TRANSPARENCE.md), [TRANSPARENCE-PAR-OBJET.md](TRANSPARENCE-PAR-OBJET.md), [TRANSPARENCE-OMBRES-JAUGES.md](TRANSPARENCE-OMBRES-JAUGES.md) | transparence des effets MAX (PSP, registres, patch 0010), mélange par objet, ombres et jauges comme la PSP (patch 0011) | `patches/fbneo` |

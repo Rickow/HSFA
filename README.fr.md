@@ -58,8 +58,10 @@ ROM programme CPS2 et la fait tourner sur une CPS2 émulée. Trois jeux sont tra
 
 Ils tournent dans deux environnements :
 - un **fork de MAME** : banc de développement, jeu `sfa3hx` ;
-- un **cœur libretro FBNeo « HSFA »** pour RetroArch : Android (arm64), Linux (x86_64) et ROCKNIX (RGB10X, aarch64),
-  en 4:3 et en 16:9.
+- un **cœur libretro FBNeo « HSFA »** pour RetroArch : Android (arm64), Linux (x86_64), Windows (x64), ROCKNIX (RGB10X,
+  aarch64) et Recalbox 10 (Raspberry Pi : armhf et aarch64), en 4:3 et en 16:9 (12 cœurs par release). Les cœurs
+  contiennent aussi deux pilotes d'essai, pas encore construits depuis l'ISO : `sfa3umhsfa` (Upper MAX) et `sfa3hahsfa`
+  (Hyper + Arcade).
 
 > **Aucune donnée de jeu ici.** Le dépôt ne contient que des outils, des patchs et de la documentation. Tout ce qui
 > vient du jeu (programmes, graphismes, sons) est reconstruit **depuis votre propre ISO** de l'Anthology.
@@ -117,27 +119,32 @@ Ils tournent dans deux environnements :
        --sortie hsfa_sortie --jeux sfa3,upper,hyper
    ```
    Options et empreintes attendues : [docs/guide/construction-iso.md](docs/guide/construction-iso.md).
-4. **Installer les cœurs** : les compiler depuis [`patches/fbneo/`](patches/fbneo/README.md), puis suivre le guide
-   [Android](docs/guide/installation-android.md) ou [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md).
+4. **Installer les cœurs** : les télécharger depuis les releases ou les compiler depuis
+   [`patches/fbneo/`](patches/fbneo/README.md), puis suivre le guide [Android](docs/guide/installation-android.md),
+   [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md), [Recalbox](docs/guide/installation-recalbox.md) ou
+   [Windows](tools/windows/LISEZMOI-windows.md).
 
 Le parcours complet (banc MAME, diagnostic, non-régression) : [docs/guide/demarrage.md](docs/guide/demarrage.md).
 
 ## Organisation du dépôt
 
 ```
-README.md, README.fr.md, CHANGELOG.md
+README.md, README.fr.md, CHANGELOG.md, CREDITS.md, NOTICE.md, LICENSE
+AGENTS.md, CLAUDE.md    reprendre le projet (règles, méthode, acquis)
+construire.sh/.bat      construction en un clic depuis l'ISO
 config.example.env      chemins locaux (HSFA_WORKSPACE, HSFA_EXTRACT...) ; requirements.txt
 docs/
-  guide/                démarrage, construction depuis l'ISO, installation Android et ROCKNIX
+  guide/                démarrage, construction depuis l'ISO, installation Android / ROCKNIX / Recalbox, livraisons
   architecture/         traducteur, mémoire CPS2, banc MAME, cœur FBNeo, réorganisation des données, voie B
   reference/            symboles, formats, carte des modules, adresses
   methodes/             oracle et non-régression, pièges du traducteur
-  journal/              HANDOFF.md (journal §1-§146) et son index
+  journal/              HANDOFF.md (journal §1-§201) et son index
   rapports/             rapports d'études détaillés
 src/hsfa/               traducteur MIPS -> 68000 et chaîne de construction (mame/ : scripts Lua du banc)
 scripts/                construction/ (depuis l'ISO), validation/ (non-régression), qualite/, localiser.py
 tools/                  outils par thème (décors, son d'Hyper, greffe, réorganisation, flux, ROCKNIX...)
-patches/                mame-fork/ (jeu sfa3hx), fbneo/ (cœur HSFA)
+patches/                mame-fork/ (jeu sfa3hx), fbneo/ (cœur HSFA), traducteur/ (diff du traducteur de la greffe)
+re/                     index des connaissances : adresses, champs, zones mémoire (outils dans re/outils/)
 max/, tools/max/        travaux de la session SFA3 MAX (PSP)
 legacy/                 époque PNACH (PCSX2) : patchs, anciens outils, anciens documents
 ```

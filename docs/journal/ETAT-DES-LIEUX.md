@@ -4,8 +4,8 @@
 > [`AGENTS.md`](../../AGENTS.md) §5 (tableau des chantiers et des décisions D1-D7), le point transverse dans
 > [`POINT-ETAPE-2026-10-21`](../rapports/POINT-ETAPE-2026-10-21.md), la reprise dans
 > [`TRANSMISSION-2026-10-21`](TRANSMISSION-2026-10-21.md), ce qui a été livré dans
-> [`docs/guide/LIVRAISONS.md`](../guide/LIVRAISONS.md), et le journal va jusqu'au §172 (index :
-> [`INDEX-HANDOFF.md`](INDEX-HANDOFF.md) §13). En bref : traducteur v150 validée et v151 en préparation (§171) ;
+> [`docs/guide/LIVRAISONS.md`](../guide/LIVRAISONS.md), et le journal va jusqu'au §201 (index :
+> [`INDEX-HANDOFF.md`](INDEX-HANDOFF.md) §13). En bref, au 2026-10-24 : traducteur v150 validée et v151 en préparation (§171) ;
 > greffe Arcade sur Hyper à `ro9a7_fige` (60/85 fins) ; persos MAX dans Upper au lot 2b16 ; cœur FBNeo à 16 patchs
 > plus le 11b. Ce qui suit reste utile pour ses commandes, ses variables et ses pièges.
 

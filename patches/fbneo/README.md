@@ -63,9 +63,10 @@ et 0009, déjà cités par les rapports. Les patchs 12 et 13 s'appliquent avec o
 
 ## Construire
 
-Chaîne vérifiée le 2026-10-24 depuis un arbre neuf au commit `af5d3f3` : les 17 patchs (16 plus le 11b)
-s'appliquent sans erreur (un avertissement d'espace pour le patch 4), et l'arbre obtenu est identique, hors fichiers
-générés, à l'arbre de référence `94c666a` (`git diff` vide). Les cœurs 4:3 et 16:9 se construisent.
+Dernière vérification complète écrite ici : le 2026-10-24, depuis un arbre neuf au commit `af5d3f3` : les 17 patchs
+de l'époque (16 plus le 11b) s'appliquent sans erreur (un avertissement d'espace pour le patch 4), et l'arbre obtenu est identique, hors fichiers
+générés, à l'arbre de référence `94c666a` (`git diff` vide). Les cœurs 4:3 et 16:9 se construisent. Depuis, chaque lot de cœurs est construit avec la chaîne entière sur
+`af5d3f3` (dernier : 0001-0025, 0007b, 0021b, 0021c, lot du 2026-11-08, 12 cœurs).
 
 ```bash
 git clone https://github.com/libretro/FBNeo.git && cd FBNeo && git checkout af5d3f3
