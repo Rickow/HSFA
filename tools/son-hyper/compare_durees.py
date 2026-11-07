@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare les durees des flux d'Hyper (jeux A, B, C, longs) aux morceaux mesures au banc (CPS2 ou CPS-1).
 
-Durees des flux : commentaires de hsfa_flux_table.txt (produite depuis VOTRE ISO par hsfa_build.py, etape flux ; plus dans le depot) (« ; 69.8 s boucle »), qui valent « intro + une
+Durees des flux : commentaires de tools/flux/hsfa_flux_table.txt (« ; 69.8 s boucle »), qui valent « intro + une
 boucle » (calibrage SFA1 / SFA2 : 3 % pres pour 24 morceaux sur 32). Jeux de flux : colonnes jeu / index / flux de
 variantes_ssf2.tsv. Mesures : TSV de mesure_boucles.py ou de banc_cps1.py (colonnes code et intro+boucle_s).
 

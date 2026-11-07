@@ -2,7 +2,7 @@
 """compare_variantes.py -- rapproche les flux d'Hyper des morceaux mesures (mesure_boucles.py / mesure_cps1.py).
 
 Base : la duree d'un flux ADX vaut intro + une boucle (calibre sur ZERO / ZERO 2, voir mesure_boucles.py). On
-compare la duree de chaque flux (hsfa_flux_table.txt, produite par hsfa_build.py depuis l ISO) a l'intro + boucle des morceaux d'un jeu, avec une
+compare la duree de chaque flux (tools/flux/hsfa_flux_table.txt) a l'intro + boucle des morceaux d'un jeu, avec une
 affectation un pour un (scipy si present, sinon plus proche voisin sans unicite).
 
 Jeux de variantes (PARTITIONS-HYPER §2) : A = Y553-586, B = Y494-527, C = Y460-493,

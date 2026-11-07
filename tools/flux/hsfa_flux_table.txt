@@ -1,0 +1,561 @@
+# HSFA lecteur de flux : code son (hexa) -> entree de Y_DATA.BIN (AFS), volume (0-127+), drapeaux
+# drapeaux : q = joue aussi par le Z80 QSound ; p = demarre en pause ; x = jamais en flux ; - = aucun
+# genere par gen_table_flux.py depuis la table native PS2 (exec. 0x5CB300, ro9 = ro5 = ro3)
+0001 1 97 qpx  # intro ; 26.5 s
+0002 2 86 q  # ZERO 3 (SFA3) ; 15.1 s boucle
+0003 3 81 q  # ZERO 3 (SFA3) ; 3.1 s
+0004 4 81 q  # ZERO 3 (SFA3) ; 21.9 s boucle
+0005 5 82 q  # ZERO 3 (SFA3) ; 5.7 s boucle
+0006 6 79 q  # ZERO 3 (SFA3) ; 3.0 s
+0007 7 82 q  # ZERO 3 (SFA3) ; 16.8 s boucle
+0008 8 88 q  # ZERO 3 (SFA3) ; 15.9 s boucle
+0009 9 86 q  # ZERO 3 (SFA3) ; 62.9 s boucle
+000A 10 77 q  # ZERO 3 (SFA3) ; 58.1 s boucle
+000B 11 87 q  # ZERO 3 (SFA3) ; 49.4 s boucle
+000C 12 91 q  # ZERO 3 (SFA3) ; 81.9 s boucle
+000D 13 83 q  # ZERO 3 (SFA3) ; 69.8 s boucle
+000E 14 97 q  # ZERO 3 (SFA3) ; 59.5 s boucle
+000F 15 85 q  # ZERO 3 (SFA3) ; 72.1 s boucle
+0010 16 87 q  # ZERO 3 (SFA3) ; 58.6 s boucle
+0011 17 95 q  # ZERO 3 (SFA3) ; 58.5 s boucle
+0012 18 85 q  # ZERO 3 (SFA3) ; 52.7 s boucle
+0013 19 75 q  # ZERO 3 (SFA3) ; 72.9 s boucle
+0014 20 94 q  # ZERO 3 (SFA3) ; 72.9 s boucle
+0015 21 89 q  # ZERO 3 (SFA3) ; 53.8 s boucle
+0016 22 75 q  # ZERO 3 (SFA3) ; 55.6 s boucle
+0017 23 96 q  # ZERO 3 (SFA3) ; 78.3 s boucle
+0018 24 82 q  # ZERO 3 (SFA3) ; 46.2 s boucle
+0019 25 82 q  # ZERO 3 (SFA3) ; 54.8 s boucle
+001A 26 86 q  # ZERO 3 (SFA3) ; 40.5 s boucle
+001B 27 91 q  # ZERO 3 (SFA3) ; 51.3 s boucle
+001D 29 91 q  # ZERO 3 (SFA3) ; 76.1 s boucle
+001E 30 87 q  # ZERO 3 (SFA3) ; 76.1 s boucle
+001F 31 86 q  # ZERO 3 (SFA3) ; 46.9 s boucle
+0020 32 90 q  # ZERO 3 (SFA3) ; 71.0 s boucle
+0021 33 88 q  # ZERO 3 (SFA3) ; 53.4 s boucle
+0022 34 87 q  # ZERO 3 (SFA3) ; 72.6 s boucle
+0023 35 81 q  # ZERO 3 (SFA3) ; 51.9 s boucle
+0024 36 85 q  # ZERO 3 (SFA3) ; 58.5 s boucle
+0025 37 85 q  # ZERO 3 (SFA3) ; 62.3 s boucle
+0026 38 86 q  # ZERO 3 (SFA3) ; 71.7 s boucle
+0027 39 84 q  # ZERO 3 (SFA3) ; 54.9 s boucle
+0028 40 73 q  # ZERO 3 (SFA3) ; 57.9 s boucle
+0029 41 85 q  # ZERO 3 (SFA3) ; 37.2 s boucle
+002B 43 74 q  # ZERO 3 (SFA3) ; 15.5 s boucle
+002C 44 86 q  # ZERO 3 (SFA3) ; 18.1 s boucle
+002D 45 87 q  # ZERO 3 (SFA3) ; 96.5 s boucle
+002F 47 86 q  # ZERO 3 (SFA3) ; 4.2 s
+0030 48 88 -  # ZERO 3 persos d'Upper ; 77.0 s boucle
+0031 49 88 -  # ZERO 3 persos d'Upper ; 67.1 s boucle
+0032 50 92 -  # ZERO 3 persos d'Upper ; 78.7 s boucle
+0033 51 91 -  # ZERO 3 persos d'Upper ; 65.4 s boucle
+0034 52 89 -  # ZERO 3 persos d'Upper ; 59.1 s boucle
+0035 53 90 -  # ZERO 3 persos d'Upper ; 40.7 s boucle
+0036 54 77 -  # ZERO 3 persos d'Upper ; 15.1 s boucle
+0041 56 65 -  # ZERO (SFA1) ; 57.9 s boucle
+0042 57 69 -  # ZERO (SFA1) ; 63.1 s boucle
+0043 58 50 -  # ZERO (SFA1) ; 125.1 s boucle
+0044 59 72 -  # ZERO (SFA1) ; 89.1 s boucle
+0045 60 63 -  # ZERO (SFA1) ; 67.9 s boucle
+0046 61 74 -  # ZERO (SFA1) ; 64.8 s boucle
+0047 62 78 -  # ZERO (SFA1) ; 53.5 s boucle
+0048 63 64 -  # ZERO (SFA1) ; 79.4 s boucle
+0049 64 68 -  # ZERO (SFA1) ; 62.1 s boucle
+004A 65 70 -  # ZERO (SFA1) ; 42.2 s boucle
+004B 66 70 -  # ZERO (SFA1) ; 55.4 s boucle
+004C 67 73 -  # ZERO (SFA1) ; 58.4 s boucle
+004D 68 73 -  # ZERO (SFA1) ; 86.9 s boucle
+0051 70 73 -  # ZERO 2 (SFA2) ; 57.2 s boucle
+0052 71 65 -  # ZERO 2 (SFA2) ; 59.8 s boucle
+0053 72 45 -  # ZERO 2 (SFA2) ; 56.0 s boucle
+0054 73 76 -  # ZERO 2 (SFA2) ; 89.5 s boucle
+0055 74 78 -  # ZERO 2 (SFA2) ; 67.0 s boucle
+0056 75 79 -  # ZERO 2 (SFA2) ; 67.1 s boucle
+0057 76 81 -  # ZERO 2 (SFA2) ; 53.0 s boucle
+0058 77 48 -  # ZERO 2 (SFA2) ; 79.3 s boucle
+0059 78 81 -  # ZERO 2 (SFA2) ; 64.4 s boucle
+005A 79 81 -  # ZERO 2 (SFA2) ; 42.4 s boucle
+005B 80 79 -  # ZERO 2 (SFA2) ; 54.6 s boucle
+005C 81 77 -  # ZERO 2 (SFA2) ; 58.4 s boucle
+005D 82 62 -  # ZERO 2 (SFA2) ; 86.9 s boucle
+005E 83 134 -  # ZERO 2 (SFA2) ; 58.2 s boucle
+005F 84 76 -  # ZERO 2 (SFA2) ; 99.4 s boucle
+0060 85 63 -  # ZERO 2 (SFA2) ; 51.5 s boucle
+0061 86 81 -  # ZERO 2 (SFA2) ; 78.4 s boucle
+0062 87 79 -  # ZERO 2 (SFA2) ; 51.1 s boucle
+0063 88 80 -  # ZERO 2 (SFA2) ; 67.7 s boucle
+006C 459 94 -  # non envoye par Hyper ; 48.3 s
+006D 440 94 -  # non envoye par Hyper ; 125.9 s boucle
+006E 441 94 -  # non envoye par Hyper ; 125.9 s boucle
+006F 442 94 -  # non envoye par Hyper ; 125.9 s boucle
+0070 443 94 -  # non envoye par Hyper ; 127.0 s boucle
+0071 444 94 -  # non envoye par Hyper ; 125.9 s boucle
+0072 445 94 -  # non envoye par Hyper ; 125.8 s boucle
+0073 446 94 -  # non envoye par Hyper ; 125.9 s boucle
+0074 447 94 -  # non envoye par Hyper ; 127.0 s boucle
+0075 448 94 -  # non envoye par Hyper ; 125.9 s boucle
+0076 449 94 -  # non envoye par Hyper ; 125.8 s boucle
+0077 450 94 -  # non envoye par Hyper ; 125.9 s boucle
+0078 451 94 -  # non envoye par Hyper ; 125.9 s boucle
+0079 452 94 -  # non envoye par Hyper ; 125.8 s boucle
+007A 453 94 -  # non envoye par Hyper ; 125.8 s boucle
+007B 454 94 -  # non envoye par Hyper ; 125.9 s boucle
+007C 455 94 -  # non envoye par Hyper ; 125.9 s boucle
+007D 456 94 -  # non envoye par Hyper ; 125.8 s boucle
+007E 457 94 -  # non envoye par Hyper ; 125.9 s boucle
+007F 458 94 -  # non envoye par Hyper ; 125.9 s boucle
+0141 97 74 -  # module ro1 ; 180.0 s boucle
+0142 98 73 -  # module ro1 ; 180.0 s boucle
+0143 99 68 -  # module ro1 ; 180.0 s boucle
+0144 100 70 -  # module ro1 ; 180.0 s boucle
+0145 101 70 -  # module ro1 ; 180.0 s boucle
+0146 102 81 -  # module ro1 ; 180.0 s boucle
+0147 103 81 -  # module ro1 ; 180.0 s boucle
+0148 104 67 -  # module ro1 ; 180.0 s boucle
+0149 105 89 -  # module ro1 ; 180.0 s boucle
+014A 106 74 -  # module ro1 ; 180.0 s boucle
+014B 107 72 -  # module ro1 ; 180.0 s boucle
+014C 108 72 -  # module ro1 ; 180.0 s boucle
+014D 109 70 -  # module ro1 ; 24.8 s
+014E 110 74 -  # module ro1 ; 89.8 s boucle
+014F 111 58 -  # module ro1 ; 6.9 s
+0150 112 68 -  # module ro1 ; 5.3 s
+0151 113 82 -  # module ro1 ; 40.0 s boucle
+0152 114 57 -  # module ro1 ; 3.2 s
+0153 115 89 -  # module ro1 ; 3.7 s
+0154 116 79 -  # module ro1 ; 5.6 s
+0155 117 74 -  # module ro1 ; 90.0 s
+0156 118 74 -  # module ro1 ; 90.0 s
+0157 119 89 -  # module ro1 ; 55.8 s
+0158 120 72 -  # module ro1 ; 90.0 s
+0159 121 74 -  # module ro1 ; 90.0 s
+015A 122 72 -  # module ro1 ; 60.0 s
+015B 123 72 -  # module ro1 ; 60.0 s
+015C 124 72 -  # module ro1 ; 60.0 s
+015D 125 72 -  # module ro1 ; 70.0 s
+015E 126 72 -  # module ro1 ; 60.0 s
+015F 127 77 -  # module ro1 ; 90.0 s
+0160 128 77 -  # module ro1 ; 90.0 s
+0161 129 67 -  # module ro1 ; 90.0 s
+0168 130 89 -  # module ro1 ; 180.0 s boucle
+0169 131 91 -  # module ro1 ; 60.0 s
+0180 553 94 -  # variantes ZERO 3 / EX ; 69.8 s boucle
+0181 554 94 -  # variantes ZERO 3 / EX ; 55.7 s boucle
+0182 555 94 -  # variantes ZERO 3 / EX ; 65.5 s boucle
+0183 556 94 -  # variantes ZERO 3 / EX ; 55.3 s boucle
+0184 557 94 -  # variantes ZERO 3 / EX ; 60.8 s boucle
+0185 558 94 -  # variantes ZERO 3 / EX ; 57.7 s boucle
+0186 559 94 -  # variantes ZERO 3 / EX ; 73.5 s boucle
+0187 560 94 -  # variantes ZERO 3 / EX ; 55.0 s boucle
+0188 561 94 -  # variantes ZERO 3 / EX ; 57.1 s boucle
+0189 562 94 -  # variantes ZERO 3 / EX ; 56.1 s boucle
+018A 563 94 -  # variantes ZERO 3 / EX ; 84.4 s boucle
+018B 564 94 -  # variantes ZERO 3 / EX ; 66.4 s boucle
+018C 565 94 -  # variantes ZERO 3 / EX ; 39.4 s boucle
+018D 566 94 -  # variantes ZERO 3 / EX ; 55.3 s boucle
+018E 567 94 -  # variantes ZERO 3 / EX ; 38.4 s boucle
+018F 568 94 -  # variantes ZERO 3 / EX ; 40.0 s boucle
+0190 569 94 -  # variantes ZERO 3 / EX ; 35.9 s boucle
+0191 570 94 -  # variantes ZERO 3 / EX ; 39.0 s boucle
+0192 571 94 -  # variantes ZERO 3 / EX ; 25.6 s boucle
+0193 572 94 -  # variantes ZERO 3 / EX ; 27.7 s boucle
+0194 573 94 -  # variantes ZERO 3 / EX ; 25.7 s boucle
+0195 574 94 -  # variantes ZERO 3 / EX ; 23.6 s boucle
+0196 575 94 -  # variantes ZERO 3 / EX ; 26.7 s boucle
+0197 576 94 -  # variantes ZERO 3 / EX ; 51.3 s boucle
+0198 577 94 -  # variantes ZERO 3 / EX ; 47.1 s boucle
+0199 578 94 -  # variantes ZERO 3 / EX ; 24.6 s boucle
+019A 579 94 -  # variantes ZERO 3 / EX ; 45.1 s boucle
+019B 580 94 -  # variantes ZERO 3 / EX ; 21.2 s boucle
+019C 581 94 -  # variantes ZERO 3 / EX ; 51.3 s boucle
+019D 582 94 -  # variantes ZERO 3 / EX ; 28.7 s boucle
+019E 583 94 -  # variantes ZERO 3 / EX ; 25.6 s boucle
+019F 584 94 -  # variantes ZERO 3 / EX ; 17.9 s boucle
+01A0 585 94 -  # variantes ZERO 3 / EX ; 16.8 s boucle
+01A1 586 94 -  # variantes ZERO 3 / EX ; 53.3 s boucle
+01A2 494 107 -  # variantes ZERO 3 / EX ; 68.8 s boucle
+01A3 495 107 -  # variantes ZERO 3 / EX ; 50.8 s boucle
+01A4 496 107 -  # variantes ZERO 3 / EX ; 67.2 s boucle
+01A5 497 107 -  # variantes ZERO 3 / EX ; 56.1 s boucle
+01A6 498 107 -  # variantes ZERO 3 / EX ; 58.5 s boucle
+01A7 499 107 -  # variantes ZERO 3 / EX ; 62.1 s boucle
+01A8 500 107 -  # variantes ZERO 3 / EX ; 77.7 s boucle
+01A9 501 107 -  # variantes ZERO 3 / EX ; 91.6 s boucle
+01AA 502 107 -  # variantes ZERO 3 / EX ; 61.3 s boucle
+01AB 503 107 -  # variantes ZERO 3 / EX ; 57.2 s boucle
+01AC 504 107 -  # variantes ZERO 3 / EX ; 45.9 s boucle
+01AD 505 107 -  # variantes ZERO 3 / EX ; 69.8 s boucle
+01AE 506 107 -  # variantes ZERO 3 / EX ; 45.9 s boucle
+01AF 507 107 -  # variantes ZERO 3 / EX ; 68.3 s boucle
+01B0 508 107 -  # variantes ZERO 3 / EX ; 40.7 s boucle
+01B1 509 107 -  # variantes ZERO 3 / EX ; 49.6 s boucle
+01B2 510 107 -  # variantes ZERO 3 / EX ; 45.6 s boucle
+01B3 511 107 -  # variantes ZERO 3 / EX ; 37.7 s boucle
+01B4 512 107 -  # variantes ZERO 3 / EX ; 26.4 s boucle
+01B5 513 107 -  # variantes ZERO 3 / EX ; 28.7 s boucle
+01B6 514 107 -  # variantes ZERO 3 / EX ; 26.3 s boucle
+01B7 515 107 -  # variantes ZERO 3 / EX ; 23.5 s boucle
+01B8 516 107 -  # variantes ZERO 3 / EX ; 26.6 s boucle
+01B9 517 107 -  # variantes ZERO 3 / EX ; 51.4 s boucle
+01BA 518 107 -  # variantes ZERO 3 / EX ; 47.4 s boucle
+01BB 519 107 -  # variantes ZERO 3 / EX ; 25.6 s boucle
+01BC 520 107 -  # variantes ZERO 3 / EX ; 45.6 s boucle
+01BD 521 107 -  # variantes ZERO 3 / EX ; 25.9 s boucle
+01BE 522 107 -  # variantes ZERO 3 / EX ; 56.5 s boucle
+01BF 523 107 -  # variantes ZERO 3 / EX ; 33.3 s boucle
+01C0 524 107 -  # variantes ZERO 3 / EX ; 26.3 s boucle
+01C1 525 107 -  # variantes ZERO 3 / EX ; 50.0 s boucle
+01C2 526 107 -  # variantes ZERO 3 / EX ; 14.7 s boucle
+01C3 527 107 -  # variantes ZERO 3 / EX ; 52.9 s boucle
+01C4 460 94 -  # variantes ZERO 3 / EX ; 79.5 s boucle
+01C5 461 94 -  # variantes ZERO 3 / EX ; 58.7 s boucle
+01C6 462 94 -  # variantes ZERO 3 / EX ; 71.5 s boucle
+01C7 463 94 -  # variantes ZERO 3 / EX ; 65.8 s boucle
+01C8 464 94 -  # variantes ZERO 3 / EX ; 65.7 s boucle
+01C9 465 94 -  # variantes ZERO 3 / EX ; 67.8 s boucle
+01CA 466 94 -  # variantes ZERO 3 / EX ; 81.8 s boucle
+01CB 467 94 -  # variantes ZERO 3 / EX ; 68.2 s boucle
+01CC 468 94 -  # variantes ZERO 3 / EX ; 63.8 s boucle
+01CD 469 94 -  # variantes ZERO 3 / EX ; 62.6 s boucle
+01CE 470 94 -  # variantes ZERO 3 / EX ; 89.4 s boucle
+01CF 471 94 -  # variantes ZERO 3 / EX ; 72.7 s boucle
+01D0 472 94 -  # variantes ZERO 3 / EX ; 47.5 s boucle
+01D1 473 94 -  # variantes ZERO 3 / EX ; 62.6 s boucle
+01D2 474 94 -  # variantes ZERO 3 / EX ; 42.1 s boucle
+01D3 475 94 -  # variantes ZERO 3 / EX ; 53.2 s boucle
+01D4 476 94 -  # variantes ZERO 3 / EX ; 51.3 s boucle
+01D5 477 94 -  # variantes ZERO 3 / EX ; 42.5 s boucle
+01D6 478 94 -  # variantes ZERO 3 / EX ; 29.3 s boucle
+01D7 479 94 -  # variantes ZERO 3 / EX ; 30.4 s boucle
+01D8 480 94 -  # variantes ZERO 3 / EX ; 28.0 s boucle
+01D9 481 94 -  # variantes ZERO 3 / EX ; 25.6 s boucle
+01DA 482 94 -  # variantes ZERO 3 / EX ; 93.9 s boucle
+01DB 483 94 -  # variantes ZERO 3 / EX ; 54.8 s boucle
+01DC 484 94 -  # variantes ZERO 3 / EX ; 50.1 s boucle
+01DD 485 94 -  # variantes ZERO 3 / EX ; 51.7 s boucle
+01DE 486 94 -  # variantes ZERO 3 / EX ; 48.7 s boucle
+01DF 487 94 -  # variantes ZERO 3 / EX ; 23.0 s boucle
+01E0 488 94 -  # variantes ZERO 3 / EX ; 54.1 s boucle
+01E1 489 94 -  # variantes ZERO 3 / EX ; 61.8 s boucle
+01E2 490 94 -  # variantes ZERO 3 / EX ; 54.4 s boucle
+01E3 491 94 -  # variantes ZERO 3 / EX ; 50.0 s boucle
+01E4 492 94 -  # variantes ZERO 3 / EX ; 54.4 s boucle
+01E5 493 94 -  # variantes ZERO 3 / EX ; 60.0 s boucle
+01E6 543 94 -  # variantes ZERO 3 / EX ; 133.9 s boucle
+01E7 544 94 -  # variantes ZERO 3 / EX ; 150.4 s boucle
+01E8 546 94 -  # variantes ZERO 3 / EX ; 130.1 s boucle
+01E9 547 94 -  # variantes ZERO 3 / EX ; 119.5 s boucle
+01EA 549 94 -  # variantes ZERO 3 / EX ; 152.7 s boucle
+01EB 552 94 -  # variantes ZERO 3 / EX ; 154.3 s boucle
+01ED 433 94 -  # variantes ZERO 3 / EX ; 78.8 s boucle
+01EE 434 94 -  # variantes ZERO 3 / EX ; 77.8 s boucle
+01EF 435 94 -  # variantes ZERO 3 / EX ; 102.5 s boucle
+01F0 436 94 -  # variantes ZERO 3 / EX ; 104.7 s boucle
+01F1 437 94 -  # variantes ZERO 3 / EX ; 120.3 s boucle
+01F2 439 94 -  # variantes ZERO 3 / EX ; 187.0 s boucle
+01F3 438 94 -  # variantes ZERO 3 / EX ; 140.5 s boucle
+01F4 545 94 -  # variantes ZERO 3 / EX ; 164.6 s boucle
+01F5 548 94 -  # variantes ZERO 3 / EX ; 140.1 s boucle
+01F6 550 94 -  # variantes ZERO 3 / EX ; 129.7 s boucle
+01F7 551 94 -  # variantes ZERO 3 / EX ; 77.7 s boucle
+01FE 528 94 -  # variantes ZERO 3 / EX ; 68.8 s boucle
+01FF 529 94 -  # variantes ZERO 3 / EX ; 97.8 s boucle
+0280 133 91 -  # ALPHA / module ro6 ; 27.0 s
+0281 134 87 -  # ALPHA / module ro6 ; 58.1 s
+0282 135 73 -  # ALPHA / module ro6 ; 8.3 s
+0283 136 88 -  # ALPHA / module ro6 ; 8.5 s
+0284 137 90 -  # ALPHA / module ro6 ; 34.6 s
+0285 138 92 -  # ALPHA / module ro6 ; 6.1 s
+0286 139 81 -  # ALPHA / module ro6 ; 17.2 s
+0287 140 66 -  # ALPHA / module ro6 ; 7.9 s
+0288 141 93 -  # ALPHA / module ro6 ; 101.1 s
+0289 142 97 -  # ALPHA / module ro6 ; 119.3 s
+028A 143 94 -  # ALPHA / module ro6 ; 77.7 s
+028B 144 96 -  # ALPHA / module ro6 ; 142.8 s
+028C 145 94 -  # ALPHA / module ro6 ; 137.0 s
+028D 146 94 -  # ALPHA / module ro6 ; 125.3 s
+028E 147 116 -  # ALPHA / module ro6 ; 91.1 s
+028F 148 103 -  # ALPHA / module ro6 ; 131.3 s
+0290 149 102 -  # ALPHA / module ro6 ; 131.6 s
+0291 150 91 -  # ALPHA / module ro6 ; 92.1 s
+0292 151 88 -  # ALPHA / module ro6 ; 134.2 s
+0293 152 99 -  # ALPHA / module ro6 ; 106.1 s
+0294 153 125 -  # ALPHA / module ro6 ; 102.4 s
+0295 154 102 -  # ALPHA / module ro6 ; 34.5 s
+0296 155 50 -  # ALPHA / module ro6 ; 44.6 s
+0297 156 48 -  # ALPHA / module ro6 ; 24.8 s
+0298 157 93 -  # ALPHA / module ro6 ; 38.9 s
+0299 158 129 -  # ALPHA / module ro6 ; 108.8 s
+029A 159 62 -  # ALPHA / module ro6 ; 32.6 s
+029B 160 120 -  # ALPHA / module ro6 ; 26.6 s
+029C 161 92 -  # ALPHA / module ro6 ; 33.0 s
+029D 162 88 -  # ALPHA / module ro6 ; 28.8 s
+029E 163 86 -  # ALPHA / module ro6 ; 34.5 s
+029F 164 115 -  # ALPHA / module ro6 ; 24.3 s
+02A0 165 107 -  # ALPHA / module ro6 ; 31.4 s
+02A1 166 104 -  # ALPHA / module ro6 ; 44.6 s
+02A2 167 134 -  # ALPHA / module ro6 ; 86.9 s
+02A3 168 134 -  # ALPHA / module ro6 ; 88.9 s
+02C1 170 74 -  # ALPHA / module ro6 ; 60.8 s boucle
+02C2 171 106 -  # ALPHA / module ro6 ; 64.4 s boucle
+02C3 172 81 -  # ALPHA / module ro6 ; 60.2 s boucle
+02C4 173 87 -  # ALPHA / module ro6 ; 64.5 s boucle
+02C5 174 86 -  # ALPHA / module ro6 ; 61.3 s boucle
+02C6 175 102 -  # ALPHA / module ro6 ; 67.7 s boucle
+02C7 176 61 -  # ALPHA / module ro6 ; 67.3 s boucle
+02C8 177 103 -  # ALPHA / module ro6 ; 85.2 s boucle
+02C9 178 97 -  # ALPHA / module ro6 ; 55.1 s boucle
+02CA 179 104 -  # ALPHA / module ro6 ; 44.4 s boucle
+02CB 180 97 -  # ALPHA / module ro6 ; 59.4 s boucle
+02CC 181 81 -  # ALPHA / module ro6 ; 91.7 s boucle
+02CD 182 121 -  # ALPHA / module ro6 ; 91.1 s boucle
+02CE 183 97 -  # ALPHA / module ro6 ; 55.4 s boucle
+02CF 184 103 -  # ALPHA / module ro6 ; 82.0 s boucle
+02D0 185 97 -  # ALPHA / module ro6 ; 61.4 s boucle
+02D1 186 115 -  # ALPHA / module ro6 ; 100.9 s boucle
+02D2 187 70 -  # ALPHA / module ro6 ; 56.6 s boucle
+02D3 188 110 -  # ALPHA / module ro6 ; 74.8 s boucle
+02D4 189 97 -  # ALPHA / module ro6 ; 59.4 s boucle
+02D5 190 103 -  # ALPHA / module ro6 ; 48.4 s
+02D6 191 134 -  # ALPHA / module ro6 ; 28.9 s boucle
+02D7 192 70 -  # ALPHA / module ro6 ; 6.0 s
+02D8 193 97 -  # ALPHA / module ro6 ; 5.9 s
+02D9 194 65 -  # ALPHA / module ro6 ; 3.4 s
+02DA 195 90 -  # ALPHA / module ro6 ; 11.7 s boucle
+02DB 196 94 -  # ALPHA / module ro6 ; 4.3 s
+02DC 197 105 -  # ALPHA / module ro6 ; 5.4 s
+02DD 198 105 -  # ALPHA / module ro6 ; 14.0 s
+02DE 199 134 -  # ALPHA / module ro6 ; 4.1 s boucle
+02DF 200 97 -  # ALPHA / module ro6 ; 4.0 s boucle
+02E0 201 102 -  # ALPHA / module ro6 ; 27.4 s
+02E1 202 82 -  # ALPHA / module ro6 ; 24.8 s boucle
+02E2 203 121 -  # ALPHA / module ro6 ; 78.0 s boucle
+02E3 204 108 -  # ALPHA / module ro6 ; 18.0 s boucle
+02E4 205 105 -  # ALPHA / module ro6 ; 44.4 s boucle
+02E5 206 103 -  # ALPHA / module ro6 ; 8.3 s boucle
+02E6 207 105 -  # ALPHA / module ro6 ; 15.7 s boucle
+02E7 208 118 -  # ALPHA / module ro6 ; 54.2 s boucle
+02E8 209 118 -  # ALPHA / module ro6 ; 8.2 s boucle
+02E9 210 102 -  # ALPHA / module ro6 ; 60.0 s
+02EA 211 108 -  # ALPHA / module ro6 ; 70.2 s boucle
+02EB 212 94 -  # ALPHA / module ro6 ; 50.8 s
+02EC 213 102 -  # ALPHA / module ro6 ; 53.8 s boucle
+02ED 214 94 -  # ALPHA / module ro6 ; 56.0 s
+02EE 215 115 -  # ALPHA / module ro6 ; 33.3 s boucle
+02EF 216 75 -  # ALPHA / module ro6 ; 54.3 s
+02F0 217 82 -  # ALPHA / module ro6 ; 74.0 s
+02F1 218 86 -  # ALPHA / module ro6 ; 70.9 s boucle
+02F2 219 82 -  # ALPHA / module ro6 ; 7.7 s boucle
+02F3 220 82 -  # ALPHA / module ro6 ; 28.5 s boucle
+02F4 221 82 -  # ALPHA / module ro6 ; 36.8 s boucle
+02F5 222 103 -  # ALPHA / module ro6 ; 8.3 s boucle
+02F6 223 86 -  # ALPHA / module ro6 ; 16.6 s boucle
+02F7 224 90 -  # ALPHA / module ro6 ; 15.6 s boucle
+02F8 225 82 -  # ALPHA / module ro6 ; 29.9 s
+02F9 226 93 -  # ALPHA / module ro6 ; 84.0 s boucle
+02FA 227 103 -  # ALPHA / module ro6 ; 131.6 s boucle
+02FB 228 94 -  # ALPHA / module ro6 ; 56.2 s boucle
+02FC 229 84 -  # ALPHA / module ro6 ; 75.4 s boucle
+1100 230 84 -  # autres modules ; 300.1 s
+1101 231 78 -  # autres modules ; 300.1 s
+1102 232 74 -  # autres modules ; 300.1 s
+1103 233 81 -  # autres modules ; 300.1 s
+1104 234 87 -  # autres modules ; 300.1 s
+1105 235 94 -  # autres modules ; 300.1 s
+1106 236 91 -  # autres modules ; 300.1 s
+1107 237 70 -  # autres modules ; 300.1 s
+1108 238 70 -  # autres modules ; 300.1 s
+1109 239 87 -  # autres modules ; 300.1 s
+110A 240 70 -  # autres modules ; 300.1 s
+110B 241 94 -  # autres modules ; 300.1 s
+110C 242 54 -  # autres modules ; 300.1 s
+110D 243 77 -  # autres modules ; 60.1 s
+110E 244 84 -  # autres modules ; 60.1 s
+110F 245 91 -  # autres modules ; 60.1 s
+1110 246 64 -  # autres modules ; 22.7 s
+1111 247 74 -  # autres modules ; 4.0 s
+1112 248 84 -  # autres modules ; 6.9 s
+1113 249 64 -  # autres modules ; 5.4 s
+1114 250 75 -  # autres modules ; 5.2 s
+1115 251 70 -  # autres modules ; 4.6 s
+1116 252 60 -  # autres modules ; 3.1 s
+1120 253 64 -  # autres modules ; 300.1 s
+1121 254 64 -  # autres modules ; 300.1 s
+1122 255 57 -  # autres modules ; 300.1 s
+1123 256 64 -  # autres modules ; 300.1 s
+1124 257 77 -  # autres modules ; 300.1 s
+1125 258 54 -  # autres modules ; 300.1 s
+1126 259 64 -  # autres modules ; 300.1 s
+1127 260 54 -  # autres modules ; 300.1 s
+1128 261 57 -  # autres modules ; 300.1 s
+1129 262 81 -  # autres modules ; 300.1 s
+112A 263 67 -  # autres modules ; 300.1 s
+112B 264 94 -  # autres modules ; 300.1 s
+112C 265 74 -  # autres modules ; 300.1 s
+112D 266 64 -  # autres modules ; 60.1 s
+112E 267 77 -  # autres modules ; 60.1 s
+112F 268 70 -  # autres modules ; 60.1 s
+1130 269 70 -  # autres modules ; 23.0 s
+1131 270 74 -  # autres modules ; 3.9 s
+1132 271 70 -  # autres modules ; 6.2 s
+1133 272 67 -  # autres modules ; 6.0 s
+1134 273 70 -  # autres modules ; 4.5 s
+1135 274 81 -  # autres modules ; 6.1 s
+1136 275 60 -  # autres modules ; 3.0 s
+1137 276 67 -  # autres modules ; 11.0 s
+113C 277 60 -  # autres modules ; 248.6 s
+113D 278 60 -  # autres modules ; 248.6 s
+113E 279 54 -  # autres modules ; 21.8 s
+113F 280 81 -  # autres modules ; 2.9 s
+1140 281 81 -  # autres modules ; 4.0 s
+1141 282 94 -  # autres modules ; 4.0 s
+1142 283 67 -  # autres modules ; 4.5 s
+1143 284 94 -  # autres modules ; 4.0 s
+1144 285 67 -  # autres modules ; 4.0 s
+1145 286 81 -  # autres modules ; 7.0 s
+1146 287 81 -  # autres modules ; 4.0 s
+1147 288 94 -  # autres modules ; 3.5 s
+1148 289 94 -  # autres modules ; 2.0 s
+1149 290 94 -  # autres modules ; 1.5 s
+114A 291 87 -  # autres modules ; 2.0 s
+114B 292 94 -  # autres modules ; 4.0 s
+114C 293 74 -  # autres modules ; 1.5 s
+114D 295 87 -  # autres modules ; 5.0 s
+114E 296 87 -  # autres modules ; 3.5 s
+114F 297 81 -  # autres modules ; 4.5 s
+1150 298 87 -  # autres modules ; 7.0 s
+1151 299 87 -  # autres modules ; 2.5 s
+1152 300 87 -  # autres modules ; 2.5 s
+1153 301 81 -  # autres modules ; 7.0 s
+1154 302 87 -  # autres modules ; 3.0 s
+1155 303 87 -  # autres modules ; 3.0 s
+1156 304 101 -  # autres modules ; 5.0 s
+1157 305 87 -  # autres modules ; 4.5 s
+1158 306 81 -  # autres modules ; 1.6 s
+1159 307 87 -  # autres modules ; 5.5 s
+115A 308 81 -  # autres modules ; 5.2 s
+115B 309 87 -  # autres modules ; 2.0 s
+115C 310 87 -  # autres modules ; 4.5 s
+115D 311 81 -  # autres modules ; 3.5 s
+115E 312 81 -  # autres modules ; 6.0 s
+115F 313 81 -  # autres modules ; 6.0 s
+1160 314 81 -  # autres modules ; 4.0 s
+1161 315 81 -  # autres modules ; 2.5 s
+1162 316 87 -  # autres modules ; 3.0 s
+1163 317 81 -  # autres modules ; 5.0 s
+1164 318 74 -  # autres modules ; 4.0 s
+1165 319 81 -  # autres modules ; 6.0 s
+1166 320 84 -  # autres modules ; 5.0 s
+1167 321 87 -  # autres modules ; 2.5 s
+1168 322 81 -  # autres modules ; 3.5 s
+1169 323 81 -  # autres modules ; 4.0 s
+116A 324 81 -  # autres modules ; 3.5 s
+116B 325 81 -  # autres modules ; 4.5 s
+116C 326 81 -  # autres modules ; 3.5 s
+116D 327 81 -  # autres modules ; 2.2 s
+116E 328 84 -  # autres modules ; 3.5 s
+116F 329 81 -  # autres modules ; 3.0 s
+1170 330 87 -  # autres modules ; 5.0 s
+1171 331 81 -  # autres modules ; 2.2 s
+1172 332 81 -  # autres modules ; 4.0 s
+1173 333 81 -  # autres modules ; 4.5 s
+1174 334 81 -  # autres modules ; 4.0 s
+1175 335 87 -  # autres modules ; 3.7 s
+1176 336 81 -  # autres modules ; 4.0 s
+1177 337 94 -  # autres modules ; 3.0 s
+1178 338 87 -  # autres modules ; 6.5 s
+1179 339 81 -  # autres modules ; 3.0 s
+117A 340 87 -  # autres modules ; 5.0 s
+117B 341 84 -  # autres modules ; 4.7 s
+117C 342 81 -  # autres modules ; 5.0 s
+117D 343 81 -  # autres modules ; 4.2 s
+117E 344 81 -  # autres modules ; 3.5 s
+117F 345 54 -  # autres modules ; 0.5 s
+1180 346 87 -  # autres modules ; 5.0 s
+1181 347 81 -  # autres modules ; 6.0 s
+1182 348 81 -  # autres modules ; 5.8 s
+1183 349 81 -  # autres modules ; 7.5 s
+1184 350 81 -  # autres modules ; 2.0 s
+1185 351 94 -  # autres modules ; 4.0 s
+1186 352 81 -  # autres modules ; 3.0 s
+1187 353 94 -  # autres modules ; 6.5 s
+1188 354 81 -  # autres modules ; 4.5 s
+1189 355 87 -  # autres modules ; 5.0 s
+118A 356 74 -  # autres modules ; 3.0 s
+118B 357 81 -  # autres modules ; 2.0 s
+118C 358 87 -  # autres modules ; 6.0 s
+118D 359 81 -  # autres modules ; 5.2 s
+118E 360 84 -  # autres modules ; 4.5 s
+118F 361 81 -  # autres modules ; 7.5 s
+1190 362 87 -  # autres modules ; 7.0 s
+1191 363 81 -  # autres modules ; 4.5 s
+1192 364 94 -  # autres modules ; 4.2 s
+1193 365 81 -  # autres modules ; 2.0 s
+1194 366 81 -  # autres modules ; 4.0 s
+1195 367 81 -  # autres modules ; 2.0 s
+1196 368 87 -  # autres modules ; 4.5 s
+1197 369 81 -  # autres modules ; 5.8 s
+1198 370 81 -  # autres modules ; 6.0 s
+1199 371 81 -  # autres modules ; 7.0 s
+119A 372 87 -  # autres modules ; 5.0 s
+119B 373 81 -  # autres modules ; 6.0 s
+119C 374 87 -  # autres modules ; 5.5 s
+119D 375 84 -  # autres modules ; 4.5 s
+119E 376 81 -  # autres modules ; 5.0 s
+119F 377 81 -  # autres modules ; 8.5 s
+11A0 378 81 -  # autres modules ; 5.5 s
+11A1 379 81 -  # autres modules ; 7.0 s
+11A2 380 81 -  # autres modules ; 6.5 s
+11A3 381 87 -  # autres modules ; 5.5 s
+11A4 382 87 -  # autres modules ; 4.5 s
+11A5 383 87 -  # autres modules ; 4.5 s
+11A6 384 81 -  # autres modules ; 4.0 s
+11A7 385 94 -  # autres modules ; 6.0 s
+11A8 386 81 -  # autres modules ; 5.0 s
+11A9 387 81 -  # autres modules ; 7.2 s
+11AA 388 101 -  # autres modules ; 7.0 s
+11AB 389 94 -  # autres modules ; 5.5 s
+11AC 390 81 -  # autres modules ; 4.5 s
+11AD 391 101 -  # autres modules ; 6.5 s
+11AE 392 81 -  # autres modules ; 3.5 s
+11AF 393 87 -  # autres modules ; 9.5 s
+11B0 394 94 -  # autres modules ; 7.0 s
+11B1 395 94 -  # autres modules ; 6.0 s
+11B2 396 81 -  # autres modules ; 6.0 s
+11B3 397 94 -  # autres modules ; 3.0 s
+11B4 398 81 -  # autres modules ; 2.5 s
+11B5 399 81 -  # autres modules ; 4.5 s
+11B6 400 94 -  # autres modules ; 9.0 s
+11B7 401 81 -  # autres modules ; 2.5 s
+11B8 402 87 -  # autres modules ; 6.0 s
+11B9 403 94 -  # autres modules ; 3.7 s
+11BA 404 87 -  # autres modules ; 2.5 s
+11BB 405 81 -  # autres modules ; 2.0 s
+11BC 406 94 -  # autres modules ; 4.2 s
+11BD 407 87 -  # autres modules ; 2.5 s
+11BE 408 101 -  # autres modules ; 4.5 s
+11BF 409 81 -  # autres modules ; 4.0 s
+11C0 410 101 -  # autres modules ; 3.5 s
+11C1 411 81 -  # autres modules ; 3.0 s
+11C2 412 81 -  # autres modules ; 4.5 s
+11C3 413 107 -  # autres modules ; 3.7 s
+11C4 414 87 -  # autres modules ; 1.0 s
+11C5 415 101 -  # autres modules ; 4.5 s
+11C6 416 87 -  # autres modules ; 1.0 s
+11C7 417 101 -  # autres modules ; 2.5 s
+11C8 418 87 -  # autres modules ; 1.0 s
+11C9 419 94 -  # autres modules ; 4.0 s
+11CA 420 94 -  # autres modules ; 4.0 s
+11CB 421 87 -  # autres modules ; 6.0 s
+11CC 422 81 -  # autres modules ; 2.5 s
+11CD 423 94 -  # autres modules ; 6.0 s
+11CE 424 81 -  # autres modules ; 5.5 s
+11CF 425 94 -  # autres modules ; 3.0 s
+11D0 426 81 -  # autres modules ; 4.0 s
+11D1 427 101 -  # autres modules ; 5.0 s
+11D2 428 81 -  # autres modules ; 5.0 s
+11D3 429 81 -  # autres modules ; 5.0 s
+11D4 430 81 -  # autres modules ; 8.0 s
+11D5 431 87 -  # autres modules ; 3.5 s
+11D6 432 81 -  # autres modules ; 1.0 s
+11D7 294 74 -  # autres modules ; 6.0 s
