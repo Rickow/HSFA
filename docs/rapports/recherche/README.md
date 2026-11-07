@@ -160,3 +160,35 @@ Ce qui touche le projet. Détail hors dépôt, dans les notes du livre.
   pourraient nommer sa couche d'exécution (rendu, manettes, mémoire, son) ; à vérifier en cherchant `flPS2`,
   `CapSndEng`, `acrmw` dans l'ELF de l'Anthology. Aucune trace publique d'un accès extérieur au kit.
 
+
+## 7. Retours de cps2recomp (tmcleroy, 2026-11-03)
+
+Après notre ticket n° 244 sur son dépôt, tmcleroy a confronté `re/connaissances/sfa3_arcade.tsv` à son portage
+(`tools/hsfa_index.py` chez lui ; résultat non publié). Notre `sfa3ud` est la même version que son `sfa3u` : aucune
+adresse ne bouge, hors 3 608 octets de la Phoenix Edition en 16 endroits.
+
+- **Corrigé dans l'index (2026-11-04)** : `$0DCB12` = données d'attaque par perso, pas des points d'entrée ;
+  `$027B98` n'est pas un début de routine (`joueur_init` = `$027BAE`) ; `$FF851C` = copie des commandes une fois par
+  tour, pas un compteur (`sfa3_arcade.tsv`, `champs.tsv`). `max_psp.tsv` (compteur côté PSP, mesuré par la session
+  MAX) n'est pas touché : à revoir par elle.
+- **Ajouté** : `$02A710` (quatrième liste d'animation, lit +$23E / +$293), `$FF8090` région (réglages d'usine
+  `$235A`), `$FF80BB` REGULATION complété (palette d’objets 25), `$FF81C6` numéro de fin. Confiance « déduit » : vérifié par
+  lui, pas encore par nous.
+- **Reste ouvert** : trois adresses « mesurées » de notre index tombent au milieu d'instructions (relevés de banc) ;
+  sa liste n'est pas publiée. À retrouver en comparant nos adresses mesurées au désassemblage.
+- **Pour la session du cœur (16:9 calé sur le décor, patchs 0022-0023)**, ses méthodes d'écran large (GPL-3 : idées
+  seulement) : butée de caméra mesurée par décor et par côté (jusqu'à 36 px de plus que la marge fixe de 64 px) ;
+  plans lointains dessinés décalés pour finir avec la caméra ; journal par image de ce que chaque plan dessine sur
+  chaque ligne, joueurs placés dans chaque coin, et contrôle automatique qui échoue si une colonne dépasse le dessin.
+  Ses relevés confirment pour *Alpha* : troisième plan à la moitié de la vitesse de la caméra, plan du décor de 768 px.
+
+### 7.1 Suite (2026-11-07) : ticket fermé, une adresse à vérifier
+
+tmcleroy a fermé le ticket n° 244 le 7 novembre : nos notes sont entrées chez lui par sa PR n° 249 (`tools/hsfa_index.py`,
+index local d'environ 9 200 adresses, hors de son dépôt). Les trois points « lâches » qu'il signale (`$0DCB12`, `$027B98`,
+`$FF851C`) sont ceux déjà corrigés ici. Il confirme région (A5+90), numéro de fin (A5+1C6), Regulation (A5+BB, dont il fait
+un réglage de sang rouge ou blanc, sa PR n° 248) et la routine `$02A710`.
+
+**Vérifié** : `$FF810B` (A5+10B) était déjà mesuré chez nous (`re/connaissances/champs.tsv`, `BSET D0,$10B(A5)` en ROM
+`$29E0C` et `$341DC`, dans sa routine `$029E10`) ; entrée ajoutée à `sfa3_arcade.tsv` le 2026-11-07 (confiance « mesuré »,
+source citée).

@@ -28,7 +28,9 @@ HSFA stands on the work of many people. Thank you all.
 - **tmcleroy**, [cps2recomp](https://github.com/tmcleroy/cps2recomp) and
   [sfa2-recomp](https://github.com/tmcleroy/sfa2-recomp): static recompilation of CPS-2 games to C++. HSFA's
   « stage-locked » 16:9 view comes from its *Invisible walls* idea; its notes confirmed where the stage art ends and
-  how stages move between games. Ideas only: no code taken (GPL-3.0).
+  how stages move between games; its guest-stage work (#281, #294) gave the stage-check idea (camera held in the
+  middle and at both ends) and SFA2 stage-code addresses; it cross-checked our SFA3 address index (#249) and corrected
+  four entries. Ideas only: no code taken (GPL-3.0).
 - **omegakatana92**, [Street-Fighter-Alpha-Recomp](https://github.com/omegakatana92/Street-Fighter-Alpha-Recomp-):
   *Street Fighter Alpha* port made with cps2recomp; its memory map of SFA1 was read as a reference. No code taken.
 

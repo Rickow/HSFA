@@ -1,0 +1,125 @@
+From 9624051975e606a498a97a2a1193ae73ce99d4eb Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Tue, 3 Nov 2026 18:30:00 +0100
+Subject: [PATCH] HSFA: SFA3 optional hsfa_gfx.bin (port tiles missing from the
+ arcade ROM)
+
+The SFA3 object tables (banques.py) turn a local tile of the PS2 port into
+a code of the arcade graphics ROM by matching its content (exactly, or
+mirrored since patch 0024). 684 distinct tiles have no match at all: the
+port has its own drawings for some ending scenes (the Shadaloo Dolls in the
+endings of Cammy, E. Honda, R. Mika and Cody), cut differently from the
+arcade sprites. HsfaEclater dropped them (dolls missing from the screen).
+
+Like Upper and Hyper, the build now adds these tiles as they are to an
+extended graphics ROM, hsfa_gfx.bin (translator hsfa_gfx.py, SFA3: first
+code $7F8C0), and points the tables to them. The sfa3hsfa driver:
+- lists hsfa_gfx.bin as an OPTIONAL file (graphics region $2000000-
+  $3FFFFFF, region raised to 64 MB as for Upper); an archive without it
+  loads as before;
+- reads the code bits 18-19 from the X word bits 10-11 (as Upper / Hyper)
+  only when hsfa_gfx.bin was loaded, so an archive without it gives
+  exactly the same output.
+
+The first extended code is $7F8C0 on purpose: on 18 bits it is $3F8C0,
+and the arcade tiles $3F8C0-$3FFFF (1,856) are all transparent, in the
+arcade ROM and in the ROM rebuilt from the ISO. A core without this patch
+(or stock MAME) therefore draws nothing there, as before, instead of
+garbage tiles.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps.h        |  1 +
+ src/burn/drv/capcom/cps_hsfa.cpp | 12 +++++++++++-
+ src/burn/drv/capcom/cps_obj.cpp  |  2 +-
+ src/burn/drv/capcom/d_cps2.cpp   |  4 ++++
+ 4 files changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index cdc4d49..33208f0 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -540,6 +540,7 @@ INT32 Sf2mdtScanSound(INT32 nAction, INT32 *pnMin);
+ extern INT32 HsfaMode;
+ extern INT32 HsfaHyper;
+ extern UINT32 nCpsGfxLenMin;
++extern INT32 bHsfaGfx20;							// (patch 0025) codes d'objets sur 20 bits (bits 18-19 = bits 10-11 de X)
+ INT32 HsfaInit();
+ INT32 HsfaExit();
+ void HsfaFrameDone();
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 6fc77e6..fb049df 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -24,6 +24,10 @@ extern UINT8 *CpsRam660;
+ INT32 HsfaMode = 0;									// 0 = inactif, 1 = SFA3 traduit, 2 = Upper ou Hyper (fork)
+ INT32 HsfaHyper = 0;								// Hyper (mode 2) : roulette sur la touche Piece, crochet HSFA_NOROUL
+ UINT32 nCpsGfxLenMin = 0;							// taille minimale de la region graphique (Upper, Hyper : 64 Mo)
++// (patch 0025) objets : bits 18-19 du code lus dans les bits 10-11 de X. Upper / Hyper (mode 2) : toujours ; SFA3
++// (mode 1) : seulement si l'archive a hsfa_gfx.bin (tuiles du portage absentes de la ROM d'arcade, codes $7F8C0+) ;
++// sans ce fichier, SFA3 garde exactement la lecture d'avant (code sur 18 bits)
++INT32 bHsfaGfx20 = 0;
+ 
+ // donnees externes du portage : image de [base, $F00000) ; la base vient de la taille de hsfa_ext.bin
+ // (SFA3 / Upper : 5 Mo = $A00000-$EFFFFF ; Hyper : $940000-$EFFFFF, blocs $940000 et $C84000 de banc_mem.lua)
+@@ -1543,8 +1547,13 @@ static INT32 HsfaLoadData()
+ 			// (patch 0008) chargee et convertie sur place (conversion mot de 32 bits par mot de 32 bits) : plus de
+ 			// tampon de la taille du fichier (ro9a : 48 Mo de moins au demarrage)
+ 			UINT8 *p = CpsGfx + HSFA_GFX_BASE;
+-			if (BurnLoadRom(p, i, 1)) return 1;
++			if (BurnLoadRom(p, i, 1)) {
++				if (!(ri.nType & BRF_OPT)) return 1;
++				memset(p, 0, ri.nLen);				// (patch 0025) facultatif (SFA3) : absent = region vide, rien n'y renvoie
++				continue;
++			}
+ 			HsfaConvertGfx(p, ri.nLen, p);
++			bHsfaGfx20 = 1;
+ 		}
+ 	}
+ 	return (HsfaTab == NULL) ? 1 : 0;
+@@ -1761,6 +1770,7 @@ INT32 HsfaExit()
+ 	HsfaMode = 0;
+ 	HsfaHyper = 0;
+ 	nCpsGfxLenMin = 0;
++	bHsfaGfx20 = 0;
+ 	nHsfaExtBase = 0xA00000; nHsfaExtLen = 0x500000;
+ 	return 0;
+ }
+diff --git a/src/burn/drv/capcom/cps_obj.cpp b/src/burn/drv/capcom/cps_obj.cpp
+index 887427e..f1545b9 100644
+--- a/src/burn/drv/capcom/cps_obj.cpp
++++ b/src/burn/drv/capcom/cps_obj.cpp
+@@ -432,7 +432,7 @@ INT32 Cps2ObjDraw(INT32 nLevelFrom, INT32 nLevelTo)
+ 		} else {
+ 			n |= (BURN_ENDIAN_SWAP_INT16(ps[1]) & 0x6000) << 3;	// high bits of address
+ 		}
+-		if (HsfaMode == 2) {
++		if (HsfaMode == 2 || bHsfaGfx20) {						// (patch 0025) SFA3 : avec hsfa_gfx.bin
+ 			n |= (BURN_ENDIAN_SWAP_INT16(ps[0]) & 0x0c00) << 8;	// HSFA : bits 18-19 du code = bits 10-11 de X
+ 		}
+ #ifdef HSFA_WS
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index b09b391..02a011a 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15430,6 +15430,9 @@ static struct BurnRomInfo Sfa3hsfaRomDesc[] = {
+ 
+ 	{ "hsfa_ext.bin",  0x500000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// $A00000-$EFFFFF
+ 	{ "hsfa_tab.bin",  0x400000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// tables de banques
++	// (patch 0025) FACULTATIF : tuiles d'objets du portage absentes de la ROM d'arcade (fins), region $2000000-$3FFFFFF,
++	// codes $7F8C0+ (= $3F8C0+ sur 18 bits : tuiles transparentes de la ROM, rien ne s'affiche sans ce fichier)
++	{ "hsfa_gfx.bin",  0x2000000, 0x00000000, CPS2_HSFA_DATA | BRF_OPT | BRF_GRA },
+ };
+ 
+ STD_ROM_PICK(Sfa3hsfa)
+@@ -15625,6 +15628,7 @@ STD_ROM_FN(Sfa3hahsfa)
+ static INT32 HsfaSfa3Init()
+ {
+ 	HsfaMode = 1;
++	nCpsGfxLenMin = HsfaGfxLenMin();			// (patch 0025) 64 Mo : hsfa_gfx.bin facultatif en $2000000
+ 	INT32 nRet = PhoenixInit();
+ 	if (!nRet) nRet = HsfaInit();
+ 	return nRet;
+-- 
+2.53.0
+

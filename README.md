@@ -7,11 +7,11 @@
 > **No game data is provided.** You need your own copy of *Street Fighter Alpha Anthology* (PS2, USA, `SLUS-21317`).
 > Not in this release: **Upper MAX** (the four SFA3 MAX characters) and the **Arcade-mode graft** onto Hyper.
 
-1. **Download the cores** from the [releases](../../releases) page: `hsfa-v0.1.5-cores-<platform>.zip` for Android
+1. **Download the cores** from the [releases](../../releases) page: `hsfa-v0.1.6-cores-<platform>.zip` for Android
    (arm64), ROCKNIX (aarch64: RGB10X, R36S…), Windows (x64), Linux (x86_64) or Recalbox 10 (Raspberry Pi; tested on
    a Pi 3B). Each archive holds the 4:3 core
    (`fbneo_hsfa`) and the 16:9 core (`fbneo_hsfaws`), with their licence.
-2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Easiest: download `hsfa-v0.1.5-construction.zip`
+2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Easiest: download `hsfa-v0.1.6-construction.zip`
    from the release (or this repository), then run **`construire.sh`** (Linux, macOS, WSL) or double-click
    **`construire.bat`** (Windows, experimental: untested so far) and give it your ISO. It sets up Python, checks for
    ffmpeg, and builds the three games into `sortie/archives/`. By hand:
@@ -64,13 +64,13 @@ They run in two environments:
 
 > **Picking the project up** (human or agent): read [AGENTS.md](AGENTS.md) (in French): rules, method, findings and open work, updated with every discovery.
 
-## Status (2026-11-07, release v0.1.5)
+## Status (2026-11-08, release v0.1.6)
 
 **Working**
 
 | | Status | Details |
 |---|---|---|
-| SFA3 (`ro3`) | complete: attract mode; Arcade mode to the credits, **32/32 endings** match the arcade; VERSUS, SURVIVAL, DRAMATIC, TRAINING; controls **42/42** identical to the arcade; arcade turbo rate (133.3%); sound validated | [journal §110-§113](docs/journal/HANDOFF.md), [non-regression](docs/methodes/oracle-et-non-regression.md) |
+| SFA3 (`ro3`) | complete: attract mode; Arcade mode to the credits, **32/32 endings** match the arcade (v0.1.6: the Shadaloo dolls the PS2 port redrew in four endings are back, with the v0.1.6 cores); VERSUS, SURVIVAL, DRAMATIC, TRAINING; controls **42/42** identical to the arcade; arcade turbo rate (133.3%); sound validated | [journal §110-§113](docs/journal/HANDOFF.md), [non-regression](docs/methodes/oracle-et-non-regression.md) |
 | Upper (`ro5`) | playable end to end, **40/40 endings**; hybrid sound ROM (SFA3 music + Upper voices); the music that exists only as streams on the disc is packed in the zip as Ogg Vorbis | [§122-§128](docs/journal/HANDOFF.md), [FLUX](docs/rapports/FLUX.md) |
 | Hyper (`ro9`) | VERSUS without exceptions (151-match tour); supers of the ZERO / ZERO 2 / ALPHA versions no longer crash; super gauge and TRAINING fixed; ZERO / ZERO 2 / ALPHA music in the zip (Ogg Vorbis); per-version SFA1 / SFA2 voices replayed on a 2nd QSound when the replay table is present (see below) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
 | Menus | OPTION and EXIT return to the mode menu; the PS2 option-screen settings (difficulty, damage, timer, speed, rounds) are core options | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
@@ -91,13 +91,16 @@ They run in two environments:
 
 **In progress (not in this release)**
 
-- **Route B**: graft Upper's Arcade-mode layer onto Hyper ("augmented ro9"), with Upper as the oracle
-  ([architecture](docs/architecture/voie-b-greffe.md)).
-- **Upper MAX**: Eagle, Maki, Yun and Ingrid (SFA3 MAX, PSP) in Upper, driver `sfa3umhsfa`
+- **Route B, "Hyper + Arcade"**: Upper's Arcade mode grafted onto Hyper ("augmented ro9", driver `sfa3hahsfa`), with
+  Upper as the oracle; test builds so far; next: SFA1 / SFA2 stages extracted from the ISO with their animations, then
+  the four MAX characters ([architecture](docs/architecture/voie-b-greffe.md)).
+- **Upper MAX**: Eagle, Maki, Yun and Ingrid (SFA3 MAX, PSP) in Upper, driver `sfa3umhsfa`; test builds so far; the build
+  script will take the PSP ISO as an option (without it, plain Upper is built)
   ([CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md)).
-- **Data relayout**: remove the memory adapters, ~20% of 68K time in fights
-  ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.md)).
-- **Widescreen stages** and SFA2 stages: exact PSD export, re-import, injection in the fork and the core
+- **Data relayout**: phases 1-2 done and tagged but not enabled (small gain on the host; paused until the MAX
+  characters go into the graft) ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.md)).
+- **Redrawn widescreen stages** (exact PSD export, re-import, injection in the fork and the core): on hold; the 16:9
+  view locks onto the arcade art instead
   ([DECORS-WS](docs/rapports/DECORS-WS.md), [INJECTION-FORK](docs/rapports/INJECTION-FORK.md)).
 
 ## Getting started

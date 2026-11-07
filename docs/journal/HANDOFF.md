@@ -5546,3 +5546,38 @@ Alpha Counter = artefact du banc.
   (ROM SSF2T) et persos MAX (ISO PSP) seulement si le joueur les fournit.
 - **Upper MAX** : 2b31 (onde de Yun derrière ses jambes). Banc des données d'images en tours de jeu : derniers écarts
   natifs ou de mesure.
+
+### 201. SFA3 : tuiles d'objets dessinées par le portage (poupées de Shadaloo) ; traducteur v158, patch 0025
+
+- **Défaut** (agent sfa3_restes, `work/sfa3_restes/RAPPORT.md` §2, §5) : après v157, il reste 888 tuiles d'objets non
+  vides sans entrée dans les tables de SFA3 (684 contenus distincts ; f405 / f407 / f409 / f410, f280, f285, f254). Leur
+  contenu n'est dans la ROM d'arcade ni tel quel, ni en miroir, ni dans une fenêtre décalée. Le portage a ses propres
+  découpes des scènes de fin : ce sont les **poupées de Shadaloo** des fins de Cammy, E. Honda, R. Mika et Cody (489 tuiles
+  retirées en jeu sur 32 fins). La ROM reconstruite depuis l'ISO ne les contient pas non plus.
+- **Correctif** (méthode d'Upper) : `hsfa_gfx.py` ajoute ces tuiles telles quelles en ROM étendue pour SFA3 aussi.
+  - Premier code SFA3 : **$7F8C0** (`HSFA_GFX_CODE0`). Sur 18 bits il vaut $3F8C0 ; les tuiles $3F8C0-$3FFFF (1 856) de
+    la ROM d'arcade et de la ROM reconstruite sont transparentes : un pilote qui ignore les bits 18-19 (MAME d'origine,
+    cœur sans 0025) n'affiche rien à leur place, comme avant. Garde de capacité : arrêt au-delà de $7FFFF.
+  - Seules les entrées vides des tables changent (`banques_hx/`) ; Upper / Hyper inchangés ($40000).
+- **Traducteur v158** (= v157 + ce changement de `hsfa_gfx.py`, commit `7feac5b`). Constructions ro3 / ro5 / ro9 et
+  tables `banques` : v157 à l'octet. Nouveau pour SFA3 : `banques_hx/` (7 tables) et `hsfa_gfx.bin` (684 tuiles, ROM
+  d'arcade). Upper / Hyper : `hsfa_gfx.py` v157 et v158 donnent les mêmes `banques_hx` et `hsfa_gfx.bin`. Références :
+  `work/references/v158` (et `v158_banc`). Atelier : `work/mame/roms_tr/sfa3ud/sz3.05c` mis à v157 / v158 (`eaec4f67`).
+- **Chaîne publique** : `hsfa_build.py` lance `hsfa_gfx.py` pour sfa3, et `paquet_fbneo.py` met `banques_hx` et
+  `hsfa_gfx.bin` dans le zip (tuiles en $1FC6000). Interrupteur **`SFA3_TUILES_PS2`** (défaut 1 ; 0 = zip v157 à l'octet).
+  - Depuis l'ISO seule : zip SFA3 `edf6c027` (`hsfa_gfx.bin` `398d954b`, 590 tuiles, `hsfa_tab.bin` `34a5a825`) ;
+    `SFA3_TUILES_PS2=0` → `345ead54` (= v157). Upper et Hyper : zips identiques à ceux d'avant.
+- **Cœur FBNeo, patch 0025** (accord du porteur du 03/11) : `hsfa_gfx.bin` **facultatif** dans `sfa3hsfa` (`BRF_OPT`,
+  région graphique portée à 64 Mo comme Upper) ; bits 18-19 du code lus seulement si le fichier est chargé
+  (`bHsfaGfx20`). Arbre `e3de98d` (= 590e367 + 0025).
+- **Bancs** :
+  - MAME (fork + ROM étendue) : 32 fins = v157, tuiles non vides retirées 489 → 0 ; MAME d'origine + nouvelles tables :
+    1 415 captures identiques à v157 ; nonreg SFA3 42 / 0.
+  - Cœur 0025 contre le 07/11, zips en service (SFA3, Upper, Upper MAX, Hyper, greffe ; 4:3 On / Off, 16:9 défaut, x86
+    aux drapeaux ARM) : **25/25 identiques** (images, journaux, son). Zip v158 sur le cœur du 07/11 = zip v157 (combat
+    et fins) : pas de tuile parasite.
+  - Fins de Cammy, Honda, R. Mika, Cody (cœur 0025 + zip v158) : poupées présentes en 4:3 et en 16:9, comme sur la
+    borne.
+- **Livraisons** : cœurs du 08/11 (12 cœurs, `work/livraison_coeurs_2026-11-08`) ; zip SFA3 `edf6c027`.
+- **Gardé tel quel** (RAPPORT §3) : 23 cellules de scroll1 du décor $00 (colonne 0 du ciel en miroir, données du
+  portage). Invisibles en vue calée ; seul le mode Raw les montre.

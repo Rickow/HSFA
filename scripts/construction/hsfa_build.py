@@ -616,6 +616,11 @@ class Construction:
         for args in (["tout"], [str(J["b32"])], ["plans"]):
             self.lance("gfx_" + jeu, dict(cwd=W, sys_path=sp, argv=["banques.py"] + args, module="banques",
                                           patchs=self.patchs_banques(jeu)), env, python=py)
+        # (patch FBNeo 0025) SFA3 : tuiles d'objets du portage absentes de la ROM d'arcade (fins) ajoutees telles quelles
+        # en ROM etendue (hsfa_gfx.py, codes $7F8C0+) ; SFA3_TUILES_PS2=0 : archive de v157 (sans hsfa_gfx.bin) a l'octet
+        if jeu == "sfa3" and os.environ.get("SFA3_TUILES_PS2", "1") != "0":
+            self.lance("gfx_" + jeu, dict(cwd=W, sys_path=sp, argv=["hsfa_gfx.py"], module="hsfa_gfx",
+                                          patchs=self.patchs_banques(jeu)), dict(env), python=py)
         if jeu in ("upper", "hyper"):
             env2 = dict(env)
             if jeu == "hyper":                      # ROM etendue d'Upper reprise en tete (HANDOFF §133)

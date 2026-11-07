@@ -16,6 +16,17 @@ D = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, D)
 import banques, anthgfx, profils
 
 EXT0 = 0x40000                      # premier code de la ROM etendue (region $2000000)
+# (sfa3_restes, patch FBNeo 0025) SFA3 (MODULE=ro3) : tuiles d'objets du portage SANS correspondance dans la ROM d'arcade
+# (ni exacte ni en miroir : dessins propres au portage dans les fins, ex. les poupees de Shadaloo), ajoutees telles quelles
+# a partir du code $7F8C0 (octet $3FC6000 de la region) : sur 18 bits ce code vaut $3F8C0, et les tuiles $3F8C0-$3FFFF
+# (1 856) de la ROM d'arcade comme de la ROM reconstruite depuis l'ISO sont TRANSPARENTES -> un pilote qui ignore les
+# bits 18-19 (MAME d'origine, coeur sans le patch 0025) n'affiche rien a leur place (comme avant) au lieu d'autres tuiles.
+# HSFA_GFX_CODE0 : autre premier code (essais). Upper / Hyper : $40000 (inchange).
+if banques.MODULE == 'ro3':
+    EXT0 = int(os.environ.get("HSFA_GFX_CODE0", "0x7F8C0"), 16)
+    EXT_MAX = 0x80000                # au-dela, la tuile retomberait sur une tuile NON transparente de la ROM (18 bits)
+else:
+    EXT_MAX = None
 VIDE = banques.VIDE
 
 def encode(px):
@@ -81,7 +92,12 @@ def main():
             t[m] = neuf[cle]; ajout += 1
         t.astype('<u4').tofile(p)
         if ajout: print("f%d : %d tuiles vers la ROM etendue" % (n, ajout))
+    if EXT_MAX is not None and EXT0 + len(blob) // 128 > EXT_MAX:
+        raise SystemExit("ROM etendue SFA3 : %d tuiles depassent la zone $%x-$%x" % (len(blob) // 128, EXT0, EXT_MAX - 1))
     open(os.path.join(W, "hsfa_gfx.bin"), "wb").write(blob)
+    if EXT0 != 0x40000:                              # (sfa3_restes) decalage dans la region pour le banc / le paquet
+        print("premier code $%x : HSFA_GFX=%s@%x (fork MAME), decalage $%x dans hsfa_gfx.bin du paquet FBNeo"
+              % (EXT0, os.path.join(W, "hsfa_gfx.bin"), 0x2000000 + (EXT0 - 0x40000) * 128, (EXT0 - 0x40000) * 128))
     print("ROM etendue : %d tuiles uniques, %.2f Mo (place : %.0f Mo)" % (len(neuf), len(blob) / 2**20, 96))
     if len(blob) > 0x1000000: print("ATTENTION : plus de 16 Mo -> chevauche hsfa_plans.bin en $3000000 (deplacer les plans)")   # (agent_ro9)
 

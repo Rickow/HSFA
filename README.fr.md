@@ -8,12 +8,12 @@
 > `SLUS-21317`). Pas dans cette release : **Upper MAX** (les quatre persos de SFA3 MAX) et la **greffe du mode
 > Arcade** sur Hyper.
 
-1. **Télécharger les cœurs** depuis la page des [releases](../../releases) : `hsfa-v0.1.5-cores-<plateforme>.zip` pour
+1. **Télécharger les cœurs** depuis la page des [releases](../../releases) : `hsfa-v0.1.6-cores-<plateforme>.zip` pour
    Android (arm64), ROCKNIX (aarch64 : RGB10X, R36S…), Windows (x64), Linux (x86_64) ou Recalbox 10 (Raspberry Pi ;
    essayé sur un Pi 3B). Chaque archive contient le
    cœur 4:3 (`fbneo_hsfa`) et le cœur 16:9 (`fbneo_hsfaws`), avec leur licence.
 2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes). Le plus simple : télécharger
-   `hsfa-v0.1.5-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
+   `hsfa-v0.1.6-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
    double-cliquer sur **`construire.bat`** (Windows, expérimental : pas encore testé) et lui donner votre ISO. Il prépare
    Python, regarde si ffmpeg est là et construit les trois jeux dans `sortie/archives/`. À la main :
    ```bash
@@ -67,13 +67,13 @@ Ils tournent dans deux environnements :
 
 > **Reprendre le projet** (personne ou agent) : lire [AGENTS.md](AGENTS.md), qui condense règles, méthode, acquis et chantiers, tenu à jour à chaque découverte.
 
-## État (2026-11-07, release v0.1.5)
+## État (2026-11-08, release v0.1.6)
 
 **Ce qui marche**
 
 | | État | Détails |
 |---|---|---|
-| SFA3 (`ro3`) | complet : attraction ; mode Arcade jusqu'au générique, **32/32 fins** conformes à l'arcade ; VERSUS, SURVIVAL, DRAMATIC, TRAINING ; commandes **42/42** identiques à l'arcade ; cadence turbo de l'arcade (133,3 %) ; son validé | [journal §110-§113](docs/journal/HANDOFF.md), [non-régression](docs/methodes/oracle-et-non-regression.md) |
+| SFA3 (`ro3`) | complet : attraction ; mode Arcade jusqu'au générique, **32/32 fins** conformes à l'arcade (v0.1.6 : les poupées de Shadaloo redessinées par le portage PS2 dans quatre fins sont revenues, avec les cœurs v0.1.6) ; VERSUS, SURVIVAL, DRAMATIC, TRAINING ; commandes **42/42** identiques à l'arcade ; cadence turbo de l'arcade (133,3 %) ; son validé | [journal §110-§113](docs/journal/HANDOFF.md), [non-régression](docs/methodes/oracle-et-non-regression.md) |
 | Upper (`ro5`) | jouable de bout en bout, **40/40 fins** ; ROM son hybride (musiques de SFA3 + voix d'Upper) ; les musiques qui n'existent qu'en flux sur le disque sont rangées dans le zip en Ogg Vorbis | [§122-§128](docs/journal/HANDOFF.md), [FLUX](docs/rapports/FLUX.md) |
 | Hyper (`ro9`) | VERSUS sans exception (tournée de 151 combats) ; les supers des versions ZERO / ZERO 2 / ALPHA ne plantent plus ; jauge de super et TRAINING corrigés ; musiques ZERO / ZERO 2 / ALPHA dans le zip (Ogg Vorbis) ; voix SFA1 / SFA2 par version, rejouées sur un 2ᵉ QSound, quand la table du rejeu est là (voir plus bas) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
 | Menus | OPTION et EXIT ramènent au menu des modes ; les réglages de l'écran d'options PS2 (difficulté, dégâts, chrono, vitesse, manches) sont des options du cœur | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
@@ -93,13 +93,16 @@ Ils tournent dans deux environnements :
 
 **En cours (pas dans cette release)**
 
-- **Voie B** : greffer la couche du mode Arcade d'Upper sur Hyper (« ro9 augmenté »), avec Upper comme oracle
-  ([architecture](docs/architecture/voie-b-greffe.md)).
-- **Upper MAX** : Eagle, Maki, Yun et Ingrid (SFA3 MAX, PSP) dans Upper, pilote `sfa3umhsfa`
+- **Voie B, « Hyper + Arcade »** : mode Arcade d'Upper greffé sur Hyper (« ro9 augmenté », pilote `sfa3hahsfa`), avec
+  Upper comme oracle ; versions d'essai pour l'instant ; ensuite : décors SFA1 / SFA2 extraits de l'ISO avec leurs
+  animations, puis les quatre persos MAX ([architecture](docs/architecture/voie-b-greffe.md)).
+- **Upper MAX** : Eagle, Maki, Yun et Ingrid (SFA3 MAX, PSP) dans Upper, pilote `sfa3umhsfa` ; versions d'essai pour
+  l'instant ; le script de construction prendra l'ISO PSP en option (sans elle, Upper normal)
   ([CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md)).
-- **Réorganisation des données** : supprimer les adaptateurs mémoire, ~20 % du temps 68K en combat
-  ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.md)).
-- **Décors widescreen** et décors de SFA2 : export PSD exact, réimportation, injection au fork et au cœur
+- **Réorganisation des données** : phases 1-2 faites et étiquetées, non activées (gain faible sur l'hôte ; en pause
+  jusqu'à l'arrivée des MAX dans la greffe) ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.md)).
+- **Décors widescreen redessinés** (export PSD exact, réimportation, injection au fork et au cœur) : en attente ; la vue
+  16:9 se cale sur le décor d'arcade à la place
   ([DECORS-WS](docs/rapports/DECORS-WS.md), [INJECTION-FORK](docs/rapports/INJECTION-FORK.md)).
 
 ## Démarrer

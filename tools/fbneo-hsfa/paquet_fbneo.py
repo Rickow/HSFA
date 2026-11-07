@@ -13,7 +13,7 @@ Reproduit le banc MAME du projet :
                     programme ; la fin est fixe ($F00000) : le pilote deduit la base de la taille du fichier ;
   - hsfa_tab.bin  : tables de banc_sprites.lua / banc_plans.lua (f<N>.bin, plan1, plan2, f312, carte.txt)
                     + parametres (banque commune, pointeur d'animation, fichier de l'intro, bases des plans) ;
-  - hsfa_gfx.bin  : (Upper, Hyper) region graphique $2000000-$3FFFFFF au format interne MAME : hsfa_gfx.bin en +0,
+  - hsfa_gfx.bin  : (Upper, Hyper ; SFA3 avec le patch 0025 : tuiles du portage en $1FC6000) region graphique $2000000-$3FFFFFF au format interne MAME : hsfa_gfx.bin en +0,
                     hsfa_plans.bin en +$1000000 (= HSFA_GFX=...hsfa_gfx.bin,...hsfa_plans.bin@3000000) ;
   - son : ROM d'origine de SFA3 (sfa3hsfa) ou ROM hybride d'Upper hx3.* (sfa3uhsfa et sfa3hhsfa, QSound 16 Mo ;
     les musiques d'Hyper sont jouees par le lecteur de flux ADX du coeur, depuis le Y_DATA.BIN de l'utilisateur) ;
@@ -542,9 +542,21 @@ def ecrit_membre(z, nom, d, stocke=False):
     else:
         z.writestr(zi, d, compresslevel=None if stocke else 6)
 
+def _jeu_sfa3(J):
+    """(patch FBNeo 0025) SFA3 : tuiles d'objets du portage absentes de la ROM d'arcade (fins) ajoutees telles quelles par
+    hsfa_gfx.py (codes $7F8C0+ = octet $1FC6000 de hsfa_gfx.bin) : tables de banques_hx et membre hsfa_gfx.bin, s'ils
+    existent. SFA3_TUILES_PS2=0 : archive d'avant (sans hsfa_gfx.bin), a l'octet. Un coeur sans le patch 0025 ignore
+    hsfa_gfx.bin et lit ces codes sur 18 bits ($3F8C0+ : tuiles transparentes de la ROM), c'est-a-dire comme avant."""
+    if os.environ.get("SFA3_TUILES_PS2", "1") == "0": return J
+    hx, gfx = os.path.join(J["dossier"], "banques_hx"), os.path.join(J["dossier"], "hsfa_gfx.bin")
+    if not (os.path.isdir(os.path.join(WORK, hx)) and os.path.isfile(os.path.join(WORK, gfx))):
+        print("  (pas de %s ni de %s : archive sans les tuiles du portage)" % (hx, gfx)); return J
+    return dict(J, banques=hx, gfx=[(gfx, 0x1FC6000)])
+
 def construit(cle):
     J = JEUX[cle]
     if J == "MAX": J = _jeu_upper_max()
+    if cle == "sfa3": J = _jeu_sfa3(J)
     journal.clear()
     print("== %s (%s)" % (J["nom"], cle))
     roms = os.environ.get("HSFA_ROMS") or os.path.join(WORK, J["roms"])
