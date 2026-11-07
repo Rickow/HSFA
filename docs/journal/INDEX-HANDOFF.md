@@ -413,6 +413,7 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §199 | 5486 | SFA3 | tuiles rangées en miroir par le portage (traducteur v157, patch 0024) |
 | §200 | 5529 | Greffe ro9a26 → ro9a28 ; vrai 16:9 calé (0023) ; SFA3 tuiles en miroir (v157, 0024) ; décors SFA1 / SFA2 préparés | — |
 | §201 | 5550 | SFA3 | tuiles d'objets dessinées par le portage (poupées de Shadaloo) ; traducteur v158, patch 0025 |
+| §202 | (fin) | Upper MAX depuis les deux disques : compléments scriptés, sans sfa3ud, ROM son régénérée, G_MAX en voie ISO, 656 captures cœur identiques | — |
 
 ---
 

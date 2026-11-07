@@ -2,7 +2,13 @@
 Suit branches, BSR/JSR (dans la région), et tables de saut Capcom :
   MOVE.W tab(PC,Dn.W),Dm ; JMP/JSR tab(PC,Dm.W)   (table de décalages 16 bits relatifs à tab)."""
 import struct, re, capstone
-B = open(__import__("os").path.join(__import__("os").environ.get("HSFA_WORK", "work"), "cps2", "sfa3_prog.bin"), "rb").read()
+_P = __import__("os").path.join(__import__("os").environ.get("HSFA_WORK", "work"), "cps2", "sfa3_prog.bin")
+# (2026-11-07) sans programme d'arcade (construction depuis les seuls disques) : B vide. Les outils d'APPRENTISSAGE (tout,
+# tailles68, evaluer, appris_acteurs, mouvements, champs_projectiles) en ont besoin ; les autres l'importent seulement
+# (brouillons, tables_explicites, projectiles_max, acteurs_fins, anims_fins_max : 0 octet lu) et lisent les tables
+# apprises versionnées de ce dossier (api_arcade_psp.json, champs_votes.json, tailles68.json, carte_champs.json,
+# api_acteurs.json).
+B = open(_P, "rb").read() if __import__("os").path.exists(_P) else b""
 L = lambda a: struct.unpack_from(">I", B, a)[0]; Ws = lambda a: struct.unpack_from(">h", B, a)[0]
 md = capstone.Cs(capstone.CS_ARCH_M68K, capstone.CS_MODE_BIG_ENDIAN | capstone.CS_MODE_M68K_000)
 md.detail = False

@@ -60,8 +60,8 @@ Ils tournent dans deux environnements :
 - un **fork de MAME** : banc de développement, jeu `sfa3hx` ;
 - un **cœur libretro FBNeo « HSFA »** pour RetroArch : Android (arm64), Linux (x86_64), Windows (x64), ROCKNIX (RGB10X,
   aarch64) et Recalbox 10 (Raspberry Pi : armhf et aarch64), en 4:3 et en 16:9 (12 cœurs par release). Les cœurs
-  contiennent aussi deux pilotes d'essai, pas encore construits depuis l'ISO : `sfa3umhsfa` (Upper MAX) et `sfa3hahsfa`
-  (Hyper + Arcade).
+  contiennent aussi deux pilotes plus récents : `sfa3umhsfa` (Upper MAX, constructible depuis vos disques depuis le
+  2026-11-07, voir plus bas) et `sfa3hahsfa` (Hyper + Arcade, versions d'essai seulement).
 
 > **Aucune donnée de jeu ici.** Le dépôt ne contient que des outils, des patchs et de la documentation. Tout ce qui
 > vient du jeu (programmes, graphismes, sons) est reconstruit **depuis votre propre ISO** de l'Anthology.
@@ -98,9 +98,10 @@ Ils tournent dans deux environnements :
 - **Voie B, « Hyper + Arcade »** : mode Arcade d'Upper greffé sur Hyper (« ro9 augmenté », pilote `sfa3hahsfa`), avec
   Upper comme oracle ; versions d'essai pour l'instant ; ensuite : décors SFA1 / SFA2 extraits de l'ISO avec leurs
   animations, puis les quatre persos MAX ([architecture](docs/architecture/voie-b-greffe.md)).
-- **Upper MAX** : Eagle, Maki, Yun et Ingrid (SFA3 MAX, PSP) dans Upper, pilote `sfa3umhsfa` ; versions d'essai pour
-  l'instant ; le script de construction prendra l'ISO PSP en option (sans elle, Upper normal)
-  ([CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md)).
+- **Upper MAX** : Eagle, Maki, Yun et Ingrid (SFA3 MAX, PSP) dans Upper, pilote `sfa3umhsfa`. **Construction expérimentale
+  depuis vos deux disques** (Anthology PS2 + ISO PSP européenne de *SFA3 MAX*, ULES-00235), rien d'autre à installer
+  (assembleur 68000 du projet) : `hsfa_build.py --jeux uppermax --psp-iso <ISO PSP>` ; sans l'ISO PSP, Upper normal
+  ([guide §5](docs/guide/construction-iso.md), [CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md)).
 - **Réorganisation des données** : phases 1-2 faites et étiquetées, non activées (gain faible sur l'hôte ; en pause
   jusqu'à l'arrivée des MAX dans la greffe) ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.md)).
 - **Décors widescreen redessinés** (export PSD exact, réimportation, injection au fork et au cœur) : en attente ; la vue

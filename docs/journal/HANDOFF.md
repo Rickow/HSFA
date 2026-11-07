@@ -5581,3 +5581,39 @@ Alpha Counter = artefact du banc.
 - **Livraisons** : cœurs du 08/11 (12 cœurs, `work/livraison_coeurs_2026-11-08`) ; zip SFA3 `edf6c027`.
 - **Gardé tel quel** (RAPPORT §3) : 23 cellules de scroll1 du décor $00 (colonne 0 du ciel en miroir, données du
   portage). Invisibles en vue calée ; seul le mode Raw les montre.
+
+### 202. Upper MAX construit depuis les deux disques du joueur (`hsfa_build.py --jeux uppermax --psp-iso`)
+
+- **But** (décision de l'utilisateur du 07/11) : le joueur fournit seulement l'ISO PS2 de l'Anthology et l'ISO PSP
+  **européenne** de SFA3 MAX. Plus de programme d'arcade `sfa3ud`, plus de fichiers d'atelier. Agent `script_um`,
+  `work/script_uppermax/` (RAPPORT.md, ETAT.md).
+- **Compléments scriptés** : ce qui sortait jusqu'ici de commandes ponctuelles est produit par les outils de `max/`
+  (session MAX, commits 8b9ff0b et f99add9) et par `tools/integration-max/upper_max/regen_max.py`. Les sorties sont
+  identiques à l'octet :
+  - scripts de fin (`convertir_fin.py ecrire`, modèles $10 / $07 / $14 / $10) ;
+  - palettes et jeux de palettes de fin ;
+  - portraits de victoire (`winXX_e.pac` entrée 4 ; Ingrid 4 palettes par couleur) ;
+  - sauts / physique (`sauts_max.py`, EBOOT 0x21C1C6-0x21CE3E) ;
+  - parcours : table de décision + rangs relus dans l'EBOOT, `0x20A784` / `0x20A7AE` / `0x20A7D8`.
+- **Sans `sfa3ud`** : les octets lus ont été tracés.
+  - Les tables apprises de la Rosette du code (adresses, champs, votes) et les décisions des acteurs des fins
+    (n° d'animations) sont versionnées dans `max/`.
+  - Les scripts de fin d'arcade sont lus dans le module **ro3** (table PS2 `0x584600` = `$26DCC`).
+  - Les enregistrements d'acteurs de ro3 ont des octets modifiés par l'Anthology : on ne les utilise pas.
+- **ROM son MAX régénérée** (`upper_max/son/chaine_son.py` : voix VAG, `se_mid`, table son ro9, `gen_voix_max`,
+  `gen_son_max`) : hx3.* 6/6, `commandes_voix_max.s` et `commandes_son_max.s` identiques au 2b31.
+- **`s/acteurs_fins_max.s`** reste à l'état 2b31 : il est produit avec le `traduire.py` de d98c4f1. La copie du cache
+  v2 était périmée depuis 64f79e3 (37 lignes). La version actuelle passera par un lot d'essai et un banc des fins
+  (session MAX).
+- **Défaut de la voie ISO seule, corrigé** : Upper ISO a 569 tuiles propres de moins. Les outils MAX numérotaient donc
+  dès `$4D872`, alors que le paquet place les tuiles MAX en `G_MAX = $4DAAB` (persos MAX faux à l'écran). Correctif :
+  `regen_max.py --g-max 4DAAB`, qui complète de tuiles nulles la copie de `hsfa_gfx.bin` lue par les outils MAX.
+- **Preuves** :
+  - jumeau `--arcade` = 2b31 sur 28/29 membres (sauf `hsfa_info.txt`) ;
+  - ISO seule, depuis une copie `git archive` du dépôt, audit `strace` (aucun fichier d'atelier lu) : programme
+    `7ede9d19`, ROM son, `hsfa_ext` et flux identiques au 2b31 ; `sz3.13/15/17/19m`, `hsfa_gfx` et `hsfa_tab`
+    diffèrent (voie ISO) ;
+  - équivalence d'affichage : 114 tables, mêmes tuiles (sauf `plan1`, non affiché, comme pour Upper) ;
+  - cœur FBNeo : 4 persos MAX contre Ryu, **656 / 656 captures identiques au pixel**, journaux identiques.
+- Durée : 2 min 32 s de plus qu'Upper ; dépendance nouvelle : **vasm**, dont le sous-ensemble employé est décrit dans
+  BUILD §10.6. Détail : `docs/rapports/BUILD.md` §10, `docs/guide/construction-iso.md` §5.

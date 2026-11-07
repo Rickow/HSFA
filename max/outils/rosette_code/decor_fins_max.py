@@ -121,6 +121,8 @@ if __name__ == "__main__":
         d = os.path.join(CONV, "pl%02x" % cid, "fin", "decor"); os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "tuiles.bin"), "wb").write(b"".join(tuiles))
         open(os.path.join(d, "palettes_cps2.bin"), "wb").write(struct.pack("<%dH" % len(ram), *ram))
+        # mêmes palettes (entrée 0x4000019 du pac) sous le nom que lit jeux_palettes_fin.py
+        open(os.path.join(CONV, "pl%02x" % cid, "fin", "palettes_fin_cps2.bin"), "wb").write(struct.pack("<%dH" % len(ram), *ram))
         open(os.path.join(d, "decor.bin"), "wb").write(b)
         json.dump(st, open(os.path.join(d, "decor.json"), "w"))
         sym.append("FIN118_%02X equ $%06X" % (cid, adr["FIN118_%02X" % cid]))

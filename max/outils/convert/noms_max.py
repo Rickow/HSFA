@@ -86,6 +86,7 @@ def bandeau():
     return out
 if __name__ == "__main__":
     bd = bandeau(); d = os.path.expanduser("~/.cache/sfa3max/converti/noms")
+    os.makedirs(d, exist_ok=True)            # (2026-11-07) 1er passage : dossier absent (relevé script_uppermax)
     json.dump(bd, open(os.path.join(d, "bandeau.json"), "w"), indent=1, ensure_ascii=False)
     print({pl: {t: (v["texte"], v["n"], v["positions"][:8]) for t, v in x.items() if t in ("J1_US", "J2_US")} for pl, x in bd.items()})
     out, t = main(); print({k: (v["nom"], v["largeur_tuiles"], v["code_local"]) for k, v in out.items()}, len(t), "tuiles")

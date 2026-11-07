@@ -57,7 +57,8 @@ They run in two environments:
 - a **MAME fork**: development bench, game `sfa3hx`;
 - a **FBNeo libretro core "HSFA"** for RetroArch: Android (arm64), Linux (x86_64), Windows (x64), ROCKNIX (RGB10X,
   aarch64) and Recalbox 10 (Raspberry Pi: armhf and aarch64), in 4:3 and 16:9 (12 cores per release). The cores also
-  hold two test drivers not built from the ISO yet: `sfa3umhsfa` (Upper MAX) and `sfa3hahsfa` (Hyper + Arcade).
+  hold two newer drivers: `sfa3umhsfa` (Upper MAX, buildable from your discs since 2026-11-07, see below) and
+  `sfa3hahsfa` (Hyper + Arcade, test builds only).
 
 > **No game data here.** This repository only contains tools, patches and documentation. Everything that comes from
 > the game (programs, graphics, sound) is rebuilt **from your own ISO** of the Anthology.
@@ -95,9 +96,10 @@ They run in two environments:
 - **Route B, "Hyper + Arcade"**: Upper's Arcade mode grafted onto Hyper ("augmented ro9", driver `sfa3hahsfa`), with
   Upper as the oracle; test builds so far; next: SFA1 / SFA2 stages extracted from the ISO with their animations, then
   the four MAX characters ([architecture](docs/architecture/voie-b-greffe.md)).
-- **Upper MAX**: Eagle, Maki, Yun and Ingrid (SFA3 MAX, PSP) in Upper, driver `sfa3umhsfa`; test builds so far; the build
-  script will take the PSP ISO as an option (without it, plain Upper is built)
-  ([CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md)).
+- **Upper MAX**: Eagle, Maki, Yun and Ingrid (SFA3 MAX, PSP) in Upper, driver `sfa3umhsfa`. **Experimental build
+  from your two discs** (PS2 Anthology + European PSP ISO of *SFA3 MAX*, ULES-00235), nothing else to install (HSFA's own
+  68000 assembler): `hsfa_build.py --jeux uppermax --psp-iso <PSP ISO>`; without the PSP ISO, plain Upper is built
+  ([guide §5](docs/guide/construction-iso.md), [CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md)).
 - **Data relayout**: phases 1-2 done and tagged but not enabled (small gain on the host; paused until the MAX
   characters go into the graft) ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.md)).
 - **Redrawn widescreen stages** (exact PSD export, re-import, injection in the fork and the core): on hold; the 16:9

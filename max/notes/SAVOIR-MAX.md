@@ -75,7 +75,7 @@ frames, acteurs). L'agent d'intégration lit aussi **directement** `<ws-max>/wor
 - **Dossiers de travail hors dépôt** : `<ws-max>/work/re/` (`rosette_code/`, `convert/`, `rosette_construction/`,
   `ppsspp/`, `sauvegardes/` de `assembler.sh`), arcade déchiffré `~/.cache/sfa3max/sfa3ud_donnees.bin`.
 - **Variables propres à MAX** : `SFA3MAX_CACHE` (racine), `SFA3MAX_PAC_DIR`, `SFA3MAX_ETIRE` (liste de pl étirés,
-  défaut `pl26,pl27,pl28` ; vide = aucun), `SFA3MAX_ETIRE_APERCU` (ID étirés de l'aperçu de sélection),
+  défaut `pl26,pl27,pl28,pl29` = cache v2 livré, depuis le 07/11 ; vide = aucun), `SFA3MAX_ETIRE_APERCU` (ID étirés de l'aperçu de sélection),
   `SFA3MAX_SORTIE_S` (dossier des `.s` de `frames_max.py`), `HSFA_PLANS`, `HSFA_WORK`, `ANTHOLOGY_DIR`.
 - **Échanges** : `<hsfa>/work/echanges/MAX.md` (questions / réponses, md5 des livraisons).
 

@@ -11,6 +11,7 @@ Correspondance des codes :
 Sortie : sons_pas_max.s (SONS_PAS_MAX : 4 pointeurs ; SONS_PAS_26…29 : 8 o par index, commentaire = code PSP et confiance)."""
 import os, re, struct, sys
 ICI = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, ICI)
+sys.path.insert(0, os.path.join(ICI, "..", "..", "..", "tools", "max"))
 from relocs import img, pointer_words
 
 GABARITS = {0x26: 0x2A3198, 0x27: 0x2A6268, 0x28: 0x2AD6DC, 0x29: 0x2B1EE0}

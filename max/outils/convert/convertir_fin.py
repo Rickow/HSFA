@@ -8,7 +8,8 @@ Règles établies en alignant les 32 fins d'arcade (ROM sfa3ud, table $26DCC) su
     commence à 45, la 3 à 76) : base + k, k = n° de ligne dans l'ordre du script (base fixée à l'intégration) ;
   - fondus x2 : A200 -> 4200, F200 -> 5200 ; D200 / C200 (ajouts PSP) retirés ;
   - insertions PSP retirées (option `psp_seul`) : palettes 0904 de jeu >= `pal_max`, 0A02 (0, FFC0) avant une scène.
-Usage : python3 convertir_fin.py valider   (reconvertit les fins d'arcade et mesure la concordance avec la ROM)"""
+Usage : python3 convertir_fin.py valider   (reconvertit les fins d'arcade et mesure la concordance avec la ROM)
+        python3 convertir_fin.py ecrire    (écrit converti/plXX/fin/script_fin_XX.s des 4 fins MAX, modèles MODELES)"""
 import sys, os, difflib, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import script_fin as S
@@ -124,3 +125,22 @@ def ecrire_s(ins, nom, fichier, base_texte_sym=None):
         if op == 0x0034 and base_texte_sym: a[2] = a[3] = "%s+%d" % (base_texte_sym, args[2])
         L.append("        dc.w    $%04x, $%04x%s" % (att, op, (", " + ", ".join(a)) if a else ""))
     open(fichier, "w").write("\n".join(L) + "\n")
+
+
+# fin d'arcade modèle de chaque fin MAX (mêmes plans / palettes de scène ; Eagle : README « Fin d'Eagle »). Yun : $06
+# donne le même script que $14.
+MODELES = {"26": 0x10, "27": 0x07, "28": 0x14, "29": 0x10}
+
+
+def ecrire_fins(conv=None):
+    """converti/plXX/fin/script_fin_XX.s (FINXX_SCRIPT, textes TEXTE_FIN_XX + k) : ce que lit l'intégration"""
+    conv = conv or os.path.join(os.path.expanduser(os.environ.get("SFA3MAX_CACHE", "~/.cache/sfa3max")), "converti")
+    for n, m in sorted(MODELES.items()):
+        ins, _ = convertir_avec_modele(n, m)
+        d = os.path.join(conv, "pl" + n, "fin"); os.makedirs(d, exist_ok=True)
+        ecrire_s(ins, "FIN%s_SCRIPT" % n, os.path.join(d, "script_fin_%s.s" % n), "TEXTE_FIN_%s" % n)
+        print("fin $%s : modèle $%02X, %d instructions -> %s" % (n, m, len(ins), d))
+
+
+if __name__ == "__main__" and sys.argv[1:] == ["ecrire"]:
+    ecrire_fins()

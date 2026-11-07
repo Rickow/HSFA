@@ -98,6 +98,9 @@ def perso(pl):
     fam["128x224"] = {"objs": objs, "poses": famille(POSES_128, ID), "source": "select_e.pac jeu 2 (frames %s, base %d)" % (list(cs), base)}
     # 6 variantes de couleurs x 4 palettes (base + 4 v + r) ; les objets du 128x224 (et des bandeaux) visent la variante 0
     S.variantes = [sel.P_brut(base + 4 * v + r) for v in range(6) for r in range(4)]
+    # portrait de victoire : winXX_e.pac entrée 4 = 6 couleurs × 8 palettes (k·v + r, k = 8) ; R_DIRECT : 4 par couleur
+    # (8 v + r, r < 4 ; k = 4) -> portraits_victoire_variantes.bin (lu par l'intégration, bloc 0x72BDF0[ID])
+    S.victoire = [win.P_brut(8 * v + r) for v in range(6) for r in range(4 if pl in R_DIRECT else 8)]
     fam["128x224"]["variantes"] = {"fichier": "portraits_palettes_variantes.bin (24 palettes : variante v, palette r = 4 v + r)",
         "palette_du_fichier_vers_r": {str(i): p - base for (e, p), i in S.pal_idx.items() if e == id(sel)}}
     if pl in R_DIRECT:      # (HSFA §131) le jeu ne copie que 4 palettes par variante : attributs = r directement (0..3)
@@ -128,6 +131,7 @@ def ecrire(S, fam, pl):
         return struct.pack("<%dH" % len(pal), *pal)
     open(os.path.join(d, "portraits_palettes.bin"), "wb").write(module(S.palettes))
     open(os.path.join(d, "portraits_palettes_variantes.bin"), "wb").write(module(S.variantes))
+    open(os.path.join(d, "portraits_victoire_variantes.bin"), "wb").write(module(S.victoire))
     for k, v in fam.items(): v["T"] = sum(((a >> 8 & 15) + 1) * ((a >> 12 & 15) + 1) for _, a, _, _ in v["objs"])
     json.dump(fam, open(os.path.join(d, "portraits.json"), "w"), indent=1)
     return d

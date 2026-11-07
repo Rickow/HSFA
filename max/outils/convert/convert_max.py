@@ -32,11 +32,13 @@ def find_boxset(b6):
 # (2026-10-18, mesure HSFA ×1,186 sur captures PPSSPP) ÉTIREMENT HORIZONTAL DES PERSOS MAX : FUN_0000D2A8 / FUN_0000CD84
 # (dessin des frames) testent l'octet +0x57 de l'objet sprite (= +0xAB de l'objet de jeu, posé à 1 par les inits MAX et par
 # leurs tirs / effets) : case de 32 texels dessinée sur 0x26 = 38 px (19/16), ancre X × 12/10 (division entière C), Y
-# inchangé ; boîtes non touchées (étirement purement graphique). Ingrid ($29) : mesurée à ×1 (autre chemin de dessin).
+# inchangé ; boîtes non touchées (étirement purement graphique). Ingrid ($29) : mesurée d'abord à ×1 (autre chemin de dessin),
+# mais le cache v2 livré (lots 2b) l'étire aussi : bank.bin / frames.json de pl29 identiques à l'octet seulement avec pl29
+# étiré (contrôle du 07/11) ; d'où le défaut ci-dessous.
 # Conversion : case PSP j -> bloc CPS2 3×2 tuiles (48×32 : colonnes 0-37 = texel floor(k·32/38), 38-47 transparentes),
 # b = 32·(j // 5) + 3·(j % 5) ; objet à x = col·38 − trunc(ancre·12/10), attributs 0x1200 ; case en miroir H : x − 10
-# (le miroir CPS2 retourne les 48 px). SFA3MAX_ETIRE = liste des pl étirés (défaut « pl26,pl27,pl28 » ; vide = aucun).
-ETIRE = [p for p in os.environ.get("SFA3MAX_ETIRE", "pl26,pl27,pl28").split(",") if p]
+# (le miroir CPS2 retourne les 48 px). SFA3MAX_ETIRE = liste des pl étirés (défaut « pl26,pl27,pl28,pl29 » = cache v2 ; vide = aucun).
+ETIRE = [p for p in os.environ.get("SFA3MAX_ETIRE", "pl26,pl27,pl28,pl29").split(",") if p]
 LARGEUR_CASE = 38
 def bank_code_etire(j):
     b = 32 * (j // 5) + 3 * (j % 5)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""hsfa_build.py -- reconstruit les jeux HSFA (SFA3, Upper, Hyper ; a terme MAX) a partir de l'ISO de l'utilisateur.
+"""hsfa_build.py (+ jeu uppermax : Upper + persos MAX de SFA3 MAX PSP) -- reconstruit les jeux HSFA (SFA3, Upper, Hyper ; a terme MAX) a partir de l'ISO de l'utilisateur.
 
 Le depot ne contient que des outils et des modifications : toutes les donnees de jeu sont lues dans l'ISO PS2 de
 *Street Fighter Alpha Anthology* (USA, SLUS-21317) fournie par l'utilisateur. La ROM graphique CPS2 de SFA3 est
@@ -111,6 +111,28 @@ JEUX = {
     "sfa3": dict(module="ro3", travail="mame", roms="roms_tr", b32=312, zip="sfa3hsfa", paquet="sfa3"),
     "upper": dict(module="ro5", travail="mame_ro5", roms="roms_ro5", b32=525, zip="sfa3uhsfa", paquet="upper"),
     "hyper": dict(module="ro9", travail="mame_ro9", roms="roms_ro9", b32=548, zip="sfa3hhsfa", paquet="hyper"),
+}
+
+# (script_uppermax) Upper + persos MAX (Eagle, Maki, Yun, Ingrid) de SFA3 MAX PSP : construction MAX=1 de l'integration
+# (etat 2b31), pilote sfa3umhsfa. Travail dans mame_ro5um/ ; le banc de reference est Upper sans MAX (prog_upper).
+JEUX["uppermax"] = dict(module="ro5", travail="mame_ro5um", roms=os.path.join("banc", "roms_ro5"), b32=525,
+                        zip="sfa3umhsfa", paquet="upper_max")
+GROUPES_REQUIS["uppermax"] = ["ro5", "ro3"]
+OUTILS_UM = os.environ.get("HSFA_OUTILS_UPPERMAX", os.path.join(DEPOT, "tools", "integration-max", "upper_max"))
+# ISO PSP de SFA3 MAX, EUROPE (ULES-00235, v1.01) : fichiers lus (empreintes = sommes de controle, aucune donnee de jeu)
+REF_PSP_ID = "ULES00235"
+REF_PSP_ISO = "5f58de7e83a0270bead43103f6c0136e"     # ISO complete (information : seuls les fichiers lus sont exiges)
+REF_PSP = {   # chemin dans l'ISO -> (taille, md5, nom dans le cache)
+    "PSP_GAME/SYSDIR/BOOT.BIN": (3693304, "df6d60fd9f843165b8040c5c23984e7d", "BOOT.BIN"),   # EBOOT en clair (ELF)
+    "PSP_GAME/USRDIR/EUR/DATA/PL26_E.PAC": (1705984, "7209750992a71f3b2a685ba9ddbb84f4", "pac/pl26_e.pac"),   # Eagle
+    "PSP_GAME/USRDIR/EUR/DATA/PL27_E.PAC": (1746944, "c6d5cee6395d8738f82c99a261ae3c8b", "pac/pl27_e.pac"),   # Maki
+    "PSP_GAME/USRDIR/EUR/DATA/PL28_E.PAC": (1886208, "3a41b2100a3aded66a084e66b66351b2", "pac/pl28_e.pac"),   # Yun
+    "PSP_GAME/USRDIR/EUR/DATA/PL29_E.PAC": (2078720, "c025bc2509aa1ea6d78ad0c83220866f", "pac/pl29_e.pac"),   # Ingrid
+}
+REF_SON_MAX = {   # ROM son MAX regeneree (son/chaine_son.py) : empreintes du lot 2b31 (controle)
+    "hx3.01": "32ea9c5758b6847d57fd96d232a38798", "hx3.02": "869e036d20d1e15da5f2168c4c57d68f",
+    "hx3.11m": "8da6a5e4272125bc0a7accada5e249e8", "hx3.12m": "2920bde5bea33dbca952d49edeb06329",
+    "hx3.13m": "65c573eb71d7963c7fbe7f22f86b114c", "hx3.14m": "1dacb518b9ce363233a499650f9b1276",
 }
 
 # Chemins codes en dur dans les scripts existants, remplaces a l'execution (module, attribut) -> role.
@@ -245,6 +267,12 @@ class Construction:
         self.jeux = [j.strip() for j in a.jeux.split(",") if j.strip()]
         for j in self.jeux:
             if j not in JEUX: raise Echec("jeu inconnu : %s (connus : %s)" % (j, ", ".join(JEUX)))
+        # (script_uppermax) uppermax = upper + persos MAX ; sans ISO PSP : Upper seul, inchange
+        self.uppermax = "uppermax" in self.jeux
+        if self.uppermax:
+            self.jeux = [j for j in self.jeux if j != "uppermax"]
+            if "upper" not in self.jeux: self.jeux.insert(0 if self.jeux[:1] != ["sfa3"] else 1, "upper")
+        self.psp = os.path.join(self.S, "cache", "psp")
         self.cache = os.path.join(self.S, "cache")
         self.xdata = os.path.join(self.cache, "iso", "X_DATA.BIN")
         self.ext = os.path.join(self.cache, "anthology_extract")
@@ -294,7 +322,8 @@ class Construction:
 
     # ---- sous-processus ---------------------------------------------------------------------------------------------
     def env(self, **kw):
-        garde = ("PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "USERPROFILE")
+        garde = ("PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "USERPROFILE",
+                 "HSFA_ASM", "HSFA_VASM")             # HSFA_ASM=vasm|compare : contrôle de l'assembleur 68000 (MAX)
         e = {k: v for k, v in os.environ.items() if k in garde}   # environnement PROPRE : aucun reglage d'essai
         e["PYTHONPYCACHEPREFIX"] = os.path.join(self.cache, "pyc")  # rien n'est ecrit dans les dossiers d'outils
         e["PYTHONIOENCODING"] = "utf-8"
@@ -691,8 +720,138 @@ class Construction:
 
     def e_max(self):
         if not self.a.max:
-            self.log("pas d'ISO PSP (--max) : etape MAX ignoree"); return []
-        raise Echec("squelette : persos MAX (ISO PSP SFA3 MAX, ULES00235/ULUS10062) non implementes")
+            self.log("pas d'ISO PSP (--psp-iso) : %s" % ("uppermax -> Upper SANS les persos MAX (sfa3uhsfa.zip, identique "
+                     "a --jeux upper)" if self.uppermax else "etape MAX ignoree")); return []
+        if not self.uppermax:
+            self.log("ISO PSP donnee sans le jeu uppermax (--jeux ...,uppermax) : rien a faire"); return []
+        self.log("persos MAX : etapes psp, max_donnees, son_uppermax, prog_uppermax, paquet_uppermax"); return []
+
+    # ---- (script_uppermax) Upper MAX ------------------------------------------------------------------------------
+    def _iso_psp(self):
+        sys.path.insert(0, os.path.join(DEPOT, "tools", "max"))
+        import iso_psp
+        return iso_psp
+
+    def e_psp(self):
+        """ISO PSP : identite (PARAM.SFO), empreintes des fichiers lus, copie dans cache/psp/ (BOOT.BIN, pac/)"""
+        IP = self._iso_psp(); src = os.path.abspath(self.a.max); os.makedirs(os.path.join(self.psp, "pac"), exist_ok=True)
+        if not os.path.isfile(src): raise Echec("ISO PSP introuvable : %s" % src)
+        try:
+            sfo = IP.lit(src, "PSP_GAME/PARAM.SFO")
+        except Exception as x:
+            raise Echec("%s : pas une ISO de jeu PSP lisible (ISO 9660, PSP_GAME/PARAM.SFO) : %s. Un .cso / .chd se "
+                        "convertit d'abord en .iso." % (src, x))
+        ident = "?"
+        for cand in (b"ULES", b"ULUS", b"ULJM", b"ULKS", b"ULAS", b"NPEH", b"NPUH", b"NPJH"):
+            i = sfo.find(cand)
+            if i >= 0: ident = sfo[i:i + 9].decode("ascii", "replace"); break
+        self.log("ISO PSP : %s (%.0f Mo), DISC_ID %s" % (src, os.path.getsize(src) / 1e6, ident))
+        if ident != REF_PSP_ID:
+            raise Echec("ISO PSP %s : seule l'edition EUROPEENNE de Street Fighter Alpha 3 MAX (ULES-00235) est prise en "
+                        "charge (US ULUS-10062, JP ULJM-05xxx : code de l'EBOOT et fichiers decales, non convertis)" % ident)
+        ok = True; out = []
+        for chemin, (taille, md5, nom) in REF_PSP.items():
+            try:
+                d = IP.lit(src, chemin)
+            except KeyError:
+                self.log("%s : absent de l'ISO" % chemin, "!! "); ok = False; continue
+            m = md5_octets(d)
+            if m != md5 or len(d) != taille:
+                self.log("%s : md5 %s (%d o), attendu %s (%d o)" % (chemin, m, len(d), md5, taille), "!! "); ok = False
+            p = os.path.join(self.psp, nom); open(p + ".tmp", "wb").write(d); os.replace(p + ".tmp", p); out.append(p)
+        if not ok and not self.a.iso_differente:
+            raise Echec("ISO PSP differente de la reference (ISO modifiee, patchee 16:9, ou corrompue) : il faut l'ISO EU "
+                        "d'origine de SFA3 MAX (ULES-00235 v1.01). --iso-differente force la suite (resultats non garantis).")
+        eb = os.path.join(self.psp, "BOOT.BIN")
+        if self.a.psp_eboot:                 # EBOOT fourni a part : seulement s'il vaut BOOT.BIN (dump PPSSPP accepte)
+            d = open(self.a.psp_eboot, "rb").read()
+            if d[:4] == b"~PSP":
+                raise Echec("%s : EBOOT CHIFFRE (en-tete ~PSP). Inutile : le BOOT.BIN de l'ISO est deja en clair ; "
+                            "retirer --psp-eboot." % self.a.psp_eboot)
+            if d[:4] != b"\x7fELF" or md5_octets(d[:REF_PSP["PSP_GAME/SYSDIR/BOOT.BIN"][0]]) != REF_PSP["PSP_GAME/SYSDIR/BOOT.BIN"][1]:
+                raise Echec("%s : EBOOT different du BOOT.BIN de l'ISO EU de reference" % self.a.psp_eboot)
+            self.log("EBOOT fourni (%d o) = BOOT.BIN de l'ISO (+ %d o de fin, ignores)" % (len(d), len(d) - os.path.getsize(eb)))
+        self.log("ISO PSP : %d fichiers conformes (BOOT.BIN = EBOOT en clair, aucun dechiffrement)" % len(out))
+        return out
+
+    def max_donnees(self):
+        return os.path.join(self.cache, "max_regen")
+
+    def e_max_donnees(self):
+        """cache MAX v2 (converti/, fork/, s/ + sources .s de rosette_code) regenere depuis l'ISO PSP par les outils de
+        max/ (regen_max.py) ; tables apprises sur le programme d'arcade versionnees dans max/ (aucun programme d'arcade)"""
+        R = self.max_donnees(); os.makedirs(R, exist_ok=True)
+        argv = ["regen_max.py", "--dest", R, "--sortie", self.S, "--psp-iso", os.path.abspath(self.a.max), "--depot", DEPOT,
+                "--gfx", self.arcade, "--parcours", os.path.join(OUTILS_UM, "parcours_max.json"),
+                "--traduire-acteurs", os.path.join(OUTILS_UM, "traduire_2b31.py"), "--g-max", "4DAAB",   # = max_cache.G_MAX
+                "--python", self.python_numpy()]
+        self.lance("max_donnees", dict(cwd=R, sys_path=[OUTILS_UM], argv=argv, code="import regen_max\nregen_max.main()\n"),
+                   self.env(), python=self.python_numpy())
+        rc = os.path.join(R, "depot", "max", "outils", "rosette_code")
+        out = [os.path.join(rc, f) for f in sorted(os.listdir(rc)) if f.endswith(".s")]
+        for d in ("converti", "fork", "s"):
+            for racine, _, fs in os.walk(os.path.join(R, d)):
+                out += [os.path.join(racine, f) for f in sorted(fs)]
+        self.log("donnees MAX : %d fichiers (converti/, fork/, s/, sources .s)" % len(out))
+        return out
+
+    def e_son_uppermax(self):
+        """ROM son MAX = ROM hybride d'Upper + voix / cris / voix d'Ingrid / sequence $2C (son/chaine_son.py) ; ecrit
+        aussi commandes_voix_max.s et commandes_son_max.s a cote des sources MAX"""
+        S = os.path.join(self.W, "agent_son_max"); R = self.max_donnees()
+        os.makedirs(S, exist_ok=True)
+        argv = ["chaine_son.py", "--cache", R, "--depot", DEPOT, "--hybride", os.path.join(self.W, "agent_son_ro5", "hybride", "roms_hybride"),
+                "--extract", self.ext, "--sortie", S, "--equ", os.path.join(R, "depot", "max", "outils", "rosette_code"),
+                "--python", self.python_numpy()]
+        self.lance("son_uppermax", dict(cwd=S, sys_path=[os.path.join(OUTILS_UM, "son")], argv=argv,
+                   code="import chaine_son\nchaine_son.main()\n"), self.env(), python=self.python_numpy())
+        res = []
+        for n, md5 in REF_SON_MAX.items():
+            p = os.path.join(S, "roms_son_max_pas", n); h = md5_fichier(p); res.append(p)
+            self.log("%s : %s %s" % (n, h, "= lot 2b31" if h == md5 else "DIFFERENT du lot 2b31"), "   " if h == md5 else "!! ")
+        return res
+
+    def vasm(self):
+        """vasm n'est demandé que pour HSFA_ASM=vasm ou compare ; par défaut, l'assembleur hsfa_asm68k (tools/asm68k)
+        est employé (même sortie à l'octet, Python seul, MIT)"""
+        if os.environ.get("HSFA_ASM", "hsfa") not in ("vasm", "compare"):
+            return None
+        v = self.a.vasm or os.environ.get("HSFA_VASM") or shutil.which("vasmm68k_mot")
+        if not v or not os.path.exists(v):
+            raise Echec("vasm (vasmm68k_mot) introuvable : il assemble le code MAX (http://sun.hasenbraten.de/vasm/) ; --vasm CHEMIN")
+        return v
+
+    def e_prog_uppermax(self):
+        W = self.travail("uppermax"); os.makedirs(W, exist_ok=True)
+        argv = ["um_prog.py", "--dest", W, "--upper", self.travail("upper"),
+                "--extract", self.ext, "--anims", self.anims, "--xdata", self.xdata, "--cache-max", self.max_donnees(),
+                "--rosette", os.path.join(self.max_donnees(), "depot", "max", "outils", "rosette_code"),
+                "--eboot", os.path.join(self.psp, "BOOT.BIN"), "--pac", os.path.join(self.psp, "pac"), "--depot", DEPOT,
+                "--python", self.python_numpy()] + (["--vasm", self.vasm()] if self.vasm() else [])
+        self.lance("prog_uppermax", dict(cwd=W, sys_path=[OUTILS_UM], argv=argv, code="import um_prog\num_prog.main()\n"),
+                   self.env(), python=self.python_numpy())
+        B = os.path.join(W, "banc"); roms = self.roms("uppermax")
+        out = [os.path.join(roms, n) for n in PRG] + [os.path.join(B, f) for f in sorted(os.listdir(B))
+                                                       if f.startswith("ext_") or f == "max_plus_gfx.bin"]
+        out += [os.path.join(B, "banques_hx", f) for f in sorted(os.listdir(os.path.join(B, "banques_hx")))]
+        self.log("uppermax : sz3ud.03c md5 %s" % md5_fichier(out[0]))
+        return out
+
+    def e_paquet_uppermax(self):
+        J = JEUX["uppermax"]; roms = self.roms("uppermax")
+        for n in list(REF_ARCADE_GFX) + ["phoenix.key"]:
+            d = os.path.join(roms, n)
+            if os.path.lexists(d): os.remove(d)
+            shutil.copyfile(os.path.join(self.arcade, n), d)
+        dest = os.path.join(self.S, "archives"); os.makedirs(dest, exist_ok=True)
+        spec = dict(cwd=dest, sys_path=[self.O["paquet"]], argv=["paquet_fbneo.py", J["paquet"]],
+                    code="import paquet_fbneo\npaquet_fbneo.construit(%r)\n" % J["paquet"])
+        W = self.travail("uppermax")
+        self.lance("paquet_uppermax", spec, self.env(HSFA_WORK=self.W, HSFA_SORTIE=dest, HSFA_STRICT="1",
+                   SOURCE_DATE_EPOCH=self.a.date_source, MAX_BANC=os.path.relpath(os.path.join(W, "banc"), self.W),
+                   MAX_SON="agent_son_max/roms_son_max_pas", SFA3MAX_CACHE=self.max_donnees(),
+                   HSFA_MAX_CACHE_DIR=os.path.join(W, "outils_max", "ag", "untranspile"), **self.env_paquet()), nice=False)
+        return [os.path.join(dest, J["zip"] + ".zip")]
 
     def e_empreintes(self):
         lignes = ["# Empreintes des ROM et archives produites par hsfa_build.py (%s)" % time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -704,6 +863,8 @@ class Construction:
             W = self.travail(j)
             if os.path.isdir(W):
                 cibles += [os.path.join(W, f) for f in sorted(os.listdir(W)) if f.startswith("ext_") or f.startswith("hsfa_")]
+        if self.uppermax and os.path.isdir(self.roms("uppermax")):
+            r = self.roms("uppermax"); cibles += [os.path.join(r, f) for f in sorted(os.listdir(r)) if f in PRG]
         sh = os.path.join(self.W, "agent_son_ro5", "hybride", "roms_hybride")
         if "upper" in self.jeux and os.path.isdir(sh): cibles += [os.path.join(sh, f) for f in sorted(os.listdir(sh))]
         ar = os.path.join(self.S, "archives")
@@ -776,7 +937,22 @@ class Construction:
         if not self.a.sans_flux:
             E.append(("flux", ["module_ro9"], [self.O["flux"], self.O["son_table"]], self.e_flux,
                       "table du lecteur de flux ADX (gen_table_flux.py) -> systeme/fbneo/hsfa/"))
-        E.append(("max", [], [], self.e_max, "persos MAX depuis l'ISO PSP (squelette, --max)"))
+        if self.uppermax and self.a.max:
+            E += [("psp", [], [os.path.join(DEPOT, "tools", "max", "iso_psp.py")], self.e_psp,
+                   "ISO PSP de SFA3 MAX (EU ULES-00235) : empreintes, BOOT.BIN (EBOOT en clair) et .pac des 4 persos"),
+                  ("max_donnees", ["psp", "gfx_upper", "prog_upper", "afs", "arcade"],
+                   [os.path.join(OUTILS_UM, "regen_max.py"), os.path.join(OUTILS_UM, "parcours_max.json"),
+                    os.path.join(OUTILS_UM, "traduire_2b31.py"), os.path.join(DEPOT, "max", "outils"),
+                    os.path.join(DEPOT, "tools", "max")], self.e_max_donnees,
+                   "donnees MAX regenerees depuis l'ISO PSP (outils de max/, regen_max.py)"),
+                  ("son_uppermax", ["son_upper", "max_donnees"], [os.path.join(OUTILS_UM, "son"), os.path.join(DEPOT, "max", "outils", "sons")],
+                   self.e_son_uppermax, "ROM son MAX (voix, cris, voix d'Ingrid) depuis l'ISO PSP et la ROM hybride d'Upper"),
+                  ("prog_uppermax", ["prog_upper", "gfx_upper", "psp", "max_donnees", "son_uppermax", "afs", "module_ro5"],
+                   [os.path.join(OUTILS_UM, "um_prog.py"), os.path.join(OUTILS_UM, "fige.py"), os.path.join(OUTILS_UM, "integration_2b31")],
+                   self.e_prog_uppermax, "programme d'Upper MAX (integration MAX=1, etat 2b31 : prepare_max + mame_test)"),
+                  ("paquet_uppermax", ["prog_uppermax", "son_uppermax", "gfx_upper", "arcade"], [self.O["paquet"]],
+                   self.e_paquet_uppermax, "archive FBNeo sfa3umhsfa.zip (paquet_fbneo.py upper_max)")]
+        E.append(("max", [], [], self.e_max, "persos MAX depuis l'ISO PSP (--psp-iso ; avec --jeux ...,uppermax)"))
         E.append(("empreintes", [], [], self.e_empreintes, "empreintes de toutes les ROM et archives produites"))
         return E
 
@@ -799,6 +975,8 @@ class Construction:
                 continue
             params = dict(iso=os.path.abspath(self.a.anthology), outils=self.O)      # seulement ce qui change la sortie
             if nom == "max": params["max"] = self.a.max and os.path.abspath(self.a.max)
+            if nom in ("psp", "max_donnees", "son_uppermax", "prog_uppermax", "paquet_uppermax"):
+                params.update(psp=os.path.abspath(self.a.max), eboot=self.a.psp_eboot, uppermax=True)
             if nom.startswith("paquet_"):
                 params.update(date_source=self.a.date_source, flux=self.a.flux_format, sans_flux=self.a.sans_flux,
                               rejeu=self.table_rejeu_source(), redirection=self.redirection())
@@ -836,9 +1014,14 @@ def main():
         return _lancer(sys.argv[2])
     ap = argparse.ArgumentParser(description="Construit les jeux HSFA a partir de l'ISO de l'utilisateur.")
     ap.add_argument("--anthology", required=True, help="ISO PS2 de Street Fighter Alpha Anthology (USA, SLUS-21317)")
-    ap.add_argument("--max", help="ISO PSP de Street Fighter Alpha 3 MAX (persos MAX : etape non implementee)")
+    ap.add_argument("--max", "--psp-iso", dest="max", help="ISO PSP de Street Fighter Alpha 3 MAX, EUROPE (ULES-00235) : "
+                    "persos MAX du jeu uppermax (--jeux ...,uppermax) ; sans elle, uppermax = Upper sans MAX")
+    ap.add_argument("--psp-eboot", help="(facultatif) EBOOT en clair (dump PPSSPP) : inutile, BOOT.BIN de l'ISO suffit ; "
+                    "verifie s'il est donne")
+    ap.add_argument("--vasm", help="(controle) vasmm68k_mot, avec HSFA_ASM=vasm ou compare ; par defaut le code MAX est "
+                                   "assemble par tools/asm68k/hsfa_asm68k.py")
     ap.add_argument("--sortie", required=True, help="dossier de sortie (cache, travail, archives, journal)")
-    ap.add_argument("--jeux", default="sfa3,upper,hyper", help="sfa3,upper,hyper (defaut : les trois)")
+    ap.add_argument("--jeux", default="sfa3,upper,hyper", help="sfa3,upper,hyper,uppermax (defaut : les trois premiers)")
     ap.add_argument("--arcade", action="append", help="(facultatif) ROM d'arcade de SFA3 (sfa3.zip ou dossier) : sz3.13m-20m ; "
                     "sans elle, la ROM graphique est reconstruite depuis l'ISO")
     ap.add_argument("--etape", help="reprendre a cette etape (les precedentes doivent etre faites)")

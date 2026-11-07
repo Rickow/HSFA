@@ -1,0 +1,96 @@
+{
+ "26": {
+  "nom": "Eagle",
+  "pl": "pl26",
+  "gabarit_psp": "0x2a3198",
+  "actif": true,
+  "rappels": {
+   "748d98": "psp_1b0b90",
+   "748e38": "psp_1b18bc",
+   "748ed8": "psp_1b18bc",
+   "748f78": "psp_1b2f30",
+   "749018": "psp_1b2f30",
+   "7490b8": "psp_1b0238",
+   "7491f8": "psp_1b03cc",
+   "749298": "psp_1b36f8",
+   "749658": "psp_1b1058",
+   "7496f8": "psp_1b3614",
+   "749798": "psp_1b35a8",
+   "74c038": "psp_1b17f0",
+   "749518": "psp_1b3668"
+  },
+  "suffixe": "26",
+  "id": "26"
+ },
+ "27": {
+  "nom": "Maki",
+  "pl": "pl27",
+  "gabarit_psp": "0x2a6268",
+  "actif": true,
+  "rappels": {
+   "748d98": "psp_1b46f0",
+   "748e38": "psp_1b5dc0",
+   "748ed8": "psp_1b5dc0",
+   "748f78": "psp_1b9644",
+   "749018": "psp_1b9644",
+   "7490b8": "psp_1b4234",
+   "7491f8": "psp_1b445c",
+   "749298": "psp_1b9ef8",
+   "749658": "psp_1b5214",
+   "7496f8": "psp_1b9e10",
+   "749798": "psp_1b9da4",
+   "74c038": "psp_1b5c64",
+   "749518": "psp_1b9e68"
+  },
+  "suffixe": "27",
+  "id": "27"
+ },
+ "2d": {
+  "nom": "Yun",
+  "pl": "pl28",
+  "gabarit_psp": "0x2ad6dc",
+  "actif": true,
+  "rappels": {
+   "748d98": "psp_1bb944",
+   "748e38": "psp_1bd28c",
+   "748ed8": "psp_1bd28c",
+   "748f78": "psp_1befc0",
+   "749018": "psp_1befc0",
+   "7490b8": "psp_1bac14",
+   "7491f8": "psp_1baf6c",
+   "749298": "psp_1bf63c",
+   "749658": "psp_1bc8bc",
+   "7496f8": "psp_1bf394",
+   "749798": "psp_1bf328",
+   "74c038": "psp_1bd178",
+   "749518": "psp_1bf3ec"
+  },
+  "suffixe": "28",
+  "id": "2d"
+ },
+ "2e": {
+  "nom": "Ingrid",
+  "pl": "pl29",
+  "gabarit_psp": "0x2b1ee0",
+  "actif": true,
+  "rappels": {
+   "748d98": "psp_1c2750",
+   "748e38": "psp_1c3924",
+   "748ed8": "psp_1c3924",
+   "748f78": "psp_1c5b28",
+   "749018": "psp_1c5b28",
+   "7490b8": "psp_1c1e00",
+   "7491f8": "psp_1c208c",
+   "749298": "psp_1c67a4",
+   "749658": "psp_1c2ccc",
+   "7496f8": "psp_1c6144",
+   "749798": "psp_1c60d4",
+   "74c038": "psp_1c2fe8",
+   "749518": "psp_1c619c"
+  },
+  "suffixe": "29",
+  "id": "2e"
+ },
+ "_doc": "tables par perso d'Upper (PS2) -> rappel du gabarit PSP du perso (indices 16-27) ; 749518 (arcade $DD192, init) -> racine 0x215040[id] ; 749158 ($DCE92, commun) inchangée",
+ "_doc_ids": "clé = n° de perso dans Upper ; Yun et Ingrid en $2D/$2E (décision du coordinateur, 2026-10-11 : au-delà des pseudo-ID $28-$2C d'Upper) ; 'suffixe' = numérotation de la session MAX ($28/$29)"
+}

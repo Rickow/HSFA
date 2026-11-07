@@ -506,3 +506,112 @@ Les autres sous-commandes (`tout`, `312`) n'ont pas changé de code.
   au banc.
 - `sortie_iso/` (reprise incrémentale) et `sortie_iso2/` : programmes 8/8 × 3 identiques au banc, mêmes empreintes.
 - Rien n'a été écrit dans `work/mame*` (en particulier `mame_ro5`, où tourne une validation).
+
+## 10. Upper MAX (`--jeux uppermax --psp-iso`) : les persos de SFA3 MAX depuis les deux disques
+
+Agent `script_um`, 2026-11-07 (§202 du journal). Le jeu `uppermax` produit `sfa3umhsfa.zip` : Upper avec Eagle,
+Maki, Yun et Ingrid, à l'état du lot **2b31** (banc_max52). Il part de deux entrées seulement :
+- l'ISO PS2 de l'Anthology ;
+- l'ISO PSP **européenne** de *SFA3 MAX* (ULES-00235 v1.01).
+
+Il n'utilise ni programme d'arcade, ni EBOOT déchiffré, ni fichier d'atelier. Les outils sont dans
+`tools/integration-max/upper_max/` (README) et `max/` (session MAX). Il faut aussi **vasm** (`vasmm68k_mot`,
+`--vasm`), en plus de numpy.
+
+### 10.1 Étapes
+
+| Étape | Outil | Durée (07/11, machine chargée) |
+|---|---|---|
+| `psp` | identité (`PARAM.SFO` = ULES00235), empreintes de `BOOT.BIN` (EBOOT **déjà en clair** dans l'ISO) et des 4 `plXX_e.pac` | < 1 s |
+| `max_donnees` | `regen_max.py` : cache MAX v2 et sources `.s`, produits par les outils de `max/` ; il ajoute les compléments (scripts et palettes de fin, portraits de victoire, sauts, parcours) | 83 s |
+| `son_uppermax` | `son/chaine_son.py` : voix (VAG des pac), `se_mid`, table son ro9 → ROM son MAX (6 fichiers) et `commandes_*_max.s` | 8 s |
+| `prog_uppermax` | `um_prog.py` : intégration MAX=1 figée à l'état 2b31 (`integration_2b31/`), vasm, traducteur | 56 s |
+| `paquet_uppermax` | `paquet_fbneo.py upper_max` | 5 s |
+
+Construction complète (Upper + Upper MAX), depuis zéro : 5 min 10 s, dont 2 min 32 s pour la partie MAX. Elle
+occupe 1,1 Go. Sans `--psp-iso`, `uppermax` = `--jeux upper`, à l'octet.
+
+### 10.2 Ce qui remplace le programme d'arcade `sfa3ud`
+
+On a tracé les octets lus par chaque outil (`<workspace>/work/script_uppermax/outils/trace_site`).
+- **Apprentissage** de la Rosette, qui lit le code 68K d'arcade : `tout`, `tailles68`, `evaluer`, `appris_acteurs`,
+  `mouvements`, `champs_projectiles`. Leurs sorties lues ensuite sont **versionnées** dans
+  `max/outils/rosette_code/` : `api_arcade_psp.json`, `champs_votes.json`, `tailles68.json`, `carte_champs.json`,
+  `api_acteurs.json`. Elles ne contiennent que des adresses, des numéros de champs et des votes. Les autres sorties
+  ne sont lues par personne.
+- **Acteurs des fins** : les décisions de `rosette_donnees.py` (n° d'animations) sont versionnées dans
+  `rosette_donnees_appris.json`. On ne peut pas lire les enregistrements du module ro3 à la place : l'Anthology y a
+  modifié des octets (+1, +3, +6, +$1B-$1F) sur 26 fins sur 33.
+- **Scripts de fin** des modèles d'arcade : lus dans le module **ro3** de l'ISO (table PS2 `0x584600` = `$26DCC`).
+  Les 4 fins MAX converties sont identiques.
+- `brouillons`, `tables_explicites`, `projectiles_max`, `acteurs_fins`, `anims_fins_max` importent le désassembleur
+  mais lisent 0 octet du programme d'arcade.
+
+### 10.3 Preuves
+
+1. **Avec la ROM graphique d'arcade** (`--arcade`, programme d'arcade absent ; `<workspace>/work/script_uppermax/zero_arc`) : le zip
+   est **identique au 2b31 sur 28/29 membres**. Seul `hsfa_info.txt` change (chemins, dates). Deux constructions
+   donnent le même zip à l'octet (CRC `ba29a84e`).
+2. **Voie ISO seule** (`zero_iso2`, construction depuis zéro dans une copie `git archive` du dépôt, auditée par
+   `strace`) :
+   - les fichiers ouverts sont uniquement la sortie, la copie du dépôt, les deux ISO, le venv, vasm et le système ;
+   - **programme** (`sz3ud.03c` `7ede9d19` … `sz3.10b`), **ROM son** (hx3.* 6/6), `hsfa_ext.bin` et flux sont
+     identiques au 2b31 ;
+   - les différences sont celles de la voie ISO (§5) : `sz3.13m`/`15m`/`17m`/`19m`, `hsfa_gfx.bin`, `hsfa_tab.bin`.
+3. **Équivalence d'affichage** (`tools/integration-max/upper_max/equivalence_um.py`, méthode du §5.4) : sur les 114 tables du banc
+   (673 527 entrées, dont les banques des 4 persos MAX et les portraits), la tuile désignée est **la même**.
+   Il y a une seule exception, `plan1`, et elle existe déjà pour Upper seul : Upper sert ses plans tels quels, la table
+   n'est pas affichée.
+4. **Cœur FBNeo** (cœur du 05/11, pilote de l'intégration) : chaque perso MAX contre Ryu, 6 000 à 9 000 images,
+   zip 2b31 contre zip ISO seule. **656 captures sur 656 sont identiques au pixel** et les journaux du jeu et du
+   lecteur de flux sont identiques. Le cœur charge par leur nom les ROM aux CRC inconnus (avertissement attendu).
+
+### 10.4 Défaut corrigé en route (voie ISO seule)
+
+Les outils MAX numérotent leurs tuiles neuves après les tuiles propres d'Upper (`hsfa_gfx.bin`). Le paquet et
+l'intégration les placent en `G_MAX = $4DAAB` (`max_cache.py`). En voie ISO, Upper a **569 tuiles propres de moins**
+(celles de l'Anthology sont dans la ROM reconstruite). Sans correctif, les banques MAX visaient `$4D872` : les persos
+s'affichaient faux. `regen_max.py --g-max 4DAAB` complète la copie de `hsfa_gfx.bin` lue par les outils MAX avec des
+tuiles nulles jusqu'à G_MAX. Ce correctif est sans effet en voie arcade.
+
+### 10.5 Écarts connus et limites
+
+- **Écarts du cache MAX régénéré** face au cache de l'atelier (121/126 identiques) :
+  - scripts de fin : lignes opA (vitesse 0 au lieu du décalage PSP), que l'intégration remet de toute façon à 0 ;
+  - `parcours_max.json` : commentaires seulement.
+- `s/acteurs_fins_max.s` reste à l'**état 2b31** : il est produit avec le `traduire.py` de d98c4f1
+  (`traduire_2b31.py`). La version actuelle de la session MAX passera d'abord par un lot d'essai et un banc des fins.
+- **Région** : EU seulement. US et JP ont un EBOOT décalé ; il faudrait une table VA EU → US et un nouveau banc.
+- **Assembleur** : depuis le 2026-11-07, `tools/asm68k/hsfa_asm68k.py` (MIT, bibliothèque standard) remplace vasm,
+  dont la licence ne permet pas de l'embarquer. Sortie identique à vasm (binaire, liste, symboles) sur les 5 appels
+  de la construction et sur un corpus synthétique ; construction Upper MAX sans vasm = même zip (128fb48d). Variables :
+  `HSFA_ASM=vasm` (vasm), `HSFA_ASM=compare` (les deux, échec s'ils diffèrent : à faire une fois par nouveau lot de
+  sources). Détail : `tools/asm68k/README.md`.
+
+### 10.6 Sous-ensemble de vasm employé (référence de l'assembleur maison)
+
+Il y a cinq appels : `tout.s` dans `prepare_max.py`, puis les 4 blocs de frames (`bloc_d80000`, `bloc_dc0000`,
+`bloc_e00000`, `bloc_e40000`) dans `conv/convertit_frames.py`, dont les symboles sont relus dans la liste. L'appel
+principal :
+
+`vasmm68k_mot -m68000 -spaces -Fbin -quiet -maxerrors=500 -L tout.lst -o tout.bin tout.s`
+
+- **Source** : un seul fichier (`tout.s`, 73 195 lignes), syntaxe Motorola. Les espaces sont admis dans les
+  opérandes (`-spaces`). Il n'y a ni `include`, ni macro, ni section.
+- **Sortie** : binaire brut (`-Fbin`). La liste `-L` sert à relire les symboles (format « Symbols by name »).
+- **Directives** :
+  - `org` (3 : `$3A0000`, `$B80000`, `$D68000`) ;
+  - `equ` (3 833) ;
+  - `dc.b` / `dc.w` / `dc.l`, `dcb.b` / `dcb.w`, `ds.b` / `ds.l` ;
+  - `even`, `cnop 0,4` ;
+  - un seul `ifnd` / `endif`.
+- **Étiquettes** : globales, et locales en `.nom` (166).
+- **Expressions** : `+ - * / << >> & |` et parenthèses ; constantes `$hex` et décimales.
+- **Instructions** : 106 mnémoniques du 68000 avec taille explicite (`.b/.w/.l`). Les branchements sont courts
+  (`.s`) ou laissés à l'assembleur (`bsr`, `bra`, `bcc` sans taille : choix de la taille par vasm, à reproduire à
+  l'identique). Mnémoniques particulières : `movem.l`, `move sr`/`move ccr`, `scc`, `dbra`, `divs.w`, `muls`, `exg`,
+  `swap`.
+- **Modes d'adressage** :
+  - `Dn`, `An`, `(An)`, `(An)+`, `-(An)` ;
+  - `d(An)`, `d(An,Xn)`, `d(PC)` ;
+  - `abs.w`, `abs.l`, `#imm`, listes de registres.

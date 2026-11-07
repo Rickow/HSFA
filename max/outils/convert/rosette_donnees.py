@@ -3,7 +3,11 @@ Recherche une fois pour toutes ce qui se faisait à la main : pour chaque bloc a
 transformation des champs. Sortie : ~/.cache/sfa3max/rosette_donnees.json.
 Blocs traités (v1) : acteurs des fins (table $275DA : par fin, décalages de groupes, enregistrements de 32 octets
 jusqu'à un mot négatif ; générateur $2750E ; repères de début / fin en +$18 / +$19).
-Usage : python3 rosette_donnees.py acteurs"""
+Usage : python3 rosette_donnees.py acteurs | acteurs_max | appris
+(2026-11-07) Sans la ROM sfa3ud (construction depuis les seuls disques) : acteurs_max lit les DÉCISIONS apprises sur la
+ROM, versionnées dans rosette_donnees_appris.json (n° d'animations seulement : vote (banque, anim PSP) -> anim arcade, et
+résultats de par_contenu) ; « appris » les réécrit depuis la ROM. Les enregistrements du module ro3 de l'Anthology ne
+conviennent pas : octets +1, +3 (n° d'animation), +6, +$1B-$1F modifiés par l'Anthology sur 26 fins sur 33."""
 import os, sys, struct, json, collections
 sys.path.insert(0, __import__("os").path.join(__import__("os").path.dirname(__import__("os").path.abspath(__file__)), "..", "..", "..", "tools", "max"))
 ROMD = os.path.expanduser("~/.cache/sfa3max/sfa3ud_donnees.bin")
@@ -13,6 +17,33 @@ NB_FINS = 33
 
 
 def rom(): return open(ROMD, "rb").read()
+
+
+APPRIS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "rosette_donnees_appris.json")
+
+
+def decisions():
+    """-> (TA, contenu(fin, banque, n) -> (m, score)) : depuis la ROM si elle est là, sinon la table versionnée"""
+    if os.path.exists(ROMD):
+        TA = table_anims(); B = rom(); ANC = ancres(B, paires_4b())
+        return TA, lambda f, b, n: par_contenu(B, f, b, n, ANC)
+    J = json.load(open(APPRIS))
+    TA = {tuple(int(x) for x in k.split(",")): v for k, v in J["table_anims"].items()}
+    return TA, lambda f, b, n: tuple(J["par_contenu"].get("%d,%d,%d" % (f, b, n), (None, 0)))
+
+
+def ecrire_appris():
+    """rosette_donnees_appris.json : décisions de acteurs_max qui lisent la ROM (pour les 4 fins MAX)"""
+    TA, contenu = decisions(); pc = {}
+    for fin in (0x26, 0x27, 0x28, 0x29):
+        for g in acteurs_max(fin):
+            for r in g:
+                k = (r[0x1F], r[3])
+                if r[0x1F] < 0x20 and r[0] == 0x4B and k not in TA: pc["%d,%d,%d" % ((fin,) + k)] = list(contenu(fin, *k))
+    json.dump({"_": "rosette_donnees.py appris (ROM sfa3ud) : n° d'animations seulement", "table_anims":
+               {"%d,%d" % k: v for k, v in sorted(TA.items())}, "par_contenu": dict(sorted(pc.items()))},
+              open(APPRIS, "w"), indent=0)
+    print("rosette_donnees_appris.json : %d votes, %d recherches par contenu" % (len(TA), len(pc)))
 
 
 def eboot():
@@ -304,7 +335,7 @@ def ecrire_nouveaux(fichier):
 
 def ecrire_acteurs_s(fin, fichier):
     """groupes d'acteurs au format du générateur $2750E : table de décalages (mots) puis enregistrements, fin = $FFFF"""
-    G = acteurs_max(fin); nom = "FIN%02X_ACTEURS" % fin; TA = table_anims(); B = rom(); ANC = ancres(B, paires_4b())
+    G = acteurs_max(fin); nom = "FIN%02X_ACTEURS" % fin; TA, contenu = decisions()
     L = ["; acteurs de la fin $%02X (format arcade, générateur $2750E) — rosette_donnees.py" % fin, "%s:" % nom]
     L += ["        dc.w    %s_G%d-%s" % (nom, g, nom) for g in range(len(G))]
     for g, recs in enumerate(G):
@@ -352,7 +383,7 @@ def ecrire_acteurs_s(fin, fichier):
                         k[1], D[0], k[0], "" if TA.get(k) is None else ", vote %d écarté" % TA[k])
                 elif k in TA: r[3] = TA[k]; note = "      ; anim PSP %d -> arcade %d (banque %d)" % (k[1], r[3], k[0])
                 else:
-                    m, sc = par_contenu(B, fin, k[0], k[1], ANC) if r[0] == 0x4B else (None, 0)
+                    m, sc = contenu(fin, k[0], k[1]) if r[0] == 0x4B else (None, 0)
                     if m is not None:
                         r[3] = m; note = "      ; anim PSP %d -> arcade %d (banque %d, par contenu, score %d)" % (k[1], m, k[0], sc)
                     elif (fin, k[0], k[1]) in INVITES:
@@ -381,6 +412,9 @@ if __name__ == "__main__" and sys.argv[1:2] == ["acteurs_max"]:
         print("fin $%02X : %d groupes, %d acteurs" % ((f,) + ecrire_acteurs_s(f, os.path.join(d, "acteurs_fin_%02x.s" % f))))
     ecrire_nouveaux(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "rosette_code", "decor_nouveaux_max.md"))
     ecrire_poses(os.path.join(os.path.expanduser(os.environ.get("SFA3MAX_CACHE", "~/.cache/sfa3max")), "converti", "pose_generique_max.s"))
+
+if __name__ == "__main__" and sys.argv[1:] == ["appris"]:
+    ecrire_appris()
 
 if __name__ == "__main__" and sys.argv[1:] == ["acteurs"]:
     r = acteurs()

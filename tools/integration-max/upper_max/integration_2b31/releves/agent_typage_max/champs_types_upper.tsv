@@ -1,0 +1,213 @@
+base	depl_arcade	taille	occ	type	depl_image_upper	transfo_valeur	reloge_A5	confiance	preuve
+A5	$8A	1	2	u8	$8B	aucune	non	mesuré	align B->img $8B : 67/67 (ex. arcade $23ED4, va 0x3d8f4)
+A5	$102	2	2	s16	$102	aucune	non	mesuré	align W->img $102 : 18/18 (ex. arcade $207CC, va 0x28fb4)
+A5	$105	1	1	u8	$104	aucune	non	mesuré	align B->img $104 : 13/13 (ex. arcade $7CCEC, va 0xf3080)
+A5	$10B	1	3	u8	$10A	aucune	non	mesuré	align B->img $10A : 50/50 (ex. arcade $29E10, va 0x235054)
+A5	$10D	1	3	u8	$10C	aucune	non	mesuré	align B->img $10C : 76/76 (ex. arcade $20632, va 0x27a08)
+A5	$10E	1	2	u8	$10F	aucune	non	mesuré	align B->img $10F : 40/40 (ex. arcade $22DE8, va 0x33ac0)
+A5	$11C	1	3	u8	$11D	aucune	non	mesuré	align B->img $11D : 45/45 (ex. arcade $23EB8, va 0x3d824)
+A5	$123	1	1	u8	$122	aucune	non	mesuré	align B->img $122 : 81/81 (ex. arcade $17466, va 0x151bb0)
+A5	$124	1	3	u8	$125	aucune	non	mesuré	align B->img $125 : 56/56 (ex. arcade $B2122, va 0x6b020)
+A5	$125	1	15	u8	$124	aucune	non	mesuré	align B->img $124 : 72/72 (ex. arcade $B2386, va 0x6de00)
+A5	$14E	1	20	s16 (octet fort)	$14E	aucune	non	déduit	arcade : $14E.W x7 (sub/add/move.w, ex. $1747A) ; Upper MIPS A5 $14E : lh/sh x7, aucun octet ; align W $14E->img $14E 7/7 (ex. arcade $19B58, va 0x13ba50) ; octet fort d'un s16 = même adresse dans l'image
+A5	$290	2	1	s32 (partie haute)	$292	aucune	non	mesuré	align W->img $292 : 18/18 (ex. arcade $2601C, va 0x2b544)
+A5	$7788	4	2	inconnu (ni arcade ni Upper)	$7788	aucune (si lu seulement par MAX)	non	inconnu	aucun accès A5 $7784-$778B dans ro5 (MIPS) ni dans la ROM arcade ($7788(A5) ou $FFF788) ; $FFF788 est au-delà de la zone A5 vérifiée ($FF8000-$FFF1C0) ; Eagle psp_1b70f8 : move.l $7788(a5),d3 puis +$4000000 : probablement une globale PSP mal traduite (à revoir)
+objet	$0	1	33	u8	$1	aucune	-	mesuré	align B->img $1 : 310/315 (ex. arcade $265B4, va 0x2d204) ; minorité $0 x5 ; région plans/système (exclue) : $1 x72
+objet	$0	4	4	u8[4]	$0	octets échangés dans chaque mot	-	mesuré	align L->img $0 : 225/225 (ex. arcade $267D6, va 0x2e49c) ; région plans/système (exclue) : $0 x13 ; imm.L {'octets/mot': 202, 'autre': 4} ; sous-accès : mot $0, octets hôte [0, 1, 2, 3]
+objet	$1	1	61	u8	$0	aucune	-	mesuré	align B->img $0 : 115/115 (ex. arcade $B0A5C, va 0x62c08) ; région plans/système (exclue) : $0 x14
+objet	$2	1	11	u8	$3	aucune	-	mesuré	align B->img $3 : 107/107 (ex. arcade $2330E, va 0x36618) ; région plans/système (exclue) : $3 x2
+objet	$3	1	34	u8	$2	aucune	-	mesuré	align B->img $2 : 322/322 (ex. arcade $B0A6A, va 0x62d54) ; région plans/système (exclue) : $2 x4
+objet	$4	1	148	u8	$5	aucune	-	mesuré	align B->img $5 : 659/659 (ex. arcade $B0A3C, va 0x62b98) ; région plans/système (exclue) : $5 x21
+objet	$4	2	2	u8[2] lu en mot	$4	octets inversés (mot)	-	mesuré	align W->img $4 : 79/79 (ex. arcade $265D8, va 0x2d314) ; région plans/système (exclue) : $6 x6, $4 x1 ; octets hôte [4, 5], imm {'neutre': 11, 'bswap16': 14, 'identique': 18}
+objet	$4	4	5	u8[4]	$4	octets échangés dans chaque mot	-	mesuré	align L->img $4 : 495/495 (ex. arcade $2697C, va 0x2f0b4) ; région plans/système (exclue) : $4 x3 ; imm.L {'neutre': 11, 'octets/mot': 462, 'autre': 3} ; sous-accès : mot $4, octets hôte [4, 5, 6, 7]
+objet	$5	1	98	u8	$4	aucune	-	mesuré	align B->img $4 : 1007/1007 (ex. arcade $24F5A, va 0x486ac) ; région plans/système (exclue) : $4 x3
+objet	$6	1	56	u8	$7	aucune	-	mesuré	align B->img $7 : 340/340 (ex. arcade $233F0, va 0x36cd4)
+objet	$7	1	476	u8	$6	aucune	-	mesuré	align B->img $6 : 2555/2557 (ex. arcade $B0A46, va 0x62bc8) ; minorité $7 x2
+objet	$8	1	1	u8	$9	aucune	-	mesuré	align B->img $9 : 37/37 (ex. arcade $22FD2, va 0x34868) ; région plans/système (exclue) : $9 x1
+objet	$B	1	293	u8	$A	aucune	-	mesuré	align B->img $A : 1819/1819 (ex. arcade $233BC, va 0x36980) ; région plans/système (exclue) : $A x1
+objet	$C	1	58	u8	$D	aucune	-	mesuré	align B->img $D : 63/63 (ex. arcade $B0E66, va 0x653bc) ; région plans/système (exclue) : $D x1
+objet	$D	1	56	u8	$C	aucune	-	mesuré	align B->img $C : 146/146 (ex. arcade $B0E6C, va 0x653d0)
+objet	$E	1	37	u8	$F	aucune	-	mesuré	align B->img $F : 474/474 (ex. arcade $B0A52, va 0x62bf8) ; région plans/système (exclue) : $F x1
+objet	$F	1	1	u8	$E	aucune	-	mesuré	align B->img $E : 82/82 (ex. arcade $B242A, va 0x6e3b0)
+objet	$10	2	128	s32 (partie haute)	$12	aucune	-	mesuré	align W->img $12 : 1054/1071 (ex. arcade $2640C, va 0x2ca04) ; minorité $10 x17 ; région plans/système (exclue) : $12 x15, $10 x1
+objet	$10	4	107	s32	$10	SWAP	-	mesuré	align L->img $10 : 76/76 (ex. arcade $B1FFE, va 0x6a8e8) ; région plans/système (exclue) : $10 x7 ; imm.L {'SWAP': 8} ; sous-accès : mot $12, octets hôte [19, 18, 17, 16]
+objet	$12	2	7	s32 (partie basse)	$10	aucune	-	mesuré	align W->img $10 : 75/85 (ex. arcade $26418, va 0x2ca34) ; minorité $12 x10 ; région plans/système (exclue) : $10 x12, $12 x1
+objet	$14	2	53	s32 (partie haute)	$16	aucune	-	mesuré	align W->img $16 : 1151/1161 (ex. arcade $26412, va 0x2ca1c) ; minorité $14 x8, $12 x2 ; région plans/système (exclue) : $16 x11
+objet	$14	4	103	s32	$14	SWAP	-	mesuré	align L->img $14 : 41/41 (ex. arcade $B2004, va 0x6a900) ; région plans/système (exclue) : $14 x1 ; imm.L {'SWAP': 5, 'autre': 4} ; sous-accès : mot $16, octets hôte [23, 22, 21, None]
+objet	$18	2	63	s16	$18	aucune	-	mesuré	align W->img $18 : 238/238 (ex. arcade $B148A, va 0x67ad0) ; région plans/système (exclue) : $1A x5, $18 x4 ; octets hôte [25, None]
+objet	$1C	4	2	pointeur 32 bits (adresse PS2)	$1C	SWAP à l'écriture/lecture ; à la lecture comme adresse : SWAP puis JSR $400 (CONV_An) comme l'image	-	mesuré	align L $1C->img $1C 151/151 ; l'image traduit MOVEA.L $001c(A6),A0 ; [remise en ordre du long] ; JSR CONV_A0 (ex. arcade $22FB8, va 0x34788)
+objet	$20	2	2	s16	$20	aucune	-	mesuré	objets/joueurs : align W $20->img $20 9/9 (ex. arcade $85B74, va 0x186070 ; A4 $B5E92) ; ATTENTION : dans les structures de PLAN (code arcade < $1C000) $20.W est la partie haute d'un s32 -> img $22 (11x, ex. $17B2E) : ne pas confondre
+objet	$22	1	3	s16 (octet fort)	$22	aucune	-	déduit	align B $22->img $22 1/1 (arcade $21C40, va 0x14b1c0) ; Upper : $22.W s16 (align 11/11 dans le code d'objets, ex. $85B7A) ; COLLISION possible : MAX y écrit un type d'objet PSP (move.b #$2b,$22(a4)) alors qu'Upper lit $22.W dans des routines d'objets
+objet	$28	2	10	s16 (pointeur mot)	$28	aucune	-	mesuré	align W $28->img $28 73/73 (joueur : A4 $20F52 movea.w ; objets $B4F50) ; imm.W identiques (#$90, #$48) ; union : dans certains effets ($B3C80-$BBC48) $28/$29 sont deux u8 (img $29/$28)
+objet	$2A	2	2	s16 (pointeur mot)	$2A	aucune	-	mesuré	align W $2A->img $2A 56/56 (A4 $20F3C movea.w) ; imm identiques ; union u8 dans quelques effets ($2A.1 -> img $2B, ex. $B3B94)
+objet	$2C	2	10	s16 (pointeur mot)	$2C	aucune	-	mesuré	align W $2C->img $2C 39/39 (A4 $20F22, objets $B24BE) ; plans : partie de s32 (img $2E, 2x, code < $1C000)
+objet	$2E	2	2	s16 (pointeur mot)	$2E	aucune	-	mesuré	align W $2E->img $2E 21/21 (A4 $20F0C) ; union u8 dans quelques effets ($2E.1 -> img $2F)
+objet	$31	1	123	u8	$30	aucune	-	mesuré	align B->img $30 : 872/872 (ex. arcade $233C8, va 0x36af0) ; région plans/système (exclue) : $30 x4
+objet	$32	1	10	u8	$33	aucune	-	mesuré	align B->img $33 : 87/87 (ex. arcade $7D638, va 0xf6388) ; région plans/système (exclue) : $33 x4
+objet	$33	1	117	u8	$32	aucune	-	mesuré	align B->img $32 : 844/844 (ex. arcade $B2456, va 0x6e48c)
+objet	$34	1	98	u8	$35	aucune	-	mesuré	align B->img $35 : 177/177 (ex. arcade $B0EA8, va 0x655bc)
+objet	$34	2	2	u8[2] lu en mot	$34	octets inversés (mot)	-	mesuré	align W->img $34 : 57/57 (ex. arcade $7CACE, va 0xf2554) ; octets hôte [52, 53], imm {'bswap16': 1, 'identique': 6}
+objet	$35	1	170	u8	$34	aucune	-	mesuré	align B->img $34 : 1155/1155 (ex. arcade $B23DA, va 0x6e174)
+objet	$36	2	532	s16	$36	aucune	-	mesuré	align W->img $36 : 590/590 (ex. arcade $24C38, va 0x4693c) ; région plans/système (exclue) : $36 x9
+objet	$38	2	97	s16	$38	aucune	-	mesuré	align W->img $38 : 586/586 (ex. arcade $B16A8, va 0x68fe4) ; région plans/système (exclue) : $38 x3 ; octets hôte [57, 56]
+objet	$3A	1	47	s16 (octet fort)	$3A	aucune	-	mesuré	align B->img $3A : 712/715 (ex. arcade $B22A0, va 0x6d504) ; minorité $3B x3 ; région plans/système (exclue) : $3B x2
+objet	$3A	2	66	s16	$3A	aucune	-	mesuré	align W->img $3A : 316/316 (ex. arcade $B0E1A, va 0x65000) ; octets hôte [59, 58]
+objet	$3C	1	87	u8	$3D	aucune	-	mesuré	align B->img $3D : 578/578 (ex. arcade $B0A58, va 0x62c04) ; région plans/système (exclue) : $3D x26
+objet	$3E	1	12	u8	$3F	aucune	-	mesuré	align B->img $3F : 171/171 (ex. arcade $2332A, va 0x36694)
+objet	$3F	1	5	u8	$3E	aucune	-	mesuré	align B->img $3E : 214/214 (ex. arcade $3813C, va 0xbee58)
+objet	$40	4	234	s32	$40	SWAP	-	mesuré	align L->img $40 : 603/603 (ex. arcade $B0C80, va 0x6416c) ; imm.L {'autre': 1, 'SWAP': 205} ; sous-accès : mot $42, octets hôte [67, 66, 65, 64]
+objet	$44	4	121	s32	$44	SWAP	-	mesuré	align L->img $44 : 410/410 (ex. arcade $73904, va 0xd6378) ; imm.L {'SWAP': 193} ; sous-accès : mot $46, octets hôte [71, 70, 69, 68]
+objet	$48	4	138	s32	$48	SWAP	-	mesuré	align L->img $48 : 356/357 (ex. arcade $B2620, va 0x6f21c) ; minorité $4C x1 ; imm.L {'SWAP': 119} ; sous-accès : mot $4A, octets hôte [75, 74, 73, None]
+objet	$4C	4	89	s32	$4C	SWAP	-	mesuré	align L->img $4C : 357/357 (ex. arcade $787F2, va 0xe1588) ; imm.L {'SWAP': 232} ; sous-accès : mot $4E, octets hôte [79, None, 77, 79]
+objet	$50	2	18	s16	$50	aucune	-	mesuré	align W $50->img $50 181/187 ; imm.W identiques x31 (#$70, #$48) ; minorité img $52 x6 (structures de plan, ex. $17B18)
+objet	$52	2	4	s16	$52	aucune	-	mesuré	align W->img $52 : 37/38 (ex. arcade $B4E74, va 0x120fd0) ; minorité $50 x1 ; région plans/système (exclue) : $52 x1 ; octets hôte [83, None]
+objet	$55	1	1	u8	$54	aucune	-	mesuré	align B->img $54 : 59/59 (ex. arcade $2EE1C, va 0x163b60)
+objet	$57	1	2	u8	$56	aucune	-	mesuré	align B->img $56 : 11/11 (ex. arcade $80C6C, va 0x172514)
+objet	$59	1	16	u8	$58	aucune	-	mesuré	align B->img $58 : 200/200 (ex. arcade $24FEE, va 0x48bc4) ; région plans/système (exclue) : $58 x7
+objet	$5A	1	8	u8	$5B	aucune	-	mesuré	align B->img $5B : 125/127 (ex. arcade $22FDC, va 0x34888) ; minorité $5A x2
+objet	$5B	1	63	u8	$5A	aucune	-	mesuré	align B->img $5A : 187/187 (ex. arcade $232A8, va 0x36300)
+objet	$5D	1	5	u8	$5C	aucune	-	mesuré	align B->img $5C : 16/16 (ex. arcade $329F0, va 0x85f84) ; région plans/système (exclue) : $5C x1
+objet	$5F	1	12	u8	$5E	aucune	-	mesuré	align B->img $5E : 184/184 (ex. arcade $23D48, va 0x3c3d0)
+objet	$60	4	7	pointeur 32 bits (adresse PS2)	$60	SWAP à l'écriture/lecture ; à la lecture comme adresse : SWAP puis JSR $400 (CONV_An) comme l'image	-	mesuré	align L 20/20 ; imm.L 'autre' x14 = adresses converties (ex. #$78A20 -> #$157801CF) ; MOVEA.L $0060(A6),A0 ; [remise en ordre du long] ; JSR CONV_A0 (arcade $B054C, va 0x10c48c)
+objet	$64	2	32	s16	$64	aucune	-	mesuré	align W->img $64 : 636/636 (ex. arcade $B2C2C, va 0x71ddc) ; octets hôte [101, None]
+objet	$67	1	9	u8	$66	aucune	-	mesuré	align B->img $66 : 42/42 (ex. arcade $22F6E, va 0x34324) ; région plans/système (exclue) : $66 x1
+objet	$6B	1	93	u8	$6A	aucune	-	mesuré	align B->img $6A : 14/14 (ex. arcade $AB414, va 0x2137d4)
+objet	$6C	1	34	u8	$6D	aucune	-	mesuré	align B->img $6D : 10/11 (ex. arcade $B175E, va 0x695c8) ; minorité $6A x1
+objet	$6C	4	10	u8[4] (union : pointeur chez certains persos)	$6C	octets échangés dans chaque mot	-	ambigu	octets $6C/$6D/$6E/$6F -> img $6D/$6C/$6F/$6E (u8, 10/11, 4/7, 12/12, 11/11) ; long hôte $6C (lw x5, sw x6) ; arcade $6C.L = MOVEA.L chez un perso ($6F088) ; aucun long aligné. MAX : move.l $6c(a1),d3 ; subq.l #1 ; move.b d3,$6c(a6) (octet faible = arcade $6F)
+objet	$6D	1	22	u8	$6C	aucune	-	déduit	align B $6D->img $6C 4/7, minorité img $6B x3 (autre structure) ; voisins $6C/$6E/$6F u8
+objet	$6E	1	40	u8	$6F	aucune	-	mesuré	align B->img $6F : 12/12 (ex. arcade $55C76, va 0x2abd7c)
+objet	$6F	1	26	u8	$6E	aucune	-	mesuré	align B->img $6E : 11/11 (ex. arcade $33CEA, va 0xd2294)
+objet	$70	1	1	u8	$71	aucune	-	mesuré	align B->img $71 : 81/81 (ex. arcade $33B1C, va 0xd185c)
+objet	$72	1	3	u8	$73	aucune	-	mesuré	align B->img $73 : 126/127 (ex. arcade $24F86, va 0x4886c) ; minorité $72 x1
+objet	$74	4	3	ambigu : u8[4] / s32 / pointeur selon l'objet	$74	u8[4] : octets échangés dans chaque mot ; s32 : SWAP	-	ambigu	align L 4/4 ; image : MOVE.L $0014(A6),$0074(A6) (copie d'une position s32), MOVEA.L $0074(A6),A0 ; remise en ordre ; CONV_A0 (pointeur), octets $74/$75/$76 u8 (arcade $74.1 x8, ex. $26214) ; MAX : move.l #3,$74(a6), move.l d7,$74(a4)
+objet	$80	1	15	u8	$81	aucune	-	mesuré	align B->img $81 : 107/107 (ex. arcade $328DC, va 0x85150)
+objet	$81	1	43	u8	$80	aucune	-	mesuré	align B->img $80 : 230/230 (ex. arcade $328E8, va 0x8518c)
+objet	$82	1	413	u8	$83	aucune	-	mesuré	align B->img $83 : 1075/1075 (ex. arcade $206A6, va 0x27fb4)
+objet	$82	4	1	u8[4]	$82	octets échangés dans chaque mot	-	déduit	octets $82->img $83 1075/1075, $84->img $85 60, $85->img $84 48 ; $84.W imm bswap16 x14 ; long non aligné à 4 (pas de lw hôte en $82) ; MAX : move.l $82(a6),$3d4(a6) puis move.b $3d4(a6),$82(a6) : $3D4 doit hériter de cette disposition (cf. $3D4)
+objet	$88	4	7	pointeur 32 bits (adresse PS2)	$88	SWAP à l'écriture/lecture ; à la lecture comme adresse : SWAP puis JSR $400 (CONV_An) comme l'image	-	mesuré	align L 18/18 ; imm.L 'autre' x11 (adresses) ; MOVEA.L $0088(A6),A0 ; [remise en ordre du long] ; JSR CONV_A0 (arcade $7B402, va 0xeb670)
+objet	$A0	4	4	pointeur 32 bits (adresse PS2)	$A0	SWAP à l'écriture/lecture ; à la lecture comme adresse : SWAP puis JSR $400 (CONV_An) comme l'image	-	mesuré	align L 17/17 ; MOVEA.L $00a0(A6),A3 ; [remise en ordre du long] ; JSR CONV_A3 (arcade $22FC6, va 0x34800) ; MAX : move.l $a0(a6),d3
+objet	$A4	2	56	s16	$A4	aucune	-	mesuré	align W->img $A4 : 95/95 (ex. arcade $30D86, va 0x757e8)
+objet	$A4	4	8	s16[2]	$A4	aucune	-	déduit	$A4.W -> img $A4 95/95 (s16, pointeur mot) ; $A6.W -> img $A6 ; aucun accès long dans Upper ni l'arcade ; MAX : clr.l $a4(a1) uniquement (valeur nulle, sans risque)
+objet	$A9	1	89	u8	$A8	aucune	-	mesuré	align B->img $A8 : 534/534 (ex. arcade $30CD0, va 0x751b8)
+objet	$AA	1	92	u8	$AB	aucune	-	mesuré	align B->img $AB : 489/489 (ex. arcade $31092, va 0x76e30)
+objet	$AB	1	23	u8	$AA	aucune	-	mesuré	align B->img $AA : 224/224 (ex. arcade $2F79A, va 0x169ff0)
+objet	$AC	1	7	u8	$AD	aucune	-	mesuré	align B->img $AD : 62/62 (ex. arcade $24B44, va 0x45e64)
+objet	$AC	4	6	mixte : u8 $AC, u8 $AD, s16 $AE	$AC	octets inversés dans le mot haut seulement (mot bas natif)	-	déduit	$AC.1 -> img $AD 62/62 ; $AD.1 -> img $AC 6/6 ; $AE.W -> img $AE 21/21 ; aucun accès long ; MAX : tst.l $ac(a6) uniquement (test de nullité : indifférent à la disposition)
+objet	$AE	2	2	s16	$AE	aucune	-	mesuré	align W->img $AE : 21/21 (ex. arcade $2EAA8, va 0x160f14)
+objet	$B9	1	27	u8	$B8	aucune	-	mesuré	align B->img $B8 : 149/149 (ex. arcade $31128, va 0x771a8)
+objet	$BC	1	14	u8	$BD	aucune	-	mesuré	align B->img $BD : 71/71 (ex. arcade $37E5A, va 0xbdd68)
+objet	$BD	1	7	u8	$BC	aucune	-	mesuré	align B->img $BC : 39/39 (ex. arcade $24E12, va 0x47d00)
+objet	$CC	1	6	u8	$CD	aucune	-	mesuré	align B->img $CD : 52/52 (ex. arcade $240EA, va 0x3edd8)
+objet	$CE	1	38	u8	$CF	aucune	-	mesuré	align B->img $CF : 265/265 (ex. arcade $312B8, va 0x77db4)
+objet	$D6	1	10	u8	$D7	aucune	-	mesuré	align B->img $D7 : 33/33 (ex. arcade $24DA2, va 0x476bc)
+objet	$DE	1	6	u8	$DF	aucune	-	mesuré	align B->img $DF : 15/15 (ex. arcade $24B30, va 0x45da4)
+objet	$EB	1	1	u8	$EA	aucune	-	mesuré	align B->img $EA : 11/11 (ex. arcade $23140, va 0x355b0)
+objet	$ED	1	3	u8	$EC	aucune	-	mesuré	align B->img $EC : 14/14 (ex. arcade $2BC8E, va 0x246ed0)
+objet	$EE	1	3	u8	$EF	aucune	-	mesuré	align B->img $EF : 33/33 (ex. arcade $1C23A, va 0xcd0ec)
+objet	$EF	1	3	u8	$EE	aucune	-	mesuré	align B->img $EE : 25/25 (ex. arcade $1C23E, va 0xcd100)
+objet	$101	1	34	u8	$100	aucune	-	mesuré	align B->img $100 : 178/178 (ex. arcade $1FFAA, va 0x298cc) ; région plans/système (exclue) : $100 x26
+objet	$101	2	4	ERREUR (mot à adresse impaire)	?	?	-	inconnu	un MOVE.W en $101(An) avec An pair déclenche une erreur d'adresse sur 68000 ; Upper : $101 est un u8 (-> img $100, 178/178) ; à corriger dans le code MAX (octet $101 ?)
+objet	$102	1	25	u8	$103	aucune	-	mesuré	align B->img $103 : 320/320 (ex. arcade $251F8, va 0x49e9c) ; région plans/système (exclue) : $103 x23
+objet	$110	4	1	s32 ou pointeur (long seul)	$110	SWAP (+ CONV si adresse PS2 lue par Upper)	-	déduit	arcade : move.l x3, andi.l x1 (ex. $7DF0) ; Upper : seulement des copies longues (MOVE.L $0110(A6),$0138(A6), arcade $B3C7A) ; aucun accès mot/octet ; MAX y range un pointeur de table (PSP 0x160)
+objet	$114	1	1	u8	$115	aucune	-	mesuré	align B->img $115 : 3/3 (ex. arcade $27B80, va 0x222fcc) ; région plans/système (exclue) : $115 x1
+objet	$11E	2	10	s16	$11E	aucune	-	mesuré	align W->img $11E : 178/178 (ex. arcade $31130, va 0x7727c) ; région plans/système (exclue) : $11E x2
+objet	$124	1	3	u8	$125	aucune	-	mesuré	align B->img $125 : 14/14 (ex. arcade $28090, va 0x2265b8)
+objet	$125	1	48	u8	$124	aucune	-	mesuré	align B->img $124 : 271/271 (ex. arcade $2067E, va 0x27c64) ; région plans/système (exclue) : $124 x8
+objet	$132	1	52	u8	$133	aucune	-	mesuré	align B->img $133 : 395/395 (ex. arcade $3113A, va 0x77348) ; région plans/système (exclue) : $133 x7
+objet	$212	1	2	u8	$213	aucune	-	mesuré	align B->img $213 : 11/11 (ex. arcade $30CD6, va 0x751c4)
+objet	$21C	2	32	s16	$21C	aucune	-	mesuré	align W->img $21C : 92/92 (ex. arcade $30DE8, va 0x75a5c)
+objet	$238	1	37	u8	$239	aucune	-	mesuré	align B->img $239 : 144/145 (ex. arcade $30D7E, va 0x757a4) ; minorité $103 x1
+objet	$239	1	2	u8	$238	aucune	-	mesuré	align B->img $238 : 7/7 (ex. arcade $2ADFE, va 0x23e198)
+objet	$23B	1	3	u8	$23A	aucune	-	mesuré	align B->img $23A : 20/20 (ex. arcade $28ADC, va 0x22b1ec)
+objet	$23E	1	4	u8	$23F	aucune	-	mesuré	align B->img $23F : 14/14 (ex. arcade $32686, va 0x84144)
+objet	$23F	1	5	u8	$23E	aucune	-	mesuré	align B->img $23E : 96/96 (ex. arcade $32A00, va 0x85fb8)
+objet	$244	1	3	u8	$245	aucune	-	déduit	align B->img $245 : 2/2 (ex. arcade $313EC, va 0x78950)
+objet	$248	1	14	u8	$249	aucune	-	mesuré	align B->img $249 : 18/18 (ex. arcade $37EB4, va 0xbe084)
+objet	$24C	1	6	u8	$24D	aucune	-	mesuré	align B->img $24D : 18/18 (ex. arcade $2EE72, va 0x163e64)
+objet	$24D	1	2	u8	$24C	aucune	-	mesuré	align B->img $24C : 10/10 (ex. arcade $2EE96, va 0x16406c)
+objet	$254	1	1	u8	$255	aucune	-	mesuré	align B->img $255 : 6/6 (ex. arcade $3813C, va 0xbee58)
+objet	$257	1	21	u8	$256	aucune	-	mesuré	align B->img $256 : 5/5 (ex. arcade $2BBEA, va 0x246b9c)
+objet	$25D	1	18	u8	$25C	aucune	-	mesuré	align B->img $25C : 88/88 (ex. arcade $2F7C0, va 0x16a09c)
+objet	$268	2	1	s16	$268	aucune	-	mesuré	align W->img $268 : 5/5 (ex. arcade $2EE40, va 0x163d54) ; octets hôte [None, 616]
+objet	$26A	1	1	u8	$26B	aucune	-	mesuré	align B->img $26B : 15/15 (ex. arcade $28CC6, va 0x22c054)
+objet	$26B	1	1	u8	$26A	aucune	-	mesuré	align B->img $26A : 13/13 (ex. arcade $28C60, va 0x22bd48)
+objet	$26F	1	11	u8	$26E	aucune	-	mesuré	align B->img $26E : 16/16 (ex. arcade $29FF6, va 0x236028)
+objet	$270	1	4	u8	$271	aucune	-	mesuré	align B->img $271 : 35/35 (ex. arcade $286D8, va 0x229810)
+objet	$272	1	4	u8 (libre, entre des u8 d'Upper)	$273	aucune	-	déduit	aucun accès Upper à l'octet $272 ; voisins u8 : $270->img $271 35/35, $271 hôte, $273->img $272 8/8 (ex. $28B2A) ; ATTENTION : laisser $272 à l'image $272 écraserait l'octet arcade $273 d'Upper ; MAX : clr.b / btst d1,$272(a6)
+objet	$27D	1	1	s16 (octet faible de $27C.W)	$27D	aucune	-	déduit	arcade : $27C.W (move.w, $2F8FC) ; align W $27C->img $27C 1/1 (va 0x16a910) ; Upper : $27C lh/sh seulement ; octet faible d'un s16 = même adresse dans l'image
+objet	$293	1	3	u8	$292	aucune	-	mesuré	align B->img $292 : 3/3 (ex. arcade $2ED88, va 0x1632d0)
+objet	$294	1	3	u8	$295	aucune	-	mesuré	align B->img $295 : 21/21 (ex. arcade $244BA, va 0x41524)
+objet	$296	1	1	u8	$297	aucune	-	déduit	align B->img $297 : 1/1 (ex. arcade $2EE72, va 0x163e64)
+objet	$29D	1	2	u8	$29C	aucune	-	mesuré	align B->img $29C : 3/3 (ex. arcade $249F0, va 0x45404)
+objet	$2A6	1	1	s16 (octet fort de $2A6.W)	$2A6	aucune	-	déduit	$2A6.W -> img $2A6 19/19 ; $2A7.1 -> img $2A7 15/15 (hôte $2A6 : octet faible) ; donc $2A6 octet fort = hôte $2A7 = img $2A6
+objet	$2A6	2	4	s16	$2A6	aucune	-	mesuré	align W->img $2A6 : 19/19 (ex. arcade $313F0, va 0x78964) ; octets hôte [None, 678]
+objet	$2A8	2	3	s16	$2A8	aucune	-	mesuré	align W->img $2A8 : 4/4 (ex. arcade $313F4, va 0x78978)
+objet	$2AC	1	2	u8	$2AD	aucune	-	mesuré	align B->img $2AD : 5/5 (ex. arcade $2BC02, va 0x246c14)
+objet	$2AF	1	5	u8	$2AE	aucune	-	mesuré	align B->img $2AE : 13/13 (ex. arcade $29FF0, va 0x236018)
+objet	$2C4	1	21	u8	$2C5	aucune	-	mesuré	align B->img $2C5 : 61/61 (ex. arcade $2B060, va 0x23f5bc)
+objet	$2C5	1	2	u8	$2C4	aucune	-	mesuré	align B->img $2C4 : 6/6 (ex. arcade $31144, va 0x7735c)
+objet	$2C7	1	1	u8	$2C6	aucune	-	déduit	align B->img $2C6 : 1/1 (ex. arcade $2EE7E, va 0x163e88)
+objet	$2C8	1	23	u8	$2C9	aucune	-	mesuré	align B->img $2C9 : 285/285 (ex. arcade $2352E, va 0x37f2c)
+objet	$2C9	1	61	u8	$2C8	aucune	-	mesuré	align B->img $2C8 : 551/551 (ex. arcade $30CDA, va 0x751dc)
+objet	$2CA	1	3	u8	$2CB	aucune	-	mesuré	align B->img $2CB : 95/95 (ex. arcade $27ED6, va 0x225660)
+objet	$2CE	1	2	u8	$2CF	aucune	-	mesuré	align B->img $2CF : 31/31 (ex. arcade $2EEB6, va 0x164208)
+objet	$332	2	16	jamais accédé par Upper (champ MAX seul)	$332	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $330-$333 ; arcade : A6.1 x1 ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$336	2	12	jamais accédé par Upper (champ MAX seul)	$336	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $334-$337 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$33A	2	24	jamais accédé par Upper (champ MAX seul)	$33A	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $338-$33B ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$33E	2	3	jamais accédé par Upper (champ MAX seul)	$33E	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $33C-$33F ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$342	4	4	jamais accédé par Upper (champ MAX seul)	$342	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $340-$343 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$34A	4	9	jamais accédé par Upper (champ MAX seul)	$34A	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $348-$34B ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$34E	1	1	jamais accédé par Upper (champ MAX seul)	$34E	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $34C-$34F ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$356	2	4	jamais accédé par Upper (champ MAX seul)	$356	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $354-$357 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$358	2	9	jamais accédé par Upper (champ MAX seul)	$358	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $358-$35B ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$35A	2	1	jamais accédé par Upper (champ MAX seul)	$35A	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $358-$35B ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$35C	2	1	jamais accédé par Upper (champ MAX seul)	$35C	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $35C-$35F ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$35F	1	6	jamais accédé par Upper (champ MAX seul)	$35F	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $35C-$35F ; arcade : A6.1 x1 ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$361	1	2	jamais accédé par Upper (champ MAX seul)	$361	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $360-$363 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$362	1	1	jamais accédé par Upper (champ MAX seul)	$362	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $360-$363 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$363	1	1	jamais accédé par Upper (champ MAX seul)	$363	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $360-$363 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$364	1	6	jamais accédé par Upper (champ MAX seul)	$364	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $364-$367 ; arcade : A4.1 x1 ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$365	1	3	jamais accédé par Upper (champ MAX seul)	$365	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $364-$367 ; arcade : A1.1 x1 ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$366	1	2	jamais accédé par Upper (champ MAX seul)	$366	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $364-$367 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$367	1	3	jamais accédé par Upper (champ MAX seul)	$367	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $364-$367 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$370	2	1	s16	$370	aucune	-	mesuré	align W->img $370 : 11/11 (ex. arcade $2D828, va 0x10e0c0) ; octets hôte [881, 880]
+objet	$378	2	1	s16	$378	aucune	-	mesuré	align W->img $378 : 30/30 (ex. arcade $2D89A, va 0x10e680) ; octets hôte [889, 888]
+objet	$37A	2	1	s16	$37A	aucune	-	mesuré	align W->img $37A : 9/9 (ex. arcade $2D89E, va 0x10e6a0) ; octets hôte [891, None]
+objet	$37C	2	1	s16	$37C	aucune	-	mesuré	align W->img $37C : 13/13 (ex. arcade $2D804, va 0x10ddb0) ; octets hôte [None, 892]
+objet	$3C0	1	1	jamais accédé par Upper (champ MAX seul)	$3C0	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3C0-$3C3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3C0	4	40	jamais accédé par Upper (champ MAX seul)	$3C0	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3C0-$3C3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3C4	4	24	jamais accédé par Upper (champ MAX seul)	$3C4	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3C4-$3C7 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3C8	4	46	jamais accédé par Upper (champ MAX seul)	$3C8	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3C8-$3CB ; arcade : A6.1 x1 ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3CC	4	26	jamais accédé par Upper (champ MAX seul)	$3CC	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3CC-$3CF ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3D0	4	3	jamais accédé par Upper (champ MAX seul)	$3D0	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3D0-$3D3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3D4	1	1	u8 (hérite de u8[4] via la copie de $82)	$3D5	aucune	-	déduit	si $3D4 restait à l'image $3D4, move.b $3d4,$82 (-> img $83) recopierait l'octet arcade $83 au lieu de $82 ; avec u8[4] : img $3D5 = octet arcade $82 copié
+objet	$3D4	4	2	MAX seul, mais reçoit une copie de $82.L (u8[4])	$3D4	aucune pour la copie (transit registre) ; constante éventuelle : octets échangés dans chaque mot	-	déduit	aucun accès Upper ; MAX : move.l $82(a6),$3d4(a6) puis move.b $3d4(a6),$82(a6), et move.l $101(a0),$3d4(a6) (adresse impaire !) ; $3D4 doit suivre la disposition u8[4] de sa source
+objet	$3D8	4	2	jamais accédé par Upper (champ MAX seul)	$3D8	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3D8-$3DB ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E0	2	35	jamais accédé par Upper (champ MAX seul)	$3E0	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E0-$3E3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E1	1	4	jamais accédé par Upper (champ MAX seul)	$3E1	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E0-$3E3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E2	1	5	jamais accédé par Upper (champ MAX seul)	$3E2	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E0-$3E3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E2	2	50	jamais accédé par Upper (champ MAX seul)	$3E2	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E0-$3E3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E3	1	2	jamais accédé par Upper (champ MAX seul)	$3E3	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E0-$3E3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E4	1	1	jamais accédé par Upper (champ MAX seul)	$3E4	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E4-$3E7 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E6	2	21	jamais accédé par Upper (champ MAX seul)	$3E6	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E4-$3E7 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E8	1	2	jamais accédé par Upper (champ MAX seul)	$3E8	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E8-$3EB ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E8	2	1	jamais accédé par Upper (champ MAX seul)	$3E8	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E8-$3EB ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3E9	1	1	jamais accédé par Upper (champ MAX seul)	$3E9	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3E8-$3EB ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3EC	4	5	jamais accédé par Upper (champ MAX seul)	$3EC	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3EC-$3EF ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3F2	1	1	jamais accédé par Upper (champ MAX seul)	$3F2	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3F0-$3F3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3F2	2	21	jamais accédé par Upper (champ MAX seul)	$3F2	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3F0-$3F3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+objet	$3F3	1	1	jamais accédé par Upper (champ MAX seul)	$3F3	aucune (disposition 68K telle quelle, cf. TYPAGE-MAX.md §2 et §4)	-	inconnu	aucun accès MIPS ro5 A6/A4/A1 en $3F0-$3F3 ; arcade : aucun ; joueurs : aucun accès A5 absolu ($400/$800/$C00/$1000 + $330-$3FF) sauf $370-$37E ; aucune constante 0xA08xxx visant $x330-$x3FF
+pas d'animation	$1	1	1	u8 (octets du pas, données PS2)	$0	aucune	-	mesuré	align B->img $0 : 6/6 (ex. arcade $126E, va 0x32b1c) ; A0/A1 toutes provenances confondues ; octets rangés un par un (§44)
+pas d'animation	$8	1	1	u8 (octets du pas, données PS2)	$9	aucune	-	mesuré	align B->img $9 : 9/9 (ex. arcade $24D54, va 0x4730c) ; A0/A1 toutes provenances confondues ; octets rangés un par un (§44)
+pas d'animation	$9	1	4	u8 (octets du pas, données PS2)	$8	aucune	-	mesuré	align B->img $8 : 34/34 (ex. arcade $22FBC, va 0x347a4) ; A0/A1 toutes provenances confondues ; octets rangés un par un (§44)
+pas d'animation	$B	1	1	u8 (octets du pas, données PS2)	$A	aucune	-	mesuré	align B->img $A : 21/21 (ex. arcade $1B56, va 0x60c70) ; A0/A1 toutes provenances confondues ; octets rangés un par un (§44)
+pas d'animation	$12	1	29	u8 (octets du pas, données PS2)	$13	aucune	-	mesuré	align B->img $13 : 7/7 (ex. arcade $1B68, va 0x60cb8) ; A0/A1 toutes provenances confondues ; octets rangés un par un (§44)
+pas d'animation	$13	1	21	u8 (octets du pas, données PS2)	$12	aucune	-	mesuré	align B->img $12 : 3/3 (ex. arcade $1B6E, va 0x60cd0) ; A0/A1 toutes provenances confondues ; octets rangés un par un (§44)
+pointeur a0	$2	2	1	table MAX (68K gros-boutiste)	$2	aucune	-	déduit	A0 = TAB_VOIX_MAX (dc.w dans moteur_max_main.s, psp_cee0c) : données assemblées par MAX, pas une table PS2 d'Upper ; ne pas convertir
+pointeur a0	$4	4	1	table MAX (68K gros-boutiste)	$4	aucune	-	déduit	A0 = TAB_SONS_CLES (dc.l, moteur_max_main.s psp_cee5c) : données MAX ; ne pas convertir
+pointeur a0	$14	2	1	s32 (partie haute) — A0 = objet	$16	aucune	-	mesuré	commentaire MAX « pointeur d'objet » (Eagle l.421, Yun l.4034) ; champ objet $14.W -> img $16 1151/1161
+pointeur a0	$55	1	1	u8 — A0 = structure joueur ($400(A5)+$400k)	$54	aucune	-	mesuré	psp_d014c : lea $400(a5),a0 ; btst #7,$55(a0) ; champ objet $55.1 -> img $54 59/59
+pointeur a0	$5F	1	1	u8 — A0 = objet	$5E	aucune	-	mesuré	Yun l.4051 (« pointeur d'objet ») ; champ objet $5F.1 -> img $5E 184/184
+pointeur a0	$101	4	1	ERREUR (long à adresse impaire)	?	?	-	inconnu	Yun l.4072 move.l $101(a0),$3d4(a6) : erreur d'adresse sur 68000 (A0 objet pair) ; $101 est un u8 (img $100) ; à corriger
+pointeur a0	$25D	1	1	u8 — A0 = objet	$25C	aucune	-	mesuré	Yun l.4043/4081 ; champ objet $25D.1 -> img $25C 88/88
+pointeur a3	$10	2	1	s32 (partie haute) — A3 = caméra de plan ($1BD68)	$12	aucune	-	mesuré	align W A3 $10->img $12 114/114 (ex. arcade $1B4DE, va 0xc6678) ; psp_cfbf4 : sub.w $10(a3),d0

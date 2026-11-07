@@ -1,0 +1,7 @@
+{
+ "_note": "Table de décision (ids seulement) : un tirage du parcours Arcade relevé sous PPSSPP par perso MAX (R6, agent_integration_max, 2b22) ; rangée 0 du parcours. Rang 5, rival (rang 9) et boss sont relus dans l'EBOOT (contrôle). Eagle : 0x15 = combat secret (Balrog).",
+ "Eagle $26": {"id_psp": "26", "releve_psp": ["23", "09", "05", "1b", "20", "06", "1a", "08", "0b", "15", "0a"], "combat_secret": "15"},
+ "Maki $27": {"id_psp": "27", "releve_psp": ["28", "0f", "12", "1d", "0d", "21", "1a", "1c", "07", "0a"]},
+ "Yun $2D": {"id_psp": "28", "releve_psp": ["0c", "08", "03", "06", "22", "0e", "26", "1c", "21", "0a"]},
+ "Ingrid $2E": {"id_psp": "29", "releve_psp": ["04", "03", "22", "23", "17", "07", "16", "20", "09", "0a"]}
+}

@@ -1,0 +1,962 @@
+[
+ {
+  "ps2": "60ad90",
+  "n": 40,
+  "e": 1,
+  "role": "ID → ID de BASE (variantes : $12→$04, $13→$11, $14→$06, $17→$00) — lu par le code natif 0x381A00",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "60d070"
+ },
+ {
+  "ps2": "60d070",
+  "n": 40,
+  "e": 4,
+  "role": "table de code (étape B)",
+  "src": "etapeB",
+  "kind": "code",
+  "suivante": "6102b0"
+ },
+ {
+  "ps2": "6102b0",
+  "n": 40,
+  "e": 4,
+  "role": "table de code (étape B)",
+  "src": "etapeB",
+  "kind": "code",
+  "suivante": "6132e0"
+ },
+ {
+  "ps2": "6132e0",
+  "n": 40,
+  "e": 1,
+  "role": "masque #$03210D40 -> table d'octets ro5",
+  "src": "hors combat masque_voix_3210d40",
+  "kind": "simple",
+  "suivante": "613440"
+ },
+ {
+  "ps2": "613440",
+  "n": 40,
+  "e": 2,
+  "role": "n° de son par perso = base de voix + 5 (cri de K.O. ?)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "613490"
+ },
+ {
+  "ps2": "613490",
+  "n": 40,
+  "e": 2,
+  "role": "BASE DE LA BANQUE DE VOIX par perso (0x300 + 0x20 × n)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "615570"
+ },
+ {
+  "ps2": "615570",
+  "n": 40,
+  "e": 4,
+  "role": "(dx, dy) par perso : position d'un objet attaché créé par le moteur",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "615572"
+ },
+ {
+  "ps2": "615572",
+  "n": 40,
+  "e": 4,
+  "role": "(2e mot de 0x39CDD0)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "615790"
+ },
+ {
+  "ps2": "615790",
+  "n": 40,
+  "e": 4,
+  "role": "(dx, dy) par perso : position d'un effet ($3D = $45/$46)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "615792"
+ },
+ {
+  "ps2": "615792",
+  "n": 40,
+  "e": 4,
+  "role": "(2e mot de 0x39CFD0)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "615ac0"
+ },
+ {
+  "ps2": "615ac0",
+  "n": 40,
+  "e": 4,
+  "role": "(dx, dy) par perso propriétaire ($3A d'un objet)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "615ca0"
+ },
+ {
+  "ps2": "615ca0",
+  "n": 40,
+  "e": 1,
+  "role": "octet par perso propriétaire ($3A) + $02/4 → routine 0x1337F0",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "616180"
+ },
+ {
+  "ps2": "616180",
+  "n": 40,
+  "e": 1,
+  "role": "ID → ID de référence pour un objet (Ryu→$0A, variantes → 0/$0A ; Upper : Guile→$03, Dee Jay→$1F, Shin Akuma→$02)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "617290"
+ },
+ {
+  "ps2": "617290",
+  "n": 40,
+  "e": 2,
+  "role": "hauteur Y d'un objet posé sur le perso (étoiles d'étourdissement ?)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "617be0"
+ },
+ {
+  "ps2": "617be0",
+  "n": 40,
+  "e": 1,
+  "role": "octet par perso (adversaire) → routine 0x8BF10, après lecture de ses tables d'animation",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "6180f0"
+ },
+ {
+  "ps2": "6180f0",
+  "n": 40,
+  "e": 2,
+  "role": "décalage X d'un objet attaché (signé selon le sens)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "61a840"
+ },
+ {
+  "ps2": "61a840",
+  "n": 40,
+  "e": 4,
+  "role": "long par perso signé selon le sens, en début de manche (vitesse/position X ?)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "61aa30"
+ },
+ {
+  "ps2": "61aa30",
+  "n": 40,
+  "e": 4,
+  "role": "octet par perso × (ism+1) → $270 (Chun-Li 2, Sodom 6, Vega 4, Juli/Juni 8)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "61aad0"
+ },
+ {
+  "ps2": "61aad0",
+  "n": 40,
+  "e": 4,
+  "role": "(dx, dy) par perso → $12/$16 d'un objet",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "61aad2"
+ },
+ {
+  "ps2": "61aad2",
+  "n": 40,
+  "e": 4,
+  "role": "(2e mot de 0x3A2E40)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "61b4e0"
+ },
+ {
+  "ps2": "61b4e0",
+  "n": 40,
+  "e": 1,
+  "role": "masque #$E76BFFFB -> table d'octets ro5",
+  "src": "hors combat masque_e76bfffb",
+  "kind": "simple",
+  "suivante": "61b510"
+ },
+ {
+  "ps2": "61b510",
+  "n": 40,
+  "e": 1,
+  "role": "masque #$3F4AFB9B -> table d'octets ro5",
+  "src": "hors combat masque_3f4afb9b",
+  "kind": "simple",
+  "suivante": "61b540"
+ },
+ {
+  "ps2": "61b540",
+  "n": 40,
+  "e": 1,
+  "role": "masque 32 bits #$2640F310 (ro3, dans le code) -> table d'octets 40 entrées dans ro5",
+  "src": "hors combat masque_2640f310",
+  "kind": "simple",
+  "suivante": "61b680"
+ },
+ {
+  "ps2": "61b680",
+  "n": 40,
+  "e": 1,
+  "role": "combat secret : $15 (Balrog, décor $14) ou $1E (Juli+Juni, décor $2A), $FF = aucun",
+  "src": "hors combat rival_secret",
+  "kind": "simple",
+  "suivante": "61b6d0"
+ },
+ {
+  "ps2": "61b6d0",
+  "n": 40,
+  "e": 1,
+  "role": "mode arcade ($114(A5) = 9)",
+  "src": "combat",
+  "note": "décor imposé aux combats 8 / 9 : 2 x 40 -- constante de rangée",
+  "kind": "multi"
+ },
+ {
+  "ps2": "61bbc0",
+  "n": 40,
+  "e": 4,
+  "role": "enregistrements de 4 octets par perso (mode arcade)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "61bd60"
+ },
+ {
+  "ps2": "61bd60",
+  "n": 40,
+  "e": 1,
+  "role": "ID -> $176(A5) (variante 0-4 : fin/illustration ; tirée au hasard sous condition)",
+  "src": "hors combat variante_fin_176",
+  "kind": "simple",
+  "suivante": "61be10"
+ },
+ {
+  "ps2": "61be10",
+  "n": 40,
+  "e": 1,
+  "role": "ID -> décor (home stage) ; correctif $90(A5)=8 : $18->$0C",
+  "src": "hors combat decor_du_perso",
+  "kind": "simple",
+  "suivante": "61c0e0"
+ },
+ {
+  "ps2": "61c0e0",
+  "n": 40,
+  "e": 1,
+  "role": "octet par perso",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "620630"
+ },
+ {
+  "ps2": "620630",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : aiguillage par ID (JMP, table de 32) dans le code d'un objet",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "622d10"
+ },
+ {
+  "ps2": "622d10",
+  "n": 40,
+  "e": 4,
+  "role": "(dx, dy) selon l'ID ADVERSE, dans le code d'un perso",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "622db0"
+ },
+ {
+  "ps2": "622db0",
+  "n": 40,
+  "e": 4,
+  "role": "idem, adversaire accroupi ($2C9)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "623e50"
+ },
+ {
+  "ps2": "623e50",
+  "n": 40,
+  "e": 2,
+  "role": "mot selon l'ID ADVERSE (3 variantes : en l'air / accroupi / debout) → $1F0",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "628320"
+ },
+ {
+  "ps2": "628320",
+  "n": 40,
+  "e": 2,
+  "role": "ID → n° d'entrée X_DATA.BIN de la BANQUE DE SPRITES (HANDOFF §51)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "628370"
+ },
+ {
+  "ps2": "628370",
+  "n": 40,
+  "e": 2,
+  "role": "n° d'entrée X_DATA du portrait (e314+ / e340+) ; natif 0x3838D0 appelé par sélection, VS, citations…",
+  "src": "hors combat portrait_momo",
+  "kind": "simple",
+  "suivante": "628470"
+ },
+ {
+  "ps2": "628470",
+  "n": 40,
+  "e": 4,
+  "role": "portraits (MOMO) par perso",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "661ef0"
+ },
+ {
+  "ps2": "661ef0",
+  "n": 40,
+  "e": 128,
+  "role": "IA : 128 o par perso (avec $209, $212, $24B)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "67e2a0"
+ },
+ {
+  "ps2": "67e2a0",
+  "n": 40,
+  "e": 2,
+  "role": "offset -> 8 citations (2 lignes, 1er octet = X) par perso",
+  "src": "hors combat citations_par_perso",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 15194,
+  "region": 15728,
+  "suivante": "697fe0"
+ },
+ {
+  "ps2": "697fe0",
+  "n": 40,
+  "e": 32,
+  "role": "moteur de coups : octet [ID défenseur × 32 + $126] (base de dégâts/étourdissement ?)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "6989e0"
+ },
+ {
+  "ps2": "6989e0",
+  "n": 40,
+  "e": 32,
+  "role": "moteur de coups : octet [ID × 32 + aléa 0-31]",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "698ee0"
+ },
+ {
+  "ps2": "698ee0",
+  "n": 40,
+  "e": 32,
+  "role": "moteur de coups : octet [ID × 32 + aléa 0-31] (variante)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "6993e0"
+ },
+ {
+  "ps2": "6993e0",
+  "n": 40,
+  "e": 1,
+  "role": "seuil par perso comparé à la vitalité $50",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "699408"
+ },
+ {
+  "ps2": "699408",
+  "n": 40,
+  "e": 1,
+  "role": "seuil par perso comparé à la vitalité $50 (variante)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "699430"
+ },
+ {
+  "ps2": "699430",
+  "n": 40,
+  "e": 1,
+  "role": "octet par perso (moteur de coups)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "699458"
+ },
+ {
+  "ps2": "699458",
+  "n": 40,
+  "e": 1,
+  "role": "octet signé par perso → table 0x5F6030 × 128",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "699480"
+ },
+ {
+  "ps2": "699480",
+  "n": 40,
+  "e": 1,
+  "role": "octet par perso × 32 → table 0x5F4F30 [aléa]",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "722080"
+ },
+ {
+  "ps2": "722080",
+  "n": 40,
+  "e": 2,
+  "role": "palettes (3e table : décalages u16 → palette n° D0, × 32)",
+  "src": "combat",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 8496,
+  "region": 10448,
+  "suivante": "72bdf0"
+ },
+ {
+  "ps2": "72bdf0",
+  "n": 40,
+  "e": 4,
+  "role": "palettes (portraits ?) par perso, ID masqué & $1F",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "748ba0"
+ },
+ {
+  "ps2": "748ba0",
+  "n": 40,
+  "e": 2,
+  "role": "décalages u16 relatifs → octet par coup normal (index = $81?12 + $80?6 + $83 : debout/accroupi/saut × poing/pied × force)",
+  "src": "combat",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 128,
+  "region": 152,
+  "suivante": "748c38"
+ },
+ {
+  "ps2": "748c38",
+  "n": 40,
+  "e": 2,
+  "role": "décalages u16 relatifs → masque de bits par coup normal, choisi par $371 (bits 1-2)",
+  "src": "combat",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 108,
+  "region": 112,
+  "suivante": "748ca8"
+ },
+ {
+  "ps2": "748ca8",
+  "n": 40,
+  "e": 2,
+  "role": "demi-largeur du perso → $A6 (24 ou 32)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "748cf8"
+ },
+ {
+  "ps2": "748cf8",
+  "n": 40,
+  "e": 4,
+  "role": "pointeur → 3 décalages u16 (ism) → 2 octets par coup normal → $23F et $292 (compteurs)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "748d98"
+ },
+ {
+  "ps2": "748d98",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : coups normaux (sous-état $07 = $0A) — routine par perso",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "748e38"
+ },
+ {
+  "ps2": "748e38",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : coups spéciaux / super combos, entrée 1 ($124 = 0)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "748ed8"
+ },
+ {
+  "ps2": "748ed8",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : coups spéciaux / super combos, entrée 2 ($124 ≠ 0)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "748f78"
+ },
+ {
+  "ps2": "748f78",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : état principal $04 = 4 (JSR), variante $124 = 0",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "749018"
+ },
+ {
+  "ps2": "749018",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : état principal $04 = 4, variante $124 ≠ 0",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "7490b8"
+ },
+ {
+  "ps2": "7490b8",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : état principal $04 = 8 (poses : victoire ?)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "749158"
+ },
+ {
+  "ps2": "749158",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : état principal $04 = $0A — routine générique commune (sauf Akuma/Shin Akuma dans Upper)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "7491f8"
+ },
+ {
+  "ps2": "7491f8",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : état principal $04 = $0E — intro d'avant-combat (répliques selon l'adversaire)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "749298"
+ },
+ {
+  "ps2": "749298",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : état $04 = $10 (provocation ? garde aérienne ?)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "749338"
+ },
+ {
+  "ps2": "749338",
+  "n": 40,
+  "e": 4,
+  "role": "pointeur → 3 pointeurs (ism) → en-tête de 5 décalages u16 → boîtes corps $90/$94/$98, poussée $9C, ATTAQUES $A0 (32 o : boîte + propriétés : dégâts, étourdissement…)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "7493d8"
+ },
+ {
+  "ps2": "7493d8",
+  "n": 40,
+  "e": 4,
+  "role": "table des jeux de boîtes de corps → $88 (index = mot A bits 0-7)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "749478"
+ },
+ {
+  "ps2": "749478",
+  "n": 40,
+  "e": 4,
+  "role": "table → $C0 (index = mot A bits 16-23) → $C4 / $C7",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "749518"
+ },
+ {
+  "ps2": "749518",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : initialisation du perso en début de manche (JSR) — crée ses objets, remet ses variables",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "7495b8"
+ },
+ {
+  "ps2": "7495b8",
+  "n": 40,
+  "e": 4,
+  "role": "positions de projection : [ID] → +2×ID adverse → +8×(mot C bits 0-7) → (dx, dy)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "749658"
+ },
+ {
+  "ps2": "749658",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : reconnaissance des commandes du perso (tampons $190/$1B0/$1C0/$1F0…, appels aux reconnaisseurs génériques ¼ de cercle, charges…)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "7496f8"
+ },
+ {
+  "ps2": "7496f8",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : prise au sol (adversaire au sol)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "749798"
+ },
+ {
+  "ps2": "749798",
+  "n": 40,
+  "e": 4,
+  "role": "CODE : prise aérienne (adversaire en l'air)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "749838"
+ },
+ {
+  "ps2": "749838",
+  "n": 40,
+  "e": 4,
+  "role": "TABLES D'ANIMATION PAR COUP : pointeur → 3 × 4 pointeurs (ism 0 : +0, ism −1 : +16, ism +1 : +32) → $2B0, $2B8, $2B4, $2BC",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "7498d8"
+ },
+ {
+  "ps2": "7498d8",
+  "n": 40,
+  "e": 8,
+  "role": "VITESSES DE MARCHE, ism 0 : 2 longs par perso (avant / arrière) → $40",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "749a18"
+ },
+ {
+  "ps2": "749a18",
+  "n": 40,
+  "e": 8,
+  "role": "vitesses de marche, ism −1",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "749b58"
+ },
+ {
+  "ps2": "749b58",
+  "n": 40,
+  "e": 8,
+  "role": "vitesses de marche, ism +1",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "749c98"
+ },
+ {
+  "ps2": "749c98",
+  "n": 40,
+  "e": 64,
+  "role": "SAUTS, ism 0 : 64 o par perso (vitesses/accélérations X/Y → $40-$4C, par type de saut)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74a698"
+ },
+ {
+  "ps2": "74a698",
+  "n": 40,
+  "e": 64,
+  "role": "sauts, ism −1",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74b098"
+ },
+ {
+  "ps2": "74b098",
+  "n": 40,
+  "e": 64,
+  "role": "sauts, ism +1",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c038"
+ },
+ {
+  "ps2": "74c038",
+  "n": 40,
+  "e": 4,
+  "role": "CODE IA : lancement d'un coup spécial par le CPU (aiguillage par $AB)",
+  "src": "combat",
+  "kind": "code",
+  "suivante": "74c0d8"
+ },
+ {
+  "ps2": "74c0d8",
+  "n": 40,
+  "e": 4,
+  "role": "IA : scripts du CPU — pointeur → décalages u16 indexés par $204 → script → $220",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c178"
+ },
+ {
+  "ps2": "74c178",
+  "n": 40,
+  "e": 4,
+  "role": "IA : scripts du CPU (variante) indexés par $204",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c218"
+ },
+ {
+  "ps2": "74c218",
+  "n": 40,
+  "e": 4,
+  "role": "IA : scripts indexés par $C6 de l'adversaire",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c2b8"
+ },
+ {
+  "ps2": "74c2b8",
+  "n": 40,
+  "e": 4,
+  "role": "IA : scripts indexés par $21F → $21E, $206, $22C",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c358"
+ },
+ {
+  "ps2": "74c358",
+  "n": 40,
+  "e": 4,
+  "role": "positions d'objets attachés : [ID propriétaire] → $40 d'un objet ; mot C bits 8-11 × 2 → (dx, dy)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c3f8"
+ },
+ {
+  "ps2": "74c3f8",
+  "n": 40,
+  "e": 4,
+  "role": "positions d'apparition d'effets : [$3A objet = ID propriétaire] → (dx, dy)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c498"
+ },
+ {
+  "ps2": "74c498",
+  "n": 40,
+  "e": 4,
+  "role": "positions d'effets (variante, index $02 objet × 16) : [$3A] → (dx, dy)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c538"
+ },
+ {
+  "ps2": "74c538",
+  "n": 40,
+  "e": 4,
+  "role": "SONS PAR PAS : [ID] → $E6 ; index = $C7 × 8 (+2 si $BD(A5)) → n° de son (u16) → routine son 0xF53D0",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c5d8"
+ },
+ {
+  "ps2": "74c5d8",
+  "n": 40,
+  "e": 4,
+  "role": "effet lié au pas : [ID] → $264 (joueur) / $50, $60 (objets) ; index = mot B bits 16-23 × 4 → mot → table 0x5C703C",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c680"
+ },
+ {
+  "ps2": "74c680",
+  "n": 40,
+  "e": 1,
+  "role": "longueur de la jauge de GARDE → $2CC (34-50 ; ÷2 si $EA)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c6a8"
+ },
+ {
+  "ps2": "74c6a8",
+  "n": 40,
+  "e": 1,
+  "role": "seuil d'ÉTOURDISSEMENT → $24D (64-80 ; +8 ism −1, −8 ism +1, −24 Cody ism +1 ; ÷2 si $EA)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c6d0"
+ },
+ {
+  "ps2": "74c6d0",
+  "n": 40,
+  "e": 1,
+  "role": "index par perso → table T_592780 → D6 (réglage de jauge ?)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c6f8"
+ },
+ {
+  "ps2": "74c6f8",
+  "n": 40,
+  "e": 1,
+  "role": "index par perso → table T_5927C0 → D6 (réglage de jauge ?)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c720"
+ },
+ {
+  "ps2": "74c720",
+  "n": 40,
+  "e": 1,
+  "role": "octet par perso → $159",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c748"
+ },
+ {
+  "ps2": "74c748",
+  "n": 40,
+  "e": 1,
+  "role": "octet par perso retiré de $2CA (récupération ? comparé à $B4)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "74c770"
+ },
+ {
+  "ps2": "74c770",
+  "n": 40,
+  "e": 2,
+  "role": "décalages u16 relatifs → liste d'octets (ID adverses) : cas particuliers selon l'adversaire",
+  "src": "combat",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 366,
+  "region": 368,
+  "suivante": "74c8e0"
+ },
+ {
+  "ps2": "74c8e0",
+  "n": 40,
+  "e": 2,
+  "role": "décalages u16 relatifs → liste d'octets (ID adverses), variante",
+  "src": "combat",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 330,
+  "region": 586,
+  "suivante": "76e9fe"
+ },
+ {
+  "ps2": "76e9fe",
+  "n": 40,
+  "e": 2,
+  "role": "décalages u16 relatifs → liste de paires de mots, par ID (adversaire, $103(A4))",
+  "src": "combat",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 6736,
+  "region": 6992,
+  "suivante": "951ba0"
+ },
+ {
+  "ps2": "951ba0",
+  "n": 40,
+  "e": 2,
+  "role": "IA : décalages u16 relatifs → 32 octets par perso, tirage aléatoire (×8)",
+  "src": "combat",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 80,
+  "region": 336,
+  "suivante": "95c7a0"
+ },
+ {
+  "ps2": "95c7a0",
+  "n": 40,
+  "e": 2,
+  "role": "HUD de combat (barre de vie ?) : décalage par perso",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "95c840"
+ },
+ {
+  "ps2": "95c840",
+  "n": 40,
+  "e": 2,
+  "role": "HUD de combat : décalage par perso (variante)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": "960090"
+ },
+ {
+  "ps2": "960090",
+  "n": 40,
+  "e": 2,
+  "role": "offset -> liste d'octets (n° de ligne) terminée par 0",
+  "src": "hors combat bios_par_perso",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 225,
+  "region": 481,
+  "suivante": "967bf0"
+ },
+ {
+  "ps2": "967bf0",
+  "n": 64,
+  "e": 2,
+  "role": "mot par perso → $70/$78 d'un objet ; index = ID + $18 (24 entrées non-perso avant)",
+  "src": "combat",
+  "note": "mot par perso, index = ID + $18 (24 entrées non-perso avant)",
+  "kind": "simple"
+ },
+ {
+  "ps2": "978d1c",
+  "n": 40,
+  "e": 2,
+  "role": "offset vers 16 parcours de 10 adversaires (octets ID) par perso",
+  "src": "hors combat parcours_arcade",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 5200,
+  "region": 5360,
+  "suivante": "97a20c"
+ },
+ {
+  "ps2": "97a20c",
+  "n": 40,
+  "e": 2,
+  "role": "si $BF(A5) : l'arcade lit du CODE comme table ($D07E) ; Upper a une vraie table",
+  "src": "hors combat parcours_arcade_alt",
+  "kind": "rel16",
+  "off_min": 80,
+  "off_max": 2800,
+  "region": 3056,
+  "suivante": "97ca90"
+ },
+ {
+  "ps2": "97ca90",
+  "n": 40,
+  "e": 4,
+  "role": "pointeur par perso → 3 mots (ism) → objet (A3 = joueur)",
+  "src": "combat",
+  "kind": "simple",
+  "suivante": null
+ }
+]

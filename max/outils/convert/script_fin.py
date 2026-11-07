@@ -27,7 +27,17 @@ def nom(op):
     return "cl%d" % cl
 
 
+# (2026-11-07) même table dans le module SFA3 de l'Anthology (ISO PS2, ro3_usa_prog68k.bin décompressé) : adresse PS2
+# 0x584600 = $26DCC, 33 longs petit-boutistes (adresses PS2), scripts en mots petit-boutistes ; fichier = PS2 − 0x1F0000.
+# Les 4 fins MAX converties (modèles $10, $07, $14) sont identiques à celles lues dans sfa3ud (contrôle du 07/11).
+T_SCRIPTS_RO3, BASE_RO3 = 0x584600, 0x1F0000
+
+
 def arcade(fin, nmots=6000):
+    if not os.path.exists(ROMD) and os.environ.get("ANTHOLOGY_DIR"):
+        m = open(os.path.join(os.environ["ANTHOLOGY_DIR"], "decompressed", "ro3_usa_prog68k.bin"), "rb").read()
+        a = struct.unpack_from("<I", m, T_SCRIPTS_RO3 - BASE_RO3 + 4 * fin)[0]
+        return a, lire(struct.unpack_from("<%dH" % min(nmots, (len(m) - (a - BASE_RO3)) // 2), m, a - BASE_RO3))
     b = open(ROMD, "rb").read()
     a = struct.unpack_from(">I", b, T_SCRIPTS + 4 * fin)[0]
     return a, lire(struct.unpack_from(">%dH" % nmots, b, a))

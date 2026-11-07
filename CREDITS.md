@@ -18,7 +18,8 @@ HSFA stands on the work of many people. Thank you all.
   **Pillow**.
 - **Sean Barrett**: stb_vorbis (Ogg Vorbis decoder). The DL-1425 **QSound HLE** authors, **superctr** and **Valley
   Bell** (via MAME). **Ivan Kosarev**: the `z80` emulator used by the music-board test bench (MIT). See `NOTICE.md`.
-- **vasm** (Volker Barthelmann, Frank Wille): the 68000 assembler of the MAX code drafts; **FFmpeg** / **libvorbis**:
+- **vasm** (Volker Barthelmann, Frank Wille): the reference whose exact output HSFA's own 68000 assembler
+  (`tools/asm68k/`) reproduces; no vasm code is used; **FFmpeg** / **libvorbis**:
   the Ogg Vorbis music in the zips.
 - **Recalbox**, **ROCKNIX** and **Android** retro communities: the platforms the cores run on.
 

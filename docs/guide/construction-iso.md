@@ -14,6 +14,9 @@ Rapport complet : [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 du jour
 - L'ISO USA (`SLUS-21317`, 2 048 o/secteur). Les images `.chd`, `.bin` et `.cso` sont refusées : convertir d'abord en
   `.iso`. Un dossier qui contient `X_DATA.BIN` est aussi accepté.
 - Facultatif : `--arcade sfa3.zip` (ROM graphique d'arcade de SFA3) au lieu de la reconstruire depuis l'ISO.
+- Pour **Upper MAX** (Upper + Eagle, Maki, Yun, Ingrid ; §5) : l'ISO PSP **européenne** de *Street Fighter Alpha 3
+  MAX* (ULES-00235 v1.01, `.iso`). Rien d'autre à installer : le code des MAX est assemblé par l'assembleur 68000 du
+  projet (`tools/asm68k/`, Python). vasm reste utilisable pour comparer (`HSFA_ASM=vasm`, ou `HSFA_ASM=compare`).
 
 ## 2. Configurer
 
@@ -32,7 +35,9 @@ python3 scripts/construction/hsfa_build.py \
 
 | Option | Effet |
 |---|---|
-| `--jeux sfa3,upper,hyper` | jeux à construire (défaut : les trois) |
+| `--jeux sfa3,upper,hyper` | jeux à construire (défaut : les trois) ; `uppermax` en plus : Upper MAX (§5) |
+| `--psp-iso ISO` | (Upper MAX) ISO PSP européenne de SFA3 MAX ; sans elle, `uppermax` = Upper |
+| `--vasm CHEMIN` | (Upper MAX, facultatif) chemin de `vasmm68k_mot` pour `HSFA_ASM=vasm` ou `compare` |
 | `--arcade ZIP\|DOSSIER` | ROM graphique d'arcade (sinon voie « ISO seule », par défaut) |
 | `--liste` | liste des étapes |
 | `--etape NOM` / `--jusqua NOM` | refaire à partir de NOM / s'arrêter après NOM |
@@ -79,9 +84,24 @@ Ce qui est garanti (rapport BUILD §0, §3, §5 ; contrôle du 2026-10-27 contre
 - Sans table, Hyper garde les voix de SFA3 pour toutes ses versions (programme `dda35430…`) et le zip n'a pas de
   rejeu : sans table, les codes de rejeu n'auraient pas de son.
 
-Pas encore couvert : le contenu MAX.
+## 5. Upper MAX (persos de SFA3 MAX)
 
-## 5. Ensuite
+```bash
+python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
+    --psp-iso "Street Fighter Alpha 3 MAX (Europe).iso" --sortie hsfa_sortie --jeux upper,uppermax
+```
+
+- Résultat : `archives/sfa3umhsfa.zip` (pilote `sfa3umhsfa` du cœur). C'est l'état du lot **2b31**. Le programme et
+  la ROM son sont identiques à ce lot. Avec `--arcade`, l'archive entière l'est aussi, hors `hsfa_info.txt`.
+- Il ne faut pas de dump PPSSPP ni d'EBOOT déchiffré : le `BOOT.BIN` de l'ISO est déjà en clair. L'ISO est
+  contrôlée : identité et empreintes des fichiers lus. Une ISO patchée (16:9 par exemple), un EBOOT chiffré ou une
+  autre région sont refusés avec un message.
+- Seule l'**édition européenne** est prise en charge. Les éditions US et JP ont un code décalé.
+- Durée : environ 2 min 30 de plus qu'Upper seul ; place : environ 500 Mo de plus.
+- Détail et preuves : [rapports/BUILD.md](../rapports/BUILD.md) §10 ;
+  [tools/integration-max/upper_max](../../tools/integration-max/upper_max/README.md).
+
+## 6. Ensuite
 
 - Copier les zips sur la console : [installation-android.md](installation-android.md),
   [installation-rocknix.md](installation-rocknix.md).

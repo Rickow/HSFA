@@ -31,8 +31,8 @@ NOTES = {"Eagle": "scénario 3 = face à Balrog (combat secret avant Bison) : pl
 
 
 def lire_iso(chemin_iso, nom):
-    return subprocess.run(["isoinfo", "-i", chemin_iso, "-x", "/PSP_GAME/USRDIR/eur/data/" + nom],
-                          capture_output=True, check=True).stdout
+    import iso_psp                                   # (tools/max) lecteur ISO 9660 en Python : plus besoin d'isoinfo
+    return iso_psp.lit(chemin_iso, "/PSP_GAME/USRDIR/eur/data/" + nom)
 
 
 def repliques_psp(bd):

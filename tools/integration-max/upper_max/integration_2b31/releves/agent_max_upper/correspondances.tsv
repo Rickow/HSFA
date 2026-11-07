@@ -1,0 +1,114 @@
+arcade	nom	upper_68k	va_mips_instr	va_mips_entree	statut	remarque	upper_68k_image_12h56	source
+$1B4D0	affichage / test de plan (parallaxe)	$19D5C	0xc65f8	0xc65b0	identique	portage seulement	$19D34	manuel
+$1BD5C	A3 = table selon $E (plan)	$1A68E	0xcb0d4	0xcb0d0	identique	portage seulement	$1A666	manuel
+$1BD68	A3 = caméra du plan $E, D0 = décalage	$1A6B2	0xcb13c	0xcb120	identique	SUBI.W #$C0 traduit ADDI.W #$FF40	$1A68A	alignement
+$1BDA6	aléa (graine $AE(A5))	$1A706	0xcb360	0xcb350	identique	octets $AE/$AF de la graine : disposition du portage	$1A6DE	alignement
+$1C1C8	allocation d'un projectile (réservoir)	$1ABAE	0xccd3c	0xccd10	identique	portage seulement	$1AB86	alignement
+$1C206	raz d'objet et retour au réservoir	$1ABEA	0xccfd4	0xccfd0	modifiée par Upper	efface en plus $DC(A6) (MIPS sb 220, va 0xcd128 ; compteur de vie des projectiles, lu en $32EFE) ; reste identique	-	manuel (complément)
+$1C2C8	allocation d'objet standard ($10)	$1ACE0	0xcd5cc	0xcd5a0	identique	portage seulement	$1ACB8	alignement
+$1C368	allocation d'effet ($18)	$1ADB0	0xcdb4c	0xcdb20	identique	portage seulement	$1AD88	alignement
+$1C37E	allocation + raz d'effet	$1ADC6	0xcdc64	0xcdc60	identique	portage seulement	$1AD9E	alignement
+$20674	points / réaction ($AC(A5), $125)	$016FA	0x27da0	0x27cc0	identique	portage seulement	$016FA	manuel
+$2068C	points, force $82 (pose $216)	$0171C	0x27e68	0x27e40	identique	portage seulement	$0171C	alignement
+$206AE	points	$01748	0x280d0	0x27ff0	identique	portage seulement	$01748	alignement
+$2A708	lancer l'animation n (table $2B0)	$51A68	0x2398d8	0x2398c0	identique	table par perso $DCB12 -> image $1DF038 (40 pointeurs, $26/$27 = copies)	$51A40	alignement
+$2A710	lancer l'animation n (table $2BC) + octets perso/ism -> $23E/$293	$51A7E	0x239934	0x239900	identique	idem $2A708 ; index (ism+1)x2 inchangé	$51A56	alignement
+$2A758	lancer l'animation n (table $2B4)	$51AFA	0x239b28	0x239b10	identique	portage seulement	$51AD2	manuel
+$2A75E	lancer l'animation n (table $2B8)	$51B0E	0x239b68	0x239b50	identique	portage seulement	$51AE6	manuel
+$2A770	charger le pas d'animation A0	$51B2C	0x239c48	0x239c30	identique	portage seulement	$51B04	manuel
+$2A7EA	avancer l'animation	$51BF4	0x239fb4	0x239f80	identique	portage seulement	$51BCC	alignement
+$2A98C	état $2000600 (garde/chute)	$51E74	0x23acf8	0x23ace0	identique	portage seulement	$51E4C	manuel
+$2AA08	intégrer vitesse/accélération ($40-$4C)	$51F08	0x23afa8	0x23af80	identique	portage seulement	$51EE0	manuel
+$2AEBC	fin de coup -> $2F770 (efface $2C8, $5B)	$5262C	0x23e970	0x23e960	modifiée par Upper	n'efface plus $2C8(A6) (MOVEQ #0,D0 retiré, sans effet : $2F770 le refait) ; ne fait que CLR.B $5B puis JMP $31942	$52604	manuel
+$2AF7A	test de sol / atterrissage	$52718	0x23ef2c	0x23eef0	identique	portage seulement	$526F0	alignement
+$2B1FC	test	$529E6	0x240064	0x240030	identique	portage seulement	$529BE	alignement
+$2BAF2	retour en garde (BSR $2B828 puis $2BAF8)	$53528	0x246548	0x246540	identique	JSR $2B828 (va 0x2448c0) ; MOVEQ #0,D0 ; JMP $2BAF8 (va 0x246570)	-	manuel (complément)
+$2BB26	retour en garde	$5355E	0x246628	0x246620	identique	portage seulement	$53536	alignement
+$2BB5A	retour au neutre	$53594	0x24671c	0x2466f0	identique	portage seulement	$5356C	alignement
+$2C0AC	$D(A6) := table[mode $138(A5), côté $101]	$53A12	0x248470	0x248460	identique	portage seulement	$539EA	manuel
+$2D5EA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E104	$2521E	0x10d104	0x10d0f0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$251F6	manuel
+$2D5F2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E10C	$25228	0x10d134	0x10d120	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25200	manuel
+$2D5FA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E134	$25232	0x10d164	0x10d150	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2520A	manuel
+$2D602	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E13C	$2523C	0x10d194	0x10d180	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25214	manuel
+$2D60A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E114	$25246	0x10d1c4	0x10d1b0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2521E	manuel
+$2D612	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E11C	$25250	0x10d1f4	0x10d1e0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25228	manuel
+$2D61A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E124	$2525A	0x10d224	0x10d210	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25232	manuel
+$2D622	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E12C	$25264	0x10d254	0x10d240	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2523C	manuel
+$2D62A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E14C	$2526E	0x10d284	0x10d270	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25246	manuel
+$2D632	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E154	$25278	0x10d2b4	0x10d2a0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25250	manuel
+$2D63A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E144	$25282	0x10d2e4	0x10d2d0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2525A	manuel
+$2D642	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E164	$2528C	0x10d314	0x10d300	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25264	manuel
+$2D64A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E16E	$25296	0x10d344	0x10d330	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2526E	manuel
+$2D652	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E178	$252A0	0x10d374	0x10d360	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25278	manuel
+$2D65A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E182	$252AA	0x10d3a4	0x10d390	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25282	manuel
+$2D662	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E18C	$252B4	0x10d3d4	0x10d3c0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2528C	manuel
+$2D66A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E198	$252BE	0x10d404	0x10d3f0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25296	manuel
+$2D672	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1A4	$252C8	0x10d434	0x10d420	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252A0	manuel
+$2D67A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1B0	$252D2	0x10d464	0x10d450	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252AA	manuel
+$2D682	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1BC	$252DC	0x10d494	0x10d480	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252B4	manuel
+$2D68A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1C4	$252E6	0x10d4c4	0x10d4b0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252BE	manuel
+$2D692	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1CC	$252F0	0x10d4f4	0x10d4e0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252C8	manuel
+$2D69A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1D8	$252FA	0x10d524	0x10d510	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252D2	manuel
+$2D6A2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1E4	$25304	0x10d554	0x10d540	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252DC	manuel
+$2D6AA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1F0	$2530E	0x10d584	0x10d570	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252E6	manuel
+$2D6B2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1FC	$25318	0x10d5b4	0x10d5a0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252F0	manuel
+$2D6BA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E208	$25322	0x10d5e4	0x10d5d0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$252FA	manuel
+$2D6C2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E216	$2532C	0x10d614	0x10d600	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25304	manuel
+$2D6CA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E224	$25336	0x10d644	0x10d630	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2530E	manuel
+$2D6D2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E238	$25340	0x10d674	0x10d660	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25318	manuel
+$2D6DA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E24C	$2534A	0x10d6a4	0x10d690	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25322	manuel
+$2D6EA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E25A	$2535E	0x10d704	0x10d6f0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25336	manuel
+$2D6F2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E260	$25368	0x10d734	0x10d720	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25340	manuel
+$2D6FA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E266	$25372	0x10d764	0x10d750	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2534A	manuel
+$2D702	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E272	$2537C	0x10d794	0x10d780	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25354	manuel
+$2D70A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E27E	$25386	0x10d7c4	0x10d7b0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2535E	manuel
+$2D712	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E286	$25390	0x10d7f4	0x10d7e0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25368	manuel
+$2D71A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E28A	$2539A	0x10d824	0x10d810	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25372	manuel
+$2D722	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E282	$253A4	0x10d854	0x10d840	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2537C	manuel
+$2D72A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E29E	$253AE	0x10d884	0x10d870	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25386	manuel
+$2D732	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E2A6	$253B8	0x10d8b4	0x10d8a0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$25390	manuel
+$2D73A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E28E	$253C2	0x10d8e4	0x10d8d0	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$2539A	manuel
+$2D742	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E296	$253CC	0x10d914	0x10d900	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$253A4	manuel
+$2D74A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E2AE	$253D6	0x10d944	0x10d930	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$253AE	manuel
+$2D752	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E2B6	$253E0	0x10d974	0x10d960	identique	entrée décalée d'un rang (arcade k -> Upper k-1) ; déf. identique en $D0Cxxx ; tronc commun identique (réorganisé)	$253B8	manuel
+$2E3E0	saisie (n -> $32F) variante adversaire $1C/$D	$3017E	0x15cda4	0x15cd80	modifiée par Upper	écriture $32F(A6) supprimée (D0 = n passe en registre jusqu'à la queue commune $30208 = arcade $2E462)	$30156	manuel
+$2E3FE	déclenchement d'une saisie (n -> $32F), selon $3E / état $4-$6	$301AA	0x15cee8	0x15ce90	modifiée par Upper	écriture $32F(A6) supprimée ; BRA $2E366 devient BSR $300BE + RTS	$30182	manuel
+$2E422	saisie, chemin « joueur » de $2E3FE	$301D2	0x15d184	-	identique	entrée interne (label MIPS 0x15d168, pas de prologue) : JMP possible dans l'image ; $204/$200 lus #$402/#$0002 (disposition)	$301AA	manuel
+$2E4C2	victime mise en état « saisi »	$302B2	0x15da04	0x15d9e0	modifiée par Upper	ajouts : appels $9F314 (A6=victime, drapeaux $C32D(A5)) et $9E9E0 (A8=victime) en tête ; en fin, si bit 4 de $C372(A5) nul : CLR.B $5F(A6) et $5F(A1)	$3028A	manuel
+$2E636	saisie variante (adversaire $31, n -> $32F)	$304DE	0x15ead4	0x15eab0	modifiée par Upper	écriture $32F(A6) supprimée ; reste identique (l'écart « $25D remplacé par un appel » d'ECARTS concerne $2E614 -> $3047C)	$304B6	manuel
+$2E700	saisie variante (adversaire $31 = 0, n -> $32F)	-	-	-	absente	pas de variante « TST.B $31(A1) ; BNE échec » dans Upper (seuls $2E6EC -> va 0x15f4b4 et $2E714 -> va 0x15f574 visent la suite 0x15eb70 = $2E646) ; à écrire : MOVEA.W $38(A6),A1 ; TST.B $31(A1) [brut $30] ; BNE échec (va 0x15dc90 = $2E52A) ; JMP suite (va 0x15eb70)	-	manuel (complément)
+$2E7F2	coup direct à la victime $38 (attaque n de $A0)	$306D8	0x15f9a0	0x15f990	modifiée par Upper	ajout en fin : si bit 4 de $C373(A5) nul (JSR $1156) -> CLR.B $2CE(A1) ; variables -$5CD2/-$5CD0(A5) relogées (-$746C/-$746A, portage)	$306B0	alignement
+$2E8C0	A0 = objet du camp ($156/$158(A5))	$3080E	0x15fd94	0x15fd70	modifiée par Upper	TST.B $59(A6) remplacé par BSR $30802 : table T_615070 [mode $138(A5)x2 (+$10 si $AC(A5)=2) + côté $101(A6)]	$307E6	alignement
+$2E96C	prise, attaque n de $A0 (D2=1)	$30936	0x160790	0x160780	identique	A5 relogées (portage)	$3090E	alignement
+$2E970	prise, attaque n de $A0 (D2=0)	$3093A	0x1607bc	0x1607b0	identique	A5 relogées (portage)	$30912	alignement
+$2EA06	mash (boutons $378) en saisie	$309D8	0x160ba4	0x160b70	identique	table $C94DA -> $F96B0 (mêmes valeurs, longs échangés)	$309B0	alignement
+$2EA7A	mash de la victime ($AE)	$30A4A	0x160d90	0x160d70	identique	table $C945A -> $F9630	$30A22	alignement
+$2EB06	annulation de coup normal	$30AC8	0x1611fc	0x1611c0	identique	portage seulement	$30AA0	alignement
+$2EC28	poing faible + pied faible	$30BDE	0x161c7c	0x161c40	identique	portage seulement	$30BB6	alignement
+$2ECD8	super : seuil de jauge $11E selon l'ism, puis $2ED02 (D2=1)	$30C90	0x162358	0x162300	modifiée par Upper	fonction MIPS 0x162300 : ajoute TST.B $F0(A6) -> échec, et seuil forcé à $90 si $123(A6) >= 2 ; seuils ism inchangés ($30 / $90 / $48)	-	manuel (complément)
+$2ED00	super : D2=0 puis $2ED02 (test $2020400 / $31)	$30CDC	0x16266c	0x162660	identique	entrée 0x162660 ; suite $2ED02 = 0x162690	-	manuel (complément)
+$2ED28	super : D2=0 puis $2ED2A (test $2000606, état $200…)	$30D4C	0x162b2c	0x162b20	identique	entrée 0x162b20 ; suite $2ED2A = 0x162b50 ; NB : l'homologue de $2ED1C (D2=1, fonction 0x162800) a reçu dans Upper le même seuil de jauge que $2ECD8	-	manuel (complément)
+$2EDA0	super : déclenchement (raz $5D/$5E, $2AF7A, $114:=2…)	$30DF4	0x1633e0	0x1633d0	identique	entrée 0x1633d0 ; $2AF7A = 0x23eef0, $2E8C0 = 0x15fd70, $2F770 = 0x169e90	-	manuel (complément)
+$2EF6C	gain de jauge super $11E	$3105C	0x164d34	0x164d00	identique	chemin mort ×1,25 retiré ; temporaire -$4B0A(A5) relogé	$31034	alignement
+$2F52C	pose $291=1, $2A0=10 puis neutre	$316CC	0x168564	0x168550	identique	portage seulement	$316A4	alignement
+$2F53C	neutre (suite)	$316DC	0x1685c4	0x168590	identique	portage seulement	$316B4	alignement
+$2F5AC	neutre (variante)	$3175E	0x168b38	0x168af0	identique	portage seulement	$31736	alignement
+$2F6F8	test contre-attaque ($125/$3E/$CE)	$318F6	0x169b74	0x169b40	identique	portage seulement	$318CE	alignement
+$2F728	force du poing pressé -> $82	$31922	0x169cb8	0x169cb0	identique	portage seulement	$318FA	alignement
+$2F74C	force du pied pressé -> $82	$31946	0x169da8	0x169da0	identique	portage seulement	$3191E	alignement
+$2F770	raz $3E/$294, libère l'adversaire	$3196A	0x169e94	0x169e90	identique	portage seulement	$31942	alignement
+$2F796	remise à l'état neutre	$319A0	0x169fe4	0x169fb0	identique	portage seulement	$31978	alignement
+$2F980	lecture de combinaison de boutons	$31B24	0x16aab8	0x16aa80	identique	portage seulement	$31AFC	alignement
+$2F9BE	placer l'adversaire (table $DD212)	$31B62	0x16adb4	0x16ad90	identique	table par perso $DD212 -> $1DF8F8 (40 pointeurs)	$31B3A	alignement
+$2FA36	se placer sur l'adversaire (table $DD212)	$31C16	0x16b1a4	0x16b180	identique	realign.pkl donnait $31CA2 (= arcade $2FAAE) : homologue réel $31BEE ; table $DD212 -> $1DF8F8	$31BEE	corrigé
+$33074	projectile : routine commune	$2B190	0x137a18	0x137a00	identique	portage seulement	$2B168	alignement
+$330C4	projectile : demi-tour	$2B1E2	0x137c58	0x137c40	identique	portage seulement	$2B1BA	alignement
+$33120	projectile : renvoi (Soul Reflect)	$2B25E	0x137ea8	0x137e90	identique	portage seulement	$2B236	alignement
+$3323A	projectile : en-tête d'animation (5 mots relatifs -> $90-$A0)	$2B3AE	0x138520	0x138510	identique	même format : A0 = $60(A6) (pointeur PS2 converti par CONV $400), $90/$94/$98/$9C/$A0 := A0 + mot[0..4] (longs échangés à l'écriture)	-	manuel (complément)
+$0369C	son/voix propre au perso (masque par ID)	$2B61A	0x138ea0	0x138e90	modifiée par Upper	masque #$03210D40 BTST ID remplacé par BSR $2B594 (table d'octets par ID T_6132e0, fichier 0x4232E0) : entrées $28/$29 à ajouter	$2B5F2	alignement
+$804DA	création de 3 objets fils	$3268A	0x16f7cc	0x16f790	identique	réorganisé (BSR/BRA du recompilateur)	$32662	alignement
+$80668	création d'objet fils	$32842	0x170054	0x170030	identique	portage seulement	$3281A	alignement
+$80B70	objet fils lié à l'attaque n (table $A0)	$32DD4	0x171ea8	0x171e90	identique	portage seulement	$32DAC	alignement
+$80E8E	objet fils	$3303A	0x172c7c	0x172c70	identique	portage seulement	$33012	alignement
+$82E36	objet fils selon la force $82 / ism	$33B56	0x176ad4	0x176ab0	identique	réorganisé (BMI -> BSR $33DB8)	$33B2E	alignement
+$97CD6	effet / son	$40DB2	0x1c62a0	0x1c6290	identique	portage seulement	$40D8A	alignement
