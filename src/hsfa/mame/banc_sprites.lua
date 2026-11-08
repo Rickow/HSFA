@@ -165,6 +165,18 @@ local function eclater(page, fin, adr_courante)
   out[#out + 1] = {0x8000, 0x8000, 0, 0}
   STATS.listes = STATS.listes + 1; STATS.tuiles = STATS.tuiles + #out - 1
   local ret
+  if OBJ_DIFFERE then                                   -- (patch 0027) liste mise en file, publiee par la fin d'image
+    local pend = {}
+    for k, o in ipairs(out) do
+      local a = page + 8 * (k - 1)
+      for w = 0, 3 do
+        conv[a + 2 * w] = o[w + 1]; pend[#pend + 1] = {a - page + 2 * w, o[w + 1]}
+        if a + 2 * w == adr_courante then ret = o[w + 1] end
+      end
+    end
+    FILE_OBJ[#FILE_OBJ + 1] = {2, pend}
+    return ret or 0x8000
+  end
   busy = true
   -- (HANDOFF §103) la CPS2 echange ses deux banques d'objets a chaque retour de trame. Trop lente en turbo, la
   -- traduction commence une liste avant le retour de trame et la finit apres (une moitie dans chaque banque), et
@@ -181,11 +193,42 @@ local function eclater(page, fin, adr_courante)
   busy = false
   return ret or 0x8000
 end
+-- (patch 0027, agent sfa3_selection) PUBLICATION DIFFEREE (BANC_OBJ_DIFFERE=1, comme le coeur FBNeo HSFA_OBJ_DIFFERE=1) :
+-- ecrite des son marqueur, la liste etait prise par la CPS2 a la fin de la meme image, une image plus tot qu'a l'arcade,
+-- les palettes gardant le delai de l'arcade (ecran de selection, choix aleatoire : perso aux couleurs du precedent). La
+-- liste est publiee dans les deux banques a la 2e fin d'image (frame_done precede la prise de vblank) ; les ecritures
+-- du jeu ne touchent plus les banques physiques.
+OBJ_DIFFERE = os.getenv("BANC_OBJ_DIFFERE") == "1"
+FILE_OBJ = {}
+BANQUE_OBJ = 0
+if OBJ_DIFFERE then
+  TAP_BANQUE_OBJ = mem:install_write_tap(0x8040e0, 0x8040e1, "banque_obj", function(o, d, m) if m & 0xff ~= 0 then BANQUE_OBJ = d & 1 end end)
+  emu.register_frame_done(function()
+    local reste = {}
+    for _, e in ipairs(FILE_OBJ) do
+      e[1] = e[1] - 1
+      if e[1] <= 0 then for _, w in ipairs(e[2]) do OBJ1:write_u16(w[1], w[2]); OBJ2:write_u16(w[1], w[2]) end
+      else reste[#reste + 1] = e end
+    end
+    FILE_OBJ = reste
+  end)
+end
+local function banque_visee(offset)   -- banque physique d'une ecriture du jeu (cps2_objram1_w / cps2_objram2_w)
+  if offset < 0x708000 then return (BANQUE_OBJ == 1) and OBJ2 or OBJ1 else return (BANQUE_OBJ == 1) and OBJ1 or OBJ2 end
+end
 TAP_SPRITES = mem:install_write_tap(0x700000, 0x70ffff, "sprites", function(offset, data, mask)
   -- marqueur de fin du portage : X = Y = $8000 (code et attributs quelconques) -> declenche sur Y
   if busy then return end
   ombre[offset] = data & 0xffff
   age[offset] = IMAGE
+  if OBJ_DIFFERE then                                   -- (patch 0027) l'ecriture du jeu laisse la banque telle quelle
+    if data == 0x8000 and (offset & 7) == 2 and lit(offset - 2) == 0x8000 then
+      local pg = (offset < 0x708000) and 0x700000 or 0x708000
+      local ok, r = pcall(eclater, pg, offset - 2, offset)
+      if not ok then busy = false; if not ERREUR_SPRITES then ERREUR_SPRITES = r; print("banc_sprites : " .. tostring(r)) end end
+    end
+    return banque_visee(offset):read_u16(offset & 0x1ffe)
+  end
   if data ~= 0x8000 or (offset & 7) ~= 2 or lit(offset - 2) ~= 0x8000 then return conv[offset] end
   local a = offset - 2
   local page = (offset < 0x708000) and 0x700000 or 0x708000

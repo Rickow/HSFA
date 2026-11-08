@@ -1,0 +1,134 @@
+From ff6298e52e0fc3633f79cb09c5ee711e97145bc0 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sun, 8 Nov 2026 14:00:00 +0100
+Subject: [PATCH] HSFA: deferred publication of the converted object list
+ (arcade sprite latency)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The converted sprite list was written to both object banks as soon as the
+game wrote its end marker (HANDOFF §103), so the CPS2 fetched it at the end
+of the same frame: one frame earlier than on the arcade board, where the
+game fills the hidden bank shown after the next swap. Palettes kept the
+arcade delay, so a sprite whose palette changes at the same time was drawn
+for one frame with the previous palette (random select roulette of SFA3:
+portrait and preview of a character in the colours of the previous one;
+ending explosions).
+
+The latest finished list is now published to both banks by HsfaFrameDone,
+after the frame's object fetch: arcade latency, lists still complete. It is
+rebuilt from Ombre/Age/Conv, which are already saved in states. Config entry
+"obj_differe" (1/0), HSFA_OBJ_DIFFERE overrides; 0 = previous behaviour,
+byte-identical output.
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 42 ++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index fb049df..deb9cf5 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -85,6 +85,15 @@ static UINT16 nCfgPlans[3] = { 0, 0, 0 };
+ // d'environnement HSFA_LAT4 / HSFA_LAT4_MAX prioritaires (HSFA_LAT4=0 : ancien comportement)
+ static INT32 nCfgLat4 = 1;
+ static INT32 nCfgLat4Max = 10;
++// (patch 0027, agent sfa3_selection) PUBLICATION DIFFEREE de la liste d'objets convertie. La liste etait ecrite dans les
++// deux banques des son marqueur de fin (HANDOFF §103) : prise par la CPS2 a la fin de la MEME image, soit une image plus
++// tot qu'a l'arcade (le jeu y ecrit la banque cachee, montree apres l'echange suivant), alors que les palettes gardent
++// le delai de l'arcade -> objets dessines avec la palette de l'image precedente (choix aleatoire de l'ecran de
++// selection : portrait et apercu d'un perso aux couleurs du precedent ; explosions de fin). Ici la derniere liste
++// terminee est publiee dans les deux banques par HsfaFrameDone, APRES la prise de l'image : delai de l'arcade, liste
++// toujours entiere (§103). Entree "obj_differe" (1/0) de la config, HSFA_OBJ_DIFFERE prioritaire (0 = ancien
++// comportement, sortie identique a l'octet).
++static INT32 nCfgObjDiffere = 1;
+ 
+ // --------------------------------------------------------------------------------------------------------------
+ // Etat (sauvegarde dans les etats)
+@@ -233,6 +242,7 @@ static void HsfaParseConfig(const char *s, UINT32 n)
+ 		else if (strcmp(k, "gfx_intro") == 0) nCfgGfxIntro = strtol(v, NULL, 10);
+ 		else if (strcmp(k, "lat4") == 0) nCfgLat4 = strtol(v, NULL, 10);
+ 		else if (strcmp(k, "lat4_max") == 0) nCfgLat4Max = strtol(v, NULL, 10);
++		else if (strcmp(k, "obj_differe") == 0) nCfgObjDiffere = strtol(v, NULL, 10);
+ 		else if (strcmp(k, "plans") == 0) {
+ 			char *e = (char*)v;
+ 			for (INT32 i = 0; i < 3; i++) {
+@@ -306,12 +316,14 @@ static INT32 HsfaParseTab(UINT32 nLen)
+ 	if (c >= 0) HsfaParseConfig((const char*)HsfaEntries[c].pData, HsfaEntries[c].nLen);
+ 	if (getenv("HSFA_LAT4")) nCfgLat4 = atoi(getenv("HSFA_LAT4"));			// (agent_portraits) 0 = ancien comportement
+ 	if (getenv("HSFA_LAT4_MAX")) nCfgLat4Max = atoi(getenv("HSFA_LAT4_MAX"));
++	if (getenv("HSFA_OBJ_DIFFERE")) nCfgObjDiffere = atoi(getenv("HSFA_OBJ_DIFFERE"));	// (patch 0027)
+ 	c = HsfaFind("carte");
+ 	if (c < 0) return 1;
+ 	HsfaParseCarte((const char*)HsfaEntries[c].pData, HsfaEntries[c].nLen);
+ 
+ 	bprintf(0, _T("HSFA : %d tables, commun %d, pointeur %06X, plans %s\n"), nHsfaEntries, nCfgCommun, nCfgPtrAnim, bCfgPlans ? _T("fork") : _T("renumerotes"));
+ 	bprintf(0, _T("HSFA : chargement differe de l'emplacement 4 %s (max %d images)\n"), nCfgLat4 ? _T("actif") : _T("coupe"), nCfgLat4Max);
++	bprintf(0, _T("HSFA : publication differee des objets %s\n"), nCfgObjDiffere ? _T("active") : _T("coupee"));
+ 	return 0;
+ }
+ 
+@@ -424,6 +436,7 @@ static UINT16 HsfaEclater(UINT32 nPage, UINT32 nFin, UINT32 nCourante)
+ 	nStatListes++; nStatTuiles += n - 1;
+ 
+ 	// (HANDOFF §103) liste complete ecrite dans les DEUX banques physiques
++	// (patch 0027) publication differee : liste gardee dans Conv, publiee par HsfaFrameDone (HsfaPublier)
+ 	UINT16 ret = 0x8000;
+ 	for (INT32 k = 0; k < n; k++) {
+ 		UINT32 a = nPage + 8 * k;
+@@ -432,6 +445,7 @@ static UINT16 HsfaEclater(UINT32 nPage, UINT32 nFin, UINT32 nCourante)
+ 			UINT16 v = Out[k * 4 + w];
+ 			Conv[i] = v; ConvOk[i] = 1;
+ 			if (a + 2 * w == nCourante) ret = v;
++			if (nCfgObjDiffere) continue;
+ 			UINT32 o = (a - nPage) + 2 * w;
+ 			WrW(CpsRam708 + 0x0000 + o, v);
+ 			WrW(CpsRam708 + 0x8000 + o, v);
+@@ -457,6 +471,9 @@ static void HsfaObjWrite(UINT32 a, UINT16 d, UINT16 nMask)
+ 		w = Conv[i];
+ 	}
+ 
++	// (patch 0027) publication differee : seules les listes publiees entrent dans les banques physiques
++	if (nCfgObjDiffere) return;
++
+ 	// memoire d'objets de MAME : objram1 = banque FBNeo +$8000, objram2 = banque FBNeo +0
+ 	UINT8 *p = NULL;
+ 	if (a < 0x702000) {
+@@ -713,9 +730,34 @@ static void HsfaOptions()
+ 
+ static void HsfaIdleStats();
+ 
++// (patch 0027) publie dans les deux banques la DERNIERE liste terminee : marqueur de fin (X = Y = $8000 ecrits par le
++// jeu) le plus recent d'apres Age ; liste convertie lue dans Conv (ecrite par HsfaEclater au marqueur). Tout vient de
++// l'etat sauvegarde (Ombre, Age, Conv) : un etat recharge republie la meme liste. Sans marqueur : rien.
++static void HsfaPublier()
++{
++	INT32 nFin = -1, nAge = -1;
++	for (INT32 i = 0; i < 0x8000; i += 4) {
++		if (Ombre[i] == 0x8000 && Ombre[i + 1] == 0x8000 && ConvOk[i + 1] && Age[i + 1] > nAge) { nAge = Age[i + 1]; nFin = i; }
++	}
++	if (nFin < 0) return;
++	// liste CONVERTIE (eclatee en tuiles 16x16, plus longue que la liste brute) : du debut de la page jusqu'a SON
++	// marqueur de fin (ecrit par HsfaEclater), 1024 entrees au plus
++	INT32 nDebut = (nFin < 0x4000) ? 0 : 0x4000;		// page $700000 ou $708000 (mots)
++	for (INT32 k = 0; k < 1025; k++) {
++		INT32 i = nDebut + 4 * k;
++		for (INT32 w = 0; w < 4; w++) {
++			UINT16 v = ConvOk[i + w] ? Conv[i + w] : 0;
++			WrW(CpsRam708 + 0x0000 + 8 * k + 2 * w, v);
++			WrW(CpsRam708 + 0x8000 + 8 * k + 2 * w, v);
++		}
++		if (Conv[i] == 0x8000 && Conv[i + 1] == 0x8000) break;
++	}
++}
++
+ void HsfaFrameDone()
+ {
+ 	if (!HsfaMode) return;
++	if (nCfgObjDiffere) HsfaPublier();					// (patch 0027) apres la prise de l'image (CpsObjGet)
+ 	if (nPlanesPending) {								// banc_plans.lua (HSFA_PLANS) : bases ecrites a la 1re image
+ 		for (INT32 k = 0; k < 3; k++) HsfaPlaneWrite(k, nCfgPlans[k], 0xFFFF);
+ 		HsfaUpdateScroll();
+-- 
+2.53.0
+

@@ -419,7 +419,11 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §205 | 5685 | atelier | journée du 07/11 : greffe ro9a29 / ro9a30, décors SFA1 / SFA2 prêts à intégrer, études MAX dans la greffe et constructeur, fausse alerte de Cammy |
 | §206 | 5711 | hsfa | constructeur tout-en-un (tools/constructeur, CI, guide) ; Ogg portable hsfa_oggenc (flux_ogg v3, plus de ffmpeg) : nouvelles empreintes Upper cb14c9a7, Hyper 8ed7f853, Upper MAX ee3fd85a |
 | §207 | 5776 | Hyper | piste « vie basse » dès le début du combat : traducteur v160 (`PRETE_CMP`, comparaison différée sur le registre prêté ; Upper 2 sites, Hyper 7) |
-| §208 | (fin) | hsfa | outils de l'atelier versés : tools/bancs (lance_emu, empreinte, banc de jour), banc-coups (banc_max), frame-data-max, decors/{sfa1-iso,sfa2-iso,integration}, coeurs, ps2-oracle ; 4 fichiers de la greffe mis à jour |
+| §208 | 5834 | hsfa | outils de l'atelier versés : tools/bancs (lance_emu, empreinte, banc de jour), banc-coups (banc_max), frame-data-max, decors/{sfa1-iso,sfa2-iso,integration}, coeurs, ps2-oracle ; 4 fichiers de la greffe mis à jour |
+| §209 | 5900 | SFA3 | départ du curseur de sélection sur la case aléatoire (v157/v158), corrigé par v159 |
+| §210 | 5908 | cœur | patch 0027 : publication différée des objets (aperçu du choix aléatoire aux couleurs du précédent) ; cœurs du 10/11 |
+| §211 | 5918 | atelier | journée du 08/11 : banc de jour vert, v0.1.7, greffe ro9a32 → ro9a34, études décors / traducteur ro1-ro4 / MAX dans la greffe |
+| §212 | (fin) | sfa3ha | Hyper + Arcade constructible depuis l'ISO (--jeux hyperarcade, ro9a35b) ; relevés de la greffe en tableaux d'adresses |
 
 ---
 

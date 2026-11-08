@@ -39,7 +39,7 @@ python3 scripts/construction/hsfa_build.py \
 
 | Option | Effet |
 |---|---|
-| `--jeux sfa3,upper,hyper` | jeux à construire (défaut : les trois) ; `uppermax` en plus : Upper MAX (§5) |
+| `--jeux sfa3,upper,hyper` | jeux à construire (défaut : les trois) ; `uppermax` en plus : Upper MAX (§5) ; `hyperarcade` : Hyper + Arcade (§6, expérimental) |
 | `--psp-iso ISO` | (Upper MAX) ISO PSP européenne de SFA3 MAX ; sans elle, `uppermax` = Upper |
 | `--vasm CHEMIN` | (Upper MAX, facultatif) chemin de `vasmm68k_mot` pour `HSFA_ASM=vasm` ou `compare` |
 | `--arcade ZIP\|DOSSIER` | ROM graphique d'arcade (sinon voie « ISO seule », par défaut) |
@@ -53,6 +53,7 @@ python3 scripts/construction/hsfa_build.py \
 | `--sans-flux` | ni table de flux, ni flux dans les zips (musiques du disque absentes) |
 | `--rejeu-table FICHIER` | (Hyper) table du rejeu des sons SFA1 / SFA2 (défaut : `tools/son-hyper/rejeu/hsfa_rejeu_table.txt` si elle est là) ; avec elle, redirection des voix par version et rejeu (§4) |
 | `--sans-redirection` | (Hyper) ni redirection des voix ni rejeu, même avec la table |
+| `--greffe-releves DOSSIER` | (Hyper + Arcade) autres relevés de la greffe que ceux du dépôt (§6) |
 | `--outils-*` | emplacement de chaque groupe d'outils (sinon `HSFA_OUTILS_*`) |
 
 Chaque étape est **idempotente** : elle est sautée si ses entrées, ses outils et ses paramètres n'ont pas changé
@@ -108,7 +109,29 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
 - Détail et preuves : [rapports/BUILD.md](../rapports/BUILD.md) §10 ;
   [tools/integration-max/upper_max](../../tools/integration-max/upper_max/README.md).
 
-## 6. Ensuite
+## 6. Hyper + Arcade (mode Arcade d'Upper greffé sur Hyper, expérimental)
+
+```bash
+python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
+    --sortie hsfa_sortie --jeux hyperarcade [--rejeu-table hsfa_rejeu_table.txt] [--arcade sfa3.zip]
+```
+
+- Résultat : `archives/sfa3hahsfa.zip` (pilote `sfa3hahsfa` du cœur), état **ro9a35b** (08/11). `hyperarcade`
+  ajoute `upper` et `hyper` : la greffe part de leurs sorties (modules, anims, banques, son). Étapes en plus :
+  `greffe_hyperarcade` (code figé de `tools/greffe-arcade/construction/`, environ 3 min) et `paquet_hyperarcade`.
+- **Avec la ROM d'arcade et la table du rejeu** : le zip est celui de ro9a35b, hors `hsfa_info.txt` (provenance).
+- **Sans la table du rejeu** : la greffe part du module d'Hyper d'origine. Hyper garde les voix de SFA3 pour toutes
+  les versions, et le zip n'a pas de rejeu (`hsfa_rejeu.bin`, `hsfa_rejeu_table.txt` absents), comme Hyper seul.
+- **Sans la ROM d'arcade** (voie ISO seule) : ROM graphique reconstruite depuis l'ISO, comme pour Hyper ; seuls la
+  ROM graphique, `hsfa_gfx.bin` et `hsfa_tab.bin` changent (codes de tuiles), le programme est le même. Au cœur, la
+  partie est la même ; seule l'ombre au sol des persos est pleine au lieu de tramée (tuile retouchée de l'Anthology).
+- **Relevés** : la greffe relit des tableaux tirés de passes MAME et d'analyses de l'atelier (adresses et numéros
+  seulement, 4,5 Mo de TSV dans `tools/greffe-arcade/construction/releves_ro9a35b/`) ; `--greffe-releves` en donne
+  d'autres. Détail : [tools/greffe-arcade/construction](../../tools/greffe-arcade/construction/LISEZMOI.md).
+- Durée : environ 2 min 30 de plus qu'Upper + Hyper (greffe 130-160 s, paquet 8 s) ; place : environ 0,4 Go de plus.
+- Détail et preuves : [rapports/BUILD.md](../rapports/BUILD.md) §11.
+
+## 7. Ensuite
 
 - Copier les zips sur la console : [installation-android.md](installation-android.md),
   [installation-rocknix.md](installation-rocknix.md).

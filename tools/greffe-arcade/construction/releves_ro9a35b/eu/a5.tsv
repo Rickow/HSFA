@@ -1,0 +1,17457 @@
+# releve de la greffe Arcade (HSFA) : eu/a5.pkl
+# origine et mesure : etude_upper_hyper/a5_compare.py : variables A5 d'Upper / d'Hyper (acces, routines, tailles)
+# format : arbre prefixe (releves_tsv.py) ; nœud = profondeur, type, cle (i:hexa, s:texte, t:hexa,hexa), nombre ; R = enregistrements (colonnes nommees), M = cle -> valeur, LV/SV = suite de valeurs ; cellules : hexa nu = entier, =texte, @n etiquette n du vocabulaire (VOC en tete), ~reel, !0/!1 drapeau, . vide, [a,b] liste, (a,b) tuple
+# aucun octet du jeu : adresses, numeros, tailles, drapeaux, etiquettes
+VOC	0
+0	D	-	3
+1	D	s:D5	613
+2	D	i:13f	4
+3	X	s:n	16
+3	X	s:w	b
+3	SV	s:routines	11
+241a0
+266f20
+2489e0
+266280
+261210
+262930
+2615d0
+26dfb0
+26e2f0
+2717d0
+292370
+3	M	s:tailles	2
+s:lb	b
+s:sb	b
+2	D	i:c372	4
+3	X	s:n	4
+3	X	s:w	0
+3	SV	s:routines	4
+242c0
+242f0
+24320
+24350
+3	M	s:tailles	1
+s:lb	4
+2	D	i:c373	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+24380
+243e0
+24440
+243b0
+24410
+24470
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c374	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+244a0
+244d0
+3	M	s:tailles	1
+s:lb	2
+2	D	i:c375	4
+3	X	s:n	4
+3	X	s:w	0
+3	SV	s:routines	4
+24500
+24530
+24560
+24590
+3	M	s:tailles	1
+s:lb	4
+2	D	i:c376	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+245c0
+24620
+24680
+24650
+245f0
+246b0
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c377	4
+3	X	s:n	4
+3	X	s:w	0
+3	SV	s:routines	4
+246e0
+24710
+24740
+24770
+3	M	s:tailles	1
+s:lb	4
+2	D	i:be	4
+3	X	s:n	8
+3	X	s:w	3
+3	SV	s:routines	7
+24f00
+408480
+28b40
+25de0
+25c10
+4f430
+260390
+3	M	s:tailles	2
+s:lb	5
+s:sb	3
+2	D	i:12e	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+24f00
+266a0
+25bc0
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:9eb0	4
+3	X	s:n	13
+3	X	s:w	9
+3	SV	s:routines	8
+24f00
+25740
+25de0
+26ac0
+25bc0
+26b00
+26c80
+25c10
+3	M	s:tailles	2
+s:sh	9
+s:lh	a
+2	D	i:9eb2	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	3
+24f00
+25d30
+25180
+3	M	s:tailles	2
+s:sh	4
+s:lh	2
+2	D	i:9eb4	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+24f00
+25de0
+26c80
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:138	4
+3	X	s:n	80
+3	X	s:w	7
+3	SV	s:routines	103
+25000
+122600
+185200
+185600
+182e00
+23f600
+4a410
+cfc10
+127020
+182220
+23d230
+3e630
+4f430
+224840
+247e40
+34ee40
+16c650
+270050
+248460
+23ec60
+84e60
+12ce60
+222270
+11ea70
+12e070
+14b670
+262e70
+33c80
+2c1880
+38aa90
+3adc90
+266a0
+490b0
+12a8b0
+12deb0
+1600b0
+1690b0
+2592b0
+26b0b0
+2732c0
+139ad0
+270ad0
+4b2e0
+23eef0
+250ef0
+164d00
+221700
+24d700
+26e900
+26cd00
+f9f10
+15ff10
+222f10
+26ad10
+45320
+222d20
+364720
+26f130
+25930
+125b30
+125130
+25740
+28b40
+12ab40
+19d140
+269340
+26c140
+15a350
+361950
+89360
+198b60
+226760
+233b60
+89d70
+12f970
+180370
+25180
+181580
+24cb80
+25b180
+12e790
+262990
+2c1590
+39da0
+1ad3a0
+22b3a0
+12f5b0
+123bb0
+12d9b0
+1817c0
+2475c0
+26b7c0
+26bdc0
+1595d0
+2631d0
+12e1e0
+1961e0
+221de0
+181bf0
+2453f0
+121bf0
+13ddf0
+26abf0
+3	M	s:tailles	2
+s:lh	79
+s:sh	7
+2	D	i:ac	4
+3	X	s:n	59
+3	X	s:w	c
+3	SV	s:routines	71
+25000
+121f00
+125e80
+25180
+127680
+185200
+185600
+24b880
+250700
+25b180
+f9f10
+124210
+15ff10
+189910
+196810
+255010
+260390
+263c10
+40d410
+249820
+249aa0
+24f020
+266f20
+267820
+25930
+4f430
+12a430
+186630
+18b9b0
+19beb0
+24ea30
+2592b0
+26b0b0
+27b40
+27cc0
+27e40
+125440
+186dc0
+19d140
+247e40
+24b7c0
+24bcc0
+254440
+4d950
+122950
+1878d0
+258450
+2615d0
+2631d0
+265750
+266a00
+2717d0
+40b250
+12e1e0
+18ec60
+2489e0
+25c6e0
+266560
+26fe60
+2712e0
+26cd00
+26ef0
+27ff0
+28170
+4c3f0
+24b670
+250ef0
+25cf70
+262e70
+26e2f0
+26b7c0
+3	M	s:tailles	2
+s:lb	4d
+s:sb	c
+2	D	i:c200	4
+3	X	s:n	76
+3	X	s:w	3
+3	SV	s:routines	75
+12b480
+257700
+258a00
+25d680
+26e900
+40a880
+40c680
+40c800
+410800
+411100
+40c790
+222f10
+4dd90
+4e310
+11bf90
+253290
+260390
+261210
+262990
+263c10
+4104b0
+270050
+4106e0
+253a0
+24f020
+2569a0
+3d8da0
+40c720
+40c9a0
+40b250
+41a6b0
+25930
+4ea30
+11b830
+2486b0
+2524b0
+268ab0
+26b0b0
+26f130
+272eb0
+12ab40
+251ec0
+254440
+260d40
+269340
+26c140
+4077c0
+40f550
+4105d0
+224ed0
+3b7d0
+4d950
+139ad0
+258450
+25e750
+2615d0
+265750
+3ea60
+134ce0
+135b60
+223b60
+2553e0
+268290
+257ee0
+25c6e0
+2fcd60
+4078e0
+41abd0
+4c3f0
+2453f0
+264970
+272410
+313170
+3d9870
+4020f0
+3	M	s:tailles	2
+s:lb	73
+s:sb	3
+2	D	i:114	4
+3	X	s:n	1e
+3	X	s:w	8
+3	SV	s:routines	17
+25de0
+19cd00
+19c420
+28b40
+2489e0
+24c540
+24f020
+250700
+251320
+269340
+11bf90
+139ad0
+24ea30
+24f9d0
+250ef0
+2717d0
+26b7c0
+3	M	s:tailles	2
+s:lh	16
+s:sh	8
+2	D	i:15d	4
+3	X	s:n	23
+3	X	s:w	5
+3	SV	s:routines	30
+182e00
+258a00
+26e900
+222f10
+11bf90
+260390
+272b90
+261120
+91730
+244b30
+26b0b0
+28b40
+251ec0
+269340
+26b7c0
+26c140
+f2fd0
+139ad0
+2615d0
+2717d0
+25de0
+2489e0
+25c6e0
+2712e0
+1bcd70
+1bd170
+2453f0
+26f9f0
+271bf0
+2fd9f0
+3	M	s:tailles	2
+s:lb	1e
+s:sb	5
+2	D	i:90	4
+3	X	s:n	36
+3	X	s:w	1
+3	SV	s:routines	43
+26c80
+18f300
+102a80
+2ee80
+19cd00
+3e6380
+70710
+11bf90
+137690
+18d390
+1c8d90
+322a0
+12d720
+134520
+182220
+199da0
+2a6b0
+102430
+120630
+187eb0
+1887b0
+19beb0
+28b40
+fd0c0
+12e640
+1bbe40
+1bc0c0
+1c8ec0
+24bcc0
+5fcd0
+60d50
+101850
+10b4d0
+10c950
+18ef50
+1cd750
+29de0
+12ce60
+188160
+198b60
+1ca960
+12d570
+1948f0
+3	M	s:tailles	2
+s:lh	35
+s:sh	1
+2	D	i:109	4
+3	X	s:n	12
+3	X	s:w	6
+3	SV	s:routines	10
+28340
+26e900
+24c540
+12ca80
+26ef0
+4f430
+24bf30
+2615d0
+268ab0
+2705b0
+3	M	s:tailles	2
+s:lb	c
+s:sb	6
+2	D	i:13a	4
+3	X	s:n	1a
+3	X	s:w	4
+3	SV	s:routines	23
+26cd00
+26d600
+26e900
+f9f10
+272410
+26f4a0
+26b0b0
+272eb0
+269340
+26b7c0
+26bdc0
+26c140
+17f0d0
+91cd0
+1e2dd0
+265750
+1961e0
+26ef0
+91af0
+1bcd70
+2116f0
+26f9f0
+271bf0
+3	M	s:tailles	2
+s:lh	16
+s:sh	4
+2	D	i:10d	4
+3	X	s:n	56
+3	X	s:w	5
+3	SV	s:routines	84
+88a00
+240200
+2e0c00
+3d2c00
+28e600
+27fc10
+415a10
+397c20
+3d2820
+1f7230
+f1c40
+161c40
+23b640
+397250
+3f1850
+e4660
+f3260
+241660
+3d4e60
+162c70
+3b2e70
+3d880
+395c80
+3b3080
+3be280
+163690
+28f890
+302a90
+3d3aa0
+165cb0
+268ab0
+3bdab0
+3c4ec0
+b1ac0
+3022c0
+1640d0
+224ed0
+3d3ce0
+2278e0
+26ef0
+229ef0
+395af0
+3d38f0
+2da700
+2eef00
+228920
+22a530
+3aa530
+397940
+24c540
+395f40
+164350
+1a6950
+265750
+3ac360
+226760
+2c3360
+3d3f60
+160d70
+3d4170
+227180
+3c6980
+2a0d90
+225ba0
+227da0
+388da0
+3961a0
+2705b0
+3a17b0
+3d57b0
+26bdc0
+1611c0
+2333c0
+1633d0
+2615d0
+2717d0
+3975e0
+1607e0
+1fdbe0
+2275e0
+2329e0
+23abe0
+3969f0
+3d47f0
+3	M	s:tailles	2
+s:lb	51
+s:sb	5
+2	D	i:102	4
+3	X	s:n	16
+3	X	s:w	5
+3	SV	s:routines	18
+28b40
+152ba0
+2687a0
+12f4e0
+f37c0
+269340
+26c140
+26e900
+11b830
+4f430
+54b30
+120e30
+12a430
+2615d0
+265750
+268290
+2705b0
+38aa90
+3	M	s:tailles	2
+s:lh	11
+s:sh	5
+2	D	i:6ebc	4
+3	X	s:n	9
+3	X	s:w	3
+3	SV	s:routines	6
+cdee0
+cdda0
+295f0
+11a190
+cca70
+11a3d0
+3	M	s:tailles	2
+s:lb	6
+s:sb	3
+2	D	i:152	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+295f0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:16e	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+295f0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:150	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+295f0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:bd	4
+3	X	s:n	2c
+3	X	s:w	27
+3	SV	s:routines	41
+136b80
+258a00
+266a00
+136f80
+260390
+266210
+136420
+24a520
+25ae20
+266420
+266f20
+267820
+4ea30
+4f430
+24a630
+252930
+268ab0
+2705b0
+29840
+24a8c0
+24ae40
+254440
+25c240
+269340
+26b7c0
+26c140
+4d950
+2615d0
+265750
+2717d0
+252e60
+25c6e0
+266560
+26fe60
+2703e0
+2712e0
+4c3f0
+137170
+267b70
+26e2f0
+26f9f0
+3	M	s:tailles	2
+s:lb	5
+s:sb	27
+2	D	i:71b8	4
+3	X	s:n	c
+3	X	s:w	7
+3	SV	s:routines	9
+93900
+cc240
+95360
+1346a0
+92dc0
+136f80
+29970
+95010
+93170
+3	M	s:tailles	2
+s:lh	5
+s:sh	7
+2	D	i:71bc	4
+3	X	s:n	d
+3	X	s:w	7
+3	SV	s:routines	7
+cc240
+95360
+136f80
+1346a0
+29970
+95010
+14a5d0
+3	M	s:tailles	2
+s:lh	6
+s:sh	7
+2	D	i:71c0	4
+3	X	s:n	d
+3	X	s:w	7
+3	SV	s:routines	7
+cc240
+95360
+136f80
+1346a0
+29970
+95010
+14a5d0
+3	M	s:tailles	2
+s:lh	6
+s:sh	7
+2	D	i:8182	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+2a080
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:149	4
+3	X	s:n	9
+3	X	s:w	6
+3	SV	s:routines	6
+2a300
+2712e0
+26b7c0
+2615d0
+2d1b0
+272b90
+3	M	s:tailles	2
+s:lb	3
+s:sb	6
+2	D	i:13c	4
+3	X	s:n	d
+3	X	s:w	4
+3	SV	s:routines	11
+269340
+26e900
+26f4a0
+26b7c0
+2a3d0
+213110
+265750
+2116f0
+26b0b0
+272410
+272eb0
+3	M	s:tailles	2
+s:lh	9
+s:sh	4
+2	D	i:8	4
+3	X	s:n	71
+3	X	s:w	43
+3	SV	s:routines	69
+4d780
+24ae00
+24a480
+15ae80
+26e900
+26f680
+408480
+2b310
+2b290
+4d110
+4f990
+4fb10
+92710
+15b610
+25e590
+265310
+40d410
+4d520
+134420
+1353a0
+24a520
+24b2a0
+25fda0
+26f020
+40e330
+506b0
+2af30
+2a6b0
+4ea30
+24a630
+24b530
+2524b0
+252930
+26f130
+2708b0
+2a640
+4f340
+92840
+24a8c0
+24ae40
+252d40
+254440
+40cfc0
+917d0
+919d0
+15add0
+24b050
+2615d0
+270050
+4d6e0
+24b1e0
+24b460
+252e60
+25aae0
+261560
+2703e0
+2712e0
+4072e0
+4d270
+4f7f0
+507f0
+24b0f0
+24b370
+254bf0
+25f570
+270970
+40cf70
+40fb70
+40d130
+3	M	s:tailles	3
+s:lh	2e
+s:sh	2c
+s:sw	17
+2	D	i:c	4
+3	X	s:n	a6
+3	X	s:w	56
+3	SV	s:routines	115
+15b610
+236a10
+40d410
+362210
+121020
+134420
+266420
+26f020
+4ea30
+4f430
+92030
+92630
+15b230
+24ae40
+254440
+25c240
+265440
+254250
+12a650
+265050
+270050
+252e60
+26fe60
+4d270
+236e70
+237870
+91a80
+26f680
+408480
+25e690
+92290
+235290
+235c90
+268290
+15b2a0
+2374b0
+2a6b0
+506b0
+924b0
+268ab0
+2366c0
+24a8c0
+2528c0
+252cd0
+25aae0
+25d6e0
+2712e0
+4072e0
+238cf0
+2542f0
+91af0
+12f700
+238900
+252b00
+25fd00
+26e900
+92710
+4d110
+4fb10
+265310
+26dd20
+25ed20
+4d520
+11bd20
+24a520
+265120
+40e330
+24b530
+40d130
+26f130
+252930
+26f930
+254b30
+2fdd30
+237130
+2fb40
+1e1540
+252d40
+26c140
+26ff40
+15b350
+25e750
+265750
+270360
+92170
+235970
+238370
+25f570
+270970
+40fb70
+4d780
+1e0b80
+235590
+25e590
+30fa0
+1353a0
+254ba0
+25fda0
+34f7a0
+4f3b0
+1e0fb0
+237fb0
+923c0
+2651c0
+917d0
+2fbd0
+2615d0
+26e1e0
+2703e0
+252df0
+254bf0
+4f7f0
+507f0
+237bf0
+26f9f0
+3	M	s:tailles	3
+s:sh	2d
+s:lh	50
+s:sw	29
+2	D	i:e	4
+3	X	s:n	45
+3	X	s:w	26
+3	SV	s:routines	28
+4d780
+25fd00
+18e080
+92290
+92710
+40d410
+254ba0
+25ed20
+25fda0
+26dd20
+2a6b0
+92030
+924b0
+92630
+1b9cb0
+252930
+923c0
+26c140
+26ff40
+270050
+252e60
+26e1e0
+26fe60
+254bf0
+92170
+91af0
+25f570
+26f9f0
+3	M	s:tailles	4
+s:sh	25
+s:lh	1c
+s:lb	3
+s:sb	1
+2	D	i:805a	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+2a6b0
+2b910
+31340
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:805b	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+2a6b0
+2b310
+310e0
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:805c	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+2a6b0
+2b910
+31530
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:805d	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+2a6b0
+2b310
+310e0
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:805e	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+2a6b0
+2b310
+31340
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:805f	4
+3	X	s:n	e
+3	X	s:w	9
+3	SV	s:routines	9
+2c060
+310e0
+31340
+2eb60
+2ee80
+2a6b0
+2c170
+2e2b0
+31530
+3	M	s:tailles	2
+s:sb	9
+s:lb	5
+2	D	i:8060	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	3
+2a6b0
+2b910
+31530
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:8029	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2cc60
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:817e	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+31cb0
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8018	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+2a6b0
+2d450
+2d4c0
+3	M	s:tailles	3
+s:sw	1
+s:lb	2
+s:sb	1
+2	D	i:801c	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+2a6b0
+2d620
+2d5b0
+3	M	s:tailles	3
+s:sw	1
+s:lb	2
+s:sb	1
+2	D	i:8020	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+2a6b0
+2d860
+2d7f0
+3	M	s:tailles	3
+s:sw	1
+s:lb	2
+s:sb	1
+2	D	i:8092	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+31530
+3	M	s:tailles	1
+s:sh	2
+2	D	i:8094	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	5
+217920
+2d6e0
+2cac0
+31530
+2a6b0
+3	M	s:tailles	2
+s:sh	3
+s:lh	3
+2	D	i:8026	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2a6b0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:802c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2cc60
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:802d	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2cc60
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:8032	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	4
+2a6b0
+2b310
+2af30
+2ee80
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:8000	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	5
+2a6b0
+2b310
+217210
+2d950
+2b910
+3	M	s:tailles	2
+s:sw	3
+s:lw	4
+2	D	i:8004	4
+3	X	s:n	9
+3	X	s:w	3
+3	SV	s:routines	6
+2a6b0
+2b310
+2d950
+2b910
+2c170
+2db30
+3	M	s:tailles	2
+s:sw	3
+s:lw	6
+2	D	i:802a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2a6b0
+2cc60
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:802e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2a6b0
+2cc60
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:8030	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2a6b0
+2cc60
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:8008	4
+3	X	s:n	a
+3	X	s:w	1
+3	SV	s:routines	4
+2a6b0
+2c510
+2d950
+2db70
+3	M	s:tailles	2
+s:sw	1
+s:lw	9
+2	D	i:800c	4
+3	X	s:n	4
+3	X	s:w	1
+3	SV	s:routines	4
+2a6b0
+2f380
+2f4a0
+2f5c0
+3	M	s:tailles	2
+s:sw	1
+s:lw	3
+2	D	i:8034	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2fbd0
+3	M	s:tailles	2
+s:sw	2
+s:lw	1
+2	D	i:8010	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2db70
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8012	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2db70
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8014	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2db70
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8016	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2a6b0
+2db70
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:63	4
+3	X	s:n	10
+3	X	s:w	2
+3	SV	s:routines	13
+4d520
+92840
+24bcc0
+2af30
+907f0
+c56b0
+136d70
+24b670
+24b9f0
+24bb30
+2524b0
+260210
+260390
+3	M	s:tailles	2
+s:lb	e
+s:sb	2
+2	D	i:a8	4
+3	X	s:n	2c
+3	X	s:w	f
+3	SV	s:routines	22
+4e880
+4e900
+4e490
+260390
+4dd90
+4e310
+40d410
+2af30
+4ea30
+24b530
+2524b0
+92840
+135040
+260d40
+2717d0
+17f0d0
+1354e0
+135b60
+137460
+4c3f0
+4e770
+24b8f0
+3	M	s:tailles	2
+s:lb	1d
+s:sb	f
+2	D	i:c140	4
+3	X	s:n	62
+3	X	s:w	49
+3	SV	s:routines	86
+205000
+258a00
+266a00
+209610
+8de20
+1eb020
+219620
+25ae20
+266420
+267820
+24a630
+4f430
+92030
+d1a30
+24ae40
+4d050
+d1c50
+2c060
+252e60
+2ee80
+15ae80
+204e80
+20bc80
+21a480
+4c890
+92290
+516b0
+924b0
+4eec0
+2132c0
+252cd0
+25c6e0
+24b0f0
+1eb6f0
+2c0f0
+91af0
+26e2f0
+26e900
+2b310
+2b910
+8ff20
+1ee320
+24a520
+266f20
+2af30
+4c730
+d1330
+1e4530
+252930
+265750
+2d950
+4d950
+25e750
+266560
+267b70
+171770
+24af70
+2c170
+2c370
+ced70
+d1570
+171970
+4d780
+209780
+219d80
+4f990
+25e590
+260390
+4023a0
+2705b0
+1ebbb0
+923c0
+1ebdc0
+40cfc0
+8d5d0
+8fdd0
+917d0
+2615d0
+2bfe0
+4cbe0
+525e0
+1edbf0
+32bf0
+4f7f0
+1707f0
+26f9f0
+3	M	s:tailles	2
+s:sw	49
+s:lw	19
+2	D	i:8068	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b310
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:22	4
+3	X	s:n	20
+3	X	s:w	1c
+3	SV	s:routines	27
+154280
+252b00
+258a00
+15ae80
+15b610
+2b310
+2b910
+4c890
+4d110
+91490
+155810
+1342a0
+25ae20
+25e420
+31db0
+516b0
+4eec0
+105b40
+40cfc0
+15b350
+917d0
+4cbe0
+252e60
+25c6e0
+4c3f0
+ced70
+25fef0
+3	M	s:tailles	4
+s:sh	1a
+s:lh	2
+s:lb	2
+s:sb	2
+2	D	i:24	4
+3	X	s:n	2a
+3	X	s:w	21
+3	SV	s:routines	29
+154280
+252b00
+258a00
+15ae80
+2b310
+2b910
+4c890
+4d110
+91490
+155810
+259190
+40d410
+1342a0
+25ae20
+25e420
+31db0
+516b0
+2cac0
+4eec0
+40cfc0
+15b350
+917d0
+218450
+4cbe0
+252e60
+25c6e0
+4c3f0
+ced70
+25fef0
+3	M	s:tailles	2
+s:sh	21
+s:lh	9
+2	D	i:806a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b310
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:26	4
+3	X	s:n	20
+3	X	s:w	1e
+3	SV	s:routines	31
+15ae80
+252b00
+258a00
+2b310
+2b910
+4c890
+4d110
+91490
+219590
+25ae20
+25e420
+214630
+155eb0
+31db0
+516b0
+924b0
+2d740
+4eec0
+40cfc0
+917d0
+1e7550
+4cbe0
+252e60
+25c6e0
+1571f0
+4c3f0
+92170
+ced70
+211d70
+24af70
+25fef0
+3	M	s:tailles	2
+s:sh	1e
+s:lh	2
+2	D	i:28	4
+3	X	s:n	28
+3	X	s:w	22
+3	SV	s:routines	34
+15ae80
+252b00
+258a00
+2b310
+2b910
+4c890
+4d110
+91490
+1eaa10
+25ae20
+25e420
+214630
+1e6fb0
+155eb0
+31db0
+516b0
+924b0
+213d30
+2d740
+2cac0
+4eec0
+40cfc0
+917d0
+1e7550
+4cbe0
+252e60
+25c6e0
+1571f0
+4c3f0
+92170
+ced70
+211d70
+24af70
+25fef0
+3	M	s:tailles	2
+s:sh	22
+s:lh	6
+2	D	i:806c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b310
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:2a	4
+3	X	s:n	24
+3	X	s:w	1e
+3	SV	s:routines	32
+157300
+252b00
+258a00
+15ae80
+2b310
+2b910
+4c890
+4d110
+91490
+211c20
+25ae20
+25e420
+31db0
+516b0
+924b0
+1e6fb0
+213d30
+4eec0
+1586c0
+1594c0
+213b40
+40cfc0
+917d0
+1011d0
+4cbe0
+252e60
+25c6e0
+4c3f0
+92170
+ced70
+211d70
+25fef0
+3	M	s:tailles	2
+s:sh	1e
+s:lh	6
+2	D	i:2c	4
+3	X	s:n	24
+3	X	s:w	1e
+3	SV	s:routines	31
+157300
+252b00
+258a00
+15ae80
+2b310
+2b910
+4c890
+4d110
+91490
+1eaa10
+211c20
+25ae20
+25e420
+31db0
+516b0
+924b0
+2cac0
+4eec0
+1586c0
+1594c0
+40cfc0
+917d0
+4cbe0
+252e60
+25c6e0
+4c3f0
+92170
+ced70
+20b5f0
+211d70
+25fef0
+3	M	s:tailles	2
+s:sh	1e
+s:lh	6
+2	D	i:c130	4
+3	X	s:n	f
+3	X	s:w	b
+3	SV	s:routines	12
+32c40
+258a00
+25ae20
+c8fe0
+25c6e0
+40cfc0
+40e3a0
+2b310
+32830
+516b0
+ced70
+259190
+3	M	s:tailles	2
+s:sw	b
+s:lw	4
+2	D	i:c134	4
+3	X	s:n	a
+3	X	s:w	8
+3	SV	s:routines	8
+32c40
+40cfc0
+2b310
+32830
+c9410
+516b0
+ced70
+155cd0
+3	M	s:tailles	2
+s:sw	8
+s:lw	2
+2	D	i:c138	4
+3	X	s:n	a
+3	X	s:w	7
+3	SV	s:routines	8
+c9840
+32c40
+40cfc0
+2b310
+32830
+516b0
+ced70
+1011d0
+3	M	s:tailles	2
+s:sw	7
+s:lw	3
+2	D	i:806e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b310
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:32	4
+3	X	s:n	2f
+3	X	s:w	21
+3	SV	s:routines	33
+15ae80
+258a00
+266a00
+2b310
+4d110
+4c890
+15b2a0
+25ae20
+266420
+266f20
+267820
+4023a0
+252930
+4f430
+516b0
+54930
+92030
+15acb0
+2705b0
+4eec0
+917d0
+252cd0
+265750
+4cbe0
+252e60
+25c6e0
+266560
+24af70
+4c3f0
+4f7f0
+907f0
+ced70
+26e2f0
+3	M	s:tailles	2
+s:sh	21
+s:lh	e
+2	D	i:8070	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b310
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:3a	4
+3	X	s:n	17
+3	X	s:w	15
+3	SV	s:routines	22
+15ae80
+258a00
+2b310
+4d110
+4c890
+15b2a0
+25ae20
+4023a0
+32830
+516b0
+54930
+92030
+15acb0
+4eec0
+917d0
+252cd0
+4cbe0
+252e60
+25c6e0
+24af70
+4c3f0
+ced70
+3	M	s:tailles	2
+s:sh	15
+s:lh	2
+2	D	i:8019	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+2b310
+2d500
+2ee80
+319d0
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:801d	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+2b310
+2d660
+2ee80
+319d0
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:8021	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+2b310
+2ee80
+2d8a0
+319d0
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:8061	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2b910
+31530
+3	M	s:tailles	2
+s:lb	1
+s:sb	2
+2	D	i:8062	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+2b910
+31530
+2f6e0
+3	M	s:tailles	2
+s:lb	2
+s:sb	2
+2	D	i:8063	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2b910
+31530
+3	M	s:tailles	2
+s:lb	1
+s:sb	2
+2	D	i:8084	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b910
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8086	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b910
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8088	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2b910
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8065	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2b910
+31530
+3	M	s:tailles	2
+s:lb	1
+s:sb	2
+2	D	i:8066	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2bf70
+31340
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8028	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+2c060
+2c170
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:184	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+2c170
+8e6e0
+8f660
+3	M	s:tailles	2
+s:sw	1
+s:lw	2
+2	D	i:188	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+2c170
+8e6e0
+8f660
+3	M	s:tailles	2
+s:sw	1
+s:lw	2
+2	D	i:18c	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+2c170
+8e6e0
+8f660
+3	M	s:tailles	2
+s:sw	1
+s:lw	2
+2	D	i:190	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+2c170
+8e6e0
+8f660
+3	M	s:tailles	2
+s:sw	1
+s:lw	2
+2	D	i:c170	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	1
+2c170
+3	M	s:tailles	2
+s:sw	2
+s:lw	1
+2	D	i:8096	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2c510
+31340
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8098	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2c510
+31340
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:809a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2c510
+31340
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:809c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2c510
+31340
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:100	4
+3	X	s:n	45
+3	X	s:w	12
+3	SV	s:routines	62
+2ee80
+157300
+154280
+198a00
+151b80
+247d80
+26f680
+4bc10
+c8890
+fd910
+fdc10
+13bb10
+14f510
+263c10
+37ef10
+37fa90
+40d410
+f29a0
+151ea0
+155920
+199da0
+24f020
+25ed20
+371920
+199530
+1e4530
+f2a30
+54b30
+4abb0
+4b930
+4c1b0
+4ea30
+4f430
+4fc30
+37f830
+14f9b0
+1519b0
+2cac0
+1586c0
+247e40
+254440
+4ac50
+4bad0
+139ad0
+151750
+196f50
+258450
+15acb0
+2615d0
+247db0
+4aa60
+151560
+2489e0
+2fcd60
+37eae0
+4acf0
+4bb70
+4c3f0
+105c70
+151270
+25f570
+292370
+3	M	s:tailles	2
+s:lh	33
+s:sh	12
+2	D	i:2e	4
+3	X	s:n	9
+3	X	s:w	6
+3	SV	s:routines	5
+2cac0
+ced70
+91490
+13b8b0
+516b0
+3	M	s:tailles	2
+s:lh	3
+s:sh	6
+2	D	i:160	4
+3	X	s:n	e
+3	X	s:w	c
+3	SV	s:routines	13
+15c400
+24a200
+249f60
+24a060
+11a7a0
+24a260
+26ff40
+2d1b0
+11aa70
+11a6d0
+15c770
+25d410
+25d550
+3	M	s:tailles	2
+s:sb	c
+s:lb	2
+2	D	i:808a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2d950
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8090	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2d950
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:808c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2d950
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:808e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2d950
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8072	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+2db70
+31530
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:8074	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+2db70
+31530
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:8076	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+2db70
+31530
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:8078	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+2db70
+31530
+310e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:807a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2ee80
+31340
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:807e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2f380
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8080	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2f4a0
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8082	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2f5c0
+31530
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8038	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+2fbd0
+30eb0
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:803a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2fbd0
+30fa0
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:803c	4
+3	X	s:n	1b
+3	X	s:w	f
+3	SV	s:routines	6
+31340
+310e0
+319d0
+31530
+2fbd0
+31cb0
+3	M	s:tailles	2
+s:sh	f
+s:lh	c
+2	D	i:803e	4
+3	X	s:n	18
+3	X	s:w	e
+3	SV	s:routines	6
+31340
+310e0
+319d0
+31530
+2fbd0
+31cb0
+3	M	s:tailles	2
+s:sh	e
+s:lh	a
+2	D	i:8040	4
+3	X	s:n	15
+3	X	s:w	d
+3	SV	s:routines	6
+31340
+310e0
+319d0
+31530
+2fbd0
+31cb0
+3	M	s:tailles	2
+s:sh	d
+s:lh	8
+2	D	i:8042	4
+3	X	s:n	12
+3	X	s:w	c
+3	SV	s:routines	6
+31340
+310e0
+319d0
+31530
+2fbd0
+31cb0
+3	M	s:tailles	2
+s:sh	c
+s:lh	6
+2	D	i:8044	4
+3	X	s:n	e
+3	X	s:w	b
+3	SV	s:routines	4
+2fbd0
+31530
+310e0
+319d0
+3	M	s:tailles	2
+s:sh	b
+s:lh	3
+2	D	i:8046	4
+3	X	s:n	c
+3	X	s:w	a
+3	SV	s:routines	3
+2fbd0
+310e0
+319d0
+3	M	s:tailles	2
+s:sh	a
+s:lh	2
+2	D	i:8048	4
+3	X	s:n	b
+3	X	s:w	9
+3	SV	s:routines	3
+2fbd0
+310e0
+319d0
+3	M	s:tailles	2
+s:sh	9
+s:lh	2
+2	D	i:804a	4
+3	X	s:n	a
+3	X	s:w	8
+3	SV	s:routines	3
+2fbd0
+310e0
+319d0
+3	M	s:tailles	2
+s:sh	8
+s:lh	2
+2	D	i:804c	4
+3	X	s:n	7
+3	X	s:w	7
+3	SV	s:routines	1
+2fbd0
+3	M	s:tailles	1
+s:sh	7
+2	D	i:804e	4
+3	X	s:n	6
+3	X	s:w	6
+3	SV	s:routines	1
+2fbd0
+3	M	s:tailles	1
+s:sh	6
+2	D	i:8050	4
+3	X	s:n	5
+3	X	s:w	5
+3	SV	s:routines	1
+2fbd0
+3	M	s:tailles	1
+s:sh	5
+2	D	i:8052	4
+3	X	s:n	4
+3	X	s:w	4
+3	SV	s:routines	1
+2fbd0
+3	M	s:tailles	1
+s:sh	4
+2	D	i:8054	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	1
+2fbd0
+3	M	s:tailles	1
+s:sh	3
+2	D	i:8056	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	1
+2fbd0
+3	M	s:tailles	1
+s:sh	2
+2	D	i:8058	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2fbd0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:182	4
+3	X	s:n	1c
+3	X	s:w	12
+3	SV	s:routines	25
+4ca00
+1e3e00
+4dd90
+8ff20
+90120
+902a0
+90420
+30eb0
+4ea30
+4f430
+40d130
+8bb40
+135040
+252d40
+4d050
+4d950
+8fdd0
+4cbe0
+90060
+901e0
+90360
+2712e0
+4c3f0
+25fef0
+270970
+3	M	s:tailles	2
+s:lb	a
+s:sb	12
+2	D	i:d	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+30eb0
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:803b	4
+3	X	s:n	8
+3	X	s:w	0
+3	SV	s:routines	4
+310e0
+31530
+31340
+319d0
+3	M	s:tailles	1
+s:lb	8
+2	D	i:807c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+31530
+3	M	s:tailles	1
+s:sh	1
+2	D	i:8064	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+31530
+3	M	s:tailles	1
+s:sb	1
+2	D	i:95	4
+3	X	s:n	c
+3	X	s:w	7
+3	SV	s:routines	6
+13d820
+13db40
+c59a0
+405d40
+31db0
+32830
+3	M	s:tailles	2
+s:sb	7
+s:lb	5
+2	D	i:94	4
+3	X	s:n	c
+3	X	s:w	6
+3	SV	s:routines	6
+13d820
+13db40
+c59a0
+405d40
+31db0
+32830
+3	M	s:tailles	2
+s:sb	6
+s:lb	6
+2	D	i:e4	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	1
+31db0
+3	M	s:tailles	1
+s:sb	2
+2	D	i:89	4
+3	X	s:n	26
+3	X	s:w	2
+3	SV	s:routines	35
+182e00
+18e980
+cfc10
+5c790
+163690
+1d2810
+1d4310
+1d6410
+322a0
+10afa0
+18cea0
+1b3920
+1d41a0
+1c9c30
+1cf230
+1d4030
+d02c0
+13b340
+195040
+1ceac0
+1d3740
+1d6340
+10b150
+10c950
+1c9350
+1d34d0
+5c0e0
+1907e0
+195860
+1952e0
+1cf4e0
+1d5060
+128e70
+1d2ef0
+23fcf0
+3	M	s:tailles	2
+s:sb	2
+s:lb	24
+2	D	i:86	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+322a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:1f8	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+322a0
+3	M	s:tailles	1
+s:sw	1
+2	D	i:1fc	4
+3	X	s:n	7
+3	X	s:w	4
+3	SV	s:routines	3
+322a0
+260390
+1354e0
+3	M	s:tailles	2
+s:sh	4
+s:lh	3
+2	D	i:1fe	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+322a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:9eaa	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+322a0
+134b10
+136420
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:9eab	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+322a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:9eac	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+322a0
+24b530
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:9ead	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	2
+322a0
+260390
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:e5	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+322a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:a6	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+322a0
+139900
+13a980
+3	M	s:tailles	2
+s:sb	1
+s:lb	2
+2	D	i:bf	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+322a0
+1342a0
+3	M	s:tailles	1
+s:sb	2
+2	D	i:838c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+324b0
+32830
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:8388	4
+3	X	s:n	9
+3	X	s:w	1
+3	SV	s:routines	5
+8bb40
+332c0
+32eb0
+33150
+324b0
+3	M	s:tailles	2
+s:sw	1
+s:lw	8
+2	D	i:c144	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+32830
+ced70
+3	M	s:tailles	2
+s:lw	1
+s:sw	2
+2	D	i:c148	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+32830
+ced70
+3	M	s:tailles	2
+s:lw	1
+s:sw	2
+2	D	i:c14c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+32830
+ced70
+3	M	s:tailles	2
+s:lw	1
+s:sw	2
+2	D	i:c150	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+32830
+ced70
+3	M	s:tailles	2
+s:lw	1
+s:sw	2
+2	D	i:c13c	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	6
+32c40
+32830
+ced70
+54930
+516b0
+13b8b0
+3	M	s:tailles	2
+s:lw	3
+s:sw	5
+2	D	i:c158	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+32830
+ced70
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:3c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+32830
+ced70
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:3e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+32830
+ced70
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:81	4
+3	X	s:n	1a
+3	X	s:w	1
+3	SV	s:routines	15
+123300
+12c400
+134ce0
+127980
+13ab60
+1a2b60
+32830
+ce510
+11bf90
+124510
+126790
+13ac30
+31e4d0
+336650
+406bb0
+3	M	s:tailles	2
+s:lb	19
+s:sb	1
+2	D	i:84	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+32830
+260210
+25fef0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:34	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+32bf0
+ced70
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:c154	4
+3	X	s:n	30
+3	X	s:w	2f
+3	SV	s:routines	43
+4d780
+1bb300
+408480
+2d9f00
+26e900
+25e590
+260390
+268290
+40d410
+8de20
+8ff20
+17c420
+24a520
+25ed20
+2dcea0
+d1a30
+d1330
+4c730
+4f430
+516b0
+24a630
+252930
+2705b0
+309db0
+309cc0
+3b6b40
+40cfc0
+d0650
+4d050
+4d950
+8d5d0
+8fdd0
+917d0
+2615d0
+265750
+38bbe0
+3ae560
+32bf0
+ced70
+24af70
+25f570
+26f9f0
+3b6d70
+3	M	s:tailles	2
+s:lw	1
+s:sw	2f
+2	D	i:a9	4
+3	X	s:n	8
+3	X	s:w	7
+3	SV	s:routines	7
+32c40
+2703e0
+4023a0
+1341f0
+25fef0
+cc090
+2705b0
+3	M	s:tailles	2
+s:lb	1
+s:sb	7
+2	D	i:15c	4
+3	X	s:n	3e
+3	X	s:w	2
+3	SV	s:routines	62
+eea00
+137a00
+1ac580
+1b7900
+171380
+1b8080
+26e900
+dc910
+da090
+de990
+e3c90
+e9210
+ec890
+137710
+137e90
+e63a0
+f2420
+137820
+1715a0
+2654b0
+33930
+d6730
+d8730
+dc2b0
+e6db0
+ee8b0
+eeb30
+ef2b0
+1716b0
+d46c0
+6c7c0
+de640
+e0240
+e12c0
+e27c0
+e2a40
+e2cc0
+ef0c0
+137c40
+de750
+6c1d0
+dafd0
+db4d0
+dbd50
+df4d0
+e03d0
+ea2d0
+1b6db0
+d6060
+d6460
+dc4e0
+e1660
+e1a60
+e8560
+edfe0
+eec60
+220e60
+d8e70
+df5f0
+e57f0
+e86f0
+e9af0
+3	M	s:tailles	2
+s:lb	3c
+s:sb	2
+2	D	i:10e	4
+3	X	s:n	31
+3	X	s:w	8
+3	SV	s:routines	47
+88a00
+240200
+2e0c00
+3d880
+26e900
+2eef00
+3b3080
+3be280
+3c6980
+3d2c00
+4f990
+15c990
+163690
+266210
+268290
+302a90
+415a10
+15dd20
+225ba0
+2363a0
+388da0
+3d2820
+33930
+165cb0
+268ab0
+3a17b0
+3bdab0
+74040
+b1ac0
+15d6c0
+1c3440
+2333c0
+3022c0
+3c4ec0
+1633d0
+1640d0
+164350
+1a6950
+224ed0
+2615d0
+265750
+1607e0
+226760
+23abe0
+241660
+3ac360
+3b2e70
+3	M	s:tailles	2
+s:lb	29
+s:sb	8
+2	D	i:107	4
+3	X	s:n	2e
+3	X	s:w	6
+3	SV	s:routines	46
+faf00
+fb700
+164d00
+1e3880
+28e600
+395c80
+3b3080
+fbc90
+11bf90
+26c010
+28f890
+1dbf20
+24d420
+3961a0
+3d3aa0
+33930
+dbe30
+268ab0
+2705b0
+2e23b0
+4149b0
+691c0
+109c40
+395f40
+397940
+2615d0
+265750
+2717d0
+2e4bd0
+397250
+e4660
+fb160
+fb960
+13b4e0
+23ec60
+3975e0
+3d3ce0
+3d3f60
+3d4e60
+10a0f0
+395af0
+3969f0
+3b2e70
+3d38f0
+3d4170
+3d47f0
+3	M	s:tailles	2
+s:lb	28
+s:sb	6
+2	D	i:8b90	4
+3	X	s:n	7
+3	X	s:w	7
+3	SV	s:routines	4
+34230
+46b10
+353e0
+465d0
+3	M	s:tailles	1
+s:sh	7
+2	D	i:8b94	4
+3	X	s:n	24
+3	X	s:w	c
+3	SV	s:routines	26
+3dc80
+3f400
+3ed80
+3a690
+3b390
+42610
+46b10
+15f990
+39da0
+3cb20
+40720
+41720
+34230
+38230
+42530
+42ab0
+3c3630
+3d440
+15f5c0
+419d0
+465d0
+353e0
+42260
+1607e0
+40af0
+41070
+3	M	s:tailles	2
+s:sh	c
+s:lh	18
+2	D	i:8b92	4
+3	X	s:n	7
+3	X	s:w	7
+3	SV	s:routines	4
+34230
+46b10
+353e0
+465d0
+3	M	s:tailles	1
+s:sh	7
+2	D	i:8b96	4
+3	X	s:n	e
+3	X	s:w	b
+3	SV	s:routines	9
+3cb20
+1607e0
+353e0
+15f5c0
+34230
+42ab0
+465d0
+46b10
+15f990
+3	M	s:tailles	2
+s:sh	b
+s:lh	3
+2	D	i:8b98	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+343c0
+3	M	s:tailles	2
+s:sw	1
+s:lb	1
+2	D	i:8b99	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+343c0
+3	M	s:tailles	1
+s:lb	1
+2	D	i:8b9a	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+343c0
+3	M	s:tailles	1
+s:lb	1
+2	D	i:8bac	4
+3	X	s:n	9
+3	X	s:w	7
+3	SV	s:routines	8
+36020
+36900
+37140
+37560
+379c0
+37fa0
+46fa0
+37cb0
+3	M	s:tailles	2
+s:sh	7
+s:lh	2
+2	D	i:1af	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	7
+362c0
+1607e0
+15f5c0
+3e090
+388b0
+3dbd0
+15f990
+3	M	s:tailles	2
+s:sb	5
+s:lb	3
+2	D	i:8baa	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	5
+362c0
+3ca20
+40af0
+3b390
+419d0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:8bae	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+362c0
+397d0
+3c180
+419d0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:c370	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	5
+408480
+40a910
+40f370
+2486b0
+3b7d0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:1a8	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+3cb20
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:11c	4
+3	X	s:n	40
+3	X	s:w	8
+3	SV	s:routines	61
+a1280
+b5600
+27f300
+acc80
+38b080
+b5910
+27fc10
+281310
+2d8510
+2dac90
+312210
+313890
+3f2990
+ad020
+234e20
+35ffa0
+3713a0
+39ae20
+3f17a0
+49030
+2654b0
+268ab0
+2c32b0
+2fdfb0
+33a6b0
+34b930
+34e7b0
+39b130
+39b5b0
+4149b0
+3d440
+a0540
+109c40
+10a2c0
+2da940
+2e7c40
+2fc8c0
+34e1c0
+39ba40
+3da140
+1e2dd0
+2615d0
+265750
+2717d0
+27ebd0
+2a01d0
+36f7d0
+37bdd0
+3d7b50
+3e62d0
+b52e0
+2afce0
+2c1be0
+33b5e0
+37c760
+a0f70
+322af0
+3aeb70
+3b70f0
+3b74f0
+3d8570
+3	M	s:tailles	2
+s:sb	8
+s:lb	38
+2	D	i:11d	4
+3	X	s:n	b
+3	X	s:w	9
+3	SV	s:routines	8
+3d440
+49030
+265750
+2654b0
+2615d0
+268ab0
+2717d0
+34b930
+3	M	s:tailles	2
+s:sb	9
+s:lb	2
+2	D	i:11e	4
+3	X	s:n	8
+3	X	s:w	7
+3	SV	s:routines	8
+3d440
+49030
+265750
+2654b0
+2615d0
+268ab0
+2717d0
+34b930
+3	M	s:tailles	2
+s:sb	7
+s:lb	1
+2	D	i:8a	4
+3	X	s:n	4c
+3	X	s:w	8
+3	SV	s:routines	73
+3d880
+88a00
+f4000
+f0200
+cc300
+f4700
+f4e80
+240200
+266280
+2e0c00
+f3710
+163690
+25d410
+260390
+266210
+27fc10
+2a0d90
+302a90
+3be280
+415a10
+1353a0
+225ba0
+388da0
+3961a0
+397c20
+3d2820
+3d3aa0
+397250
+4f430
+165cb0
+243cb0
+268ab0
+26dfb0
+3bdab0
+3d57b0
+135040
+161c40
+1611c0
+2333c0
+25c240
+26ff40
+3022c0
+395f40
+397940
+3c4ec0
+3c6980
+40b250
+1633d0
+1640d0
+164350
+1a6950
+224ed0
+25d550
+2679d0
+270050
+2717d0
+3d3f60
+3d4e60
+f09e0
+1607e0
+23abe0
+241660
+26cb60
+395c80
+3975e0
+3d2c00
+3d3ce0
+395af0
+3969f0
+3d38f0
+3d4170
+3d47f0
+2eef00
+3	M	s:tailles	2
+s:lb	44
+s:sb	8
+2	D	i:8b9c	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	3
+3d880
+1607e0
+3ea60
+3	M	s:tailles	2
+s:sh	4
+s:lh	1
+2	D	i:8ba0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3d880
+3	M	s:tailles	1
+s:sh	1
+2	D	i:144	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	5
+3dc80
+1961e0
+269340
+265750
+24f9d0
+3	M	s:tailles	4
+s:sb	2
+s:lb	2
+s:sh	1
+s:lh	1
+2	D	i:12b	4
+3	X	s:n	c
+3	X	s:w	8
+3	SV	s:routines	10
+3dc80
+138900
+157300
+24e2a0
+1734d0
+91af0
+1736b0
+224ed0
+24e490
+24e7b0
+3	M	s:tailles	2
+s:sb	8
+s:lb	4
+2	D	i:148	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	4
+3e090
+91af0
+1736b0
+1734d0
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:8bb4	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ea60
+3	M	s:tailles	1
+s:sh	1
+2	D	i:a1	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+40960
+408480
+407990
+60b50
+40f370
+3	M	s:tailles	2
+s:lb	2
+s:sb	3
+2	D	i:141	4
+3	X	s:n	16
+3	X	s:w	3
+3	SV	s:routines	20
+258a00
+3d7c00
+11bf90
+ca990
+42610
+a0820
+fc620
+fbf30
+26f5b0
+2722b0
+269340
+26b7c0
+139ad0
+2615d0
+2717d0
+caae0
+1961e0
+2489e0
+25c6e0
+2fcd60
+3	M	s:tailles	2
+s:lb	13
+s:sb	3
+2	D	i:6ebd	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+465d0
+473b0
+cb670
+c68a0
+3	M	s:tailles	2
+s:lb	3
+s:sb	2
+2	D	i:1a4	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+465d0
+46b10
+3	M	s:tailles	2
+s:sw	2
+s:lw	2
+2	D	i:8ba8	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	2
+465d0
+46b10
+3	M	s:tailles	2
+s:sh	4
+s:lh	4
+2	D	i:8ba4	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	2
+465d0
+46b10
+3	M	s:tailles	2
+s:sw	4
+s:lw	4
+2	D	i:6ebe	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+46b10
+473b0
+cb670
+c68a0
+3	M	s:tailles	2
+s:lb	3
+s:sb	2
+2	D	i:bb	4
+3	X	s:n	14
+3	X	s:w	4
+3	SV	s:routines	18
+17fea0
+1845e0
+19d140
+1e3cc0
+4b9e0
+1e5480
+1ec660
+1ef400
+4ab10
+5d4d0
+60b50
+18bfb0
+1e57f0
+1edbf0
+1ee010
+1ee290
+2138b0
+407990
+3	M	s:tailles	2
+s:lb	10
+s:sb	4
+2	D	i:128	4
+3	X	s:n	11
+3	X	s:w	9
+3	SV	s:routines	17
+4aec0
+4cbe0
+4b020
+4bde0
+4bf40
+15ae80
+252b00
+252e60
+25e420
+4af70
+4b0d0
+4be90
+4bff0
+4c890
+4d950
+506b0
+40d410
+3	M	s:tailles	2
+s:lh	8
+s:sh	9
+2	D	i:83	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	8
+13a980
+13d820
+260d40
+24d420
+1342a0
+4c3f0
+4ea30
+4d950
+3	M	s:tailles	2
+s:sb	4
+s:lb	4
+2	D	i:0	4
+3	X	s:n	36
+3	X	s:w	1f
+3	SV	s:routines	29
+4ca00
+4dc80
+134380
+408480
+4d780
+4d110
+4fb10
+260390
+40d410
+4d520
+4dd20
+1342a0
+134420
+1353a0
+4c730
+4cdb0
+4ea30
+260330
+134340
+4d950
+1343d0
+4cf60
+4072e0
+4c3f0
+4d270
+507f0
+1341f0
+270970
+40fb70
+3	M	s:tailles	3
+s:sw	8
+s:sh	17
+s:lh	17
+2	D	i:8e	4
+3	X	s:n	15
+3	X	s:w	5
+3	SV	s:routines	14
+136420
+17e0e0
+17c420
+17ce20
+17e3a0
+17e9a0
+24a800
+24aa40
+4c3f0
+1361f0
+4ea30
+136970
+17bc90
+17c970
+3	M	s:tailles	2
+s:sb	5
+s:lb	10
+2	D	i:8d	4
+3	X	s:n	1c
+3	X	s:w	8
+3	SV	s:routines	19
+250700
+189910
+255010
+260390
+185fa0
+4ea30
+186630
+18b9b0
+24ea30
+186dc0
+254440
+2717d0
+4d950
+1878d0
+1354e0
+18db60
+18ec60
+4c3f0
+254bf0
+3	M	s:tailles	2
+s:sb	8
+s:lb	14
+2	D	i:aa	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+4c3f0
+904e0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:181	4
+3	X	s:n	25
+3	X	s:w	1c
+3	SV	s:routines	36
+8ca80
+8df80
+8ce80
+8cc80
+8ee00
+4dd90
+8c710
+8de20
+8ff20
+90120
+902a0
+90420
+4ea30
+8bdb0
+8fdb0
+8e0c0
+8c5c0
+8f640
+8bb40
+135040
+4d950
+8bfd0
+8c1d0
+8c3d0
+8d5d0
+8fdd0
+8bc60
+8c860
+90060
+901e0
+90360
+2712e0
+4c3f0
+8d070
+25fef0
+270970
+3	M	s:tailles	2
+s:sb	1c
+s:lb	9
+2	D	i:183	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+4c3f0
+4e900
+4dd20
+4dd90
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:8f	4
+3	X	s:n	2e
+3	X	s:w	29
+3	SV	s:routines	43
+136b80
+258a00
+266a00
+26e900
+26f680
+260390
+136420
+24a520
+25ae20
+266420
+266f20
+267820
+40aca0
+4f430
+4ea30
+24a630
+252930
+268ab0
+2705b0
+134940
+135040
+24a8c0
+24ae40
+254440
+25c240
+26c140
+4d950
+2615d0
+265750
+270050
+2717d0
+40b250
+252e60
+25c6e0
+266560
+26fe60
+2703e0
+2712e0
+4c3f0
+136d70
+267b70
+26e2f0
+26f9f0
+3	M	s:tailles	2
+s:sb	29
+s:lb	5
+2	D	i:8c20	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	4
+4c3f0
+15ae80
+4d270
+15c280
+3	M	s:tailles	3
+s:sh	1
+s:sb	4
+s:lb	3
+2	D	i:ab	4
+3	X	s:n	9
+3	X	s:w	8
+3	SV	s:routines	8
+135040
+4c3f0
+4f430
+4d950
+252930
+254bf0
+261210
+2717d0
+3	M	s:tailles	2
+s:sb	8
+s:lb	1
+2	D	i:dc	4
+3	X	s:n	9
+3	X	s:w	3
+3	SV	s:routines	7
+55440
+1cbe80
+50d80
+536e0
+1cbcc0
+4c3f0
+54b30
+3	M	s:tailles	2
+s:sh	3
+s:lb	6
+2	D	i:c3a5	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	6
+2519a0
+251ac0
+4e1c0
+4c3f0
+24f9d0
+4d950
+3	M	s:tailles	2
+s:sb	3
+s:lb	3
+2	D	i:8c21	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	4
+4c3f0
+507f0
+4cbe0
+4d270
+3	M	s:tailles	2
+s:sb	2
+s:lb	4
+2	D	i:80	4
+3	X	s:n	2d
+3	X	s:w	3
+3	SV	s:routines	40
+93900
+187700
+153880
+25b180
+21f580
+105a90
+10c890
+210710
+260090
+34b410
+40d410
+e7020
+191e20
+21bc20
+3b71a0
+4123a0
+4f430
+187eb0
+4103b0
+103dc0
+103fc0
+19d140
+273fc0
+40fe40
+102ed0
+106850
+1529d0
+187250
+1873d0
+410550
+58ce0
+1046e0
+21e5e0
+226760
+2553e0
+2fe060
+4106e0
+4c3f0
+25f570
+25fef0
+3	M	s:tailles	4
+s:lb	26
+s:sb	2
+s:sh	1
+s:lh	4
+2	D	i:cd	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+4c3f0
+4d950
+3	M	s:tailles	1
+s:sb	2
+2	D	i:e9	4
+3	X	s:n	9
+3	X	s:w	6
+3	SV	s:routines	7
+4e900
+1341f0
+4c730
+25fef0
+4dd90
+407990
+40d410
+3	M	s:tailles	2
+s:lb	3
+s:sb	6
+2	D	i:4	4
+3	X	s:n	3d
+3	X	s:w	28
+3	SV	s:routines	40
+4ca00
+408480
+5ba80
+4d780
+4c890
+4d110
+4fb10
+15b610
+261210
+40d410
+4c820
+4d520
+134420
+1353a0
+2611a0
+4cdb0
+4ea30
+506b0
+5ccb0
+24b530
+26f130
+40e330
+4cec0
+50640
+24a8c0
+24ae40
+4d050
+270050
+4cbe0
+4cf60
+4cfe0
+5ace0
+2712e0
+4072e0
+4cb70
+4d270
+507f0
+254bf0
+270970
+40fb70
+3	M	s:tailles	3
+s:lh	15
+s:sh	18
+s:sw	10
+2	D	i:6	4
+3	X	s:n	18
+3	X	s:w	f
+3	SV	s:routines	16
+4ca00
+4cbe0
+5ace0
+50d80
+51480
+5ba80
+24a8c0
+24ae40
+408480
+506b0
+507f0
+4cdb0
+51250
+5ccb0
+40d410
+40e330
+3	M	s:tailles	2
+s:sh	f
+s:lh	9
+2	D	i:10	4
+3	X	s:n	6a
+3	X	s:w	4a
+3	SV	s:routines	79
+258a00
+266a00
+26d600
+26c010
+15b610
+40d410
+134420
+25ae20
+266420
+267820
+26f020
+4ea30
+24ae40
+254440
+25c240
+268050
+270050
+24a260
+252e60
+4d270
+25c670
+26e280
+26f680
+408480
+57a90
+268290
+506b0
+266eb0
+268ab0
+24a8c0
+2712e0
+25aae0
+25c6e0
+25d6e0
+4072e0
+2664f0
+26e2f0
+26cd00
+26e900
+92710
+4d110
+4fb10
+265310
+26dd20
+4d520
+24a520
+266f20
+24b530
+252930
+26f130
+40e330
+26c140
+270540
+265750
+26bd50
+266560
+26cb60
+267b70
+270970
+4d780
+58390
+258990
+266990
+25e590
+25fda0
+1353a0
+26d5a0
+2705b0
+25adb0
+2677b0
+26bdc0
+917d0
+2615d0
+2679d0
+2703e0
+26e1e0
+4f7f0
+507f0
+254bf0
+3	M	s:tailles	3
+s:sh	1a
+s:sw	30
+s:lh	20
+2	D	i:14	4
+3	X	s:n	96
+3	X	s:w	67
+3	SV	s:routines	113
+24a200
+258a00
+25a200
+53210
+55610
+15b610
+1cbe10
+25d410
+40d410
+11f820
+134420
+1cc820
+1cf820
+249820
+25ae20
+266420
+26f020
+54e30
+4ea30
+55440
+24ae40
+254440
+25c240
+25ce40
+258450
+270050
+1cce60
+24a060
+24a260
+252e60
+4d270
+1cd470
+1ce070
+5ba80
+26f680
+408480
+25a690
+25a090
+268290
+520a0
+249aa0
+506b0
+2592b0
+4eec0
+59ec0
+1cb6c0
+24a8c0
+11f4d0
+25a6d0
+25c0d0
+25d0d0
+25d6e0
+5b0e0
+5c0e0
+25a4e0
+25aae0
+25b0e0
+25c6e0
+4072e0
+2712e0
+25cef0
+26e900
+92710
+4fb10
+4d110
+265310
+26dd20
+259f20
+4d520
+24a520
+59920
+54730
+55530
+24b530
+252930
+26f130
+40e330
+26c140
+15b350
+1cd750
+25d550
+265750
+249f60
+55f70
+25a370
+25cf70
+270970
+4d780
+52780
+57580
+1cc380
+25b180
+56b90
+5c790
+259190
+25e590
+1353a0
+25fda0
+25a7b0
+2497b0
+259db0
+53bd0
+545d0
+917d0
+2615d0
+1ccfe0
+1d2be0
+26e1e0
+2703e0
+4f7f0
+507f0
+72bf0
+254bf0
+3	M	s:tailles	5
+s:sh	1c
+s:sw	3f
+s:sb	c
+s:lb	15
+s:lh	1a
+2	D	i:2	4
+3	X	s:n	4
+3	X	s:w	4
+3	SV	s:routines	4
+4d270
+40d410
+408480
+1353a0
+3	M	s:tailles	1
+s:sh	4
+2	D	i:62	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+4d520
+907f0
+136d70
+24b670
+24b9f0
+24bb30
+3	M	s:tailles	1
+s:lb	6
+2	D	i:ad	4
+3	X	s:n	4
+3	X	s:w	4
+3	SV	s:routines	4
+4d950
+260390
+1354e0
+2717d0
+3	M	s:tailles	1
+s:sb	4
+2	D	i:c218	4
+3	X	s:n	18
+3	X	s:w	2
+3	SV	s:routines	13
+404100
+405d40
+406ea0
+402510
+4dd90
+907f0
+25f570
+402930
+403250
+403770
+404ad0
+405430
+40d410
+3	M	s:tailles	2
+s:lh	16
+s:sh	2
+2	D	i:c217	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+4dd90
+3	M	s:tailles	1
+s:lb	1
+2	D	i:c210	4
+3	X	s:n	9
+3	X	s:w	3
+3	SV	s:routines	3
+4dd90
+404100
+907f0
+3	M	s:tailles	2
+s:lh	6
+s:sh	3
+2	D	i:a4	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	6
+134940
+134830
+60b50
+4dd90
+260390
+407990
+3	M	s:tailles	2
+s:lb	3
+s:sb	3
+2	D	i:c212	4
+3	X	s:n	9
+3	X	s:w	3
+3	SV	s:routines	3
+4dd90
+404100
+907f0
+3	M	s:tailles	2
+s:lh	6
+s:sh	3
+2	D	i:a5	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	4
+4dd90
+4e310
+60b50
+26c140
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:c314	4
+3	X	s:n	19
+3	X	s:w	9
+3	SV	s:routines	9
+25ed20
+40f220
+254440
+26f680
+4dd90
+25f570
+260390
+263c10
+40d410
+3	M	s:tailles	2
+s:sh	9
+s:lh	10
+2	D	i:c39e	4
+3	X	s:n	13
+3	X	s:w	2
+3	SV	s:routines	16
+4e600
+250700
+24f020
+2489e0
+135b60
+251320
+269340
+26d600
+2712e0
+4dd90
+1bd170
+136970
+222f10
+2615d0
+2631d0
+271bf0
+3	M	s:tailles	2
+s:sb	2
+s:lb	11
+2	D	i:c39f	4
+3	X	s:n	7
+3	X	s:w	5
+3	SV	s:routines	5
+4e600
+24f9d0
+4e490
+4dd90
+2615d0
+3	M	s:tailles	2
+s:sb	5
+s:lb	2
+2	D	i:c214	4
+3	X	s:n	c
+3	X	s:w	2
+3	SV	s:routines	8
+4e1c0
+4e600
+907f0
+402850
+4e310
+404ad0
+405350
+40d410
+3	M	s:tailles	2
+s:lh	a
+s:sh	2
+2	D	i:c320	4
+3	X	s:n	1c
+3	X	s:w	2
+3	SV	s:routines	23
+40c680
+410800
+411100
+4e490
+40bd90
+40c790
+411190
+40c720
+40c9a0
+40f6a0
+2524b0
+40c430
+4104b0
+40b250
+40c3d0
+40c550
+40f550
+4105d0
+40c5d0
+41abd0
+40c0e0
+4106e0
+4e770
+3	M	s:tailles	2
+s:sb	2
+s:lb	1a
+2	D	i:a7	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+4ea30
+3	M	s:tailles	1
+s:sb	1
+2	D	i:8b	4
+3	X	s:n	12
+3	X	s:w	7
+3	SV	s:routines	17
+cc300
+135040
+220e60
+d31e0
+1353a0
+252e60
+266280
+26cb60
+4f430
+252930
+253b50
+260390
+2679d0
+268ab0
+26dfb0
+2717d0
+40b250
+3	M	s:tailles	2
+s:sb	7
+s:lb	b
+2	D	i:b4	4
+3	X	s:n	3f
+3	X	s:w	5
+3	SV	s:routines	60
+ae500
+1a8a80
+12ca80
+12b480
+1ace80
+1b7900
+26d600
+28c780
+ecc10
+179f90
+1b1d90
+1b8910
+1c0290
+1c2290
+1c4290
+260390
+265310
+392210
+315c20
+a7ba0
+6f1a0
+ebfa0
+1149a0
+125620
+127020
+1ad3a0
+1b6a20
+1d7420
+4f430
+123bb0
+1accb0
+1b8730
+1c0930
+1c68b0
+2654b0
+1d93a0
+12ab40
+12c1c0
+ebd50
+103250
+114a50
+1339d0
+1c2150
+1c23d0
+2717d0
+114b60
+1220e0
+127860
+174060
+1bfae0
+28b860
+31a260
+e1df0
+1243f0
+12f970
+1a82f0
+1be7f0
+320770
+3766f0
+38e5f0
+3	M	s:tailles	2
+s:sb	5
+s:lb	3a
+2	D	i:b8	4
+3	X	s:n	1b
+3	X	s:w	b
+3	SV	s:routines	25
+24a800
+26f680
+17bc90
+260390
+137620
+17c420
+17ce20
+17e3a0
+17e9a0
+4f430
+26b0b0
+26dfb0
+2705b0
+135040
+24a8c0
+26c140
+24ae40
+2615d0
+270050
+2717d0
+17e0e0
+1961e0
+2712e0
+17c970
+26f9f0
+3	M	s:tailles	2
+s:sb	b
+s:lb	10
+2	D	i:ba	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	3
+4f430
+260390
+2717d0
+3	M	s:tailles	1
+s:sb	3
+2	D	i:104	4
+3	X	s:n	7
+3	X	s:w	5
+3	SV	s:routines	7
+24ae40
+134940
+4f430
+24af70
+134830
+260390
+2717d0
+3	M	s:tailles	2
+s:sb	5
+s:lb	2
+2	D	i:12d	4
+3	X	s:n	a
+3	X	s:w	9
+3	SV	s:routines	9
+4f430
+261210
+260090
+260390
+2615d0
+268290
+268ab0
+2705b0
+2717d0
+3	M	s:tailles	2
+s:sb	9
+s:lb	1
+2	D	i:168	4
+3	X	s:n	1a
+3	X	s:w	3
+3	SV	s:routines	26
+182e00
+257700
+262680
+222f10
+260390
+272b90
+24f020
+2569a0
+261120
+4f430
+91730
+23d230
+24ea30
+251ec0
+260d40
+2732c0
+91cd0
+2615d0
+135b60
+2489e0
+2553e0
+25c6e0
+2712e0
+1bcd70
+254bf0
+262e70
+3	M	s:tailles	2
+s:sb	3
+s:lb	17
+2	D	i:130	4
+3	X	s:n	8
+3	X	s:w	6
+3	SV	s:routines	7
+4f430
+cfc10
+24ea30
+139ad0
+24f9d0
+260390
+2717d0
+3	M	s:tailles	2
+s:sb	6
+s:lb	2
+2	D	i:e0	4
+3	X	s:n	11
+3	X	s:w	11
+3	SV	s:routines	16
+15ae80
+266a00
+266420
+266560
+2651c0
+266f20
+267820
+40cfc0
+4f430
+2615d0
+260390
+917d0
+265750
+267b70
+26e2f0
+26f9f0
+3	M	s:tailles	1
+s:sw	11
+2	D	i:8c24	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+4f430
+3	M	s:tailles	1
+s:lb	1
+2	D	i:8c25	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+4f430
+3	M	s:tailles	1
+s:lb	1
+2	D	i:8c26	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+4f430
+3	M	s:tailles	1
+s:lb	1
+2	D	i:8c27	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+4f430
+3	M	s:tailles	1
+s:lb	1
+2	D	i:c0b8	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+4f430
+3	M	s:tailles	1
+s:lb	1
+2	D	i:c0b9	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+4f430
+3	M	s:tailles	1
+s:lb	1
+2	D	i:c38c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+4f430
+4fc30
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:10a	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+4f430
+271280
+268ab0
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:a	4
+3	X	s:n	32
+3	X	s:w	1b
+3	SV	s:routines	24
+50d80
+58f00
+408480
+4f990
+92710
+15b610
+25e590
+40d410
+58ba0
+15b2a0
+24b2a0
+25fda0
+24a630
+252930
+254440
+5a7e0
+24b1e0
+24b460
+252e60
+25aae0
+4f7f0
+507f0
+24b0f0
+24b370
+3	M	s:tailles	4
+s:sh	1a
+s:lh	13
+s:sb	1
+s:lb	4
+2	D	i:6eb9	4
+3	X	s:n	2c
+3	X	s:w	3
+3	SV	s:routines	39
+cc680
+1b9480
+25b180
+50290
+56b90
+58390
+5c790
+196810
+1b4510
+39a390
+52ea0
+cd5a0
+25ed20
+2592b0
+54e30
+5ccb0
+169fb0
+3ac9b0
+59ec0
+d97c0
+1bbe40
+2d8fc0
+53bd0
+16f450
+179450
+17f0d0
+17f550
+253b50
+25e750
+32dfd0
+3ace50
+5b0e0
+5c0e0
+cd6e0
+1961e0
+2b0b60
+55f70
+1bcd70
+2168f0
+3	M	s:tailles	2
+s:lb	29
+s:sb	3
+2	D	i:8c52	4
+3	X	s:n	a
+3	X	s:w	4
+3	SV	s:routines	4
+506b0
+51250
+50d80
+51480
+3	M	s:tailles	2
+s:sh	4
+s:lh	6
+2	D	i:b	4
+3	X	s:n	f
+3	X	s:w	6
+3	SV	s:routines	15
+50d80
+1cddc0
+1cb360
+51480
+10cfc0
+24ae00
+25fda0
+506b0
+51250
+516b0
+10bb10
+1ca330
+1ce070
+1ce7f0
+1cebf0
+3	M	s:tailles	2
+s:sb	6
+s:lb	9
+2	D	i:c38e	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+506b0
+507f0
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:8d16	4
+3	X	s:n	8
+3	X	s:w	2
+3	SV	s:routines	8
+50b00
+1ccba0
+50b40
+1cbe80
+1cb7e0
+54b30
+5fb70
+58390
+3	M	s:tailles	2
+s:sb	2
+s:lb	6
+2	D	i:8c28	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	6
+50b80
+50c40
+50d80
+51480
+51250
+50cb0
+3	M	s:tailles	2
+s:lh	3
+s:sh	3
+2	D	i:8c2c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+50b80
+50d80
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:8c2a	4
+3	X	s:n	a
+3	X	s:w	3
+3	SV	s:routines	9
+50d80
+51f00
+59920
+55440
+51480
+59d20
+54b30
+51250
+55dd0
+3	M	s:tailles	2
+s:sh	3
+s:lh	7
+2	D	i:8c30	4
+3	X	s:n	27
+3	X	s:w	f
+3	SV	s:routines	27
+50d80
+54d00
+52780
+51480
+57580
+53210
+56b90
+59d90
+520a0
+53aa0
+59920
+54e30
+5afb0
+5bfb0
+55e40
+59ec0
+51250
+52650
+53bd0
+57450
+530e0
+56a60
+5b0e0
+5c0e0
+51f70
+55f70
+597f0
+3	M	s:tailles	3
+s:sw	3
+s:lb	18
+s:sb	c
+2	D	i:8c34	4
+3	X	s:n	19
+3	X	s:w	f
+3	SV	s:routines	10
+50d80
+55440
+5ace0
+51480
+534c0
+5ba80
+53210
+51250
+55530
+5ccb0
+3	M	s:tailles	3
+s:sw	3
+s:sb	c
+s:lb	a
+2	D	i:8c2e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+50d80
+57a90
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:8c38	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	5
+50d80
+57960
+58260
+58390
+57a90
+3	M	s:tailles	3
+s:sw	1
+s:lb	4
+s:sb	2
+2	D	i:8c3c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+50d80
+3	M	s:tailles	1
+s:sw	1
+2	D	i:8c40	4
+3	X	s:n	10
+3	X	s:w	e
+3	SV	s:routines	15
+52440
+59ca0
+55440
+5a760
+570a0
+5c720
+516b0
+52b30
+53670
+545d0
+54730
+54930
+56610
+578d0
+5ba10
+3	M	s:tailles	2
+s:lh	2
+s:sh	e
+2	D	i:8c42	4
+3	X	s:n	e
+3	X	s:w	d
+3	SV	s:routines	14
+52440
+59ca0
+55440
+5a760
+570a0
+5c720
+516b0
+52b30
+53670
+545d0
+54930
+56610
+578d0
+5ba10
+3	M	s:tailles	2
+s:lh	1
+s:sh	d
+2	D	i:c15c	4
+3	X	s:n	d
+3	X	s:w	c
+3	SV	s:routines	13
+52780
+59920
+57580
+520a0
+59ec0
+5b0e0
+5c0e0
+516b0
+53210
+54930
+54e30
+55f70
+56b90
+3	M	s:tailles	2
+s:lw	1
+s:sw	c
+2	D	i:c160	4
+3	X	s:n	1f
+3	X	s:w	1e
+3	SV	s:routines	30
+59e00
+5ba80
+53b10
+5ba10
+56610
+5c790
+570a0
+59ca0
+5b020
+5c020
+5c720
+516b0
+52b30
+52bb0
+55eb0
+52440
+526c0
+55440
+574c0
+56ad0
+53150
+578d0
+51fe0
+59860
+5a760
+5a7e0
+5ace0
+53670
+54570
+54d70
+3	M	s:tailles	2
+s:lw	1
+s:sw	1e
+2	D	i:c164	4
+3	X	s:n	10
+3	X	s:w	f
+3	SV	s:routines	15
+51fe0
+574c0
+59860
+59e00
+526c0
+5a7e0
+5ace0
+5b020
+5c020
+516b0
+53b10
+53150
+54d70
+55eb0
+56ad0
+3	M	s:tailles	2
+s:lw	1
+s:sw	f
+2	D	i:8c4a	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+516b0
+581e0
+58b30
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:8c4c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+516b0
+581e0
+58b30
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:c168	4
+3	X	s:n	7
+3	X	s:w	6
+3	SV	s:routines	7
+581e0
+59060
+58b30
+516b0
+582d0
+579d0
+591f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	6
+2	D	i:c16c	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+516b0
+579d0
+582d0
+3	M	s:tailles	2
+s:lw	1
+s:sw	3
+2	D	i:8c31	4
+3	X	s:n	7b
+3	X	s:w	39
+3	SV	s:routines	62
+52780
+54500
+59e00
+5ba80
+57580
+53210
+53b10
+56610
+56b90
+5ba10
+5c790
+520a0
+52aa0
+565a0
+566a0
+570a0
+57120
+59920
+59ca0
+5b020
+5b9a0
+5c020
+524b0
+523b0
+52b30
+52bb0
+54730
+54e30
+55530
+55eb0
+57030
+5c6b0
+52440
+526c0
+52e40
+534c0
+553c0
+55440
+574c0
+59ec0
+53150
+53bd0
+545d0
+56ad0
+578d0
+5ccb0
+5c720
+51fe0
+525e0
+536e0
+537e0
+59860
+5a760
+5a7e0
+5ace0
+5b0e0
+5c0e0
+53670
+54570
+54d70
+55f70
+5a6f0
+3	M	s:tailles	2
+s:lb	42
+s:sb	39
+2	D	i:dd	4
+3	X	s:n	c
+3	X	s:w	1
+3	SV	s:routines	10
+520a0
+1cb7e0
+52780
+536e0
+1c8ec0
+54e30
+54730
+1c8d90
+1cb4d0
+1cd750
+3	M	s:tailles	2
+s:lb	b
+s:sb	1
+2	D	i:8d15	4
+3	X	s:n	c
+3	X	s:w	8
+3	SV	s:routines	7
+520a0
+52780
+536e0
+54730
+57a90
+5d4d0
+5d590
+3	M	s:tailles	2
+s:sb	8
+s:lb	4
+2	D	i:8d14	4
+3	X	s:n	7
+3	X	s:w	5
+3	SV	s:routines	7
+520a0
+52780
+536e0
+54730
+57a90
+5f630
+5f7b0
+3	M	s:tailles	2
+s:sb	5
+s:lb	2
+2	D	i:8c81	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	8
+520a0
+52780
+55aa0
+57580
+55710
+55810
+55d10
+5f9b0
+3	M	s:tailles	2
+s:sb	5
+s:lb	3
+2	D	i:8c54	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+520a0
+5ee20
+52780
+59ec0
+5e770
+3	M	s:tailles	2
+s:sw	3
+s:lw	2
+2	D	i:8c58	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+520a0
+5ee20
+52780
+59ec0
+5e770
+3	M	s:tailles	2
+s:sw	3
+s:lw	2
+2	D	i:8c5c	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+520a0
+5ee20
+52780
+59ec0
+5e770
+3	M	s:tailles	2
+s:sw	3
+s:lw	2
+2	D	i:8c60	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+520a0
+5ee20
+52780
+59ec0
+5e770
+3	M	s:tailles	2
+s:sw	3
+s:lw	2
+2	D	i:16	4
+3	X	s:n	52
+3	X	s:w	26
+3	SV	s:routines	53
+57580
+24a200
+5ba80
+25a600
+52d10
+56b90
+1d1910
+1d2110
+25d410
+566a0
+191e20
+1922a0
+1ccba0
+1cdea0
+1cf820
+249820
+25ed20
+249aa0
+524b0
+54730
+52bb0
+54b30
+54e30
+5ccb0
+1c8b30
+252930
+2592b0
+1863c0
+1cbcc0
+25c240
+186fd0
+92a50
+1cb4d0
+1cee50
+25a6d0
+25c0d0
+25d0d0
+25d550
+25e750
+536e0
+5ace0
+1c8960
+249f60
+24a060
+24a160
+252e60
+55f70
+1caf70
+1ce7f0
+2542f0
+25cef0
+25cf70
+25f570
+3	M	s:tailles	4
+s:lb	18
+s:sb	10
+s:sh	16
+s:lh	14
+2	D	i:8c7c	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	4
+524b0
+52b30
+5ee20
+5a7e0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:8c35	4
+3	X	s:n	25
+3	X	s:w	10
+3	SV	s:routines	16
+534c0
+570a0
+566a0
+536e0
+57120
+57860
+5a760
+5a7e0
+5ace0
+5ba80
+54730
+54570
+545d0
+56610
+59c30
+5c790
+3	M	s:tailles	2
+s:lb	15
+s:sb	10
+2	D	i:8c36	4
+3	X	s:n	b
+3	X	s:w	6
+3	SV	s:routines	5
+537e0
+566a0
+56610
+54930
+54b30
+3	M	s:tailles	4
+s:sb	4
+s:lb	4
+s:lh	1
+s:sh	2
+2	D	i:17	4
+3	X	s:n	18
+3	X	s:w	9
+3	SV	s:routines	20
+5ba80
+1cbe80
+55980
+556a0
+1ccba0
+1cdea0
+1cf820
+54b30
+54e30
+11fe30
+15b530
+186630
+18e530
+252930
+18e440
+254440
+187350
+1d0b50
+1cb7e0
+252e60
+3	M	s:tailles	2
+s:sb	9
+s:lb	f
+2	D	i:8c80	4
+3	X	s:n	c
+3	X	s:w	6
+3	SV	s:routines	6
+55c60
+5f900
+55aa0
+55d10
+559f0
+5f9b0
+3	M	s:tailles	3
+s:lb	6
+s:sb	3
+s:sh	3
+2	D	i:8c37	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	2
+566a0
+56990
+3	M	s:tailles	2
+s:lb	3
+s:sb	2
+2	D	i:8c39	4
+3	X	s:n	1a
+3	X	s:w	c
+3	SV	s:routines	14
+581e0
+58f00
+58ce0
+58ba0
+58ac0
+59060
+579d0
+58170
+57a90
+582d0
+58390
+58b30
+591f0
+592d0
+3	M	s:tailles	2
+s:lb	e
+s:sb	c
+2	D	i:6eba	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	4
+57a90
+cd860
+cd9a0
+cc7d0
+3	M	s:tailles	2
+s:lb	4
+s:sb	3
+2	D	i:12	4
+3	X	s:n	7b
+3	X	s:w	36
+3	SV	s:routines	63
+58f00
+f2c00
+180d80
+180200
+f8500
+19d780
+25a200
+25a600
+26cd00
+58390
+190990
+191010
+198f90
+19c990
+235290
+235590
+235c90
+25a090
+26c010
+10cf20
+182220
+181f20
+19cc20
+259f20
+25ae20
+25ed20
+26d5a0
+180ab0
+1813b0
+197ab0
+199b30
+19a1b0
+252930
+2592b0
+259db0
+25a7b0
+25a9b0
+199140
+1999c0
+19a3c0
+26bdc0
+26c140
+19bdd0
+25a6d0
+25c0d0
+257ee0
+25c6e0
+f04e0
+58ce0
+10c460
+1810e0
+1895e0
+1977e0
+19ace0
+19b960
+252e60
+70a70
+10bff0
+183370
+19aef0
+235970
+25a370
+26e2f0
+3	M	s:tailles	4
+s:sh	13
+s:lh	a
+s:lb	3b
+s:sb	23
+2	D	i:8c83	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	4
+58390
+58f00
+5fb70
+59060
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:8c64	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+58390
+5e610
+5ebd0
+3	M	s:tailles	2
+s:sw	1
+s:lw	2
+2	D	i:8c68	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+58390
+5e610
+5ebd0
+3	M	s:tailles	2
+s:sw	1
+s:lw	2
+2	D	i:8c6c	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+58390
+5e610
+5ebd0
+3	M	s:tailles	2
+s:sw	1
+s:lw	2
+2	D	i:8c70	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	4
+58390
+5e610
+59060
+5ebd0
+3	M	s:tailles	2
+s:sw	2
+s:lw	2
+2	D	i:8c78	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+59060
+5e610
+5ebd0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:8c7e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+59060
+5ebd0
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:8c3d	4
+3	X	s:n	e
+3	X	s:w	4
+3	SV	s:routines	2
+591f0
+592d0
+3	M	s:tailles	2
+s:sb	4
+s:lb	a
+2	D	i:15	4
+3	X	s:n	1a
+3	X	s:w	9
+3	SV	s:routines	17
+5a7e0
+11f820
+191e20
+5ba80
+11ff20
+1cf160
+1cf820
+1d1d40
+1d3740
+5ccb0
+11f4d0
+15b350
+1b3750
+1d1530
+1d6190
+25ebd0
+25f070
+3	M	s:tailles	2
+s:lb	11
+s:sb	9
+2	D	i:8c76	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+5e770
+5ee20
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8c7a	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+5ebd0
+5ee20
+5f3b0
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8c79	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+5ebd0
+3	M	s:tailles	1
+s:lb	2
+2	D	i:8c75	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+5ebd0
+5ee20
+5efb0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:8c77	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+5ee20
+3	M	s:tailles	1
+s:lb	2
+2	D	i:8c82	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+5fac0
+5fb70
+3	M	s:tailles	3
+s:lb	2
+s:sb	1
+s:sh	1
+2	D	i:97	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+60b50
+3	M	s:tailles	1
+s:sb	1
+2	D	i:98	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	5
+60b50
+2615d0
+260390
+407990
+2717d0
+3	M	s:tailles	2
+s:sb	2
+s:lb	3
+2	D	i:96	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+60b50
+907f0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:99	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+60b50
+13a980
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:9a	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+60b50
+ce000
+407990
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:9b	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+60b50
+3	M	s:tailles	1
+s:sb	1
+2	D	i:bc	4
+3	X	s:n	7
+3	X	s:w	1
+3	SV	s:routines	7
+13b4e0
+23a400
+139620
+60b50
+13b6b0
+1394f0
+239c30
+3	M	s:tailles	2
+s:sb	1
+s:lb	6
+2	D	i:92	4
+3	X	s:n	a
+3	X	s:w	1
+3	SV	s:routines	7
+15c400
+11ae40
+249aa0
+60b50
+15c770
+11b090
+25d0d0
+3	M	s:tailles	2
+s:sb	1
+s:lh	9
+2	D	i:ce	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+60b50
+3	M	s:tailles	1
+s:sb	1
+2	D	i:d2	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+60b50
+3	M	s:tailles	1
+s:sb	1
+2	D	i:d3	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+60b50
+3	M	s:tailles	1
+s:sb	1
+2	D	i:a0	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+408480
+260390
+60b50
+40f370
+407990
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:a2	4
+3	X	s:n	8
+3	X	s:w	3
+3	SV	s:routines	8
+24c540
+12ca80
+271280
+24bf30
+60b50
+260390
+268ab0
+407990
+3	M	s:tailles	2
+s:sb	3
+s:lb	5
+2	D	i:a3	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	7
+189000
+257ee0
+408480
+60b50
+260390
+253290
+407990
+3	M	s:tailles	2
+s:sb	3
+s:lb	4
+2	D	i:de	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	4
+60b50
+260390
+407990
+2615d0
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:df	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	4
+60b50
+407990
+2705b0
+2615d0
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:f1	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+60dc0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:f0	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+60dc0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:a3c0	4
+3	X	s:n	7
+3	X	s:w	1
+3	SV	s:routines	6
+60dc0
+15c280
+15ae80
+92dc0
+1201c0
+93170
+3	M	s:tailles	2
+s:sh	1
+s:lh	6
+2	D	i:b5	4
+3	X	s:n	33
+3	X	s:w	e
+3	SV	s:routines	30
+f0000
+1b7900
+1a8a80
+1a2980
+16ca80
+61010
+d3610
+10c890
+185990
+1b1d90
+1b8910
+1c0290
+1ec210
+210710
+e0ca0
+ebfa0
+fd620
+1b6a20
+1db3a0
+1b8730
+1c0930
+1dacb0
+ebd50
+103250
+1196e0
+1a2b60
+1bfae0
+d38f0
+1a82f0
+1be7f0
+3	M	s:tailles	2
+s:sb	e
+s:lb	25
+2	D	i:124	4
+3	X	s:n	4f
+3	X	s:w	11
+3	SV	s:routines	72
+a1280
+b5600
+fa280
+c7800
+acc80
+157300
+27f300
+38b080
+b5910
+c7e10
+24e490
+261210
+27fc10
+2d8510
+2dac90
+312210
+313890
+3f2990
+2a01d0
+ad020
+24e2a0
+24e5a0
+3713a0
+39ae20
+3f17a0
+33a6b0
+39b5b0
+92030
+15acb0
+1736b0
+173930
+24e330
+24e7b0
+268ab0
+2c32b0
+2fdfb0
+a0540
+92840
+148240
+26bdc0
+2da940
+2e7c40
+2fc8c0
+34e1c0
+39ba40
+3da140
+3e62d0
+6aed0
+1483d0
+1633d0
+1734d0
+173b50
+2615d0
+265750
+2717d0
+27ebd0
+b52e0
+1bbbe0
+1c0f60
+2712e0
+272360
+2afce0
+2c1be0
+3d7b50
+a0f70
+14b670
+1bba70
+322af0
+3aeb70
+3b70f0
+39b130
+37bdd0
+3	M	s:tailles	2
+s:lb	3e
+s:sb	11
+2	D	i:125	4
+3	X	s:n	79
+3	X	s:w	9
+3	SV	s:routines	120
+137a00
+e9210
+103410
+157e10
+1da010
+415a10
+137820
+24d420
+158030
+177e30
+137c40
+de640
+e0240
+e2a40
+152640
+24ae40
+419040
+106850
+13ca50
+158250
+415450
+d6060
+d6460
+e1660
+e1a60
+d8e70
+1c3070
+418c70
+419e70
+1b8080
+da090
+e3c90
+ec890
+137e90
+413a90
+1528a0
+4176a0
+dc2b0
+ef2b0
+fdcb0
+ffeb0
+103eb0
+1e24b0
+268ab0
+ffcc0
+d46c0
+e12c0
+e2cc0
+ef0c0
+1026c0
+db4d0
+df4d0
+ea2d0
+dc4e0
+4144f0
+e86f0
+e9af0
+1042f0
+1780f0
+24b0f0
+1b7900
+137710
+dc910
+1b8910
+154110
+100320
+109d20
+24a520
+17b330
+d8730
+1b8730
+d6730
+1a9d30
+178940
+103b40
+419340
+108750
+de750
+dbd50
+101b50
+101d50
+103950
+6d960
+e8560
+100f60
+411d60
+104d80
+152380
+152f80
+1ac580
+de990
+109590
+e63a0
+1073a0
+155ba0
+4123a0
+e6db0
+1b6db0
+4119b0
+4149b0
+6c7c0
+e27c0
+17adc0
+2651c0
+4131c0
+6c1d0
+dafd0
+e03d0
+2615d0
+2717d0
+4189d0
+1019e0
+edfe0
+1009e0
+1021e0
+1579e0
+df5f0
+e57f0
+107df0
+26f9f0
+3	M	s:tailles	2
+s:lb	70
+s:sb	9
+2	D	i:12a	4
+3	X	s:n	15
+3	X	s:w	5
+3	SV	s:routines	21
+fd910
+1ab610
+1dc910
+1da010
+6f1a0
+16cf20
+16ddb0
+1e24b0
+2705b0
+1d70c0
+1d8f40
+2717d0
+265750
+1ac4d0
+1ddd50
+2615d0
+179be0
+1aae60
+220760
+26e1e0
+1c3070
+3	M	s:tailles	2
+s:lb	10
+s:sb	5
+2	D	i:a3bc	4
+3	X	s:n	e
+3	X	s:w	1
+3	SV	s:routines	13
+71b60
+1b3140
+15bf60
+15ae80
+15bbc0
+1b3920
+1b4a60
+1b4e20
+1b5300
+120250
+1b26f0
+1b2a50
+1b4510
+3	M	s:tailles	2
+s:lw	d
+s:sw	1
+2	D	i:c0bc	4
+3	X	s:n	16
+3	X	s:w	3
+3	SV	s:routines	18
+1cbcc0
+1ee7e0
+1fe920
+213780
+10a9c0
+220260
+4113a0
+4114a0
+738b0
+1cb4d0
+1827d0
+1e1cb0
+20e410
+20fe90
+2136f0
+21b3d0
+21b6f0
+4112d0
+3	M	s:tailles	2
+s:lw	13
+s:sw	3
+2	D	i:8e34	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+76d80
+77e80
+77bf0
+3	M	s:tailles	2
+s:sw	3
+s:lw	3
+2	D	i:180	4
+3	X	s:n	34
+3	X	s:w	1a
+3	SV	s:routines	26
+8ca80
+8df80
+8ce80
+8cc80
+8c110
+8c310
+8c510
+8c710
+8c9a0
+8bdb0
+8c5c0
+8cbc0
+8cdc0
+8cfc0
+8d7c0
+8d840
+8d8c0
+8d940
+8bfd0
+8c1d0
+8c3d0
+8d5d0
+8bc60
+8c860
+8bef0
+8d070
+3	M	s:tailles	2
+s:sb	1a
+s:lb	1a
+2	D	i:30	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+907f0
+ced70
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:68	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:60	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:64	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:67	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:58	4
+3	X	s:n	9
+3	X	s:w	1
+3	SV	s:routines	4
+907f0
+260210
+260390
+24b9f0
+3	M	s:tailles	2
+s:lh	8
+s:sb	1
+2	D	i:5a	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	3
+907f0
+260210
+24b9f0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:5c	4
+3	X	s:n	9
+3	X	s:w	1
+3	SV	s:routines	4
+907f0
+260210
+24bb30
+260390
+3	M	s:tailles	2
+s:lh	8
+s:sb	1
+2	D	i:5e	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	3
+907f0
+260210
+24bb30
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:59	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:5d	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:1c4	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:1c5	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c204	4
+3	X	s:n	4
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	2
+s:sh	1
+s:lh	3
+2	D	i:c206	4
+3	X	s:n	4
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	2
+s:sh	1
+s:lh	3
+2	D	i:c208	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	2
+907f0
+404100
+3	M	s:tailles	2
+s:sh	3
+s:lh	3
+2	D	i:c20c	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	2
+s:lh	2
+s:sh	3
+2	D	i:c20a	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	2
+907f0
+404100
+3	M	s:tailles	2
+s:sh	3
+s:lh	3
+2	D	i:c20e	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	2
+s:lh	2
+s:sh	3
+2	D	i:c21a	4
+3	X	s:n	19
+3	X	s:w	2
+3	SV	s:routines	10
+405d40
+406ea0
+402510
+907f0
+402930
+403250
+403770
+404ad0
+405430
+40d410
+3	M	s:tailles	2
+s:sh	2
+s:lh	17
+2	D	i:c216	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+907f0
+25f570
+404ad0
+3	M	s:tailles	2
+s:sh	2
+s:lh	4
+2	D	i:1c0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+907f0
+3	M	s:tailles	1
+s:sw	1
+2	D	i:4a	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+91490
+ced70
+154280
+3	M	s:tailles	2
+s:lh	1
+s:sh	3
+2	D	i:4e	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+91490
+ced70
+219590
+155eb0
+3	M	s:tailles	2
+s:lh	1
+s:sh	4
+2	D	i:52	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+91490
+ced70
+1586c0
+3	M	s:tailles	2
+s:lh	1
+s:sh	3
+2	D	i:4c	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+91490
+ced70
+154280
+3	M	s:tailles	2
+s:lh	1
+s:sh	3
+2	D	i:50	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+91490
+ced70
+155eb0
+3	M	s:tailles	2
+s:lh	1
+s:sh	3
+2	D	i:54	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+91490
+ced70
+1586c0
+3	M	s:tailles	2
+s:lh	1
+s:sh	3
+2	D	i:56	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+91490
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:85	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+91700
+3	M	s:tailles	1
+s:sb	1
+2	D	i:123	4
+3	X	s:n	6a
+3	X	s:w	67
+3	SV	s:routines	101
+baa00
+3c9410
+36da20
+3a5820
+3a5c20
+32d430
+337630
+3a7a30
+bca40
+2ad640
+3a4040
+336650
+34e450
+2fbc60
+34c460
+382e60
+3c4460
+3f1060
+2ab870
+2f0070
+3a7c70
+2e5680
+399280
+2bd290
+3aba90
+2cd4a0
+3192a0
+3abea0
+2b8ab0
+2c02b0
+3336b0
+33bcb0
+3a3cb0
+3ebab0
+2ab0c0
+2efec0
+2dc4d0
+3aa2d0
+2f0ce0
+2f12e0
+31cce0
+3494e0
+391cf0
+338ef0
+2aaaf0
+3ec6f0
+9f900
+28af00
+28b100
+2a8500
+37ab00
+385f00
+3aaf00
+2af110
+339f10
+35f910
+152d20
+2acf20
+319120
+2f1130
+34b930
+3eb930
+2bfd40
+36f140
+265750
+2c0f50
+35a150
+37b950
+35e760
+3efd60
+2ac960
+31cb70
+2ce170
+2a7570
+333f70
+9ff70
+1a0170
+bad80
+151b80
+327980
+332b80
+386380
+3a6180
+3aab80
+2dbb90
+2fc190
+36df90
+3a9990
+3569a0
+3ec9a0
+2a93b0
+34dbb0
+3a41b0
+b9bc0
+3a6dc0
+2615d0
+2717d0
+2e4bd0
+35e1f0
+bb3f0
+2a7df0
+3	M	s:tailles	2
+s:sb	67
+s:lb	3
+2	D	i:10b	4
+3	X	s:n	b1
+3	X	s:w	3e
+3	SV	s:routines	63
+26e900
+2daf00
+2fe280
+2e7e80
+322c00
+39be00
+3b7600
+3d8680
+3f2c80
+2b0990
+39b210
+39bc10
+3f2290
+234f20
+27ed20
+281420
+2a05a0
+2c3da0
+312320
+33aea0
+34e920
+38b520
+39b6a0
+27ffb0
+2705b0
+2d87b0
+33b230
+33b3b0
+37c8b0
+3e6630
+b53c0
+26c140
+360ec0
+370840
+3b72c0
+3d8340
+2717d0
+38b150
+34e450
+37c550
+3f2750
+a0650
+a1050
+ace50
+b56d0
+2615d0
+265750
+a1360
+2c4260
+313fe0
+2daa50
+3aede0
+33ab50
+b59f0
+235070
+2c1cf0
+2fcb70
+33aff0
+33b6f0
+371770
+33acd0
+39aef0
+3da3f0
+3	M	s:tailles	2
+s:lb	73
+s:sb	3e
+2	D	i:134	4
+3	X	s:n	37
+3	X	s:w	4
+3	SV	s:routines	53
+104d80
+152f80
+152380
+103410
+109590
+154110
+157e10
+260090
+265310
+413a90
+415a10
+100320
+1073a0
+109d20
+1528a0
+155ba0
+4123a0
+4176a0
+ffeb0
+103eb0
+158030
+2654b0
+4119b0
+4149b0
+b1ac0
+ffcc0
+1026c0
+103b40
+152640
+4131c0
+419040
+419340
+101b50
+101d50
+103950
+106850
+108750
+13ca50
+158250
+415450
+4189d0
+1009e0
+100f60
+1019e0
+1021e0
+1579e0
+411d60
+b40f0
+1042f0
+107df0
+4144f0
+418c70
+419e70
+3	M	s:tailles	2
+s:lb	33
+s:sb	4
+2	D	i:6e92	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c68a0
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6e94	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c68a0
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ea6	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c68a0
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec7	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c68a0
+cb670
+13df80
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea8	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c68a0
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec8	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c68a0
+13e020
+cb670
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e96	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ebf	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+cb670
+13e190
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e98	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec0	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+13e210
+cb670
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e9a	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec1	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+cb670
+13e290
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e9c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec2	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+13e310
+cb670
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e9e	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec3	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+cb670
+13e390
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea0	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec4	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+13e410
+cb670
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea2	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec5	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+cb670
+13e490
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea4	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c6d10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec6	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c6d10
+13e510
+cb670
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eaa	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c7800
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec9	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c7800
+13e620
+cb670
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eac	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c7800
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6eca	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c7800
+cb670
+13e6c0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eae	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c7800
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ecb	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c7800
+cb670
+13e760
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eb0	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c7800
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ecc	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+c7800
+13e800
+cb670
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eb2	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c7e10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ecd	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	4
+c7e10
+cb670
+13eb80
+13e970
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:6eb4	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+c7e10
+cb670
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ece	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	4
+c7e10
+13ea10
+13ec20
+cb670
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:110	4
+3	X	s:n	c
+3	X	s:w	2
+3	SV	s:routines	10
+caae0
+26cd00
+f8c20
+fc620
+ca990
+f5bd0
+f2fd0
+fbf30
+11bf90
+2615d0
+3	M	s:tailles	2
+s:lb	a
+s:sb	2
+2	D	i:bcd0	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+ca990
+caae0
+3	M	s:tailles	2
+s:sw	2
+s:lw	2
+2	D	i:bccc	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ca990
+3	M	s:tailles	1
+s:sw	1
+2	D	i:ae	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	2
+cb350
+1342a0
+3	M	s:tailles	4
+s:lh	1
+s:lb	2
+s:sb	1
+s:sh	1
+2	D	i:af	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+cb350
+3	M	s:tailles	1
+s:sb	1
+2	D	i:71b6	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+cb670
+40efe0
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:71ba	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+cb670
+40efe0
+14a3a0
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:71be	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+cb670
+40efe0
+14a3a0
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:c371	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+cb670
+40c0e0
+40c9a0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:8c	4
+3	X	s:n	21
+3	X	s:w	5
+3	SV	s:routines	32
+cc300
+193600
+195c80
+258a00
+136b80
+25b180
+194f90
+265310
+136420
+152d20
+194720
+25ae20
+d1a30
+2592b0
+2705b0
+2708b0
+40d130
+135040
+134940
+1951c0
+195740
+25c240
+1837d0
+193950
+2615d0
+182b60
+1941e0
+25c6e0
+270360
+136d70
+1b3e70
+25cef0
+3	M	s:tailles	2
+s:sb	5
+s:lb	1c
+2	D	i:6eb6	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+cc3d0
+ccd10
+ccfd0
+3	M	s:tailles	2
+s:sb	3
+s:lb	3
+2	D	i:6e84	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+cc3d0
+ccd10
+ccfd0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6eb7	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+cc3d0
+ccd10
+ccfd0
+3	M	s:tailles	2
+s:sb	3
+s:lb	3
+2	D	i:6e86	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+cc3d0
+ccd10
+ccfd0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6e8a	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+cc680
+cd5a0
+cd6e0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6e8c	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+cc7d0
+cd860
+cd9a0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6ebb	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	4
+cc920
+cdb20
+cdc60
+1a6c20
+3	M	s:tailles	2
+s:sb	3
+s:lb	4
+2	D	i:6e8e	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+cc920
+cdb20
+cdc60
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6e90	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+cca70
+cdee0
+cdda0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6eb8	4
+3	X	s:n	c
+3	X	s:w	3
+3	SV	s:routines	9
+ccbc0
+f2c00
+cd420
+f3260
+cd2e0
+f2dd0
+f2fd0
+268050
+268290
+3	M	s:tailles	2
+s:sb	3
+s:lb	9
+2	D	i:6e88	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+ccbc0
+cd420
+cd2e0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6e82	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	1
+ce000
+3	M	s:tailles	2
+s:lh	2
+s:sh	1
+2	D	i:6e80	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+ce000
+ce510
+ce660
+3	M	s:tailles	3
+s:lh	2
+s:sh	1
+s:sw	1
+2	D	i:bca4	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+ce930
+ce9b0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bca8	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+ce930
+ce9b0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcac	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+ce930
+ce9b0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcb0	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+ce930
+ce9b0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcb4	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+ce930
+ce9b0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcb8	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+ce930
+ce9b0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:38	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ced70
+3	M	s:tailles	1
+s:sh	1
+2	D	i:6a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ced70
+3	M	s:tailles	1
+s:sh	1
+2	D	i:88	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ced70
+3	M	s:tailles	1
+s:sb	1
+2	D	i:d1	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ced70
+3	M	s:tailles	1
+s:sb	1
+2	D	i:176	4
+3	X	s:n	8
+3	X	s:w	2
+3	SV	s:routines	8
+d1fa0
+24e240
+253840
+196d70
+19de90
+25ab90
+25c430
+26f9f0
+3	M	s:tailles	2
+s:lh	6
+s:sh	2
+2	D	i:10f	4
+3	X	s:n	1b
+3	X	s:w	1a
+3	SV	s:routines	26
+266a00
+26e900
+266210
+24a520
+266420
+266f20
+267820
+26f020
+2654b0
+268ab0
+26f130
+2705b0
+40e330
+24ae40
+24a8c0
+2615d0
+265750
+2717d0
+d31e0
+266560
+26e1e0
+2712e0
+24b0f0
+267b70
+26e2f0
+26f9f0
+3	M	s:tailles	2
+s:sb	1a
+s:lb	1
+2	D	i:143	4
+3	X	s:n	11
+3	X	s:w	4
+3	SV	s:routines	17
+f37c0
+26b7c0
+13ab60
+26e900
+f82c0
+2c3360
+272eb0
+f02b0
+f3cf0
+f47b0
+f40b0
+2615d0
+265750
+26b0b0
+2705b0
+2717d0
+272410
+3	M	s:tailles	2
+s:lb	d
+s:sb	4
+2	D	i:12c	4
+3	X	s:n	35
+3	X	s:w	18
+3	SV	s:routines	47
+f0880
+f4300
+f2180
+f2580
+f1f80
+f9b00
+f1b10
+f6610
+f7c90
+fd490
+268290
+270050
+f49a0
+f5120
+f6020
+f7e20
+f9d20
+26dd20
+f17b0
+f7fb0
+f86b0
+2705b0
+f0fc0
+f1c40
+f2240
+f26c0
+f4d40
+26c140
+2717d0
+f10d0
+f0cd0
+f1450
+f2850
+f45d0
+f8a50
+2615d0
+265750
+268050
+f04e0
+f6de0
+f74e0
+fb460
+f3cf0
+f6470
+f76f0
+f7970
+267b70
+3	M	s:tailles	2
+s:sb	18
+s:lb	1d
+2	D	i:13	4
+3	X	s:n	23
+3	X	s:w	c
+3	SV	s:routines	32
+f8500
+25a200
+1ba180
+19d780
+198f90
+199790
+25a090
+197a20
+19ae20
+19c7a0
+19cb20
+19d620
+259f20
+25ed20
+199b30
+1b8d30
+1b9cb0
+1ba5b0
+252930
+2592b0
+259db0
+199fc0
+1b93c0
+19bcd0
+25a6d0
+f04e0
+252e60
+257ee0
+19a2f0
+19aaf0
+19b770
+25a370
+3	M	s:tailles	2
+s:lb	17
+s:sb	c
+2	D	i:15a	4
+3	X	s:n	13
+3	X	s:w	2
+3	SV	s:routines	18
+f1c40
+26bdc0
+f3260
+26c140
+f26c0
+281380
+34e820
+3b7560
+3d85e0
+23d230
+234e90
+265750
+268ab0
+271bf0
+272410
+272eb0
+33b650
+37c7d0
+3	M	s:tailles	2
+s:lb	11
+s:sb	2
+2	D	i:161	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	4
+f1f80
+269340
+f3260
+f26c0
+3	M	s:tailles	2
+s:lb	3
+s:sb	5
+2	D	i:105	4
+3	X	s:n	14
+3	X	s:w	5
+3	SV	s:routines	19
+26e900
+fd910
+272410
+f8c20
+38ae30
+272eb0
+26b0b0
+26dfb0
+2705b0
+269340
+26b7c0
+26c140
+2717d0
+f2fd0
+f5bd0
+2615d0
+3f1850
+2453f0
+271bf0
+3	M	s:tailles	2
+s:lb	f
+s:sb	5
+2	D	i:120	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	5
+26cd00
+f8c20
+269340
+2722b0
+f5bd0
+3	M	s:tailles	2
+s:lb	4
+s:sb	4
+2	D	i:156	4
+3	X	s:n	4d
+3	X	s:w	5
+3	SV	s:routines	38
+122600
+123300
+122b80
+25b180
+12c700
+11bf90
+121290
+124510
+160290
+262990
+11e3a0
+122020
+128ba0
+249820
+fa0b0
+1222b0
+123bb0
+124330
+12a8b0
+12da30
+12db30
+12dc30
+1603b0
+12ab40
+132d40
+15fe40
+2631d0
+11d8e0
+1220e0
+12ce60
+128e70
+11ea70
+121bf0
+122a70
+12f970
+15fd70
+160170
+262e70
+3	M	s:tailles	2
+s:lh	48
+s:sh	5
+2	D	i:158	4
+3	X	s:n	4b
+3	X	s:w	5
+3	SV	s:routines	38
+124e80
+12c700
+127980
+25b180
+12b480
+11bf90
+126790
+160290
+262990
+11e3a0
+125620
+125fa0
+127020
+1277a0
+249820
+128ba0
+fa0b0
+125130
+125b30
+1260b0
+12da30
+12db30
+12dc30
+1603b0
+12ab40
+132d40
+15fe40
+2631d0
+11d8e0
+125560
+12ce60
+11ea70
+1257f0
+128e70
+12f970
+15fd70
+160170
+262e70
+3	M	s:tailles	2
+s:lh	46
+s:sh	5
+2	D	i:108	4
+3	X	s:n	10
+3	X	s:w	5
+3	SV	s:routines	8
+11d8e0
+26c140
+269340
+11e3a0
+265750
+260390
+2615d0
+2705b0
+3	M	s:tailles	2
+s:lb	b
+s:sb	5
+2	D	i:c32c	4
+3	X	s:n	29
+3	X	s:w	10
+3	SV	s:routines	16
+127020
+40fe40
+223b60
+410280
+40f6a0
+4106e0
+410800
+411100
+123bb0
+40f550
+40f890
+4104b0
+410550
+4105d0
+4106b0
+4107d0
+3	M	s:tailles	2
+s:lb	19
+s:sb	10
+2	D	i:170	4
+3	X	s:n	f
+3	X	s:w	7
+3	SV	s:routines	9
+148240
+1483d0
+12f970
+1736b0
+1734d0
+24e7b0
+2615d0
+265750
+2717d0
+3	M	s:tailles	2
+s:lb	8
+s:sb	7
+2	D	i:14a	4
+3	X	s:n	c
+3	X	s:w	3
+3	SV	s:routines	10
+269340
+134940
+134f60
+26c140
+26b7c0
+26e900
+134830
+1361f0
+26b0b0
+313890
+3	M	s:tailles	2
+s:lb	9
+s:sb	3
+2	D	i:106	4
+3	X	s:n	9
+3	X	s:w	2
+3	SV	s:routines	9
+134940
+2712e0
+24ae40
+134f60
+1371e0
+134830
+1361f0
+136d70
+4158b0
+3	M	s:tailles	2
+s:lb	7
+s:sb	2
+2	D	i:9ed8	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+135040
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:147	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	3
+1354e0
+261120
+260390
+3	M	s:tailles	1
+s:sb	3
+2	D	i:11f	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	5
+1361f0
+2615d0
+24a630
+260390
+2717d0
+3	M	s:tailles	2
+s:lb	2
+s:sb	4
+2	D	i:bcbc	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+139900
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:bcc0	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+13b160
+3	M	s:tailles	2
+s:lb	1
+s:sh	1
+2	D	i:118	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	5
+13d820
+13db40
+260210
+260090
+13b8b0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:14e	4
+3	X	s:n	7
+3	X	s:w	1
+3	SV	s:routines	6
+14a800
+151b80
+1594c0
+155810
+13b8b0
+1571f0
+3	M	s:tailles	2
+s:lh	6
+s:sh	1
+2	D	i:c174	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+13bb10
+13d530
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:c176	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	2
+13bb10
+13d530
+3	M	s:tailles	2
+s:sh	1
+s:lh	2
+2	D	i:11a	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	2
+13d820
+13db40
+3	M	s:tailles	2
+s:sh	4
+s:lh	2
+2	D	i:be54	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+1449f0
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:be58	4
+3	X	s:n	b
+3	X	s:w	5
+3	SV	s:routines	1
+1449f0
+3	M	s:tailles	4
+s:sw	1
+s:lh	4
+s:sh	4
+s:lw	2
+2	D	i:b24c	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+14f510
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:b248	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+14f510
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:b24a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+14f510
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:b1c4	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+151b80
+156b00
+1561d0
+3	M	s:tailles	2
+s:sb	1
+s:lb	2
+2	D	i:133	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+15c400
+265750
+269340
+26b7c0
+3	M	s:tailles	2
+s:lb	1
+s:sb	4
+2	D	i:132	4
+3	X	s:n	a
+3	X	s:w	6
+3	SV	s:routines	6
+15c400
+269340
+2712e0
+26b7c0
+265750
+272b90
+3	M	s:tailles	2
+s:lb	4
+s:sb	6
+2	D	i:b9	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+1603b0
+2615d0
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:162	4
+3	X	s:n	9
+3	X	s:w	6
+3	SV	s:routines	7
+2712e0
+2615d0
+265750
+1736b0
+1633d0
+1734d0
+2717d0
+3	M	s:tailles	2
+s:lb	3
+s:sb	6
+2	D	i:a3b9	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+164d00
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:a3a8	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	1
+1663f0
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:a3b4	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+1663f0
+3	M	s:tailles	1
+s:sw	1
+2	D	i:a3b7	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1663f0
+3	M	s:tailles	1
+s:lb	1
+2	D	i:a3aa	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+1663f0
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:a3b6	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1663f0
+3	M	s:tailles	1
+s:lb	1
+2	D	i:a3ac	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+1663f0
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:a3b5	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1663f0
+3	M	s:tailles	1
+s:lb	1
+2	D	i:9ea4	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	6
+17c420
+24a800
+17ce20
+17cc10
+17c190
+24a630
+3	M	s:tailles	2
+s:lh	4
+s:sh	2
+2	D	i:b350	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+17f0d0
+17f730
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:b354	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+17f0d0
+17f730
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:b358	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+17f0d0
+17f730
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:b35c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+17f0d0
+17f730
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:15f	4
+3	X	s:n	2a
+3	X	s:w	12
+3	SV	s:routines	41
+180200
+197400
+197500
+258a00
+24ae00
+198f90
+199790
+19c990
+25a690
+265310
+181320
+181f20
+19c7a0
+19d620
+24a520
+25ed20
+25ae20
+24b2a0
+180ab0
+1835b0
+19a1b0
+1999c0
+199fc0
+24a8c0
+24ae40
+25c0d0
+2615d0
+270050
+1810e0
+182160
+1977e0
+19ace0
+19b960
+25c6e0
+180cf0
+183370
+19aaf0
+19b770
+24b0f0
+24b370
+26f9f0
+3	M	s:tailles	2
+s:lb	18
+s:sb	12
+2	D	i:146	4
+3	X	s:n	19
+3	X	s:w	9
+3	SV	s:routines	12
+24a260
+266a00
+266f20
+266560
+249aa0
+1838d0
+25d0d0
+25cf70
+2615d0
+265750
+26e2f0
+2717d0
+3	M	s:tailles	2
+s:lb	10
+s:sb	9
+2	D	i:112	4
+3	X	s:n	9
+3	X	s:w	4
+3	SV	s:routines	8
+1847a0
+235f00
+195f20
+249aa0
+249820
+24a200
+24a260
+184910
+3	M	s:tailles	2
+s:lh	5
+s:sh	4
+2	D	i:b364	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+185fa0
+3	M	s:tailles	1
+s:sw	1
+2	D	i:b360	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+185fa0
+3	M	s:tailles	1
+s:sw	1
+2	D	i:172	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+196f50
+24f020
+25f570
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:b448	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+197c20
+3	M	s:tailles	1
+s:sh	1
+2	D	i:b44a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+197c20
+3	M	s:tailles	1
+s:sh	1
+2	D	i:b44c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+197c20
+3	M	s:tailles	1
+s:sh	1
+2	D	i:14c	4
+3	X	s:n	19
+3	X	s:w	8
+3	SV	s:routines	19
+19a800
+250700
+19a880
+260390
+19db10
+24f020
+251320
+261120
+19beb0
+24ea30
+269340
+2717d0
+19bc50
+24f9d0
+2615d0
+2631d0
+19b960
+250ef0
+19b4f0
+3	M	s:tailles	3
+s:lb	1
+s:lh	10
+s:sh	8
+2	D	i:13e	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	5
+1ae8b0
+39aa10
+2615d0
+265750
+2717d0
+3	M	s:tailles	2
+s:lb	3
+s:sb	5
+2	D	i:113	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+1b4320
+25cf70
+25d0d0
+3	M	s:tailles	2
+s:lb	1
+s:sb	2
+2	D	i:1a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+1ceac0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:b982	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b98a	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b992	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b99a	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b9a2	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b9aa	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b9b2	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	1
+2	D	i:b9ba	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	1
+2	D	i:b9c2	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	1
+2	D	i:b9ca	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	1
+2	D	i:b9d2	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+1d4310
+3	M	s:tailles	1
+s:lh	1
+2	D	i:b9da	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d5060
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b9e2	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d5060
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b9ea	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d5060
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b9f2	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d5060
+3	M	s:tailles	1
+s:lh	2
+2	D	i:b9fa	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d5060
+3	M	s:tailles	1
+s:lh	2
+2	D	i:ba02	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	1
+1d5060
+3	M	s:tailles	1
+s:lh	2
+2	D	i:ba10	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+20a480
+3	M	s:tailles	1
+s:sh	1
+2	D	i:ba12	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+20ae70
+3	M	s:tailles	1
+s:sh	1
+2	D	i:9edc	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	2
+220e60
+221680
+3	M	s:tailles	2
+s:lh	3
+s:sh	2
+2	D	i:9ee0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+221680
+3	M	s:tailles	1
+s:sw	1
+2	D	i:135	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+22b3a0
+265750
+233b60
+3	M	s:tailles	2
+s:lb	2
+s:sb	3
+2	D	i:c338	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	4
+22fd60
+40f550
+23d0a0
+40fe40
+3	M	s:tailles	2
+s:lh	3
+s:sh	3
+2	D	i:10c	4
+3	X	s:n	9
+3	X	s:w	4
+3	SV	s:routines	7
+271240
+269340
+271260
+4131c0
+23d230
+265750
+268ab0
+3	M	s:tailles	2
+s:lb	5
+s:sb	4
+2	D	i:163	4
+3	X	s:n	f
+3	X	s:w	c
+3	SV	s:routines	5
+2489e0
+269340
+2717d0
+2615d0
+26f9f0
+3	M	s:tailles	2
+s:sb	c
+s:lb	3
+2	D	i:178	4
+3	X	s:n	d
+3	X	s:w	b
+3	SV	s:routines	5
+2489e0
+25c240
+2651c0
+2717d0
+2615d0
+3	M	s:tailles	2
+s:sb	b
+s:lb	2
+2	D	i:174	4
+3	X	s:n	9
+3	X	s:w	8
+3	SV	s:routines	4
+2489e0
+24f020
+25f570
+2615d0
+3	M	s:tailles	2
+s:sh	8
+s:lh	1
+2	D	i:145	4
+3	X	s:n	a
+3	X	s:w	6
+3	SV	s:routines	6
+249820
+24a200
+249aa0
+25cf70
+25d0d0
+265750
+3	M	s:tailles	2
+s:sb	6
+s:lb	4
+2	D	i:f	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	1
+24a8c0
+3	M	s:tailles	2
+s:lb	2
+s:sb	1
+2	D	i:9ea2	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+24c540
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:9ea0	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	1
+24c540
+3	M	s:tailles	1
+s:sh	2
+2	D	i:8e8c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+24ccb0
+265750
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:8e8e	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+24ce50
+265750
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:8e90	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+24cff0
+265750
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:8e92	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+24d190
+265750
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:127	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	2
+24d420
+265750
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:171	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+24e7b0
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:131	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+24ea30
+250700
+3	M	s:tailles	1
+s:lb	2
+2	D	i:111	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+24f020
+258a00
+254e80
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:c3a6	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+24f9d0
+260390
+3	M	s:tailles	2
+s:lb	1
+s:sb	2
+2	D	i:140	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+24f9d0
+2615d0
+2717d0
+3	M	s:tailles	3
+s:sw	1
+s:lw	1
+s:sb	2
+2	D	i:121	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+24f9d0
+260390
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:122	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+24f9d0
+260390
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:15e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+24f9d0
+260390
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:137	4
+3	X	s:n	a
+3	X	s:w	7
+3	SV	s:routines	6
+2517c0
+26f020
+269340
+2615d0
+26f130
+2722b0
+3	M	s:tailles	2
+s:lb	3
+s:sb	7
+2	D	i:116	4
+3	X	s:n	9
+3	X	s:w	4
+3	SV	s:routines	7
+257ee0
+408480
+2717d0
+260390
+260090
+40f370
+40f550
+3	M	s:tailles	2
+s:sb	4
+s:lb	5
+2	D	i:8e3d	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+25fef0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:e8	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+25fef0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:b0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+260390
+3	M	s:tailles	1
+s:sw	1
+2	D	i:c37a	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+260390
+2712e0
+4077c0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:8e3a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+260390
+3	M	s:tailles	1
+s:sh	1
+2	D	i:8e38	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+260390
+3	M	s:tailles	1
+s:sb	1
+2	D	i:8e39	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+260390
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c390	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+260390
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c391	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+260390
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c30c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2615d0
+40f220
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:c30d	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2615d0
+40f220
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:c37c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+263c10
+407990
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:c384	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+263c10
+407990
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:c3a0	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+263c10
+407990
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:c380	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+263c10
+407990
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:c388	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+263c10
+407990
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:c3a2	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+263c10
+407990
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:17a	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+265750
+26d600
+269340
+271bf0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:c3a7	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+408020
+4080e0
+408080
+408050
+4080b0
+408110
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c3a8	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+408140
+408200
+4081a0
+408170
+4081d0
+408230
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c3a9	4
+3	X	s:n	5
+3	X	s:w	0
+3	SV	s:routines	5
+408260
+408320
+4082c0
+4082f0
+408290
+3	M	s:tailles	1
+s:lb	5
+2	D	i:c327	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	4
+408480
+40a910
+40f370
+40f6a0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:c328	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	4
+408480
+40a910
+40f370
+40f6a0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:c329	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	4
+408480
+40a910
+40f370
+40f6a0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:c32d	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	4
+408480
+40a910
+40bcf0
+40f370
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:c32e	4
+3	X	s:n	8
+3	X	s:w	2
+3	SV	s:routines	6
+408480
+40c0e0
+40c9a0
+40a910
+40bcf0
+40f370
+3	M	s:tailles	2
+s:lb	6
+s:sb	2
+2	D	i:c325	4
+3	X	s:n	a
+3	X	s:w	2
+3	SV	s:routines	6
+408480
+40f6a0
+40fdc0
+40a910
+40f370
+41abd0
+3	M	s:tailles	2
+s:lb	8
+s:sb	2
+2	D	i:c326	4
+3	X	s:n	c
+3	X	s:w	2
+3	SV	s:routines	5
+408480
+40fe40
+4109c0
+40a910
+40f370
+3	M	s:tailles	2
+s:lb	a
+s:sb	2
+2	D	i:c336	4
+3	X	s:n	8
+3	X	s:w	2
+3	SV	s:routines	5
+408480
+40a910
+410550
+40f370
+4103b0
+3	M	s:tailles	2
+s:lb	6
+s:sb	2
+2	D	i:c331	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	5
+408480
+4106e0
+40a910
+40f370
+4106b0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:c32f	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	5
+408480
+410800
+40a910
+40f370
+4107d0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:c32b	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	4
+408480
+40a910
+40f550
+40f370
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:c334	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+408480
+40a910
+40f370
+3	M	s:tailles	2
+s:lb	2
+s:sb	2
+2	D	i:c335	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+408480
+40a910
+40f370
+3	M	s:tailles	2
+s:lb	2
+s:sb	2
+2	D	i:c39a	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+40bcf0
+40f550
+40f370
+40f980
+3	M	s:tailles	2
+s:lb	1
+s:sb	4
+2	D	i:c394	4
+3	X	s:n	b
+3	X	s:w	7
+3	SV	s:routines	5
+40f980
+40f370
+40f550
+40fb70
+40bfb0
+3	M	s:tailles	2
+s:lh	4
+s:sh	7
+2	D	i:c316	4
+3	X	s:n	11
+3	X	s:w	6
+3	SV	s:routines	3
+40d130
+40d410
+40f220
+3	M	s:tailles	2
+s:lb	b
+s:sb	6
+2	D	i:c30e	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c30f	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c312	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c313	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c318	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c319	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31b	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31e	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31f	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31d	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c39c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c39d	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c310	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c311	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f220
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c322	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	3
+40f370
+4100f0
+40f550
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:c392	4
+3	X	s:n	c
+3	X	s:w	7
+3	SV	s:routines	4
+40f370
+40f550
+40fb70
+40f980
+3	M	s:tailles	2
+s:sh	7
+s:lh	5
+2	D	i:c396	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+40f370
+40fb70
+40f980
+3	M	s:tailles	2
+s:sh	3
+s:lh	3
+2	D	i:c398	4
+3	X	s:n	a
+3	X	s:w	5
+3	SV	s:routines	4
+40f370
+40f550
+40fb70
+40f980
+3	M	s:tailles	2
+s:sb	5
+s:lb	5
+2	D	i:c399	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	3
+40f370
+40fb70
+40f980
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:c323	4
+3	X	s:n	7
+3	X	s:w	5
+3	SV	s:routines	2
+40f550
+4100f0
+3	M	s:tailles	2
+s:sb	5
+s:lb	2
+2	D	i:c321	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	2
+40f550
+40fe40
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:c330	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+40f550
+3	M	s:tailles	1
+s:sb	1
+1	D	s:D9	437
+2	D	i:c372	4
+3	X	s:n	7
+3	X	s:w	0
+3	SV	s:routines	7
+24400
+24460
+243a0
+24430
+24370
+243d0
+24490
+3	M	s:tailles	1
+s:lb	7
+2	D	i:c373	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+244c0
+24520
+24580
+24550
+244f0
+245b0
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c374	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+245e0
+24610
+3	M	s:tailles	1
+s:lb	2
+2	D	i:c375	4
+3	X	s:n	4
+3	X	s:w	0
+3	SV	s:routines	4
+24640
+24670
+246a0
+246d0
+3	M	s:tailles	1
+s:lb	4
+2	D	i:c376	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+24700
+24760
+247c0
+24730
+24790
+247f0
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c377	4
+3	X	s:n	3
+3	X	s:w	0
+3	SV	s:routines	3
+24820
+24850
+24880
+3	M	s:tailles	1
+s:lb	3
+2	D	i:a9	4
+3	X	s:n	8
+3	X	s:w	7
+3	SV	s:routines	7
+a0a60
+38ff00
+3bccc0
+94ea0
+3f5c0
+24b70
+a6750
+3	M	s:tailles	2
+s:sb	7
+s:lb	1
+2	D	i:32	4
+3	X	s:n	19
+3	X	s:w	12
+3	SV	s:routines	18
+3da00
+618c0
+9a980
+637e0
+61dc0
+a0a60
+a6c00
+313960
+316a20
+31df60
+3bd120
+24b70
+9b4f0
+9b630
+3164f0
+316890
+3bdd90
+3bcf00
+3	M	s:tailles	2
+s:sh	12
+s:lh	7
+2	D	i:3a	4
+3	X	s:n	d
+3	X	s:w	c
+3	SV	s:routines	13
+3da00
+618c0
+313960
+637e0
+61dc0
+316a20
+31df60
+3bcf00
+3bd120
+24b70
+3f1b0
+316890
+3bdd90
+3	M	s:tailles	2
+s:sh	c
+s:lh	1
+2	D	i:c218	4
+3	X	s:n	16
+3	X	s:w	2
+3	SV	s:routines	12
+24cc0
+a6c00
+321220
+250e0
+266a0
+25d10
+257f0
+27070
+278b0
+28170
+2da90
+62b30
+3	M	s:tailles	2
+s:lh	14
+s:sh	2
+2	D	i:c21a	4
+3	X	s:n	15
+3	X	s:w	2
+3	SV	s:routines	9
+24cc0
+a6c00
+250e0
+27070
+25d10
+257f0
+278b0
+28170
+2da90
+3	M	s:tailles	2
+s:lh	13
+s:sh	2
+2	D	i:c214	4
+3	X	s:n	a
+3	X	s:w	2
+3	SV	s:routines	6
+25000
+a6c00
+63280
+27070
+62ff0
+2da90
+3	M	s:tailles	2
+s:lh	8
+s:sh	2
+2	D	i:c208	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	2
+266a0
+a6c00
+3	M	s:tailles	2
+s:lh	3
+s:sh	3
+2	D	i:c210	4
+3	X	s:n	9
+3	X	s:w	3
+3	SV	s:routines	3
+266a0
+a6c00
+62b30
+3	M	s:tailles	2
+s:lh	6
+s:sh	3
+2	D	i:c20a	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	2
+266a0
+a6c00
+3	M	s:tailles	2
+s:lh	3
+s:sh	3
+2	D	i:c212	4
+3	X	s:n	9
+3	X	s:w	3
+3	SV	s:routines	3
+266a0
+a6c00
+62b30
+3	M	s:tailles	2
+s:lh	6
+s:sh	3
+2	D	i:c216	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+27070
+a6c00
+321220
+3	M	s:tailles	2
+s:lh	4
+s:sh	2
+2	D	i:0	4
+3	X	s:n	26
+3	X	s:w	17
+3	SV	s:routines	23
+a0e00
+a6800
+a6980
+62a10
+2da90
+3bdd90
+295a0
+61f20
+a68a0
+285b0
+62ab0
+a6930
+618c0
+61dc0
+95340
+62150
+a6750
+3b47d0
+626e0
+63560
+952e0
+a68e0
+61bf0
+3	M	s:tailles	3
+s:sw	9
+s:sh	e
+s:lh	f
+2	D	i:4	4
+3	X	s:n	1b
+3	X	s:w	13
+3	SV	s:routines	18
+295a0
+61d00
+61f20
+63560
+61dc0
+962c0
+a0200
+a0e00
+a6980
+318c40
+285b0
+2e9b0
+61c90
+2da90
+62150
+96330
+3b47d0
+3bdd90
+3	M	s:tailles	3
+s:sw	9
+s:sh	a
+s:lh	8
+2	D	i:8	4
+3	X	s:n	40
+3	X	s:w	27
+3	SV	s:routines	39
+a0200
+a0e00
+3bcf00
+316900
+a6980
+3bd880
+2d710
+2da90
+62390
+96690
+318490
+3bd710
+3bdd90
+2d5a0
+295a0
+61f20
+96620
+316a20
+321220
+285b0
+2e9b0
+62430
+9fdb0
+31dc30
+61dc0
+a05c0
+318c40
+2d550
+62150
+3204d0
+321a50
+3b47d0
+3bce50
+63560
+a0d60
+320c60
+9a570
+316070
+3164f0
+3	M	s:tailles	3
+s:sw	c
+s:sh	1b
+s:lh	19
+2	D	i:c	4
+3	X	s:n	6e
+3	X	s:w	3a
+3	SV	s:routines	74
+9a680
+a0200
+a0e00
+9fa80
+9a980
+a6980
+316480
+316900
+318b80
+31f380
+3bd710
+2d710
+2da90
+96690
+9a390
+9fd10
+f6710
+316890
+318490
+320690
+295a0
+61f20
+9c0a0
+316a20
+3182a0
+321220
+3bb6a0
+3bd120
+3bd1a0
+371630
+3bd4b0
+3bd630
+285b0
+2e9b0
+34c30
+9a430
+9fdb0
+3169b0
+31dc30
+31f7b0
+3bdd90
+3219b0
+61dc0
+9a2c0
+9c940
+a05c0
+24f540
+25f1c0
+3166c0
+318340
+318c40
+3bd240
+301d0
+62150
+3204d0
+3205d0
+321a50
+3b47d0
+3bd0d0
+3bd3c0
+63560
+320c60
+371a60
+3a4d60
+3bd060
+9b4f0
+9a570
+9ed70
+3164f0
+318bf0
+371ff0
+3b70b0
+3bcf00
+3a91b0
+3	M	s:tailles	3
+s:sw	1c
+s:lh	34
+s:sh	1e
+2	D	i:10	4
+3	X	s:n	3f
+3	X	s:w	2f
+3	SV	s:routines	50
+9a980
+9f300
+9fa80
+9f800
+9b980
+a0200
+a0e00
+a6980
+31f380
+3bcf00
+2da90
+96690
+9e990
+9fd10
+318490
+3bd710
+3bdd90
+295a0
+61f20
+9c0a0
+9e920
+9f4a0
+9f7a0
+316a20
+285b0
+2e9b0
+9b630
+9fdb0
+31dc30
+31f7b0
+61dc0
+9b5c0
+9c940
+a05c0
+318c40
+62150
+3204d0
+321a50
+63560
+9b7e0
+9be60
+a0a60
+31df60
+9a570
+9b4f0
+9ec70
+9ed70
+a09f0
+3164f0
+31def0
+3	M	s:tailles	3
+s:sw	20
+s:sh	f
+s:lh	10
+2	D	i:14	4
+3	X	s:n	30
+3	X	s:w	29
+3	SV	s:routines	38
+9a980
+a0200
+a0e00
+a6980
+9fa80
+31f380
+3bcf00
+2da90
+96690
+9fd10
+318490
+31f210
+3bd710
+3bdd90
+295a0
+61f20
+9c0a0
+316a20
+31d6a0
+31e220
+285b0
+2e9b0
+9fdb0
+31dc30
+31f7b0
+61dc0
+a05c0
+318c40
+31e2c0
+62150
+3204d0
+321a50
+63560
+31df60
+9a570
+9b4f0
+9ed70
+3164f0
+3	M	s:tailles	5
+s:sw	21
+s:sh	5
+s:sb	3
+s:lb	4
+s:lh	3
+2	D	i:c200	4
+3	X	s:n	63
+3	X	s:w	4
+3	SV	s:routines	66
+28b80
+31000
+a1980
+9a980
+a0200
+a8600
+389700
+3b5680
+3b3690
+47b10
+51210
+53390
+96690
+98590
+318490
+31b890
+320690
+3b3810
+50d20
+52320
+9c0a0
+31aaa0
+31ca20
+31d6a0
+333aa0
+3b37a0
+3b57a0
+3b3730
+3b5330
+3b63b0
+4c7b0
+62b30
+96330
+9fdb0
+2a1630
+319430
+31b230
+31d130
+3b39b0
+2c440
+306c0
+618c0
+95340
+9c940
+9d240
+a5f40
+388ac0
+3b41b0
+974d0
+2a42d0
+316e50
+3890d0
+3a4fd0
+3b5450
+3bb0d0
+626e0
+99a60
+2a2760
+2c92e0
+3ba0e0
+2ba70
+62ff0
+a8070
+316070
+3a4870
+3781b0
+3	M	s:tailles	2
+s:lb	5f
+s:sb	4
+2	D	i:a0	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+95340
+295a0
+646a0
+28c30
+3b3fd0
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:a1	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+646a0
+55e80
+295a0
+28c30
+3b3fd0
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:a2	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	6
+32600
+9c940
+95340
+646a0
+28c30
+a1710
+3	M	s:tailles	2
+s:sb	3
+s:lb	3
+2	D	i:a3	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	7
+95340
+338a40
+295a0
+646a0
+28c30
+316e50
+31d130
+3	M	s:tailles	2
+s:sb	3
+s:lb	4
+2	D	i:de	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+28c30
+95340
+96690
+646a0
+3	M	s:tailles	2
+s:sb	2
+s:lb	3
+2	D	i:df	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	5
+95340
+a0a60
+646a0
+28c30
+96690
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:a4	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+28c30
+62b30
+646a0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:bb	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	6
+331240
+33ba60
+610e0
+646a0
+376ec0
+28c30
+3	M	s:tailles	2
+s:sb	4
+s:lb	4
+2	D	i:98	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	4
+28c30
+95340
+96690
+646a0
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:9a	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+28c30
+386a40
+646a0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:c37c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+28c30
+98590
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:c380	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+28c30
+98590
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:c384	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+28c30
+98590
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:c388	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+28c30
+98590
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:c38c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+28c30
+3	M	s:tailles	1
+s:sw	1
+2	D	i:c390	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+28c30
+3	M	s:tailles	1
+s:sw	1
+2	D	i:c394	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+28c30
+3	M	s:tailles	1
+s:sw	1
+2	D	i:c398	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+28c30
+3	M	s:tailles	1
+s:sw	1
+2	D	i:c3b0	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	2
+28c30
+98590
+3	M	s:tailles	2
+s:sh	1
+s:lh	2
+2	D	i:c3b2	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	2
+28c30
+98590
+3	M	s:tailles	2
+s:sh	1
+s:lh	2
+2	D	i:c3b4	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+28c30
+3890d0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:c3ba	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+29140
+29200
+291a0
+29170
+291d0
+29230
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c3bb	4
+3	X	s:n	6
+3	X	s:w	0
+3	SV	s:routines	6
+29260
+29320
+292c0
+292f0
+29290
+29350
+3	M	s:tailles	1
+s:lb	6
+2	D	i:c3bc	4
+3	X	s:n	5
+3	X	s:w	0
+3	SV	s:routines	5
+29380
+29440
+293e0
+29410
+293b0
+3	M	s:tailles	1
+s:lb	5
+2	D	i:c327	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	4
+295a0
+2bb00
+3b4300
+3b3fd0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:c328	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	4
+295a0
+2bb00
+3b4300
+3b3fd0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:c329	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	4
+295a0
+2bb00
+3b4300
+3b3fd0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:c32d	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	4
+295a0
+2bb00
+3b2d00
+3b3fd0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:c32e	4
+3	X	s:n	8
+3	X	s:w	2
+3	SV	s:routines	6
+295a0
+2bb00
+3b2d00
+3b30f0
+3b39b0
+3b3fd0
+3	M	s:tailles	2
+s:lb	6
+s:sb	2
+2	D	i:c370	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	5
+295a0
+2bb00
+2c92e0
+4c7b0
+3b3fd0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:c325	4
+3	X	s:n	a
+3	X	s:w	2
+3	SV	s:routines	6
+295a0
+2bb00
+3b4a20
+3b4300
+3b3fd0
+3bb0d0
+3	M	s:tailles	2
+s:lb	8
+s:sb	2
+2	D	i:c326	4
+3	X	s:n	c
+3	X	s:w	2
+3	SV	s:routines	5
+295a0
+2bb00
+3b5960
+3b4aa0
+3b3fd0
+3	M	s:tailles	2
+s:lb	a
+s:sb	2
+2	D	i:c336	4
+3	X	s:n	9
+3	X	s:w	2
+3	SV	s:routines	6
+295a0
+2bb00
+3b5230
+3b3fd0
+3b53d0
+3b5450
+3	M	s:tailles	2
+s:lb	7
+s:sb	2
+2	D	i:c331	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	5
+295a0
+2bb00
+3b5680
+3b5650
+3b3fd0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:c32f	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	5
+295a0
+2bb00
+3b57a0
+3b5770
+3b3fd0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:116	4
+3	X	s:n	8
+3	X	s:w	3
+3	SV	s:routines	6
+295a0
+95040
+95340
+31d130
+3b3fd0
+3b41b0
+3	M	s:tailles	2
+s:lb	5
+s:sb	3
+2	D	i:c32b	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	4
+295a0
+2bb00
+3b41b0
+3b3fd0
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:c334	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+295a0
+2bb00
+3b3fd0
+3	M	s:tailles	2
+s:lb	2
+s:sb	2
+2	D	i:c335	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+295a0
+2bb00
+3b3fd0
+3	M	s:tailles	2
+s:lb	2
+s:sb	2
+2	D	i:2	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	3
+295a0
+61f20
+2da90
+3	M	s:tailles	1
+s:sh	3
+2	D	i:6	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	3
+295a0
+2da90
+2e9b0
+3	M	s:tailles	1
+s:sh	3
+2	D	i:a	4
+3	X	s:n	10
+3	X	s:w	c
+3	SV	s:routines	9
+295a0
+316a20
+318490
+3164f0
+2da90
+31dc30
+3204d0
+321a50
+3bd710
+3	M	s:tailles	2
+s:sh	c
+s:lh	4
+2	D	i:be	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	6
+295a0
+95340
+a88e0
+ab5a0
+a8ab0
+a7bd0
+3	M	s:tailles	2
+s:sb	2
+s:lb	5
+2	D	i:c154	4
+3	X	s:n	28
+3	X	s:w	27
+3	SV	s:routines	36
+3da00
+61d00
+3bcf00
+9a980
+2da90
+92910
+96690
+105510
+16b610
+1c7b90
+207390
+3bdd90
+295a0
+3b720
+2d5a0
+3be20
+9c0a0
+a08a0
+105420
+1dcea0
+321220
+9fdb0
+3aa40
+920c0
+948c0
+95340
+2260d0
+3204d0
+626e0
+637e0
+a0a60
+1c7960
+320c60
+3f570
+61bf0
+3164f0
+3	M	s:tailles	2
+s:sw	27
+s:lw	1
+2	D	i:8f	4
+3	X	s:n	18
+3	X	s:w	18
+3	SV	s:routines	23
+9a980
+9b980
+31f380
+2be90
+96690
+318490
+3bdd90
+a08a0
+316a20
+9b630
+9fdb0
+2c440
+618c0
+95340
+9c940
+a05c0
+63560
+a0a60
+626e0
+31df60
+9b4f0
+9ed70
+3164f0
+3	M	s:tailles	1
+s:sb	18
+2	D	i:8a	4
+3	X	s:n	44
+3	X	s:w	4
+3	SV	s:routines	66
+9f300
+232180
+2ba380
+2d9a80
+179280
+31f380
+34c300
+379e00
+3b9100
+18d010
+230710
+2b5890
+2dbd90
+fc9a0
+37d420
+379620
+231ea0
+37e2a0
+37db20
+8d4b0
+1777b0
+177a30
+178930
+20b3b0
+2304b0
+2317b0
+2d8930
+37cb30
+2c0e40
+2dcb60
+2d7ec0
+2c440
+95340
+9c940
+fd4c0
+1773c0
+177c40
+1782c0
+1d6ac0
+231b40
+4f3d0
+9b350
+1766d0
+1cf8d0
+1d8550
+242350
+2a42d0
+2a50d0
+2dead0
+2dcde0
+4f760
+9b2e0
+9b7e0
+1b25e0
+1cf060
+230060
+230f60
+2c2360
+2c4a60
+1762f0
+177570
+200070
+200af0
+2301f0
+2dba70
+390170
+3	M	s:tailles	2
+s:lb	40
+s:sb	4
+2	D	i:8b	4
+3	X	s:n	d
+3	X	s:w	4
+3	SV	s:routines	12
+2c440
+9f300
+9c940
+95340
+9b7e0
+316a20
+317ba0
+9b350
+3d5d0
+29f410
+3164f0
+390170
+3	M	s:tailles	2
+s:lb	9
+s:sb	4
+2	D	i:ac	4
+3	X	s:n	37
+3	X	s:w	6
+3	SV	s:routines	46
+a8600
+3ad700
+33b480
+96690
+2da90
+97d10
+98590
+a5590
+318490
+aa5a0
+aa720
+aa8a0
+2c76a0
+31d6a0
+334ba0
+334fa0
+3aaca0
+34030
+2ffb0
+979b0
+9b630
+a2230
+335fb0
+383330
+2c440
+618c0
+95340
+31e2c0
+336740
+3ae340
+3afb40
+a7e50
+a7cd0
+a9950
+aaa50
+aabd0
+337250
+339350
+33f550
+3aa050
+626e0
+a49e0
+319060
+3ac560
+a43f0
+2d75f0
+3	M	s:tailles	2
+s:lb	31
+s:sb	6
+2	D	i:c320	4
+3	X	s:n	1b
+3	X	s:w	1
+3	SV	s:routines	22
+3b4300
+3b5680
+3b3690
+3b37a0
+3b2da0
+3b57a0
+3b3730
+3b39b0
+3b41b0
+3b5330
+3b63b0
+2c440
+3b3440
+3b6440
+3b5450
+3bb0d0
+3b33e0
+3b3560
+3b35e0
+3b30f0
+63170
+316070
+3	M	s:tailles	2
+s:lb	1a
+s:sb	1
+2	D	i:c140	4
+3	X	s:n	2a
+3	X	s:w	27
+3	SV	s:routines	38
+3da00
+61d00
+326d00
+9b980
+9a980
+326f00
+3bcf00
+92910
+96690
+316890
+320690
+3bdd90
+2d5a0
+3b720
+3be20
+a08a0
+3bd120
+316a20
+9b630
+9fdb0
+3bd4b0
+3c040
+920c0
+948c0
+95340
+3bd240
+3bd3c0
+3204d0
+325ad0
+3b960
+626e0
+637e0
+a0a60
+31df60
+3f570
+61bf0
+9b4f0
+3164f0
+3	M	s:tailles	2
+s:sw	27
+s:lw	3
+2	D	i:e0	4
+3	X	s:n	b
+3	X	s:w	b
+3	SV	s:routines	10
+2d5a0
+95340
+9b980
+9a980
+a08a0
+3bcf00
+9a430
+96690
+9b4f0
+9b630
+3	M	s:tailles	1
+s:sw	b
+2	D	i:22	4
+3	X	s:n	11
+3	X	s:w	10
+3	SV	s:routines	17
+2d5a0
+3da00
+618c0
+637e0
+61dc0
+94ea0
+a6800
+a78a0
+30f240
+3166c0
+3bccc0
+31df60
+3e730
+30fdd0
+316a20
+3bcf00
+320360
+3	M	s:tailles	2
+s:sh	10
+s:lh	1
+2	D	i:24	4
+3	X	s:n	1b
+3	X	s:w	14
+3	SV	s:routines	18
+2d5a0
+3da00
+61dc0
+637e0
+618c0
+94ea0
+a6800
+a78a0
+30f240
+3166c0
+3bccc0
+31df60
+3e730
+2da90
+30fdd0
+316a20
+3bcf00
+320360
+3	M	s:tailles	2
+s:sh	14
+s:lh	7
+2	D	i:26	4
+3	X	s:n	13
+3	X	s:w	12
+3	SV	s:routines	19
+3da00
+310100
+3bcf00
+3bdd90
+2d5a0
+94ea0
+a78a0
+3bd1a0
+316a20
+3e730
+3bd4b0
+61dc0
+618c0
+311440
+3bccc0
+3166c0
+31df60
+637e0
+320360
+3	M	s:tailles	2
+s:sh	12
+s:lh	1
+2	D	i:28	4
+3	X	s:n	1b
+3	X	s:w	16
+3	SV	s:routines	21
+3da00
+310100
+3bcf00
+3bdd90
+2d5a0
+94ea0
+a78a0
+3bd1a0
+316a20
+3e730
+62430
+62b30
+3bd4b0
+61dc0
+618c0
+311440
+3bccc0
+3166c0
+637e0
+320360
+31df60
+3	M	s:tailles	2
+s:sh	16
+s:lh	5
+2	D	i:2a	4
+3	X	s:n	13
+3	X	s:w	12
+3	SV	s:routines	19
+3da00
+3bcf00
+94ea0
+a78a0
+2d5a0
+316a20
+3bd1a0
+3e730
+311ab0
+3bd4b0
+61dc0
+618c0
+3166c0
+3bccc0
+311550
+320360
+637e0
+31df60
+312170
+3	M	s:tailles	2
+s:sh	12
+s:lh	1
+2	D	i:2c	4
+3	X	s:n	13
+3	X	s:w	12
+3	SV	s:routines	19
+3da00
+3bcf00
+94ea0
+a78a0
+2d5a0
+316a20
+3bd1a0
+3e730
+311ab0
+3bd4b0
+61dc0
+618c0
+3166c0
+3bccc0
+311550
+320360
+637e0
+31df60
+312170
+3	M	s:tailles	2
+s:sh	12
+s:lh	1
+2	D	i:c130	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	6
+2d5a0
+3da00
+2ea20
+31df60
+3f5c0
+3f1b0
+3	M	s:tailles	2
+s:sw	4
+s:lw	2
+2	D	i:c134	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	4
+2d5a0
+3da00
+3f1b0
+3f5c0
+3	M	s:tailles	2
+s:sw	3
+s:lw	1
+2	D	i:c138	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	4
+2d5a0
+3da00
+3f1b0
+3f5c0
+3	M	s:tailles	2
+s:sw	3
+s:lw	1
+2	D	i:8c	4
+3	X	s:n	a
+3	X	s:w	3
+3	SV	s:routines	10
+3be20
+31df60
+a0a60
+a0d60
+31e2c0
+31f380
+2d710
+9a570
+96690
+390170
+3	M	s:tailles	2
+s:lb	7
+s:sb	3
+2	D	i:182	4
+3	X	s:n	10
+3	X	s:w	b
+3	SV	s:routines	14
+61d00
+626e0
+63560
+948c0
+618c0
+94ea0
+a0e00
+316900
+3bccc0
+2d710
+62b30
+90630
+94a10
+94ad0
+3	M	s:tailles	2
+s:lb	5
+s:sb	b
+2	D	i:c316	4
+3	X	s:n	11
+3	X	s:w	6
+3	SV	s:routines	3
+2d710
+2da90
+2f8f0
+3	M	s:tailles	2
+s:lb	b
+s:sb	6
+2	D	i:80	4
+3	X	s:n	1d
+3	X	s:w	3
+3	SV	s:routines	24
+337080
+3b5680
+2da90
+94ea0
+17d520
+321220
+3b4aa0
+319430
+337830
+3b5230
+95040
+618c0
+f6a40
+1c7fc0
+3433c0
+3bccc0
+31e2c0
+3057c0
+e4450
+2a5dd0
+336bd0
+336d50
+3b53d0
+200af0
+3	M	s:tailles	2
+s:lb	1a
+s:sb	3
+2	D	i:e	4
+3	X	s:n	31
+3	X	s:w	1c
+3	SV	s:routines	22
+9fa80
+9fd10
+3bd710
+2da90
+316a20
+321220
+3bd120
+3bd1a0
+62430
+3219b0
+3bd4b0
+3bd630
+3bedb0
+318c40
+3bd240
+3bd3c0
+321a50
+33e9d0
+320c60
+9ed70
+3164f0
+318bf0
+3	M	s:tailles	4
+s:sh	1b
+s:lh	12
+s:lb	3
+s:sb	1
+2	D	i:a8	4
+3	X	s:n	1a
+3	X	s:w	a
+3	SV	s:routines	12
+618c0
+95340
+63560
+63280
+2da90
+63170
+62b30
+62ff0
+63430
+95c50
+a22f0
+316070
+3	M	s:tailles	2
+s:sb	a
+s:lb	10
+2	D	i:c314	4
+3	X	s:n	19
+3	X	s:w	9
+3	SV	s:routines	9
+95340
+321220
+320c60
+a05c0
+2da90
+62b30
+98590
+2f8f0
+318490
+3	M	s:tailles	2
+s:lh	10
+s:sh	9
+2	D	i:100	4
+3	X	s:n	28
+3	X	s:w	a
+3	SV	s:routines	39
+61300
+30ef00
+313a80
+61180
+2da90
+96690
+98590
+2c7610
+30ec10
+318490
+38d510
+2c76a0
+313f20
+315ea0
+31d6a0
+321220
+2391b0
+311ab0
+61240
+618c0
+a05c0
+1a0bc0
+30f240
+315c40
+37bdc0
+237950
+238f50
+311550
+315a50
+37be50
+391e50
+63560
+a49e0
+2c75e0
+30fee0
+313960
+3157e0
+320c60
+60570
+3	M	s:tailles	2
+s:sh	a
+s:lh	1e
+2	D	i:128	4
+3	X	s:n	10
+3	X	s:w	8
+3	SV	s:routines	16
+60720
+61700
+626e0
+60880
+615a0
+637e0
+3166c0
+316a20
+320360
+2da90
+60670
+607d0
+614f0
+61650
+61bf0
+62430
+3	M	s:tailles	2
+s:sh	8
+s:lh	8
+2	D	i:e9	4
+3	X	s:n	6
+3	X	s:w	6
+3	SV	s:routines	6
+94ea0
+3bccc0
+62b30
+a6750
+2da90
+63430
+3	M	s:tailles	1
+s:sb	6
+2	D	i:10f	4
+3	X	s:n	11
+3	X	s:w	10
+3	SV	s:routines	16
+9a980
+a0200
+9c940
+9b980
+9b2e0
+a08a0
+a0a60
+2e9b0
+9a6f0
+96690
+3d5d0
+9b4f0
+9b630
+9fd10
+9fdb0
+3bdd90
+3	M	s:tailles	2
+s:sb	10
+s:lb	1
+2	D	i:71b6	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+2f6b0
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:71be	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+2f6b0
+38f4e0
+39f3d0
+3	M	s:tailles	2
+s:lh	2
+s:sh	2
+2	D	i:71ba	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+2f6b0
+38f4e0
+39f3d0
+3	M	s:tailles	2
+s:lh	2
+s:sh	2
+2	D	i:c30c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2f8f0
+96690
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:c30d	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+2f8f0
+96690
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:c30e	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c30f	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c312	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c313	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c318	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c319	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31b	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31e	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31f	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c31d	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c3ac	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c3ad	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c310	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c311	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2f8f0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:102	4
+3	X	s:n	17
+3	X	s:w	3
+3	SV	s:routines	19
+9a980
+388d80
+34a10
+96690
+9c0a0
+ab5a0
+2ffb0
+9fdb0
+3bb2b0
+9d240
+388ac0
+3a8fc0
+9c5d0
+a0a60
+37cbe0
+3b67e0
+9ed70
+2441f0
+3a4870
+3	M	s:tailles	2
+s:lh	14
+s:sh	3
+2	D	i:156	4
+3	X	s:n	56
+3	X	s:w	5
+3	SV	s:routines	41
+32280
+3aa600
+3ac680
+3a8580
+3abf00
+2d7a90
+97d10
+3a6a10
+34ea0
+2d7520
+3a7ba0
+3a9420
+3b7320
+30430
+33530
+33630
+33730
+979b0
+3aa230
+3bb2b0
+306c0
+31e2c0
+3a9d40
+3aadc0
+3834d0
+974d0
+2d7450
+2d7850
+3a4fd0
+3a74d0
+3aa950
+3aaed0
+3ab650
+329e0
+38360
+3ac860
+3b1060
+3b67e0
+2d7970
+3aa170
+3b13f0
+3	M	s:tailles	2
+s:lh	51
+s:sh	5
+2	D	i:138	4
+3	X	s:n	6e
+3	X	s:w	5
+3	SV	s:routines	91
+3a000
+40600
+313000
+a0200
+a8600
+a8410
+2ab220
+332a20
+30430
+34030
+a2630
+2a1630
+2e8840
+8de40
+9d240
+2a0440
+2a1440
+2a3c40
+1f6640
+392840
+332e50
+8e850
+a7e50
+9e460
+25e860
+2b6060
+13ea70
+3b9870
+24ec80
+312280
+333480
+60a90
+34ea0
+9f4a0
+2c76a0
+333aa0
+3a06a0
+334b0
+2bd0b0
+33ec0
+2c7cc0
+306c0
+31e2c0
+974d0
+a7cd0
+34ae0
+251ce0
+3af4e0
+508f0
+5acf0
+33d00
+2e2700
+3abf00
+97d10
+353510
+5ef20
+2c0120
+1f6930
+2dd930
+383330
+3a9d40
+4ad50
+2bf750
+3aa950
+89560
+a0f60
+29fd60
+9ed70
+a9370
+9e580
+9e990
+2d7790
+3a7ba0
+334fa0
+ab5a0
+2a09a0
+334ba0
+979b0
+a31b0
+1a0bc0
+345d0
+1dc5d0
+2a5dd0
+3327e0
+2c6be0
+329e0
+2bf9e0
+2441f0
+2d75f0
+3ad3f0
+3adff0
+3	M	s:tailles	2
+s:lh	69
+s:sh	5
+2	D	i:b4	4
+3	X	s:n	40
+3	X	s:w	3
+3	SV	s:routines	60
+31000
+32600
+30b500
+9f800
+228b80
+35d100
+362d80
+3abf00
+3b8380
+199910
+249710
+2e9290
+30a890
+353510
+35a990
+369b10
+34ea0
+22c820
+74ba0
+2871a0
+34dca0
+352e20
+35eba0
+360ba0
+3afd20
+3b7320
+1420b0
+1472b0
+280930
+34e430
+359ab0
+35b7b0
+3aa230
+306c0
+31d40
+390c0
+95340
+14dcc0
+2e9340
+30a640
+35bac0
+35f240
+3678c0
+2e9450
+32f4d0
+3b8b50
+3000e0
+360a60
+360ce0
+3ad8e0
+3af4e0
+9a570
+9a6f0
+19a8f0
+329870
+352ff0
+3580f0
+35e3f0
+365770
+3ac740
+3	M	s:tailles	2
+s:lb	3d
+s:sb	3
+2	D	i:158	4
+3	X	s:n	54
+3	X	s:w	5
+3	SV	s:routines	41
+31000
+3a8580
+32280
+97d10
+2d7a90
+3a6a10
+34ea0
+2d7520
+3a7ba0
+3ad820
+3b7320
+33530
+33630
+33730
+979b0
+3adcb0
+3bb2b0
+306c0
+31e2c0
+3afe40
+3834d0
+974d0
+2d7450
+2d7850
+3a4fd0
+3a74d0
+3ad1d0
+3aec50
+329e0
+38360
+3ad8e0
+3ae460
+3af4e0
+3afc60
+3b1060
+3b67e0
+2d7970
+3ad3f0
+3adff0
+3ae570
+3b13f0
+3	M	s:tailles	2
+s:lh	4f
+s:sh	5
+2	D	i:81	4
+3	X	s:n	17
+3	X	s:w	1
+3	SV	s:routines	13
+31f80
+3afe40
+389e60
+14b580
+3ac860
+348430
+3f1b0
+11a5d0
+386f50
+389f30
+3a4fd0
+3ab650
+3aec50
+3	M	s:tailles	2
+s:lb	16
+s:sb	1
+2	D	i:109	4
+3	X	s:n	f
+3	X	s:w	5
+3	SV	s:routines	7
+32600
+9c940
+a0a60
+aada0
+96690
+9fdb0
+a9950
+3	M	s:tailles	2
+s:lb	a
+s:sb	5
+2	D	i:90	4
+3	X	s:n	1c
+3	X	s:w	1
+3	SV	s:routines	20
+a6a80
+333480
+3ec20
+ab5a0
+648a0
+337ba0
+625b0
+761b0
+337830
+344c0
+1316c0
+33f840
+3a4fd0
+329e0
+33dce0
+3864e0
+33260
+330f0
+3381f0
+33fbf0
+3	M	s:tailles	2
+s:lh	1b
+s:sh	1
+2	D	i:170	4
+3	X	s:n	e
+3	X	s:w	6
+3	SV	s:routines	8
+34ea0
+39ce20
+9a980
+328da0
+328bb0
+96690
+a4170
+39cc90
+3	M	s:tailles	2
+s:lb	8
+s:sb	6
+2	D	i:130	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+3a000
+a43f0
+95340
+a50e0
+3	M	s:tailles	2
+s:lb	1
+s:sb	4
+2	D	i:89	4
+3	X	s:n	b
+3	X	s:w	2
+3	SV	s:routines	9
+3a000
+3ec20
+2c0880
+333aa0
+2dbd90
+3a6b0
+33d7f0
+341eb0
+3b13f0
+3	M	s:tailles	2
+s:lb	9
+s:sb	2
+2	D	i:176	4
+3	X	s:n	4
+3	X	s:w	0
+3	SV	s:routines	4
+3c390
+31f570
+317890
+31dcd0
+3	M	s:tailles	1
+s:lh	4
+2	D	i:c13c	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	4
+3da00
+3f5c0
+3f1b0
+391bf0
+3	M	s:tailles	2
+s:sw	3
+s:lw	2
+2	D	i:2e	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	4
+3da00
+637e0
+a78a0
+391bf0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:30	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+3da00
+a6c00
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:34	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+3da00
+3f570
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:c158	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+3da00
+3f1b0
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:38	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3da00
+3	M	s:tailles	1
+s:sh	1
+2	D	i:3c	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+3da00
+3f1b0
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:3e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+3da00
+3f1b0
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:6a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3da00
+3	M	s:tailles	1
+s:sh	1
+2	D	i:88	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3da00
+3	M	s:tailles	1
+s:sb	1
+2	D	i:d1	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3da00
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c144	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+3da00
+3f1b0
+3	M	s:tailles	2
+s:sw	2
+s:lw	1
+2	D	i:c148	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+3da00
+3f1b0
+3	M	s:tailles	2
+s:sw	2
+s:lw	1
+2	D	i:c14c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+3da00
+3f1b0
+3	M	s:tailles	2
+s:sw	2
+s:lw	1
+2	D	i:c150	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+3da00
+3f1b0
+3	M	s:tailles	2
+s:sw	2
+s:lw	1
+2	D	i:4a	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+3da00
+30f240
+a78a0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:4c	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+3da00
+30f240
+a78a0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:4e	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+3da00
+310100
+a78a0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:50	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+3da00
+310100
+a78a0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:52	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+3da00
+a78a0
+311ab0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:54	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	3
+3da00
+a78a0
+311ab0
+3	M	s:tailles	2
+s:sh	3
+s:lh	1
+2	D	i:95	4
+3	X	s:n	a
+3	X	s:w	6
+3	SV	s:routines	5
+3e730
+38ac30
+392270
+392590
+3f1b0
+3	M	s:tailles	2
+s:sb	6
+s:lb	4
+2	D	i:94	4
+3	X	s:n	a
+3	X	s:w	5
+3	SV	s:routines	5
+3e730
+38ac30
+392270
+392590
+3f1b0
+3	M	s:tailles	2
+s:sb	5
+s:lb	5
+2	D	i:e4	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	1
+3e730
+3	M	s:tailles	1
+s:sb	2
+2	D	i:86	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ec20
+3	M	s:tailles	1
+s:sb	1
+2	D	i:1f8	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ec20
+3	M	s:tailles	1
+s:sw	1
+2	D	i:1fc	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	2
+3ec20
+95340
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:1fe	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ec20
+3	M	s:tailles	1
+s:sb	1
+2	D	i:9eaa	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ec20
+3	M	s:tailles	1
+s:sb	1
+2	D	i:9eab	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ec20
+3	M	s:tailles	1
+s:sb	1
+2	D	i:9eac	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ec20
+3	M	s:tailles	1
+s:sb	1
+2	D	i:9ead	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	2
+3ec20
+95340
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:e5	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3ec20
+3	M	s:tailles	1
+s:sb	1
+2	D	i:a6	4
+3	X	s:n	5
+3	X	s:w	1
+3	SV	s:routines	5
+3ec20
+389c20
+388d80
+388ac0
+388e70
+3	M	s:tailles	2
+s:sb	1
+s:lb	4
+2	D	i:bf	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+3ec20
+a6800
+3	M	s:tailles	1
+s:sb	2
+2	D	i:838c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+3ee30
+3f1b0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:8388	4
+3	X	s:n	9
+3	X	s:w	1
+3	SV	s:routines	5
+3fc40
+3f830
+3ee30
+90630
+3fad0
+3	M	s:tailles	2
+s:sw	1
+s:lw	8
+2	D	i:84	4
+3	X	s:n	4
+3	X	s:w	3
+3	SV	s:routines	4
+3f1b0
+951c0
+94ea0
+3bccc0
+3	M	s:tailles	2
+s:sb	3
+s:lb	1
+2	D	i:15c	4
+3	X	s:n	42
+3	X	s:w	2
+3	SV	s:routines	66
+2f9b00
+30d300
+3b9100
+30b180
+2f8a90
+29f410
+2f2c10
+2f3010
+2f8590
+326910
+35a990
+35b110
+2f5720
+2fe320
+304a20
+3783a0
+3786a0
+30d430
+3784b0
+2f9f30
+402b0
+9fdb0
+2fc3b0
+2fe4b0
+2ff5b0
+300b30
+300db0
+2f98c0
+2fd2c0
+30d9c0
+326c40
+359e40
+37b840
+3bc440
+326b30
+378b30
+308bb0
+30dbb0
+720d0
+2f7550
+2fc050
+2ff950
+2ffd50
+302050
+303dd0
+306ed0
+3083d0
+30c8d0
+71ae0
+2f32e0
+2f9360
+2fc160
+2fd3e0
+307060
+30d560
+3788e0
+3bc6e0
+9a6f0
+2f04f0
+301030
+2f6070
+3054f0
+307af0
+3526f0
+3bc0f0
+30d1b0
+3	M	s:tailles	2
+s:lb	40
+s:sb	2
+2	D	i:10e	4
+3	X	s:n	32
+3	X	s:w	7
+3	SV	s:routines	48
+9a980
+34c300
+3b9100
+2ba380
+96690
+2b5890
+2dbd90
+9c0a0
+fc9a0
+361f30
+402b0
+8d4b0
+9fdb0
+20b3b0
+28a5b0
+2d43b0
+2d4eb0
+9c940
+fd4c0
+1d6ac0
+1e1d40
+2c0e40
+2d7ec0
+4f3d0
+1766d0
+1cf8d0
+1d8550
+1e1f50
+242350
+2a42d0
+2a50d0
+2a5dd0
+2dead0
+4f760
+78360
+9b2e0
+1cf060
+218ee0
+2b7a60
+2c2360
+2d35e0
+2dcb60
+2dcde0
+1762f0
+200070
+200af0
+2239f0
+2dba70
+3	M	s:tailles	2
+s:lb	2b
+s:sb	7
+2	D	i:107	4
+3	X	s:n	2a
+3	X	s:w	5
+3	SV	s:routines	42
+9a980
+384d80
+384580
+20f580
+96690
+19e010
+230710
+231ea0
+384320
+384b20
+38a4a0
+402b0
+1777b0
+177a30
+178930
+20cdb0
+2304b0
+2317b0
+2dd930
+3850b0
+9c940
+1773c0
+177c40
+1782c0
+1e1d40
+231b40
+2f9440
+302bc0
+376bc0
+1e1f50
+a2ed0
+19ccd0
+2bf750
+3a4fd0
+6e160
+a0a60
+230060
+230f60
+36c7e0
+9ec70
+177570
+2301f0
+3	M	s:tailles	2
+s:lb	25
+s:sb	5
+2	D	i:8b90	4
+3	X	s:n	7
+3	X	s:w	7
+3	SV	s:routines	4
+40bb0
+5c4e0
+41f80
+5bfa0
+3	M	s:tailles	1
+s:sh	7
+2	D	i:8b94	4
+3	X	s:n	29
+3	X	s:w	c
+3	SV	s:routines	28
+41f80
+56f00
+57b00
+5fe80
+47b10
+4ef90
+51210
+56010
+2d6b90
+52320
+5bfa0
+40bb0
+52cb0
+571b0
+57eb0
+1d50b0
+4dfc0
+55c40
+565c0
+2d6fc0
+2d7ec0
+4ad50
+57dd0
+58350
+4fbe0
+5c4e0
+4b670
+4c370
+3	M	s:tailles	2
+s:sh	c
+s:lh	1d
+2	D	i:8b92	4
+3	X	s:n	7
+3	X	s:w	7
+3	SV	s:routines	4
+40bb0
+5c4e0
+41f80
+5bfa0
+3	M	s:tailles	1
+s:sh	7
+2	D	i:8b96	4
+3	X	s:n	e
+3	X	s:w	b
+3	SV	s:routines	9
+41f80
+2d6fc0
+5c4e0
+5bfa0
+4dfc0
+2d7ec0
+40bb0
+58350
+2d6b90
+3	M	s:tailles	2
+s:sh	b
+s:lh	3
+2	D	i:8b98	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+40d40
+3	M	s:tailles	2
+s:sw	1
+s:lb	1
+2	D	i:8b99	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+40d40
+3	M	s:tailles	1
+s:lb	1
+2	D	i:8b9a	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+40d40
+3	M	s:tailles	1
+s:lb	1
+2	D	i:8bac	4
+3	X	s:n	9
+3	X	s:w	7
+3	SV	s:routines	8
+458c0
+47350
+46070
+42c90
+469d0
+47610
+478d0
+5c970
+3	M	s:tailles	2
+s:sh	7
+s:lh	2
+2	D	i:1af	4
+3	X	s:n	9
+3	X	s:w	6
+3	SV	s:routines	7
+487e0
+50200
+2d7ec0
+2d6fc0
+42f30
+4fb30
+2d6b90
+3	M	s:tailles	2
+s:sb	6
+s:lb	3
+2	D	i:8baa	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	5
+4de60
+56010
+42f30
+4c370
+571b0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:8bae	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+42f30
+4d380
+571b0
+4a1d0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:1a8	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+4dfc0
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:11c	4
+3	X	s:n	3c
+3	X	s:w	7
+3	SV	s:routines	57
+9a980
+28e100
+1f8580
+121980
+2b7780
+18e710
+244690
+131610
+4ef90
+96690
+f6990
+11ed10
+14fa90
+169b90
+18c290
+5eea0
+ac420
+1c52a0
+204da0
+2794a0
+27a0a0
+285920
+f5830
+1b1930
+1dd4b0
+1f6c90
+279d90
+9c940
+c32c0
+e80c0
+11fc40
+2127c0
+235240
+26fd40
+285cc0
+1c7f10
+e88d0
+18d010
+17ba50
+17c350
+212ad0
+212f50
+235bd0
+376110
+18bb60
+2133e0
+25cd60
+28dde0
+1c8310
+9a6f0
+ad670
+e4970
+110df0
+13f370
+2050f0
+225570
+28e410
+3	M	s:tailles	2
+s:sb	7
+s:lb	35
+2	D	i:11d	4
+3	X	s:n	a
+3	X	s:w	8
+3	SV	s:routines	7
+9a980
+9c940
+5eea0
+9a6f0
+4ef90
+96690
+e4970
+3	M	s:tailles	2
+s:sb	8
+s:lb	2
+2	D	i:11e	4
+3	X	s:n	7
+3	X	s:w	6
+3	SV	s:routines	7
+9a980
+9c940
+5eea0
+9a6f0
+4ef90
+96690
+e4970
+3	M	s:tailles	2
+s:sb	6
+s:lb	1
+2	D	i:10d	4
+3	X	s:n	55
+3	X	s:w	4
+3	SV	s:routines	83
+2db000
+18d010
+19e010
+177a30
+2c0e40
+177c40
+a0a60
+1cf060
+230060
+37b060
+2dba70
+200070
+2a7070
+2aa270
+179280
+2a8480
+2d9a80
+37c680
+96690
+2b5890
+231ea0
+2a78a0
+2a9ca0
+8d4b0
+2304b0
+2c8ab0
+2d7ec0
+fd4c0
+1782c0
+1d6ac0
+2bb0c0
+2a50d0
+ac4d0
+1766d0
+19ccd0
+1cf8d0
+2a42d0
+2dead0
+2d84e0
+218ee0
+1762f0
+200af0
+34c300
+3b9100
+230710
+178930
+2d8930
+2a6b40
+9c940
+1e1d40
+231b40
+242350
+a9950
+1d8550
+1e1f50
+2dcb60
+4f760
+204b60
+230f60
+2c2360
+c3370
+177570
+2a7370
+9a980
+232180
+2ba380
+9e990
+2dbd90
+fc9a0
+1777b0
+20b3b0
+2317b0
+28a5b0
+221bc0
+302bc0
+1773c0
+4f3d0
+2a5dd0
+2dcde0
+1b25e0
+2b39e0
+2239f0
+2301f0
+3	M	s:tailles	2
+s:lb	51
+s:sb	4
+2	D	i:8b9c	4
+3	X	s:n	7
+3	X	s:w	6
+3	SV	s:routines	4
+4f3d0
+50d20
+4f760
+2d7ec0
+3	M	s:tailles	2
+s:sh	6
+s:lh	1
+2	D	i:8ba0	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+4f3d0
+4f760
+3	M	s:tailles	1
+s:sh	2
+2	D	i:144	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+4fbe0
+9d240
+9a980
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:12b	4
+3	X	s:n	f
+3	X	s:w	8
+3	SV	s:routines	10
+4fbe0
+32a340
+a3c60
+328da0
+a3e50
+a4170
+2a42d0
+311550
+328bb0
+3879f0
+3	M	s:tailles	2
+s:sb	8
+s:lb	7
+2	D	i:148	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+50200
+328bb0
+328da0
+3	M	s:tailles	2
+s:sb	1
+s:lb	2
+2	D	i:8bb4	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+50d20
+3	M	s:tailles	1
+s:sh	1
+2	D	i:141	4
+3	X	s:n	c
+3	X	s:w	2
+3	SV	s:routines	10
+17bb00
+38e020
+385a40
+279780
+57eb0
+96690
+f5cd0
+385350
+38ded0
+3a4fd0
+3	M	s:tailles	2
+s:lb	a
+s:sb	2
+2	D	i:6ebd	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+5bfa0
+5d110
+38b7b0
+38f4e0
+3	M	s:tailles	2
+s:lb	3
+s:sb	2
+2	D	i:1a4	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+5bfa0
+5c4e0
+3	M	s:tailles	2
+s:sw	2
+s:lw	2
+2	D	i:8ba8	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	2
+5bfa0
+5c4e0
+3	M	s:tailles	2
+s:sh	4
+s:lh	4
+2	D	i:8ba4	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	2
+5bfa0
+5c4e0
+3	M	s:tailles	2
+s:sw	4
+s:lw	4
+2	D	i:6ebe	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	4
+5c4e0
+5d110
+38b7b0
+38f4e0
+3	M	s:tailles	2
+s:lb	3
+s:sb	2
+2	D	i:c178	4
+3	X	s:n	b
+3	X	s:w	5
+3	SV	s:routines	8
+61300
+626e0
+61240
+61180
+a05c0
+60570
+96690
+98590
+3	M	s:tailles	2
+s:lh	6
+s:sh	5
+2	D	i:83	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	8
+618c0
+a6800
+626e0
+63560
+389c20
+95c50
+a2ed0
+392270
+3	M	s:tailles	2
+s:sb	4
+s:lb	4
+2	D	i:8e	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+618c0
+63560
+3	M	s:tailles	1
+s:sb	2
+2	D	i:8d	4
+3	X	s:n	18
+3	X	s:w	6
+3	SV	s:routines	17
+618c0
+318c40
+626e0
+95340
+63560
+319060
+335920
+336740
+33b480
+a43f0
+a5590
+318490
+335fb0
+337250
+339350
+33e4b0
+33f550
+3	M	s:tailles	2
+s:sb	6
+s:lb	12
+2	D	i:aa	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+618c0
+94b90
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:181	4
+3	X	s:n	1f
+3	X	s:w	1b
+3	SV	s:routines	30
+91200
+a0e00
+92910
+94a10
+908a0
+948a0
+94ea0
+62b30
+90630
+910b0
+92bb0
+94130
+618c0
+90ac0
+90cc0
+90ec0
+920c0
+948c0
+3bccc0
+90750
+91350
+94ad0
+626e0
+63560
+91b60
+91570
+91770
+91970
+92a70
+938f0
+3	M	s:tailles	2
+s:sb	1b
+s:lb	4
+2	D	i:183	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+618c0
+62b30
+63430
+62ab0
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:bd	4
+3	X	s:n	15
+3	X	s:w	15
+3	SV	s:routines	20
+9a980
+9b980
+31f380
+318490
+96690
+3bdd90
+a08a0
+316a20
+9b630
+618c0
+95340
+9c940
+626e0
+63560
+a0a60
+9b2e0
+31df60
+9b4f0
+9ed70
+3164f0
+3	M	s:tailles	1
+s:sb	15
+2	D	i:8c20	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	2
+618c0
+61f20
+3	M	s:tailles	3
+s:sh	1
+s:sb	3
+s:lb	2
+2	D	i:ab	4
+3	X	s:n	6
+3	X	s:w	6
+3	SV	s:routines	5
+618c0
+626e0
+318c40
+96330
+3164f0
+3	M	s:tailles	1
+s:sb	6
+2	D	i:dc	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+618c0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:8c21	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	4
+618c0
+61f20
+389d20
+3bccc0
+3	M	s:tailles	2
+s:sb	3
+s:lb	4
+2	D	i:cd	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+618c0
+626e0
+3	M	s:tailles	1
+s:sb	2
+2	D	i:62	4
+3	X	s:n	4
+3	X	s:w	0
+3	SV	s:routines	4
+62150
+a6c00
+a24f0
+a23b0
+3	M	s:tailles	1
+s:lb	4
+2	D	i:63	4
+3	X	s:n	c
+3	X	s:w	2
+3	SV	s:routines	9
+95340
+a6c00
+3bd880
+951c0
+62150
+a24f0
+a23b0
+316070
+38a8d0
+3	M	s:tailles	2
+s:lb	a
+s:sb	2
+2	D	i:16	4
+3	X	s:n	1c
+3	X	s:w	10
+3	SV	s:routines	16
+316a20
+321220
+318340
+320c60
+31f380
+335d40
+3433c0
+343840
+3bd960
+62430
+62b30
+3164f0
+62ab0
+31f210
+320690
+336950
+3	M	s:tailles	4
+s:sh	d
+s:lh	8
+s:sb	3
+s:lb	4
+2	D	i:ad	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+626e0
+95340
+3	M	s:tailles	1
+s:sb	2
+2	D	i:c217	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+62b30
+3	M	s:tailles	1
+s:lb	1
+2	D	i:a5	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	3
+62b30
+62ff0
+646a0
+3	M	s:tailles	1
+s:sb	3
+2	D	i:a7	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+63560
+3	M	s:tailles	1
+s:sb	1
+2	D	i:97	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+646a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:96	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+646a0
+a6c00
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:99	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+646a0
+389c20
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:9b	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+646a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:bc	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+646a0
+2b9b20
+2b8f80
+3	M	s:tailles	2
+s:sb	1
+s:lb	2
+2	D	i:92	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+646a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:ce	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+646a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:d2	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+646a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:d3	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+646a0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:f1	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+64910
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:f0	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	2
+64910
+95c50
+3	M	s:tailles	2
+s:sb	1
+s:lb	2
+2	D	i:a3c0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+64910
+3	M	s:tailles	1
+s:sh	1
+2	D	i:b5	4
+3	X	s:n	2b
+3	X	s:w	c
+3	SV	s:routines	25
+35d100
+335310
+35a990
+30a890
+2feea0
+34dca0
+35eba0
+379420
+35b7b0
+348430
+34e430
+359ab0
+30a640
+321c40
+35bac0
+35f240
+2eea50
+2ee750
+348250
+64b60
+36bc60
+35e3f0
+3580f0
+36b570
+3a45f0
+3	M	s:tailles	2
+s:sb	c
+s:lb	1f
+2	D	i:124	4
+3	X	s:n	49
+3	X	s:w	d
+3	SV	s:routines	66
+9a980
+28e100
+1f8580
+121980
+38cd20
+1c7f10
+244690
+38c710
+96690
+9e990
+f6990
+11ed10
+131610
+14fa90
+169b90
+39ce20
+6fea0
+ac420
+1c52a0
+204da0
+2794a0
+27a0a0
+285920
+328da0
+3836a0
+96330
+f5830
+1b1930
+1dd4b0
+328bb0
+1f6c90
+329030
+39cc90
+279d90
+9c940
+c32c0
+e80c0
+2127c0
+235240
+285cc0
+a18d0
+18d010
+a3e50
+17ba50
+212ad0
+212f50
+311550
+3a06a0
+a3c60
+a3f60
+18bb60
+2133e0
+28dde0
+18c290
+313960
+329360
+110df0
+a3cf0
+a4170
+ad670
+13f370
+2050f0
+225570
+28e410
+2dba70
+35f870
+3	M	s:tailles	2
+s:lb	3c
+s:sb	d
+2	D	i:125	4
+3	X	s:n	4a
+3	X	s:w	6
+3	SV	s:routines	73
+2f9b00
+330300
+311880
+30b180
+32d580
+2f8a90
+96690
+2f2c10
+2f3010
+2f8590
+32e090
+35a990
+35b110
+3bdd90
+a08a0
+2f5720
+2fe320
+304a20
+3783a0
+3786a0
+3083d0
+3784b0
+35b7b0
+9a430
+2f9f30
+2fc3b0
+2fe4b0
+2ff5b0
+300b30
+300db0
+301030
+9c940
+2f98c0
+2fd2c0
+30d9c0
+32d840
+359e40
+35bac0
+3bc440
+378b30
+308bb0
+30dbb0
+30f0d0
+720d0
+a2ed0
+2f7550
+2fc050
+2ff950
+2ffd50
+302050
+303dd0
+306ed0
+30c8d0
+36a8d0
+71ae0
+2f32e0
+2f9360
+2fc160
+2fd3e0
+307060
+34fbe0
+361b60
+3788e0
+3bc6e0
+73270
+2f04f0
+2f6070
+3054f0
+307af0
+330870
+3526f0
+3757f0
+3bc0f0
+3	M	s:tailles	2
+s:lb	44
+s:sb	6
+2	D	i:12a	4
+3	X	s:n	13
+3	X	s:w	4
+3	SV	s:routines	19
+9a980
+377900
+351780
+9fd10
+96690
+323090
+36e610
+74ba0
+322120
+32f120
+3696b0
+352640
+350fd0
+36a8d0
+36d1d0
+a0a60
+361b60
+367560
+3757f0
+3	M	s:tailles	2
+s:lb	f
+s:sb	4
+2	D	i:12	4
+3	X	s:n	2d
+3	X	s:w	15
+3	SV	s:routines	26
+333180
+379900
+333480
+9e990
+76510
+31f210
+331d10
+332610
+334290
+9f4a0
+9f7a0
+316a20
+3315a0
+339020
+37c020
+381920
+31d130
+332340
+31df60
+320c60
+331fe0
+342060
+3426e0
+9ed70
+9ec70
+3164f0
+3	M	s:tailles	4
+s:lb	16
+s:sh	9
+s:lh	2
+s:sb	c
+2	D	i:8e34	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+7b0a0
+7bf10
+7c1a0
+3	M	s:tailles	2
+s:sw	3
+s:lw	3
+2	D	i:180	4
+3	X	s:n	34
+3	X	s:w	1a
+3	SV	s:routines	26
+90c00
+90e00
+91000
+91200
+91490
+908a0
+910b0
+916b0
+918b0
+91ab0
+922b0
+92330
+923b0
+92430
+90ac0
+90cc0
+90ec0
+920c0
+90750
+91350
+909e0
+91b60
+91570
+91770
+91970
+92a70
+3	M	s:tailles	2
+s:sb	1a
+s:lb	1a
+2	D	i:184	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+931d0
+94150
+3	M	s:tailles	1
+s:lw	2
+2	D	i:188	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+931d0
+94150
+3	M	s:tailles	1
+s:lw	2
+2	D	i:18c	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+931d0
+94150
+3	M	s:tailles	1
+s:lw	2
+2	D	i:190	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+931d0
+94150
+3	M	s:tailles	1
+s:lw	2
+2	D	i:8e3d	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+94ea0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:e8	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+94ea0
+3bccc0
+3	M	s:tailles	1
+s:sb	2
+2	D	i:134	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	6
+95040
+9a6f0
+28caf0
+9a570
+28a5b0
+30f0d0
+3	M	s:tailles	2
+s:sb	4
+s:lb	4
+2	D	i:118	4
+3	X	s:n	8
+3	X	s:w	2
+3	SV	s:routines	6
+95040
+951c0
+392270
+392590
+391bf0
+3b8b50
+3	M	s:tailles	2
+s:lb	6
+s:sb	2
+2	D	i:12d	4
+3	X	s:n	8
+3	X	s:w	7
+3	SV	s:routines	7
+95040
+9c940
+95340
+a0a60
+9c0a0
+96330
+96690
+3	M	s:tailles	2
+s:lb	1
+s:sb	7
+2	D	i:58	4
+3	X	s:n	9
+3	X	s:w	1
+3	SV	s:routines	4
+951c0
+a6c00
+95340
+a23b0
+3	M	s:tailles	2
+s:lh	8
+s:sb	1
+2	D	i:5a	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	3
+951c0
+a6c00
+a23b0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:5c	4
+3	X	s:n	9
+3	X	s:w	1
+3	SV	s:routines	4
+951c0
+a6c00
+a24f0
+95340
+3	M	s:tailles	2
+s:lh	8
+s:sb	1
+2	D	i:5e	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	3
+951c0
+a6c00
+a24f0
+3	M	s:tailles	2
+s:sh	2
+s:lh	3
+2	D	i:b0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+95340
+3	M	s:tailles	1
+s:sw	1
+2	D	i:b8	4
+3	X	s:n	6
+3	X	s:w	5
+3	SV	s:routines	6
+95340
+a0a60
+a05c0
+96690
+9ed70
+3bdd90
+3	M	s:tailles	2
+s:sb	5
+s:lb	1
+2	D	i:ba	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+95340
+3	M	s:tailles	1
+s:sb	1
+2	D	i:104	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	2
+95340
+3bdd90
+3	M	s:tailles	1
+s:sb	3
+2	D	i:147	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+95340
+960f0
+3	M	s:tailles	1
+s:sb	2
+2	D	i:168	4
+3	X	s:n	c
+3	X	s:w	2
+3	SV	s:routines	12
+95340
+a5f40
+a49e0
+318c40
+971c0
+31ca20
+960f0
+95c50
+979b0
+a43f0
+319430
+31b890
+3	M	s:tailles	2
+s:sb	2
+s:lb	a
+2	D	i:15d	4
+3	X	s:n	d
+3	X	s:w	3
+3	SV	s:routines	9
+95340
+a5f40
+ab5a0
+960f0
+96690
+a8ab0
+2a1630
+37c3f0
+3a4fd0
+3	M	s:tailles	2
+s:sb	3
+s:lb	a
+2	D	i:8e3a	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+95340
+3	M	s:tailles	1
+s:sh	1
+2	D	i:8e38	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+95340
+3	M	s:tailles	1
+s:sb	1
+2	D	i:8e39	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+95340
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c3a0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+95340
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c3a1	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+95340
+3	M	s:tailles	1
+s:sb	1
+2	D	i:108	4
+3	X	s:n	f
+3	X	s:w	4
+3	SV	s:routines	8
+95340
+9d240
+a0a60
+9a980
+9ed70
+96690
+3a6a10
+3a74d0
+3	M	s:tailles	2
+s:sb	4
+s:lb	b
+2	D	i:11f	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+95340
+96690
+3	M	s:tailles	1
+s:sb	2
+2	D	i:14c	4
+3	X	s:n	8
+3	X	s:w	6
+3	SV	s:routines	7
+95340
+a50e0
+960f0
+a43f0
+97d10
+96690
+a5590
+3	M	s:tailles	2
+s:sh	6
+s:lh	2
+2	D	i:121	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+95340
+a50e0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:122	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+95340
+a50e0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:15e	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+95340
+a50e0
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:13f	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	6
+a65a0
+1a0bc0
+96330
+9b350
+97470
+96690
+3	M	s:tailles	2
+s:sb	3
+s:lb	3
+2	D	i:105	4
+3	X	s:n	c
+3	X	s:w	4
+3	SV	s:routines	11
+9d240
+225320
+382040
+a0a60
+a1980
+96690
+9ed70
+9fdb0
+ac4d0
+37c3f0
+37eff0
+3	M	s:tailles	2
+s:sb	4
+s:lb	8
+2	D	i:10b	4
+3	X	s:n	b0
+3	X	s:w	3d
+3	SV	s:routines	61
+9a980
+110f00
+27a180
+11f500
+14fd80
+2b7880
+96690
+c3e10
+11f890
+11fa10
+121a90
+212890
+225a10
+2135b0
+17c120
+18e820
+1c8420
+1dd720
+2137a0
+235d20
+2795b0
+9fdb0
+ad430
+11f1b0
+11f330
+169e30
+18bcb0
+18d3b0
+204eb0
+212bb0
+244a60
+e8a40
+1b1dc0
+1c5fc0
+1f87c0
+213040
+225640
+2359c0
+28dec0
+11f650
+c42d0
+11fd50
+25ddd0
+28e1d0
+270c60
+a0a60
+ad960
+f5ae0
+f6c60
+13fde0
+17c460
+1c80e0
+1f7160
+205360
+9ed70
+acf70
+e8570
+131970
+279e70
+285af0
+28e4f0
+3	M	s:tailles	2
+s:sb	3d
+s:lb	73
+2	D	i:12c	4
+3	X	s:n	33
+3	X	s:w	16
+3	SV	s:routines	45
+9b980
+379900
+9fa80
+9a980
+380200
+380900
+384880
+96690
+37d110
+37f890
+380b10
+380d90
+9c0a0
+379ca0
+37b5a0
+37b9a0
+382f20
+37d720
+37b3a0
+37af30
+37fa30
+3810b0
+3868b0
+37ddc0
+37e540
+37f440
+381240
+383140
+37abd0
+3813d0
+381ad0
+9be60
+a0a60
+37a3e0
+37b060
+37b660
+37bae0
+37e160
+9ed70
+37a0f0
+37a4f0
+37a870
+37bc70
+37d9f0
+381e70
+3	M	s:tailles	2
+s:sb	16
+s:lb	1d
+2	D	i:162	4
+3	X	s:n	7
+3	X	s:w	4
+3	SV	s:routines	5
+328da0
+9a980
+96690
+2dba70
+328bb0
+3	M	s:tailles	2
+s:sb	4
+s:lb	3
+2	D	i:15f	4
+3	X	s:n	10
+3	X	s:w	7
+3	SV	s:routines	16
+31df60
+3315a0
+320c60
+a08a0
+332340
+332580
+333180
+3333c0
+96690
+31f210
+9a570
+331d10
+331f50
+334290
+3344d0
+3bdd90
+3	M	s:tailles	2
+s:sb	7
+s:lb	9
+2	D	i:143	4
+3	X	s:n	10
+3	X	s:w	3
+3	SV	s:routines	15
+a0a60
+a1980
+37cbe0
+9a980
+9c0a0
+3816e0
+389700
+389e60
+96690
+9fdb0
+c3370
+3796d0
+37d110
+37d4d0
+37dbd0
+3	M	s:tailles	2
+s:sb	3
+s:lb	d
+2	D	i:163	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+96690
+a65a0
+3	M	s:tailles	1
+s:sb	2
+2	D	i:140	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+96690
+3b7320
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:146	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+96690
+9a980
+3	M	s:tailles	1
+s:sb	2
+2	D	i:123	4
+3	X	s:n	6c
+3	X	s:w	69
+3	SV	s:routines	103
+201e10
+202a10
+203010
+295810
+222210
+30ec10
+1f4c20
+139020
+1bba20
+1c2820
+221020
+23fa20
+278e20
+11b630
+1bfa30
+210030
+345a30
+e7a40
+145c40
+139650
+149e50
+1c1a60
+201c60
+202e60
+138c80
+1c0080
+206080
+24da80
+96690
+1f2090
+f4aa0
+117ca0
+1c20a0
+f50b0
+21d8b0
+26f6b0
+11d2c0
+24e8d0
+25c6d0
+269ed0
+d28e0
+d10e0
+149ce0
+198ee0
+21b8e0
+13e4f0
+21e4f0
+d1f00
+22c300
+26e500
+145f10
+e1d20
+223120
+25b520
+1c0920
+128130
+223530
+117340
+12ff40
+21d350
+199150
+1bcd50
+1f5f50
+21cf50
+293b50
+278760
+221960
+21f160
+e4970
+e8570
+11e570
+146170
+21b770
+266770
+9a980
+e5580
+13cb80
+1bc580
+20f580
+e7390
+222590
+233790
+26df90
+292990
+e75a0
+1167a0
+21f3a0
+1db7a0
+23f5a0
+1bddb0
+23c5b0
+25afb0
+137bc0
+1ed9c0
+2069c0
+2941c0
+11a5d0
+137dd0
+1c45d0
+1d5fd0
+2937d0
+1f51e0
+21b3e0
+3	M	s:tailles	2
+s:sb	69
+s:lb	3
+2	D	i:13e	4
+3	X	s:n	7
+3	X	s:w	4
+3	SV	s:routines	4
+96690
+234f20
+9a980
+354a20
+3	M	s:tailles	2
+s:sb	4
+s:lb	3
+2	D	i:110	4
+3	X	s:n	b
+3	X	s:w	2
+3	SV	s:routines	9
+382040
+38e020
+385a40
+37c3f0
+96690
+37eff0
+385350
+38ded0
+3a4fd0
+3	M	s:tailles	2
+s:sb	2
+s:lb	9
+2	D	i:178	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	4
+96690
+9a430
+31f380
+a65a0
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:149	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+96690
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c3b6	4
+3	X	s:n	8
+3	X	s:w	3
+3	SV	s:routines	6
+9c940
+389700
+388d80
+388ac0
+96690
+3890d0
+3	M	s:tailles	2
+s:sh	3
+s:lh	5
+2	D	i:c3b5	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	5
+389700
+9c940
+388ac0
+9ec70
+96690
+3	M	s:tailles	2
+s:sb	5
+s:lb	3
+2	D	i:174	4
+3	X	s:n	6
+3	X	s:w	5
+3	SV	s:routines	3
+96690
+321220
+a49e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	5
+2	D	i:137	4
+3	X	s:n	7
+3	X	s:w	5
+3	SV	s:routines	4
+96690
+a0200
+9d240
+a18b0
+3	M	s:tailles	2
+s:sb	5
+s:lb	2
+2	D	i:b9	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+96690
+2d7a90
+3	M	s:tailles	2
+s:sb	1
+s:lb	1
+2	D	i:10c	4
+3	X	s:n	8
+3	X	s:w	4
+3	SV	s:routines	6
+9a980
+9c940
+9d240
+a16f0
+a16d0
+2bd0b0
+3	M	s:tailles	2
+s:sb	4
+s:lb	4
+2	D	i:127	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	2
+9a980
+a2ed0
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:135	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+9a980
+2ab220
+2b6060
+3	M	s:tailles	2
+s:sb	3
+s:lb	2
+2	D	i:15a	4
+3	X	s:n	11
+3	X	s:w	2
+3	SV	s:routines	16
+9a980
+e8940
+9c940
+a1980
+17c3c0
+18e780
+1c8380
+235c40
+37b060
+37bae0
+9ed70
+9e990
+11fcb0
+2b77f0
+2bd0b0
+37c680
+3	M	s:tailles	2
+s:sb	2
+s:lb	f
+2	D	i:13a	4
+3	X	s:n	d
+3	X	s:w	3
+3	SV	s:routines	11
+9a980
+9f800
+9d240
+a1980
+9f4a0
+9ed70
+9e990
+9fdb0
+a9950
+376110
+383330
+3	M	s:tailles	2
+s:sh	3
+s:lh	a
+2	D	i:13c	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	4
+9a980
+9d240
+a1980
+9fdb0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:8e8c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+9a980
+a2760
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8e8e	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+9a980
+a2900
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8e90	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+9a980
+a2aa0
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:8e92	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+9a980
+a2c40
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:145	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+9a980
+3	M	s:tailles	1
+s:sb	1
+2	D	i:132	4
+3	X	s:n	4
+3	X	s:w	4
+3	SV	s:routines	2
+9a980
+9d240
+3	M	s:tailles	1
+s:sb	4
+2	D	i:133	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	2
+9a980
+9d240
+3	M	s:tailles	1
+s:sb	3
+2	D	i:6eb8	4
+3	X	s:n	c
+3	X	s:w	3
+3	SV	s:routines	9
+9be60
+37c020
+37c680
+9c0a0
+37c1f0
+37c3f0
+390a30
+391190
+3912d0
+3	M	s:tailles	2
+s:lb	9
+s:sb	3
+2	D	i:10a	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+9c940
+a1710
+3	M	s:tailles	2
+s:lb	2
+s:sb	2
+2	D	i:161	4
+3	X	s:n	8
+3	X	s:w	5
+3	SV	s:routines	4
+9d240
+37c680
+37b3a0
+37bae0
+3	M	s:tailles	2
+s:sb	5
+s:lb	3
+2	D	i:120	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	3
+9d240
+382040
+37eff0
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:171	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+a4170
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:131	4
+3	X	s:n	2
+3	X	s:w	0
+3	SV	s:routines	2
+a43f0
+a5590
+3	M	s:tailles	1
+s:lb	2
+2	D	i:114	4
+3	X	s:n	9
+3	X	s:w	2
+3	SV	s:routines	6
+a49e0
+ab5a0
+a43f0
+a8ab0
+a5590
+3a4fd0
+3	M	s:tailles	2
+s:sh	2
+s:lh	7
+2	D	i:172	4
+3	X	s:n	2
+3	X	s:w	2
+3	SV	s:routines	2
+a49e0
+321220
+3	M	s:tailles	1
+s:sh	2
+2	D	i:111	4
+3	X	s:n	3
+3	X	s:w	3
+3	SV	s:routines	2
+a49e0
+318ed0
+3	M	s:tailles	1
+s:sb	3
+2	D	i:ae	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	2
+a6800
+38e890
+3	M	s:tailles	4
+s:sh	1
+s:lh	1
+s:lb	2
+s:sb	1
+2	D	i:68	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	1
+s:sh	1
+2	D	i:60	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:64	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:67	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	1
+s:sb	1
+2	D	i:59	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	1
+s:sb	1
+2	D	i:5d	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	1
+s:sb	1
+2	D	i:1c4	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	2
+s:lb	1
+s:sb	1
+2	D	i:1c5	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c204	4
+3	X	s:n	4
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	2
+s:sh	1
+s:lh	3
+2	D	i:c206	4
+3	X	s:n	4
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	2
+s:sh	1
+s:lh	3
+2	D	i:c20c	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	2
+s:lh	2
+s:sh	3
+2	D	i:c20e	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	2
+s:lh	2
+s:sh	3
+2	D	i:1c0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+a6c00
+3	M	s:tailles	1
+s:sw	1
+2	D	i:56	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+a78a0
+3	M	s:tailles	2
+s:lh	1
+s:sh	1
+2	D	i:85	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+a7b10
+3	M	s:tailles	1
+s:sb	1
+2	D	i:12e	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+a7bd0
+a9370
+a8890
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:9eb0	4
+3	X	s:n	11
+3	X	s:w	8
+3	SV	s:routines	7
+a88e0
+a8410
+a8890
+a8ab0
+a7bd0
+a9790
+a97d0
+3	M	s:tailles	2
+s:sh	8
+s:lh	9
+2	D	i:9eb2	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	3
+a7bd0
+a8a00
+a7e50
+3	M	s:tailles	2
+s:sh	4
+s:lh	2
+2	D	i:9eb4	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+a7bd0
+a8ab0
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:6ebc	4
+3	X	s:n	8
+3	X	s:w	3
+3	SV	s:routines	5
+3908e0
+391ad0
+ac050
+391990
+3be8d0
+3	M	s:tailles	2
+s:lb	5
+s:sb	3
+2	D	i:152	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ac050
+3	M	s:tailles	1
+s:sh	1
+2	D	i:16e	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ac050
+3	M	s:tailles	1
+s:sh	1
+2	D	i:150	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+ac050
+3	M	s:tailles	1
+s:sh	1
+2	D	i:6eb9	4
+3	X	s:n	12
+3	X	s:w	3
+3	SV	s:routines	15
+130b20
+2244e0
+224040
+2e3620
+2348a0
+2f69c0
+317ba0
+31e2c0
+1c6190
+16a6d0
+320690
+324730
+3904f0
+391450
+391590
+3	M	s:tailles	2
+s:lb	f
+s:sb	3
+2	D	i:14a	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+13f370
+3	M	s:tailles	1
+s:lb	1
+2	D	i:9edc	4
+3	X	s:n	5
+3	X	s:w	2
+3	SV	s:routines	2
+29f410
+29fce0
+3	M	s:tailles	2
+s:lh	3
+s:sh	2
+2	D	i:9ee0	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+29fce0
+3	M	s:tailles	1
+s:sw	1
+2	D	i:c32c	4
+3	X	s:n	2d
+3	X	s:w	10
+3	SV	s:routines	19
+3abf00
+3b4300
+3b5680
+2c8710
+3b4aa0
+3b57a0
+3b63b0
+3b41b0
+3b5330
+3b4f40
+3b5050
+3b53d0
+3b5450
+3b5650
+2a2760
+3af4e0
+3b5770
+3b44f0
+3b5170
+3	M	s:tailles	2
+s:lb	1d
+s:sb	10
+2	D	i:c338	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	4
+2b09b0
+2bce30
+3b4aa0
+3b41b0
+3	M	s:tailles	2
+s:lh	3
+s:sh	3
+2	D	i:a3b9	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+2dd930
+3	M	s:tailles	2
+s:sb	2
+s:lb	2
+2	D	i:a3a8	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	1
+2df210
+3	M	s:tailles	2
+s:sh	2
+s:lh	1
+2	D	i:a3b4	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+2df210
+3	M	s:tailles	1
+s:sw	1
+2	D	i:a3b7	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+2df210
+3	M	s:tailles	1
+s:lb	1
+2	D	i:a3aa	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+2df210
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:a3b6	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+2df210
+3	M	s:tailles	1
+s:lb	1
+2	D	i:a3ac	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+2df210
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:a3b5	4
+3	X	s:n	1
+3	X	s:w	0
+3	SV	s:routines	1
+2df210
+3	M	s:tailles	1
+s:lb	1
+2	D	i:14e	4
+3	X	s:n	7
+3	X	s:w	1
+3	SV	s:routines	6
+311440
+30ec10
+30fdd0
+312170
+391bf0
+39f830
+3	M	s:tailles	2
+s:sh	1
+s:lh	6
+2	D	i:b1c4	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+30ec10
+310420
+310d50
+3	M	s:tailles	2
+s:sb	1
+s:lb	2
+2	D	i:b24c	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+313a80
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:b248	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	1
+313a80
+3	M	s:tailles	2
+s:sh	2
+s:lh	2
+2	D	i:b24a	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+313a80
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:17	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	7
+316a20
+33ee80
+3164f0
+318490
+335fb0
+336cd0
+33ed90
+3	M	s:tailles	2
+s:sb	3
+s:lb	4
+2	D	i:13	4
+3	X	s:n	a
+3	X	s:w	5
+3	SV	s:routines	7
+379900
+381920
+316a20
+320c60
+3164f0
+31d130
+3bedb0
+3	M	s:tailles	2
+s:sb	5
+s:lb	5
+2	D	i:15	4
+3	X	s:n	6
+3	X	s:w	1
+3	SV	s:routines	3
+320b10
+320d20
+3433c0
+3	M	s:tailles	2
+s:lb	5
+s:sb	1
+2	D	i:b	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+321a50
+3	M	s:tailles	1
+s:sb	1
+2	D	i:b364	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+335920
+3	M	s:tailles	1
+s:sw	1
+2	D	i:b360	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+335920
+3	M	s:tailles	1
+s:sw	1
+2	D	i:6ebb	4
+3	X	s:n	7
+3	X	s:w	3
+3	SV	s:routines	4
+34c5d0
+391710
+391850
+390790
+3	M	s:tailles	2
+s:lb	4
+s:sb	3
+2	D	i:c0bc	4
+3	X	s:n	4
+3	X	s:w	0
+3	SV	s:routines	1
+372760
+3	M	s:tailles	1
+s:lw	4
+2	D	i:6e82	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	1
+386a40
+3	M	s:tailles	2
+s:lh	2
+s:sh	1
+2	D	i:6e80	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	3
+386a40
+386f50
+3870a0
+3	M	s:tailles	3
+s:lh	2
+s:sh	1
+s:sw	1
+2	D	i:bca4	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+387370
+3873f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bca8	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+387370
+3873f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcac	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+387370
+3873f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcb0	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+387370
+3873f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcb4	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+387370
+3873f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:bcb8	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+387370
+3873f0
+3	M	s:tailles	2
+s:lw	1
+s:sw	1
+2	D	i:c3b8	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	3
+388ac0
+389040
+3890d0
+3	M	s:tailles	2
+s:lh	2
+s:sh	1
+2	D	i:bcbc	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+388e70
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:6e92	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38b7b0
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6e94	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38b7b0
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ea6	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38b7b0
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec7	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38b7b0
+38f4e0
+3929d0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea8	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38b7b0
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec8	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38b7b0
+392a70
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e96	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ebf	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392be0
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e98	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec0	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392c60
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e9a	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec1	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392ce0
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e9c	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec2	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392d60
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6e9e	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec3	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392de0
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea0	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec4	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392e60
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea2	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec5	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392ee0
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6ea4	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38bc20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec6	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38bc20
+392f60
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eaa	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38c710
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ec9	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38c710
+393070
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eac	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38c710
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6eca	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38c710
+393110
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eae	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38c710
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ecb	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38c710
+38f4e0
+3931b0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eb0	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38c710
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ecc	4
+3	X	s:n	6
+3	X	s:w	2
+3	SV	s:routines	3
+38c710
+393250
+38f4e0
+3	M	s:tailles	2
+s:lb	4
+s:sb	2
+2	D	i:6eb2	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38cd20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ecd	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	4
+38cd20
+3933c0
+38f4e0
+3935d0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:6eb4	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	2
+38cd20
+38f4e0
+3	M	s:tailles	2
+s:lh	1
+s:sh	2
+2	D	i:6ece	4
+3	X	s:n	7
+3	X	s:w	2
+3	SV	s:routines	4
+38cd20
+393460
+393670
+38f4e0
+3	M	s:tailles	2
+s:lb	5
+s:sb	2
+2	D	i:bcd0	4
+3	X	s:n	4
+3	X	s:w	2
+3	SV	s:routines	2
+38ded0
+38e020
+3	M	s:tailles	2
+s:sw	2
+s:lw	2
+2	D	i:bccc	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+38ded0
+3	M	s:tailles	1
+s:sw	1
+2	D	i:af	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+38e890
+3	M	s:tailles	1
+s:sb	1
+2	D	i:c371	4
+3	X	s:n	3
+3	X	s:w	2
+3	SV	s:routines	3
+38f4e0
+3b30f0
+3b39b0
+3	M	s:tailles	2
+s:sb	2
+s:lb	1
+2	D	i:71b8	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3900b0
+3	M	s:tailles	1
+s:sh	1
+2	D	i:71bc	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+3900b0
+39f600
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:71c0	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+3900b0
+39f600
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:6eb6	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+390240
+390e70
+390b80
+3	M	s:tailles	2
+s:sb	3
+s:lb	3
+2	D	i:6e84	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+390240
+390e70
+390b80
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6eb7	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+390240
+390e70
+390b80
+3	M	s:tailles	2
+s:sb	3
+s:lb	3
+2	D	i:6e86	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+390240
+390e70
+390b80
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6e8a	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+3904f0
+391450
+391590
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6eba	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+390640
+3	M	s:tailles	1
+s:sb	1
+2	D	i:6e8c	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+390640
+3	M	s:tailles	1
+s:sh	1
+2	D	i:6e8e	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+390790
+391710
+391850
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6e90	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+3908e0
+391990
+391ad0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:6e88	4
+3	X	s:n	5
+3	X	s:w	3
+3	SV	s:routines	3
+390a30
+391190
+3912d0
+3	M	s:tailles	2
+s:sh	3
+s:lh	2
+2	D	i:c174	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	2
+391e50
+391f80
+3	M	s:tailles	2
+s:sh	1
+s:lh	1
+2	D	i:c176	4
+3	X	s:n	3
+3	X	s:w	1
+3	SV	s:routines	2
+391e50
+391f80
+3	M	s:tailles	2
+s:sh	1
+s:lh	2
+2	D	i:11a	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	2
+392270
+392590
+3	M	s:tailles	2
+s:sh	4
+s:lh	2
+2	D	i:be54	4
+3	X	s:n	2
+3	X	s:w	1
+3	SV	s:routines	1
+399440
+3	M	s:tailles	2
+s:sw	1
+s:lw	1
+2	D	i:be58	4
+3	X	s:n	b
+3	X	s:w	5
+3	SV	s:routines	1
+399440
+3	M	s:tailles	4
+s:sw	1
+s:lh	4
+s:sh	4
+s:lw	2
+2	D	i:c3aa	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	4
+3b2d00
+3b45e0
+3b41b0
+3b3fd0
+3	M	s:tailles	2
+s:lb	1
+s:sb	4
+2	D	i:c3a4	4
+3	X	s:n	b
+3	X	s:w	7
+3	SV	s:routines	5
+3b2fc0
+3b45e0
+3b3fd0
+3b41b0
+3b47d0
+3	M	s:tailles	2
+s:lh	4
+s:sh	7
+2	D	i:c322	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	3
+3b3fd0
+3b4d50
+3b41b0
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:c3a2	4
+3	X	s:n	c
+3	X	s:w	7
+3	SV	s:routines	4
+3b3fd0
+3b45e0
+3b41b0
+3b47d0
+3	M	s:tailles	2
+s:sh	7
+s:lh	5
+2	D	i:c3a6	4
+3	X	s:n	6
+3	X	s:w	3
+3	SV	s:routines	3
+3b3fd0
+3b45e0
+3b47d0
+3	M	s:tailles	2
+s:sh	3
+s:lh	3
+2	D	i:c3a8	4
+3	X	s:n	a
+3	X	s:w	5
+3	SV	s:routines	4
+3b3fd0
+3b45e0
+3b41b0
+3b47d0
+3	M	s:tailles	2
+s:sb	5
+s:lb	5
+2	D	i:c3a9	4
+3	X	s:n	5
+3	X	s:w	4
+3	SV	s:routines	3
+3b3fd0
+3b45e0
+3b47d0
+3	M	s:tailles	2
+s:sb	4
+s:lb	1
+2	D	i:c323	4
+3	X	s:n	7
+3	X	s:w	5
+3	SV	s:routines	2
+3b41b0
+3b4d50
+3	M	s:tailles	2
+s:sb	5
+s:lb	2
+2	D	i:c321	4
+3	X	s:n	6
+3	X	s:w	4
+3	SV	s:routines	2
+3b41b0
+3b4aa0
+3	M	s:tailles	2
+s:sb	4
+s:lb	2
+2	D	i:c330	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3b41b0
+3	M	s:tailles	1
+s:sb	1
+2	D	i:106	4
+3	X	s:n	1
+3	X	s:w	1
+3	SV	s:routines	1
+3bdd90
+3	M	s:tailles	1
+s:sb	1
+1	D	s:orig	2
+2	D	s:ro5	570
+3	SV	i:be	1
+be
+3	SV	i:12e	1
+12e
+3	SV	i:9eb0	1
+9eb0
+3	SV	i:9eb2	1
+9eb2
+3	SV	i:9eb4	1
+9eb4
+3	SV	i:c200	1
+c000
+3	SV	i:138	1
+138
+3	SV	i:ac	1
+ac
+3	SV	i:15d	1
+15d
+3	SV	i:90	1
+90
+3	SV	i:109	1
+109
+3	SV	i:102	1
+102
+3	SV	i:114	1
+114
+3	SV	i:6ebc	1
+6ebc
+3	SV	i:152	1
+152
+3	SV	i:16e	1
+16e
+3	SV	i:150	1
+150
+3	SV	i:bd	1
+bd
+3	SV	i:71b8	1
+71b8
+3	SV	i:71bc	1
+71bc
+3	SV	i:71c0	1
+71c0
+3	SV	i:8182	1
+8182
+3	SV	i:149	1
+149
+3	SV	i:8	1
+8
+3	SV	i:c	1
+c
+3	SV	i:e	1
+e
+3	SV	i:805a	1
+805a
+3	SV	i:805b	1
+805b
+3	SV	i:805c	1
+805c
+3	SV	i:805d	1
+805d
+3	SV	i:805e	1
+805e
+3	SV	i:805f	1
+805f
+3	SV	i:8060	1
+8060
+3	SV	i:8029	1
+8029
+3	SV	i:817e	1
+817e
+3	SV	i:8018	1
+8018
+3	SV	i:801c	1
+801c
+3	SV	i:8020	1
+8020
+3	SV	i:8092	1
+8092
+3	SV	i:8094	1
+8094
+3	SV	i:8026	1
+8026
+3	SV	i:802c	1
+802c
+3	SV	i:802d	1
+802d
+3	SV	i:8032	1
+8032
+3	SV	i:8000	1
+8000
+3	SV	i:8004	1
+8004
+3	SV	i:802a	1
+802a
+3	SV	i:802e	1
+802e
+3	SV	i:8030	1
+8030
+3	SV	i:8008	1
+8008
+3	SV	i:800c	1
+800c
+3	SV	i:8010	1
+8010
+3	SV	i:8012	1
+8012
+3	SV	i:8014	1
+8014
+3	SV	i:63	1
+63
+3	SV	i:a8	1
+a8
+3	SV	i:c140	1
+bf40
+3	SV	i:8068	1
+8068
+3	SV	i:22	1
+22
+3	SV	i:24	1
+24
+3	SV	i:806a	1
+806a
+3	SV	i:26	1
+26
+3	SV	i:28	1
+28
+3	SV	i:806c	1
+806c
+3	SV	i:2a	1
+2a
+3	SV	i:2c	1
+2c
+3	SV	i:c130	1
+bf30
+3	SV	i:c134	1
+bf34
+3	SV	i:c138	1
+bf38
+3	SV	i:806e	1
+806e
+3	SV	i:32	1
+32
+3	SV	i:8070	1
+8070
+3	SV	i:3a	1
+3a
+3	SV	i:8019	1
+8019
+3	SV	i:801d	1
+801d
+3	SV	i:8021	1
+8021
+3	SV	i:8061	1
+8061
+3	SV	i:8062	1
+8062
+3	SV	i:8063	1
+8063
+3	SV	i:8084	1
+8084
+3	SV	i:8086	1
+8086
+3	SV	i:8088	1
+8088
+3	SV	i:8065	1
+8065
+3	SV	i:8066	1
+8066
+3	SV	i:8028	1
+8028
+3	SV	i:184	1
+184
+3	SV	i:188	1
+188
+3	SV	i:18c	1
+18c
+3	SV	i:190	1
+190
+3	SV	i:c170	1
+bf70
+3	SV	i:8096	1
+8096
+3	SV	i:8098	1
+8098
+3	SV	i:809a	1
+809a
+3	SV	i:809c	1
+809c
+3	SV	i:100	1
+100
+3	SV	i:2e	1
+2e
+3	SV	i:160	1
+160
+3	SV	i:808a	1
+808a
+3	SV	i:8090	1
+8090
+3	SV	i:808c	1
+808c
+3	SV	i:808e	1
+808e
+3	SV	i:8072	1
+8072
+3	SV	i:8074	1
+8074
+3	SV	i:8076	1
+8076
+3	SV	i:8078	1
+8078
+3	SV	i:8016	1
+8016
+3	SV	i:807a	1
+807a
+3	SV	i:807e	1
+807e
+3	SV	i:8080	1
+8080
+3	SV	i:8082	1
+8082
+3	SV	i:8034	1
+8034
+3	SV	i:8038	1
+8038
+3	SV	i:803a	1
+803a
+3	SV	i:803c	1
+803c
+3	SV	i:803e	1
+803e
+3	SV	i:8040	1
+8040
+3	SV	i:8042	1
+8042
+3	SV	i:8044	1
+8044
+3	SV	i:8046	1
+8046
+3	SV	i:8048	1
+8048
+3	SV	i:804a	1
+804a
+3	SV	i:804c	1
+804c
+3	SV	i:804e	1
+804e
+3	SV	i:8050	1
+8050
+3	SV	i:8052	1
+8052
+3	SV	i:8054	1
+8054
+3	SV	i:8056	1
+8056
+3	SV	i:8058	1
+8058
+3	SV	i:182	1
+182
+3	SV	i:d	1
+d
+3	SV	i:803b	1
+803b
+3	SV	i:807c	1
+807c
+3	SV	i:8064	1
+8064
+3	SV	i:95	1
+95
+3	SV	i:94	1
+94
+3	SV	i:e4	1
+e4
+3	SV	i:89	1
+89
+3	SV	i:86	1
+86
+3	SV	i:1f8	1
+1f8
+3	SV	i:1fc	1
+1fc
+3	SV	i:1fe	1
+1fe
+3	SV	i:9eaa	1
+9eaa
+3	SV	i:9eab	1
+9eab
+3	SV	i:9eac	1
+9eac
+3	SV	i:9ead	1
+9ead
+3	SV	i:e5	1
+e5
+3	SV	i:a6	1
+a6
+3	SV	i:bf	1
+bf
+3	SV	i:838c	1
+838c
+3	SV	i:8388	1
+8388
+3	SV	i:c144	1
+bf44
+3	SV	i:c148	1
+bf48
+3	SV	i:c14c	1
+bf4c
+3	SV	i:c150	1
+bf50
+3	SV	i:c13c	1
+bf3c
+3	SV	i:c158	1
+bf58
+3	SV	i:3c	1
+3c
+3	SV	i:3e	1
+3e
+3	SV	i:81	1
+81
+3	SV	i:84	1
+84
+3	SV	i:34	1
+34
+3	SV	i:c154	1
+bf54
+3	SV	i:a9	1
+a9
+3	SV	i:15c	1
+15c
+3	SV	i:10e	1
+10e
+3	SV	i:107	1
+107
+3	SV	i:8b90	1
+8b90
+3	SV	i:8b94	1
+8b94
+3	SV	i:8b92	1
+8b92
+3	SV	i:8b96	1
+8b96
+3	SV	i:8b98	1
+8b98
+3	SV	i:8bac	1
+8bac
+3	SV	i:1af	1
+1af
+3	SV	i:8baa	1
+8baa
+3	SV	i:8bae	1
+8bae
+3	SV	i:1a8	1
+1a8
+3	SV	i:11c	1
+11c
+3	SV	i:11d	1
+11d
+3	SV	i:11e	1
+11e
+3	SV	i:10d	1
+10d
+3	SV	i:8a	1
+8a
+3	SV	i:8b9c	1
+8b9c
+3	SV	i:8ba0	1
+8ba0
+3	SV	i:144	1
+144
+3	SV	i:12b	1
+12b
+3	SV	i:148	1
+148
+3	SV	i:8bb4	1
+8bb4
+3	SV	i:a1	1
+a1
+3	SV	i:141	1
+141
+3	SV	i:6ebd	1
+6ebd
+3	SV	i:1a4	1
+1a4
+3	SV	i:8ba8	1
+8ba8
+3	SV	i:8ba4	1
+8ba4
+3	SV	i:6ebe	1
+6ebe
+3	SV	i:bb	1
+bb
+3	SV	i:128	1
+128
+3	SV	i:83	1
+83
+3	SV	i:0	1
+0
+3	SV	i:8e	1
+8e
+3	SV	i:8d	1
+8d
+3	SV	i:aa	1
+aa
+3	SV	i:181	1
+181
+3	SV	i:183	1
+183
+3	SV	i:8f	1
+8f
+3	SV	i:8c20	1
+8c20
+3	SV	i:ab	1
+ab
+3	SV	i:dc	1
+dc
+3	SV	i:c3a5	1
+c1a3
+3	SV	i:8c21	1
+8c21
+3	SV	i:80	1
+80
+3	SV	i:cd	1
+cd
+3	SV	i:e9	1
+e9
+3	SV	i:4	1
+4
+3	SV	i:6	1
+6
+3	SV	i:10	1
+10
+3	SV	i:14	1
+14
+3	SV	i:2	1
+2
+3	SV	i:62	1
+62
+3	SV	i:ad	1
+ad
+3	SV	i:c218	1
+c018
+3	SV	i:c217	1
+c017
+3	SV	i:c210	1
+c010
+3	SV	i:a4	1
+a4
+3	SV	i:c212	1
+c012
+3	SV	i:a5	1
+a5
+3	SV	i:c314	1
+c114
+3	SV	i:c39e	1
+c19c
+3	SV	i:c39f	1
+c19d
+3	SV	i:c320	1
+c120
+3	SV	i:a7	1
+a7
+3	SV	i:8b	1
+8b
+3	SV	i:b4	1
+b4
+3	SV	i:b8	1
+b8
+3	SV	i:ba	1
+ba
+3	SV	i:104	1
+104
+3	SV	i:12d	1
+12d
+3	SV	i:168	1
+168
+3	SV	i:130	1
+130
+3	SV	i:e0	1
+e0
+3	SV	i:8c24	1
+8c24
+3	SV	i:8c25	1
+8c25
+3	SV	i:8c26	1
+8c26
+3	SV	i:8c27	1
+8c27
+3	SV	i:c38c	1
+c18c
+3	SV	i:10a	1
+10a
+3	SV	i:a	1
+a
+3	SV	i:6eb9	1
+6eb9
+3	SV	i:8c52	1
+8c52
+3	SV	i:b	1
+b
+3	SV	i:c38e	1
+c18e
+3	SV	i:8c28	1
+8c28
+3	SV	i:8c2c	1
+8c2c
+3	SV	i:8c2a	1
+8c2a
+3	SV	i:8c30	1
+8c30
+3	SV	i:8c34	1
+8c34
+3	SV	i:8c40	1
+8c40
+3	SV	i:8c42	1
+8c42
+3	SV	i:c15c	1
+bf5c
+3	SV	i:c160	1
+bf60
+3	SV	i:c164	1
+bf64
+3	SV	i:8c4a	1
+8c4a
+3	SV	i:8c4c	1
+8c4c
+3	SV	i:c168	1
+bf68
+3	SV	i:c16c	1
+bf6c
+3	SV	i:8c31	1
+8c31
+3	SV	i:dd	1
+dd
+3	SV	i:8d15	1
+8d15
+3	SV	i:8d14	1
+8d14
+3	SV	i:8c81	1
+8c81
+3	SV	i:8c54	1
+8c54
+3	SV	i:8c58	1
+8c58
+3	SV	i:8c5c	1
+8c5c
+3	SV	i:8c60	1
+8c60
+3	SV	i:16	1
+16
+3	SV	i:8c7c	1
+8c7c
+3	SV	i:8c35	1
+8c35
+3	SV	i:8c36	1
+8c36
+3	SV	i:17	1
+17
+3	SV	i:8c80	1
+8c80
+3	SV	i:8c37	1
+8c37
+3	SV	i:8c38	1
+8c38
+3	SV	i:8c39	1
+8c39
+3	SV	i:6eba	1
+6eba
+3	SV	i:8c2e	1
+8c2e
+3	SV	i:12	1
+12
+3	SV	i:8c83	1
+8c83
+3	SV	i:8c64	1
+8c64
+3	SV	i:8c68	1
+8c68
+3	SV	i:8c6c	1
+8c6c
+3	SV	i:8c70	1
+8c70
+3	SV	i:8c3d	1
+8c3d
+3	SV	i:15	1
+15
+3	SV	i:8c78	1
+8c78
+3	SV	i:8c76	1
+8c76
+3	SV	i:8c7e	1
+8c7e
+3	SV	i:8c7a	1
+8c7a
+3	SV	i:8c79	1
+8c79
+3	SV	i:8c75	1
+8c75
+3	SV	i:8c77	1
+8c77
+3	SV	i:8c82	1
+8c82
+3	SV	i:97	1
+97
+3	SV	i:98	1
+98
+3	SV	i:96	1
+96
+3	SV	i:99	1
+99
+3	SV	i:9a	1
+9a
+3	SV	i:9b	1
+9b
+3	SV	i:bc	1
+bc
+3	SV	i:92	1
+92
+3	SV	i:ce	1
+ce
+3	SV	i:d2	1
+d2
+3	SV	i:d3	1
+d3
+3	SV	i:a0	1
+a0
+3	SV	i:a2	1
+a2
+3	SV	i:a3	1
+a3
+3	SV	i:de	1
+de
+3	SV	i:df	1
+df
+3	SV	i:f1	1
+f1
+3	SV	i:f0	1
+f0
+3	SV	i:a3c0	1
+a3c0
+3	SV	i:b5	1
+b5
+3	SV	i:125	1
+125
+3	SV	i:12a	1
+12a
+3	SV	i:a3bc	1
+a3bc
+3	SV	i:c0bc	1
+be48
+3	SV	i:8e34	1
+8e34
+3	SV	i:180	1
+180
+3	SV	i:60	1
+64
+3	SV	i:5e	1
+5e
+3	SV	i:5d	1
+5d
+3	SV	i:1c4	1
+1c4
+3	SV	i:5a	1
+5a
+3	SV	i:58	1
+58
+3	SV	i:5c	2
+5c
+c006
+3	SV	i:c208	1
+c008
+3	SV	i:c20c	1
+c00c
+3	SV	i:c204	1
+c004
+3	SV	i:c20a	1
+c00a
+3	SV	i:c20e	1
+c00e
+3	SV	i:c21a	1
+c01a
+3	SV	i:c214	1
+c014
+3	SV	i:c216	1
+c016
+3	SV	i:4a	1
+4a
+3	SV	i:4e	1
+4e
+3	SV	i:52	1
+52
+3	SV	i:4c	1
+4c
+3	SV	i:50	1
+50
+3	SV	i:54	1
+54
+3	SV	i:56	1
+56
+3	SV	i:85	1
+85
+3	SV	i:13a	1
+13a
+3	SV	i:124	1
+124
+3	SV	i:6e92	1
+6e92
+3	SV	i:6e94	1
+6e94
+3	SV	i:6ea6	1
+6ea6
+3	SV	i:6ec7	1
+6ec7
+3	SV	i:6ea8	1
+6ea8
+3	SV	i:6ec8	1
+6ec8
+3	SV	i:6e96	1
+6e96
+3	SV	i:6ebf	1
+6ebf
+3	SV	i:6e98	1
+6e98
+3	SV	i:6ec0	1
+6ec0
+3	SV	i:6e9a	1
+6e9a
+3	SV	i:6ec1	1
+6ec1
+3	SV	i:6e9c	1
+6e9c
+3	SV	i:6ec2	1
+6ec2
+3	SV	i:6e9e	1
+6e9e
+3	SV	i:6ec3	1
+6ec3
+3	SV	i:6ea0	1
+6ea0
+3	SV	i:6ec4	1
+6ec4
+3	SV	i:6ea2	1
+6ea2
+3	SV	i:6ec5	1
+6ec5
+3	SV	i:6ea4	1
+6ea4
+3	SV	i:6ec6	1
+6ec6
+3	SV	i:6eaa	1
+6eaa
+3	SV	i:6ec9	1
+6ec9
+3	SV	i:6eac	1
+6eac
+3	SV	i:6eca	1
+6eca
+3	SV	i:6eae	1
+6eae
+3	SV	i:6ecb	1
+6ecb
+3	SV	i:6eb0	1
+6eb0
+3	SV	i:6ecc	1
+6ecc
+3	SV	i:6eb2	1
+6eb2
+3	SV	i:6ecd	1
+6ecd
+3	SV	i:6eb4	1
+6eb4
+3	SV	i:6ece	1
+6ece
+3	SV	i:110	1
+110
+3	SV	i:bcd0	1
+ba60
+3	SV	i:bccc	1
+ba5c
+3	SV	i:ae	1
+ae
+3	SV	i:af	1
+af
+3	SV	i:71b6	1
+71b6
+3	SV	i:71ba	1
+71ba
+3	SV	i:71be	1
+71be
+3	SV	i:c371	1
+c171
+3	SV	i:8c	1
+8c
+3	SV	i:6eb6	1
+6eb6
+3	SV	i:6e84	1
+6e84
+3	SV	i:6eb7	1
+6eb7
+3	SV	i:6e86	1
+6e86
+3	SV	i:6e8a	1
+6e8a
+3	SV	i:6e8c	1
+6e8c
+3	SV	i:6ebb	1
+6ebb
+3	SV	i:6e8e	1
+6e8e
+3	SV	i:6e90	1
+6e90
+3	SV	i:6eb8	1
+6eb8
+3	SV	i:6e88	1
+6e88
+3	SV	i:6e80	1
+6e80
+3	SV	i:bca4	1
+ba34
+3	SV	i:bca8	1
+ba38
+3	SV	i:bcac	1
+ba3c
+3	SV	i:bcb0	1
+ba40
+3	SV	i:bcb4	1
+ba44
+3	SV	i:bcb8	1
+ba48
+3	SV	i:30	1
+30
+3	SV	i:38	1
+38
+3	SV	i:6a	1
+6a
+3	SV	i:88	1
+88
+3	SV	i:d1	1
+d1
+3	SV	i:176	1
+176
+3	SV	i:10f	1
+10f
+3	SV	i:143	1
+143
+3	SV	i:12c	1
+12c
+3	SV	i:13	1
+13
+3	SV	i:15a	1
+15a
+3	SV	i:161	1
+161
+3	SV	i:105	1
+105
+3	SV	i:120	1
+120
+3	SV	i:156	1
+156
+3	SV	i:158	1
+158
+3	SV	i:134	1
+134
+3	SV	i:108	1
+108
+3	SV	i:c32c	1
+c12c
+3	SV	i:14a	1
+14a
+3	SV	i:106	1
+106
+3	SV	i:147	1
+147
+3	SV	i:11f	1
+11f
+3	SV	i:bcc0	1
+ba50
+3	SV	i:118	1
+118
+3	SV	i:14e	1
+14e
+3	SV	i:11a	1
+11a
+3	SV	i:be58	1
+bbe8
+3	SV	i:be54	1
+bbe4
+3	SV	i:170	1
+170
+3	SV	i:b24c	1
+b00c
+3	SV	i:b248	1
+b008
+3	SV	i:b24a	1
+b00a
+3	SV	i:123	1
+123
+3	SV	i:b1c4	1
+af84
+3	SV	i:133	1
+133
+3	SV	i:132	1
+132
+3	SV	i:b9	1
+b9
+3	SV	i:162	1
+162
+3	SV	i:a3b9	1
+a3b9
+3	SV	i:a3a8	1
+a3a8
+3	SV	i:a3b4	1
+a3b4
+3	SV	i:a3b7	1
+a3b7
+3	SV	i:a3aa	1
+a3aa
+3	SV	i:a3b6	1
+a3b6
+3	SV	i:a3ac	1
+a3ac
+3	SV	i:a3b5	1
+a3b5
+3	SV	i:9ea4	1
+9ea4
+3	SV	i:b350	1
+b110
+3	SV	i:b354	1
+b114
+3	SV	i:b358	1
+b118
+3	SV	i:b35c	1
+b11c
+3	SV	i:15f	1
+15f
+3	SV	i:112	1
+112
+3	SV	i:b364	1
+b124
+3	SV	i:b360	1
+b120
+3	SV	i:172	1
+172
+3	SV	i:b448	1
+b1d8
+3	SV	i:b44a	1
+b1da
+3	SV	i:b44c	1
+b1dc
+3	SV	i:14c	1
+14c
+3	SV	i:13e	1
+13e
+3	SV	i:113	1
+113
+3	SV	i:1a	1
+1a
+3	SV	i:b982	1
+b712
+3	SV	i:b98a	1
+b71a
+3	SV	i:b992	1
+b722
+3	SV	i:b99a	1
+b72a
+3	SV	i:b9a2	1
+b732
+3	SV	i:b9aa	1
+b73a
+3	SV	i:b9b2	1
+b742
+3	SV	i:b9ba	1
+b74a
+3	SV	i:b9c2	1
+b752
+3	SV	i:b9ca	1
+b75a
+3	SV	i:b9d2	1
+b762
+3	SV	i:b9da	1
+b76a
+3	SV	i:b9e2	1
+b772
+3	SV	i:b9ea	1
+b77a
+3	SV	i:b9f2	1
+b782
+3	SV	i:b9fa	1
+b78a
+3	SV	i:ba02	1
+b792
+3	SV	i:ba10	2
+b7a0
+b7a2
+3	SV	i:13c	1
+13c
+3	SV	i:9edc	1
+9edc
+3	SV	i:9ee0	1
+9ee0
+3	SV	i:135	1
+135
+3	SV	i:c338	1
+c138
+3	SV	i:10b	1
+10b
+3	SV	i:10c	1
+10c
+3	SV	i:c370	1
+c170
+3	SV	i:145	1
+145
+3	SV	i:146	1
+146
+3	SV	i:f	1
+f
+3	SV	i:9ea2	1
+9ea2
+3	SV	i:9ea0	1
+9ea0
+3	SV	i:8e8c	1
+8e8c
+3	SV	i:8e8e	1
+8e8e
+3	SV	i:8e90	1
+8e90
+3	SV	i:8e92	1
+8e92
+3	SV	i:127	1
+127
+3	SV	i:171	1
+171
+3	SV	i:174	1
+174
+3	SV	i:111	1
+111
+3	SV	i:137	1
+137
+3	SV	i:116	1
+116
+3	SV	i:178	1
+178
+3	SV	i:8e3d	1
+8e3d
+3	SV	i:e8	1
+e8
+3	SV	i:13f	1
+13f
+3	SV	i:17a	1
+17a
+3	SV	i:163	1
+163
+3	SV	i:c37a	1
+c17a
+3	SV	i:140	1
+140
+3	SV	i:c372	7
+c1a5
+c1a6
+c172
+c173
+c174
+c176
+c177
+3	SV	i:c373	2
+c175
+c1a7
+3	SV	i:c327	1
+c127
+3	SV	i:c328	1
+c128
+3	SV	i:c329	1
+c129
+3	SV	i:c32d	1
+c12d
+3	SV	i:c32e	1
+c12e
+3	SV	i:c325	1
+c125
+3	SV	i:c326	1
+c126
+3	SV	i:c336	1
+c136
+3	SV	i:c331	1
+c131
+3	SV	i:c32f	1
+c12f
+3	SV	i:c32b	1
+c12b
+3	SV	i:c334	1
+c134
+3	SV	i:c335	1
+c135
+3	SV	i:c39a	1
+c198
+3	SV	i:c394	1
+c192
+3	SV	i:c316	1
+c116
+3	SV	i:c30c	1
+c10c
+3	SV	i:c30d	1
+c10d
+3	SV	i:c30e	1
+c10e
+3	SV	i:c30f	1
+c10f
+3	SV	i:c312	1
+c112
+3	SV	i:c313	1
+c113
+3	SV	i:c318	1
+c118
+3	SV	i:c319	1
+c119
+3	SV	i:c31a	1
+c11a
+3	SV	i:c31b	1
+c11b
+3	SV	i:c31e	1
+c11e
+3	SV	i:c31f	1
+c11f
+3	SV	i:c31c	1
+c11c
+3	SV	i:c31d	1
+c11d
+3	SV	i:c39c	1
+c19a
+3	SV	i:c39d	1
+c19b
+3	SV	i:c310	1
+c110
+3	SV	i:c311	1
+c111
+3	SV	i:c322	1
+c122
+3	SV	i:c392	1
+c190
+3	SV	i:c396	1
+c194
+3	SV	i:c398	1
+c196
+3	SV	i:c399	1
+c197
+3	SV	i:c323	1
+c123
+3	SV	i:c321	1
+c121
+3	SV	i:c330	1
+c130
+2	D	s:ro9	369
+3	SV	i:be	1
+be
+3	SV	i:12e	1
+12e
+3	SV	i:9eb0	1
+9eb0
+3	SV	i:9eb2	1
+9eb2
+3	SV	i:9eb4	1
+9eb4
+3	SV	i:c200	1
+c000
+3	SV	i:138	3
+138
+8c2a
+8066
+3	SV	i:ac	1
+ac
+3	SV	i:15d	1
+15d
+3	SV	i:109	1
+109
+3	SV	i:102	1
+102
+3	SV	i:114	1
+114
+3	SV	i:6ebc	1
+6ebc
+3	SV	i:8	1
+8
+3	SV	i:22	1
+22
+3	SV	i:24	1
+24
+3	SV	i:26	1
+26
+3	SV	i:28	1
+28
+3	SV	i:2a	1
+2a
+3	SV	i:2c	1
+2c
+3	SV	i:95	1
+95
+3	SV	i:94	1
+94
+3	SV	i:e4	1
+e4
+3	SV	i:90	1
+90
+3	SV	i:89	1
+89
+3	SV	i:86	1
+86
+3	SV	i:1f8	1
+1f8
+3	SV	i:1fc	1
+1fc
+3	SV	i:1fe	1
+1fe
+3	SV	i:9eaa	1
+9eaa
+3	SV	i:9eab	1
+9eab
+3	SV	i:9eac	1
+9eac
+3	SV	i:9ead	1
+9ead
+3	SV	i:e5	1
+e5
+3	SV	i:a6	1
+a6
+3	SV	i:bf	1
+bf
+3	SV	i:838c	1
+838c
+3	SV	i:8388	1
+8388
+3	SV	i:c144	1
+bf44
+3	SV	i:c130	1
+bf30
+3	SV	i:c148	1
+bf48
+3	SV	i:c134	1
+bf34
+3	SV	i:c14c	1
+bf4c
+3	SV	i:c138	1
+bf38
+3	SV	i:c150	1
+bf50
+3	SV	i:c13c	1
+bf3c
+3	SV	i:c158	1
+bf58
+3	SV	i:3a	1
+3a
+3	SV	i:3c	1
+3c
+3	SV	i:3e	1
+3e
+3	SV	i:81	1
+81
+3	SV	i:84	1
+84
+3	SV	i:34	1
+34
+3	SV	i:c154	1
+bf54
+3	SV	i:c140	1
+bf40
+3	SV	i:a9	1
+a9
+3	SV	i:15c	1
+15c
+3	SV	i:10e	1
+10e
+3	SV	i:107	1
+107
+3	SV	i:8b90	1
+8b90
+3	SV	i:8b94	1
+8b94
+3	SV	i:8b92	1
+8b92
+3	SV	i:8b96	1
+8b96
+3	SV	i:8bac	1
+8bac
+3	SV	i:1af	1
+1af
+3	SV	i:8bae	1
+8bae
+3	SV	i:8baa	1
+8baa
+3	SV	i:11c	1
+11c
+3	SV	i:11d	1
+11d
+3	SV	i:11e	1
+11e
+3	SV	i:a1	1
+a1
+3	SV	i:141	1
+141
+3	SV	i:6ebd	1
+6ebd
+3	SV	i:1a4	1
+1a4
+3	SV	i:8ba8	1
+8ba8
+3	SV	i:8ba4	1
+8ba4
+3	SV	i:6ebe	1
+6ebe
+3	SV	i:bb	1
+bb
+3	SV	i:100	1
+100
+3	SV	i:128	1
+128
+3	SV	i:32	1
+32
+3	SV	i:83	1
+83
+3	SV	i:0	1
+0
+3	SV	i:8e	1
+8e
+3	SV	i:a8	1
+a8
+3	SV	i:8d	1
+8d
+3	SV	i:aa	1
+aa
+3	SV	i:181	1
+181
+3	SV	i:182	1
+182
+3	SV	i:183	1
+183
+3	SV	i:8f	1
+8f
+3	SV	i:bd	1
+bd
+3	SV	i:8c20	1
+8c20
+3	SV	i:ab	1
+ab
+3	SV	i:dc	1
+dc
+3	SV	i:8c21	1
+8c21
+3	SV	i:80	1
+80
+3	SV	i:cd	1
+cd
+3	SV	i:4	1
+4
+3	SV	i:c	1
+c
+3	SV	i:10	1
+10
+3	SV	i:14	1
+14
+3	SV	i:2	1
+2
+3	SV	i:62	1
+62
+3	SV	i:63	1
+63
+3	SV	i:c218	1
+c018
+3	SV	i:c217	1
+c017
+3	SV	i:e9	1
+e9
+3	SV	i:c210	1
+c010
+3	SV	i:a4	1
+a4
+3	SV	i:c212	1
+c012
+3	SV	i:a5	1
+a5
+3	SV	i:c314	1
+c114
+3	SV	i:c320	1
+c120
+3	SV	i:a7	1
+a7
+3	SV	i:97	1
+97
+3	SV	i:98	1
+98
+3	SV	i:96	1
+96
+3	SV	i:99	1
+99
+3	SV	i:9a	1
+9a
+3	SV	i:9b	1
+9b
+3	SV	i:bc	1
+bc
+3	SV	i:92	1
+92
+3	SV	i:ce	1
+ce
+3	SV	i:d2	1
+d2
+3	SV	i:d3	1
+d3
+3	SV	i:a0	1
+a0
+3	SV	i:a2	1
+a2
+3	SV	i:a3	1
+a3
+3	SV	i:de	1
+de
+3	SV	i:df	1
+df
+3	SV	i:f1	1
+f1
+3	SV	i:f0	1
+f0
+3	SV	i:a3c0	1
+a3c0
+3	SV	i:b5	1
+b5
+3	SV	i:125	1
+125
+3	SV	i:10d	1
+10d
+3	SV	i:8a	1
+8a
+3	SV	i:180	1
+180
+3	SV	i:184	1
+184
+3	SV	i:188	1
+188
+3	SV	i:18c	1
+18c
+3	SV	i:190	1
+190
+3	SV	i:60	1
+64
+3	SV	i:5e	1
+5e
+3	SV	i:5d	1
+5d
+3	SV	i:1c4	1
+1c4
+3	SV	i:5a	1
+5a
+3	SV	i:58	1
+58
+3	SV	i:5c	2
+5c
+c006
+3	SV	i:c208	1
+c008
+3	SV	i:c20c	1
+c00c
+3	SV	i:c204	1
+c004
+3	SV	i:c20a	1
+c00a
+3	SV	i:c20e	1
+c00e
+3	SV	i:c21a	1
+c01a
+3	SV	i:c214	1
+c014
+3	SV	i:c216	1
+c016
+3	SV	i:4a	1
+4a
+3	SV	i:4e	1
+4e
+3	SV	i:52	1
+52
+3	SV	i:4c	1
+4c
+3	SV	i:50	1
+50
+3	SV	i:54	1
+54
+3	SV	i:56	1
+56
+3	SV	i:2e	1
+2e
+3	SV	i:85	1
+85
+3	SV	i:e0	1
+e0
+3	SV	i:e	1
+e
+3	SV	i:a	1
+a
+3	SV	i:16	1
+16
+3	SV	i:6e92	1
+6e92
+3	SV	i:6e94	1
+6e94
+3	SV	i:6ea6	1
+6ea6
+3	SV	i:6ec7	1
+6ec7
+3	SV	i:6ea8	1
+6ea8
+3	SV	i:6ec8	1
+6ec8
+3	SV	i:6e96	1
+6e96
+3	SV	i:6ebf	1
+6ebf
+3	SV	i:6e98	1
+6e98
+3	SV	i:6ec0	1
+6ec0
+3	SV	i:6e9a	1
+6e9a
+3	SV	i:6ec1	1
+6ec1
+3	SV	i:6e9c	1
+6e9c
+3	SV	i:6ec2	1
+6ec2
+3	SV	i:6e9e	1
+6e9e
+3	SV	i:6ec3	1
+6ec3
+3	SV	i:6ea0	1
+6ea0
+3	SV	i:6ec4	1
+6ec4
+3	SV	i:6ea2	1
+6ea2
+3	SV	i:6ec5	1
+6ec5
+3	SV	i:6ea4	1
+6ea4
+3	SV	i:6ec6	1
+6ec6
+3	SV	i:124	1
+124
+3	SV	i:6eaa	1
+6eaa
+3	SV	i:6ec9	1
+6ec9
+3	SV	i:6eac	1
+6eac
+3	SV	i:6eca	1
+6eca
+3	SV	i:6eae	1
+6eae
+3	SV	i:6ecb	1
+6ecb
+3	SV	i:6eb0	1
+6eb0
+3	SV	i:6ecc	1
+6ecc
+3	SV	i:6eb2	1
+6eb2
+3	SV	i:6ecd	1
+6ecd
+3	SV	i:6eb4	1
+6eb4
+3	SV	i:6ece	1
+6ece
+3	SV	i:110	1
+110
+3	SV	i:bcd0	1
+ba60
+3	SV	i:bccc	1
+ba5c
+3	SV	i:ae	1
+ae
+3	SV	i:af	1
+af
+3	SV	i:71b6	1
+71b6
+3	SV	i:71ba	1
+71ba
+3	SV	i:71be	1
+71be
+3	SV	i:c371	1
+c171
+3	SV	i:71b8	1
+71b8
+3	SV	i:71bc	1
+71bc
+3	SV	i:71c0	1
+71c0
+3	SV	i:8c	1
+8c
+3	SV	i:8b	1
+8b
+3	SV	i:6eb6	1
+6eb6
+3	SV	i:6e84	1
+6e84
+3	SV	i:6eb7	1
+6eb7
+3	SV	i:6e86	1
+6e86
+3	SV	i:6eb9	1
+6eb9
+3	SV	i:6e8a	1
+6e8a
+3	SV	i:6eb8	2
+6eb8
+6eba
+3	SV	i:6e88	2
+6e88
+6e8c
+3	SV	i:6ebb	1
+6ebb
+3	SV	i:6e8e	1
+6e8e
+3	SV	i:6e90	1
+6e90
+3	SV	i:6e80	1
+6e80
+3	SV	i:bca4	1
+ba34
+3	SV	i:bca8	1
+ba38
+3	SV	i:bcac	1
+ba3c
+3	SV	i:bcb0	1
+ba40
+3	SV	i:bcb4	1
+ba44
+3	SV	i:bcb8	1
+ba48
+3	SV	i:30	1
+30
+3	SV	i:38	1
+38
+3	SV	i:6a	1
+6a
+3	SV	i:88	1
+88
+3	SV	i:d1	1
+d1
+3	SV	i:130	1
+130
+3	SV	i:176	1
+176
+3	SV	i:10f	1
+10f
+3	SV	i:b4	1
+b4
+3	SV	i:143	1
+143
+3	SV	i:12c	1
+12c
+3	SV	i:12	1
+12
+3	SV	i:13	1
+13
+3	SV	i:15a	1
+15a
+3	SV	i:161	1
+161
+3	SV	i:105	1
+105
+3	SV	i:120	1
+120
+3	SV	i:13a	2
+13a
+17a
+3	SV	i:156	1
+156
+3	SV	i:158	1
+158
+3	SV	i:134	1
+134
+3	SV	i:108	1
+108
+3	SV	i:c32c	1
+c12c
+3	SV	i:12b	1
+12b
+3	SV	i:118	1
+118
+3	SV	i:14e	1
+14e
+3	SV	i:11a	1
+11a
+3	SV	i:be58	1
+bbe8
+3	SV	i:be54	1
+bbe4
+3	SV	i:170	1
+170
+3	SV	i:b24c	1
+b00c
+3	SV	i:b248	1
+b008
+3	SV	i:b24a	1
+b00a
+3	SV	i:123	1
+123
+3	SV	i:b1c4	1
+af84
+3	SV	i:b9	1
+b9
+3	SV	i:8b9c	1
+8b9c
+3	SV	i:162	1
+162
+3	SV	i:a3a8	1
+a3a8
+3	SV	i:a3b4	1
+a3b4
+3	SV	i:a3b7	1
+a3b7
+3	SV	i:a3aa	1
+a3aa
+3	SV	i:a3b6	1
+a3b6
+3	SV	i:a3ac	1
+a3ac
+3	SV	i:a3b5	1
+a3b5
+3	SV	i:12a	1
+12a
+3	SV	i:148	1
+148
+3	SV	i:15f	1
+15f
+3	SV	i:b364	1
+b124
+3	SV	i:b360	1
+b120
+3	SV	i:17	1
+17
+3	SV	i:15	1
+15
+3	SV	i:13e	1
+13e
+3	SV	i:c0bc	1
+be48
+3	SV	i:9edc	1
+9edc
+3	SV	i:9ee0	1
+9ee0
+3	SV	i:c338	1
+c138
+3	SV	i:10b	1
+10b
+3	SV	i:c370	1
+c170
+3	SV	i:8e8c	1
+8e8c
+3	SV	i:8e8e	1
+8e8e
+3	SV	i:8e90	1
+8e90
+3	SV	i:8e92	1
+8e92
+3	SV	i:127	1
+127
+3	SV	i:171	1
+171
+3	SV	i:168	1
+168
+3	SV	i:116	1
+116
+3	SV	i:178	1
+178
+3	SV	i:172	1
+172
+3	SV	i:174	1
+174
+3	SV	i:b	1
+b
+3	SV	i:8e3d	1
+8e3d
+3	SV	i:e8	1
+e8
+3	SV	i:12d	1
+12d
+3	SV	i:147	1
+147
+3	SV	i:14c	1
+14c
+3	SV	i:13f	1
+13f
+3	SV	i:10c	1
+10c
+3	SV	i:135	1
+135
+3	SV	i:13c	1
+13c
+3	SV	i:144	1
+144
+3	SV	i:146	1
+146
+3	SV	i:145	1
+145
+3	SV	i:132	1
+132
+3	SV	i:133	1
+133
+3	SV	i:b8	1
+b8
+3	SV	i:10a	1
+10a
+3	SV	i:c372	9
+c1a5
+c1a6
+c1a7
+c172
+c173
+c174
+c175
+c176
+c177
+3	SV	i:c327	1
+c127
+3	SV	i:c328	1
+c128
+3	SV	i:c329	1
+c129
+3	SV	i:c32d	1
+c12d
+3	SV	i:c32e	1
+c12e
+3	SV	i:c325	1
+c125
+3	SV	i:c326	1
+c126
+3	SV	i:c336	1
+c136
+3	SV	i:c331	1
+c131
+3	SV	i:c32f	1
+c12f
+3	SV	i:c32b	1
+c12b
+3	SV	i:c334	1
+c134
+3	SV	i:c335	1
+c135
+3	SV	i:6	1
+6
+3	SV	i:c3aa	1
+c198
+3	SV	i:c3a4	1
+c192
+3	SV	i:c316	1
+c116
+3	SV	i:c30c	1
+c10c
+3	SV	i:c30d	1
+c10d
+3	SV	i:c30e	1
+c10e
+3	SV	i:c30f	1
+c10f
+3	SV	i:c312	1
+c112
+3	SV	i:c313	1
+c113
+3	SV	i:c318	1
+c118
+3	SV	i:c319	1
+c119
+3	SV	i:c31a	1
+c11a
+3	SV	i:c31b	1
+c11b
+3	SV	i:c31e	1
+c11e
+3	SV	i:c31f	1
+c11f
+3	SV	i:c31c	1
+c11c
+3	SV	i:c31d	1
+c11d
+3	SV	i:c3ac	1
+c19a
+3	SV	i:c3ad	1
+c19b
+3	SV	i:c310	1
+c110
+3	SV	i:c311	1
+c111
+3	SV	i:c322	1
+c122
+3	SV	i:c3a2	1
+c190
+3	SV	i:c3a6	1
+c194
+3	SV	i:c3a8	1
+c196
+3	SV	i:c3a9	1
+c197
+3	SV	i:c323	1
+c123
+3	SV	i:c321	1
+c121
+3	SV	i:c330	1
+c130

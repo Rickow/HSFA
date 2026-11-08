@@ -98,7 +98,9 @@ Ils tournent dans deux environnements :
 **En cours (pas dans cette release)**
 
 - **Voie B, « Hyper + Arcade »** : mode Arcade d'Upper greffé sur Hyper (« ro9 augmenté », pilote `sfa3hahsfa`), avec
-  Upper comme oracle ; versions d'essai pour l'instant ; ensuite : décors SFA1 / SFA2 extraits de l'ISO avec leurs
+  Upper comme oracle ; versions d'essai pour l'instant. **Construction expérimentale depuis l'ISO** (état ro9a35b) :
+  `hsfa_build.py --jeux hyperarcade` ; avec la ROM d'arcade et la table du rejeu, zip de ro9a35b à l'octet hors
+  `hsfa_info.txt` ([guide §6](docs/guide/construction-iso.md)). Ensuite : décors SFA1 / SFA2 extraits de l'ISO avec leurs
   animations, puis les quatre persos MAX ([architecture](docs/architecture/voie-b-greffe.md)).
 - **Upper MAX** : Eagle, Maki, Yun et Ingrid (SFA3 MAX, PSP) dans Upper, pilote `sfa3umhsfa`. **Construction expérimentale
   depuis vos deux disques** (Anthology PS2 + ISO PSP européenne de *SFA3 MAX*, ULES-00235), rien d'autre à installer

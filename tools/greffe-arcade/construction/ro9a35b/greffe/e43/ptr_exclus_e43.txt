@@ -1,0 +1,7081 @@
+# (etape 4) cases (adresse d'execution PS2 d'Upper) dont le long n'est pas un pointeur de code : paires de mots de script
+# de fin (etape4/compare_script.py). Format : adresse  commentaire
+918f28  fin de Ken : mots $4200 $0030 (68K Upper $CB4448, script +$228) pris pour 0x114200
+91c204  fin du perso u_ : long $00250301 (paire de mots de script)
+91c210  fin du perso u_ : long $00270301 (paire de mots de script)
+91c21c  fin du perso u_ : long $00300301 (paire de mots de script)
+91c250  fin du perso u_ : long $003c0038 (paire de mots de script)
+91c254  fin du perso u_ : long $003c0301 (paire de mots de script)
+91c2bc  fin du perso u_ : long $002c00f0 (paire de mots de script)
+91c2d8  fin du perso u_ : long $00340000 (paire de mots de script)
+91c2e4  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c318  fin du perso u_ : long $00340000 (paire de mots de script)
+91c324  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c330  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c360  fin du perso u_ : long $00492831 (paire de mots de script)
+91c36c  fin du perso u_ : long $00360008 (paire de mots de script)
+91c370  fin du perso u_ : long $00880301 (paire de mots de script)
+91c384  fin du perso u_ : long $00491812 (paire de mots de script)
+91c3a0  fin du perso u_ : long $00340002 (paire de mots de script)
+91c470  fin du perso u_ : long $00b10301 (paire de mots de script)
+91c4ec  fin du perso u_ : long $009a00c0 (paire de mots de script)
+91c4f4  fin du perso u_ : long $00b40301 (paire de mots de script)
+91c56c  fin du perso u_ : long $00b70301 (paire de mots de script)
+91c580  fin du perso u_ : long $003c00ba (paire de mots de script)
+91c6a0  fin du perso u_ : long $00340000 (paire de mots de script)
+91c6ac  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c6b8  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c6c4  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c6f4  fin du perso u_ : long $004900f0 (paire de mots de script)
+91c74c  fin du perso u_ : long $00340000 (paire de mots de script)
+91c758  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c764  fin du perso u_ : long $003400d0 (paire de mots de script)
+91c778  fin du perso u_ : long $00b40200 (paire de mots de script)
+91b9ac  fin du perso 05 : long $00340050 (paire de mots de script)
+91ba28  fin du perso 05 : long $00340000 (paire de mots de script)
+91ba38  fin du perso 05 : long $0038000d (paire de mots de script)
+91ba80  fin du perso 05 : long $00340000 (paire de mots de script)
+91ba84  fin du perso 05 : long $00480010 (paire de mots de script)
+91ba90  fin du perso 05 : long $00480019 (paire de mots de script)
+91baa8  fin du perso 05 : long $00280301 (paire de mots de script)
+91bac8  fin du perso 05 : long $002c0301 (paire de mots de script)
+91bb04  fin du perso 05 : long $005d0000 (paire de mots de script)
+91bb14  fin du perso 05 : long $00340301 (paire de mots de script)
+91bb18  fin du perso 05 : long $00340000 (paire de mots de script)
+91bb40  fin du perso 05 : long $00500301 (paire de mots de script)
+91bb58  fin du perso 05 : long $00520301 (paire de mots de script)
+91bbc4  fin du perso 05 : long $00710301 (paire de mots de script)
+91bc00  fin du perso 05 : long $008f0301 (paire de mots de script)
+91e394  fin du perso 08 : long $00340000 (paire de mots de script)
+91e3a0  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e3c8  fin du perso 08 : long $00310000 (paire de mots de script)
+91e404  fin du perso 08 : long $00340000 (paire de mots de script)
+91e41c  fin du perso 08 : long $00340000 (paire de mots de script)
+91e428  fin du perso 08 : long $003400e0 (paire de mots de script)
+91e434  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e464  fin du perso 08 : long $00280301 (paire de mots de script)
+91e48c  fin du perso 08 : long $00340010 (paire de mots de script)
+91e498  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e4a4  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e4b0  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e4f0  fin du perso 08 : long $00291832 (paire de mots de script)
+91e50c  fin du perso 08 : long $00400301 (paire de mots de script)
+91e524  fin du perso 08 : long $00340000 (paire de mots de script)
+91e530  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e53c  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e560  fin du perso 08 : long $00300003 (paire de mots de script)
+91e564  fin du perso 08 : long $00520301 (paire de mots de script)
+91e568  fin du perso 08 : long $00340010 (paire de mots de script)
+91e574  fin du perso 08 : long $003400d0 (paire de mots de script)
+91e5ac  fin du perso 08 : long $00560301 (paire de mots de script)
+91e5b0  fin du perso 08 : long $00340010 (paire de mots de script)
+91e5d0  fin du perso 08 : long $005a0301 (paire de mots de script)
+91e5d4  fin du perso 08 : long $00340010 (paire de mots de script)
+91e5e0  fin du perso 08 : long $003400d0 (paire de mots de script)
+9205c0  fin du perso 0c : long $00340000 (paire de mots de script)
+9205f0  fin du perso 0c : long $00340000 (paire de mots de script)
+920610  fin du perso 0c : long $005d0000 (paire de mots de script)
+92062c  fin du perso 0c : long $00300301 (paire de mots de script)
+92065c  fin du perso 0c : long $00380301 (paire de mots de script)
+920660  fin du perso 0c : long $00340010 (paire de mots de script)
+920664  fin du perso 0c : long $00600010 (paire de mots de script)
+92066c  fin du perso 0c : long $00340080 (paire de mots de script)
+9206a8  fin du perso 0c : long $00500301 (paire de mots de script)
+9206c0  fin du perso 0c : long $00340000 (paire de mots de script)
+9206cc  fin du perso 0c : long $003400e0 (paire de mots de script)
+9206d8  fin du perso 0c : long $003400e0 (paire de mots de script)
+92070c  fin du perso 0c : long $00340000 (paire de mots de script)
+92074c  fin du perso 0c : long $00740301 (paire de mots de script)
+920750  fin du perso 0c : long $003400c0 (paire de mots de script)
+920770  fin du perso 0c : long $007c0301 (paire de mots de script)
+920780  fin du perso 0c : long $005d0000 (paire de mots de script)
+9207a8  fin du perso 0c : long $00900301 (paire de mots de script)
+9207c0  fin du perso 0c : long $00340000 (paire de mots de script)
+9207cc  fin du perso 0c : long $003400e0 (paire de mots de script)
+9207f8  fin du perso 0c : long $00340000 (paire de mots de script)
+920804  fin du perso 0c : long $003400e0 (paire de mots de script)
+920810  fin du perso 0c : long $003400e0 (paire de mots de script)
+92081c  fin du perso 0c : long $003400e0 (paire de mots de script)
+920874  fin du perso 0c : long $00340000 (paire de mots de script)
+920880  fin du perso 0c : long $003400e0 (paire de mots de script)
+920898  fin du perso 0c : long $005d0000 (paire de mots de script)
+9221a4  fin du perso 0e : long $00380301 (paire de mots de script)
+9221a8  fin du perso 0e : long $00340000 (paire de mots de script)
+9221b4  fin du perso 0e : long $003400d0 (paire de mots de script)
+9221c0  fin du perso 0e : long $003400d0 (paire de mots de script)
+9221d4  fin du perso 0e : long $003e0301 (paire de mots de script)
+922238  fin du perso 0e : long $00600301 (paire de mots de script)
+922240  fin du perso 0e : long $003c0062 (paire de mots de script)
+922244  fin du perso 0e : long $00640301 (paire de mots de script)
+92224c  fin du perso 0e : long $003c0066 (paire de mots de script)
+922250  fin du perso 0e : long $00680301 (paire de mots de script)
+922258  fin du perso 0e : long $003c006a (paire de mots de script)
+92225c  fin du perso 0e : long $006c0301 (paire de mots de script)
+92229c  fin du perso 0e : long $00890301 (paire de mots de script)
+9222dc  fin du perso 0e : long $008c0301 (paire de mots de script)
+9222ec  fin du perso 0e : long $00300002 (paire de mots de script)
+9222f4  fin du perso 0e : long $00492801 (paire de mots de script)
+922304  fin du perso 0e : long $003c6200 (paire de mots de script)
+922308  fin du perso 0e : long $008d0301 (paire de mots de script)
+922314  fin du perso 0e : long $008f0301 (paire de mots de script)
+922358  fin du perso 0e : long $00920301 (paire de mots de script)
+9223a4  fin du perso 0e : long $00940301 (paire de mots de script)
+9223cc  fin du perso 0e : long $00980301 (paire de mots de script)
+922424  fin du perso 0e : long $00340000 (paire de mots de script)
+922430  fin du perso 0e : long $003400d0 (paire de mots de script)
+92243c  fin du perso 0e : long $003400d0 (paire de mots de script)
+922448  fin du perso 0e : long $003400d0 (paire de mots de script)
+92245c  fin du perso 0e : long $00b40200 (paire de mots de script)
+922ea4  fin du perso 0f : long $00340000 (paire de mots de script)
+922ec4  fin du perso 0f : long $002c00f0 (paire de mots de script)
+922ee0  fin du perso 0f : long $00340000 (paire de mots de script)
+922eec  fin du perso 0f : long $003400d0 (paire de mots de script)
+922f18  fin du perso 0f : long $00300301 (paire de mots de script)
+922f4c  fin du perso 0f : long $00400301 (paire de mots de script)
+922f80  fin du perso 0f : long $00340000 (paire de mots de script)
+922fa0  fin du perso 0f : long $00600301 (paire de mots de script)
+922fd8  fin du perso 0f : long $00340000 (paire de mots de script)
+92300c  fin du perso 0f : long $00340000 (paire de mots de script)
+923018  fin du perso 0f : long $003400d0 (paire de mots de script)
+92302c  fin du perso 0f : long $00720301 (paire de mots de script)
+923034  fin du perso 0f : long $003c0078 (paire de mots de script)
+923038  fin du perso 0f : long $007a0301 (paire de mots de script)
+923044  fin du perso 0f : long $007e0301 (paire de mots de script)
+923070  fin du perso 0f : long $00340000 (paire de mots de script)
+923088  fin du perso 0f : long $004e00f0 (paire de mots de script)
+9230dc  fin du perso 0f : long $003c00a6 (paire de mots de script)
+92312c  fin du perso 0f : long $003c0003 (paire de mots de script)
+92320c  fin du perso 0f : long $003c0008 (paire de mots de script)
+923228  fin du perso 0f : long $00510009 (paire de mots de script)
+9232e8  fin du perso 0f : long $00340000 (paire de mots de script)
+9232f4  fin du perso 0f : long $003400d0 (paire de mots de script)
+923300  fin du perso 0f : long $003400d0 (paire de mots de script)
+92335c  fin du perso 0f : long $00340000 (paire de mots de script)
+92336c  fin du perso 0f : long $003c00e2 (paire de mots de script)
+923378  fin du perso 0f : long $003000e8 (paire de mots de script)
+923394  fin du perso 0f : long $004900f0 (paire de mots de script)
+9233b0  fin du perso 0f : long $00340000 (paire de mots de script)
+9233bc  fin du perso 0f : long $003400d0 (paire de mots de script)
+9233c8  fin du perso 0f : long $003400d0 (paire de mots de script)
+9233dc  fin du perso 0f : long $00b40200 (paire de mots de script)
+923414  fin du perso 0f : long $00320000 (paire de mots de script)
+924484  fin du perso 10 : long $00340010 (paire de mots de script)
+924490  fin du perso 10 : long $003400d0 (paire de mots de script)
+92449c  fin du perso 10 : long $003400d0 (paire de mots de script)
+9244a8  fin du perso 10 : long $003400d0 (paire de mots de script)
+924528  fin du perso 10 : long $00340000 (paire de mots de script)
+924534  fin du perso 10 : long $003400d0 (paire de mots de script)
+924558  fin du perso 10 : long $003400d0 (paire de mots de script)
+924564  fin du perso 10 : long $003400d0 (paire de mots de script)
+9245a8  fin du perso 10 : long $00240301 (paire de mots de script)
+9245ac  fin du perso 10 : long $0034001e (paire de mots de script)
+9245b8  fin du perso 10 : long $003400d0 (paire de mots de script)
+9245d8  fin du perso 10 : long $00280301 (paire de mots de script)
+92460c  fin du perso 10 : long $002c0301 (paire de mots de script)
+924610  fin du perso 10 : long $003400d0 (paire de mots de script)
+92464c  fin du perso 10 : long $00440301 (paire de mots de script)
+924658  fin du perso 10 : long $00480301 (paire de mots de script)
+924680  fin du perso 10 : long $00500301 (paire de mots de script)
+9246a8  fin du perso 10 : long $00600301 (paire de mots de script)
+9246d0  fin du perso 10 : long $00700301 (paire de mots de script)
+9246f8  fin du perso 10 : long $00740301 (paire de mots de script)
+92471c  fin du perso 10 : long $00320004 (paire de mots de script)
+924720  fin du perso 10 : long $00780301 (paire de mots de script)
+924748  fin du perso 10 : long $007c0301 (paire de mots de script)
+924780  fin du perso 10 : long $007e0301 (paire de mots de script)
+9247b8  fin du perso 10 : long $00340000 (paire de mots de script)
+9247d0  fin du perso 10 : long $002c00f0 (paire de mots de script)
+9247ec  fin du perso 10 : long $00340000 (paire de mots de script)
+9247f8  fin du perso 10 : long $003400d0 (paire de mots de script)
+92482c  fin du perso 10 : long $00340000 (paire de mots de script)
+924858  fin du perso 10 : long $00940301 (paire de mots de script)
+92488c  fin du perso 10 : long $00960301 (paire de mots de script)
+924890  fin du perso 10 : long $0034001e (paire de mots de script)
+924948  fin du perso 10 : long $00340000 (paire de mots de script)
+924a90  fin du perso 10 : long $002e0000 (paire de mots de script)
+926528  fin du perso 15 : long $00340020 (paire de mots de script)
+926538  fin du perso 15 : long $00600002 (paire de mots de script)
+926564  fin du perso 15 : long $00340040 (paire de mots de script)
+9265b8  fin du perso 15 : long $00280012 (paire de mots de script)
+9265dc  fin du perso 15 : long $00400018 (paire de mots de script)
+9265e4  fin du perso 15 : long $00340000 (paire de mots de script)
+92661c  fin du perso 15 : long $00290000 (paire de mots de script)
+926638  fin du perso 15 : long $00340100 (paire de mots de script)
+926644  fin du perso 15 : long $003400d0 (paire de mots de script)
+926650  fin du perso 15 : long $003400d0 (paire de mots de script)
+92665c  fin du perso 15 : long $003400d0 (paire de mots de script)
+926668  fin du perso 15 : long $003400d0 (paire de mots de script)
+926674  fin du perso 15 : long $003400d0 (paire de mots de script)
+926680  fin du perso 15 : long $003400d0 (paire de mots de script)
+92668c  fin du perso 15 : long $003400d0 (paire de mots de script)
+9266a0  fin du perso 15 : long $00220301 (paire de mots de script)
+9266a4  fin du perso 15 : long $00340020 (paire de mots de script)
+9266b8  fin du perso 15 : long $00250301 (paire de mots de script)
+9266c4  fin du perso 15 : long $00270301 (paire de mots de script)
+9266d0  fin du perso 15 : long $00290301 (paire de mots de script)
+9266d8  fin du perso 15 : long $0040002a (paire de mots de script)
+9266dc  fin du perso 15 : long $002b0301 (paire de mots de script)
+9266e0  fin du perso 15 : long $00340000 (paire de mots de script)
+9266ec  fin du perso 15 : long $003400d0 (paire de mots de script)
+9266f8  fin du perso 15 : long $003400d0 (paire de mots de script)
+926708  fin du perso 15 : long $0040002c (paire de mots de script)
+92670c  fin du perso 15 : long $002d0301 (paire de mots de script)
+926718  fin du perso 15 : long $002f0301 (paire de mots de script)
+926724  fin du perso 15 : long $00310301 (paire de mots de script)
+926730  fin du perso 15 : long $00330301 (paire de mots de script)
+92673c  fin du perso 15 : long $00350301 (paire de mots de script)
+926770  fin du perso 15 : long $00400040 (paire de mots de script)
+926780  fin du perso 15 : long $00410301 (paire de mots de script)
+9267bc  fin du perso 15 : long $00430301 (paire de mots de script)
+926830  fin du perso 15 : long $00600301 (paire de mots de script)
+926834  fin du perso 15 : long $00340040 (paire de mots de script)
+926858  fin du perso 15 : long $00700301 (paire de mots de script)
+927dd8  fin du perso 17 : long $0040000a (paire de mots de script)
+927e14  fin du perso 17 : long $00340040 (paire de mots de script)
+927e20  fin du perso 17 : long $003400d0 (paire de mots de script)
+927e90  fin du perso 17 : long $00340040 (paire de mots de script)
+927ed4  fin du perso 17 : long $00400006 (paire de mots de script)
+927f38  fin du perso 17 : long $003400d0 (paire de mots de script)
+927f5c  fin du perso 17 : long $002e0401 (paire de mots de script)
+929278  fin du perso 19 : long $00340000 (paire de mots de script)
+92929c  fin du perso 19 : long $002c00f0 (paire de mots de script)
+9292b8  fin du perso 19 : long $00340000 (paire de mots de script)
+9292c4  fin du perso 19 : long $003400d0 (paire de mots de script)
+9292fc  fin du perso 19 : long $003cffc0 (paire de mots de script)
+929300  fin du perso 19 : long $002a0301 (paire de mots de script)
+929304  fin du perso 19 : long $00340000 (paire de mots de script)
+929368  fin du perso 19 : long $00320301 (paire de mots de script)
+92936c  fin du perso 19 : long $003400d0 (paire de mots de script)
+92938c  fin du perso 19 : long $003e0301 (paire de mots de script)
+929390  fin du perso 19 : long $00340000 (paire de mots de script)
+9293e8  fin du perso 19 : long $005c0301 (paire de mots de script)
+9293ec  fin du perso 19 : long $00340000 (paire de mots de script)
+9293f8  fin du perso 19 : long $003400d0 (paire de mots de script)
+92941c  fin du perso 19 : long $003c0003 (paire de mots de script)
+92944c  fin du perso 19 : long $00730301 (paire de mots de script)
+929450  fin du perso 19 : long $00340014 (paire de mots de script)
+92945c  fin du perso 19 : long $003400d0 (paire de mots de script)
+92947c  fin du perso 19 : long $00760301 (paire de mots de script)
+9294a8  fin du perso 19 : long $00340000 (paire de mots de script)
+9294b4  fin du perso 19 : long $003400d0 (paire de mots de script)
+9294c8  fin du perso 19 : long $007b0301 (paire de mots de script)
+9294cc  fin du perso 19 : long $003400a0 (paire de mots de script)
+929500  fin du perso 19 : long $00340000 (paire de mots de script)
+929534  fin du perso 19 : long $00340000 (paire de mots de script)
+929540  fin du perso 19 : long $003400d0 (paire de mots de script)
+929550  fin du perso 19 : long $003c0080 (paire de mots de script)
+929554  fin du perso 19 : long $00820301 (paire de mots de script)
+92955c  fin du perso 19 : long $003c0083 (paire de mots de script)
+929560  fin du perso 19 : long $00840301 (paire de mots de script)
+92956c  fin du perso 19 : long $00860301 (paire de mots de script)
+929570  fin du perso 19 : long $0034000a (paire de mots de script)
+9295ac  fin du perso 19 : long $00890301 (paire de mots de script)
+9295d8  fin du perso 19 : long $00510009 (paire de mots de script)
+929600  fin du perso 19 : long $008c0301 (paire de mots de script)
+92960c  fin du perso 19 : long $008e0301 (paire de mots de script)
+929638  fin du perso 19 : long $002a1401 (paire de mots de script)
+929650  fin du perso 19 : long $00340000 (paire de mots de script)
+929694  fin du perso 19 : long $00980301 (paire de mots de script)
+929698  fin du perso 19 : long $00340000 (paire de mots de script)
+9296fc  fin du perso 19 : long $00340000 (paire de mots de script)
+929708  fin du perso 19 : long $003400d0 (paire de mots de script)
+92971c  fin du perso 19 : long $00b40200 (paire de mots de script)
+929734  fin du perso 19 : long $00320401 (paire de mots de script)
+92b6a0  fin du perso 1b : long $00340000 (paire de mots de script)
+92b6ac  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b6b8  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b6f0  fin du perso 1b : long $0060000c (paire de mots de script)
+92b718  fin du perso 1b : long $00400014 (paire de mots de script)
+92b738  fin du perso 1b : long $0060001c (paire de mots de script)
+92b774  fin du perso 1b : long $00400022 (paire de mots de script)
+92b778  fin du perso 1b : long $00240301 (paire de mots de script)
+92b77c  fin du perso 1b : long $00340000 (paire de mots de script)
+92b788  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b794  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b7c0  fin du perso 1b : long $00280301 (paire de mots de script)
+92b7c4  fin du perso 1b : long $00340000 (paire de mots de script)
+92b7d0  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b7f0  fin du perso 1b : long $00300301 (paire de mots de script)
+92b824  fin du perso 1b : long $00400301 (paire de mots de script)
+92b83c  fin du perso 1b : long $00340000 (paire de mots de script)
+92b848  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b854  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b860  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b86c  fin du perso 1b : long $003400e0 (paire de mots de script)
+92b880  fin du perso 1b : long $00420301 (paire de mots de script)
+92b88c  fin du perso 1b : long $00460301 (paire de mots de script)
+92b8a4  fin du perso 1b : long $00490301 (paire de mots de script)
+92b8a8  fin du perso 1b : long $00340000 (paire de mots de script)
+92b8c8  fin du perso 1b : long $004c0301 (paire de mots de script)
+92b8d4  fin du perso 1b : long $00500301 (paire de mots de script)
+92b918  fin du perso 1b : long $00540301 (paire de mots de script)
+92b920  fin du perso 1b : long $00500056 (paire de mots de script)
+92b924  fin du perso 1b : long $00600301 (paire de mots de script)
+92b964  fin du perso 1b : long $00680301 (paire de mots de script)
+92b988  fin du perso 1b : long $00700301 (paire de mots de script)
+92b9a0  fin du perso 1b : long $00340000 (paire de mots de script)
+92b9b8  fin du perso 1b : long $00302009 (paire de mots de script)
+92b9c4  fin du perso 1b : long $00600003 (paire de mots de script)
+92b9c8  fin du perso 1b : long $00800301 (paire de mots de script)
+92ba04  fin du perso 1b : long $00880301 (paire de mots de script)
+92ba84  fin du perso 1b : long $00340000 (paire de mots de script)
+92ba90  fin du perso 1b : long $003400e0 (paire de mots de script)
+92ba9c  fin du perso 1b : long $003400e0 (paire de mots de script)
+92bab4  fin du perso 1b : long $0040ffd0 (paire de mots de script)
+92c4e0  fin du perso 1c : long $00340000 (paire de mots de script)
+92c4ec  fin du perso 1c : long $003400d0 (paire de mots de script)
+92c4f8  fin du perso 1c : long $003400d0 (paire de mots de script)
+92c548  fin du perso 1c : long $00600016 (paire de mots de script)
+92c588  fin du perso 1c : long $00606200 (paire de mots de script)
+92c5cc  fin du perso 1c : long $00600022 (paire de mots de script)
+92c5ec  fin du perso 1c : long $00240301 (paire de mots de script)
+92c618  fin du perso 1c : long $00280301 (paire de mots de script)
+92c620  fin du perso 1c : long $00400029 (paire de mots de script)
+92c624  fin du perso 1c : long $002a0301 (paire de mots de script)
+92c658  fin du perso 1c : long $002c0301 (paire de mots de script)
+92c6c0  fin du perso 1c : long $00300301 (paire de mots de script)
+92c6c4  fin du perso 1c : long $00340000 (paire de mots de script)
+92c6ec  fin du perso 1c : long $00340301 (paire de mots de script)
+92c6f0  fin du perso 1c : long $00340000 (paire de mots de script)
+92c714  fin du perso 1c : long $00400036 (paire de mots de script)
+92c718  fin du perso 1c : long $00380301 (paire de mots de script)
+92c72c  fin du perso 1c : long $00492822 (paire de mots de script)
+92c740  fin du perso 1c : long $003a0301 (paire de mots de script)
+92c750  fin du perso 1c : long $00340000 (paire de mots de script)
+92c75c  fin du perso 1c : long $003400d0 (paire de mots de script)
+92c784  fin du perso 1c : long $003e0301 (paire de mots de script)
+92c7a4  fin du perso 1c : long $00420301 (paire de mots de script)
+92c7b0  fin du perso 1c : long $00460301 (paire de mots de script)
+92c7b4  fin du perso 1c : long $00340000 (paire de mots de script)
+92c7c8  fin du perso 1c : long $004a0301 (paire de mots de script)
+92c7d0  fin du perso 1c : long $0060004c (paire de mots de script)
+92c7d8  fin du perso 1c : long $00492822 (paire de mots de script)
+92c7e8  fin du perso 1c : long $004e0301 (paire de mots de script)
+92c7ec  fin du perso 1c : long $00340000 (paire de mots de script)
+92c7f8  fin du perso 1c : long $003400d0 (paire de mots de script)
+92c804  fin du perso 1c : long $003400d0 (paire de mots de script)
+92c820  fin du perso 1c : long $00380401 (paire de mots de script)
+92c844  fin du perso 1c : long $005f0301 (paire de mots de script)
+92d124  fin du perso 1d : long $00340000 (paire de mots de script)
+92d168  fin du perso 1d : long $00340000 (paire de mots de script)
+92d174  fin du perso 1d : long $003400e0 (paire de mots de script)
+92d1a8  fin du perso 1d : long $00600014 (paire de mots de script)
+92d1d4  fin du perso 1d : long $0060001c (paire de mots de script)
+92d204  fin du perso 1d : long $00280301 (paire de mots de script)
+92d21c  fin du perso 1d : long $00340000 (paire de mots de script)
+92d228  fin du perso 1d : long $003400e0 (paire de mots de script)
+92d234  fin du perso 1d : long $003400e0 (paire de mots de script)
+92d278  fin du perso 1d : long $00380301 (paire de mots de script)
+92d27c  fin du perso 1d : long $00340000 (paire de mots de script)
+92d2b0  fin du perso 1d : long $00480301 (paire de mots de script)
+92d2c8  fin du perso 1d : long $00340000 (paire de mots de script)
+92d2ec  fin du perso 1d : long $00600003 (paire de mots de script)
+92d2f0  fin du perso 1d : long $00580301 (paire de mots de script)
+92d330  fin du perso 1d : long $00600301 (paire de mots de script)
+92d358  fin du perso 1d : long $00620301 (paire de mots de script)
+92d370  fin du perso 1d : long $00400003 (paire de mots de script)
+92d374  fin du perso 1d : long $00680301 (paire de mots de script)
+92d3a8  fin du perso 1d : long $00740301 (paire de mots de script)
+92d3c4  fin du perso 1d : long $00400003 (paire de mots de script)
+92d3c8  fin du perso 1d : long $007c0301 (paire de mots de script)
+92d3cc  fin du perso 1d : long $00340000 (paire de mots de script)
+92d3d0  fin du perso 1d : long $00400001 (paire de mots de script)
+92d3dc  fin du perso 1d : long $0060007e (paire de mots de script)
+92d3e4  fin du perso 1d : long $00800301 (paire de mots de script)
+92d3fc  fin du perso 1d : long $00340000 (paire de mots de script)
+92d430  fin du perso 1d : long $008c0301 (paire de mots de script)
+92d440  fin du perso 1d : long $00900301 (paire de mots de script)
+92d4c4  fin du perso 1d : long $00940301 (paire de mots de script)
+92d4c8  fin du perso 1d : long $00340000 (paire de mots de script)
+92d4d4  fin du perso 1d : long $003400e0 (paire de mots de script)
+92d4f0  fin du perso 1d : long $003a0401 (paire de mots de script)
+92ddac  fin du perso 1e : long $00340040 (paire de mots de script)
+92ddb8  fin du perso 1e : long $003400d0 (paire de mots de script)
+92ddc4  fin du perso 1e : long $003400d0 (paire de mots de script)
+92ddd0  fin du perso 1e : long $003400d0 (paire de mots de script)
+92dddc  fin du perso 1e : long $003400d0 (paire de mots de script)
+92de00  fin du perso 1e : long $00400002 (paire de mots de script)
+92de28  fin du perso 1e : long $00340040 (paire de mots de script)
+92de58  fin du perso 1e : long $00400010 (paire de mots de script)
+92de64  fin du perso 1e : long $00800290 (paire de mots de script)
+92de74  fin du perso 1e : long $00400006 (paire de mots de script)
+92def8  fin du perso 1e : long $00290000 (paire de mots de script)
+92df10  fin du perso 1e : long $00340040 (paire de mots de script)
+92df1c  fin du perso 1e : long $003400d0 (paire de mots de script)
+92df28  fin du perso 1e : long $003400d0 (paire de mots de script)
+92df34  fin du perso 1e : long $003400d0 (paire de mots de script)
+92e33c  fin du perso 1f : long $00340040 (paire de mots de script)
+92e348  fin du perso 1f : long $003400d0 (paire de mots de script)
+92e354  fin du perso 1f : long $003400d0 (paire de mots de script)
+92e360  fin du perso 1f : long $003400d0 (paire de mots de script)
+92e36c  fin du perso 1f : long $003400d0 (paire de mots de script)
+92e390  fin du perso 1f : long $00400007 (paire de mots de script)
+92e3b8  fin du perso 1f : long $00340040 (paire de mots de script)
+92e41c  fin du perso 1f : long $00340040 (paire de mots de script)
+92e428  fin du perso 1f : long $003400d0 (paire de mots de script)
+92e43c  fin du perso 1f : long $00800310 (paire de mots de script)
+92e444  fin du perso 1f : long $00340040 (paire de mots de script)
+92e454  fin du perso 1f : long $0040000e (paire de mots de script)
+92e4bc  fin du perso 1f : long $008002aa (paire de mots de script)
+92e4d8  fin du perso 1f : long $00340070 (paire de mots de script)
+92e508  fin du perso 1f : long $008002ac (paire de mots de script)
+92e550  fin du perso 1f : long $00340080 (paire de mots de script)
+92e580  fin du perso 1f : long $008002ae (paire de mots de script)
+92e5b0  fin du perso 1f : long $008002af (paire de mots de script)
+92e5d4  fin du perso 1f : long $00340080 (paire de mots de script)
+92e604  fin du perso 1f : long $008002b1 (paire de mots de script)
+99d49c  fin du perso 20 : long $00340040 (paire de mots de script)
+99d4a8  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d4e4  fin du perso 20 : long $00400005 (paire de mots de script)
+99d4f8  fin du perso 20 : long $00340000 (paire de mots de script)
+99d508  fin du perso 20 : long $00250007 (paire de mots de script)
+99d510  fin du perso 20 : long $00340100 (paire de mots de script)
+99d54c  fin du perso 20 : long $00340080 (paire de mots de script)
+99d558  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d570  fin du perso 20 : long $00340080 (paire de mots de script)
+99d57c  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d588  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d594  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d5b0  fin du perso 20 : long $00290000 (paire de mots de script)
+99d5cc  fin du perso 20 : long $00340100 (paire de mots de script)
+99d5d8  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d5e4  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d5f0  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d620  fin du perso 20 : long $00340100 (paire de mots de script)
+99d63c  fin du perso 20 : long $00290000 (paire de mots de script)
+99d660  fin du perso 20 : long $00230301 (paire de mots de script)
+99d664  fin du perso 20 : long $00340000 (paire de mots de script)
+99d688  fin du perso 20 : long $005d0000 (paire de mots de script)
+99d698  fin du perso 20 : long $00300301 (paire de mots de script)
+99d69c  fin du perso 20 : long $00340040 (paire de mots de script)
+99d6a8  fin du perso 20 : long $003400d0 (paire de mots de script)
+99d6dc  fin du perso 20 : long $00320301 (paire de mots de script)
+99d73c  fin du perso 20 : long $00340301 (paire de mots de script)
+99d780  fin du perso 20 : long $00360301 (paire de mots de script)
+99d788  fin du perso 20 : long $00400037 (paire de mots de script)
+99d7a4  fin du perso 20 : long $00410301 (paire de mots de script)
+99d7a8  fin du perso 20 : long $00340100 (paire de mots de script)
+99d7b8  fin du perso 20 : long $00500042 (paire de mots de script)
+99d7bc  fin du perso 20 : long $00430301 (paire de mots de script)
+99d81c  fin du perso 20 : long $00450301 (paire de mots de script)
+99d828  fin du perso 20 : long $00470301 (paire de mots de script)
+99d834  fin du perso 20 : long $00490301 (paire de mots de script)
+99d838  fin du perso 20 : long $00340040 (paire de mots de script)
+99d844  fin du perso 20 : long $003400d0 (paire de mots de script)
+99f008  fin du perso 21 : long $0040001a (paire de mots de script)
+99f044  fin du perso 21 : long $00340040 (paire de mots de script)
+99f054  fin du perso 21 : long $00310000 (paire de mots de script)
+99f088  fin du perso 21 : long $004e0000 (paire de mots de script)
+99f0c8  fin du perso 21 : long $004e0000 (paire de mots de script)
+99f154  fin du perso 21 : long $00340040 (paire de mots de script)
+99f160  fin du perso 21 : long $003400d0 (paire de mots de script)
+99f16c  fin du perso 21 : long $00340100 (paire de mots de script)
+99f1bc  fin du perso 21 : long $00800200 (paire de mots de script)
+99f1e0  fin du perso 21 : long $0040001a (paire de mots de script)
+99f1f4  fin du perso 21 : long $00340000 (paire de mots de script)
+99f230  fin du perso 21 : long $00230301 (paire de mots de script)
+99f274  fin du perso 21 : long $00250301 (paire de mots de script)
+99f2a4  fin du perso 21 : long $00400026 (paire de mots de script)
+99f2b4  fin du perso 21 : long $00270301 (paire de mots de script)
+99f2d8  fin du perso 21 : long $00290301 (paire de mots de script)
+99f2e4  fin du perso 21 : long $002b0301 (paire de mots de script)
+99f2f0  fin du perso 21 : long $002d0301 (paire de mots de script)
+99f2f8  fin du perso 21 : long $0031002e (paire de mots de script)
+99f2fc  fin du perso 21 : long $002f0301 (paire de mots de script)
+99f308  fin du perso 21 : long $00310301 (paire de mots de script)
+99f330  fin du perso 21 : long $00400301 (paire de mots de script)
+99f340  fin du perso 21 : long $00340040 (paire de mots de script)
+99f34c  fin du perso 21 : long $003400d0 (paire de mots de script)
+99f374  fin du perso 21 : long $00802200 (paire de mots de script)
+99f378  fin du perso 21 : long $00420301 (paire de mots de script)
+99f3a0  fin du perso 21 : long $00340100 (paire de mots de script)
+99f3bc  fin du perso 21 : long $00400011 (paire de mots de script)
+99f3d8  fin du perso 21 : long $00440301 (paire de mots de script)
+99f3e8  fin du perso 21 : long $00340040 (paire de mots de script)
+99f3f4  fin du perso 21 : long $003400d0 (paire de mots de script)
+99f400  fin du perso 21 : long $003400d0 (paire de mots de script)
+99f424  fin du perso 21 : long $00420401 (paire de mots de script)
+99e718  fin du perso 22 : long $0060ffd0 (paire de mots de script)
+99e748  fin du perso 22 : long $00340040 (paire de mots de script)
+99e754  fin du perso 22 : long $003400d0 (paire de mots de script)
+99e778  fin du perso 22 : long $00400002 (paire de mots de script)
+99e7cc  fin du perso 22 : long $00340008 (paire de mots de script)
+99e810  fin du perso 22 : long $00340040 (paire de mots de script)
+99e834  fin du perso 22 : long $00400080 (paire de mots de script)
+99e848  fin du perso 22 : long $00850301 (paire de mots de script)
+99e880  fin du perso 22 : long $00400001 (paire de mots de script)
+99e8ac  fin du perso 22 : long $00340020 (paire de mots de script)
+99e8b8  fin du perso 22 : long $003400d0 (paire de mots de script)
+99e8c4  fin du perso 22 : long $003400d0 (paire de mots de script)
+99e8d0  fin du perso 22 : long $003400d0 (paire de mots de script)
+99e8e0  fin du perso 22 : long $004000b0 (paire de mots de script)
+99e8f4  fin du perso 22 : long $00340040 (paire de mots de script)
+99e900  fin du perso 22 : long $003400d0 (paire de mots de script)
+99e91c  fin du perso 22 : long $00400016 (paire de mots de script)
+99e930  fin du perso 22 : long $00340020 (paire de mots de script)
+99e93c  fin du perso 22 : long $003400d0 (paire de mots de script)
+99e960  fin du perso 22 : long $00440401 (paire de mots de script)
+92103c  fin de Sakura (0D) avec intermedes : mots $2700 $0078 (commande 0A02 +$14) pris pour le pointeur 0x782700 (28/10)
+99e3dc  fin de T.Hawk (23) : mots $0200 $0080 du script pris pour le pointeur 0x800200 (28/10)
+970f40  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f44  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f48  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f4c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f50  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f54  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f58  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f5c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f60  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f64  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f68  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f6c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f70  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f74  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f78  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f7c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f80  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f84  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f88  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f8c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f90  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f94  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f98  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970f9c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fa0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fa4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fa8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fb0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fb4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fb8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fbc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fc0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fc4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fc8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fcc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fd0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fd4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fd8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fdc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fe0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fe4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fe8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970fec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970ff0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970ff4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970ff8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+970ffc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971000  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971004  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971008  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97100c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971010  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971014  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971018  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97101c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971020  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971024  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971028  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97102c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971030  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971034  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971038  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97103c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971040  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971044  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971048  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97104c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971050  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971054  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971058  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97105c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971060  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971064  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971068  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97106c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971070  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971074  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971078  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97107c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971080  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971084  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971088  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97108c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971090  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971094  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971098  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97109c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710a0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710a4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710a8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710ac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710b0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710b4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710b8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710bc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710c0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710c4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710c8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710cc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710d0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710d4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710d8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710dc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710e0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710e4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710e8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710ec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710f0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710f4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710f8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9710fc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971100  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971104  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971108  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97110c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971110  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971114  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971118  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97111c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971120  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971124  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971128  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97112c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971130  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971134  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971138  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97113c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971140  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971144  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971148  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97114c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971150  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971154  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971158  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97115c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971160  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971164  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971168  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97116c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971170  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971174  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971178  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97117c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971180  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971184  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971188  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97118c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971190  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971194  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971198  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97119c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711a0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711a4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711a8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711ac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711b0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711b4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711b8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711bc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711c0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711c4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711c8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711cc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711d0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711d4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711d8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711dc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711e0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711e4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711e8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711ec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711f0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711f4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711f8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9711fc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971200  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971204  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971208  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97120c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971210  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971214  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971218  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97121c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971220  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971224  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971228  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97122c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971230  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971234  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971238  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97123c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971240  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971244  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971248  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97124c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971250  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971254  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971258  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97125c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971260  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971264  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971268  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97126c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971270  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971274  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971278  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97127c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971280  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971284  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971288  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97128c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971290  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971294  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971298  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97129c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712a0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712a4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712a8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712ac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712b0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712b4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712b8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712bc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712c0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712c4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712c8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712cc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712d0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712d4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712d8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712dc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712e0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712e4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712e8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712ec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712f0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712f4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712f8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9712fc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971300  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971304  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971308  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97130c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971310  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971314  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971318  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97131c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971320  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971324  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971328  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97132c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971330  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971334  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971338  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97133c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971340  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971344  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971348  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97134c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971350  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971354  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971358  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97135c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971360  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971364  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971368  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97136c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971370  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971374  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971378  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97137c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971380  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971384  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971388  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97138c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971390  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971394  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971398  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97139c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713a0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713a4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713a8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713ac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713b0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713b4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713b8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713bc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713c0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713c4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713c8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713cc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713d0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713d4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713d8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713dc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713e0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713e4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713e8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713ec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713f0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713f4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713f8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9713fc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971400  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971404  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971408  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97140c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971410  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971414  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971418  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97141c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971420  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971424  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971428  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97142c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971430  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971434  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971438  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97143c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971440  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971444  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971448  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97144c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971450  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971454  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971458  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97145c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971460  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971464  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971468  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97146c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971470  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971474  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971478  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97147c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971480  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971484  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971488  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97148c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971490  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971494  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971498  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97149c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714a0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714a4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714a8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714ac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714b0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714b4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714b8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714bc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714c0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714c4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714c8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714cc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714d0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714d4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714d8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714dc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714e0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714e4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714e8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714ec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714f0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714f4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714f8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9714fc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971500  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971504  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971508  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97150c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971510  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971514  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971518  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97151c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971520  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971524  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971528  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97152c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971530  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971534  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971538  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97153c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971540  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971544  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971548  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97154c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971550  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971554  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971558  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97155c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971560  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971564  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971568  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97156c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971570  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971574  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971578  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97157c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971580  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971584  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971588  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97158c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971590  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971594  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971598  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97159c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715a0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715a4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715a8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715ac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715b0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715b4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715b8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715bc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715c0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715c4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715c8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715cc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715d0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715d4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715d8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715dc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715e0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715e4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715e8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715ec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715f0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715f4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715f8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9715fc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971600  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971604  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971608  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97160c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971610  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971614  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971618  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97161c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971620  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971624  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971628  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97162c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971630  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971634  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971638  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97163c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971640  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971644  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971648  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97164c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971650  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971654  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971658  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97165c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971660  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971664  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971668  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97166c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971670  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971674  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971678  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97167c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971680  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971684  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971688  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97168c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971690  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971694  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971698  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97169c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716a0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716a4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716a8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716ac  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716b0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716b4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716b8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716bc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716c0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716c4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716c8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716cc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716d0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716d4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716d8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716dc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716e0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716e4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716e8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716ec  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716f0  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716f4  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716f8  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+9716fc  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971700  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971704  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971708  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97170c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971710  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971714  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971718  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97171c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971720  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971724  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971728  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97172c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971730  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971734  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971738  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97173c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971740  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971744  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971748  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97174c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971750  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971754  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971758  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97175c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971760  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971764  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971768  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97176c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971770  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971774  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971778  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97177c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971780  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971784  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+971788  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+97178c  repliques d intermede (T 0x970F40) : mots de reponse pris pour des pointeurs (28/10)
+91a1f4  script de fin : mots $0200 $0070 (28/10)
+91e8cc  script de fin : mots $0200 $0068 (28/10)
+926f98  script de fin : mots $0200 $0020 (28/10)
+9283b8  script de fin : mots $0200 $0020 (28/10)
+928a90  script de fin : mots $0200 $0040 (28/10)
+928fb4  script de fin : mots $0200 $0068 (28/10)
+92aea0  script de fin : mots $0200 $0080 (28/10)
+92bb98  script de fin : mots $0200 $0040 (28/10)
+92d5e4  script de fin : mots $0200 $0040 (28/10)
+92eb04  script de fin : mots $0200 $0078 (28/10)
+92ebf0  script de fin : mots $0200 $0020 (28/10)
+92ee3c  script de fin : mots $0200 $0060 (28/10)
+92ee50  script de fin : mots $0200 $0060 (28/10)
+92eeb0  script de fin : mots $0200 $0030 (28/10)
+92efc4  script de fin : mots $0200 $0028 (28/10)
+92f0a4  script de fin : mots $0200 $0050 (28/10)
+92f39c  script de fin : mots $0200 $0030 (28/10)
+92f4bc  script de fin : mots $0200 $0028 (28/10)
+92f6f0  script de fin : mots $0200 $0028 (28/10)
+92f8a8  script de fin : mots $0200 $0030 (28/10)
+92fba0  script de fin : mots $0200 $0030 (28/10)
+92fc1c  script de fin : mots $0200 $0030 (28/10)
+92fcdc  script de fin : mots $0200 $0030 (28/10)
+92ff8c  script de fin : mots $0200 $0030 (28/10)
+92ffe0  script de fin : mots $0200 $0030 (28/10)
+92fff4  script de fin : mots $0200 $0030 (28/10)
+93054c  script de fin : mots $0200 $0030 (28/10)
+930780  script de fin : mots $0200 $0030 (28/10)
+930ecc  script de fin : mots $0200 $0040 (28/10)
+930f30  script de fin : mots $0200 $0030 (28/10)
+930f80  script de fin : mots $0200 $0040 (28/10)
+9311c0  script de fin : mots $0200 $0040 (28/10)
+9333b0  script de fin : mots $0200 $0050 (28/10)
+933458  script de fin : mots $0200 $0070 (28/10)
+933464  script de fin : mots $0200 $0068 (28/10)
+9335d8  script de fin : mots $0200 $0080 (28/10)
+9336a8  script de fin : mots $0200 $0020 (28/10)
+9336bc  script de fin : mots $0200 $0080 (28/10)
+9338b8  script de fin : mots $0200 $0080 (28/10)
+933998  script de fin : mots $0200 $0080 (28/10)
+933a70  script de fin : mots $0200 $0020 (28/10)
+933a84  script de fin : mots $0200 $0080 (28/10)
+933c5c  script de fin : mots $0200 $0070 (28/10)
+933ca8  script de fin : mots $0200 $0080 (28/10)
+933db0  script de fin : mots $0200 $0020 (28/10)
+933dc4  script de fin : mots $0200 $0080 (28/10)
+933efc  script de fin : mots $0200 $0030 (28/10)
+933ff4  script de fin : mots $0200 $0060 (28/10)
+934200  script de fin : mots $0200 $0060 (28/10)
+937814  script de fin : mots $0200 $0060 (28/10)
+9384ec  script de fin : mots $0200 $0060 (28/10)
+9391bc  script de fin : mots $0200 $0060 (28/10)
+93a77c  script de fin : mots $0200 $0040 (28/10)
+93bd5c  script de fin : mots $0200 $0060 (28/10)
+93beec  script de fin : mots $0200 $0060 (28/10)
+93ca84  script de fin : mots $0200 $0080 (28/10)
+93cb28  script de fin : mots $0200 $0080 (28/10)
+93cbf0  script de fin : mots $0200 $0080 (28/10)
+93ccc4  script de fin : mots $0200 $0080 (28/10)
+940404  script de fin : mots $0200 $0090 (28/10)
+94054c  script de fin : mots $0200 $0090 (28/10)
+940a48  script de fin : mots $0200 $0090 (28/10)
+941320  script de fin : mots $0200 $0050 (28/10)
+94138c  script de fin : mots $0200 $0050 (28/10)
+941468  script de fin : mots $0200 $0070 (28/10)
+9414d4  script de fin : mots $0200 $0070 (28/10)
+941618  script de fin : mots $0200 $0070 (28/10)
+941cac  script de fin : mots $0200 $0060 (28/10)
+941da8  script de fin : mots $0200 $0028 (28/10)
+941fe8  script de fin : mots $0200 $0028 (28/10)
+942030  script de fin : mots $0200 $0060 (28/10)
+942248  script de fin : mots $0200 $0098 (28/10)
+942388  script de fin : mots $0200 $0080 (28/10)
+942470  script de fin : mots $0200 $0060 (28/10)
+9424d8  script de fin : mots $0200 $0080 (28/10)
+9433d4  script de fin : mots $0200 $0020 (28/10)
+943c30  script de fin : mots $0200 $0040 (28/10)
+9442e4  script de fin : mots $0200 $0028 (28/10)
+944614  script de fin : mots $0200 $0030 (28/10)
+944fa4  script de fin : mots $0200 $0060 (28/10)
+945300  script de fin : mots $0200 $0058 (28/10)
+945458  script de fin : mots $0200 $0050 (28/10)
+94546c  script de fin : mots $0200 $0060 (28/10)
+946a5c  script de fin : mots $0200 $0080 (28/10)
+947020  script de fin : mots $0200 $0070 (28/10)
+9473a0  script de fin : mots $0200 $0090 (28/10)
+9475e8  script de fin : mots $0200 $0050 (28/10)
+947f70  script de fin : mots $0200 $0030 (28/10)
+947f90  script de fin : mots $0200 $0030 (28/10)
+94a198  script de fin : mots $0200 $0060 (28/10)
+94a20c  script de fin : mots $0200 $0068 (28/10)
+94a250  script de fin : mots $0200 $0090 (28/10)
+94a2fc  script de fin : mots $0200 $0070 (28/10)
+94a30c  script de fin : mots $0200 $0070 (28/10)
+94a908  script de fin : mots $0200 $0030 (28/10)
+94aa64  script de fin : mots $0200 $0030 (28/10)
+94ad2c  script de fin : mots $0200 $0070 (28/10)
+94ad38  script de fin : mots $0200 $0070 (28/10)
+94ad68  script de fin : mots $0200 $0070 (28/10)
+94aed4  script de fin : mots $0200 $0068 (28/10)
+94af40  script de fin : mots $0200 $0060 (28/10)
+94af88  script de fin : mots $0200 $0070 (28/10)
+94bab0  script de fin : mots $0200 $0080 (28/10)
+94bae8  script de fin : mots $0200 $0040 (28/10)
+94bc60  script de fin : mots $0200 $0028 (28/10)
+94ca40  script de fin : mots $0200 $0088 (28/10)
+94ca70  script de fin : mots $0200 $0090 (28/10)
+94cb30  script de fin : mots $0200 $0070 (28/10)
+94d354  script de fin : mots $0200 $0030 (28/10)
+94d380  script de fin : mots $0200 $0080 (28/10)
+94d55c  script de fin : mots $0200 $0030 (28/10)
+94d810  script de fin : mots $0200 $0030 (28/10)
+94d818  script de fin : mots $0200 $0030 (28/10)
+94ec30  script de fin : mots $0200 $0078 (28/10)
+94ee28  script de fin : mots $0200 $0060 (28/10)
+94f770  script de fin : mots $0200 $0070 (28/10)
+94fa30  script de fin : mots $0200 $0028 (28/10)
+94fa4c  script de fin : mots $0200 $0070 (28/10)
+94ff00  script de fin : mots $0200 $0060 (28/10)
+94ff14  script de fin : mots $0200 $0060 (28/10)
+94ff34  script de fin : mots $0200 $0078 (28/10)
+94ff94  script de fin : mots $0200 $0048 (28/10)
+950004  script de fin : mots $0200 $0030 (28/10)
+950580  script de fin : mots $0200 $0060 (28/10)
+950594  script de fin : mots $0200 $0060 (28/10)
+9505b4  script de fin : mots $0200 $0060 (28/10)
+9505d4  script de fin : mots $0200 $0060 (28/10)
+951344  script de fin : mots $0200 $0088 (28/10)
+951354  script de fin : mots $0200 $0086 (28/10)
+951370  script de fin : mots $0200 $0060 (28/10)
+951960  script de fin : mots $0200 $0088 (28/10)
+99dbb0  script de fin : mots $0200 $0078 (28/10)
+99dff8  script de fin : mots $0200 $0078 (28/10)
+99e1b4  script de fin : mots $0200 $0020 (28/10)
+99e460  script de fin : mots $0200 $0080 (28/10)
+99e648  script de fin : mots $0200 $0020 (28/10)
+99ece0  script de fin : mots $0200 $0090 (28/10)
+99ef48  script de fin : mots $0200 $0020 (28/10)
+99fe4c  script de fin : mots $0200 $0020 (28/10)
+# (31/10, e22) table des positions des portraits T_615F20 (type 14, Upper 0x180370) : paires de mots X / vitesse prises pour des pointeurs (portraits decales)
+615f20  T_615F20 : mots de position (X, vitesse), pas un pointeur
+615f30  T_615F20 : mots de position (X, vitesse), pas un pointeur
+615f60  T_615F20 : mots de position (X, vitesse), pas un pointeur
+615f70  T_615F20 : mots de position (X, vitesse), pas un pointeur
+615f78  T_615F20 : mots de position (X, vitesse), pas un pointeur
+616020  T_615F20 : mots de position (X, vitesse), pas un pointeur
+616038  T_615F20 : mots de position (X, vitesse), pas un pointeur
+616060  T_615F20 : mots de position (X, vitesse), pas un pointeur
+616070  T_615F20 : mots de position (X, vitesse), pas un pointeur
+616078  T_615F20 : mots de position (X, vitesse), pas un pointeur
+9184c0
+9184c4
+9184c8
+9184cc
+9184e0
+9184e4
+9184e8
+9184ec
+918500
+918504
+918508
+91850c
+918520
+918524
+918528
+91852c
+918540
+918544
+918548
+91854c
+918560
+918564
+918568
+91856c
+918580
+918584
+918588
+91858c
+9185a0
+9185a4
+9185a8
+9185ac
+9185c0
+9185c4
+9185c8
+9185cc
+9185e0
+9185e4
+9185e8
+9185ec
+918600
+918604
+918608
+91860c
+918620
+918624
+918628
+91862c
+918640
+918644
+918648
+91864c
+918660
+918664
+918668
+91866c
+918680
+918684
+918688
+91868c
+9186a0
+9186a4
+9186a8
+9186ac
+9186c0
+9186c4
+9186c8
+9186cc
+9186e0
+9186e4
+9186e8
+9186ec
+918700
+918704
+918708
+91870c
+918720
+918724
+918728
+91872c
+918740
+918744
+918748
+91874c
+918760
+918764
+918768
+91876c
+918780
+918784
+918788
+91878c
+9187a0
+9187a4
+9187a8
+9187ac
+9187c0
+9187c4
+9187c8
+9187cc
+9187e0
+9187e4
+9187e8
+9187ec
+918800
+918804
+918808
+91880c
+918820
+918824
+918828
+91882c
+918840
+918844
+918848
+91884c
+918860
+918864
+918868
+91886c
+918880
+918884
+918888
+91888c
+9188a4
+9188a8
+9188ac
+9188b0
+9188c4
+9188c8
+9188cc
+9188d0
+9188e4
+9188e8
+9188ec
+9188f0
+918904
+918908
+91890c
+918910
+918924
+918928
+91892c
+918930
+918944
+918948
+91894c
+918950
+918964
+918968
+91896c
+918970
+918984
+918988
+91898c
+918990
+9189a4
+9189a8
+9189ac
+9189b0
+9189c4
+9189c8
+9189cc
+9189d0
+9189e4
+9189e8
+9189ec
+9189f0
+918a04
+918a08
+918a0c
+918a10
+918a24
+918a28
+918a2c
+918a30
+918a44
+918a48
+918a4c
+918a50
+918a64
+918a68
+918a6c
+918a70
+918a84
+918a88
+918a8c
+918a90
+918aa4
+918aa8
+918aac
+918ab0
+919024
+919028
+91902c
+919030
+919044
+919048
+91904c
+919050
+919064
+919068
+91906c
+919070
+919084
+919088
+91908c
+919090
+9190a4
+9190a8
+9190ac
+9190b0
+9190c4
+9190c8
+9190cc
+9190d0
+9190e4
+9190e8
+9190ec
+9190f0
+919104
+919108
+91910c
+919110
+919124
+919128
+91912c
+919130
+919144
+919148
+91914c
+919150
+919164
+919168
+91916c
+919170
+919184
+919188
+91918c
+919190
+9191a4
+9191a8
+9191ac
+9191b0
+9191c4
+9191c8
+9191cc
+9191d0
+9191e4
+9191e8
+9191ec
+9191f0
+919204
+919208
+91920c
+919210
+919224
+919228
+91922c
+919230
+919244
+919248
+91924c
+919250
+919264
+919268
+91926c
+919270
+919284
+919288
+91928c
+919290
+9192a4
+9192a8
+9192ac
+9192b0
+9192c4
+9192c8
+9192cc
+9192d0
+9192e4
+9192e8
+9192ec
+9192f0
+919304
+919308
+91930c
+919310
+919324
+919328
+91932c
+919330
+919344
+919348
+91934c
+919350
+919694
+919698
+91969c
+9196a0
+9196b4
+9196b8
+9196bc
+9196c0
+9196d4
+9196d8
+9196dc
+9196e0
+9196f4
+9196f8
+9196fc
+919700
+919714
+919718
+91971c
+919720
+919734
+919738
+91973c
+919740
+919754
+919758
+91975c
+919760
+919774
+919778
+91977c
+919780
+919794
+919798
+91979c
+9197a0
+9197b4
+9197b8
+9197bc
+9197c0
+9197d4
+9197d8
+9197dc
+9197e0
+9197f4
+9197f8
+9197fc
+919800
+919814
+919818
+91981c
+919820
+919834
+919838
+91983c
+919840
+919858
+91985c
+919860
+919864
+919878
+91987c
+919880
+919884
+919898
+91989c
+9198a0
+9198a4
+9198b8
+9198bc
+9198c0
+9198c4
+9198d8
+9198dc
+9198e0
+9198e4
+9198f8
+9198fc
+919900
+919904
+919918
+91991c
+919920
+919924
+919938
+91993c
+919940
+919944
+919958
+91995c
+919960
+919964
+919978
+91997c
+919980
+919984
+919998
+91999c
+9199a0
+9199a4
+9199b8
+9199bc
+9199c0
+9199c4
+9199d8
+9199dc
+9199e0
+9199e4
+9199f8
+9199fc
+919a00
+919a04
+919a18
+919a1c
+919a20
+919a24
+919a38
+919a3c
+919a40
+919a44
+919a58
+919a5c
+919a60
+919a64
+91a094
+91a098
+91a09c
+91a0a0
+91a0b4
+91a0b8
+91a0bc
+91a0c0
+91a0d4
+91a0d8
+91a0dc
+91a0e0
+91a0f4
+91a0f8
+91a0fc
+91a100
+91a114
+91a118
+91a11c
+91a120
+91a134
+91a138
+91a13c
+91a140
+91a154
+91a158
+91a15c
+91a160
+91a174
+91a178
+91a17c
+91a180
+91a194
+91a198
+91a19c
+91a1a0
+91a1b4
+91a1b8
+91a1bc
+91a1c0
+91a1d4
+91a1d8
+91a1dc
+91a1e0
+91a1f4
+91a1f8
+91a1fc
+91a200
+91a214
+91a218
+91a21c
+91a220
+91a234
+91a238
+91a23c
+91a240
+91a254
+91a258
+91a25c
+91a260
+91a278
+91a27c
+91a280
+91a284
+91a298
+91a29c
+91a2a0
+91a2a4
+91a2b8
+91a2bc
+91a2c0
+91a2c4
+91a3b8
+91a3bc
+91a3c0
+91a3c4
+91a3d8
+91a3dc
+91a3e0
+91a3e4
+91a3f8
+91a3fc
+91a400
+91a404
+91a418
+91a41c
+91a420
+91a424
+91a438
+91a43c
+91a440
+91a444
+91a4d8
+91a4dc
+91a4e0
+91a4e4
+91a4f8
+91a4fc
+91a500
+91a504
+91a51c
+91a520
+91a524
+91a528
+91a53c
+91a540
+91a544
+91a548
+91a55c
+91a560
+91a564
+91a568
+91a61c
+91a620
+91a624
+91a628
+91a63c
+91a640
+91a644
+91a648
+91a65c
+91a660
+91a664
+91a668
+91a67c
+91a680
+91a684
+91a688
+91a69c
+91a6a0
+91a6a4
+91a6a8
+91a6bc
+91a6c0
+91a6c4
+91a6c8
+91a6dc
+91a6e0
+91a6e4
+91a6e8
+91a6fc
+91a700
+91a704
+91a708
+91a71c
+91a720
+91a724
+91a728
+91a75c
+91a760
+91a764
+91a768
+91a77c
+91a780
+91a784
+91a788
+91a79c
+91a7a0
+91a7a4
+91a7a8
+91a7bc
+91a7c0
+91a7c4
+91a7c8
+91a7dc
+91a7e0
+91a7e4
+91a7e8
+91a7fc
+91a800
+91a804
+91a808
+91a81c
+91a820
+91a824
+91a828
+91a83c
+91a840
+91a844
+91a848
+91a85c
+91a860
+91a864
+91a868
+91a87c
+91a880
+91a884
+91a888
+91a89c
+91a8a0
+91a8a4
+91a8a8
+91a8c0
+91a8c4
+91a8c8
+91a8cc
+91a8e0
+91a8e4
+91a8e8
+91a8ec
+91a900
+91a904
+91a908
+91a90c
+91a920
+91a924
+91a928
+91a92c
+91a940
+91a944
+91a948
+91a94c
+91a960
+91a964
+91a968
+91a96c
+91a980
+91a984
+91a988
+91a98c
+91a9a0
+91a9a4
+91a9a8
+91a9ac
+91a9c0
+91a9c4
+91a9c8
+91a9cc
+91a9e0
+91a9e4
+91a9e8
+91a9ec
+91aa00
+91aa04
+91aa08
+91aa0c
+91b170
+91b174
+91b178
+91b17c
+91b190
+91b194
+91b198
+91b19c
+91b1b0
+91b1b4
+91b1b8
+91b1bc
+91b1d0
+91b1d4
+91b1d8
+91b1dc
+91b1f0
+91b1f4
+91b1f8
+91b1fc
+91b210
+91b214
+91b218
+91b21c
+91b230
+91b234
+91b238
+91b23c
+91b250
+91b254
+91b258
+91b25c
+91b270
+91b274
+91b278
+91b27c
+91b290
+91b294
+91b298
+91b29c
+91b2b0
+91b2b4
+91b2b8
+91b2bc
+91b330
+91b334
+91b338
+91b33c
+91b350
+91b354
+91b358
+91b35c
+91b370
+91b374
+91b378
+91b37c
+91b390
+91b394
+91b398
+91b39c
+91b3b0
+91b3b4
+91b3b8
+91b3bc
+91b3d4
+91b3d8
+91b3dc
+91b3e0
+91b3f4
+91b3f8
+91b3fc
+91b400
+91b414
+91b418
+91b41c
+91b420
+91b434
+91b438
+91b43c
+91b440
+91b454
+91b458
+91b45c
+91b460
+91b474
+91b478
+91b47c
+91b480
+91b494
+91b498
+91b49c
+91b4a0
+91b4d4
+91b4d8
+91b4dc
+91b4e0
+91b4f4
+91b4f8
+91b4fc
+91b500
+91b514
+91b518
+91b51c
+91b520
+91b534
+91b538
+91b53c
+91b540
+91b554
+91b558
+91b55c
+91b560
+91b574
+91b578
+91b57c
+91b580
+91b594
+91b598
+91b59c
+91b5a0
+91b5b4
+91b5b8
+91b5bc
+91b5c0
+91b5d4
+91b5d8
+91b5dc
+91b5e0
+91b5f4
+91b5f8
+91b5fc
+91b600
+91b614
+91b618
+91b61c
+91b620
+91b634
+91b638
+91b63c
+91b640
+91b654
+91b658
+91b65c
+91b660
+91b674
+91b678
+91b67c
+91b680
+91b694
+91b698
+91b69c
+91b6a0
+91b6b4
+91b6b8
+91b6bc
+91b6c0
+91b6d4
+91b6d8
+91b6dc
+91b6e0
+91b6f4
+91b6f8
+91b6fc
+91b700
+91b714
+91b718
+91b71c
+91b720
+91b734
+91b738
+91b73c
+91b740
+91b754
+91b758
+91b75c
+91b760
+91b774
+91b778
+91b77c
+91b780
+91b794
+91b798
+91b79c
+91b7a0
+91bc38
+91bc3c
+91bc40
+91bc44
+91bc58
+91bc5c
+91bc60
+91bc64
+91bc78
+91bc7c
+91bc80
+91bc84
+91bc98
+91bc9c
+91bca0
+91bca4
+91bcb8
+91bcbc
+91bcc0
+91bcc4
+91bcd8
+91bcdc
+91bce0
+91bce4
+91bcf8
+91bcfc
+91bd00
+91bd04
+91bd18
+91bd1c
+91bd20
+91bd24
+91bd38
+91bd3c
+91bd40
+91bd44
+91bd58
+91bd5c
+91bd60
+91bd64
+91bd78
+91bd7c
+91bd80
+91bd84
+91bd98
+91bd9c
+91bda0
+91bda4
+91bdb8
+91bdbc
+91bdc0
+91bdc4
+91bdd8
+91bddc
+91bde0
+91bde4
+91bdf8
+91bdfc
+91be00
+91be04
+91be18
+91be1c
+91be20
+91be24
+91be38
+91be3c
+91be40
+91be44
+91be58
+91be5c
+91be60
+91be64
+91be78
+91be7c
+91be80
+91be84
+91be98
+91be9c
+91bea0
+91bea4
+91beb8
+91bebc
+91bec0
+91bec4
+91bed8
+91bedc
+91bee0
+91bee4
+91bef8
+91befc
+91bf00
+91bf04
+91bf18
+91bf1c
+91bf20
+91bf24
+91bf38
+91bf3c
+91bf40
+91bf44
+91bf5c
+91bf60
+91bf64
+91bf68
+91bfbc
+91bfc0
+91bfc4
+91bfc8
+91bfdc
+91bfe0
+91bfe4
+91bfe8
+91bffc
+91c000
+91c004
+91c008
+91c7f0
+91c7f4
+91c7f8
+91c7fc
+91c810
+91c814
+91c818
+91c81c
+91c830
+91c834
+91c838
+91c83c
+91c854
+91c858
+91c85c
+91c860
+91c874
+91c878
+91c87c
+91c880
+91c894
+91c898
+91c89c
+91c8a0
+91c8b8
+91c8bc
+91c8c0
+91c8c4
+91c9b8
+91c9bc
+91c9c0
+91c9c4
+91c9fc
+91ca00
+91ca04
+91ca08
+91ca1c
+91ca20
+91ca24
+91ca28
+91ca5c
+91ca60
+91ca64
+91ca68
+91ca7c
+91ca80
+91ca84
+91ca88
+91ca9c
+91caa0
+91caa4
+91caa8
+91cae0
+91cae4
+91cae8
+91caec
+91cb80
+91cb84
+91cb88
+91cb8c
+91cba4
+91cba8
+91cbac
+91cbb0
+91cbc4
+91cbc8
+91cbcc
+91cbd0
+91cbe4
+91cbe8
+91cbec
+91cbf0
+91cc04
+91cc08
+91cc0c
+91cc10
+91cc28
+91cc2c
+91cc30
+91cc34
+91cc48
+91cc4c
+91cc50
+91cc54
+91cc68
+91cc6c
+91cc70
+91cc74
+91cc8c
+91cc90
+91cc94
+91cc98
+91ccd0
+91ccd4
+91ccd8
+91ccdc
+91ccf0
+91ccf4
+91ccf8
+91ccfc
+91cd10
+91cd14
+91cd18
+91cd1c
+91cd30
+91cd34
+91cd38
+91cd3c
+91cd54
+91cd58
+91cd5c
+91cd60
+91cd74
+91cd78
+91cd7c
+91cd80
+91cd94
+91cd98
+91cd9c
+91cda0
+91cdb8
+91cdbc
+91cdc0
+91cdc4
+91cdfc
+91ce00
+91ce04
+91ce08
+91cf00
+91cf04
+91cf08
+91cf0c
+91cf20
+91cf24
+91cf28
+91cf2c
+91cf40
+91cf44
+91cf48
+91cf4c
+91cf64
+91cf68
+91cf6c
+91cf70
+91cf84
+91cf88
+91cf8c
+91cf90
+91cfa4
+91cfa8
+91cfac
+91cfb0
+91cfc8
+91cfcc
+91cfd0
+91cfd4
+91cfe8
+91cfec
+91cff0
+91cff4
+91d008
+91d00c
+91d010
+91d014
+91d028
+91d02c
+91d030
+91d034
+91d04c
+91d050
+91d054
+91d058
+91d06c
+91d070
+91d074
+91d078
+91d08c
+91d090
+91d094
+91d098
+91d0ac
+91d0b0
+91d0b4
+91d0b8
+91d0cc
+91d0d0
+91d0d4
+91d0d8
+91d0f0
+91d0f4
+91d0f8
+91d0fc
+91d110
+91d114
+91d118
+91d11c
+91d130
+91d134
+91d138
+91d13c
+91d154
+91d158
+91d15c
+91d160
+91d174
+91d178
+91d17c
+91d180
+91d198
+91d19c
+91d1a0
+91d1a4
+91d27c
+91d280
+91d284
+91d288
+91d29c
+91d2a0
+91d2a4
+91d2a8
+91d2bc
+91d2c0
+91d2c4
+91d2c8
+91d2dc
+91d2e0
+91d2e4
+91d2e8
+91d31c
+91d320
+91d324
+91d328
+91d340
+91d344
+91d348
+91d34c
+91d360
+91d364
+91d368
+91d36c
+91d3a0
+91d3a4
+91d3a8
+91d3ac
+91d3c4
+91d3c8
+91d3cc
+91d3d0
+91d3e4
+91d3e8
+91d3ec
+91d3f0
+91d404
+91d408
+91d40c
+91d410
+91d428
+91d42c
+91d430
+91d434
+91d448
+91d44c
+91d450
+91d454
+91d468
+91d46c
+91d470
+91d474
+91d488
+91d48c
+91d490
+91d494
+91dec0
+91dec4
+91dec8
+91decc
+91dee0
+91dee4
+91dee8
+91deec
+91df00
+91df04
+91df08
+91df0c
+91df20
+91df24
+91df28
+91df2c
+91df40
+91df44
+91df48
+91df4c
+91df60
+91df64
+91df68
+91df6c
+91df80
+91df84
+91df88
+91df8c
+91dfa0
+91dfa4
+91dfa8
+91dfac
+91dfc0
+91dfc4
+91dfc8
+91dfcc
+91dfe0
+91dfe4
+91dfe8
+91dfec
+91e000
+91e004
+91e008
+91e00c
+91e020
+91e024
+91e028
+91e02c
+91e040
+91e044
+91e048
+91e04c
+91e060
+91e064
+91e068
+91e06c
+91e084
+91e088
+91e08c
+91e090
+91e0a4
+91e0a8
+91e0ac
+91e0b0
+91e0c4
+91e0c8
+91e0cc
+91e0d0
+91e0e4
+91e0e8
+91e0ec
+91e0f0
+91e104
+91e108
+91e10c
+91e110
+91e124
+91e128
+91e12c
+91e130
+91e144
+91e148
+91e14c
+91e150
+91e164
+91e168
+91e16c
+91e170
+91e184
+91e188
+91e18c
+91e190
+91e1a4
+91e1a8
+91e1ac
+91e1b0
+91e1c4
+91e1c8
+91e1cc
+91e1d0
+91e1e4
+91e1e8
+91e1ec
+91e1f0
+91e204
+91e208
+91e20c
+91e210
+91e628
+91e62c
+91e630
+91e634
+91e648
+91e64c
+91e650
+91e654
+91e668
+91e66c
+91e670
+91e674
+91e6c8
+91e6cc
+91e6d0
+91e6d4
+91e6e8
+91e6ec
+91e6f0
+91e6f4
+91e708
+91e70c
+91e710
+91e714
+91e728
+91e72c
+91e730
+91e734
+91e768
+91e76c
+91e770
+91e774
+91e788
+91e78c
+91e790
+91e794
+91e7ac
+91e7b0
+91e7b4
+91e7b8
+91e7cc
+91e7d0
+91e7d4
+91e7d8
+91e80c
+91e810
+91e814
+91e818
+91e82c
+91e830
+91e834
+91e838
+91e84c
+91e850
+91e854
+91e858
+91e86c
+91e870
+91e874
+91e878
+91e8ac
+91e8b0
+91e8b4
+91e8b8
+91e8cc
+91e8d0
+91e8d4
+91e8d8
+91e8ec
+91e8f0
+91e8f4
+91e8f8
+91e90c
+91e910
+91e914
+91e918
+91e92c
+91e930
+91e934
+91e938
+91e94c
+91e950
+91e954
+91e958
+91e96c
+91e970
+91e974
+91e978
+91e98c
+91e990
+91e994
+91e998
+91edc8
+91edcc
+91edd0
+91edd4
+91ede8
+91edec
+91edf0
+91edf4
+91ee08
+91ee0c
+91ee10
+91ee14
+91ee28
+91ee2c
+91ee30
+91ee34
+91ee48
+91ee4c
+91ee50
+91ee54
+91ee68
+91ee6c
+91ee70
+91ee74
+91ee88
+91ee8c
+91ee90
+91ee94
+91eec8
+91eecc
+91eed0
+91eed4
+91eee8
+91eeec
+91eef0
+91eef4
+91ef08
+91ef0c
+91ef10
+91ef14
+91ef28
+91ef2c
+91ef30
+91ef34
+91ef48
+91ef4c
+91ef50
+91ef54
+91ef68
+91ef6c
+91ef70
+91ef74
+91ef88
+91ef8c
+91ef90
+91ef94
+91efa8
+91efac
+91efb0
+91efb4
+91efc8
+91efcc
+91efd0
+91efd4
+91efe8
+91efec
+91eff0
+91eff4
+91f008
+91f00c
+91f010
+91f014
+91f028
+91f02c
+91f030
+91f034
+91f048
+91f04c
+91f050
+91f054
+91f4a0
+91f4a4
+91f4a8
+91f4ac
+91f4c0
+91f4c4
+91f4c8
+91f4cc
+91f500
+91f504
+91f508
+91f50c
+91f520
+91f524
+91f528
+91f52c
+91f540
+91f544
+91f548
+91f54c
+91f580
+91f584
+91f588
+91f58c
+91f5a0
+91f5a4
+91f5a8
+91f5ac
+91f5c0
+91f5c4
+91f5c8
+91f5cc
+91f5e0
+91f5e4
+91f5e8
+91f5ec
+91f600
+91f604
+91f608
+91f60c
+91f620
+91f624
+91f628
+91f62c
+91f640
+91f644
+91f648
+91f64c
+91f660
+91f664
+91f668
+91f66c
+91f680
+91f684
+91f688
+91f68c
+91f6a0
+91f6a4
+91f6a8
+91f6ac
+91f6c0
+91f6c4
+91f6c8
+91f6cc
+91f6e0
+91f6e4
+91f6e8
+91f6ec
+91f720
+91f724
+91f728
+91f72c
+91f740
+91f744
+91f748
+91f74c
+91f760
+91f764
+91f768
+91f76c
+91f780
+91f784
+91f788
+91f78c
+91f7a0
+91f7a4
+91f7a8
+91f7ac
+91f7c0
+91f7c4
+91f7c8
+91f7cc
+91f7e0
+91f7e4
+91f7e8
+91f7ec
+91f800
+91f804
+91f808
+91f80c
+91f820
+91f824
+91f828
+91f82c
+91f840
+91f844
+91f848
+91f84c
+91f864
+91f868
+91f86c
+91f870
+91f884
+91f888
+91f88c
+91f890
+91f8a4
+91f8a8
+91f8ac
+91f8b0
+91f8c4
+91f8c8
+91f8cc
+91f8d0
+91f8e4
+91f8e8
+91f8ec
+91f8f0
+91fe84
+91fe88
+91fe8c
+91fe90
+91fea4
+91fea8
+91feac
+91feb0
+91fec4
+91fec8
+91fecc
+91fed0
+91fee4
+91fee8
+91feec
+91fef0
+91ff04
+91ff08
+91ff0c
+91ff10
+91ff24
+91ff28
+91ff2c
+91ff30
+91ff44
+91ff48
+91ff4c
+91ff50
+91ff64
+91ff68
+91ff6c
+91ff70
+91ff84
+91ff88
+91ff8c
+91ff90
+91ffa4
+91ffa8
+91ffac
+91ffb0
+91ffc4
+91ffc8
+91ffcc
+91ffd0
+91ffe4
+91ffe8
+91ffec
+91fff0
+920004
+920008
+92000c
+920010
+920024
+920028
+92002c
+920030
+920044
+920048
+92004c
+920050
+920064
+920068
+92006c
+920070
+920084
+920088
+92008c
+920090
+9200a4
+9200a8
+9200ac
+9200b0
+9200c4
+9200c8
+9200cc
+9200d0
+9200e4
+9200e8
+9200ec
+9200f0
+920104
+920108
+92010c
+920110
+920124
+920128
+92012c
+920130
+920144
+920148
+92014c
+920150
+920168
+92016c
+920170
+920174
+920188
+92018c
+920190
+920194
+9201a8
+9201ac
+9201b0
+9201b4
+9201c8
+9201cc
+9201d0
+9201d4
+9201e8
+9201ec
+9201f0
+9201f4
+920208
+92020c
+920210
+920214
+920228
+92022c
+920230
+920234
+920248
+92024c
+920250
+920254
+920268
+92026c
+920270
+920274
+920288
+92028c
+920290
+920294
+9202a8
+9202ac
+9202b0
+9202b4
+9202c8
+9202cc
+9202d0
+9202d4
+9202e8
+9202ec
+9202f0
+9202f4
+920308
+92030c
+920310
+920314
+920328
+92032c
+920330
+920334
+920348
+92034c
+920350
+920354
+920368
+92036c
+920370
+920374
+920388
+92038c
+920390
+920394
+9203a8
+9203ac
+9203b0
+9203b4
+9203c8
+9203cc
+9203d0
+9203d4
+9203e8
+9203ec
+9203f0
+9203f4
+920408
+92040c
+920410
+920414
+920428
+92042c
+920430
+920434
+9208f4
+9208f8
+9208fc
+920900
+920914
+920918
+92091c
+920920
+920934
+920938
+92093c
+920940
+920954
+920958
+92095c
+920960
+920974
+920978
+92097c
+920980
+920994
+920998
+92099c
+9209a0
+9209b4
+9209b8
+9209bc
+9209c0
+9209d4
+9209d8
+9209dc
+9209e0
+9209f4
+9209f8
+9209fc
+920a00
+920a14
+920a18
+920a1c
+920a20
+920a34
+920a38
+920a3c
+920a40
+920a54
+920a58
+920a5c
+920a60
+920a74
+920a78
+920a7c
+920a80
+920a94
+920a98
+920a9c
+920aa0
+920ab8
+920abc
+920ac0
+920ac4
+920b18
+920b1c
+920b20
+920b24
+920b38
+920b3c
+920b40
+920b44
+920b58
+920b5c
+920b60
+920b64
+920b78
+920b7c
+920b80
+920b84
+920b98
+920b9c
+920ba0
+920ba4
+920bb8
+920bbc
+920bc0
+920bc4
+920c18
+920c1c
+920c20
+920c24
+920c38
+920c3c
+920c40
+920c44
+920c58
+920c5c
+920c60
+920c64
+920c78
+920c7c
+920c80
+920c84
+920cd8
+920cdc
+920ce0
+920ce4
+920cf8
+920cfc
+920d00
+920d04
+920d18
+920d1c
+920d20
+920d24
+920d38
+920d3c
+920d40
+920d44
+920d58
+920d5c
+920d60
+920d64
+920d78
+920d7c
+920d80
+920d84
+920d98
+920d9c
+920da0
+920da4
+920db8
+920dbc
+920dc0
+920dc4
+920dd8
+920ddc
+920de0
+920de4
+920df8
+920dfc
+920e00
+920e04
+9214c8
+9214cc
+9214d0
+9214d4
+9214e8
+9214ec
+9214f0
+9214f4
+921508
+92150c
+921510
+921514
+92152c
+921530
+921534
+921538
+92154c
+921550
+921554
+921558
+92156c
+921570
+921574
+921578
+92158c
+921590
+921594
+921598
+9215b0
+9215b4
+9215b8
+9215bc
+9215d0
+9215d4
+9215d8
+9215dc
+9215f4
+9215f8
+9215fc
+921600
+921614
+921618
+92161c
+921620
+921634
+921638
+92163c
+921640
+921678
+92167c
+921680
+921684
+921698
+92169c
+9216a0
+9216a4
+9216b8
+9216bc
+9216c0
+9216c4
+9216dc
+9216e0
+9216e4
+9216e8
+9216fc
+921700
+921704
+921708
+92171c
+921720
+921724
+921728
+921740
+921744
+921748
+92174c
+921760
+921764
+921768
+92176c
+921780
+921784
+921788
+92178c
+9217a0
+9217a4
+9217a8
+9217ac
+9217c0
+9217c4
+9217c8
+9217cc
+9217e0
+9217e4
+9217e8
+9217ec
+921820
+921824
+921828
+92182c
+921840
+921844
+921848
+92184c
+921864
+921868
+92186c
+921870
+921884
+921888
+92188c
+921890
+9218a8
+9218ac
+9218b0
+9218b4
+9218c8
+9218cc
+9218d0
+9218d4
+9218e8
+9218ec
+9218f0
+9218f4
+92192c
+921930
+921934
+921938
+92194c
+921950
+921954
+921958
+92196c
+921970
+921974
+921978
+921990
+921994
+921998
+92199c
+9219b0
+9219b4
+9219b8
+9219bc
+9219d4
+9219d8
+9219dc
+9219e0
+9219f4
+9219f8
+9219fc
+921a00
+921a14
+921a18
+921a1c
+921a20
+921a98
+921a9c
+921aa0
+921aa4
+921ab8
+921abc
+921ac0
+921ac4
+921ad8
+921adc
+921ae0
+921ae4
+921afc
+921b00
+921b04
+921b08
+921b1c
+921b20
+921b24
+921b28
+921b40
+921b44
+921b48
+921b4c
+921b60
+921b64
+921b68
+921b6c
+921b84
+921b88
+921b8c
+921b90
+921ba4
+921ba8
+921bac
+921bb0
+921bc4
+921bc8
+921bcc
+921bd0
+921be4
+921be8
+921bec
+921bf0
+921c08
+921c0c
+921c10
+921c14
+921c28
+921c2c
+921c30
+921c34
+921c48
+921c4c
+921c50
+921c54
+921c6c
+921c70
+921c74
+921c78
+921c8c
+921c90
+921c94
+921c98
+921cac
+921cb0
+921cb4
+921cb8
+921cd0
+921cd4
+921cd8
+921cdc
+921cf0
+921cf4
+921cf8
+921cfc
+921d10
+921d14
+921d18
+921d1c
+9224b8
+9224bc
+9224c0
+9224c4
+92251c
+922520
+922524
+922528
+92253c
+922540
+922544
+922548
+92255c
+922560
+922564
+922568
+92257c
+922580
+922584
+922588
+9225a0
+9225a4
+9225a8
+9225ac
+9225c0
+9225c4
+9225c8
+9225cc
+9225e0
+9225e4
+9225e8
+9225ec
+922600
+922604
+922608
+92260c
+922620
+922624
+922628
+92262c
+922640
+922644
+922648
+92264c
+922660
+922664
+922668
+92266c
+922680
+922684
+922688
+92268c
+9226a0
+9226a4
+9226a8
+9226ac
+9226c0
+9226c4
+9226c8
+9226cc
+9226e0
+9226e4
+9226e8
+9226ec
+922704
+922708
+92270c
+922710
+922724
+922728
+92272c
+922730
+922788
+92278c
+922790
+922794
+92282c
+922830
+922834
+922838
+922870
+922874
+922878
+92287c
+922890
+922894
+922898
+92289c
+9228b4
+9228b8
+9228bc
+9228c0
+9228d4
+9228d8
+9228dc
+9228e0
+9228f8
+9228fc
+922900
+922904
+922918
+92291c
+922920
+922924
+922938
+92293c
+922940
+922944
+922958
+92295c
+922960
+922964
+9229bc
+9229c0
+9229c4
+9229c8
+9229dc
+9229e0
+9229e4
+9229e8
+9229fc
+922a00
+922a04
+922a08
+923450
+923454
+923458
+92345c
+923470
+923474
+923478
+92347c
+923490
+923494
+923498
+92349c
+9234b4
+9234b8
+9234bc
+9234c0
+9234d4
+9234d8
+9234dc
+9234e0
+9234f4
+9234f8
+9234fc
+923500
+923514
+923518
+92351c
+923520
+923538
+92353c
+923540
+923544
+923558
+92355c
+923560
+923564
+923578
+92357c
+923580
+923584
+92359c
+9235a0
+9235a4
+9235a8
+9235bc
+9235c0
+9235c4
+9235c8
+9235dc
+9235e0
+9235e4
+9235e8
+923600
+923604
+923608
+92360c
+923664
+923668
+92366c
+923670
+923684
+923688
+92368c
+923690
+9236a4
+9236a8
+9236ac
+9236b0
+9236c4
+9236c8
+9236cc
+9236d0
+9236e4
+9236e8
+9236ec
+9236f0
+923708
+92370c
+923710
+923714
+923728
+92372c
+923730
+923734
+923748
+92374c
+923750
+923754
+92376c
+923770
+923774
+923778
+92378c
+923790
+923794
+923798
+9237b0
+9237b4
+9237b8
+9237bc
+9237d0
+9237d4
+9237d8
+9237dc
+9237f0
+9237f4
+9237f8
+9237fc
+923810
+923814
+923818
+92381c
+923830
+923834
+923838
+92383c
+923850
+923854
+923858
+92385c
+9238b4
+9238b8
+9238bc
+9238c0
+9238d4
+9238d8
+9238dc
+9238e0
+9238f4
+9238f8
+9238fc
+923900
+923914
+923918
+92391c
+923920
+923938
+92393c
+923940
+923944
+923978
+92397c
+923980
+923984
+92399c
+9239a0
+9239a4
+9239a8
+9239bc
+9239c0
+9239c4
+9239c8
+9239dc
+9239e0
+9239e4
+9239e8
+9239fc
+923a00
+923a04
+923a08
+923a1c
+923a20
+923a24
+923a28
+923a3c
+923a40
+923a44
+923a48
+923a60
+923a64
+923a68
+923a6c
+923a80
+923a84
+923a88
+923a8c
+923aa0
+923aa4
+923aa8
+923aac
+923ac4
+923ac8
+923acc
+923ad0
+923ae4
+923ae8
+923aec
+923af0
+923b04
+923b08
+923b0c
+923b10
+923b28
+923b2c
+923b30
+923b34
+923b68
+923b6c
+923b70
+923b74
+923b88
+923b8c
+923b90
+923b94
+923ba8
+923bac
+923bb0
+923bb4
+923bcc
+923bd0
+923bd4
+923bd8
+923bec
+923bf0
+923bf4
+923bf8
+923c10
+923c14
+923c18
+923c1c
+923c30
+923c34
+923c38
+923c3c
+923c54
+923c58
+923c5c
+923c60
+923c74
+923c78
+923c7c
+923c80
+923c94
+923c98
+923c9c
+923ca0
+923cd8
+923cdc
+923ce0
+923ce4
+923cf8
+923cfc
+923d00
+923d04
+923d1c
+923d20
+923d24
+923d28
+923d60
+923d64
+923d68
+923d6c
+923d80
+923d84
+923d88
+923d8c
+923da4
+923da8
+923dac
+923db0
+923de8
+923dec
+923df0
+923df4
+923e08
+923e0c
+923e10
+923e14
+923e2c
+923e30
+923e34
+923e38
+923e4c
+923e50
+923e54
+923e58
+923e6c
+923e70
+923e74
+923e78
+923e8c
+923e90
+923e94
+923e98
+924ac8
+924acc
+924ad0
+924ad4
+924ae8
+924aec
+924af0
+924af4
+924b4c
+924b50
+924b54
+924b58
+924b6c
+924b70
+924b74
+924b78
+924b8c
+924b90
+924b94
+924b98
+924bac
+924bb0
+924bb4
+924bb8
+924bcc
+924bd0
+924bd4
+924bd8
+924bec
+924bf0
+924bf4
+924bf8
+924c0c
+924c10
+924c14
+924c18
+924c2c
+924c30
+924c34
+924c38
+924c50
+924c54
+924c58
+924c5c
+924c70
+924c74
+924c78
+924c7c
+924c90
+924c94
+924c98
+924c9c
+924cb0
+924cb4
+924cb8
+924cbc
+924cd0
+924cd4
+924cd8
+924cdc
+924cf0
+924cf4
+924cf8
+924cfc
+924d10
+924d14
+924d18
+924d1c
+924d54
+924d58
+924d5c
+924d60
+924d74
+924d78
+924d7c
+924d80
+924d94
+924d98
+924d9c
+924da0
+924db4
+924db8
+924dbc
+924dc0
+924dd8
+924ddc
+924de0
+924de4
+924df8
+924dfc
+924e00
+924e04
+924e18
+924e1c
+924e20
+924e24
+924e3c
+924e40
+924e44
+924e48
+924e5c
+924e60
+924e64
+924e68
+924e7c
+924e80
+924e84
+924e88
+924e9c
+924ea0
+924ea4
+924ea8
+924ec0
+924ec4
+924ec8
+924ecc
+924ee0
+924ee4
+924ee8
+924eec
+924f00
+924f04
+924f08
+924f0c
+924f20
+924f24
+924f28
+924f2c
+924f40
+924f44
+924f48
+924f4c
+924f64
+924f68
+924f6c
+924f70
+924f84
+924f88
+924f8c
+924f90
+924fa8
+924fac
+924fb0
+924fb4
+924fc8
+924fcc
+924fd0
+924fd4
+924fe8
+924fec
+924ff0
+924ff4
+92500c
+925010
+925014
+925018
+92502c
+925030
+925034
+925038
+92504c
+925050
+925054
+925058
+925070
+925074
+925078
+92507c
+9250b0
+9250b4
+9250b8
+9250bc
+9250d4
+9250d8
+9250dc
+9250e0
+9250f4
+9250f8
+9250fc
+925100
+925114
+925118
+92511c
+925120
+925134
+925138
+92513c
+925140
+925154
+925158
+92515c
+925160
+925174
+925178
+92517c
+925180
+925198
+92519c
+9251a0
+9251a4
+9251b8
+9251bc
+9251c0
+9251c4
+9251d8
+9251dc
+9251e0
+9251e4
+9251fc
+925200
+925204
+925208
+92523c
+925240
+925244
+925248
+925260
+925264
+925268
+92526c
+9252c0
+9252c4
+9252c8
+9252cc
+9252e4
+9252e8
+9252ec
+9252f0
+925304
+925308
+92530c
+925310
+925328
+92532c
+925330
+925334
+925348
+92534c
+925350
+925354
+92536c
+925370
+925374
+925378
+92538c
+925390
+925394
+925398
+925410
+925414
+925418
+92541c
+925430
+925434
+925438
+92543c
+925454
+925458
+92545c
+925460
+925474
+925478
+92547c
+925480
+925494
+925498
+92549c
+9254a0
+9254b8
+9254bc
+9254c0
+9254c4
+9254d8
+9254dc
+9254e0
+9254e4
+9254f8
+9254fc
+925500
+925504
+925518
+92551c
+925520
+925524
+925538
+92553c
+925540
+925544
+925558
+92555c
+925560
+925564
+925578
+92557c
+925580
+925584
+92559c
+9255a0
+9255a4
+9255a8
+9255bc
+9255c0
+9255c4
+9255c8
+9255dc
+9255e0
+9255e4
+9255e8
+9255fc
+925600
+925604
+925608
+925620
+925624
+925628
+92562c
+925640
+925644
+925648
+92564c
+925660
+925664
+925668
+92566c
+925da0
+925da4
+925da8
+925dac
+925dc0
+925dc4
+925dc8
+925dcc
+925de0
+925de4
+925de8
+925dec
+925e04
+925e08
+925e0c
+925e10
+925e24
+925e28
+925e2c
+925e30
+925e44
+925e48
+925e4c
+925e50
+925e64
+925e68
+925e6c
+925e70
+925e88
+925e8c
+925e90
+925e94
+925ea8
+925eac
+925eb0
+925eb4
+925ecc
+925ed0
+925ed4
+925ed8
+925eec
+925ef0
+925ef4
+925ef8
+925f0c
+925f10
+925f14
+925f18
+925f2c
+925f30
+925f34
+925f38
+925fcc
+925fd0
+925fd4
+925fd8
+925ff0
+925ff4
+925ff8
+925ffc
+926010
+926014
+926018
+92601c
+926034
+926038
+92603c
+926040
+926054
+926058
+92605c
+926060
+926078
+92607c
+926080
+926084
+926098
+92609c
+9260a0
+9260a4
+9260b8
+9260bc
+9260c0
+9260c4
+9260d8
+9260dc
+9260e0
+9260e4
+9260fc
+926100
+926104
+926108
+92611c
+926120
+926124
+926128
+926140
+926144
+926148
+92614c
+926160
+926164
+926168
+92616c
+926180
+926184
+926188
+92618c
+92687c
+926880
+926884
+926888
+92689c
+9268a0
+9268a4
+9268a8
+9268bc
+9268c0
+9268c4
+9268c8
+9268dc
+9268e0
+9268e4
+9268e8
+9268fc
+926900
+926904
+926908
+92691c
+926920
+926924
+926928
+92693c
+926940
+926944
+926948
+92695c
+926960
+926964
+926968
+92697c
+926980
+926984
+926988
+92699c
+9269a0
+9269a4
+9269a8
+9269bc
+9269c0
+9269c4
+9269c8
+9269dc
+9269e0
+9269e4
+9269e8
+9269fc
+926a00
+926a04
+926a08
+926a1c
+926a20
+926a24
+926a28
+926a3c
+926a40
+926a44
+926a48
+926a5c
+926a60
+926a64
+926a68
+926a7c
+926a80
+926a84
+926a88
+926a9c
+926aa0
+926aa4
+926aa8
+926abc
+926ac0
+926ac4
+926ac8
+926adc
+926ae0
+926ae4
+926ae8
+926b00
+926b04
+926b08
+926b0c
+926b20
+926b24
+926b28
+926b2c
+926b40
+926b44
+926b48
+926b4c
+926b60
+926b64
+926b68
+926b6c
+926b80
+926b84
+926b88
+926b8c
+926bc0
+926bc4
+926bc8
+926bcc
+926be0
+926be4
+926be8
+926bec
+926c00
+926c04
+926c08
+926c0c
+926c20
+926c24
+926c28
+926c2c
+926c40
+926c44
+926c48
+926c4c
+926c60
+926c64
+926c68
+926c6c
+926c80
+926c84
+926c88
+926c8c
+926ca0
+926ca4
+926ca8
+926cac
+926cc0
+926cc4
+926cc8
+926ccc
+926d00
+926d04
+926d08
+926d0c
+926d20
+926d24
+926d28
+926d2c
+926d40
+926d44
+926d48
+926d4c
+926e04
+926e08
+926e0c
+926e10
+926e24
+926e28
+926e2c
+926e30
+926e44
+926e48
+926e4c
+926e50
+926e64
+926e68
+926e6c
+926e70
+926e84
+926e88
+926e8c
+926e90
+926ea4
+926ea8
+926eac
+926eb0
+926ec4
+926ec8
+926ecc
+926ed0
+926ee4
+926ee8
+926eec
+926ef0
+926f04
+926f08
+926f0c
+926f10
+926f24
+926f28
+926f2c
+926f30
+926f44
+926f48
+926f4c
+926f50
+9274b8
+9274bc
+9274c0
+9274c4
+9274d8
+9274dc
+9274e0
+9274e4
+9274f8
+9274fc
+927500
+927504
+927518
+92751c
+927520
+927524
+927538
+92753c
+927540
+927544
+927558
+92755c
+927560
+927564
+927578
+92757c
+927580
+927584
+927598
+92759c
+9275a0
+9275a4
+9275b8
+9275bc
+9275c0
+9275c4
+9275d8
+9275dc
+9275e0
+9275e4
+9275f8
+9275fc
+927600
+927604
+927618
+92761c
+927620
+927624
+927638
+92763c
+927640
+927644
+927658
+92765c
+927660
+927664
+927678
+92767c
+927680
+927684
+92775c
+927760
+927764
+927768
+92777c
+927780
+927784
+927788
+92779c
+9277a0
+9277a4
+9277a8
+9277bc
+9277c0
+9277c4
+9277c8
+9277dc
+9277e0
+9277e4
+9277e8
+9277fc
+927800
+927804
+927808
+92783c
+927840
+927844
+927848
+92785c
+927860
+927864
+927868
+9278bc
+9278c0
+9278c4
+9278c8
+9278dc
+9278e0
+9278e4
+9278e8
+9278fc
+927900
+927904
+927908
+92791c
+927920
+927924
+927928
+92793c
+927940
+927944
+927948
+92795c
+927960
+927964
+927968
+92797c
+927980
+927984
+927988
+92799c
+9279a0
+9279a4
+9279a8
+927a40
+927a44
+927a48
+927a4c
+927a60
+927a64
+927a68
+927a6c
+927a80
+927a84
+927a88
+927a8c
+927aa0
+927aa4
+927aa8
+927aac
+927ae0
+927ae4
+927ae8
+927aec
+927b00
+927b04
+927b08
+927b0c
+927b20
+927b24
+927b28
+927b2c
+927b40
+927b44
+927b48
+927b4c
+927b60
+927b64
+927b68
+927b6c
+927b80
+927b84
+927b88
+927b8c
+927f7c
+927f80
+927f84
+927f88
+927f9c
+927fa0
+927fa4
+927fa8
+927fbc
+927fc0
+927fc4
+927fc8
+927fdc
+927fe0
+927fe4
+927fe8
+927ffc
+928000
+928004
+928008
+92801c
+928020
+928024
+928028
+92803c
+928040
+928044
+928048
+92805c
+928060
+928064
+928068
+92807c
+928080
+928084
+928088
+92809c
+9280a0
+9280a4
+9280a8
+9280bc
+9280c0
+9280c4
+9280c8
+9280dc
+9280e0
+9280e4
+9280e8
+928100
+928104
+928108
+92810c
+928120
+928124
+928128
+92812c
+928140
+928144
+928148
+92814c
+928160
+928164
+928168
+92816c
+928180
+928184
+928188
+92818c
+9281a0
+9281a4
+9281a8
+9281ac
+9281c0
+9281c4
+9281c8
+9281cc
+9281e0
+9281e4
+9281e8
+9281ec
+928200
+928204
+928208
+92820c
+928220
+928224
+928228
+92822c
+928240
+928244
+928248
+92824c
+928264
+928268
+92826c
+928270
+928284
+928288
+92828c
+928290
+9282a4
+9282a8
+9282ac
+9282b0
+9282c4
+9282c8
+9282cc
+9282d0
+9282e4
+9282e8
+9282ec
+9282f0
+928304
+928308
+92830c
+928310
+928324
+928328
+92832c
+928330
+928344
+928348
+92834c
+928350
+928364
+928368
+92836c
+928370
+9288cc
+9288d0
+9288d4
+9288d8
+9288ec
+9288f0
+9288f4
+9288f8
+92890c
+928910
+928914
+928918
+92892c
+928930
+928934
+928938
+92894c
+928950
+928954
+928958
+928a2c
+928a30
+928a34
+928a38
+928a4c
+928a50
+928a54
+928a58
+928a6c
+928a70
+928a74
+928a78
+928a8c
+928a90
+928a94
+928a98
+928aac
+928ab0
+928ab4
+928ab8
+928ad0
+928ad4
+928ad8
+928adc
+928b50
+928b54
+928b58
+928b5c
+928b70
+928b74
+928b78
+928b7c
+928bb0
+928bb4
+928bb8
+928bbc
+928c50
+928c54
+928c58
+928c5c
+928c70
+928c74
+928c78
+928c7c
+928c90
+928c94
+928c98
+928c9c
+928cb0
+928cb4
+928cb8
+928cbc
+928cd0
+928cd4
+928cd8
+928cdc
+928cf0
+928cf4
+928cf8
+928cfc
+928d10
+928d14
+928d18
+928d1c
+928d30
+928d34
+928d38
+928d3c
+928d50
+928d54
+928d58
+928d5c
+928d70
+928d74
+928d78
+928d7c
+928d90
+928d94
+928d98
+928d9c
+928db4
+928db8
+928dbc
+928dc0
+928dd4
+928dd8
+928ddc
+928de0
+928df4
+928df8
+928dfc
+928e00
+928e14
+928e18
+928e1c
+928e20
+928e34
+928e38
+928e3c
+928e40
+928e54
+928e58
+928e5c
+928e60
+928e74
+928e78
+928e7c
+928e80
+928e94
+928e98
+928e9c
+928ea0
+928eb4
+928eb8
+928ebc
+928ec0
+928ed4
+928ed8
+928edc
+928ee0
+928ef4
+928ef8
+928efc
+928f00
+928f14
+928f18
+928f1c
+928f20
+928f34
+928f38
+928f3c
+928f40
+928f54
+928f58
+928f5c
+928f60
+928f74
+928f78
+928f7c
+928f80
+928f94
+928f98
+928f9c
+928fa0
+928fb4
+928fb8
+928fbc
+928fc0
+928fd4
+928fd8
+928fdc
+928fe0
+928ff4
+928ff8
+928ffc
+929000
+929014
+929018
+92901c
+929020
+929034
+929038
+92903c
+929040
+929054
+929058
+92905c
+929060
+929074
+929078
+92907c
+929080
+929094
+929098
+92909c
+9290a0
+929778
+92977c
+929780
+929784
+929798
+92979c
+9297a0
+9297a4
+9297b8
+9297bc
+9297c0
+9297c4
+9297dc
+9297e0
+9297e4
+9297e8
+9297fc
+929800
+929804
+929808
+92981c
+929820
+929824
+929828
+929840
+929844
+929848
+92984c
+929860
+929864
+929868
+92986c
+929880
+929884
+929888
+92988c
+9298a4
+9298a8
+9298ac
+9298b0
+9298c4
+9298c8
+9298cc
+9298d0
+9298e4
+9298e8
+9298ec
+9298f0
+929948
+92994c
+929950
+929954
+929968
+92996c
+929970
+929974
+929988
+92998c
+929990
+929994
+9299a8
+9299ac
+9299b0
+9299b4
+9299c8
+9299cc
+9299d0
+9299d4
+9299e8
+9299ec
+9299f0
+9299f4
+929a08
+929a0c
+929a10
+929a14
+929a2c
+929a30
+929a34
+929a38
+929a4c
+929a50
+929a54
+929a58
+929a6c
+929a70
+929a74
+929a78
+929a8c
+929a90
+929a94
+929a98
+929aac
+929ab0
+929ab4
+929ab8
+929aec
+929af0
+929af4
+929af8
+929b0c
+929b10
+929b14
+929b18
+929b30
+929b34
+929b38
+929b3c
+929b50
+929b54
+929b58
+929b5c
+929b70
+929b74
+929b78
+929b7c
+929b94
+929b98
+929b9c
+929ba0
+929bb4
+929bb8
+929bbc
+929bc0
+929bd4
+929bd8
+929bdc
+929be0
+929bf4
+929bf8
+929bfc
+929c00
+929c14
+929c18
+929c1c
+929c20
+929c34
+929c38
+929c3c
+929c40
+929c54
+929c58
+929c5c
+929c60
+929c74
+929c78
+929c7c
+929c80
+929c98
+929c9c
+929ca0
+929ca4
+929cb8
+929cbc
+929cc0
+929cc4
+929cd8
+929cdc
+929ce0
+929ce4
+929cf8
+929cfc
+929d00
+929d04
+929d18
+929d1c
+929d20
+929d24
+929d38
+929d3c
+929d40
+929d44
+929d58
+929d5c
+929d60
+929d64
+929d7c
+929d80
+929d84
+929d88
+929d9c
+929da0
+929da4
+929da8
+929dbc
+929dc0
+929dc4
+929dc8
+929ddc
+929de0
+929de4
+929de8
+929e00
+929e04
+929e08
+929e0c
+929e20
+929e24
+929e28
+929e2c
+929e40
+929e44
+929e48
+929e4c
+929e60
+929e64
+929e68
+929e6c
+929e80
+929e84
+929e88
+929e8c
+929ea0
+929ea4
+929ea8
+929eac
+929ec0
+929ec4
+929ec8
+929ecc
+929ee0
+929ee4
+929ee8
+929eec
+929f00
+929f04
+929f08
+929f0c
+929f40
+929f44
+929f48
+929f4c
+929f84
+929f88
+929f8c
+929f90
+92a048
+92a04c
+92a050
+92a054
+92a068
+92a06c
+92a070
+92a074
+92a088
+92a08c
+92a090
+92a094
+92a944
+92a948
+92a94c
+92a950
+92a964
+92a968
+92a96c
+92a970
+92a988
+92a98c
+92a990
+92a994
+92a9a8
+92a9ac
+92a9b0
+92a9b4
+92a9c8
+92a9cc
+92a9d0
+92a9d4
+92a9e8
+92a9ec
+92a9f0
+92a9f4
+92aa08
+92aa0c
+92aa10
+92aa14
+92aa28
+92aa2c
+92aa30
+92aa34
+92aa48
+92aa4c
+92aa50
+92aa54
+92aa6c
+92aa70
+92aa74
+92aa78
+92aacc
+92aad0
+92aad4
+92aad8
+92aaec
+92aaf0
+92aaf4
+92aaf8
+92ab10
+92ab14
+92ab18
+92ab1c
+92ab30
+92ab34
+92ab38
+92ab3c
+92ab50
+92ab54
+92ab58
+92ab5c
+92ab70
+92ab74
+92ab78
+92ab7c
+92ab90
+92ab94
+92ab98
+92ab9c
+92abb0
+92abb4
+92abb8
+92abbc
+92abd0
+92abd4
+92abd8
+92abdc
+92abf0
+92abf4
+92abf8
+92abfc
+92ac10
+92ac14
+92ac18
+92ac1c
+92ac30
+92ac34
+92ac38
+92ac3c
+92ac74
+92ac78
+92ac7c
+92ac80
+92ac94
+92ac98
+92ac9c
+92aca0
+92acb4
+92acb8
+92acbc
+92acc0
+92acd4
+92acd8
+92acdc
+92ace0
+92acf4
+92acf8
+92acfc
+92ad00
+92ad14
+92ad18
+92ad1c
+92ad20
+92ad74
+92ad78
+92ad7c
+92ad80
+92ad98
+92ad9c
+92ada0
+92ada4
+92ae1c
+92ae20
+92ae24
+92ae28
+92ae3c
+92ae40
+92ae44
+92ae48
+92ae7c
+92ae80
+92ae84
+92ae88
+92aec0
+92aec4
+92aec8
+92aecc
+92aee0
+92aee4
+92aee8
+92aeec
+92af00
+92af04
+92af08
+92af0c
+92af20
+92af24
+92af28
+92af2c
+92af64
+92af68
+92af6c
+92af70
+92af84
+92af88
+92af8c
+92af90
+92afa4
+92afa8
+92afac
+92afb0
+92afc4
+92afc8
+92afcc
+92afd0
+92afe8
+92afec
+92aff0
+92aff4
+92b008
+92b00c
+92b010
+92b014
+92b028
+92b02c
+92b030
+92b034
+92b048
+92b04c
+92b050
+92b054
+92b06c
+92b070
+92b074
+92b078
+92b08c
+92b090
+92b094
+92b098
+92b0ac
+92b0b0
+92b0b4
+92b0b8
+92b0cc
+92b0d0
+92b0d4
+92b0d8
+92b0ec
+92b0f0
+92b0f4
+92b0f8
+92b10c
+92b110
+92b114
+92b118
+92b16c
+92b170
+92b174
+92b178
+92b190
+92b194
+92b198
+92b19c
+92b1b0
+92b1b4
+92b1b8
+92b1bc
+92b1d0
+92b1d4
+92b1d8
+92b1dc
+92b214
+92b218
+92b21c
+92b220
+92b234
+92b238
+92b23c
+92b240
+92b254
+92b258
+92b25c
+92b260
+92bb14
+92bb18
+92bb1c
+92bb20
+92bb34
+92bb38
+92bb3c
+92bb40
+92bb54
+92bb58
+92bb5c
+92bb60
+92bb74
+92bb78
+92bb7c
+92bb80
+92bb94
+92bb98
+92bb9c
+92bba0
+92bbb4
+92bbb8
+92bbbc
+92bbc0
+92bc94
+92bc98
+92bc9c
+92bca0
+92bcb4
+92bcb8
+92bcbc
+92bcc0
+92bcf8
+92bcfc
+92bd00
+92bd04
+92bd18
+92bd1c
+92bd20
+92bd24
+92bd38
+92bd3c
+92bd40
+92bd44
+92bd58
+92bd5c
+92bd60
+92bd64
+92bd78
+92bd7c
+92bd80
+92bd84
+92bd98
+92bd9c
+92bda0
+92bda4
+92bdf8
+92bdfc
+92be00
+92be04
+92be18
+92be1c
+92be20
+92be24
+92be38
+92be3c
+92be40
+92be44
+92be58
+92be5c
+92be60
+92be64
+92be78
+92be7c
+92be80
+92be84
+92be98
+92be9c
+92bea0
+92bea4
+92beb8
+92bebc
+92bec0
+92bec4
+92bed8
+92bedc
+92bee0
+92bee4
+92bef8
+92befc
+92bf00
+92bf04
+92bf18
+92bf1c
+92bf20
+92bf24
+92bf38
+92bf3c
+92bf40
+92bf44
+92bf58
+92bf5c
+92bf60
+92bf64
+92bf98
+92bf9c
+92bfa0
+92bfa4
+92bfbc
+92bfc0
+92bfc4
+92bfc8
+92bfdc
+92bfe0
+92bfe4
+92bfe8
+92bffc
+92c000
+92c004
+92c008
+92c01c
+92c020
+92c024
+92c028
+92c03c
+92c040
+92c044
+92c048
+92c05c
+92c060
+92c064
+92c068
+92c07c
+92c080
+92c084
+92c088
+92c09c
+92c0a0
+92c0a4
+92c0a8
+92c0bc
+92c0c0
+92c0c4
+92c0c8
+92c0fc
+92c100
+92c104
+92c108
+92c15c
+92c160
+92c164
+92c168
+92c17c
+92c180
+92c184
+92c188
+92c19c
+92c1a0
+92c1a4
+92c1a8
+92c1bc
+92c1c0
+92c1c4
+92c1c8
+92c1dc
+92c1e0
+92c1e4
+92c1e8
+92c1fc
+92c200
+92c204
+92c208
+92c21c
+92c220
+92c224
+92c228
+92c23c
+92c240
+92c244
+92c248
+92c25c
+92c260
+92c264
+92c268
+92c880
+92c884
+92c888
+92c88c
+92c8a0
+92c8a4
+92c8a8
+92c8ac
+92c8c0
+92c8c4
+92c8c8
+92c8cc
+92c8e0
+92c8e4
+92c8e8
+92c8ec
+92c900
+92c904
+92c908
+92c90c
+92c920
+92c924
+92c928
+92c92c
+92c940
+92c944
+92c948
+92c94c
+92c960
+92c964
+92c968
+92c96c
+92c980
+92c984
+92c988
+92c98c
+92ca80
+92ca84
+92ca88
+92ca8c
+92caa0
+92caa4
+92caa8
+92caac
+92cac0
+92cac4
+92cac8
+92cacc
+92cae0
+92cae4
+92cae8
+92caec
+92cb00
+92cb04
+92cb08
+92cb0c
+92cba0
+92cba4
+92cba8
+92cbac
+92cbe0
+92cbe4
+92cbe8
+92cbec
+92cc00
+92cc04
+92cc08
+92cc0c
+92cc20
+92cc24
+92cc28
+92cc2c
+92cc40
+92cc44
+92cc48
+92cc4c
+92cc60
+92cc64
+92cc68
+92cc6c
+92cc84
+92cc88
+92cc8c
+92cc90
+92cca4
+92cca8
+92ccac
+92ccb0
+92ccc4
+92ccc8
+92cccc
+92ccd0
+92cce4
+92cce8
+92ccec
+92ccf0
+92cd04
+92cd08
+92cd0c
+92cd10
+92cd24
+92cd28
+92cd2c
+92cd30
+92cd44
+92cd48
+92cd4c
+92cd50
+92cd64
+92cd68
+92cd6c
+92cd70
+92cd84
+92cd88
+92cd8c
+92cd90
+92cda4
+92cda8
+92cdac
+92cdb0
+92cdc4
+92cdc8
+92cdcc
+92cdd0
+92ce64
+92ce68
+92ce6c
+92ce70
+92ce84
+92ce88
+92ce8c
+92ce90
+92cea4
+92cea8
+92ceac
+92ceb0
+92cec4
+92cec8
+92cecc
+92ced0
+92cee4
+92cee8
+92ceec
+92cef0
+92cf04
+92cf08
+92cf0c
+92cf10
+92cf24
+92cf28
+92cf2c
+92cf30
+92cf44
+92cf48
+92cf4c
+92cf50
+92cf64
+92cf68
+92cf6c
+92cf70
+92d520
+92d524
+92d528
+92d52c
+92d540
+92d544
+92d548
+92d54c
+92d560
+92d564
+92d568
+92d56c
+92d580
+92d584
+92d588
+92d58c
+92d5a0
+92d5a4
+92d5a8
+92d5ac
+92d5c0
+92d5c4
+92d5c8
+92d5cc
+92d5e0
+92d5e4
+92d5e8
+92d5ec
+92d600
+92d604
+92d608
+92d60c
+92d6e0
+92d6e4
+92d6e8
+92d6ec
+92d700
+92d704
+92d708
+92d70c
+92d740
+92d744
+92d748
+92d74c
+92d760
+92d764
+92d768
+92d76c
+92d780
+92d784
+92d788
+92d78c
+92d7a0
+92d7a4
+92d7a8
+92d7ac
+92d7c0
+92d7c4
+92d7c8
+92d7cc
+92d7e0
+92d7e4
+92d7e8
+92d7ec
+92d800
+92d804
+92d808
+92d80c
+92d820
+92d824
+92d828
+92d82c
+92d840
+92d844
+92d848
+92d84c
+92d864
+92d868
+92d86c
+92d870
+92d884
+92d888
+92d88c
+92d890
+92d8a4
+92d8a8
+92d8ac
+92d8b0
+92d8c4
+92d8c8
+92d8cc
+92d8d0
+92d924
+92d928
+92d92c
+92d930
+92d944
+92d948
+92d94c
+92d950
+92d964
+92d968
+92d96c
+92d970
+92d9c4
+92d9c8
+92d9cc
+92d9d0
+92d9e4
+92d9e8
+92d9ec
+92d9f0
+92da24
+92da28
+92da2c
+92da30
+92da44
+92da48
+92da4c
+92da50
+92da64
+92da68
+92da6c
+92da70
+92da84
+92da88
+92da8c
+92da90
+92daa4
+92daa8
+92daac
+92dab0
+92dac4
+92dac8
+92dacc
+92dad0
+92dae4
+92dae8
+92daec
+92daf0
+92db04
+92db08
+92db0c
+92db10
+92db24
+92db28
+92db2c
+92db30
+92db44
+92db48
+92db4c
+92db50
+92db64
+92db68
+92db6c
+92db70
+92db84
+92db88
+92db8c
+92db90
+92dba4
+92dba8
+92dbac
+92dbb0
+92df74
+92df78
+92df7c
+92df80
+92df94
+92df98
+92df9c
+92dfa0
+92dfb4
+92dfb8
+92dfbc
+92dfc0
+92dfd4
+92dfd8
+92dfdc
+92dfe0
+92dff4
+92dff8
+92dffc
+92e000
+92e014
+92e018
+92e01c
+92e020
+92e034
+92e038
+92e03c
+92e040
+92e054
+92e058
+92e05c
+92e060
+92e074
+92e078
+92e07c
+92e080
+92e094
+92e098
+92e09c
+92e0a0
+92e0b4
+92e0b8
+92e0bc
+92e0c0
+92e0d4
+92e0d8
+92e0dc
+92e0e0
+92e0f4
+92e0f8
+92e0fc
+92e100
+92e114
+92e118
+92e11c
+92e120
+92e134
+92e138
+92e13c
+92e140
+92e174
+92e178
+92e17c
+92e180
+92e194
+92e198
+92e19c
+92e1a0
+92e1b4
+92e1b8
+92e1bc
+92e1c0
+92e1d4
+92e1d8
+92e1dc
+92e1e0
+92e658
+92e65c
+92e660
+92e664
+92e678
+92e67c
+92e680
+92e684
+92e698
+92e69c
+92e6a0
+92e6a4
+92e6b8
+92e6bc
+92e6c0
+92e6c4
+92e6d8
+92e6dc
+92e6e0
+92e6e4
+92e6f8
+92e6fc
+92e700
+92e704
+92e718
+92e71c
+92e720
+92e724
+92e738
+92e73c
+92e740
+92e744
+92e758
+92e75c
+92e760
+92e764
+92e778
+92e77c
+92e780
+92e784
+92e798
+92e79c
+92e7a0
+92e7a4
+92e7b8
+92e7bc
+92e7c0
+92e7c4
+92e7d8
+92e7dc
+92e7e0
+92e7e4
+92e7f8
+92e7fc
+92e800
+92e804
+92e818
+92e81c
+92e820
+92e824
+92e838
+92e83c
+92e840
+92e844
+92e858
+92e85c
+92e860
+92e864
+92e87c
+92e880
+92e884
+92e888
+92e89c
+92e8a0
+92e8a4
+92e8a8
+92e8bc
+92e8c0
+92e8c4
+92e8c8
+92e8dc
+92e8e0
+92e8e4
+92e8e8
+92e9bc
+92e9c0
+92e9c4
+92e9c8
+92e9dc
+92e9e0
+92e9e4
+92e9e8
+92ea00
+92ea04
+92ea08
+92ea0c
+92ea20
+92ea24
+92ea28
+92ea2c
+92ea40
+92ea44
+92ea48
+92ea4c
+92ea60
+92ea64
+92ea68
+92ea6c
+92ea80
+92ea84
+92ea88
+92ea8c
+92eaa0
+92eaa4
+92eaa8
+92eaac
+92eac0
+92eac4
+92eac8
+92eacc
+92eae0
+92eae4
+92eae8
+92eaec
+92eb00
+92eb04
+92eb08
+92eb0c
+92eb20
+92eb24
+92eb28
+92eb2c
+92eb40
+92eb44
+92eb48
+92eb4c
+99cbdc
+99cbe0
+99cbe4
+99cbe8
+99cbfc
+99cc00
+99cc04
+99cc08
+99cc1c
+99cc20
+99cc24
+99cc28
+99cc3c
+99cc40
+99cc44
+99cc48
+99cc5c
+99cc60
+99cc64
+99cc68
+99cc7c
+99cc80
+99cc84
+99cc88
+99cc9c
+99cca0
+99cca4
+99cca8
+99ccbc
+99ccc0
+99ccc4
+99ccc8
+99ccdc
+99cce0
+99cce4
+99cce8
+99ccfc
+99cd00
+99cd04
+99cd08
+99cd1c
+99cd20
+99cd24
+99cd28
+99cd3c
+99cd40
+99cd44
+99cd48
+99cd5c
+99cd60
+99cd64
+99cd68
+99cd7c
+99cd80
+99cd84
+99cd88
+99cd9c
+99cda0
+99cda4
+99cda8
+99cdbc
+99cdc0
+99cdc4
+99cdc8
+99cddc
+99cde0
+99cde4
+99cde8
+99cdfc
+99ce00
+99ce04
+99ce08
+99ce1c
+99ce20
+99ce24
+99ce28
+99ce3c
+99ce40
+99ce44
+99ce48
+99ce5c
+99ce60
+99ce64
+99ce68
+99ce7c
+99ce80
+99ce84
+99ce88
+99ce9c
+99cea0
+99cea4
+99cea8
+99cebc
+99cec0
+99cec4
+99cec8
+99cedc
+99cee0
+99cee4
+99cee8
+99cefc
+99cf00
+99cf04
+99cf08
+99cf1c
+99cf20
+99cf24
+99cf28
+99cf3c
+99cf40
+99cf44
+99cf48
+99cf5c
+99cf60
+99cf64
+99cf68
+99cf7c
+99cf80
+99cf84
+99cf88
+99cf9c
+99cfa0
+99cfa4
+99cfa8
+99cfbc
+99cfc0
+99cfc4
+99cfc8
+99cfe0
+99cfe4
+99cfe8
+99cfec
+99d000
+99d004
+99d008
+99d00c
+99d020
+99d024
+99d028
+99d02c
+99d040
+99d044
+99d048
+99d04c
+99d060
+99d064
+99d068
+99d06c
+99d080
+99d084
+99d088
+99d08c
+99d0a0
+99d0a4
+99d0a8
+99d0ac
+99d0c0
+99d0c4
+99d0c8
+99d0cc
+99d0e0
+99d0e4
+99d0e8
+99d0ec
+99d100
+99d104
+99d108
+99d10c
+99d120
+99d124
+99d128
+99d12c
+99d140
+99d144
+99d148
+99d14c
+99d160
+99d164
+99d168
+99d16c
+99d180
+99d184
+99d188
+99d18c
+99d1a0
+99d1a4
+99d1a8
+99d1ac
+99d1c0
+99d1c4
+99d1c8
+99d1cc
+99d1e0
+99d1e4
+99d1e8
+99d1ec
+99d888
+99d88c
+99d890
+99d894
+99d8a8
+99d8ac
+99d8b0
+99d8b4
+99d8c8
+99d8cc
+99d8d0
+99d8d4
+99d8e8
+99d8ec
+99d8f0
+99d8f4
+99d908
+99d90c
+99d910
+99d914
+99d928
+99d92c
+99d930
+99d934
+99d948
+99d94c
+99d950
+99d954
+99d968
+99d96c
+99d970
+99d974
+99d988
+99d98c
+99d990
+99d994
+99d9a8
+99d9ac
+99d9b0
+99d9b4
+99d9c8
+99d9cc
+99d9d0
+99d9d4
+99d9e8
+99d9ec
+99d9f0
+99d9f4
+99da08
+99da0c
+99da10
+99da14
+99da28
+99da2c
+99da30
+99da34
+99da48
+99da4c
+99da50
+99da54
+99da68
+99da6c
+99da70
+99da74
+99da88
+99da8c
+99da90
+99da94
+99daa8
+99daac
+99dab0
+99dab4
+99dac8
+99dacc
+99dad0
+99dad4
+99daec
+99daf0
+99daf4
+99daf8
+99db0c
+99db10
+99db14
+99db18
+99db2c
+99db30
+99db34
+99db38
+99db4c
+99db50
+99db54
+99db58
+99db6c
+99db70
+99db74
+99db78
+99db8c
+99db90
+99db94
+99db98
+99dbac
+99dbb0
+99dbb4
+99dbb8
+99dbcc
+99dbd0
+99dbd4
+99dbd8
+99dbec
+99dbf0
+99dbf4
+99dbf8
+99dc0c
+99dc10
+99dc14
+99dc18
+99dc2c
+99dc30
+99dc34
+99dc38
+99dc50
+99dc54
+99dc58
+99dc5c
+99dc70
+99dc74
+99dc78
+99dc7c
+99dc90
+99dc94
+99dc98
+99dc9c
+99dcb0
+99dcb4
+99dcb8
+99dcbc
+99dcd0
+99dcd4
+99dcd8
+99dcdc
+99dcf0
+99dcf4
+99dcf8
+99dcfc
+99dd10
+99dd14
+99dd18
+99dd1c
+99dd30
+99dd34
+99dd38
+99dd3c
+99dd50
+99dd54
+99dd58
+99dd5c
+99dd70
+99dd74
+99dd78
+99dd7c
+99dd90
+99dd94
+99dd98
+99dd9c
+99ddb0
+99ddb4
+99ddb8
+99ddbc
+99ddd0
+99ddd4
+99ddd8
+99dddc
+99ddf0
+99ddf4
+99ddf8
+99ddfc
+99de10
+99de14
+99de18
+99de1c
+99de30
+99de34
+99de38
+99de3c
+99de50
+99de54
+99de58
+99de5c
+99de70
+99de74
+99de78
+99de7c
+99de90
+99de94
+99de98
+99de9c
+99deb0
+99deb4
+99deb8
+99debc
+99ded0
+99ded4
+99ded8
+99dedc
+99def0
+99def4
+99def8
+99defc
+99df10
+99df14
+99df18
+99df1c
+99df34
+99df38
+99df3c
+99df40
+99df54
+99df58
+99df5c
+99df60
+99df74
+99df78
+99df7c
+99df80
+99df94
+99df98
+99df9c
+99dfa0
+99dfb4
+99dfb8
+99dfbc
+99dfc0
+99dfd4
+99dfd8
+99dfdc
+99dfe0
+99dff4
+99dff8
+99dffc
+99e000
+99e014
+99e018
+99e01c
+99e020
+99e034
+99e038
+99e03c
+99e040
+99e054
+99e058
+99e05c
+99e060
+99e074
+99e078
+99e07c
+99e080
+99e094
+99e098
+99e09c
+99e0a0
+99e0b4
+99e0b8
+99e0bc
+99e0c0
+99e490
+99e494
+99e498
+99e49c
+99e4b0
+99e4b4
+99e4b8
+99e4bc
+99e4d0
+99e4d4
+99e4d8
+99e4dc
+99e4f0
+99e4f4
+99e4f8
+99e4fc
+99e510
+99e514
+99e518
+99e51c
+99e530
+99e534
+99e538
+99e53c
+99e550
+99e554
+99e558
+99e55c
+99e570
+99e574
+99e578
+99e57c
+99e590
+99e594
+99e598
+99e59c
+99e5b0
+99e5b4
+99e5b8
+99e5bc
+99e5d0
+99e5d4
+99e5d8
+99e5dc
+99e97c
+99e980
+99e984
+99e988
+99e99c
+99e9a0
+99e9a4
+99e9a8
+99e9bc
+99e9c0
+99e9c4
+99e9c8
+99e9dc
+99e9e0
+99e9e4
+99e9e8
+99e9fc
+99ea00
+99ea04
+99ea08
+99ea1c
+99ea20
+99ea24
+99ea28
+99ea3c
+99ea40
+99ea44
+99ea48
+99ea5c
+99ea60
+99ea64
+99ea68
+99ea7c
+99ea80
+99ea84
+99ea88
+99ea9c
+99eaa0
+99eaa4
+99eaa8
+99eabc
+99eac0
+99eac4
+99eac8
+99eadc
+99eae0
+99eae4
+99eae8
+99eafc
+99eb00
+99eb04
+99eb08
+99eb1c
+99eb20
+99eb24
+99eb28
+99eb3c
+99eb40
+99eb44
+99eb48
+99eb5c
+99eb60
+99eb64
+99eb68
+99eb7c
+99eb80
+99eb84
+99eb88
+99eb9c
+99eba0
+99eba4
+99eba8
+99ebbc
+99ebc0
+99ebc4
+99ebc8
+99ebdc
+99ebe0
+99ebe4
+99ebe8
+99ebfc
+99ec00
+99ec04
+99ec08
+99ec1c
+99ec20
+99ec24
+99ec28
+99ec3c
+99ec40
+99ec44
+99ec48
+99ec5c
+99ec60
+99ec64
+99ec68
+99ec80
+99ec84
+99ec88
+99ec8c
+99eca0
+99eca4
+99eca8
+99ecac
+99ecc0
+99ecc4
+99ecc8
+99eccc
+99ece0
+99ece4
+99ece8
+99ecec
+99ed00
+99ed04
+99ed08
+99ed0c
+99ed20
+99ed24
+99ed28
+99ed2c
+99ed40
+99ed44
+99ed48
+99ed4c
+99ed60
+99ed64
+99ed68
+99ed6c
+99ed80
+99ed84
+99ed88
+99ed8c
+99eda0
+99eda4
+99eda8
+99edac
+99edc0
+99edc4
+99edc8
+99edcc
+99ede0
+99ede4
+99ede8
+99edec
+99ee00
+99ee04
+99ee08
+99ee0c
+99ee20
+99ee24
+99ee28
+99ee2c
+99ee40
+99ee44
+99ee48
+99ee4c
+99ee60
+99ee64
+99ee68
+99ee6c
+99ee80
+99ee84
+99ee88
+99ee8c
+99eea0
+99eea4
+99eea8
+99eeac
+99eec0
+99eec4
+99eec8
+99eecc
+99eee0
+99eee4
+99eee8
+99eeec
+99f444
+99f448
+99f44c
+99f450
+99f464
+99f468
+99f46c
+99f470
+99f484
+99f488
+99f48c
+99f490
+99f4a4
+99f4a8
+99f4ac
+99f4b0
+99f4c4
+99f4c8
+99f4cc
+99f4d0
+99f4e4
+99f4e8
+99f4ec
+99f4f0
+99f504
+99f508
+99f50c
+99f510
+99f524
+99f528
+99f52c
+99f530
+99f544
+99f548
+99f54c
+99f550
+99f564
+99f568
+99f56c
+99f570
+99f584
+99f588
+99f58c
+99f590
+99f5a4
+99f5a8
+99f5ac
+99f5b0
+99f5c4
+99f5c8
+99f5cc
+99f5d0
+99f5e4
+99f5e8
+99f5ec
+99f5f0
+99f624
+99f628
+99f62c
+99f630
+99f644
+99f648
+99f64c
+99f650
+99f664
+99f668
+99f66c
+99f670
+99f684
+99f688
+99f68c
+99f690
+99f6a4
+99f6a8
+99f6ac
+99f6b0
+99f6c4
+99f6c8
+99f6cc
+99f6d0
+99f6e4
+99f6e8
+99f6ec
+99f6f0
+99f704
+99f708
+99f70c
+99f710
+99f728
+99f72c
+99f730
+99f734
+99f748
+99f74c
+99f750
+99f754
+99f768
+99f76c
+99f770
+99f774
+99f788
+99f78c
+99f790
+99f794
+99f7c8
+99f7cc
+99f7d0
+99f7d4
+99f808
+99f80c
+99f810
+99f814
+99f828
+99f82c
+99f830
+99f834
+99f848
+99f84c
+99f850
+99f854
+99f868
+99f86c
+99f870
+99f874
+99f888
+99f88c
+99f890
+99f894
+99f8a8
+99f8ac
+99f8b0
+99f8b4
+99f8c8
+99f8cc
+99f8d0
+99f8d4
+99f8e8
+99f8ec
+99f8f0
+99f8f4
+99f908
+99f90c
+99f910
+99f914
+99f928
+99f92c
+99f930
+99f934
+99f948
+99f94c
+99f950
+99f954
+99f968
+99f96c
+99f970
+99f974
+99f988
+99f98c
+99f990
+99f994
+99f9a8
+99f9ac
+99f9b0
+99f9b4
+99f9c8
+99f9cc
+99f9d0
+99f9d4
+99f9e8
+99f9ec
+99f9f0
+99f9f4
+99fa0c
+99fa10
+99fa14
+99fa18
+99fa2c
+99fa30
+99fa34
+99fa38
+99fa4c
+99fa50
+99fa54
+99fa58
+99fa6c
+99fa70
+99fa74
+99fa78
+99fa8c
+99fa90
+99fa94
+99fa98
+99faac
+99fab0
+99fab4
+99fab8
+99facc
+99fad0
+99fad4
+99fad8
+99faec
+99faf0
+99faf4
+99faf8
+99fb0c
+99fb10
+99fb14
+99fb18
+99fb2c
+99fb30
+99fb34
+99fb38
+99fb4c
+99fb50
+99fb54
+99fb58
+99fb6c
+99fb70
+99fb74
+99fb78
+99fb8c
+99fb90
+99fb94
+99fb98
+99fbac
+99fbb0
+99fbb4
+99fbb8
+99fbcc
+99fbd0
+99fbd4
+99fbd8
+99fbec
+99fbf0
+99fbf4
+99fbf8
+99fc0c
+99fc10
+99fc14
+99fc18
+99fc30
+99fc34
+99fc38
+99fc3c
+99fc50
+99fc54
+99fc58
+99fc5c
+99fc70
+99fc74
+99fc78
+99fc7c
+99fc90
+99fc94
+99fc98
+99fc9c
+99fcb0
+99fcb4
+99fcb8
+99fcbc
+99fcd0
+99fcd4
+99fcd8
+99fcdc
+99fcf0
+99fcf4
+99fcf8
+99fcfc
+99fd10
+99fd14
+99fd18
+99fd1c
+99fd30
+99fd34
+99fd38
+99fd3c
+99fd50
+99fd54
+99fd58
+99fd5c
+99fd70
+99fd74
+99fd78
+99fd7c

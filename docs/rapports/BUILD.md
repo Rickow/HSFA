@@ -615,3 +615,66 @@ principal :
   - `Dn`, `An`, `(An)`, `(An)+`, `-(An)` ;
   - `d(An)`, `d(An,Xn)`, `d(PC)` ;
   - `abs.w`, `abs.l`, `#imm`, listes de registres.
+
+## 11. Hyper + Arcade (`--jeux hyperarcade`) : la greffe du mode Arcade d'Upper, depuis l'ISO (expérimental)
+
+Agent `script_ha`, 2026-11-08 (journal §212 proposé). Le jeu `hyperarcade` produit `sfa3hahsfa.zip` (pilote
+`sfa3hahsfa`) à l'état **ro9a35b** de la greffe (programme `sz3ud.03c` `650b1bec…`). Il ajoute `upper` et `hyper` :
+la greffe part de leurs sorties.
+
+### 11.1 Étapes
+
+| Étape | Outil | Durée (08/11, 4 constructions en parallèle) |
+|---|---|---|
+| `greffe_hyperarcade` | `tools/greffe-arcade/construction/greffe_ha.py` : code figé `ro9a35b/` + relevés (`releves_ro9a35b/`, TSV reconstitués par `releves_tsv.py`) matérialisés dans `cache/greffe_ha` ; plan seul → table A5 → module, bloc, traduction (traducteur de la greffe v160) | 150-160 s |
+| `paquet_hyperarcade` | `ro9a35b/paquet/paquet_fbneo.py ro9a` (flux Ogg : encodeur v3 portable) | 8 s |
+
+Entrées venues de la construction : modules ro5 / ro9 décompressés, cache des anims, `X_DATA.BIN`, banques d'Hyper et
+d'Upper, module ro9 (corrigé si la table du rejeu est donnée, sinon d'origine). Recette : `ro9a35b/greffe/vars_ro9a35b.txt`
+(interrupteurs de ro9a35b ; `HA_VARS` la remplace). Python + NumPy seulement : pas de MAME, pas de vasm ; la greffe
+relance le traducteur par `sys.executable` (constructeur tout-en-un) et copie au lieu de lier si le système refuse
+les liens symboliques.
+
+### 11.2 Relevés
+
+La greffe relit des relevés de l'atelier : journaux d'adresses lues par Upper sous MAME, cartes RAM d'Hyper et
+d'Upper, analyses (routines de l'Arcade, homologues, variables A5, couverture). Ils ne contiennent que des adresses,
+des numéros, des drapeaux et des étiquettes (vérifié objet par objet : aucun octet, aucun texte désassemblé). Ils sont
+versionnés en 18 tableaux TSV (4,5 Mo au lieu de 75 Mo) : en-tête d'origine et de mesure, journaux réduits à leur
+union par groupe en plages d'adresses, cartes RAM en plages, analyses en enregistrements. `releves_tsv.py verifier`
+redonne des objets égaux aux relevés d'origine. Trois analyses se régénèrent aussi depuis l'ISO à l'octet
+(`homologues`, `ram_statique_ro9`, `couv_k`) ; `inverse_ro5` se régénère mais diffère (profils faits avec un
+traducteur plus ancien). Sans les journaux, la greffe change de 2,3 Mo ; sans les cartes RAM, la table A5 change.
+
+### 11.3 Preuves (copie `git archive` 847b17c + versement)
+
+1. **Copie figée, entrées d'atelier** (`runA35`) : construction = `ro9a35b_fige` à l'octet (28/29 de MD5SUMS, seul
+   `env.sh` : chemins). Depuis les relevés TSV : idem (`c_tsv2`).
+2. **ROM d'arcade + table du rejeu** (`p_arc`, 5 jeux) : greffe = ro9a35b (MD5SUMS) ; zip **31/32 membres identiques**
+   à ro9a35b, seul `hsfa_info.txt` diffère (provenance). Audit de la greffe : aucun fichier lu hors de la sortie, de la
+   copie du dépôt et des relevés. Avec les relevés TSV du dépôt (`p_tsv`, défaut, `--jeux hyperarcade`, 359 s en tout) : greffe = ro9a35b (MD5SUMS),
+   zip **identique à l'octet** à celui de `p_arc` (relevés d'origine). `hsfa_info.txt` ne diffère de ro9a35b que par la
+   provenance (chemins et dates des sources ; md5 et tailles identiques).
+3. **ISO seule, avec la table** (`p_iso_t`) : programme identique ; 25/32 membres ; diffèrent `sz3.13m` / `15m` /
+   `17m` / `19m` (ROM reconstruite), `hsfa_gfx.bin`, `hsfa_tab.bin` (codes de tuiles) et `hsfa_info.txt`, comme Hyper (§5).
+4. **ISO seule, sans la table** (`p_iso_s`) : module d'Hyper d'origine (voix de SFA3) ; en plus du point 3 : `sz3ud.04c`
+   (12 o), `sz3.06c` (185 o), `hsfa_ext.bin` (113 o : voix « par pas » non appliquées) ; `hsfa_rejeu.bin` et
+   `hsfa_rejeu_table.txt` absents. `sz3ud.03c` reste `650b1bec`.
+5. **Autres jeux** : SFA3, Upper, Hyper et Upper MAX construits avec le versement (`p_arc`) et sans (`p_ref`, même
+   copie du dépôt, mêmes entrées) : **4 zips identiques à l'octet**, empreintes identiques.
+6. Durée : `p_ref` (4 jeux) 502 s, `p_arc` (5 jeux) 681 s, soit environ 3 min de plus ; ISO seule `upper,hyper,hyperarcade`
+   575 s. Place : 1,9 Go contre 1,5 Go (+0,4 Go).
+
+7. **Versement définitif** (`p_final`, relevés TSV par défaut, 5 jeux) : les 5 zips identiques à l'octet à ceux de
+   `p_ref` / `p_arc` ; voie du joueur (`p_joueur`, ISO seule, aucune option) : zip identique à l'octet à `p_iso_s`.
+8. **Cœur Linux du 10/11** (partie Arcade de Ryu, pilote de `hsfa_run`) : zip ISO seule + table : journal et musique
+   identiques au zip ro9a35b livré sur 25 000 images ; captures toutes les 250 images : 46 / 56 identiques au pixel,
+   les 10 autres diffèrent de 26 à 633 pixels, uniquement l'**ombre au sol** des persos (tramée avec la ROM d'arcade,
+   pleine en voie ISO : tuile retouchée de l'Anthology, §5.3). Sans table : partie complète, voix de SFA3.
+
+### 11.4 Limites
+
+- Expérimental. Avec la ROM d'arcade et la table du rejeu, le zip est ro9a35b (contrôlé au cœur Linux du 10/11).
+- Voie ISO seule : ombres au sol pleines au lieu de tramées (ci-dessus) ; à confirmer pour Hyper seul.
+- Windows : liens symboliques remplacés par des copies (non essayé) ; constructeur tout-en-un : modules embarqués
+  suffisants (relevé des imports), non essayé.

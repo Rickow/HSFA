@@ -25,7 +25,8 @@ ICI = os.path.dirname(os.path.abspath(__file__))
 # --------------------------------------------------------------------------------------------------------------------
 # Outils du projet (chemins de CE poste ; surchargeables par variable d'environnement ou option --outils-*)
 # --------------------------------------------------------------------------------------------------------------------
-DEPOT = os.path.normpath(os.path.join(ICI, "..", ".."))      # racine du depot (scripts/construction/..)
+DEPOT = os.environ.get("HSFA_DEPOT") or os.path.normpath(os.path.join(ICI, "..", ".."))   # racine du depot
+CONSTR = os.path.join(DEPOT, "scripts", "construction")   # (hyperarcade) rom_iso.py du depot, meme hors du depot
 _d = lambda *p: os.path.join(DEPOT, *p)
 OUTILS_DEFAUT = {
     # traducteur MIPS -> 68000 et scripts graphiques
@@ -44,6 +45,9 @@ OUTILS_DEFAUT = {
     "son_table": os.environ.get("HSFA_OUTILS_SON_TABLE", _d("src", "hsfa")),
     # gen_redirection.py + ids_102.tsv + correspondance.tsv (redirection des voix d'Hyper, SON-HYPER-ROM.md §13)
     "son_hyper": os.environ.get("HSFA_OUTILS_SON_HYPER", _d("tools", "son-hyper")),
+    # (hyperarcade) greffe_ha.py + fige35.py + ro9a35b/ (CODE fige de la greffe Arcade, etat ro9a35b ; les releves
+    # MAME / analyses de la greffe sont hors depot : --greffe-releves)
+    "greffe": os.environ.get("HSFA_OUTILS_GREFFE", _d("tools", "greffe-arcade", "construction")),
 }
 PYTHON_NUMPY_DEFAUT = os.environ.get("HSFA_PYTHON_NUMPY", _d("venv", "bin", "python"))
 
@@ -70,7 +74,8 @@ REF_GROUPES = {
     "ro8": (543, 544, "68f5a143d03bdd28db23cda949c835d9"), "ro9": (544, 553, "7fc8e6e0b44d23d8b3fea41a3c9a633f"),
 }
 # (SFA3 lit aussi des entrees du groupe ro5 : banques 391-412 et 456-457 de sa carte, anims communes)
-GROUPES_REQUIS = {"sfa3": ["ro3", "ro5"], "upper": ["ro5", "ro3"], "hyper": ["ro9", "ro5", "ro3", "ro2", "ro1"]}
+GROUPES_REQUIS = {"sfa3": ["ro3", "ro5"], "upper": ["ro5", "ro3"], "hyper": ["ro9", "ro5", "ro3", "ro2", "ro1"],
+                  "hyperarcade": ["ro9", "ro5", "ro3", "ro2", "ro1"]}
 REF_MANIFESTE = "673d96d827900d31ea9397838f82e677"   # manifest.csv (fins de ligne LF ; 76a76db5... avec CRLF sous Windows)
 REF_MODULES = {   # modules MIPS decompresses (anthology_extract/decompressed)
     "ro3": "e4826fe46eae0631e2e42cdcefd95459",
@@ -111,6 +116,11 @@ JEUX = {
     "sfa3": dict(module="ro3", travail="mame", roms="roms_tr", b32=312, zip="sfa3hsfa", paquet="sfa3"),
     "upper": dict(module="ro5", travail="mame_ro5", roms="roms_ro5", b32=525, zip="sfa3uhsfa", paquet="upper"),
     "hyper": dict(module="ro9", travail="mame_ro9", roms="roms_ro9", b32=548, zip="sfa3hhsfa", paquet="hyper"),
+    # (experimental) Hyper + mode Arcade d'Upper greffe : construit depuis les sorties d'Upper et d'Hyper ; meme
+    # disposition que l'atelier pour paquet_fbneo.py ro9a (greffe_arcade/constructions/<HA_NOM>/b9)
+    "hyperarcade": dict(module="ro9", travail=os.path.join("greffe_arcade", "constructions",
+                        os.environ.get("HA_NOM", "ro9a35b_fige"), "b9"), roms="roms_ro9", b32=None, zip="sfa3hahsfa",
+                        paquet="ro9a"),
 }
 
 # (script_uppermax) Upper + persos MAX (Eagle, Maki, Yun, Ingrid) de SFA3 MAX PSP : construction MAX=1 de l'integration
@@ -163,6 +173,10 @@ class Journal:
         ligne = "%s %s%s" % (time.strftime("%Y-%m-%d %H:%M:%S"), niveau, msg)
         print(ligne, flush=True)
         self.f.write(ligne + "\n"); self.f.flush()
+
+def arbre(d):
+    """(hyperarcade) tous les fichiers d'un dossier, sous-dossiers compris (empreinte des outils de l'etape)"""
+    return sorted(os.path.join(r, f) for r, _ds, fs in os.walk(d) for f in fs if "__pycache__" not in r)
 
 def md5_fichier(p, bloc=1 << 22):
     h = hashlib.md5()
@@ -267,6 +281,10 @@ class Construction:
         self.jeux = [j.strip() for j in a.jeux.split(",") if j.strip()]
         for j in self.jeux:
             if j not in JEUX: raise Echec("jeu inconnu : %s (connus : %s)" % (j, ", ".join(JEUX)))
+        if "hyperarcade" in self.jeux:                 # (hyperarcade) la greffe part des sorties d'Upper et d'Hyper
+            for j in ("upper", "hyper"):
+                if j not in self.jeux: self.jeux.insert(self.jeux.index("hyperarcade"), j)
+            self.jeux.remove("hyperarcade"); self.jeux.append("hyperarcade")
         # (script_uppermax) uppermax = upper + persos MAX ; sans ISO PSP : Upper seul, inchange
         self.uppermax = "uppermax" in self.jeux
         if self.uppermax:
@@ -511,7 +529,7 @@ class Construction:
         code = ("import sys, rom_iso\nT, st = rom_iso.reconstruit(%r, %r)\nmd5 = rom_iso.ecrit(T, %r)\n"
                 "for n in rom_iso.FICHIERS: print(md5[n], n)\n") % (
                     self.xdata, os.path.join(self.ext, "manifest.csv"), self.arcade)
-        spec = dict(cwd=self.arcade, sys_path=[ICI, U, os.path.dirname(U.rstrip("/"))], argv=["rom_iso.py"], code=code)
+        spec = dict(cwd=self.arcade, sys_path=[CONSTR, U, os.path.dirname(U.rstrip("/"))], argv=["rom_iso.py"], code=code)
         self.lance("arcade", spec, self.env(), python=self.python_numpy())
         out = []
         for n, md5 in REF_ISO_GFX.items():
@@ -724,6 +742,79 @@ class Construction:
                      else "DIFFERENTE de %s" % ref), "   " if a == b else "!! ")
         return [table]
 
+    # ---- hyperarcade (experimental) ---------------------------------------------------------------------------------
+    def voix_greffe(self):
+        """module d'Hyper de la greffe : 'corrige' (redirection des voix : voix par version, = ro9a35b) si la table du rejeu est la,
+        sinon 'origine' (comme prog_hyper : Hyper garde les voix SFA3) ; HA_VOIX=corrige|origine force"""
+        return os.environ.get("HA_VOIX") or ("corrige" if self.redirection() else "origine")
+
+    def vars_greffe(self):
+        """interrupteurs de la greffe : HA_VARS, sinon la recette figee (ro9a35b/greffe/vars_ro9a35b.txt)"""
+        if os.environ.get("HA_VARS") is not None: return os.environ["HA_VARS"]
+        return open(os.path.join(self.O["greffe"], "ro9a35b", "greffe", "vars_ro9a35b.txt")).read().strip()
+
+    def releves_greffe(self):
+        """releves de la greffe (journaux MAME d'Upper et d'Hyper, analyses : adresses et numeros seulement) : tableaux TSV
+        du depot (tools/greffe-arcade/construction/releves_ro9a35b, releves_tsv.py), ou --greffe-releves /
+        HSFA_GREFFE_RELEVES (tableaux TSV ou fichiers d'origine). Sans eux, la greffe ne se construit pas."""
+        r = self.a.greffe_releves or os.environ.get("HSFA_GREFFE_RELEVES") or \
+            os.path.join(self.O["greffe"], "releves_ro9a35b")
+        if not os.path.isdir(os.path.join(r, "greffe", "traces")):
+            raise Echec("hyperarcade : dossier des releves de la greffe manquant ou incomplet (--greffe-releves DOSSIER : "
+                        "greffe/traces, greffe/donnees, eu ; voir tools/greffe-arcade/construction/LISEZMOI.md)")
+        return os.path.abspath(r)
+
+    def e_greffe(self):
+        """greffe_ha.py : code fige (ro9a35b) + releves materialises dans cache/greffe_ha, entrees = sorties de cette
+        construction ; resultat copie dans travail/greffe_arcade/constructions/<HA_NOM>/ (disposition de paquet_fbneo)"""
+        G = self.O["greffe"]; nom = os.environ.get("HA_NOM", "ro9a35b_fige")
+        D = os.path.join(self.cache, "greffe_ha")
+        if os.path.isdir(D): shutil.rmtree(D)
+        ms = self.modules_son
+        if self.voix_greffe() == "origine":           # module d'origine + bloc $E70000 (inutilise par ce module)
+            ms = os.path.join(self.cache, "modules_son_origine"); os.makedirs(ms, exist_ok=True)
+            shutil.copyfile(os.path.join(self.dec, "ro9_usa_prog68k.bin"), os.path.join(ms, "ro9_usa_prog68k.bin"))
+            shutil.copyfile(os.path.join(self.modules_son, "son_donnees_ro9.bin"), os.path.join(ms, "son_donnees_ro9.bin"))
+        cmd = [sys.executable, os.path.join(G, "greffe_ha.py"), "--dest", D, "--nom", nom,
+               "--vars", self.vars_greffe(), "--code", os.path.join(G, "ro9a35b"), "--releves", self.releves_greffe(),
+               "HA_UT=" + self.O["untranspile"],
+               "HA_EXTRACT=" + self.ext, "HA_ANIMS=" + self.anims, "HA_XDATA=" + self.xdata, "HA_MODULES_SON=" + ms,
+               "HA_MAME_RO9=" + self.travail("hyper"), "HA_MAME_RO5=" + self.travail("upper")]
+        if os.environ.get("HA_AUDIT") == "1": cmd.insert(2, "--audit")
+        logp = os.path.join(self.S, "journaux", "greffe_hyperarcade.log"); t0 = time.time()
+        with open(logp, "a", encoding="utf-8") as lg:
+            lg.write("\n=== %s  %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), " ".join(cmd))); lg.flush()
+            r = subprocess.run((["nice", "-n", "19"] if os.name == "posix" else []) + cmd, env=self.env(),
+                               stdout=lg, stderr=subprocess.STDOUT)
+        if r.returncode: raise Echec("greffe : echec (code %d), voir %s" % (r.returncode, logp))
+        src = os.path.join(D, "outils", "greffe", "constructions", nom)
+        dst = os.path.dirname(self.travail("hyperarcade"))
+        if os.path.isdir(dst): shutil.rmtree(dst)
+        shutil.copytree(src, dst, symlinks=True)
+        self.log("greffe : %.0f s, voix %s (journal : %s)" % (time.time() - t0, self.voix_greffe(), os.path.relpath(logp, self.S)))
+        out = [os.path.join(self.roms("hyperarcade"), n) for n in PRG]
+        W = self.travail("hyperarcade")
+        out += [os.path.join(W, f) for f in sorted(os.listdir(W)) if f.startswith("ext_")]
+        out += [os.path.join(dst, f) for f in ("greffe.json", "assets.json", "greffe_donnees.bin", "ro9a_module.bin")]
+        self.log("hyperarcade : sz3ud.03c md5 %s" % md5_fichier(out[0]))
+        return out
+
+    def e_paquet_ha(self):
+        roms = self.roms("hyperarcade")
+        for n in list(REF_ARCADE_GFX) + ["phoenix.key"]:
+            d = os.path.join(roms, n)
+            if os.path.lexists(d): os.remove(d)
+            shutil.copyfile(os.path.join(self.arcade, n), d)
+        dest = os.path.join(self.S, "archives"); os.makedirs(dest, exist_ok=True)
+        P = os.path.join(self.O["greffe"], "ro9a35b", "paquet")
+        spec = dict(cwd=dest, sys_path=[P], argv=["paquet_fbneo.py", "ro9a"],
+                    code="import paquet_fbneo\npaquet_fbneo.construit('ro9a')\n")
+        self.lance("paquet_hyperarcade", spec, self.env(HSFA_WORK=self.W, HSFA_SORTIE=dest, HSFA_STRICT="1",
+                   HSFA_OUTILS=os.path.join(DEPOT, "tools"), SOURCE_DATE_EPOCH=self.a.date_source,
+                   HSFA_CONSTR=os.environ.get("HA_NOM", "ro9a35b_fige"), **self.env_paquet()),
+                   nice=False)
+        return [os.path.join(dest, "sfa3hahsfa.zip")]
+
     def e_max(self):
         if not self.a.max:
             self.log("pas d'ISO PSP (--psp-iso) : %s" % ("uppermax -> Upper SANS les persos MAX (sfa3uhsfa.zip, identique "
@@ -921,7 +1012,7 @@ class Construction:
                       "ids_102.tsv", "correspondance.tsv")] + ([self.table_rejeu_source()] if self.table_rejeu_source() else []),
                       self.e_son_hyper, "redirection des voix d'Hyper : module ro9 corrige, bloc $E70000, table du rejeu "
                       "(gen_redirection.py)"))
-        for j in self.jeux:
+        for j in [j for j in self.jeux if j != "hyperarcade"]:
             E.append(("prog_" + j, ["module_" + JEUX[j]["module"], "afs"] + (["son_hyper"] if j == "hyper" else []),
                       [U, M], lambda j=j: self.e_prog(j),
                       "programme 68K traduit de %s (mame_test.py, MODULE=%s)" % (j, JEUX[j]["module"])))
@@ -929,17 +1020,27 @@ class Construction:
         if self.a.arcade:
             E.append(("arcade", [], [], self.e_arcade, "ROM graphique d'arcade de SFA3 (--arcade) + phoenix.key"))
         else:
-            E.append(("arcade", ["afs"], [os.path.join(ICI, "rom_iso.py"), os.path.join(U, "anthgfx.py"), os.path.join(U, "cps2rom.py"),
+            E.append(("arcade", ["afs"], [os.path.join(CONSTR, "rom_iso.py"), os.path.join(U, "anthgfx.py"), os.path.join(U, "cps2rom.py"),
                                        os.path.join(os.path.dirname(U.rstrip("/")), "lz148778.py")],
                       self.e_arcade, "ROM graphique de SFA3 reconstruite depuis l'ISO (rom_iso.py) + phoenix.key"))
-        for j in self.jeux:
+        for j in [j for j in self.jeux if j != "hyperarcade"]:
             deps = ["module_" + JEUX[j]["module"], "afs", "arcade"] + (["gfx_upper"] if j == "hyper" else [])
             E.append(("gfx_" + j, deps, [U, M, os.path.dirname(U.rstrip("/"))], lambda j=j: self.e_gfx(j),
                       "tables de banques" + (" + ROM etendue + plans (hsfa_gfx/hsfa_plans)" if j != "sfa3" else "") + " de " + j))
-        for j in self.jeux:
+        if "hyperarcade" in self.jeux:
+            G = self.O["greffe"]
+            E.append(("greffe_hyperarcade", ["module_ro5", "module_ro9", "afs", "son_hyper", "gfx_upper", "gfx_hyper"],
+                      [os.path.join(G, "greffe_ha.py"), os.path.join(G, "fige35.py"), os.path.join(G, "releves_tsv.py")]
+                      + arbre(os.path.join(G, "ro9a35b")) + arbre(self.releves_greffe()),
+                      self.e_greffe, "greffe du mode Arcade d'Upper dans Hyper (code fige ro9a35b, greffe_ha.py)"))
+        for j in [j for j in self.jeux if j != "hyperarcade"]:
             son = {"sfa3": ["son_sfa3"], "upper": ["son_upper"], "hyper": ["son_upper", "son_hyper"]}.get(j, [])
             E.append(("paquet_" + j, ["prog_" + j, "gfx_" + j, "arcade"] + son, [self.O["paquet"]],
                       lambda j=j: self.e_paquet(j), "archive FBNeo %s.zip (paquet_fbneo.py)" % (JEUX[j]["zip"] or j)))
+        if "hyperarcade" in self.jeux:
+            E.append(("paquet_hyperarcade", ["greffe_hyperarcade", "gfx_upper", "gfx_hyper", "arcade", "son_upper", "son_hyper"],
+                      [os.path.join(self.O["greffe"], "ro9a35b", "paquet")], self.e_paquet_ha,
+                      "archive FBNeo sfa3hahsfa.zip (paquet_fbneo.py ro9a du code fige ro9a35b)"))
         if not self.a.sans_flux:
             E.append(("flux", ["module_ro9"], [self.O["flux"], self.O["son_table"]], self.e_flux,
                       "table du lecteur de flux ADX (gen_table_flux.py) -> systeme/fbneo/hsfa/"))
@@ -986,6 +1087,9 @@ class Construction:
             if nom.startswith("paquet_"):
                 params.update(date_source=self.a.date_source, flux=self.a.flux_format, sans_flux=self.a.sans_flux,
                               rejeu=self.table_rejeu_source(), redirection=self.redirection())
+            if nom == "greffe_hyperarcade":
+                params.update(ha_nom=os.environ.get("HA_NOM", "ro9a35b_fige"), ha_vars=self.vars_greffe(),
+                              voix=self.voix_greffe(), releves=self.releves_greffe())
             if nom in ("son_hyper", "prog_hyper"):
                 params.update(rejeu=self.table_rejeu_source(), redirection=self.redirection())
             if nom == "arcade": params["source"] = "arcade" if self.a.arcade else "iso"
@@ -1027,7 +1131,8 @@ def main():
     ap.add_argument("--vasm", help="(controle) vasmm68k_mot, avec HSFA_ASM=vasm ou compare ; par defaut le code MAX est "
                                    "assemble par tools/asm68k/hsfa_asm68k.py")
     ap.add_argument("--sortie", required=True, help="dossier de sortie (cache, travail, archives, journal)")
-    ap.add_argument("--jeux", default="sfa3,upper,hyper", help="sfa3,upper,hyper,uppermax (defaut : les trois premiers)")
+    ap.add_argument("--jeux", default="sfa3,upper,hyper", help="sfa3,upper,hyper,uppermax,hyperarcade (defaut : les trois "
+                    "premiers ; hyperarcade = Hyper + mode Arcade d'Upper greffe, ajoute upper et hyper ; experimental)")
     ap.add_argument("--arcade", action="append", help="(facultatif) ROM d'arcade de SFA3 (sfa3.zip ou dossier) : sz3.13m-20m ; "
                     "sans elle, la ROM graphique est reconstruite depuis l'ISO")
     ap.add_argument("--etape", help="reprendre a cette etape (les precedentes doivent etre faites)")
@@ -1040,6 +1145,9 @@ def main():
                     "les flux musique dans les archives d'Upper et d'Hyper")
     ap.add_argument("--flux-format", choices=("ogg", "adx"), default="ogg",
                     help="flux musique des archives : ogg (defaut, decision D6 ; hsfa_oggenc, gcc, g++ : tools/flux/oggenc) ou adx")
+    ap.add_argument("--greffe-releves", help="(hyperarcade) releves de la greffe Arcade (tableaux "
+                    "TSV ou fichiers d'origine) ; defaut : HSFA_GREFFE_RELEVES, sinon ceux du depot "
+                    "(tools/greffe-arcade/construction/releves_ro9a35b)")
     ap.add_argument("--rejeu-table", help="(Hyper) hsfa_rejeu_table.txt : rejeu QSound des sons SFA1 / SFA2 (defaut : "
                     "tools/son-hyper/rejeu/hsfa_rejeu_table.txt si presente). Avec elle : redirection des voix (programme "
                     "= v151) et rejeu ; sans elle : Hyper garde les voix SFA3, archive sans rejeu")

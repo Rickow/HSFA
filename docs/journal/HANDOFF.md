@@ -5896,3 +5896,64 @@ En attente :
   quand la greffe aura fini ses outils (ATTENTES) ; préparés sur ro9a22 ;
 - les rapports d'atelier des décors SFA1 / SFA2 / intégration et de `frame_data_max` ne sont pas versés dans
   `docs/rapports/`.
+
+### 209. — SFA3 : départ du curseur de sélection sur la case aléatoire (v157/v158), corrigé par v159 (08/11)
+Signalé sur le zip v158 + QSound : deux « Ryu » sur la grille (le curseur part d'une case au-dessus de Dan) et une case
+aléatoire invisible sous Zangief. Cause : site « registre prêté » de la routine d'init du curseur (img ro3 $04B394,
+PS2 0x3E5FEC) : BTST D1,D7 sur le masque $C0200000 émis après la restauration de D7 → $15D = $A0 → index $20 de la table
+0x5936D0 = case (1,1). PRETE_TEST (v159) l'émet avant la fin du prêt : départ (0,3) = Ryu, comme l'arcade et la PS2.
+Les cases aléatoires (1,1) et (5,5) et le défilement des portraits sont d'origine (arcade sfa3ud, PS2). Champs : col
+J1+$12 / lig J1+$16 (mots, portage) contre octets +$11 / +$15 (arcade). Agent sfa3_selection.
+
+### 210. bis — SFA3 et tous les jeux : objets affichés une image trop tôt (patch FBNeo 0027) (08/11)
+Signalé (capture) : pendant le choix aléatoire de la sélection, grand portrait de Dan aux couleurs fausses et aperçu
+« de Ryu ». Arcade et PS2 sont cohérentes image par image ; le portage affiche tuiles et nom du perso courant avec la
+palette du précédent. Cause : la liste d'objets convertie est écrite dans les deux banques dès son marqueur de fin
+(§103), donc prise à la fin de la même image (1 image), quand l'arcade remplit la banque cachée (2 images) ; les palettes
+gardent le délai de l'arcade. Patch 0027 : publication de la dernière liste terminée par HsfaFrameDone, après la prise
+(rien de nouveau dans les états) ; interrupteur obj_differe / HSFA_OBJ_DIFFERE (0 = 0026 à l'octet). Option 1 :
+logique, son et journaux identiques dans les 5 jeux ; objets décalés d'une image ; explosion de fin de Mika orange comme
+l'arcade. banc_sprites.lua : BANC_OBJ_DIFFERE=1. Agent sfa3_selection.
+
+### 211. Journée du 2026-11-08 : banc de jour vert, v0.1.7 publiée, greffe ro9a32 → ro9a34, études (décors au format d'Upper, traducteur sur SFA1 / SFA2 / Alpha 2 Gold, MAX dans la greffe)
+
+- **Banc de jour** (v159_banc, greffe ro9a31, max53) : 263/263 OK. Piège : la référence `v159_banc` n'avait pas de
+  `roms_fork` pour ro5 / ro9 (arrêt à 8 h 42) ; complétée par liens vers v159 + `banques_hx` / `hsfa_gfx` de v154
+  (banques identiques, prouvé). **À faire avant le prochain banc : `v160_banc`.**
+- **Publication** : v0.1.7 (traducteur v159-v160, patch 0026, constructeur tout-en-un : 5 exécutables fabriqués par la
+  CI, déterminisme de l'Ogg vérifié sur chaque système ; outils de l'atelier).
+- **Patch cœur 0027** (§210) : publication différée des objets, cœurs du 10/11 (non publiés).
+- **Greffe** : ro9a32 (barre de la transition « logo », exclusions d'attache, fin de Zangief), ro9a33 (`TIRAGE_CPU` :
+  mode du CPU tiré au hasard, décor et musique suivent ; `MUSIQUE_RIVAL` : thèmes d'Upper si J1 et J2 en ZERO 3 ; fin 0d
+  `GARDE_ANIM0` limitée aux routines de fin ; 1re scène de Sagat ; décors $36 / $3A ; 28/40 décors = Upper), ro9a34
+  (`TIRAGE_MODES` : EX et S-ISM rouge / bleu / vert ; MAZI / SAIKYO / CLASSIC exclus car jamais appliqués à un CPU ;
+  fin 18 : 36 longs de descripteurs d'acteurs relogés à tort, dans 10 fins). En cours (ro9a35) : scène noire de la fin
+  d'E. Honda (`FONDU_8FF20`, même classe que `FONDU_901E0`) ; Dan ZERO coincé dans un coup dont l'animation boucle
+  ($80FF) et dont le chemin attend $34 (68K $03C11C) : retiré du tirage en attendant (défaut probable d'Hyper lui-même).
+- **Musique** (work/musique_ha) : fidèle au PS2 hors « vie basse » (corrigé v160) ; rival / combat final (corrigés
+  ro9a33) ; fondu FF06 de reprise (proposition, lecteur de flux du cœur).
+- **Études** : décors SFA1 / SFA2 au format du moteur d'Upper = voie HYBRIDE (work/decors_format_upper, 4-5 semaines
+  tout compris) ; traducteur v160 essayé sur ro1 / ro2 / ro4 (work/essai_ro124 : 0 non résolu, ro2 / ro4 en combat sous
+  MAME, 4 difficultés nouvelles) ; MAX dans la greffe préparés puis mis en attente (work/max_hyper : patch 0028 prouvé,
+  code converti, feuille de route Eagle 137 actions).
+- **Index** : allocations du tirage (`trous68k $4D9000-$4DA1A7`) DANS la tête de la fenêtre des décors : 2 conflits
+  nouveaux avec la réserve des décors, à arbitrer à l'intégration des décors.
+
+### 212. 08/11 soir : Hyper + Arcade constructible depuis l'ISO (`--jeux hyperarcade`, état ro9a35b)
+
+- Agent `script_ha` (dossier `<workspace>/work/script_hyperarcade/`). Reprise du squelette du 01/11 (ro9a22) sur
+  ro9a35b, traducteur de la greffe v160, encodeur Ogg v3, `hsfa_build.py` actuel (avec `uppermax`).
+- Copie figée des outils de la greffe à l'état ro9a35b (marques `@HA_*@`) ; audit des fichiers ouverts : code
+  (~45 fichiers lus), décisions (12), relevés (79). Code + décisions → `tools/greffe-arcade/construction/ro9a35b/`
+  (2,2 Mo). Correctifs de portabilité seulement (traducteur relancé par `sys.executable`, liens → copies si refusés).
+- Relevés : tous des adresses / numéros (vérifié). Accord de l'utilisateur (08/11) : versionnés en TSV comme la
+  Rosette. `releves_tsv.py` : 18 tableaux, 4,5 Mo (75 Mo d'origine : journaux réduits à l'union en plages, cartes RAM
+  en plages, analyses en enregistrements avec vocabulaire) ; reconstitution exacte ; greffe depuis TSV = ro9a35b à l'octet.
+- `hsfa_build.py` : jeu `hyperarcade` (étapes `greffe_hyperarcade`, `paquet_hyperarcade`), option `--greffe-releves`.
+  Sans table du rejeu : module d'Hyper d'origine (voix SFA3), comme décidé ; avec : voix par version.
+- Preuves (BUILD §11) : zip = ro9a35b sur 31/32 membres (seul `hsfa_info.txt`) ; SFA3 / Upper / Hyper / Upper MAX
+  inchangés à l'octet ; ISO seule : ROM graphique, `hsfa_gfx`, `hsfa_tab` (comme Hyper) ; sans table : + 04c 12 o,
+  06c 185 o, `hsfa_ext` 113 o, pas de rejeu. +3 min, +0,4 Go.
+- Reste : essai Windows / constructeur tout-en-un ; régénérer à la construction les 3 analyses régénérables
+  (homologues, ram_statique_ro9, couv_k) plutôt que de les versionner ; suivre chaque nouvelle livraison de la greffe
+  (refiger : `fige35.py figer`, `decoupe35.py`, `releves_tsv.py exporter`).

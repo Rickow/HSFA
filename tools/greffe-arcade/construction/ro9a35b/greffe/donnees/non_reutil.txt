@@ -1,0 +1,2 @@
+# (31/10, e22) segments de donnees d'Upper (adresse d'execution PS2) a COPIER meme si Hyper a un homologue (etape2/donnees2.py)
+# Essai e22c : 8cbef4 / 8cbf04 (barre VERSUS, pieces -> 0xB082AC) : lettre « S » toujours hors place -> retires (vide = e22b)
