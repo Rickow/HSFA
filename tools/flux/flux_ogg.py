@@ -3,15 +3,18 @@
 
 Chaine, pour chaque entree :
   1. decodage exact par fluxtool (hsfa_flux.h : le meme decodeur que le coeur) -> PCM 16 bits stereo, boucle ADX ;
-  2. encodage ffmpeg/libvorbis (qualite HSFA_OGG_QUALITE, defaut 2, ~96 kbit/s en stereo 48 kHz), commentaires
-     LOOPSTART / LOOPEND (fin exclue, en echantillons), HSFA_ADX_MD5, HSFA_ENC ;
+  2. encodage hsfa_oggenc (oggenc/ : libvorbis 1.3.7 en IEEE strict, MEMES OCTETS sur tous les systemes ; qualite
+     HSFA_OGG_QUALITE, defaut 2, ~96 kbit/s en stereo 48 kHz), commentaires LOOPSTART / LOOPEND (fin exclue, en
+     echantillons), HSFA_ADX_MD5, HSFA_ENC ;
   3. controle : l'Ogg relu par fluxtool (stb_vorbis, comme le coeur) a le meme nombre d'echantillons et la meme boucle,
      une correlation de forme d'onde >= 0,90 et un niveau a +-0,5 dB du PCM ADX. Un echec garde l'ADX pour cette entree.
      Le controle attrape les erreurs (duree, boucle, decodage, decalage : correlation proche de 0, niveau) ; il ne juge
      pas la fidelite a l'oreille (reglage HSFA_OGG_QUALITE). Sur la vraie musique d'Hyper a q2, la correlation de forme
      d'onde va de 0,94 a 0,99 (2026-10-16) : un seuil a 0,99 refusait 125 flux sur 173.
 Cache : <cache>/Y<entree>_<md5 ADX>_q<qualite>.ogg (un Ogg n'est refait que si l'ADX ou le reglage change).
-Dependances : g++ et gcc (fluxtool, compile une fois dans le cache), ffmpeg avec libvorbis, numpy.
+Dependances : numpy ; g++ et gcc (fluxtool et hsfa_oggenc, compiles une fois dans le cache ; hsfa_oggenc depuis les
+sources officielles de HSFA_OGGENC_SOURCES, voir oggenc/construit_oggenc.py --telecharge). Binaires preconstruits
+(constructeur tout-en-un, tools/constructeur) : HSFA_FLUXTOOL, HSFA_OGGENC. Plus de ffmpeg (VERSION 3).
 
 Usage direct (essai) : flux_ogg.py <Y_DATA.BIN ou ISO> <entree> [<entree> ...]   (cache : HSFA_OGG_CACHE ou /tmp)
 Depuis paquet_fbneo.py : HSFA_FLUX_FORMAT=ogg.
@@ -20,8 +23,9 @@ import hashlib, os, shutil, struct, subprocess, sys, tempfile
 from concurrent.futures import ThreadPoolExecutor
 
 ICI = os.path.dirname(os.path.abspath(__file__))
-VERSION = "2"                                   # a changer si la chaine change : invalide le cache
-                                                # (2 : -fflags +bitexact, Ogg reproductibles a l'octet)
+VERSION = "3"                                   # a changer si la chaine change : invalide le cache
+                                                # (2 : -fflags +bitexact, Ogg reproductibles a l'octet ;
+                                                #  3 : hsfa_oggenc, memes octets sur tous les systemes)
 
 
 def qualite():
@@ -30,6 +34,9 @@ def qualite():
 
 def outil(cache):
     """chemin de fluxtool, compile si besoin (sources plus recentes que l'executable)"""
+    if os.environ.get("HSFA_FLUXTOOL"):           # binaire preconstruit (constructeur tout-en-un) : ni gcc ni g++
+        os.makedirs(cache, exist_ok=True)
+        return os.environ["HSFA_FLUXTOOL"]
     exe = os.path.join(cache, "fluxtool")
     srcs = [os.path.join(ICI, f) for f in ("fluxtool.cpp", "hsfa_flux.h", "stb_vorbis.c",
                                          os.path.join("tests", "stb_vorbis_impl.c"))]
@@ -39,6 +46,29 @@ def outil(cache):
     obj = os.path.join(cache, "stb_vorbis_impl.o")
     subprocess.run(["gcc", "-O2", "-c", "-w", "-I", ICI, "-o", obj, srcs[3]], check=True)
     subprocess.run(["g++", "-O2", "-DHSFA_FLUX_VORBIS", "-I", ICI, "-o", exe, srcs[0], obj], check=True)
+    return exe
+
+
+def encodeur(cache):
+    """chemin de hsfa_oggenc : HSFA_OGGENC, sinon compile dans le cache (sources officielles de HSFA_OGGENC_SOURCES,
+    defaut <cache>/sources_oggenc) ; refuse un encodeur dont le signal d'essai n'a pas l'empreinte de reference"""
+    kit = os.path.join(ICI, "oggenc")
+    if kit not in sys.path: sys.path.insert(0, kit)
+    import construit_oggenc as C
+    exe = os.environ.get("HSFA_OGGENC")
+    if not exe:
+        exe = os.path.join(cache, "hsfa_oggenc" + (".exe" if os.name == "nt" else ""))
+        srcs = [os.path.join(r, f) for r, _, fs in os.walk(kit) for f in fs if f.endswith((".c", ".h", ".py"))]
+        if not (os.path.exists(exe) and os.path.getmtime(exe) >= max(os.path.getmtime(s) for s in srcs)):
+            sources = os.environ.get("HSFA_OGGENC_SOURCES") or os.path.join(cache, "sources_oggenc")
+            if not all(os.path.exists(os.path.join(sources, n)) for n in C.SOURCES):
+                raise RuntimeError("sources de hsfa_oggenc absentes de %s : python3 %s --sources %s --telecharge "
+                                   "(ou --flux-format adx)" % (sources, os.path.join(kit, "construit_oggenc.py"),
+                                                               sources))
+            os.makedirs(cache, exist_ok=True)
+            C.construit(sources, exe, cc=os.environ.get("CC") or "gcc")
+    if C.verifie(exe) is None:
+        raise RuntimeError("%s ne s'execute pas sur ce systeme" % exe)
     return exe
 
 
@@ -70,25 +100,25 @@ def controle(ref, test, nref):
     return None
 
 
-def encode(source, entree, md5_adx, cache, exe=None):
+def encode(source, entree, md5_adx, cache, exe=None, enc=None):
     """chemin de l'Ogg de l'entree (cache), ou None si l'entree doit rester en ADX ; et un message"""
     q = qualite()
     dest = os.path.join(cache, "Y%d_%s_q%s_v%s.ogg" % (entree, md5_adx[:12], q, VERSION))
     if os.path.exists(dest): return dest, "cache"
     exe = exe or outil(cache)
+    enc = enc or encodeur(cache)
     with tempfile.TemporaryDirectory(dir=cache) as t:
         ref = os.path.join(t, "ref.raw")
         try:
             freq, n, d, f = pcm(exe, source, entree, ref)
         except RuntimeError as e:
             return None, "ADX non decode (%s) : garde en ADX" % e
-        meta = ["-metadata", "HSFA_ADX_MD5=" + md5_adx, "-metadata", "HSFA_ENC=libvorbis q%s v%s" % (q, VERSION)]
-        if f > d: meta += ["-metadata", "LOOPSTART=%d" % d, "-metadata", "LOOPEND=%d" % f]
+        meta = ["HSFA_ADX_MD5=" + md5_adx, "HSFA_ENC=libvorbis q%s v%s" % (q, VERSION)]
+        if f > d: meta += ["LOOPSTART=%d" % d, "LOOPEND=%d" % f]
         ogg = os.path.join(t, "e.ogg")
-        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "s16le", "-ar", str(freq), "-ac", "2", "-i", ref,
-                        "-c:a", "libvorbis", "-q:a", q] + meta +
-                       # bitexact : numero de serie Ogg fixe, pas de chaine d'encodeur -> meme Ogg a chaque construction
-                       ["-fflags", "+bitexact", "-flags:a", "+bitexact", ogg], check=True)
+        # hsfa_oggenc : numero de serie fixe, IEEE strict -> meme Ogg a chaque construction et sur tout systeme
+        r = subprocess.run([enc, ref, ogg, str(freq), q] + meta, capture_output=True, text=True)
+        if r.returncode: return None, "hsfa_oggenc : %s : garde en ADX" % r.stderr.strip()
         afs = os.path.join(t, "e.afs"); _afs_un(ogg, afs)
         test = os.path.join(t, "test.raw")
         try:
@@ -105,9 +135,13 @@ def encode(source, entree, md5_adx, cache, exe=None):
 def encode_tous(source, entrees, cache, travaux=None):
     """{entree: chemin Ogg ou None} pour [(entree, md5 ADX)], en parallele ; affiche un bilan"""
     exe = outil(cache)
+    q = qualite()
+    manque = any(not os.path.exists(os.path.join(cache, "Y%d_%s_q%s_v%s.ogg" % (i, m[:12], q, VERSION)))
+                 for i, m in entrees)
+    enc = encodeur(cache) if manque else None           # tout en cache : pas besoin de l'encodeur
     res, bilan = {}, {}
     with ThreadPoolExecutor(max_workers=travaux or os.cpu_count() or 2) as ex:
-        futs = {i: ex.submit(encode, source, i, m, cache, exe) for i, m in entrees}
+        futs = {i: ex.submit(encode, source, i, m, cache, exe, enc) for i, m in entrees}
         for i, fu in futs.items():
             chemin, msg = fu.result(); res[i] = chemin
             k = msg if msg in ("cache", "encode") else "ADX garde"

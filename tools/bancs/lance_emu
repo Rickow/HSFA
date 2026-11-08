@@ -1,0 +1,235 @@
+#!/bin/bash
+# lance_emu — LANCEUR COMMUN des émulateurs HSFA (MAME / cps2f, FBNeo (hsfa_run, RetroArch), PPSSPP, PCSX2).
+#
+#   lance_emu [options] [--] <commande…>      lance la commande (attend une place libre si la machine est pleine)
+#   lance_emu --liste                         ce qui tourne et pour qui (+ émulateurs « hors registre » vus par ps)
+#   lance_emu --arrete AGENT|PID [--delai S]  arrête PAR PID ENREGISTRÉ (groupe du processus) : SIGTERM, puis kill -9
+#                                             après S secondes (défaut 8) ; jamais pkill -f / pgrep -f
+#   lance_emu --places [N]                    nombre de places de la machine (lit, ou écrit dans registre_emu/places.conf)
+#   lance_emu --nettoie                       retire du registre les entrées dont le processus est mort
+#
+# Options de lancement :
+#   --agent NOM        étiquette (défaut : $HSFA_AGENT ; sans étiquette : « inconnu » + avertissement) ; exportée dans
+#                      l'environnement du processus (HSFA_AGENT) et écrite au registre
+#   --empreinte F      écrit l'empreinte de ce qui est chargé dans F (« # empreinte: … ») ; aussi EMPREINTE_SORTIE=F
+#   --attendu MD5      empreinte attendue (= ATTENDU_MD5) ; --ref NOM : référence nommée (= ATTENDU_REF, voir
+#                      empreinte.py / references.tsv) ; différente -> ARRÊT, code 86, rien n'est lancé
+#   --sans-attente     échoue (code 75) au lieu d'attendre si toutes les places sont prises
+#   --generique        accepte une commande qui n'est pas un émulateur connu (elle prend une place)
+#   --exec             REMPLACE lance_emu par la commande (exec, même PID : pour un appelant qui pilote le processus,
+#                      ex. psp_debug.py) ; pas de groupe propre ; entrée du registre retirée à la 1re --liste après la fin
+# Règles imposées : nice -n 19 ; MAME sans « -state » (refusé, code 2) ; places globales par verrous flock
+# (registre_emu/places/place.K, défaut 6, réglable par --places N ou LANCE_EMU_PLACES si places.conf absent) ;
+# le verrou est hérité par l'émulateur (la place reste prise tant qu'il vit, même si lance_emu est tué).
+# Registre : registre_emu/actifs/<pid>.tsv (pid, pgid, début noyau, agent, début, place, dossier, empreinte, commande),
+# retiré à la sortie ; historique : registre_emu/journal.tsv. Code de sortie = celui de la commande.
+set -u
+ICI=$(dirname "$(readlink -f "$0")")
+REG=${LANCE_EMU_REGISTRE:-$ICI/registre_emu}
+mkdir -p "$REG/actifs" "$REG/places"
+EMUS='^(mame[A-Za-z0-9._-]*|cps2f[A-Za-z0-9._-]*|hsfa_run|retroarch[A-Za-z0-9._-]*|[Pp][Pp][Ss][Ss][Pp][Pp][A-Za-z0-9._-]*|[Pp][Cc][Ss][Xx]2[A-Za-z0-9._-]*)$'
+
+places() {
+  local n
+  if [ -s "$REG/places.conf" ]; then n=$(tr -dc 0-9 < "$REG/places.conf"); else n=${LANCE_EMU_PLACES:-6}; fi
+  [ -n "$n" ] && [ "$n" -ge 1 ] 2>/dev/null || n=6
+  echo "$n"
+}
+
+# début noyau du processus (champ 22 de /proc/PID/stat, lu après « ) » : nom avec espaces) -> PID réutilisé détecté
+debut_noyau() { local s; s=$(cat "/proc/$1/stat" 2>/dev/null) || return 1; s=${s##*) }; set -- $s; echo "${20}"; }
+groupe() { local s; s=$(cat "/proc/$1/stat" 2>/dev/null) || return 1; s=${s##*) }; set -- $s; echo "$3"; }
+
+# entrée vivante ? (pid présent ET même début noyau)
+vivant() { local pid=$1 dn=$2; [ -d "/proc/$pid" ] && [ "$(debut_noyau "$pid")" = "$dn" ]; }
+
+lit_entree() {  # $1 = fichier -> variables E_PID E_PGID E_DN E_AGENT E_DEBUT E_PLACE E_CWD E_EMP E_CMD
+  IFS=$'\t' read -r E_PID E_PGID E_DN E_AGENT E_DEBUT E_PLACE E_CWD E_EMP E_CMD < "$1"
+}
+
+duree() { local s=$1; printf '%dh%02d' $((s / 3600)) $((s % 3600 / 60)); }
+
+liste() {
+  local f n=0 now; now=$(date +%s)
+  declare -A GROUPES=()
+  echo "places : $(places) (occupées : $(occupees))"
+  for f in "$REG"/actifs/*.tsv; do
+    [ -e "$f" ] || continue
+    lit_entree "$f"
+    if vivant "$E_PID" "$E_DN"; then
+      GROUPES[$E_PGID]=1; n=$((n + 1))
+      local d0; d0=$(date -d "$E_DEBUT" +%s 2>/dev/null || echo "$now")
+      printf '%-7s %-16s %6s place %-2s %s\n' "$E_PID" "$E_AGENT" "$(duree $((now - d0)))" "$E_PLACE" "$(echo "$E_CMD" | cut -c1-90)"
+    else
+      echo "(périmé, retiré) $E_PID $E_AGENT $E_DEBUT"; rm -f "$f"
+    fi
+  done
+  [ $n = 0 ] && echo "registre : rien ne tourne"
+  # hors registre : émulateurs vus par ps (1er mot de la commande) dont le groupe n'est pas enregistré
+  local h=0
+  while read -r pid pgid et a0 rest; do
+    [[ $(basename "$a0") =~ $EMUS ]] || continue
+    [ -n "${GROUPES[$pgid]:-}" ] && continue
+    [ $h = 0 ] && echo "HORS REGISTRE (lancés sans lance_emu) :"; h=$((h + 1))
+    local ag; ag=$( { tr '\0' '\n' < "/proc/$pid/environ"; } 2>/dev/null | sed -n 's/^HSFA_AGENT=//p' | head -1)
+    # sans étiquette : dossier d'atelier deviné d'après la commande (work/<dossier>/), entre crochets
+    [ -z "$ag" ] && ag=$(echo "$rest" | grep -o 'work/[A-Za-z0-9_.-]*/' | grep -v 'work/references/\|work/mame' | head -1 | sed 's#work/\(.*\)/#[\1]#')
+    printf '  %-7s %-16s %6s %s\n' "$pid" "${ag:-?}" "$(duree "$et")" "$(echo "$a0 $rest" | cut -c1-90)"
+  done < <(ps -u "$(id -u)" -o pid=,pgid=,etimes=,args=)
+  return 0
+}
+
+occupees() {  # nombre de verrous de place tenus (essai non bloquant sur chacun)
+  local k o=0
+  for k in "$REG"/places/place.*; do
+    [ -e "$k" ] || continue
+    if ! flock -n "$k" true 2>/dev/null; then o=$((o + 1)); fi
+  done
+  echo $o
+}
+
+arrete() {
+  local cible=$1 delai=${2:-8} f trouve=0 pids=()
+  for f in "$REG"/actifs/*.tsv; do
+    [ -e "$f" ] || continue
+    lit_entree "$f"
+    if [ "$E_AGENT" = "$cible" ] || [ "$E_PID" = "$cible" ]; then
+      trouve=1
+      if ! vivant "$E_PID" "$E_DN"; then echo "$E_PID ($E_AGENT) : déjà fini, entrée retirée"; rm -f "$f"; continue; fi
+      if [ "$E_PGID" = "$E_PID" ]; then kill -TERM -- "-$E_PID" 2>/dev/null; else kill -TERM "$E_PID" 2>/dev/null; fi
+      echo "$E_PID ($E_AGENT) : SIGTERM"; pids+=("$E_PID:$E_DN:$E_PGID")
+    fi
+  done
+  [ $trouve = 0 ] && { echo "rien d'enregistré pour « $cible » (lance_emu --liste)"; return 1; }
+  local t=0 x p dn pg reste
+  while [ $t -lt "$delai" ]; do
+    reste=0
+    for x in "${pids[@]}"; do IFS=: read -r p dn pg <<< "$x"; vivant "$p" "$dn" && reste=1; done
+    [ $reste = 0 ] && break
+    sleep 1; t=$((t + 1))
+  done
+  for x in "${pids[@]}"; do
+    IFS=: read -r p dn pg <<< "$x"
+    if vivant "$p" "$dn"; then
+      if [ "$pg" = "$p" ]; then kill -KILL -- "-$p" 2>/dev/null; else kill -KILL "$p" 2>/dev/null; fi
+      echo "$p : toujours vivant après ${delai} s -> kill -9"
+    fi
+  done
+  return 0
+}
+
+nettoie() { local f; for f in "$REG"/actifs/*.tsv; do [ -e "$f" ] || continue; lit_entree "$f"; vivant "$E_PID" "$E_DN" || { echo "retiré : $E_PID $E_AGENT"; rm -f "$f"; }; done; }
+
+# ------------------------------------------------------------------ commandes de gestion
+case "${1:-}" in
+  --liste) liste; exit 0;;
+  --arrete) [ -n "${2:-}" ] || { echo "usage : lance_emu --arrete AGENT|PID [--delai S]" >&2; exit 2; }
+            D=8; [ "${3:-}" = "--delai" ] && D=${4:-8}; arrete "$2" "$D"; exit $?;;
+  --places) if [ -n "${2:-}" ]; then [ "$2" -ge 1 ] 2>/dev/null || { echo "nombre invalide" >&2; exit 2; }; echo "$2" > "$REG/places.conf"; fi
+            echo "places : $(places) (occupées : $(occupees))"; exit 0;;
+  --nettoie) nettoie; exit 0;;
+  ""|-h|--help) sed -n '2,29p' "$0"; exit 0;;
+esac
+
+# ------------------------------------------------------------------ lancement
+AGENT=${HSFA_AGENT:-}; ATTENTE=1; GENERIQUE=0; EXEC=0; EMP=${EMPREINTE_SORTIE:-}
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --agent) AGENT=$2; shift 2;;
+    --empreinte) EMP=$2; shift 2;;
+    --attendu) export ATTENDU_MD5=$2; shift 2;;
+    --ref) export ATTENDU_REF=$2; shift 2;;
+    --sans-attente) ATTENTE=0; shift;;
+    --generique) GENERIQUE=1; shift;;
+    --exec) EXEC=1; shift;;
+    --) shift; break;;
+    -*) echo "lance_emu : option inconnue $1 (la commande se met après --)" >&2; exit 2;;
+    *) break;;
+  esac
+done
+[ $# -gt 0 ] || { echo "lance_emu : commande absente" >&2; exit 2; }
+if [ -z "$AGENT" ]; then AGENT=inconnu; echo "lance_emu : AVERTISSEMENT, ni HSFA_AGENT ni --agent : étiquette « inconnu »" >&2; fi
+case $AGENT in *[[:space:]]*) echo "lance_emu : étiquette sans espace" >&2; exit 2;; esac
+
+EMU=""; MAME=0
+for a in "$@"; do b=$(basename -- "$a"); if [[ $b =~ $EMUS ]]; then EMU=$b; break; fi; done
+case $EMU in mame*|cps2f*) MAME=1;; esac
+if [ -z "$EMU" ] && [ $GENERIQUE = 0 ]; then
+  echo "lance_emu : aucun émulateur connu dans la commande (mame, cps2f, hsfa_run, retroarch, PPSSPP, pcsx2) ; --generique pour forcer" >&2; exit 2
+fi
+if [ $MAME = 1 ]; then
+  for a in "$@"; do
+    case $a in -state|--state|-state=*) echo "lance_emu : « -state » INTERDIT pour MAME (consignes : l'état se prend et se recharge par le Lua)" >&2; exit 2;; esac
+  done
+fi
+
+# empreinte AVANT de prendre une place (un mauvais banc ne doit rien lancer)
+EMPL="-"
+if [ -n "$EMU" ]; then
+  T=$(mktemp); python3 "$ICI/empreinte.py" commande --sortie "$T" -- "$@" > /dev/null 2> "$T.err"; c=$?
+  if [ $c != 0 ] && [ $c != 86 ]; then
+    cat "$T.err" >&2; rm -f "$T" "$T.err"
+    if [ -n "${ATTENDU_MD5:-}${ATTENDU_REF:-}" ]; then echo "lance_emu : ARRÊT, empreinte attendue mais incalculable (code $c)" >&2; exit 86; fi
+    echo "lance_emu : avertissement, empreinte incalculable (code $c), lancement quand même" >&2; c=0; T=/dev/null
+  fi
+  rm -f "$T.err"
+  EMPL=$(head -1 "$T" 2>/dev/null | sed 's/^# empreinte: //' | cut -d'|' -f1 | tr -d ' ')
+  [ -n "$EMP" ] && { mkdir -p "$(dirname "$EMP")"; cp "$T" "$EMP"; }
+  if [ $c = 86 ]; then
+    cat "$T" >&2; rm -f "$T"
+    echo "lance_emu : ARRÊT, l'empreinte de ce qui serait chargé n'est pas celle attendue (rien n'a été lancé)" >&2; exit 86
+  fi
+  [ "$T" != /dev/null ] && rm -f "$T"
+fi
+
+# place libre (verrou flock tenu par ce processus et hérité par l'émulateur)
+N=$(places); PLACE=""; dit=0; t0=$(date +%s)
+while :; do
+  for k in $(seq 1 "$N"); do
+    exec {FDP}>>"$REG/places/place.$k"
+    if flock -n "$FDP"; then PLACE=$k; break 2; fi
+    exec {FDP}>&-
+  done
+  [ $ATTENTE = 0 ] && { echo "lance_emu : $N places prises (--sans-attente)" >&2; exit 75; }
+  [ $dit = 0 ] && { echo "lance_emu : $N places prises, attente d'une place ($AGENT)…" >&2; dit=1; }
+  sleep $((3 + RANDOM % 5)); N=$(places)
+done
+[ $dit = 1 ] && echo "lance_emu : place $PLACE obtenue après $(( $(date +%s) - t0 )) s" >&2
+
+export HSFA_AGENT=$AGENT
+if [ $EXEC = 1 ]; then   # même PID : le registre décrit ce processus, qui devient l'émulateur
+  CMD=$(printf '%q ' "$@" | tr '\t\n' '  ')
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$$" "$(groupe $$)" "$(debut_noyau $$)" "$AGENT" "$(date '+%F %T')" "$PLACE" "$PWD" "$EMPL" "$CMD" \
+    > "$REG/actifs/.$$.tmp" && mv "$REG/actifs/.$$.tmp" "$REG/actifs/$$.tsv"
+  printf '%s\tdebut\t%s\t%s\tplace=%s\t%s\t%s\n' "$(date '+%F %T')" "$$" "$AGENT" "$PLACE" "$EMPL" "$(echo "exec $CMD" | cut -c1-200)" >> "$REG/journal.tsv"
+  exec nice -n 19 "$@"
+fi
+PID=""
+fin() {
+  local c=${1:-$?}
+  [ -n "$PID" ] && rm -f "$REG/actifs/$PID.tsv"
+  [ -n "$PID" ] && printf '%s\tfin\t%s\t%s\tcode=%s\t%ss\n' "$(date '+%F %T')" "$PID" "$AGENT" "$c" "$(( $(date +%s) - DEBUT ))" >> "$REG/journal.tsv"
+}
+transmet() {  # signal reçu par lance_emu -> au groupe de l'émulateur
+  [ -n "$PID" ] && kill -"$1" -- "-$PID" 2>/dev/null
+  return 0
+}
+trap 'transmet TERM' TERM; trap 'transmet INT' INT; trap 'transmet HUP' HUP
+DEBUT=$(date +%s)
+# setsid : groupe de processus propre (PID = PGID) -> --arrete vise le groupe entier (timeout + émulateur), par PID
+setsid nice -n 19 "$@" &
+PID=$!
+DN=$(debut_noyau "$PID"); PG=$(groupe "$PID")
+CMD=$(printf '%q ' "$@" | tr '\t\n' '  ')
+printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$PID" "${PG:-$PID}" "${DN:-0}" "$AGENT" "$(date '+%F %T')" "$PLACE" "$PWD" "$EMPL" "$CMD" \
+  > "$REG/actifs/.$PID.tmp" && mv "$REG/actifs/.$PID.tmp" "$REG/actifs/$PID.tsv"
+printf '%s\tdebut\t%s\t%s\tplace=%s\t%s\t%s\n' "$(date '+%F %T')" "$PID" "$AGENT" "$PLACE" "$EMPL" "$(echo "$CMD" | cut -c1-200)" >> "$REG/journal.tsv"
+exec {FDP}>&-   # l'émulateur garde le verrou ; lance_emu n'en a plus besoin
+# attendre la fin (wait est interrompu par les signaux piégés : on reboucle tant que le processus vit)
+while :; do
+  wait "$PID"; CODE=$?
+  [ -d "/proc/$PID" ] && [ "$(debut_noyau "$PID")" = "$DN" ] && continue
+  break
+done
+fin "$CODE"
+exit "$CODE"

@@ -1,0 +1,143 @@
+# Constructeur HSFA tout-en-un : un executable par systeme (tools/constructeur), joint aux releases.
+#
+# - Aucune donnee de jeu : le constructeur lit les images du joueur ; les essais n'utilisent qu'un signal synthetique.
+# - Aucun secret : seul le GITHUB_TOKEN automatique sert, et seulement dans le travail « release » (contents: write),
+#   pour joindre les fichiers a une release que le porteur a publiee lui-meme.
+# - Sources tierces officielles, verifiees : zig (empreinte ci-dessous), libogg / libvorbis / musl (SHA-256 dans
+#   tools/flux/oggenc/construit_oggenc.py), libchdr (commit dans tools/constructeur/natifs.py), roues PyPI
+#   (--require-hashes). Actions epinglees par commit.
+# - Determinisme : chaque systeme execute hsfa_oggenc --signal et doit retrouver l'empreinte de reference
+#   (memes Ogg sur tous les systemes : sinon le travail echoue).
+name: constructeur
+
+on:
+  workflow_dispatch:          # essai : executables en artefacts seulement
+  release:
+    types: [published]        # release publiee par le porteur : executables joints
+
+permissions:
+  contents: read
+
+concurrency:
+  group: constructeur-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  ZIG_VERSION: "0.17.1"
+  ZIG_SHA256: "3581863e3cbcfd0fce0efc682ce7e9e93da96668a977791d356a26d2a7e9b17a"   # zig-x86_64-linux-0.17.1.tar.xz
+  PYTHON_VERSION: "3.14"
+  SOURCE_DATE_EPOCH: "315532800"
+
+jobs:
+  natifs:
+    # hsfa_oggenc, fluxtool et libchdr pour les 5 cibles, avec UN seul compilateur (zig = clang + libc de chaque cible)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+      - name: zig (ziglang.org, empreinte verifiee)
+        run: |
+          curl -sSfL --retry 3 -o zig.tar.xz "https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_VERSION}.tar.xz"
+          echo "${ZIG_SHA256}  zig.tar.xz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/zig" && tar -xf zig.tar.xz -C "$RUNNER_TEMP/zig" --strip-components=1
+          echo "ZIG=$RUNNER_TEMP/zig/zig" >> "$GITHUB_ENV"
+      - name: Outils natifs des 5 cibles
+        run: |
+          for c in linux-x86_64 linux-aarch64 windows-x86_64 macos-arm64 macos-x86_64; do
+            python3 tools/constructeur/natifs.py --cible "$c" --sortie "natifs/$c" --sources "$RUNNER_TEMP/sources" \
+              --telecharge --zig "$ZIG"
+          done
+          sha256sum natifs/*/* | tee natifs/SHA256SUMS.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9   # v7.0.2
+        with:
+          name: natifs
+          path: natifs/
+          if-no-files-found: error
+
+  executable:
+    needs: natifs
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { cible: linux-x86_64,   os: ubuntu-22.04,     exe: hsfa-constructeur }        # glibc >= 2.35
+          - { cible: linux-aarch64,  os: ubuntu-22.04-arm, exe: hsfa-constructeur }
+          - { cible: windows-x86_64, os: windows-2025,     exe: hsfa-constructeur.exe }
+          - { cible: macos-arm64,    os: macos-15,         exe: hsfa-constructeur }
+          - { cible: macos-x86_64,   os: macos-15-intel,   exe: hsfa-constructeur, facultatif: true }
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.facultatif == true }}
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0   # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333   # v8.0.2
+        with:
+          name: natifs
+          path: natifs
+      - name: Outils natifs de ce systeme (+ droits d'execution perdus par les artefacts)
+        run: |
+          B="natifs/${{ matrix.cible }}"
+          chmod +x "$B"/* || true
+          if [ "$RUNNER_OS" = macOS ]; then codesign -s - -f "$B"/hsfa_oggenc "$B"/fluxtool "$B"/libchdr.dylib; fi   # signature ad hoc
+          ls -la "$B"
+          echo "BIN=$B" >> "$GITHUB_ENV"
+      - name: Determinisme de l'Ogg sur ce systeme (signal d'essai, aucune donnee de jeu) -- BLOQUANT
+        run: python tools/flux/oggenc/construit_oggenc.py --verifie "$BIN/hsfa_oggenc${{ runner.os == 'Windows' && '.exe' || '' }}"
+      - name: Python de fabrication (versions et empreintes fixees)
+        run: python -m pip install --disable-pip-version-check --require-hashes -r tools/constructeur/requirements-constructeur.txt
+      - name: Executable (PyInstaller, un seul fichier) + auto-test
+        run: python tools/constructeur/fabrique.py --natifs "$BIN" --dist dist
+      - name: Le constructeur sert aussi de Python aux etapes
+        run: |
+          dist/${{ matrix.exe }} --version
+          dist/${{ matrix.exe }} -c "import numpy, zlib, json, tkinter; print(numpy.__version__)" || \
+          dist/${{ matrix.exe }} -c "import numpy, zlib, json; print(numpy.__version__, 'sans tkinter')"
+      - name: Paquet (executable, guide, licences, empreinte)
+        run: |
+          P="hsfa-constructeur-${{ matrix.cible }}"
+          mkdir -p "paquet/$P"
+          cp "dist/${{ matrix.exe }}" "paquet/$P/"
+          cp tools/constructeur/LISEZMOI.txt tools/constructeur/README.txt tools/constructeur/TIERS.md LICENSE "paquet/$P/"
+          cp "$BIN/LICENSE-libchdr.txt" "paquet/$P/"
+          cd paquet
+          if [ "$RUNNER_OS" = Windows ]; then 7z a -tzip -mx=9 "$P.zip" "$P" > /dev/null; else zip -qr -9 "$P.zip" "$P"; fi
+          python -c "import hashlib,sys; f=sys.argv[1]; print(hashlib.sha256(open(f,'rb').read()).hexdigest()+'  '+f)" "$P.zip" > "$P.zip.sha256"
+          cat "$P.zip.sha256"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9   # v7.0.2
+        with:
+          name: hsfa-constructeur-${{ matrix.cible }}
+          path: paquet/*.zip*
+          if-no-files-found: error
+
+  release:
+    # seulement pour une release PUBLIEE par le porteur : on y joint les executables (rien d'autre n'est modifie)
+    if: github.event_name == 'release'
+    needs: executable
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333   # v8.0.2
+        with:
+          pattern: hsfa-constructeur-*
+          path: art
+          merge-multiple: true
+      - name: Joindre a la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          cd art
+          cat *.sha256 > SHA256SUMS-constructeur.txt
+          cat SHA256SUMS-constructeur.txt
+          gh release upload "$TAG" *.zip SHA256SUMS-constructeur.txt --clobber --repo "$GITHUB_REPOSITORY"

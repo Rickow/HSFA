@@ -1,6 +1,6 @@
 # Index thématique de `docs/journal/HANDOFF.md`
 
-> Journal indexé : `docs/journal/HANDOFF.md` (5 583 lignes, état du 2026-11-07, jusqu'à §201). Les sections §116 à §201
+> Journal indexé : `docs/journal/HANDOFF.md` (5 832 lignes, état du 2026-11-08, jusqu'à §207). Les sections §116 à §207
 > ont une ligne chacune au §13 (§173-§201 : titre seul, ajoutées le 2026-11-07) ; numéros de ligne recalés le 2026-11-07 pour
 > §173-§201 ; la grille de fin s'arrête à §172.
 > Les numéros de ligne renvoient aux **titres** de section (`sed -n 'L,+40p' HANDOFF.md`, ou `Read` avec `offset=L`).
@@ -14,7 +14,7 @@ Le journal mélange **trois séries de numéros**. Un « §5 » peut désigner t
 |---|---|---|---|
 | **R§0 … R§8** (+ R§6bis) | chapitres « racine » `## N.` | 13–617 | les plus anciens ; ordre 0,1,2,3,4,5,**8**,6,6bis,7 ; beaucoup sont **dépassés** |
 | **C1 … C5** | chapitre « Carte MIPS↔68K… » (l. 618), `### N.` | 620–713 | métrique et impasses de la carte |
-| **§1 … §201** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–5583 | **série canonique** : §1-§21 puis §22-§201 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
+| **§1 … §207** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–5832 | **série canonique** : §1-§21 puis §22-§207 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
 
 La ligne 1543 commence par `#imm,…` : ce n'est pas un titre (faux positif de `grep '^#'`).
 
@@ -413,7 +413,13 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §199 | 5486 | SFA3 | tuiles rangées en miroir par le portage (traducteur v157, patch 0024) |
 | §200 | 5529 | Greffe ro9a26 → ro9a28 ; vrai 16:9 calé (0023) ; SFA3 tuiles en miroir (v157, 0024) ; décors SFA1 / SFA2 préparés | — |
 | §201 | 5550 | SFA3 | tuiles d'objets dessinées par le portage (poupées de Shadaloo) ; traducteur v158, patch 0025 |
-| §202 | (fin) | Upper MAX depuis les deux disques : compléments scriptés, sans sfa3ud, ROM son régénérée, G_MAX en voie ISO, 656 captures cœur identiques | — |
+| §202 | 5585 | Upper MAX depuis les deux disques : compléments scriptés, sans sfa3ud, ROM son régénérée, G_MAX en voie ISO, 656 captures cœur identiques | — |
+| §203 | 5621 | SFA3 | texte parasite sur le logo de l'écran QSound (scroll3) : patch 0026, `SFA3_TUILES_S3` (traducteur v159) |
+| §204 | 5642 | Hyper | jauge de super des versions anciennes : traducteur v159 (`PRETE_TEST`, `MEMSWAPD`) ; intégration v159 (références, Upper MAX, zips) |
+| §205 | 5685 | atelier | journée du 07/11 : greffe ro9a29 / ro9a30, décors SFA1 / SFA2 prêts à intégrer, études MAX dans la greffe et constructeur, fausse alerte de Cammy |
+| §206 | 5711 | hsfa | constructeur tout-en-un (tools/constructeur, CI, guide) ; Ogg portable hsfa_oggenc (flux_ogg v3, plus de ffmpeg) : nouvelles empreintes Upper cb14c9a7, Hyper 8ed7f853, Upper MAX ee3fd85a |
+| §207 | 5776 | Hyper | piste « vie basse » dès le début du combat : traducteur v160 (`PRETE_CMP`, comparaison différée sur le registre prêté ; Upper 2 sites, Hyper 7) |
+| §208 | (fin) | hsfa | outils de l'atelier versés : tools/bancs (lance_emu, empreinte, banc de jour), banc-coups (banc_max), frame-data-max, decors/{sfa1-iso,sfa2-iso,integration}, coeurs, ps2-oracle ; 4 fichiers de la greffe mis à jour |
 
 ---
 

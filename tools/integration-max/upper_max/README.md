@@ -35,7 +35,8 @@ Sans `--psp-iso`, `uppermax` donne Upper sans les persos MAX, identique à `--je
 - `traduire_2b31.py` : copie du `max/outils/rosette_code/traduire.py` de **d98c4f1**. Il sert seulement à produire
   `s/acteurs_fins_max.s` à l'état du lot 2b31 ; la session MAX passera aux acteurs actuels après un lot d'essai.
 - `um_prog.py`, `fige.py` et `integration_2b31/` : construction MAX=1 de l'intégration, figée à l'état 2b31
-  (traducteur v154 + crochets MAX). On n'y trouve que les fichiers que la construction lit, avec des marques de
+  (traducteur v154 + crochets MAX ; + `PRETE_TEST` / `MEMSWAPD` de la v159, §204, et `PRETE_CMP` de la v160, §207,
+  pour que la carte d'Upper reste celle de la préparation). On n'y trouve que les fichiers que la construction lit, avec des marques de
   chemins `@UM_*@`, plus 2 relevés d'adresses.
 - `son/` : chaîne de la ROM son. Elle contient :
   - `extrait_psp.py` et `rend_seq.py` (banque commune PSP) ;

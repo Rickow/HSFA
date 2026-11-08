@@ -32,6 +32,15 @@ Outils d'étude et de production écrits au fil des chantiers. Chaque dossier co
 | [`sondes-recherche/`](sondes-recherche/README.md) | sonde de PC du cœur, déchiffreur CPS2, désassembleur, banc des coups FBNeo | [D-SONDES](../docs/rapports/recherche/D-SONDES.md) |
 | [`guide-coups/`](guide-coups/README.md) | relevé des commandes du guide officiel (sans son texte) et vérification SuperCombo | [BANC-COUPS](../docs/rapports/BANC-COUPS.md) |
 | [`ppsspp-banc/`](ppsspp-banc/PPSSPP-BANC.md), [`banc-max-psp/`](banc-max-psp/BANC-PSP.md) | PPSSPP comme oracle des persos MAX ; mode B du banc des coups (PSP contre Upper MAX) | [PPSSPP-BANC](ppsspp-banc/PPSSPP-BANC.md), [BANC-PSP](banc-max-psp/BANC-PSP.md) |
+| [`bancs/`](bancs/README.md) | **outils communs des mesures** : lanceur `lance_emu` (places, registre, arrêts par PID), empreinte de ce que l'émulateur charge, banc de jour (non-régression des 4 jeux sur versions figées), `compare_zips.py` | [README](bancs/README.md) |
+| [`banc-coups/`](banc-coups/README.md) | banc des coups sous MAME (oracle arcade), **banc de non-régression MAX** `banc_max.sh` (condition de livraison d'un lot MAX), frame data contre SuperCombo | [BANC-COUPS](../docs/rapports/BANC-COUPS.md) |
+| [`frame-data-max/`](frame-data-max/README.md) | données d'images des persos MAX en tours de jeu : PSP (oracle) contre Upper MAX, passé à chaque lot MAX | [README](frame-data-max/README.md) |
+| [`decors/sfa1-iso/`](decors/sfa1-iso/README.md), [`decors/sfa2-iso/`](decors/sfa2-iso/README.md) | décors de SFA1 (13) et SFA2 (18) extraits de l'ISO seule (plans, animations), contrôles contre l'arcade sous MAME | [README SFA1](decors/sfa1-iso/README.md), [README SFA2](decors/sfa2-iso/README.md) |
+| [`decors/integration/`](decors/integration/README.md) | convertisseur commun SFA1 / SFA2 → lots « HSFADC01 » de la zone des décors de la greffe, aller-retour prouvé | [README](decors/integration/README.md) |
+| [`coeurs/`](coeurs/README.md) | construction et contrôles statiques du lot des 12 cœurs (Linux, Windows, Android, ROCKNIX, Recalbox) | [LIVRAISONS](../docs/guide/LIVRAISONS.md) |
+| [`ps2-oracle/`](ps2-oracle/README.md) | PCSX2 comme oracle : Xvfb dédié, xdotool sur le PID lancé, PINE (lecture ; écritures limitées) | [README](ps2-oracle/README.md) |
+| [`asm68k/`](asm68k/README.md) | assembleur 68000 maison `hsfa_asm68k` (remplace vasm dans la construction) | [README](asm68k/README.md) |
+| [`constructeur/`](constructeur/README.md) | constructeur tout-en-un (un exécutable par système, CI) | [README](constructeur/README.md) |
 
 ## Chemins
 
@@ -42,3 +51,8 @@ publiés : [`scripts/correspondances.tsv`](../scripts/correspondances.tsv) ; cop
 [`scripts/localiser.py`](../scripts/localiser.py). Les imports de chaque script sont vérifiés par
 [`scripts/qualite/verifier_imports.py`](../scripts/qualite/verifier_imports.py) (dépendances non publiées classées
 « externes »).
+
+Les outils communs (`bancs/`, `banc-coups/`, `coeurs/`, `ps2-oracle/`) se règlent par variables d'environnement
+(`HSFA_WORKSPACE`, `HSFA_BANC_LUA`, `LOT`, `PS2_*` : voir leur README) et se lancent depuis le dépôt. Dans l'espace de
+travail, `lance_emu`, `empreinte.*` et `banc_jour.*` vivent dans `<workspace>/work/outils/` : les autres bancs les y
+appellent.

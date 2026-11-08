@@ -1712,6 +1712,114 @@ TAILBR=__import__('os').environ.get('TAILBR','1')!='0'; TAILBR_N=[0]
 # Upper ; plafond de vitesse $900000 -> $FF0000). LUIDN=0 : ancien comportement.
 LUIDN=__import__('os').environ.get('LUIDN','1')!='0'; LUIDN_LOG=[]
 CMPMM=__import__('os').environ.get('CMPMM','1')!='0'; CMPMM_N=[]
+# (hyper_jauge, 07/11) 'op Dn,(An)' sur un long : le portage ajoute SWAP(Dn) au long range a moities echangees
+# ('lw x,d(An) ; addu x,x,swap(Dn) ; sw x,d(An)', Hyper 0x3B85C4 : ADD.L D1,(A1)+ de la jauge des versions anciennes) =
+# l'operation 68K NATURELLE sur le long en memoire (comme MOVE.L Dn,d(An) [ordre naturel], HANDOFF §83). Avant : rien
+# n'etait emis. MEMSWAPD=0 -> v158 a l'octet.
+MEMSWAPD_ON=__import__('os').environ.get('MEMSWAPD','1')!='0'; MEMSWAPD_N=[]
+# (hyper_jauge, 07/11) TEST EN ATTENTE sur le registre prete, consomme par un branchement APRES la fin de la zone
+# ('andi x,(A8).b,bit ; sw x,RES' | fin de zone | 'lw y,RES ; beq y') : le BTST/TST differe au branchement etait emis
+# sur le registre 68K deja RESTAURE (autre adresse). Hyper mips 0x3B77C0 / 0x3B8964 (jauge des versions anciennes :
+# BTST #0,$D2(A8) lu sur A4 = $8C(A6) / A3 = table des niveaux -> chiffre faux, tuiles en morceaux, MAX absent).
+# Le test est emis AVANT la fermeture (qui garde les drapeaux : MOVEA / MOVE SR..CCR) ; le branchement ne lit que les
+# drapeaux. PRETE_TEST=0 -> v158 a l'octet.
+PRETE_TEST_ON=__import__('os').environ.get('PRETE_TEST','1')!='0'; PRETE_TEST_N=[]
+def _pend_sur_prete(pend, kind, reg):
+    """(mots, texte) du test en attente s'il porte sur le registre prete (kind,reg), sinon None"""
+    if not pend: return None
+    k=pend[0]
+    if kind=='A':
+        if k=='btst' and pend[3]==reg:
+            _,bb,bd,ban=pend; return enc_btst_an(bb,ban,bd), "BTST #$%x,$%04x(A%d)"%(bb,bd&0xffff,ban)
+        if k=='tst_mem' and pend[3]==reg:
+            _,sz,disp,an=pend; return enc_tst_an(sz,an,disp), "TST.%s $%04x(A%d)"%(sz,disp&0xffff,an)
+        if k=='tst_idx' and pend[2]==reg:
+            _,sz,n,dn,dsz,d8=pend
+            return [0x4a00|(SZN[sz]<<6)|0x30|(n&7), idx_ext(dn,dsz,d8)], "TST.%s %d(A%d,D%d.%s)%s"%(sz,d8,n,dn,dsz,idx_note(sz))
+        if k=='btst_dyn' and pend[2][0]!='D' and pend[2][3]==reg:
+            ws_,mn_=enc_dynbit('btst',pend[1],pend[2]); return ws_, mn_
+    else:
+        if k=='btst_dn' and pend[2]==reg:
+            _,bit,dn=pend; return [0x0800|(dn&7), bit], "BTST #%d,D%d"%(bit,dn)
+        if k=='btst_dyn' and (pend[1]==reg or (pend[2][0]=='D' and pend[2][1]==reg)):
+            ws_,mn_=enc_dynbit('btst',pend[1],pend[2]); return ws_, mn_
+    return None
+def _vers_branchement_res(L, i):
+    """de L[i] au prochain branchement : seulement 'lui 0x7000', nop et relecture de la case RESULTAT (0x1150)"""
+    for x in L[i:i+8]:
+        if x.m=='sll' and x.w==0: continue
+        if x.m=='lui' and x.imm==0x7000: continue
+        if x.m in ('lw','lh','lb') and x.imm==0x1150: continue
+        return x.m in ('beq','bne','bltz','bgez','bgtz','blez')
+    return False
+# (v160, 08/11) COMPARAISON / TEST EN ATTENTE sur le registre prete, emis APRES la fin de la zone. Meme famille que
+# PRETE_TEST, sur les CMP / CMPI fusionnes au Bcc et sur les tests que PRETE_TEST ne voyait pas (calcul de la retenue
+# entre la fin de zone et le branchement, drapeaux rendus a l'appelant). Hyper mips 0x3899B0 (piste rapide « vie
+# basse ») : 'CMPI.B #$30,$51(A8)' lu sur A4 restaure = objet de l'appelant -> piste rapide des le debut du combat.
+# Le test que la v159 emet au consommateur (Bcc, RTS, BRA vers l'epilogue) est DEPLACE tel quel devant la fermeture
+# (MOVEA / MOVE SR..CCR : drapeaux gardes), si rien de ce qui est emis entre les deux ne touche les drapeaux et si
+# aucun branchement non absorbe n'arrive entre la fermeture et le test. Sinon : v159, site journalise.
+# PRETE_CMP=0 -> v159 a l'octet. PRETE_CMP_LOG=<fichier> : journal des sites (n'agit pas sur la sortie).
+PRETE_CMP_ON=__import__('os').environ.get('PRETE_CMP','1')!='0'; PRETE_CMP_J=[]
+def _pend_utilise(pend, kind, reg):
+    """le test en attente lit-il le registre 68K prete (kind,reg) ?"""
+    if not pend: return False
+    def _op(o):
+        if not isinstance(o,tuple) or not o: return False
+        if kind=='A':
+            if o[0]=='A' and o[1]==reg: return True
+            if o[0]=='mem' and len(o)>3 and o[3]==reg: return True
+            if o[0]=='idx' and len(o)>2 and o[2]==reg: return True
+        else:
+            if o[0]=='D' and o[1]==reg: return True
+            if o[0]=='idx' and len(o)>3 and o[3]==reg: return True
+        return False
+    k=pend[0]
+    if k=='cmp': return _op(pend[1]) or _op(pend[2])
+    if kind=='A':
+        if k in ('btst','tst_mem'): return pend[3]==reg
+        if k=='tst_idx': return pend[2]==reg
+        if k=='btst_dyn': return pend[2][0]!='D' and len(pend[2])>3 and pend[2][3]==reg
+    else:
+        if k in ('btst_dn','tst_dn'): return pend[2]==reg
+        if k=='tst_idx': return pend[3]==reg
+        if k=='btst_dyn': return pend[1]==reg or (pend[2][0]=='D' and pend[2][1]==reg)
+    return False
+def _neutre_ccr(e):
+    """emission sans effet sur N,Z,V,C (entre la fin de zone et le test deplace)"""
+    va,mn,ws=e
+    if not ws: return True
+    if mn.startswith(('MOVEA','LEA','PEA','MOVEM','(restauration')): return True
+    if ws[0]==0x40e7 and 0x44df in ws: return True          # bloc SR sauve / rendu (zones a domicile)
+    if ws[0]==0x48e7 and 0x44df in ws: return True          # ouverture A8 a domicile (MOVEM + SR)
+    return False
+def _prete_deplace(out, dif, n0, n1, test_va, tgts, absorbed):
+    """deplace out[n0:n1] (test emis par la v159 au consommateur) devant la fermeture out[dif[1]] ; rend le statut"""
+    import bisect as _b
+    pend,k,site,cva,kind,reg=dif
+    if n1<=n0: return 'rien_emis'
+    for kk in range(k, min(len(out), k+4)):                  # (une emission anterieure a pu etre dedoublee)
+        if out[kk][0]==cva and '[fin du registre prete' in out[kk][1]: k=kk; break
+    else: return 'refus_index'
+    for e in out[k+1:n0]:
+        if not _neutre_ccr(e): return 'refus_emission:'+e[1][:40]
+    srt,src=tgts
+    j=_b.bisect_right(srt, site)
+    while j<len(srt) and srt[j]<=test_va:
+        if any(s not in absorbed for s in src[srt[j]]): return 'refus_cible:%x'%srt[j]
+        j+=1
+    if not PRETE_CMP_ON: return 'deplacable'
+    mv=[(cva, e[1]+"  [test en attente sur le registre prete : avant sa fin]", e[2]) for e in out[n0:n1]]
+    del out[n0:n1]; out[k:k]=mv
+    return 'deplace'
+def _prete_journal(site, cons, statut, texte):
+    PRETE_CMP_J.append((site, cons, statut, texte))
+    if len(PRETE_CMP_J)==1 and __import__('os').environ.get('PRETE_CMP_LOG'):
+        import atexit
+        def _dump():
+            with open(__import__('os').environ['PRETE_CMP_LOG'],'a') as f:
+                for s,c,st_,t in PRETE_CMP_J: f.write("%07x %07x %-24s %s\n"%(s,c if c is not None else 0,st_,t))
+        atexit.register(_dump)
 # (agent_defauts_banc, RETAG24) POINTEUR ETIQUETE REMASQUE SUR 24 BITS : le jeu range un octet de drapeaux dans
 # l'octet fort d'un pointeur (MOVE.L ptr,(A1) ; MOVE.B drapeau,(A1)) puis l'isole par ANDI.L #$00FFFFFF. Dans la
 # traduction l'octet fort d'une adresse 68K hors ROM porte l'etiquette $01 (HW_TAG, talon CONV $400) : le masque
@@ -2059,6 +2167,15 @@ def translate(buf, start, end, verbose=False):
     priv=private_stack(ins_list)                 # empiler/depiler sur la pile privee 0x114C (HANDOFF §72)
     xrestore=None
     zopen=[]                   # zones ouvertes (lo,hi,slot,kind,reg)
+    prete_dif=None             # (v160, PRETE_CMP) (pend, index de la fermeture, va, cva, kind, reg)
+    _tgts=[None]               # (v160) cibles de branchement triees -> sources (calcul paresseux)
+    def _tg():
+        if _tgts[0] is None:
+            _d={}
+            for _x in ins_list:
+                if _x.m in _BRANCHES: _d.setdefault(_x.va+4+_x.simm*4,[]).append(_x.va)
+            _tgts[0]=(sorted(_d),_d)
+        return _tgts[0]
     ACTIVE_EXTRA.clear()
     i=0
     while i < len(ins_list):
@@ -2096,6 +2213,8 @@ def translate(buf, start, end, verbose=False):
         if ins.va in br_targets: flags_set=None
         if ccr_restore:                                # (HANDOFF §80) drapeaux du BTST en attente sauves avant l'ecriture
             out.append((ins_list[i-1].va,"MOVE (SP)+,CCR  [drapeaux du test anterieur a l'ecriture]",[0x46df])); ccr_restore=False
+        if prete_dif is not None and pend is not prete_dif[0]:        # (v160) test en attente remplace sans etre emis
+            _prete_journal(prete_dif[2], ins.va, 'perdu', str(prete_dif[0])); prete_dif=None
         if pend is not pend_obj: pend_obj=pend; pend_va=ins_list[i-1].va if i else None   # ou le test a ete pose
         # A8/D8 : fermeture (restauration) puis ouverture (sauvegarde) des zones de registre prete
         for z in list(zopen):
@@ -2111,6 +2230,16 @@ def translate(buf, start, end, verbose=False):
                     # registre prete restaure depuis sa sauvegarde FIXE (pas la pile : la pile privee s'y entrelace)
                     ws=[0x40e7, SWAP_OP|reg, 0x2b40|(reg&7), D8_HOME&0xffff,
                         0x202d|((reg&7)<<9), (D8_HOME+8)&0xffff, 0x44df]
+                _pt=_pend_sur_prete(pend,kind,reg) if PRETE_TEST_ON else None
+                if _pt is not None and (kind=='A' or (slot==0x1144 and D8_HOME is not None)) and _vers_branchement_res(ins_list,i):
+                    out.append((cva,_pt[1]+"  [test en attente sur le registre prete : avant sa fin]",_pt[0]))
+                    PRETE_TEST_N.append(ins.va); pend=None
+                if pend is not None and _pend_utilise(pend,kind,reg) and (prete_dif is None or prete_dif[0] is not pend):
+                    if pend_va is None or pend_va<lo:                          # test pose AVANT la zone : registre reel
+                        _prete_journal(ins.va, None, 'pose_avant_zone', str(pend))
+                    elif kind=='A' or (slot==0x1144 and D8_HOME is not None):  # (v160, PRETE_CMP) deplace au consommateur
+                        prete_dif=(pend, len(out), ins.va, cva, kind, reg)
+                    else: _prete_journal(ins.va, None, 'refus_fermeture_ccr', str(pend))
                 out.append((cva,"MOVE%s.L (SP)+,%s%d  [fin du registre prete a %s]"%("" if kind=='D' else "A",kind,reg,
                             "A8" if slot==0x1120 else "D8"),ws))
                 if slot==0x1144 and D8_HOME is not None and pend:
@@ -2122,6 +2251,8 @@ def translate(buf, start, end, verbose=False):
                         pend=(pend[0], _home(pend[1],pend[3]), _home(pend[2],pend[3]))+tuple(pend[3:])
                     elif pend[0]=='tst_dn' and pend[2]==reg and pend[1] in ('B','W'):
                         pend=('tst_mem', pend[1], (D8_HOME ^ (1 if pend[1]=='B' else 0)) & 0xffff, 5)
+                if prete_dif is not None and prete_dif[2]==ins.va and prete_dif[0] is not pend:   # (v160) relu au domicile
+                    _prete_journal(ins.va, None, 'domicile_D8', str(prete_dif[0])); prete_dif=None
                 zopen.remove(z); ACTIVE_EXTRA.pop(slot,None)
         for z in ZONES:
             if z[0]==ins.va and z not in zopen:
@@ -3316,6 +3447,9 @@ def translate(buf, start, end, verbose=False):
                 for x_mr,y,commut in ((SM.get(ins.rs),sb,True),(SM.get(ins.rt),sa,m!='subu')):
                     if x_mr and commut and y and y.kind=='reg68' and y.val and y.val[0]=='D':
                         st[ins.rd]=Sym('memarith',(x_mr,m,y.val[1])); lui.pop(ins.rd,None); done=True; break
+                    if (MEMSWAPD_ON and MEMMODE=='cps2' and x_mr and x_mr[0]=='L' and commut and m in ('addu','or','and','xor')
+                            and y and y.kind=='swapd' and y.val and y.val[0]=='D'):
+                        st[ins.rd]=Sym('memarith_nat',(x_mr,m,y.val[1])); lui.pop(ins.rd,None); done=True; break
                 if done: i+=1; continue
             if m=='subu' and sa and sa.kind=='an' and sa.val[1]==0:
                 nx=ins_list[i+1] if i+1<len(ins_list) else None
@@ -3563,7 +3697,7 @@ def translate(buf, start, end, verbose=False):
             # DRAPEAUX RENDUS A L'APPELANT (HANDOFF §66) : 'TST.B x(A5) ; RTS' (ROM $77A2, fin de fondu :
             # l'appelant fait BSR ; BNE). Si la derniere ecriture de RES avant ce retour est celle du test en
             # attente, aucun branchement local ne l'a emis : on l'emet devant le RTS.
-            _n0=len(out)
+            _n0=len(out); _p0=pend
             if flags_to_caller(i, pend, pend_va, absorbed, out):
                 pend=None
                 # (HANDOFF §126) test rendu place AVANT les restaurations de l'epilogue ('lq/ld ..,sp', 'addiu sp') :
@@ -3577,6 +3711,10 @@ def translate(buf, start, end, verbose=False):
                 if FTC_AVANT and _e>0 and any(ins_list[_x].va in br_targets for _x in range(_e,i+1)):
                     for _q in range(_n0,len(out)): out[_q]=(ins_list[_e-1].va,)+tuple(out[_q][1:])
                     FTC_AVANT_N[0]+=1
+                if prete_dif is not None and _p0 is prete_dif[0] and len(out)>_n0:   # (v160, PRETE_CMP)
+                    _tx=' / '.join(e_[1] for e_ in out[_n0:])
+                    _prete_journal(prete_dif[2], ins.va, _prete_deplace(out,prete_dif,_n0,len(out),out[_n0][0],_tg(),absorbed), 'RTS : '+_tx)
+                    prete_dif=None
             # un retour absorbe qui est AUSSI la cible d'un branchement (epilogue partage : ROM
             # 'BEQ fin ... JMP (table) ; fin: RTS') doit rester un RTS, sinon le branchement tombe
             # sur l'instruction emise suivante (HANDOFF §64)
@@ -3618,7 +3756,7 @@ def translate(buf, start, end, verbose=False):
            and ins.va not in absorbed and (m in ('bltz','bgez','bgtz','blez') or ins.rt==0):
             f=st.get(ins.rs)
             if f and f.kind=='flag' and (f.val,m) in BCC_OF:
-                name,op=BCC_OF[(f.val,m)]
+                name,op=BCC_OF[(f.val,m)]; _pn0=len(out)
                 if pend and pend[0]=='tst_mem' and f.val=='Z' and MEMMODE=='cps2' and pend[1]=='L' \
                    and m in ('bltz','bgez'):
                     _,sz,disp,an=pend                  # signe seul : le mot haut suffit
@@ -3655,6 +3793,10 @@ def translate(buf, start, end, verbose=False):
                 if pend and pend[0]=='btst' and m in ('beq','bne'):
                     kind,bit,disp,an=pend
                     out.append((ins.va,"BTST #$%x,$%04x(A%d)"%(bit,disp,an), enc_btst_an(bit,an,disp)))
+                if prete_dif is not None and pend is prete_dif[0]:      # (v160, PRETE_CMP)
+                    _tx=' / '.join(e_[1] for e_ in out[_pn0:])
+                    _prete_journal(prete_dif[2], ins.va, _prete_deplace(out,prete_dif,_pn0,len(out),ins.va,_tg(),absorbed), 'Bcc : '+_tx)
+                    prete_dif=None
                 out.append((ins.va,"%s (cible %08x)"%(name,ins.va+4+ins.simm*4),[op]))
                 pend=None; i+=1; continue
         if m=='bgez' and st.get(ins.rs) and st[ins.rs].kind=='arithi' \
@@ -3700,13 +3842,23 @@ def translate(buf, start, end, verbose=False):
                                         (ins_list[_k].m in ('lq','ld') and ins_list[_k].rs==29) or
                                         (ins_list[_k].m=='addiu' and ins_list[_k].rs==29 and ins_list[_k].rt==29)): _k+=1
             if _k<len(ins_list) and ins_list[_k].m=='jr' and ins_list[_k].rs==31:
-                if flags_to_caller(i, pend, pend_va, absorbed, out): pend=None
+                _n0=len(out); _p0=pend
+                if flags_to_caller(i, pend, pend_va, absorbed, out):
+                    pend=None
+                    if prete_dif is not None and _p0 is prete_dif[0] and len(out)>_n0:   # (v160, PRETE_CMP)
+                        _tx=' / '.join(e_[1] for e_ in out[_n0:])
+                        _prete_journal(prete_dif[2], ins.va, _prete_deplace(out,prete_dif,_n0,len(out),ins.va,_tg(),absorbed), 'BRA epilogue : '+_tx)
+                        prete_dif=None
             # BRANCHEMENT INCONDITIONNEL (BRA du 68K : retour de boucle, saut 'sinon', vers l'epilogue...) :
             # n'etait JAMAIS traduit (HANDOFF §63) ; on reproduit le flot du MIPS.
             out.append((ins.va,"BRA (cible %08x)"%(ins.va+4+ins.simm*4),[0x6000])); i+=1; continue
         if m in ('bne','beq') and pend and pend[0]=='btst':
             kind,bit,disp,an = pend
             out.append((ins.va,"BTST #$%x,$%04x(A%d)"%(bit,disp,an), enc_btst_an(bit,an,disp)))
+            if prete_dif is not None and pend is prete_dif[0]:          # (v160, PRETE_CMP)
+                _tx=out[-1][1]
+                _prete_journal(prete_dif[2], ins.va, _prete_deplace(out,prete_dif,len(out)-1,len(out),ins.va,_tg(),absorbed), 'Bcc(btst) : '+_tx)
+                prete_dif=None
             out.append((ins.va,"%s (cible %08x)"%(m.upper(),ins.va+4+ins.simm*4),
                         [BCC[m]]))
             pend=None; i+=1; continue
@@ -4001,6 +4153,12 @@ def translate(buf, start, end, verbose=False):
                         ws,name=enc_op_dn_mem(op,size,dn,an,disp)
                         out.append((ins.va,"%s.%s D%d,$%04x(A%d)"%(name,size,dn,disp,an),ws))
                         flags_set=('mem',an,disp,size); i+=1; continue
+                if src and src.kind=='memarith_nat' and size=='L':
+                    (msz,mdisp,man),op,dn = src.val
+                    if (man,mdisp)==(an,disp) and msz==size:
+                        ws,name=enc_op_dn_mem(op,size,dn,an,disp)
+                        out.append((ins.va,"%s.%s D%d,$%04x(A%d)  [long a moities echangees + SWAP(D%d) : ordre naturel]"%(name,size,dn,disp,an,dn),ws))
+                        MEMSWAPD_N.append(ins.va); flags_set=('mem',an,disp,size); i+=1; continue
                 if src and src.kind=='memadd':
                     (msz,mdisp,man),v = src.val
                     if (man,mdisp)==(an,disp) and msz==size and MEMMODE=='cps2' and size=='L':

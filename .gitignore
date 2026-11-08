@@ -33,3 +33,13 @@ tmp_hdd/
 # Configuration locale (chemins du poste)
 config.env
 sortie/
+
+# Outils communs : réglages et registre locaux (tools/bancs/README.md)
+tools/bancs/registre_emu/
+tools/bancs/banc_jour.conf
+tools/bancs/references.tsv
+# scripts dont le nom contient « dump » (motif *dump* ci-dessus) : ce sont des outils, pas des vidages
+!tools/banc-coups/lua/dump_objram.lua
+!tools/decors/sfa1-iso/dump_mame.py
+!tools/decors/sfa2-iso/dump_mame.py
+!tools/greffe-arcade/lua/e34_dump.lua

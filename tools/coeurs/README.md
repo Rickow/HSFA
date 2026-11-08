@@ -1,0 +1,19 @@
+# Lot des 12 cœurs FBNeo HSFA
+
+Chaîne de construction et de contrôle des cœurs livrés : Linux, Windows, Android, ROCKNIX, Recalbox armhf / aarch64,
+chacun en 4:3 (`hsfa`) et 16:9 (`hsfaws`), plus 2 cœurs x86 de contrôle. Ce sont les drapeaux des lots du 05/11 au 09/11.
+Chaîne de patchs : [`patches/fbneo/README.md`](../../patches/fbneo/README.md) ; livraisons : `docs/guide/LIVRAISONS.md`.
+
+| fichier | rôle |
+|---|---|
+| `construire_tout.sh` | les 14 cœurs, en 3 chaînes parallèles (`nice -n 19`) |
+| `build_std.sh linux\|windows\|android\|x86arm` | Linux (`make platform=unix`), Windows (`tools/windows/build_win.sh`), Android (`tools/android/build_android.sh`, `NDK`), x86 aux drapeaux ARM |
+| `build_arm.sh recalbox-armhf\|recalbox-aarch64\|rocknix hsfa\|hsfaws <sortie>` | ARM croisés : `-O3`, `HSFA_NO_FLOAT_STORE=1` (patch 0021c), LTO en une partition, glibc ≤ 2.27 pour Recalbox. Ces drapeaux ont été validés sur Pi 3. Plus récent que `tools/recalbox/build.sh` et `tools/rocknix/build.sh`, gardés comme références de la v0.1. |
+| `controle.sh <cœurs> <lot de référence>` | contrôles statiques : architecture, attributs ARM, GLIBC max, NEEDED / DLL, exports `retro_*`, version GIT, options, octet par défaut du Dip A (`dipdef.py`), taille ; chaînes personnelles (`HSFA_MOTIFS_PERSO`) |
+
+```sh
+export LOT=<dossier du lot>        # arbres fbneo, fbneo_win, fbneo_and, fbneo_r32, fbneo_r64, fbneo_rk, fbneo_x86 (patchés)
+tools/coeurs/construire_tout.sh    # -> $LOT/sortie/{linux,windows,android,rocknix,recalbox/armhf,recalbox/aarch64,x86}
+HSFA_MOTIFS_PERSO='<vos motifs>' tools/coeurs/controle.sh $LOT/sortie <lot précédent>
+```
+Licence des cœurs : `patches/fbneo/LICENSE-FBNeo.txt`, à joindre à toute archive.

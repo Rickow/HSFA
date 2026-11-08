@@ -4,8 +4,9 @@ rem Street Fighter Alpha Anthology (PS2, USA, SLUS-21317). Windows.
 rem Builds SFA3, Upper and Hyper for the FinalBurn Neo HSFA core from YOUR Anthology ISO.
 rem   construire.bat              demande le chemin de l'ISO / asks for the ISO path
 rem   construire.bat ISO [SORTIE] (glisser l'ISO sur ce fichier marche aussi / drag the ISO onto this file)
-rem Il faut Python 3.8+ (python.org, case "Add python.exe to PATH"). Musique en ADX sous Windows, sauf si ffmpeg
-rem (libvorbis), gcc et g++ sont dans le PATH (alors Ogg Vorbis, archives plus petites).
+rem Il faut Python 3.8+ (python.org, case "Add python.exe to PATH"). Musique en ADX sous Windows, sauf si gcc et g++
+rem (MinGW-w64) sont dans le PATH (alors Ogg Vorbis, archives plus petites). Plus simple, sans rien installer :
+rem le constructeur tout-en-un hsfa-constructeur.exe, joint aux releases.
 setlocal enableextensions
 set "ICI=%~dp0"
 set "ISO=%~1"
@@ -28,8 +29,11 @@ if not exist "%ICI%.venv\Scripts\python.exe" (
 "%ICI%.venv\Scripts\python.exe" -m pip install -q --disable-pip-version-check -r "%ICI%requirements.txt" || goto :fin
 
 set "FORMAT=ogg"
-for %%o in (ffmpeg gcc g++) do (where %%o >nul 2>nul || set "FORMAT=adx")
-if "%FORMAT%"=="ogg" (ffmpeg -hide_banner -encoders 2>nul | findstr /c:"libvorbis" >nul || set "FORMAT=adx")
+for %%o in (gcc g++) do (where %%o >nul 2>nul || set "FORMAT=adx")
+if "%FORMAT%"=="ogg" if not exist "%ICI%.venv\hsfa_oggenc.exe" (
+  "%ICI%.venv\Scripts\python.exe" "%ICI%tools\flux\oggenc\construit_oggenc.py" --sources "%ICI%.venv\sources_oggenc" --telecharge --cc gcc --sortie "%ICI%.venv\hsfa_oggenc.exe" >nul || set "FORMAT=adx"
+)
+if "%FORMAT%"=="ogg" set "HSFA_OGGENC=%ICI%.venv\hsfa_oggenc.exe"
 if "%FORMAT%"=="adx" echo Musique en ADX (archives d'Upper et d'Hyper plus grosses) / Music kept as ADX.
 
 echo Construction, quelques minutes / Building, a few minutes...

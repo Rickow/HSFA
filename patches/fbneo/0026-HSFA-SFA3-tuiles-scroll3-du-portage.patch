@@ -1,0 +1,71 @@
+From 42a9b8fe0f0ae1b1a6c1f694508b0074a5097cc9 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Sat, 7 Nov 2026 18:30:00 +0100
+Subject: [PATCH] HSFA: SFA3 scroll3 32x32 port tiles in the extended graphics
+ ROM (codes $C000-$FFFF)
+
+Two scroll3 tiles redrawn by the PS2 port have no exact match in the arcade
+ROM (QSound screen: end of the AUDIO 'O' without the TM sign; one tile of
+Karin's attract intro). Their f312 entry stayed empty and the driver fell
+back to 'local index + $0B00', i.e. an unrelated tile (text over the
+QSound logo, a grey square in the intro).
+
+The build now stores them as-is in hsfa_gfx.bin and the f312 table points
+to code $C000 | j (j = $3F98+). In mode 1 (SFA3) with hsfa_gfx.bin loaded,
+a scroll3 code with bits 14-15 set reads its tile at $2000000 + j * $200.
+Without hsfa_gfx.bin, without this patch, or in MAME, the code is read on
+14 bits: tiles $3F98-$3FFF of the arcade ROM and of the ROM rebuilt from
+the ISO are transparent (nothing shown instead of a wrong tile).
+---
+ src/burn/drv/capcom/cps.h       | 6 ++++++
+ src/burn/drv/capcom/cps_scr.cpp | 3 +++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index 33208f0..6a89d87 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -541,6 +541,12 @@ extern INT32 HsfaMode;
+ extern INT32 HsfaHyper;
+ extern UINT32 nCpsGfxLenMin;
+ extern INT32 bHsfaGfx20;							// (patch 0025) codes d'objets sur 20 bits (bits 18-19 = bits 10-11 de X)
++// (patch 0026) SFA3 (mode 1) avec hsfa_gfx.bin : code de scroll3 a bits 14-15 = 11 -> tuile 32x32 du portage rangee
++// telle quelle en ROM etendue, a $2000000 + (code & $3FFF) * $200 (tuiles absentes de la ROM d'arcade, table f312 de
++// hsfa_tab.bin). Sans hsfa_gfx.bin, ou sans ce patch : code sur 14 bits, comme MAME (les tables visent alors des
++// tuiles TRANSPARENTES de la ROM, $3F98-$3FFF).
++#define HSFA_S3_EXT(r)		(HsfaMode == 1 && bHsfaGfx20 && (((r) & 0xC000) == 0xC000))
++#define HSFA_S3_ADR(r)		(0x2000000 + (((UINT32)(r) & 0x3FFF) << 9))
+ INT32 HsfaInit();
+ INT32 HsfaExit();
+ void HsfaFrameDone();
+diff --git a/src/burn/drv/capcom/cps_scr.cpp b/src/burn/drv/capcom/cps_scr.cpp
+index b52b478..c96dd12 100644
+--- a/src/burn/drv/capcom/cps_scr.cpp
++++ b/src/burn/drv/capcom/cps_scr.cpp
+@@ -83,6 +83,7 @@ INT32 Cps1Scr1Draw(UINT8 *Base,INT32 sx,INT32 sy)
+ #define WS_MAXT 72
+ static inline UINT32 WsScr3Tuile(INT32 t)
+ {
++	if (HSFA_S3_EXT(t)) return HSFA_S3_ADR(t);			// (patch 0026) tuile 32x32 du portage en ROM etendue
+ 	if (HsfaMode) t &= 0x3fff;
+ 	if (Xmcota && t >= 0x5800) t -= 0x4000;
+ 	else if (Ssf2t && t < 0x5600) t += 0x4000;
+@@ -328,6 +329,7 @@ INT32 Cps2Scr3Draw(UINT8 *Base, INT32 sx, INT32 sy)
+ 			pst = (UINT16 *)(Base + p);
+ 
+ 			t = BURN_ENDIAN_SWAP_INT16(pst[0]);
++			const INT32 r = t;								// (patch 0026) code brut (bits 14-15)
+ 
+ 			if (HsfaMode) t &= 0x3fff;						// HSFA : comme MAME (code de scroll3 sur 14 bits)
+ 			if(Xmcota && t>=0x5800)      t-=0x4000;
+@@ -335,6 +337,7 @@ INT32 Cps2Scr3Draw(UINT8 *Base, INT32 sx, INT32 sy)
+ 			t <<= 9;										// Get real tile address
+ 			if (Cps2Turbo) t &= ~nCpsGfxScroll[3];			// buggy hack
+  			t += nCpsGfxScroll[3];							// add on offset to scroll tiles
++			if (HSFA_S3_EXT(r)) t = HSFA_S3_ADR(r);		// (patch 0026) tuile 32x32 du portage en ROM etendue
+ 
+ 			if (t != nKnowBlank) {							// Draw tile
+ 				a = BURN_ENDIAN_SWAP_INT16(pst[1]);
+-- 
+2.53.0
+

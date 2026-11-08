@@ -1,0 +1,8 @@
+# banc_jour.conf — versions FIGÉES passées au banc de jour (banc_jour.sh). Mettre à jour à chaque version figée / lot validé.
+VERSION=v159_banc                 # SFA3 / Upper / Hyper : work/references/<VERSION>/{ro3,ro5,ro9}
+GREFFE=auto                  # auto = greffe_arcade/constructions/ro9a<N>_fige le plus récent (avec MD5SUMS) ; sinon ro9a21…
+GREFFE_TABLE=<workspace>/work/greffe_arcade/e41/tab_f61.txt   # durées du banc 61 (ro9a31, v159, sans touche pendant la carte)
+MAX_VALIDE=max53             # dernier lot Upper MAX VALIDÉ (copie figée work/banc_coups/<nom>) : 2b27 = max45
+PLACES_BANC=5                # parties en parallèle au plus (en plus, lance_emu limite toute la machine)
+BUDGET_H=8                   # aucune partie ne démarre si elle finirait après ce délai
+ETAPES="sfa3_cmd sfa3_fins upper_fins hyper_vs greffe_fins max_arcade max_croises max_fins"

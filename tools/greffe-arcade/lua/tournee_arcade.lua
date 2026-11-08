@@ -117,12 +117,13 @@ local function selectionne(s)
     local d = chemin(x, y, s.base, 0)
     if d then appui(d) else
       if s.ex then on(":IN2", "1 Player Start") end
-      if k % 16 >= 8 and k % 16 < 11 then on(":IN0", "P1 Button 1") end
+      if k % 16 >= 8 and k % 16 < 11 then on(":IN0", "P1 Button " .. (os.getenv("BOUTON_SEL") or "1")) end   -- (e34) BOUTON_SEL : bouton de validation (couleur)
     end
   elseif et == 2 then
     local c = colonne(s) or 0
+    if s.ex and os.getenv("EX_COL") == "1" then on(":IN2", "1 Player Start") end   -- (e31) Start tenu aussi sur la colonne (grille secrete d'Hyper 0x5C5420)
     if u8(P + 0x5C) ~= c then appui("Down") else
-      if k % 16 >= 8 and k % 16 < 11 then on(":IN0", "P1 Button 1") end
+      if k % 16 >= 8 and k % 16 < 11 then on(":IN0", "P1 Button " .. (os.getenv("BOUTON_SEL") or "1")) end
     end
   elseif et == 6 then
     if u8(P + 0x5C) == s.mode then appui("Button 1") else appui("Down") end
@@ -200,8 +201,14 @@ emu.register_frame_done(function()
        and not (os.getenv("SCENEA_PASSIF") == "1" and p4 == 0xA)
        and not (PERDRE and combats > 0) then   -- (etape 6) PERDRE : aucune touche apres le 1er combat (sinon Start abrege la defaite, comme un 2e joueur)
       -- (31/10) HIST_PASSIF=1 : pas de Start pendant l'histoire (scene 4/2) : Start l'abrege (Upper 0x24B670)
-      if k % 30 < 3 and not (os.getenv("HIST_PASSIF") == "1" and p4 == 4 and p8 == 2) then on(":IN2", "1 Player Start") end
-      if k % 30 >= 15 and k % 30 < 18 then on(":IN0", "P1 Button 1") end
+      -- (e30) VICT_PASSIF=1 : aucune touche pendant l'ecran de victoire (citation, scene 4/8) : Start l'abrege
+      local vp_ = os.getenv("VICT_PASSIF") == "1" and p4 == 4 and p8 == 8
+      -- (e38) CARTE_PASSIF=1 : aucune touche pendant la carte du monde (4/2, A5+C = 2) : depuis CARTE_GREFFE la carte est
+      -- abregeable comme dans Upper, et l'abreger change certaines fins (Cammy, Sakura : Upper fait pareil) ; l'oracle
+      -- Upper (tournee_greffe) n'appuie jamais pendant la carte
+      vp_ = vp_ or (os.getenv("CARTE_PASSIF") == "1" and p4 == 4 and p8 == 2 and mem:read_u16(0xFF800C) == 2)
+      if k % 30 < 3 and not vp_ and not (os.getenv("HIST_PASSIF") == "1" and p4 == 4 and p8 == 2) then on(":IN2", "1 Player Start") end
+      if k % 30 >= 15 and k % 30 < 18 and not vp_ then on(":IN0", "P1 Button 1") end
     end
   end
   -- journal

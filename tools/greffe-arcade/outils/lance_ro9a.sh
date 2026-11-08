@@ -1,5 +1,6 @@
 #!/bin/bash
 # Partie Arcade dans Hyper augmente (fork sfa3hx). Usage : lance_ro9a.sh CONSTRUCTION TRACE "VARS..." NF [script.lua]
+# (e31, reprise) + MAME_EXTRA (ex. "-debug -debugger none" pour lua/trace_e28.lua) ; vide = inchangé
 # CONSTRUCTION = dossier constructions/<nom> (ROM dans b9/roms_ro9/sfa3ud, blocs ext dans b9/) ; graphismes d'Hyper
 # (work/mame_ro9 : hsfa_gfx.bin, hsfa_plans.bin, banques_hx) en lecture seule. nvram/cfg propres a la trace.
 H=${HSFA_WORKSPACE}; W9=$H/work/mame_ro9; G=$H/work/greffe_arcade
@@ -12,7 +13,9 @@ md5sum $C/b9/roms_ro9/sfa3ud/sz3ud.03c > $D/md5_rom.txt
 cd $H/work/mame
 env $vars NF=$nf OUT=$D/journal.txt BANC_COMMUN=${BANC_COMMUN:-545} BANC_COMMUN_UPPER=${BANC_COMMUN_UPPER-351} HSFA_PLANS=300,340,3a0 HSFA_GFX=$W9/hsfa_gfx.bin,$W9/hsfa_plans.bin@3000000$( [ "${PLANS_UPPER:-1}" = 1 ] && echo ",$H/work/mame_ro5/hsfa_plans.bin@4000000") \
   BANC_BANQUES=$( [ -d $C/banques_hx ] && echo $C/banques_hx/ || echo $W9/banques_hx/ ) BANC_PTR_ANIM=FF40BC BANC_DIR=$C/b9/ \
+  ATTENDU_REF=${ATTENDU_REF:-$C} HSFA_AGENT=${HSFA_AGENT:-greffe_arcade} $H/work/outils/lance_emu --empreinte $D/empreinte.txt -- \
   timeout ${TMAX:-1800} nice -n 19 $H/mame-fork/mame/cps2f sfa3hx -rompath $C/roms_fork -video none -sound none -nothrottle \
   -skip_gameinfo -nvram_directory $D/nv -cfg_directory $D/cfg -snapshot_directory $D/snap \
-  -autoboot_script $LUA > $D/mame.log 2>&1
+  $MAME_EXTRA -autoboot_script $LUA > $D/mame.log 2>&1
+c=$?; [ $c = 86 ] && { echo "$nom : ARRÊT, empreinte différente ($D/empreinte.txt)" >&2; exit 86; }   # (outillage, 01/11)
 echo "$nom termine : $(tail -1 $D/journal.txt)"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """fige.py -- matérialise la copie figée de l'intégration MAX (integration_2b31/ : état du lot 2b31 = banc_max52,
-traducteur v154 + crochets MAX) dans un dossier de travail, en remplaçant les marques de chemins @UM_xxx@.
+traducteur v154 + crochets MAX, + PRETE_TEST / MEMSWAPD de la v159, + PRETE_CMP de la v160) dans un dossier de travail, en remplaçant les marques de chemins @UM_xxx@.
 Une marque non donnée devient /chemin/atelier/absent/<marque> : une fuite vers l'atelier échoue au lieu de lire
 silencieusement un fichier du poste de développement."""
 import os, re, shutil

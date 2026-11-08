@@ -6,8 +6,10 @@
 #   ./construire.sh                     demande le chemin de l'ISO / asks for the ISO path
 #   ./construire.sh ISO [SORTIE]        sortie par defaut / default output : ./sortie
 #
-# Il faut Python 3.8+. Facultatif : ffmpeg (avec libvorbis), gcc et g++ pour la musique en Ogg Vorbis
-# (archives plus petites) ; sinon la musique reste en ADX. / Needs Python 3.8+; ffmpeg + gcc + g++ optional (Ogg music).
+# Il faut Python 3.8+. Facultatif : gcc et g++ pour la musique en Ogg Vorbis (archives plus petites ; l'encodeur
+# tools/flux/oggenc est compile une fois, depuis les sources officielles de libvorbis) ; sinon la musique reste en ADX.
+# Sans rien installer : le constructeur tout-en-un (tools/constructeur, joint aux releases).
+# Needs Python 3.8+; gcc + g++ optional (Ogg music). Nothing to install: the all-in-one builder (releases).
 set -e
 ICI=$(cd "$(dirname "$0")" && pwd)
 
@@ -33,11 +35,18 @@ fi
 "$ICI/.venv/bin/python" -m pip install -q --disable-pip-version-check -r "$ICI/requirements.txt"
 
 FORMAT=ogg
-for outil in ffmpeg gcc g++; do command -v "$outil" >/dev/null 2>&1 || FORMAT=adx; done
-if [ "$FORMAT" = ogg ] && ! ffmpeg -hide_banner -encoders 2>/dev/null | grep -q libvorbis; then FORMAT=adx; fi
+for outil in gcc g++; do command -v "$outil" >/dev/null 2>&1 || FORMAT=adx; done
+# encodeur Ogg portable (memes octets sur tout systeme) : sources officielles verifiees, compile une fois
+if [ "$FORMAT" = ogg ]; then
+  OGGENC="$ICI/.venv/hsfa_oggenc"
+  if [ ! -x "$OGGENC" ] && ! CC=gcc "$ICI/.venv/bin/python" "$ICI/tools/flux/oggenc/construit_oggenc.py"        --sources "$ICI/.venv/sources_oggenc" --telecharge --cc gcc --liaison "" --sortie "$OGGENC" >/dev/null; then
+    FORMAT=adx
+  fi
+  export HSFA_OGGENC="$OGGENC"
+fi
 if [ "$FORMAT" = adx ]; then
-  echo "ffmpeg (libvorbis), gcc ou g++ absent : musique en ADX (archives d'Upper et d'Hyper plus grosses)."
-  echo "ffmpeg (libvorbis), gcc or g++ missing: music kept as ADX (bigger Upper and Hyper archives)."
+  echo "gcc / g++ absent, ou encodeur Ogg non construit : musique en ADX (archives d'Upper et d'Hyper plus grosses)."
+  echo "gcc / g++ missing, or Ogg encoder not built: music kept as ADX (bigger Upper and Hyper archives)."
 fi
 
 echo "Construction (quelques minutes) / Building (a few minutes)..."

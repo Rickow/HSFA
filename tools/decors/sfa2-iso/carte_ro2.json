@@ -1,0 +1,366 @@
+{
+ "types_s1": {
+  "arcade": "$01CFC4",
+  "espace": "donnees",
+  "taille": 40,
+  "ref": null,
+  "ro2": [
+   "w 0x5620C0"
+  ],
+  "ro4": [
+   "w 0x6C0B40"
+  ],
+  "ro6": [
+   "w 0x6B74A0"
+  ],
+  "ro8": [
+   "w 0x67F9B0"
+  ]
+ },
+ "ofs_s1": {
+  "arcade": "$01CFF4",
+  "espace": "donnees",
+  "taille": 40,
+  "ref": null,
+  "ro2": [
+   "w 0x5620F0"
+  ],
+  "ro4": [
+   "w 0x6C0B70"
+  ],
+  "ro6": [
+   "w 0x6B74D0"
+  ],
+  "ro8": [
+   "w 0x67F9E0"
+  ]
+ },
+ "listes_s1": {
+  "arcade": "$01D01C",
+  "espace": "donnees",
+  "taille": 164,
+  "ref": "zone des listes des 20 d\u00e9cors",
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ },
+ "types_s2": {
+  "arcade": "$01D0BC",
+  "espace": "donnees",
+  "taille": 40,
+  "ref": null,
+  "ro2": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ],
+  "ro4": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ],
+  "ro6": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ],
+  "ro8": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ]
+ },
+ "ofs_s2": {
+  "arcade": "$01D0EC",
+  "espace": "donnees",
+  "taille": 40,
+  "ref": null,
+  "ro2": [
+   "w 0x5621E8"
+  ],
+  "ro4": [
+   "w 0x6C0C68"
+  ],
+  "ro6": [
+   "w 0x6B75C8"
+  ],
+  "ro8": [
+   "w 0x67FAD8"
+  ]
+ },
+ "listes_s2": {
+  "arcade": "$01D114",
+  "espace": "donnees",
+  "taille": 352,
+  "ref": "zone des listes des 20 d\u00e9cors",
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ },
+ "types_s3": {
+  "arcade": "$01D274",
+  "espace": "donnees",
+  "taille": 40,
+  "ref": null,
+  "ro2": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ],
+  "ro4": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ],
+  "ro6": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ],
+  "ro8": [
+   "w 0x1F002E",
+   "w 0x1F0030",
+   "w 0x1F0032",
+   "w 0x1F0034",
+   "+46"
+  ]
+ },
+ "ofs_s3": {
+  "arcade": "$01D2A4",
+  "espace": "donnees",
+  "taille": 40,
+  "ref": null,
+  "ro2": [
+   "w 0x5623A0"
+  ],
+  "ro4": [
+   "w 0x6C0E20"
+  ],
+  "ro6": [
+   "w 0x6B7780"
+  ],
+  "ro8": [
+   "w 0x67FC90"
+  ]
+ },
+ "listes_s3": {
+  "arcade": "$01D2CC",
+  "espace": "donnees",
+  "taille": 1280,
+  "ref": "zone des listes des 20 d\u00e9cors",
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ },
+ "bib_s1": {
+  "arcade": "$2AD300",
+  "espace": "donnees",
+  "taille": 12288,
+  "ref": "blocs scroll1 : 64 mots (n\u00b0 de cellule), colonne d'abord",
+  "ro2": [
+   "w 0x4E1220"
+  ],
+  "ro4": [
+   "w 0x621450"
+  ],
+  "ro6": [
+   "w 0x615810"
+  ],
+  "ro8": [
+   "w 0x5DCD00"
+  ]
+ },
+ "cel_s1": {
+  "arcade": "$2B1A80",
+  "espace": "donnees",
+  "taille": 65536,
+  "ref": "cellules scroll1 : 16 longs (code<<16|attr) ; contr\u00f4le partiel (codes)",
+  "ro2": [
+   "l 0x4E59A0"
+  ],
+  "ro4": [
+   "l 0x625BD0"
+  ],
+  "ro6": [
+   "l 0x619F90"
+  ],
+  "ro8": [
+   "l 0x5E1480"
+  ]
+ },
+ "bib_s2": {
+  "arcade": "$2D1F00",
+  "espace": "donnees",
+  "taille": 59392,
+  "ref": "blocs scroll2 0-57 identiques ; 58+ renum\u00e9rot\u00e9s par le portage",
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ },
+ "bib_s3": {
+  "arcade": "$2F8700",
+  "espace": "donnees",
+  "taille": 40960,
+  "ref": "blocs scroll3 : 64 longs",
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ },
+ "pal_spr": {
+  "arcade": "$275C40",
+  "espace": "donnees",
+  "taille": 4480,
+  "ref": "palettes des sprites de d\u00e9cor : 7 \u00d7 32 o par d\u00e9cor",
+  "ro2": [
+   "w 0x53CF40"
+  ],
+  "ro4": [
+   "w 0x6810F0"
+  ],
+  "ro6": [
+   "w 0x677490"
+  ],
+  "ro8": [
+   "w 0x639B60"
+  ]
+ },
+ "pal_s1": {
+  "arcade": "$27C1C0",
+  "espace": "donnees",
+  "taille": 20480,
+  "ref": null,
+  "ro2": [
+   "w 0x5434C0"
+  ],
+  "ro4": [
+   "w 0x687670"
+  ],
+  "ro6": [
+   "w 0x67DA10"
+  ],
+  "ro8": [
+   "w 0x6400E0"
+  ]
+ },
+ "pal_s2": {
+  "arcade": "$2865C0",
+  "espace": "donnees",
+  "taille": 20480,
+  "ref": null,
+  "ro2": [
+   "w 0x54D8C0"
+  ],
+  "ro4": [
+   "w 0x691A70"
+  ],
+  "ro6": [
+   "w 0x687E10"
+  ],
+  "ro8": [
+   "w 0x64A4E0"
+  ]
+ },
+ "pal_s3": {
+  "arcade": "$2909C0",
+  "espace": "donnees",
+  "taille": 20480,
+  "ref": null,
+  "ro2": [
+   "w 0x557CC0"
+  ],
+  "ro4": [
+   "w 0x69BE70"
+  ],
+  "ro6": [
+   "w 0x692610"
+  ],
+  "ro8": [
+   "w 0x6548E0"
+  ]
+ },
+ "cpsb": {
+  "arcade": "$01C34A",
+  "espace": "opcodes",
+  "taille": 80,
+  "ref": "contr\u00f4le CPS-B (2 mots / d\u00e9cor)",
+  "ro2": [
+   "w 0x4CBFB0"
+  ],
+  "ro4": [
+   "w 0x4FA930"
+  ],
+  "ro6": [
+   "w 0x4E7730"
+  ],
+  "ro8": [
+   "w 0x4E7CD0"
+  ]
+ },
+ "musique": {
+  "arcade": "$0154EE",
+  "espace": "opcodes",
+  "taille": 40,
+  "ref": null,
+  "ro2": [
+   "w 0x4CC870"
+  ],
+  "ro4": [
+   "w 0x4FE0E0"
+  ],
+  "ro6": [
+   "w 0x4EB6E0"
+  ],
+  "ro8": [
+   "w 0x4ECD30"
+  ]
+ },
+ "perso_decor": {
+  "arcade": "$007A7A",
+  "espace": "opcodes",
+  "taille": 32,
+  "ref": null,
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ },
+ "ofs_objets": {
+  "arcade": "$01EB66",
+  "espace": "opcodes",
+  "taille": 40,
+  "ref": null,
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ },
+ "objets": {
+  "arcade": "$01EC80",
+  "espace": "donnees",
+  "taille": 2536,
+  "ref": "enregistrements de 16 o des objets de d\u00e9cor (20 d\u00e9cors)",
+  "ro2": [],
+  "ro4": [],
+  "ro6": [],
+  "ro8": []
+ }
+}

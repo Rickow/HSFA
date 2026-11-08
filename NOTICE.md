@@ -9,6 +9,8 @@ HSFA mixes code of its own with modifications to two emulators. Each part keeps 
 | FBNeo HSFA libretro cores (4:3 `fbneo_hsfa`, 16:9 `fbneo_hsfaws`) | patches in `patches/fbneo/`; binaries attached to releases | **FinalBurn Neo licence**, full text verbatim in [patches/fbneo/LICENSE-FBNeo.txt](patches/fbneo/LICENSE-FBNeo.txt) |
 | stb_vorbis 1.22 (Ogg Vorbis decoder, patch `0004`) | `src/dep/libs/stb_vorbis/` once patched; copy in `tools/flux/stb_vorbis.c` | **public domain or MIT**, your choice (Sean Barrett), see below |
 | 2nd QSound HLE (`hsfa_qsound.h`, patch `0001`) | `src/burn/drv/capcom/hsfa_qsound.h` once patched | **BSD-3-Clause**: derived from the DL-1425 HLE of `qs_c.cpp` (superctr, Valley Bell), see below |
+| Portable Ogg Vorbis encoder `hsfa_oggenc` | `tools/flux/oggenc/` (HSFA code, MIT); at build time it compiles libvorbis 1.3.7 / libogg 1.3.6 and 15 math files of musl 1.1.21, downloaded from their official sites (not in the repository) | HSFA code: **MIT**; libvorbis, libogg: **BSD-3-Clause** (Xiph.Org); musl: **MIT** (fdlibm files: Sun Microsystems notice, kept in each file) |
+| All-in-one builder executables | built by `.github/workflows/constructeur.yml` from `tools/constructeur/`; attached to releases | each component under its own licence, listed in [tools/constructeur/TIERS.md](tools/constructeur/TIERS.md) (Python, NumPy, PyInstaller, libchdr, libvorbis, libogg, musl, stb_vorbis…); no GPL or LGPL code linked into HSFA's tools |
 | Z80 emulator `z80.h` (Ivan Kosarev), test bench of the music board only | `tools/son-hyper/tests/z80.h` | **MIT**, text in `tools/son-hyper/tests/z80.LICENSE` |
 | MAME fork of the bench (game `sfa3hx`) | patches in `patches/mame-fork/` | **MAME licence**: GPL-2.0-or-later for MAME as a whole; each modified file keeps its own SPDX header (often BSD-3-Clause) |
 
@@ -120,5 +122,8 @@ the copy of *Street Fighter Alpha Anthology* you own, and what they produce stay
   jointe à chaque archive de cœur. Pas de vente, pas de dons ; les sources des modifications sont les patchs de
   `patches/fbneo/`.
 - stb_vorbis : domaine public ou MIT. QSound HLE (`hsfa_qsound.h`) : BSD-3-Clause (superctr, Valley Bell).
+- Encodeur Ogg `tools/flux/oggenc/` : code HSFA (MIT) ; compile libvorbis / libogg (BSD-3, Xiph.Org) et des
+  fonctions de musl (MIT), téléchargées depuis leurs sites officiels. Constructeur tout-en-un : chaque composant sous
+  sa licence, liste dans `tools/constructeur/TIERS.md`.
 - Fork MAME (`patches/mame-fork/`) : licence de MAME (GPL-2.0 ou ultérieure pour l'ensemble).
 - Aucune donnée de jeu.

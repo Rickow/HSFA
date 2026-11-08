@@ -15,7 +15,7 @@
 2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes). Le plus simple : télécharger
    `hsfa-v0.1.6-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
    double-cliquer sur **`construire.bat`** (Windows, expérimental : pas encore testé) et lui donner votre ISO. Il prépare
-   Python, regarde si ffmpeg est là et construit les trois jeux dans `sortie/archives/`. À la main :
+   Python, compile l'encodeur Ogg si `gcc` est là et construit les trois jeux dans `sortie/archives/`. À la main :
    ```bash
    pip install -r requirements.txt
    python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" --sortie hsfa_sortie
@@ -23,8 +23,10 @@
    On obtient `hsfa_sortie/archives/sfa3hsfa.zip` (SFA3), `sfa3uhsfa.zip` (Upper) et `sfa3hhsfa.zip` (Hyper).
    - L'ISO doit être l'USA (`SLUS-21317`), en image `.iso` (2 048 octets par secteur) ; la variante « All Unlocked »
      convient aussi. Un `.chd` se convertit d'abord (`chdman extractdvd`).
-   - La musique est rangée en Ogg Vorbis : il faut `ffmpeg` (libvorbis), `gcc` et `g++`. Sans eux, ajouter
-     `--flux-format adx` (zip d'Hyper plus gros).
+   - La musique est rangée en Ogg Vorbis : il faut `gcc` et `g++`. L'encodeur (`tools/flux/oggenc`) se compile une
+     fois depuis les sources officielles de libvorbis : `python3 tools/flux/oggenc/construit_oggenc.py --sources DIR
+     --telecharge`, puis `HSFA_OGGENC_SOURCES=DIR`. Il donne les mêmes octets sur tous les systèmes. Sans `gcc` /
+     `g++`, ajouter `--flux-format adx` (zip d'Hyper plus gros).
    - `--arcade sfa3.zip` (facultatif) prend la ROM graphique de SFA3 dans votre jeu d'arcade au lieu de la
      reconstruire depuis l'ISO ; les zips sont alors identiques à ceux de la construction de référence du projet. Détails :
      [docs/guide/construction-iso.md](docs/guide/construction-iso.md).

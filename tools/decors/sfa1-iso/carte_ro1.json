@@ -1,0 +1,254 @@
+{
+ "types_s2": {
+  "arcade": "$01B2AE",
+  "source": "donnees",
+  "taille": 26,
+  "exec": "0x1F002E",
+  "rangement": "b",
+  "occurrences": 47190,
+  "ref": null
+ },
+ "types_s3": {
+  "arcade": "$01B37A",
+  "source": "donnees",
+  "taille": 26,
+  "exec": "0x1F002E",
+  "rangement": "b",
+  "occurrences": 47190,
+  "ref": null
+ },
+ "ofs_listes_s2": {
+  "arcade": "$01B2CE",
+  "source": "donnees",
+  "taille": 26,
+  "exec": "0x4B4C30",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "ofs_listes_s3": {
+  "arcade": "$01B39A",
+  "source": "donnees",
+  "taille": 26,
+  "exec": "0x4B4CFC",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "listes_s2": {
+  "arcade": "$01B2EA",
+  "source": "donnees",
+  "taille": 144,
+  "exec": "0x4B4C4C",
+  "rangement": "b",
+  "occurrences": 1,
+  "ref": "zone [1B2EA,1B37A) : listes des 13 decors"
+ },
+ "listes_s3": {
+  "arcade": "$01B3B6",
+  "source": "donnees",
+  "taille": 512,
+  "exec": null,
+  "rangement": null,
+  "occurrences": 0,
+  "ref": "zone [1B3B6,1B5B6) : listes des 13 decors"
+ },
+ "bib_s2": {
+  "arcade": "$1CDB60",
+  "source": "donnees",
+  "taille": 46080,
+  "exec": "0x47A8D0",
+  "rangement": "l",
+  "occurrences": 1,
+  "ref": null
+ },
+ "bib_s3_a": {
+  "arcade": "$1E2B60",
+  "source": "donnees",
+  "taille": 5888,
+  "exec": "0x48F8D0",
+  "rangement": "l",
+  "occurrences": 1,
+  "ref": null
+ },
+ "bib_s3_b": {
+  "arcade": "$1E7760",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4944D0",
+  "rangement": "l",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_s2": {
+  "arcade": "$1F20A0",
+  "source": "donnees",
+  "taille": 13312,
+  "exec": "0x4A0A10",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_s3": {
+  "arcade": "$1F94A0",
+  "source": "donnees",
+  "taille": 13312,
+  "exec": "0x4A7E10",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj24": {
+  "arcade": "$1E97A0",
+  "source": "donnees",
+  "taille": 3328,
+  "exec": "0x498110",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_00": {
+  "arcade": "$1E7960",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4948D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_01": {
+  "arcade": "$1E7B60",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x494CD0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_02": {
+  "arcade": "$1E7D60",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4950D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_03": {
+  "arcade": "$1E7F60",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4954D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_04": {
+  "arcade": "$1E8160",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4958D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_05": {
+  "arcade": "$1E8360",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x495CD0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_06": {
+  "arcade": "$1E8560",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4960D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_07": {
+  "arcade": "$1E8760",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4964D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_08": {
+  "arcade": "$1E8960",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4968D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_09": {
+  "arcade": "$1E8B60",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x496CD0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_10": {
+  "arcade": "$1E8D60",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4970D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_11": {
+  "arcade": "$1E8F60",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4974D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_obj0_12": {
+  "arcade": "$1E9160",
+  "source": "donnees",
+  "taille": 512,
+  "exec": "0x4978D0",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "pal_s1_hud": {
+  "arcade": "$1EE0A0",
+  "source": "donnees",
+  "taille": 32,
+  "exec": "0x3E4050",
+  "rangement": "w",
+  "occurrences": 2,
+  "ref": null
+ },
+ "ofs_objets": {
+  "arcade": "$01BCF8",
+  "source": "code",
+  "taille": 26,
+  "exec": "0x4AB210",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": null
+ },
+ "objets": {
+  "arcade": "$01BD12",
+  "source": "donnees",
+  "taille": 402,
+  "exec": "0x4AB22A",
+  "rangement": "w",
+  "occurrences": 1,
+  "ref": "zone des enregistrements de 16 o des 13 decors"
+ }
+}

@@ -9,8 +9,12 @@ Rapport complet : [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 du jour
 - Python 3.8+ et les modules de `requirements.txt` (`pip install -r requirements.txt`, de préférence dans un venv) ;
   numpy sert aux étapes graphiques (`gfx_*`). Ni MAME, ni assembleur externe : l'assembleur 68000 de la chaîne est en
   Python.
-- Pour la musique des archives d'Upper et d'Hyper en Ogg Vorbis (par défaut) : `ffmpeg` avec libvorbis, `gcc` et
-  `g++`. Sans eux : `--flux-format adx` (zip d'Hyper d'environ 740 Mo au lieu de 190) ou `--sans-flux`.
+- Pour la musique des archives d'Upper et d'Hyper en Ogg Vorbis (par défaut) : `gcc` et `g++`. L'encodeur
+  `hsfa_oggenc` (`tools/flux/oggenc/`, README) est compilé une fois, depuis les sources officielles de libvorbis,
+  libogg et musl (`construit_oggenc.py --sources DIR --telecharge`, puis `HSFA_OGGENC_SOURCES=DIR`, ou un binaire
+  tout fait par `HSFA_OGGENC`). Plus de ffmpeg depuis le 08/11 (§206). Sans `gcc` / `g++` : `--flux-format adx` (zip
+  d'Hyper d'environ 740 Mo au lieu de 190) ou `--sans-flux`. Sans rien installer : le constructeur tout-en-un
+  (`tools/constructeur/`, un exécutable par système joint aux releases), qui lit aussi les `.chd`.
 - L'ISO USA (`SLUS-21317`, 2 048 o/secteur). Les images `.chd`, `.bin` et `.cso` sont refusées : convertir d'abord en
   `.iso`. Un dossier qui contient `X_DATA.BIN` est aussi accepté.
 - Facultatif : `--arcade sfa3.zip` (ROM graphique d'arcade de SFA3) au lieu de la reconstruire depuis l'ISO.
@@ -59,12 +63,15 @@ Chaque étape est **idempotente** : elle est sautée si ses entrées, ses outils
 - `hsfa_sortie/EMPREINTES.txt` : md5 de toutes les ROM produites et du contenu des archives.
 - `hsfa_sortie/journal.txt` (marques `>>` étape, `ok`, `!!` anomalie) et `journaux/<étape>.log`.
 - Archives du cœur : `archives/sfa3hsfa.zip`, `sfa3uhsfa.zip`, `sfa3hhsfa.zip`. Elles sont déterministes : deux
-  constructions donnent les mêmes octets, Ogg compris (`ffmpeg -fflags +bitexact`, contrôle du 2026-10-27).
+  constructions donnent les mêmes octets, Ogg compris. Depuis le 08/11 (§206, `hsfa_oggenc`), c'est vrai d'un
+  système à l'autre (Linux, Windows, macOS, x86_64, ARM) : mêmes empreintes partout.
 
 Ce qui est garanti (rapport BUILD §0, §3, §5 ; contrôle du 2026-10-27 contre les zips officiels v151, refait le 2026-10-28 en v153 et le 2026-11-03 en v154
 (depuis l'ISO, sans table : Hyper `dda35430…`), ISO « All Unlocked », `--arcade`) :
 - les ROM programme sont **identiques (md5)** à celles des zips officiels : SFA3 `e0f1cfdc…`, Upper `0b8ecca2…`, Hyper
-  `b8e699cf…` (avec la table du rejeu) ;
+  `b8e699cf…` (avec la table du rejeu) ; depuis le traducteur v160 (2026-11-08, §207) : SFA3 `9b06c7cf…` (comme en
+  v159), Upper `3a9b7fd9…`, Hyper `0baed6af…` (avec la table ; sans : `e3806660…`) ; v159 (§203-§204) : Upper
+  `45fd0244…`, Hyper `8e4f9ef2…` / `1f06234d…` ;
 - avec `--arcade`, les archives aussi, membre à membre, hors `hsfa_info.txt` (journal de construction) et
   `hsfa_flux.bin` : ses flux Ogg ont le même audio, paquet Vorbis par paquet Vorbis, et seul leur en-tête de
   commentaires change (chaîne d'encodeur sans version depuis `+bitexact`) ;
@@ -79,9 +86,9 @@ Ce qui est garanti (rapport BUILD §0, §3, §5 ; contrôle du 2026-10-27 contre
   `ids_102.tsv` (versions), `correspondance.tsv` (code SFA3 → commande SFA1 / SFA2).
 - La **table du rejeu** (traces QSound des pilotes SFA1 / SFA2, 3,2 Mo) est une entrée à part : `--rejeu-table` ou
   `tools/son-hyper/rejeu/hsfa_rejeu_table.txt`. La construction y ajoute la section des cris par version. Avec elle,
-  le programme d'Hyper est celui de la v154 (`b8e699cf…`) et le zip contient `hsfa_rejeu.bin` (8 Mo, copiés depuis le
+  le programme d'Hyper est celui de la v160 (`0baed6af…` ; v159 : `8e4f9ef2…` ; v154-v158 : `b8e699cf…`) et le zip contient `hsfa_rejeu.bin` (8 Mo, copiés depuis le
   `X_DATA.BIN` de l'ISO, CRC contrôlés) et `hsfa_rejeu_table.txt`.
-- Sans table, Hyper garde les voix de SFA3 pour toutes ses versions (programme `dda35430…`) et le zip n'a pas de
+- Sans table, Hyper garde les voix de SFA3 pour toutes ses versions (programme `e3806660…` en v160, `1f06234d…` en v159, `dda35430…` en v154-v158) et le zip n'a pas de
   rejeu : sans table, les codes de rejeu n'auraient pas de son.
 
 ## 5. Upper MAX (persos de SFA3 MAX)

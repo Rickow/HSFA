@@ -551,7 +551,14 @@ def _jeu_sfa3(J):
     hx, gfx = os.path.join(J["dossier"], "banques_hx"), os.path.join(J["dossier"], "hsfa_gfx.bin")
     if not (os.path.isdir(os.path.join(WORK, hx)) and os.path.isfile(os.path.join(WORK, gfx))):
         print("  (pas de %s ni de %s : archive sans les tuiles du portage)" % (hx, gfx)); return J
-    return dict(J, banques=hx, gfx=[(gfx, 0x1FC6000)])
+    liste = [(gfx, 0x1FC6000)]
+    # (sfa3_qsound, patch FBNeo 0026) tuiles 32x32 de scroll3 du portage (hsfa_gfx.py : codes $C000 | j, j = $3F98+) en
+    # j * $200 = $7F3000+ ; SFA3_TUILES_S3=0 : hsfa_gfx.bin et tables de v158, a l'octet
+    s3 = os.path.join(J["dossier"], "hsfa_gfx_s3.bin")
+    if os.environ.get("SFA3_TUILES_S3", "1") != "0" and os.path.isfile(os.path.join(WORK, s3)):
+        assert os.path.getsize(os.path.join(WORK, s3)) <= (0x4000 - 0x3F98) * 0x200, "hsfa_gfx_s3.bin"
+        liste.append((s3, 0x3F98 * 0x200))
+    return dict(J, banques=hx, gfx=liste)
 
 def construit(cle):
     J = JEUX[cle]

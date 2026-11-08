@@ -28,6 +28,39 @@ if banques.MODULE == 'ro3':
 else:
     EXT_MAX = None
 VIDE = banques.VIDE
+# (sfa3_qsound, patch FBNeo 0026) SFA3 : tuiles 32x32 de SCROLL3 du portage sans correspondance exacte dans la ROM d'arcade
+# (redessinees : ex. ecran QSound, fin du « O » d'AUDIO sans le ™, local $858 ; intro, local $D4E). Sans tuile, la table
+# f312 restait VIDE et le pilote affichait le repli « local + $0B00 » = une tuile quelconque (texte « nt N / rous » sur le
+# logo QSound). Elles sont ajoutees TELLES QUELLES en ROM etendue : f312 = $4000 + ($C000 | j), j = $3F98, $3F99...
+# Code de scroll3 a bits 14-15 = 11 : le coeur avec le patch 0026 (et hsfa_gfx.bin) lit la tuile a $2000000 + j * $200
+# (octet j * $200 de hsfa_gfx.bin : fichier hsfa_gfx_s3.bin, place par paquet_fbneo.py en $7F3000) ; un pilote qui lit
+# le code sur 14 bits (MAME, coeur sans 0026) affiche la tuile j de la ROM : $3F98-$3FFF sont TRANSPARENTES dans la ROM
+# d'arcade comme dans la ROM reconstruite depuis l'ISO (rien a la place, au lieu d'une tuile parasite).
+# SFA3_TUILES_S3=0 : f312 de banques_hx = celle de banques (v158), pas de hsfa_gfx_s3.bin.
+S3_J0, S3_JFIN = 0x3F98, 0x4000
+S3 = banques.MODULE == 'ro3' and os.environ.get("SFA3_TUILES_S3", "1") != "0"
+
+def tuiles_s3(W, OUT):
+    """f312 de <banques>_hx : tuiles 32x32 du portage absentes de la ROM -> codes $C000 | j ; hsfa_gfx_s3.bin"""
+    src = os.path.join(banques.OUT, "f312.bin")
+    if not os.path.exists(src): return
+    t = np.fromfile(src, '<u4').copy()
+    neuf, blob = {}, bytearray()
+    for k, m, px in anthgfx.tiles(banques.fichier(banques.MOD['b32'])):
+        if k != 2 or px is None or m >= len(t) or t[m] != VIDE: continue
+        s = anthgfx.to_slots(2, px).astype(np.uint8)
+        if (s == 15).all(): continue                  # tuile transparente : rien a afficher
+        cle = s.tobytes()
+        if cle not in neuf:
+            j = S3_J0 + len(neuf)
+            if j >= S3_JFIN: raise SystemExit("scroll3 : plus de %d tuiles du portage" % (S3_JFIN - S3_J0))
+            neuf[cle] = j; blob += b"".join(encode(q) for q in s.reshape(4, 16, 16))
+        t[m] = 0x4000 + (0xC000 | neuf[cle])
+        print("f312 : local $%x -> tuile du portage j = $%x (code $%x)" % (m, neuf[cle], 0xC000 | neuf[cle]))
+    t.astype('<u4').tofile(os.path.join(OUT, "f312.bin"))
+    open(os.path.join(W, "hsfa_gfx_s3.bin"), "wb").write(blob)
+    print("scroll3 : %d tuiles 32x32 du portage -> hsfa_gfx_s3.bin (%d octets, en $%x de hsfa_gfx.bin du paquet FBNeo)"
+          % (len(neuf), len(blob), S3_J0 * 0x200))
 
 def encode(px):
     """tuile 16x16 (valeurs 0-15) -> 128 octets au format interne de MAME"""
@@ -95,6 +128,8 @@ def main():
     if EXT_MAX is not None and EXT0 + len(blob) // 128 > EXT_MAX:
         raise SystemExit("ROM etendue SFA3 : %d tuiles depassent la zone $%x-$%x" % (len(blob) // 128, EXT0, EXT_MAX - 1))
     open(os.path.join(W, "hsfa_gfx.bin"), "wb").write(blob)
+    if S3: tuiles_s3(W, OUT)                         # (sfa3_qsound, patch 0026) scroll3 32x32 du portage
+    elif os.path.exists(os.path.join(W, "hsfa_gfx_s3.bin")): os.remove(os.path.join(W, "hsfa_gfx_s3.bin"))   # (relance)
     if EXT0 != 0x40000:                              # (sfa3_restes) decalage dans la region pour le banc / le paquet
         print("premier code $%x : HSFA_GFX=%s@%x (fork MAME), decalage $%x dans hsfa_gfx.bin du paquet FBNeo"
               % (EXT0, os.path.join(W, "hsfa_gfx.bin"), 0x2000000 + (EXT0 - 0x40000) * 128, (EXT0 - 0x40000) * 128))

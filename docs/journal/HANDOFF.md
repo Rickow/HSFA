@@ -5617,3 +5617,282 @@ Alpha Counter = artefact du banc.
   - cœur FBNeo : 4 persos MAX contre Ryu, **656 / 656 captures identiques au pixel**, journaux identiques.
 - Durée : 2 min 32 s de plus qu'Upper ; dépendance nouvelle : **vasm**, dont le sous-ensemble employé est décrit dans
   BUILD §10.6. Détail : `docs/rapports/BUILD.md` §10, `docs/guide/construction-iso.md` §5.
+
+### 203. SFA3 : texte parasite sur le logo de l'écran QSound (scroll3) ; patch 0026, `SFA3_TUILES_S3` (traducteur v159)
+
+- **Retour de l'utilisateur** (07/11, zip du script `d31dc2cf` = v158, cœurs du 08/11) : texte « nt N / rous » sur le
+  « O » d'AUDIO de l'écran QSound, et un défaut bref dans l'intro.
+- **Cause** (agent sfa3_qsound, `work/sfa3_qsound/RAPPORT.md`) : deux tuiles 32×32 de scroll3 redessinées par le portage
+  n'ont pas d'équivalent exact dans la ROM d'arcade : e312 `$858` (fin du « O » sans le ™, 15 px) et `$D4E` (17 px, intro
+  de Karin). Leur entrée de `f312` restait vide. Le pilote se rabattait alors sur « local + `$0B00` », une tuile sans
+  rapport : du texte sur le logo, et un carré gris pendant une image. Ni la ROM de l'ISO, ni v157 / v158, ni S1_MIROIR
+  (mesuré) ; la construction `--arcade` a la même table.
+- **Famille** : relevé statique de toutes les tables (SFA3, Upper, Hyper) et dynamique sur 32 parties : rien d'autre à
+  corriger. Les f312 d'Upper / Hyper ne servent pas (mode 2, plans bruts). Plan2 `$54B4/B5/BE/BF` (fins) : le repli
+  tombe déjà sur la bonne tuile d'arcade (retouche PS2 de 1 à 84 px, invisible).
+- **Correctif** (accord de l'utilisateur) : `hsfa_gfx.py` ajoute ces tuiles telles quelles (`hsfa_gfx_s3.bin`, octet
+  `$7F3000` de `hsfa_gfx.bin`). `f312` y renvoie par les codes `$C000 | j` (j = `$3F98`+). Cœur, **patch 0026** : en mode 1
+  avec `hsfa_gfx.bin`, un code de scroll3 à bits 14-15 = 11 se lit en ROM étendue. Sans le patch ou dans MAME, le code est
+  lu sur 14 bits et les tuiles `$3F98-$3FFF` sont transparentes dans les deux ROM : carré de fond, pas de tuile parasite.
+  Interrupteur **`SFA3_TUILES_S3`** (défaut 1 ; 0 = zip v158 `edf6c027` à l'octet). Zip depuis l'ISO : `ca54ef4a` (sur v158 ; v159 complet : §204).
+- **Bancs** : cœur 0025 → 0026, 5 jeux × 4:3 / 16:9 × On / Off : 20/20 identiques ; zip v158 sur 0026 = sur 0025 ;
+  zip corrigé : seuls l'écran QSound et l'image 1488 changent (3 000 images une à une, attraction 12 000 images) ; fins
+  16 18 1a 1b 03 : 24/24 identiques. Fork MAME : diff préparé (`mame-fork-0026.diff`), non compilé.
+
+### 204. Hyper : jauge de super des versions anciennes ; traducteur v159 (PRETE_TEST, MEMSWAPD)
+
+- **Défaut** (retour de l'utilisateur, 07/11) : dans ZERO, ZERO 2 et ALPHA, le chiffre du niveau est faux
+  (« 2 » au niveau 1, « 0 » au niveau 2) et des morceaux de tuiles apparaissent. Jauge pleine : ni LEVEL ni MAX.
+  Le défaut est identique dans Hyper seul et dans la greffe ro9a30.
+- **Cause : traduction** (agent hyper_jauge, `work/hyper_jauge/RAPPORT.md` §2). La routine (mips 0x3B7320 / 0x3B87C0)
+  lit le bit 0 de `$D2` du joueur par A8. Le traducteur prête A4 ou A3 à A8. Le BTST, différé au branchement par la
+  case RÉSULTAT, était émis après la restauration du registre prêté, donc sur une autre adresse : la table des chiffres
+  et son pas ne vont plus ensemble.
+  - Même famille ailleurs : 25 sites dans Hyper, 3 dans SFA3, 5 dans Upper.
+  - En plus, `ADD.L D1,(A1)+` sur un long à moitiés échangées était perdu (3 sites, Hyper 0x3B85C4).
+- **Correctif** :
+  - `PRETE_TEST` : un test en attente sur le registre prêté est émis avant la fermeture de la zone, qui garde les
+    drapeaux ;
+  - `MEMSWAPD` : `op.L Dn,d(An)` dans l'ordre naturel.
+  - Les deux à 0 : v158 à l'octet (ro3, ro5, ro9).
+- **Preuves** :
+  - Hyper corrigé = arcade : sfz2al (ALPHA), sfa2u (ZERO 2), sfa (ZERO) ;
+  - Hyper corrigé = PS2 d'origine (PCSX2, TRAINING, jauge écrite par PINE). Le cadre bleuté de ZERO est celui de la
+    PS2 ;
+  - SFA3 et Upper : tournées Arcade aux journaux identiques ;
+  - VERSUS d'Hyper : seules les jauges changent.
+- **Greffe** : reprend le traducteur commun ; à reconstruire avec v159.
+- **Intégration v159** (agent v159, `work/v159/`) : `scripts/untranspile` `e904722`, étiquette **v159** = v158 + §203
+  (`SFA3_TUILES_S3`) + §204 (`PRETE_TEST`, `MEMSWAPD`) ; les trois à 0 : v158 à l'octet (ro3, ro5, ro9, tables comprises).
+  - Références `work/references/v159` (+ `v159_banc`) : ro3 `9b06c7cf`, ro5 `45fd0244`, ro9 `8e4f9ef2` (avec son). Tailles
+    inchangées : chaque zone d'octets qui change est un site marqué dans `carte_image.txt` (SFA3 3, Upper 5, Hyper
+    11 + 15 zones = 28 sites).
+  - **Upper MAX** : la copie figée de l'intégration (`tools/integration-max/upper_max/integration_2b31/ag/untranspile/
+    translate.py`, v154 + crochets MAX) reçoit le même correctif. Sans lui, la construction échoue : la carte d'Upper
+    (v159) n'est plus celle que relit la préparation.
+  - Depuis l'ISO, contre HEAD (dates 1980) :
+    - SFA3 `d31dc2cf` → `43d2310d` (`sz3ud.03c`, `hsfa_gfx.bin` : 912 octets en `$7F3000`, `hsfa_tab.bin` : 8 octets) ;
+    - Upper `c9ed739e` → `a26bb23b` (`sz3ud.03c`) ;
+    - Upper MAX `128fb48d` → `0c8547c7` (`sz3ud.03c` : les 5 zones d'Upper) ;
+    - Hyper sans table du rejeu `eb6a552a` → `b4490b87` (`sz3ud.03c`, `04c`) ;
+    - plus `hsfa_info.txt` dans chaque zip.
+  - `HSFA_ASM=compare` : hsfa_asm68k = vasm sur les 5 appels.
+  - Cœur du 09/11 : 4 combats MAX de 20 000 images, 1 596 captures identiques à HEAD. Journal identique sauf Yun contre
+    Ingrid : `$FF810A` 13 au lieu de 14 à une image (6958), puis identique ; à voir au banc MAX.
+  - À refaire : banc de jour (`VERSION=v159_banc`), balayage des fins, greffe à reconstruire, lot MAX (traducteur de
+    l'intégration de la session MAX).
+
+### 205. Journée du 2026-11-07 : greffe ro9a29 / ro9a30, décors SFA1 / SFA2 prêts à intégrer, études MAX dans la greffe et constructeur
+
+- **Greffe (sfa3ha)** : ro9a29 (CRC 69317E71) : grillage du décor de Vega ($38) et tai-chi du décor de Chun-Li ($08)
+  calés sur le sol (`A5_PLANS`, `PARALLAXE_TABLE`, `EFFET_08`), carte du monde qui se termine sans touche et s'abrège au
+  bouton comme Upper (`CARTE_GREFFE`, `PTR_EXCLUS_PLUS`), fin de Ken (`FONDU_901E0`) ; banc des décors (idée « stage-look »
+  de cps2recomp #294, crédité). ro9a30 (CRC 0782BF53) : scène de la forêt de la fin de Sagat (`FIN_SAGAT=foret`), losanges
+  du générique de Zangief (`PTR_EXCLUS_PAL` : 121 paires de couleurs prises pour des pointeurs), décor $4E sans plantage
+  (`DECOR_4E`). En cours (e40, ro9a31) : flash rouge après la sélection (`FLASH_SEL`), fond du K.O. par super décalé
+  (`EFFET_12A` : bit 7 de $12A non masqué dans la copie d'Upper 0x157318), 10 acteurs de fin renvoyés à Hyper 0xA0FD0
+  (`FIN_A0FD0`), 2e scène de Sagat (commande 10 de l'interpréteur d'Hyper non réentrante, $BE54(A5)).
+- **Fausse alerte écartée** : « Start pendant la carte change la fin de Cammy » est FAUX : le pilote du banc appuyait sur
+  Start pendant la fin (qui l'abrège). Vérifié sur le jeu PS2 d'origine (PCSX2 dans un Xvfb, xdotool, PINE) : fin
+  complète avec et sans Start, comme notre Upper sans touche pendant la fin.
+- **Décors SFA1 / SFA2** (work/decors_sfa1, decors_sfa2_iso, decors_integration) : animations de SFA2 localisées dans ro2
+  (durées en images ; 4 classes par tic ; sinus de Gen 0x4CD470 ; reflets de Gen ; défilements propres de Rose / Chun-Li /
+  Rolento), petits restes SFA1 (foule de Charlie : sauts, 25 soldats sur 30 car la réserve est pleine = décision : 25),
+  positions des sprites au pixel contre l'OBJ RAM ; variante de Dan (Asie) non ajoutée. Convertisseur commun
+  (aller-retour exact, rendus 127/127 et 546/546 au pixel) et plan de place : lots SFA1 en $537300, SFA2 en $550000,
+  graphismes dans les 80 Mo actuels, réserve d'objets de décor à agrandir (48 fentes proposées).
+- **Études** : MAX dans la greffe (work/max_hyper : ROM son d'Upper MAX reprise telle quelle, graphismes en $5400000 =
+  région 96 Mo, ids d'Upper, versions = ZERO 3 seulement ; décisions dans ATTENTES) ; constructeur tout-en-un
+  (work/constructeur : prototype Linux 36 Mo, zips identiques ; Ogg en encodage strict portable, pas de signature,
+  assembleur maison) ; FBNeo autonome à étudier plus tard (Windows d'abord).
+- **Outillage** : PCSX2 pilotable sans toucher l'écran de l'utilisateur (outils de `work/hyper_jauge/ps2/` ; consigne :
+  DISPLAY de l'Xvfb en dur, jamais :0 — un incident de 45 s le 07/11, touches envoyées à une fenêtre MAME du bureau).
+
+### 206. Constructeur tout-en-un et Ogg portable (`hsfa_oggenc`, `flux_ogg` version 3)
+
+Agent `constructeur`, le 2026-11-08 (`work/constructeur/`, RAPPORT2.md). Ce travail suit l'étude du 07/11 (§205) et
+applique les décisions de `ATTENTES-ET-DECISIONS.md` :
+- un exécutable par système, fabriqué par la CI ;
+- Ogg en encodage strict portable ;
+- pas de signature ;
+- l'assembleur maison.
+
+- **Encodeur Ogg portable** (`tools/flux/oggenc/`, MIT). Il remplace ffmpeg. Il est fait de libvorbis 1.3.7 et libogg
+  1.3.6, non modifiés sauf quatre lignes de `os.h`, compilés en IEEE strict (`-fno-fast-math -ffp-contract=off`).
+  Les fonctions `sin cos exp log pow atan acos floor ceil rint ldexp` viennent de musl 1.1.21 (fdlibm, sans FMA) et
+  `qsort` est un tri fusion stable, tous compilés avec le programme (`hsfa_portable.h`). Les sources officielles
+  sont téléchargées et vérifiées par SHA-256 ; il ne faut que le compilateur C.
+  - Ce qui empêchait d'avoir les mêmes octets partout :
+    - `-ffast-math`, avec la libmvec de la glibc ;
+    - les FMA implicites sur ARM ;
+    - la libm et `qsort` de chaque libc ;
+    - `vorbis_ftoi`, qui arrondit au pair en SSE2 et vers le haut ailleurs ;
+    - `rint`, redéfini sous Windows.
+  - Preuve : le signal d'essai (`hsfa_oggenc --signal`, calculé en entiers) donne `387bd0bd…` avec **11 chaînes** :
+    - gcc 15 en -O0, -O2 et -O3 ; clang 21 ;
+    - gcc et clang aarch64 (qemu) ;
+    - mingw-w64 (wine) ;
+    - zig 0.17.1 : x86_64-musl, aarch64-musl, x86_64-windows ;
+    - WebAssembly (wasi-sdk 34, wasmtime).
+  - Le témoin aarch64 sans `-ffp-contract=off` donne un autre md5 (`4a915e91…`) : le test détecte bien un écart.
+    La CI refait la vérification sur un vrai Windows, macOS et Linux ARM, et un écart l'arrête.
+- **`flux_ogg` version 3** :
+  - l'encodeur vient de `HSFA_OGGENC`, sinon il est compilé dans le cache depuis `HSFA_OGGENC_SOURCES` ;
+  - un encodeur dont le signal d'essai n'a pas l'empreinte de référence est refusé ;
+  - `hsfa_build.env()` transmet `HSFA_OGGENC`, `HSFA_OGGENC_SOURCES`, `HSFA_FLUXTOOL`, `CC` et `_PYI_*` ;
+  - `construire.sh` / `.bat` compilent l'encodeur une fois. **ffmpeg n'est plus nécessaire.**
+- **Nouvelles empreintes** (ISO « All Unlocked », dates 1980, base 260d0a4) :
+  - SFA3 `43d2310d` (inchangé : SFA3 n'a pas de flux) ;
+  - Upper `a26bb23b` → **`cb14c9a7`** ;
+  - Hyper (sans table du rejeu) `b4490b87` → **`8ed7f853`** ;
+  - Upper MAX `0c8547c7` → **`ee3fd85a`**.
+  - Seuls `hsfa_flux.bin` et sa ligne de `hsfa_info.txt` changent. Deux constructions donnent les mêmes zips.
+- **Audio** (`mesures_audio.tsv`, 218 Ogg décodés par stb_vorbis comme dans le cœur) :
+  - même nombre d'échantillons et mêmes boucles, partout ;
+  - écart ancien / nouveau : 42,6 dB sous le signal en médiane (34,5 dB au pire), environ 29 dB sous le bruit de
+    codage q2 lui-même ;
+  - rapport signal / bruit contre l'ADX : le même à 0,1 dB près.
+  - Inaudible. Y27 reste en ADX, comme avant (corrélation 0,894 < 0,90).
+- **Constructeur** (`tools/constructeur/`) :
+  - un seul exécutable PyInstaller : Python avec NumPy, Capstone et Pillow (Upper MAX), les scripts, `hsfa_oggenc`,
+    `fluxtool` et libchdr ;
+  - une fenêtre tkinter (image PS2, ISO PSP facultative, sortie), ou des questions en mode texte ;
+  - lecture des `.chd` : PS2 en ISO creuse, PSP en image complète ;
+  - il sert d'interpréteur Python aux étapes (`exe script.py`, `-c`, `-m`) ;
+  - `--auto-test` contrôle l'exécutable sans donnée de jeu.
+  - Les natifs des 5 cibles sont croisés par zig depuis Linux (`natifs.py`).
+  - Pas de vasm, pas de ffmpeg : il n'y a plus de code GPL ni LGPL lié aux outils (`TIERS.md`).
+  - Linux : les 4 jeux depuis l'ISO et depuis le `.chd` donnent les empreintes ci-dessus (RAPPORT2.md §3).
+- **CI** (`.github/workflows/constructeur.yml`, vérifiée par actionlint ; pas d'essai réel sans push) :
+  - natifs par zig (empreinte fixée), actions épinglées par commit, roues PyPI `--require-hashes` ;
+  - Windows x64, Linux x86_64 / aarch64, macOS arm64 (et Intel, facultatif) ;
+  - les exécutables sont joints à une release **publiée** par le porteur ;
+  - aucun secret (seulement le `GITHUB_TOKEN` automatique, dans le travail « release »), aucune donnée de jeu.
+- Limites :
+  - numpy ne tourne pas sous wine 10 (`ucrtbase.crealf`) : l'exécutable Windows complet n'est essayé que par la CI ;
+  - macOS n'est vérifié que par la CI ;
+  - la glibc minimale de l'exécutable Linux est celle d'Ubuntu 22.04 (2.35).
+
+### 207. Hyper : piste « vie basse » dès le début du combat ; traducteur v160 (PRETE_CMP)
+
+- **Défaut** : la piste rapide « vie basse » d'Hyper (2e code `$C3B6`) part dès le début du combat. Il a été trouvé
+  par l'agent musique_ha dans la greffe ro9a31 ; il est identique dans Hyper seul. Sur PS2, elle part quand une vie
+  passe sous `$30` (48).
+- **Cause : traduction**. C'est la même famille que §204 (PRETE_TEST), mais sur les COMPARAISONS (agent v160,
+  `work/v160/RAPPORT.md`).
+  - La routine (mips 0x3899B0) teste, pour un emplacement joueur A8, « actif et vie `$51` < `$30` ».
+  - Le traducteur prête A4 à A8. Le `CMPI.B #$30,$51(A8)` est fusionné au branchement par la case RÉSULTAT et le calcul
+    de la retenue : il était émis après `MOVEA.L (SP)+,A4` (fin du prêt), donc sur l'objet de l'appelant.
+  - PRETE_TEST (v159) ne couvrait que BTST / TST, et seulement quand rien ne sépare la fin de zone du branchement.
+- **Correctif** (`translate.py`, `PRETE_CMP`, défaut 1 ; à 0 : v159 à l'octet) :
+  - à la fin d'une zone, un test en attente (CMP, CMPI, CMPA, TST, BTST) qui lit le registre prêté, posé dans la zone,
+    est noté ;
+  - au consommateur (Bcc, RTS ou BRA vers l'épilogue, « drapeaux rendus à l'appelant »), le test que la v159 émet est
+    déplacé tel quel devant la fin du prêt. La fermeture garde les drapeaux (`MOVEA`, ou bloc `MOVE SR` … `MOVE CCR`) ;
+  - refus, v159 gardée et site journalisé (`PRETE_CMP_LOG`) : fermeture qui pose les drapeaux (D8 sans domicile),
+    émission qui les touche entre les deux, branchement non absorbé qui arrive entre la fin du prêt et le test.
+    Aucun refus dans les 3 jeux.
+- **Sites** (chaque fois un couple « test / fin du prêt » échangé sur place, sans décalage) :
+  - SFA3 : 0 (programme `9b06c7cf` inchangé) ;
+  - Upper : 2 (`3a9b7fd9`) :
+    - 0x223D28 `CMPI.L #$100002,D8` (état `$4(A6)`) ;
+    - 0x263A50 `CMP.B $129(A8),D0` (même perso `$103`, `$129` égal → +1) ;
+  - Hyper : 7 (`0baed6af` avec son ; sans : `e3806660`) :
+    - 0x389A68 : la vie basse ;
+    - 0x36745C : id `$7E` du créateur `$36` ;
+    - 0x2F0C80 : id `$57` du créateur ;
+    - 0x4FEDC : mode `$122` ≥ 2 ;
+    - 0x982C8 et 0x2A2928 : homologues d'Upper ;
+    - 0x2B6924 : état `$C02` de l'adversaire `$38`.
+  - Upper MAX : les 2 sites d'Upper (copie figée patchée). Greffe : les 7 sites d'Hyper.
+- **Exclus** :
+  - `TST.L $9C(A4)` de la restauration de contexte (mips 0x4029C) : le test est posé après la fin du prêt, il lit le vrai
+    A4 ;
+  - `SUBQ.W #1,D7` après une zone D8 : DBRA du vrai D7 ;
+  - D8 B/W relu au domicile (§73) : déjà juste.
+- **Preuves** (cœur Linux 09/11, VERSUS `00.Z3/01.Z3.iX`, codes `0180` / `0191`, vie imposée) :
+  - v159 : `0191` part 3 images après le thème, vies 144 / 144 ;
+  - v160 : `0191` part à l'image où la vie passe de 48 à 47, pour J2 comme pour J1. Rien à 49 ni à 48 ;
+  - PS2 (musique_ha) : `0192` part quand la vie passe de 50 à 46. C'est le même seuil.
+- **Non-régression** :
+  - Hyper VERSUS : 8 paires, 40 000 images, journal identique (20 sélections, 39 manches). Seuls 4 départs de la piste
+    rapide sont décalés de 1 à 3 images ;
+  - Upper : tournée Arcade aux journaux identiques (les 2 sites n'y sont pas atteints) ;
+  - SFA3 : programme identique.
+- **Intégration** : depuis l'ISO, contre HEAD `a892849` (date 2026-11-01, mêmes options) :
+  - SFA3 `79be5a4b` : identique ;
+  - Upper `3df004f5` → `993e835e`, Upper MAX `b6760266` → `5002f03c` (`sz3ud.03c` : les 2 zones d'Upper) ;
+  - Hyper sans table du rejeu `eae4e9e0` → `d6c751aa` (`sz3ud.03c` 5 zones, `04c` 2 zones) ;
+  - plus `hsfa_info.txt` ; la copie figée d'Upper MAX (`integration_2b31/.../translate.py`) reçoit le même diff.
+  - dates 1980, contre les empreintes du §206 (`work/constructeur/sortie_v3`) : SFA3 `43d2310d` identique ; Upper
+    `cb14c9a7` → **`623e7321`** ; Hyper (sans table) `8ed7f853` → **`e2c8f6fd`** ; Upper MAX `ee3fd85a` →
+    **`33658a1b`** (mêmes membres) ;
+  - cœur 09/11, 4 combats MAX de 10 000 images : 796 captures et 4 journaux identiques à HEAD.
+- **Greffe** : `git diff v159 v160` s'applique à son traducteur (`e41/untranspile3_v159`, décalages seuls). Les 7 sites de
+  ro9a31 relevés par musique_ha sont ceux d'Hyper ; à reconstruire.
+
+### 208. Outils de l'atelier versés au dépôt : bancs communs, banc des coups, décors depuis l'ISO, cœurs, oracle PS2
+
+Agent `outils_depot`, le 2026-11-08 (`work/outils_depot/`, `TRI.tsv`). Les scripts de l'atelier qui n'étaient pas dans
+le dépôt ont été relevés par nom : 181 scripts, plus `lance_emu` et les sondes MAME des décors. Chacun a été classé :
+- **A, à verser (134 lignes du tri)** : utile pour reprendre, refaire une mesure, reconstruire ou servir d'oracle ;
+- **B, reste dans l'atelier (65)** : enquête d'un jour, lot ou version datés, doublon, outil personnel ;
+- **C, fusion avec un fichier déjà publié (7)**.
+
+Le contrôle des 44 homonymes de la greffe a donné ceci : 40 sont identiques au dépôt après anonymisation, 4 sont plus
+récents dans l'atelier (C).
+
+Ce qui est versé (164 fichiers, 8 dossiers neufs, un README chacun) :
+- `tools/bancs/` : outils communs des mesures (voir la ligne d'AGENTS.md §3) :
+  - `lance_emu` : places, registre, arrêt par PID, refus de `-state` ;
+  - `empreinte.{py,sh,lua}` : preuve de ce que l'émulateur charge, née de l'incident du 01/11 où le banc mesurait max6
+    au lieu de max39 ;
+  - `banc_jour.*` : 8 étapes, 4 jeux, versions figées ;
+  - `compare_zips.py` ;
+- `tools/banc-coups/` : banc MAME des coups, `banc_max.sh` (non-régression MAX, condition de livraison), frame data
+  contre SuperCombo. `lua/tournee_max_copie.lua` est la copie figée de `tools/integration-max/upper/lua/tournee_max.lua`
+  avec un compteur de tours ;
+- `tools/frame-data-max/` : banc interne des données d'images MAX, en tours de jeu, PSP contre Upper MAX ;
+- `tools/decors/sfa1-iso/`, `tools/decors/sfa2-iso/` : décors SFA1 (13) et SFA2 (18) extraits de l'ISO seule, avec
+  leurs contrôles d'oracle et leurs sondes MAME. Les cartes `carte_*.json` ne contiennent que des ADRESSES. Le relevé
+  `anims_observees.json` n'est pas versé. Ces dossiers sont distincts de `tools/decors/sfa2/` (DECOR-SFA2, autre chantier) ;
+- `tools/decors/integration/` : lots « HSFADC01 » de la zone des décors de la greffe, aller-retour prouvé ;
+- `tools/coeurs/` : construction des 12 cœurs aux drapeaux des lots du 05 au 09/11, et `controle.sh` (contrôles
+  statiques). `build_arm.sh` est plus récent que `tools/recalbox/build.sh` et `tools/rocknix/build.sh`, gardés comme
+  références de la v0.1 ;
+- `tools/ps2-oracle/` : PCSX2 dans un Xvfb dédié, PINE. Les outils sont réécrits : l'ISO, le dossier et l'écran sont
+  donnés par variables, `:0` est refusé, xdotool vise la fenêtre du PID lancé (consignes du 07/11). Ils n'ont pas été
+  relancés après réécriture ;
+- C : `tools/greffe-arcade/lua/tournee_arcade.lua` (`BOUTON_SEL`, `EX_COL`, `VICT_PASSIF`, `CARTE_PASSIF`) ;
+  `outils/lance_ro9a.sh` et `lance_upper_lua.sh` (passent par `lance_emu` et l'empreinte) ; `construit_e3.sh`.
+
+Chemins :
+- les outils communs se règlent par variables : `HSFA_WORKSPACE`, `HSFA_BANC_LUA`, `LOT`, `NDK`, `PS2_*`,
+  `HSFA_MOTIFS_PERSO` (proposition pour `config.example.env`) ;
+- les outils d'étude gardent la forme `<workspace>/…` de `publier.sh`, à localiser par `scripts/localiser.py` ;
+- 9 correctifs SANS effet dans l'atelier sont proposés pour les originaux (`work/outils_depot/correctifs_atelier/`) :
+  variable dont le défaut est le chemin actuel, et le message parasite de `lance_emu --liste` quand un processus
+  disparaît entre `ps` et `/proc/PID/environ`.
+
+Pièges trouvés :
+- `publier.sh` coupe les modèles `mktemp -d <scratchpad>/nom_XXXX` en `${TMPDIR:-/tmp}`, ce qui casse `mktemp`.
+  Les sondes MAME des décors sont donc versées en copies adaptées ;
+- le motif `*dump*` de `.gitignore` masque 4 outils (`dump_mame.py` ×2, `dump_objram.lua`, `e34_dump.lua`) : il faut
+  des négations (proposées) ;
+- `controle.sh` cherchait les motifs personnels écrits en clair : ils passent par `HSFA_MOTIFS_PERSO`.
+
+Contrôles :
+- 0 motif d'anonymat, aussi avec `grep -a` ;
+- `py_compile` 67/67 et `bash -n` 37/37 (pas de `luac` sur la machine) ;
+- simulation `publier.sh` avec le manifeste complété : identique 524, nouveau 160, modifié 4, bloqué 0 ;
+- depuis `git archive e8a3baa` + le versement : `lance_emu --liste` et `--places` OK ; `banc_jour.sh --sec` OK
+  (263 parties, 2,5 h estimées sur 5 places, 5 empreintes attendues) ; `extrait_sfa1.py`, `extrait_sfa2.py` et
+  `convertit_decors.py --help` OK. Aucun émulateur n'a été lancé.
+
+En attente :
+- les outils de mesure audio de `musique_ha` (`qualite.py`, `raccord.py`, `suivi.py`, `extrait_flux.py`) et
+  `prete.py` (sites du registre prêté, sujet de `PRETE_CMP` en v160) : l'agent est en cours ;
+- `script_hyperarcade/hsfa_build_ha.py` et `patch_hsfa_build.py` : à fusionner dans `scripts/construction/hsfa_build.py`
+  quand la greffe aura fini ses outils (ATTENTES) ; préparés sur ro9a22 ;
+- les rapports d'atelier des décors SFA1 / SFA2 / intégration et de `frame_data_max` ne sont pas versés dans
+  `docs/rapports/`.

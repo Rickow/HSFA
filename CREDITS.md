@@ -19,8 +19,13 @@ HSFA stands on the work of many people. Thank you all.
 - **Sean Barrett**: stb_vorbis (Ogg Vorbis decoder). The DL-1425 **QSound HLE** authors, **superctr** and **Valley
   Bell** (via MAME). **Ivan Kosarev**: the `z80` emulator used by the music-board test bench (MIT). See `NOTICE.md`.
 - **vasm** (Volker Barthelmann, Frank Wille): the reference whose exact output HSFA's own 68000 assembler
-  (`tools/asm68k/`) reproduces; no vasm code is used; **FFmpeg** / **libvorbis**:
-  the Ogg Vorbis music in the zips.
+  (`tools/asm68k/`) reproduces; no vasm code is used. **Xiph.Org** (libvorbis, libogg): the Ogg Vorbis music in the
+  zips, encoded by `tools/flux/oggenc` (FFmpeg did it until `flux_ogg` version 2). **musl** (Rich Felker and
+  contributors; fdlibm by Sun Microsystems): the math functions that make that encoder give the same bytes on every
+  system.
+- All-in-one builder (`tools/constructeur/`): **libchdr** (Romain Tisserand) reads `.chd` images, **PyInstaller**
+  makes the single executable, **zig** (Andrew Kelley and contributors) cross-compiles its native tools; see
+  `tools/constructeur/TIERS.md`.
 - **Recalbox**, **ROCKNIX** and **Android** retro communities: the platforms the cores run on.
 
 ## Projects that helped (ideas, cross-checks; no code copied unless stated)
@@ -58,7 +63,8 @@ HSFA stands on the work of many people. Thank you all.
 
 *Résumé en français : jeux de Capcom (marques déposées ; projet non affilié, sans données de jeu) ; émulateurs et
 bibliothèques (FinalBurn Neo, libretro / RetroArch, MAME, PPSSPP, PCSX2, Ghidra, Capstone, stb_vorbis, QSound HLE,
-z80 d'Ivan Kosarev, vasm, FFmpeg / libvorbis) ;
+z80 d'Ivan Kosarev, vasm, libvorbis / libogg de Xiph.Org, musl, FFmpeg jusqu'à la version 2 des Ogg ; pour le
+constructeur tout-en-un : libchdr, PyInstaller, zig) ;
 projets voisins qui ont aidé par leurs idées ou leurs recoupements, sans reprise de code (irnutsmurt : Street Alpha 3
 Dreamcast Recomp ; Zer0-NexuS : patcheur Upper NAOMI et SFZ2A-DASH-CPS2 ; wikis SuperCombo, StrategyWiki,
 Street Fighter Wiki, TCRF et VGMRips pour les recoupements ; tmcleroy : cps2recomp et sfa2-recomp, d'où vient l'idée de la

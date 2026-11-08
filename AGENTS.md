@@ -66,6 +66,13 @@ les dernières sections de `docs/journal/HANDOFF.md` → `docs/methodes/`. État
 
 - **Index des connaissances** (`re/`) : avant d'analyser une adresse, `python3 re/outils/quoi.py <adresse|nom>` (mises en garde en tête) ; avant d'occuper une zone (image, blocs externes, RAM, ids, graphismes, sons), la réserver dans `re/allocations.tsv` puis `python3 re/outils/zones.py --verifie` (aucun nouveau conflit).
 
+- **Outils communs des mesures** (`tools/bancs/`, §208) : tout émulateur passe par `lance_emu` (places, registre,
+  arrêt par PID, jamais `-state`). Chaque banc écrit l'**empreinte** de ce qui est réellement chargé et s'arrête si elle
+  diffère de l'attendue. Le **banc de jour** (`banc_jour.sh --sec`, puis `banc_jour.sh`) passe les 4 jeux sur les
+  versions figées. Lot MAX : `tools/banc-coups/banc_max.sh` (aucune régression native) et
+  `tools/frame-data-max/frame_data.sh`. Oracle PS2 : `tools/ps2-oracle/` (Xvfb dédié, jamais `:0`). Cœurs :
+  `tools/coeurs/` (construction des 12, `controle.sh`). Liste complète : `tools/README.md`.
+
 - **Trouver le code d'un écart de coup** sans MAME : sonde de PC du cœur FBNeo, déchiffreur CPS2 et désassembleur
   (`tools/sondes-recherche/`, §171). Les règles `EXG_PILE_D` / `AIDE_ROXR` / `BITOP_DN` décrites dans l'index ne sont
   pas dans `src/hsfa/` : à verser au dépôt, puis tout reconstruire (Killer Bee Assault de Cammy, §171).
@@ -172,10 +179,10 @@ Passation complète de la session MAX : `max/notes/SAVOIR-MAX.md`. Échanges ave
 ## 5. Chantiers ouverts (2026-10-24)
 
 > **Mise à jour du 2026-11-07** (le tableau ci-dessous date du 2026-10-24 ; ses lignes Traducteur, Voie B, MAX, Cœur et
-> Conflits sont dépassées) : traducteur **v158** (§201 ; v157 : tuiles en miroir de SFA3, §199) ; greffe **ro9a28**
+> Conflits sont dépassées) : traducteur **v160** (§207 comparaisons sur le registre prêté, piste « vie basse » d'Hyper ; v159 : §203 écran QSound de SFA3, §204 jauge des versions anciennes d'Hyper ; v158 : §201 ; v157 : tuiles en miroir de SFA3, §199) ; greffe **ro9a28**
 > livrée (§200), ro9a29 en cours ; décors SFA1 / SFA2 extraits de l'ISO (préparés, animations en cours) ; Upper MAX
-> **2b31** validé, script de construction Upper MAX à l'étude (ISO PSP en option) ; cœur FBNeo **0001-0025**, 12 cœurs
-> (lot du 2026-11-08), release publique **v0.1.6** ; réorganisation des données en pause (`v155-reorg-p1`,
+> **2b31** validé, script de construction Upper MAX à l'étude (ISO PSP en option) ; cœur FBNeo **0001-0026**, 12 cœurs
+> (lot du 2026-11-09), release publique **v0.1.6** ; réorganisation des données en pause (`v155-reorg-p1`,
 > `v156-reorg-p2`, non activées) ; **36** conflits dans `zones.py --verifie`. Décisions du porteur :
 > `docs/ATTENTES-ET-DECISIONS.md` (dépôt privé).
 
@@ -214,7 +221,8 @@ Passation complète de la session MAX : `max/notes/SAVOIR-MAX.md`. Échanges ave
 
 ## 6. Organisation du dépôt
 
-`src/hsfa/` traducteur et chaîne · `scripts/` construction et validation · `tools/` outils par thème · `patches/`
+`src/hsfa/` traducteur et chaîne · `scripts/` construction et validation · `tools/` outils par thème (index :
+`tools/README.md` ; outils communs : `tools/bancs/`) · `patches/`
 patchs des forks MAME et FBNeo · `docs/{guide,architecture,reference,methodes,journal,rapports}` · `legacy/` époque
 PNACH · `max/`, `tools/max/` session MAX. Configuration locale : `config.example.env`.
 

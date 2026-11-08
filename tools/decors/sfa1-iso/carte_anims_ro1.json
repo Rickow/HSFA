@@ -1,0 +1,170 @@
+{
+ "$11BCBA": {
+  "genre": "tuiles_s2",
+  "anims": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "role": "classes $14 ($9=8 : Sodom 0-3, Ken 4) et $2E (Guy 5, ou 6 si $190(A5)\u22600)",
+  "ro1": [
+   "0x40A8E0"
+  ],
+  "decalage_tete": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "$0444D4": {
+  "genre": "palette",
+  "anims": [
+   0,
+   1
+  ],
+  "role": "classe $33 (Ryu 0, Guy 1)",
+  "ro1": [
+   "0x4B7C60"
+  ],
+  "decalage_tete": [
+   0,
+   0
+  ]
+ },
+ "$10F060": {
+  "genre": "sprite",
+  "anims": [
+   0,
+   1
+  ],
+  "role": "classe $06 s0 (Ryu, anim 0), $24 (Ryu, anim 1)",
+  "ro1": [
+   "0x40C680"
+  ],
+  "decalage_tete": [
+   2,
+   2
+  ]
+ },
+ "$10F526": {
+  "genre": "sprite",
+  "anims": [
+   0
+  ],
+  "role": "classe $06 s1 (Ken)",
+  "ro1": [
+   "0x40CB50"
+  ],
+  "decalage_tete": [
+   0
+  ]
+ },
+ "$10F69E": {
+  "genre": "sprite",
+  "anims": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "role": "classe $06 s2 (Charlie 0), $11 (Charlie 1-4), $1F (Charlie, cr\u00e9\u00e9s par $1E)",
+  "ro1": [
+   "0x40CCD0"
+  ],
+  "decalage_tete": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ]
+ },
+ "$10FC44": {
+  "genre": "sprite",
+  "anims": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "role": "classe $06 s3 (Guy 0), $16 (Guy 1-3)",
+  "ro1": [
+   "0x40D290"
+  ],
+  "decalage_tete": [
+   2,
+   2,
+   2,
+   2
+  ]
+ },
+ "$110292": {
+  "genre": "sprite",
+  "anims": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "role": "classe $15 (Birdie / Rose 0-2), $06 s4 (Rose 3)",
+  "ro1": [
+   "0x40D8E0"
+  ],
+  "decalage_tete": [
+   2,
+   2,
+   2,
+   2
+  ]
+ },
+ "$10FBDA": {
+  "genre": "sprite",
+  "anims": [
+   0,
+   1
+  ],
+  "role": "classe $06 s5 / s6 (Adon, Sagat, Dan)",
+  "ro1": [
+   "0x40D210"
+  ],
+  "decalage_tete": [
+   2,
+   2
+  ]
+ },
+ "$10FC20": {
+  "genre": "sprite",
+  "anims": [
+   0
+  ],
+  "role": "classe $06 s7 (Sodom, M.Bison)",
+  "ro1": [
+   "0x40D260"
+  ],
+  "decalage_tete": [
+   0
+  ]
+ },
+ "banque_8": {
+  "arcade": "$1FF1C0",
+  "taille": 384,
+  "ro1": [
+   "0x4B3DD0"
+  ]
+ }
+}

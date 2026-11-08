@@ -325,6 +325,10 @@ class Construction:
         garde = ("PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "USERPROFILE",
                  "HSFA_ASM", "HSFA_VASM")             # HSFA_ASM=vasm|compare : contrôle de l'assembleur 68000 (MAX)
         e = {k: v for k, v in os.environ.items() if k in garde}   # environnement PROPRE : aucun reglage d'essai
+        # outils de la musique Ogg (tools/flux/flux_ogg.py : hsfa_oggenc, fluxtool preconstruits ou compiles par CC)
+        # et chargeur PyInstaller du constructeur tout-en-un (_PYI_* : sinon chaque etape re-extrait l'executable)
+        e.update({k: v for k, v in os.environ.items()
+                  if k in ("HSFA_OGGENC", "HSFA_OGGENC_SOURCES", "HSFA_FLUXTOOL", "CC") or k.startswith("_PYI_")})
         e["PYTHONPYCACHEPREFIX"] = os.path.join(self.cache, "pyc")  # rien n'est ecrit dans les dossiers d'outils
         e["PYTHONIOENCODING"] = "utf-8"
         e.update({k: str(v) for k, v in kw.items()})
@@ -647,9 +651,11 @@ class Construction:
                                           patchs=self.patchs_banques(jeu)), env, python=py)
         # (patch FBNeo 0025) SFA3 : tuiles d'objets du portage absentes de la ROM d'arcade (fins) ajoutees telles quelles
         # en ROM etendue (hsfa_gfx.py, codes $7F8C0+) ; SFA3_TUILES_PS2=0 : archive de v157 (sans hsfa_gfx.bin) a l'octet
+        # (patch FBNeo 0026) + tuiles 32x32 de scroll3 du portage (hsfa_gfx_s3.bin) ; SFA3_TUILES_S3=0 : archive de v158
         if jeu == "sfa3" and os.environ.get("SFA3_TUILES_PS2", "1") != "0":
             self.lance("gfx_" + jeu, dict(cwd=W, sys_path=sp, argv=["hsfa_gfx.py"], module="hsfa_gfx",
-                                          patchs=self.patchs_banques(jeu)), dict(env), python=py)
+                                          patchs=self.patchs_banques(jeu)),
+                       dict(env, SFA3_TUILES_S3=os.environ.get("SFA3_TUILES_S3", "1")), python=py)
         if jeu in ("upper", "hyper"):
             env2 = dict(env)
             if jeu == "hyper":                      # ROM etendue d'Upper reprise en tete (HANDOFF §133)
@@ -662,7 +668,7 @@ class Construction:
         for d in ("banques", "banques_hx"):
             p = os.path.join(W, d)
             if os.path.isdir(p): out += [os.path.join(p, f) for f in sorted(os.listdir(p))]
-        out += [os.path.join(W, f) for f in ("hsfa_gfx.bin", "hsfa_plans.bin") if os.path.exists(os.path.join(W, f))]
+        out += [os.path.join(W, f) for f in ("hsfa_gfx.bin", "hsfa_gfx_s3.bin", "hsfa_plans.bin") if os.path.exists(os.path.join(W, f))]
         return out
 
     def e_paquet(self, jeu):
@@ -1033,7 +1039,7 @@ def main():
     ap.add_argument("--sans-flux", action="store_true", help="ne pas produire la table du lecteur de flux ni mettre "
                     "les flux musique dans les archives d'Upper et d'Hyper")
     ap.add_argument("--flux-format", choices=("ogg", "adx"), default="ogg",
-                    help="flux musique des archives : ogg (defaut, decision D6 ; ffmpeg avec libvorbis, gcc, g++) ou adx")
+                    help="flux musique des archives : ogg (defaut, decision D6 ; hsfa_oggenc, gcc, g++ : tools/flux/oggenc) ou adx")
     ap.add_argument("--rejeu-table", help="(Hyper) hsfa_rejeu_table.txt : rejeu QSound des sons SFA1 / SFA2 (defaut : "
                     "tools/son-hyper/rejeu/hsfa_rejeu_table.txt si presente). Avec elle : redirection des voix (programme "
                     "= v151) et rejeu ; sans elle : Hyper garde les voix SFA3, archive sans rejeu")
