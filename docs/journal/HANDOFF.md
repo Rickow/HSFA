@@ -5957,3 +5957,20 @@ l'arcade. banc_sprites.lua : BANC_OBJ_DIFFERE=1. Agent sfa3_selection.
 - Reste : essai Windows / constructeur tout-en-un ; régénérer à la construction les 3 analyses régénérables
   (homologues, ram_statique_ro9, couv_k) plutôt que de les versionner ; suivre chaque nouvelle livraison de la greffe
   (refiger : `fige35.py figer`, `decoupe35.py`, `releves_tsv.py exporter`).
+
+### 213. 11/11 : index d'*Alpha 3* recoupé avec cps2recomp (banc MAME), `portmap.py` / `aiscripts.py` en local
+- Banc MAME `sfa3ud` (menu de test piloté, K.O. de chaque côté, temps, nul) : cps2recomp avait raison sur les quatre
+  contradictions de `docs/rapports/recherche/J-CROISEMENT-CPS2RECOMP-SFA3.md` §2, en numérotation arcade : $FF8096 = écran
+  retourné ($80), $FF8097 = mode de pièces, $FF8108 = manches à gagner (1P $DE+1, 2P $DF+1), $FF810A = images de la
+  seconde, $FF810C = résultat (1 / 2 / 3 = nul ou double K.O.), $FF810D = $FF au temps écoulé. Nos alias cps2: / img:
+  (octet XOR 1) restaient justes ; corrigés dans `champs.tsv` : `ecran_retournement`, `ko_resultat_manche`, `manche_10d`
+  (devient `manche_temps_ecoule`). Côté PS2 de ces lignes non revérifié.
+- §3 vérifié en partie : crédits ($FF8070, $FF8076), $FF80C0 = total de pièces (et non « pièces vers le crédit »), caméra
+  Y $FF8294, sept réserves d'objets (init $01C03A). Non vérifiés : panneau $FFDC00, butées de caméra.
+- `portmap.py` (cps2recomp, commit 59e25cb, lancé en local, sorties hors dépôt) : `sfa3ud` → ro5 95 % d'accord avec la
+  Rosette mais 11 % de couverture (code retraduit non identique à l'octet) ; ro5 → ro9 (deux images retraduites) bien
+  meilleur. Versés : ro5 +284, ro9 +1 404 lignes « déduit » (ou « supposé » si la ligne d'origine l'est) ; les
+  désaccords sont mis de côté (non versés).
+- `aiscripts.py` : marche sur `sfa3ud` (28 persos, tables $0DF492-$0DF612), pas sur nos images ; les scripts d'*Alpha 3*
+  sont presque tous dans Upper et Hyper, souvent en plusieurs exemplaires dans Hyper (piste pour les versions anciennes).
+- Aucun code de cps2recomp chez nous ; `re/outils/verifie.py` : 0 erreur. Crédits mis à jour.

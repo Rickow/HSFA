@@ -192,3 +192,19 @@ un réglage de sang rouge ou blanc, sa PR n° 248) et la routine `$02A710`.
 **Vérifié** : `$FF810B` (A5+10B) était déjà mesuré chez nous (`re/connaissances/champs.tsv`, `BSET D0,$10B(A5)` en ROM
 `$29E0C` et `$341DC`, dans sa routine `$029E10`) ; entrée ajoutée à `sfa3_arcade.tsv` le 2026-11-07 (confiance « mesuré »,
 source citée).
+
+**Rectificatif (2026-11-10)** : `$FF810B` est déjà dans `champs.tsv` (`ko_poses_fin_terminees`, « mesuré », `BSET` en
+`$29E0C`) ; cps2recomp l'a reprise de notre index et vue en jeu. Le croisement complet de ses notes sur *Alpha 3* est
+dans `J-CROISEMENT-CPS2RECOMP-SFA3.md`.
+
+## 8. Fiches de la session cloud (2026-11-10), reprises le 2026-11-11
+
+- `J-CROISEMENT-CPS2RECOMP-SFA3.md` : adresses d'*Alpha 3* croisées avec les notes de cps2recomp (4 contradictions,
+  31 adresses nouvelles) ; outil `tools/sondes-recherche/croise_cps2recomp.py`.
+- `K-CPS2RECOMP-PISTES.md` : méthodes de cps2recomp utiles chez nous (`portmap.py`, `aiscripts.py`, sauvegardes d'état).
+- `L-PROJETS-OUVERTS-2026-11.md` : projets voisins (dont la décompilation de *Alpha 3 MAX*, transmise à la session MAX).
+- Place sur CPS-2 (Upper sur vraie carte, banques, leviers mesurés) : `P-SYNTHESE-PLACE-CPS2.md`, qui renvoie à `M-`,
+  `N-`, `O-`, `Q-` et `R-` ; outils `tools/sondes-recherche/tuiles_cps2*.py`.
+
+Suite lancée le 2026-11-11 : contradictions et adresses nouvelles au banc, `portmap.py` en local (sorties hors dépôt,
+GPL-3 : aucun code chez nous), sauvegardes d'état du cœur avec le rejeu et les flux.

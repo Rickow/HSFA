@@ -4,6 +4,38 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Dep
 par release publique ; avant, les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
 
+## En cours (pas encore publié)
+
+- **Hyper** : son de la parade en B-ISM (ticket #1) : ce son n'existe que dans la banque son du portage PS2 (commandes
+  `077C` / `027C` vides dans les Z80 d'arcade) ; la construction l'ajoutera à la ROM son d'Hyper depuis votre ISO.
+- **Construction sous Windows** (ticket #2) : sans liens symboliques, chemins et fins de ligne Windows, encodage des
+  textes ; mêmes zips à l'octet.
+- **Hyper + Arcade** (ro9a36) : CONTINUE, décors de Ryu, Sodom et Cammy, fin de Ken.
+- **Upper MAX** : comportement de manche des MAX aligné sur la PSP (4 octets).
+- **Cœurs** : sauvegardes d'état complètes (patch `0029` en essai) ; cœur Linux x86_64 compatible glibc 2.27.
+- **Index `re/`** : quatre contradictions avec les notes de cps2recomp tranchées au banc MAME (cps2recomp avait raison) ;
+  homologues Upper → Hyper proposés par son outil `portmap.py` lancé en local (ro5 +284, ro9 +1 404) ; journal §213.
+- **Recherche** : fiches J à R (`docs/rapports/recherche/`) : croisement avec cps2recomp, projets voisins, place sur
+  une vraie CPS-2 (banques, budgets).
+
+## v0.1.8 (2026-11-08, pré-version)
+
+- **Hyper + Arcade** (pilote `sfa3hahsfa`), expérimental, première construction publique : `hsfa_build.py --jeux
+  hyperarcade` (ou le constructeur). En Arcade, chaque adversaire de l'ordinateur prend un mode au hasard (ZERO / ZERO 2
+  / ALPHA / ZERO 3, EX et S-ISM compris), avec son thème et son décor ; thèmes rival et final d'Upper quand les deux
+  joueurs sont en ZERO 3 ; fins corrigées. Relevés d'adresses de la greffe versionnés (adresses seulement).
+- **Cœurs** (patch `0027`) : les sprites arrivent à la même image que leur palette, comme sur la carte d'arcade.
+
+## v0.1.7 (2026-11-08)
+
+- **Constructeur tout-en-un** (`hsfa-constructeur-<système>.zip`, Windows / Linux / macOS, construit par GitHub) : rien à
+  installer ; encodeur Ogg portable (mêmes octets partout : reconstruire Upper et Hyper une fois).
+- **Upper MAX** (Eagle, Maki, Yun, Ingrid), expérimental, depuis vos deux disques (`--jeux uppermax --psp-iso`) ;
+  assembleur 68000 du projet à la place de vasm.
+- **SFA3** : écran du logo QSound et une tuile de l'intro comme sur PS2 (patch `0026`) ; curseur de la sélection sur Ryu
+  (traducteur v159).
+- **Hyper** : jauge de super des versions anciennes ; musiques rapides « vie basse » au bon seuil (traducteur v159-v160).
+
 ## v0.1.6 (2026-11-07)
 
 - **SFA3** (traducteur v158 + patch 0025) : tuiles d'objets redessinées par le portage PS2, absentes de la ROM d'arcade

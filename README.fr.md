@@ -89,8 +89,16 @@ Ils tournent dans deux environnements :
 - **Voix d'Hyper par version** : il faut la table du rejeu QSound de SFA1 / SFA2 (`--rejeu-table`, voir le
   [guide de construction](docs/guide/construction-iso.md)). Sans elle, `hsfa_build.py` garde les voix de SFA3 pour toutes les versions d'Hyper (programme `dda35430` au lieu de
   `b8e699cf`) et le zip n'a pas de rejeu. Prévu en v0.2 : la construction recréera la table depuis votre ISO.
-- Kikosho de Chun-Li : les grands arcs restent invisibles (défaut de dessin de SFA3, en cours).
-- Un flux musique d'Hyper (Y27) reste en ADX dans le zip (pas encore de contrôle de qualité).
+- Kikosho et Kikoken de Chun-Li : les grands arcs du Kikosho et l'onde du Kikoken restent invisibles (l'effet vit le
+  bon temps depuis le traducteur v151 ; le dessin est en cours d'analyse).
+- Avec l'ISO seule (sans ROM d'arcade), l'ombre au sol d'Hyper et d'Hyper + Arcade est pleine au lieu de tramée (les
+  tuiles tramées sont dans la ROM reconstruite ; les tables de tuiles de la voie ISO pointent ailleurs ; correctif en
+  cours).
+- Sauvegardes d'état : charger un état (et le run-ahead / rembobinage de RetroArch) ne reprend pas exactement le même
+  son ni la même première image, déjà vrai du QSound de FBNeo d'origine ; correctif du cœur (patch `0029`) en essai.
+- Le cœur Linux x86_64 des v0.1.7 / v0.1.8 exige glibc 2.43 (refusé par Batocera 43 et la plupart des distributions
+  actuelles) ; une reconstruction contre glibc 2.27, identique en sortie, est en essai.
+- Un flux musique d'Hyper (Y27) reste en ADX dans le zip (sa version Ogg ne passe pas notre contrôle de qualité ; inaudible).
 - Le patcheur PS2 16:9 n'est validé que sur Upper et Hyper ; quelques écrans hors combat sont décalés.
 - Les cœurs ROCKNIX et Android ont été vérifiés sur PC (émulation ARM) et par l'utilisateur sur deux consoles, pas
   sur tous les appareils.

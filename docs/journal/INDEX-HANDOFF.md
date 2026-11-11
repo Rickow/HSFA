@@ -478,3 +478,4 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 Racine : R§0 13 · R§1 30 · R§2 57 · R§3 81 · R§4 122 · R§5 151 · R§8 421 · R§6 496 · R§6bis 511 · R§7 598.
 Chapitre carte : C1 620 · C2 632 · C3 653 · C4 683 · C5 700. En-têtes de chapitre : « Carte MIPS↔68K » 618 ·
 « Recensement du traducteur » 715 · « Assembleur, test de bout en bout » 1048.
+| §213 | (fin) | hsfa | Index d'Alpha 3 recoupé avec cps2recomp (4 contradictions tranchées au banc MAME) ; portmap ro5 +284, ro9 +1 404 |

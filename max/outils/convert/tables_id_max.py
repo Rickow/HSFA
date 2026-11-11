@@ -37,7 +37,15 @@ TABLES = [
      "27/10 ; écarts natifs aux ID $20-$24"),
     (0x623E50, 2, 1, "mot selon l'ID ADVERSE, 1re rangée (3 rangées de 40 mots)", 0x262A6C, 2, True, "probable",
      "27/10 ; rangées PSP de 40 aussi : PAS d'entrée PSP pour Yun / Ingrid (0x28/0x29 = rangée suivante)"),
+    # (11/11) comportement de manche -> $122 (sinon $133, l'ism) : Upper 3 rangées de 40 (ID, +$28, +$50), PSP 5 rangées
+    # de 42 (0x20B434 -> +0x173, sinon +0x182) ; la colonne $27 d'Upper = copie de Juli (2 aux rangées 1-2), PSP MAX = 0
+    (0x61BA10, 1, 1, "octet, comportement de manche -> $122, rangée 0", 0x20B434, 1, True, "sûre", "11/11"),
+    (0x61BA38, 1, 1, "octet, comportement de manche -> $122, rangée 1 (+$28)", 0x20B434 + 42, 1, True, "sûre", "11/11"),
+    (0x61BA60, 1, 1, "octet, comportement de manche -> $122, rangée 2 (+$50)", 0x20B434 + 84, 1, True, "sûre", "11/11"),
 ]
+# rangées 1-2 de 0x61BA10 : integre_max ne pose qu'en rangée 0 de la copie agrandie (ID >= $28) -> pour Yun / Ingrid,
+# l'entrée agrandie de ces rangées est la copie de l'entrée 0 (Ryu = 0, = PSP) ; aucune pose
+SANS_RANG = {0x61BA38: "copie agrandie : entrée 0, Ryu = 0", 0x61BA60: "copie agrandie : entrée 0, Ryu = 0"}
 CARTE = {0x26: "(276, 886)   (fiche PSP FROM: Britain = Cammy $16)", 0x27: "(373, 910)   (fiche PSP FROM: Japon = Ryu / Sakura / Karin)",
          0x2D: "(352, 894)   (fiche PSP FROM: Hong Kong = Fei-Long / Gen)",
          0x2E: "aucune   (fiche PSP FROM: « ? » (Ingrid sans origine) : natif au choix)"}   # Q8 : positions de la carte
@@ -63,6 +71,7 @@ def main():
         L.append("; ---- %s (Upper $%02X, PSP $%02X)" % (nom, uid, pid))
         for t, e, per, desc, o, s, sg, surete, note in TABLES:
             if t == 0x623E50 and pid >= 0x28: v = "aucune"
+            elif t in SANS_RANG and uid >= 0x28: v = "aucune (%s)" % SANS_RANG[t]
             else:
                 v = [psp(o, s, sg, per * pid + k) for k in range(per)]
                 v = str(v[0]) if per == 1 else "(%s)" % ", ".join(map(str, v))

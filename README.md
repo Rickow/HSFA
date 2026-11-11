@@ -87,8 +87,15 @@ They run in two environments:
   [build guide](docs/guide/construction-iso.md)). Without it,
   `hsfa_build.py` keeps Hyper's SFA3 voices for every version (program `dda35430` instead of `b8e699cf`) and the zip
   has no replay. Planned for v0.2: the build will regenerate the table from your own ISO.
-- Chun-Li's Kikosho: the big arcs are still invisible (SFA3 drawing issue being tracked).
-- One Hyper music stream (Y27) stays in ADX inside the zip (no quality check yet).
+- Chun-Li's Kikosho and Kikoken: the big arcs of the Kikosho and the Kikoken wave are still invisible (the effect lives
+  the right time since translator v151; the drawing is being investigated).
+- With the ISO alone (no arcade ROM), the ground shadows of Hyper and Hyper + Arcade are solid instead of dithered
+  (the dithered tiles are in the rebuilt ROM; the ISO-only tile tables point elsewhere; fix in progress).
+- Savestates: loading a state (and RetroArch's run-ahead / rewind) does not resume the exact same sound and first frame,
+  already true of upstream FBNeo's QSound; a core fix (patch `0029`) is being tested.
+- The Linux x86_64 core of v0.1.7 / v0.1.8 needs glibc 2.43 (refused by Batocera 43 and most current distributions);
+  a rebuild against glibc 2.27, identical in output, is being tested.
+- One Hyper music stream (Y27) stays in ADX inside the zip (its Ogg version fails our quality check; inaudible).
 - The 16:9 PS2 patcher is validated on Upper and Hyper only; a few non-fight screens are offset.
 - The ROCKNIX and Android cores were checked on PC (ARM emulation) and by the user on two handhelds, not on every
   device.

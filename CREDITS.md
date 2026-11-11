@@ -39,7 +39,9 @@ HSFA stands on the work of many people. Thank you all.
   « stage-locked » 16:9 view comes from its *Invisible walls* idea; its notes confirmed where the stage art ends and
   how stages move between games; its guest-stage work (#281, #294) gave the stage-check idea (camera held in the
   middle and at both ends) and SFA2 stage-code addresses; it cross-checked our SFA3 address index (#249) and corrected
-  four entries. Ideas only: no code taken (GPL-3.0).
+  four entries; its SFA3 notes settled four contradictions in our index (round result, rounds to win, coin mode, screen
+  flip; checked on MAME `sfa3ud`), and its `portmap.py` / `aiscripts.py` tools, run locally on our files, proposed
+  Upper / Hyper counterparts that we checked before adding them. Ideas only: no code taken (GPL-3.0).
 - **Zer0-NexuS**, [sfz2a-dash-cps2](https://github.com/Zer0-NexuS/sfz2a-dash-cps2): Cammy from *Alpha 2 Gold* on the
   *Zero 2 Alpha* arcade board; read as a reference (`docs/reference/sfz2a-dash-cps2.md`).
 - **SuperCombo Wiki**, **StrategyWiki**, the **Street Fighter Wiki**, **The Cutting Room Floor** and **VGMRips**: move
