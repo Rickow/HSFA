@@ -2,8 +2,8 @@
 
 | Document | Rôle |
 |---|---|
-| [HANDOFF.md](HANDOFF.md) | journal complet, §1-§201 (et chapitres « racine » R§0-R§8, C1-C5) : chaque découverte, décision et correctif, dans l'ordre. **Source de vérité.** Les « §N » cités dans le code et la documentation renvoient ici. |
-| [INDEX-HANDOFF.md](INDEX-HANDOFF.md) | index thématique ; §0 explique les trois séries de numéros (R§, C, §) ; signale les sections dépassées (⛔) ; §13 : une ligne par section de §116 à §201 |
+| [HANDOFF.md](HANDOFF.md) | journal complet, §1-§221 (et chapitres « racine » R§0-R§8, C1-C5) : chaque découverte, décision et correctif, dans l'ordre. **Source de vérité.** Les « §N » cités dans le code et la documentation renvoient ici. |
+| [INDEX-HANDOFF.md](INDEX-HANDOFF.md) | index thématique ; §0 explique les trois séries de numéros (R§, C, §) ; signale les sections dépassées (⛔) ; §13 : une ligne par section de §116 à §221 |
 | [ETAT-DES-LIEUX.md](ETAT-DES-LIEUX.md) | synthèse du 2026-10-04 (jusqu'à §115) : commandes, variables d'environnement, 25 pièges. L'état à jour est dans le [README](../../README.fr.md), [`AGENTS.md`](../../AGENTS.md) §5 et les dernières sections du journal. |
 | [SESSION-CLOUD-2026-10-16.md](SESSION-CLOUD-2026-10-16.md) | récapitulatif de la session cloud du 2026-10-07 au 2026-10-16, pour les sessions locales |
 | [TRANSMISSION-2026-10-21.md](TRANSMISSION-2026-10-21.md) | transmission du 2026-10-21 (reprise après le point d'étape §172) |

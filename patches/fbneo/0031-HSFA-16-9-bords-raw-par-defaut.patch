@@ -1,0 +1,87 @@
+From 040851b95d9555db2c3bf33d0bc5310c2e8782c6 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Wed, 11 Nov 2026 16:30:00 +0100
+Subject: [PATCH] HSFA: 16:9 "Widescreen edges" default is now Raw
+ (stage-locked view kept as an option)
+
+- Default of the core option "Widescreen edges" (fbneo-hsfa-ws-edges):
+  "stage" (Stage-locked view, patch 0023) -> "raw" (the picture drawn by
+  the game, PSP-like free view). Stage / mirror / repeat / black unchanged,
+  still available as options.
+- Same default when the front-end gives no value: nHsfaWsBords = 3 (raw),
+  nHsfaWsCale = 0 (cps_hsfa.cpp, under HSFA_WS).
+- No line added or removed in cps_hsfa.cpp (__LINE__ of BurnMalloc kept).
+- 4:3 core unchanged (everything under HSFA_WS); 16:9 with the option set
+  to "stage" = 16:9 core of patch 0030, frame by frame.
+---
+ src/burn/drv/capcom/cps_hsfa.cpp     | 10 +++++-----
+ src/burner/libretro/retro_common.cpp |  4 ++--
+ 2 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index fe32485..24a3478 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -1822,16 +1822,16 @@ INT32 HsfaExit()
+ // (HSFA, patch 0022) bords du 16:9. Au-dela de la fenetre 4:3 (x < nCpsGlobalXOffset ou >= nCpsGlobalXOffset + 384),
+ // le decor n'existe souvent pas (butees de camera, plans lents) et scroll1, anneau de 512 px recompose par le jeu autour
+ // de la camera, montre des colonnes perimees. Option "Widescreen edges" (nHsfaWsBords) :
+-//   0 miroir (defaut) : en combat, le fond des bandes est fait des plans (sans objets) prolonges en miroir au bord du
++//   0 miroir : en combat, le fond des bandes est fait des plans (sans objets) prolonges en miroir au bord du
+ //     decor, plan par plan et rangee de tuiles par rangee (cps_scr.cpp, cpsrd.cpp) ; l'image du jeu est dessinee
+ //     par-dessus : le miroir ne se voit que la ou aucun plan ni objet n'est dessine ;
+ //   1 repetition : la derniere tuile du decor est repetee ;
+ //   2 noir : rien en fond (colonnes perimees de scroll1 retirees) ;
+-//   3 brut : image du jeu telle quelle (comme l'ancien coeur 448 : noir et colonnes perimees).
++//   3 brut (defaut depuis le patch 0031) : image du jeu telle quelle (comme l'ancien coeur 448 : noir et colonnes perimees).
+ // Hors combat ($FF8000 = 2, $FF8004 = 4, $FF8008 = 6 faux : menus, carte, VS, citations, CONTINUE, fins, ecrans de
+ // 384 px) : bandes noires, sauf en brut. Rien n'est fait pour les bandes que le format d'ecran rogne (nHsfaWsVisible).
+ // L'interieur de la fenetre 4:3 n'est jamais touche (identique au pixel au coeur 4:3 dans tous les modes).
+-INT32 nHsfaWsBords = 0;
++INT32 nHsfaWsBords = 3;									// (patch 0031) brut par defaut (avant : 0, miroir)
+ INT32 nHsfaWsVisible = 0;
+ INT32 nHsfaWsPasse = 0;
+ INT32 bHsfaWsS1Filtre = 0;							// scroll1 : colonnes perimees retirees dans les bandes
+@@ -1919,7 +1919,7 @@ static void WsS1Suivi()
+ }
+ 
+ // --------------------------------------------------------------------------------------------------------------
+-// (HSFA, patch 0023) vue calee sur le decor (option "Widescreen edges" = "Stage-locked view", par defaut ; nHsfaWsCale).
++// (HSFA, patch 0023) vue calee sur le decor (option "Widescreen edges" = "Stage-locked view", en option depuis le patch 0031 ; nHsfaWsCale).
+ // Le jeu est inchange (logique, camera, memoire) ; en combat, la fenetre de jeu 4:3 n'est plus toujours au centre de
+ // l'image : pres d'un bout de l'arene, elle glisse vers ce bout (jusqu'a toute la marge) et l'image reste sur le decor
+ // peint. La camera (scroll2 X, butees 0 et $180 dans tous les decors des 5 jeux) donne sa position x = o + sv : marge
+@@ -1931,7 +1931,7 @@ static void WsS1Suivi()
+ // identique au pixel a celle du coeur 4:3, seule sa position change. Ce qui reste sans decor (plans lents plus etroits
+ // que l'image, colonnes de scroll1 perimees ou jamais montrees, rangees plus courtes) : miroir du patch 0022 dans les
+ // bandes, de largeur quelconque (HSFA_WS_REPLI=black : noir, pour les essais). Hors combat : comme avant (centre).
+-INT32 nHsfaWsCale = 1;
++INT32 nHsfaWsCale = 0;									// (patch 0031) inactive par defaut (defaut : brut)
+ INT32 nHsfaWsObjDx = 0;
+ static INT32 nWsRepli = -1;
+ 
+diff --git a/src/burner/libretro/retro_common.cpp b/src/burner/libretro/retro_common.cpp
+index fc1b26a..49ae0a0 100644
+--- a/src/burner/libretro/retro_common.cpp
++++ b/src/burner/libretro/retro_common.cpp
+@@ -123,7 +123,7 @@ static struct retro_core_option_v2_definition var_fbneo_hsfa_ws_bords = {
+ 	"fbneo-hsfa-ws-edges",
+ 	"Widescreen edges",
+ 	NULL,
+-	"HSFA widescreen: what the side bands show where the stage has no art beyond the arcade 4:3 view (camera at the end of the stage, slow background planes), in fights. Stage-locked view = near an end of the stage, the stage, characters and effects slide towards that end (up to the whole band) so that the picture stays on the painted stage, while the HUD stays centered; the game itself is unchanged (same camera, same picture); what is still missing (slow background planes) is mirrored. Mirror = each stage plane is continued as its mirror image at the edge of its art, tile by tile (characters and effects are not mirrored). Repeat = the last tile of art is repeated. Black = black (stale columns of the game removed). Raw = the picture drawn by the game (black and stale columns, like the former 448 px core). Outside fights (menus, VS, quotes, CONTINUE, endings: 384 px screens) the bands are black, except in Raw. The 4:3 view is never changed (Stage-locked view: only moved, HUD excepted).",
++	"HSFA widescreen: what the side bands show where the stage has no art beyond the arcade 4:3 view (camera at the end of the stage, slow background planes), in fights. Stage-locked view = near an end of the stage, the stage, characters and effects slide towards that end (up to the whole band) so that the picture stays on the painted stage, while the HUD stays centered; the game itself is unchanged (same camera, same picture); what is still missing (slow background planes) is mirrored. Mirror = each stage plane is continued as its mirror image at the edge of its art, tile by tile (characters and effects are not mirrored). Repeat = the last tile of art is repeated. Black = black (stale columns of the game removed). Raw (default) = the picture drawn by the game (black and stale columns, like the former 448 px core). Outside fights (menus, VS, quotes, CONTINUE, endings: 384 px screens) the bands are black, except in Raw. The 4:3 view is never changed (Stage-locked view: only moved, HUD excepted).",
+ 	NULL,
+ 	"video",
+ 	{
+@@ -134,7 +134,7 @@ static struct retro_core_option_v2_definition var_fbneo_hsfa_ws_bords = {
+ 		{ "raw",    "Raw" },
+ 		{ NULL,     NULL },
+ 	},
+-	"stage"
++	"raw"
+ };
+ #endif
+ static struct retro_core_option_v2_definition var_fbneo_vertical_mode = {
+-- 
+2.53.0
+

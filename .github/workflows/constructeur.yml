@@ -12,6 +12,11 @@ name: constructeur
 
 on:
   workflow_dispatch:          # essai : executables en artefacts seulement
+    inputs:
+      essai_windows:
+        description: "Essais Windows seulement (tools/constructeur/test_windows.py, Linux en temoin) : pas d'executables des 5 systemes"
+        type: boolean
+        default: false
   release:
     types: [published]        # release publiee par le porteur : executables joints
 
@@ -46,8 +51,12 @@ jobs:
       - name: Outils natifs des 5 cibles
         run: |
           for c in linux-x86_64 linux-aarch64 windows-x86_64 macos-arm64 macos-x86_64; do
-            python3 tools/constructeur/natifs.py --cible "$c" --sortie "natifs/$c" --sources "$RUNNER_TEMP/sources" \
-              --telecharge --zig "$ZIG"
+            for t in 1 2 3 4 5; do    # downloads.xiph.org coupe parfois la connexion (SSL EOF, 11/11) : nouvel essai
+              python3 tools/constructeur/natifs.py --cible "$c" --sortie "natifs/$c" --sources "$RUNNER_TEMP/sources" \
+                --telecharge --zig "$ZIG" && break
+              if [ "$t" = 5 ]; then exit 1; fi
+              echo "echec (essai $t), nouvel essai dans 60 s"; sleep 60
+            done
           done
           sha256sum natifs/*/* | tee natifs/SHA256SUMS.txt
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9   # v7.0.2
@@ -58,6 +67,7 @@ jobs:
 
   executable:
     needs: natifs
+    if: ${{ !inputs.essai_windows }}       # toujours vrai pour une release (pas d'entrees)
     strategy:
       fail-fast: false
       matrix:
@@ -118,6 +128,107 @@ jobs:
           name: hsfa-constructeur-${{ matrix.cible }}
           path: paquet/*.zip*
           if-no-files-found: error
+
+  essai-windows:
+    # workflow_dispatch avec essai_windows=true seulement : liens (jonction / copie, compte sans droit), dossier personnel,
+    # code genere, encodage, copie Git, Ogg / fluxtool, executable PyInstaller. Aucune donnee de jeu (fichiers fabriques
+    # par le test). Linux en temoin. Rapports texte en artefacts.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.essai_windows }}
+    needs: natifs
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { cible: windows-x86_64, os: windows-latest, exe: hsfa-constructeur.exe }
+          - { cible: linux-x86_64,   os: ubuntu-24.04,   exe: hsfa-constructeur }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      T: tools/constructeur/test_windows.py
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0   # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333   # v8.0.2
+        with:
+          name: natifs
+          path: natifs
+      - name: Outils natifs, contexte
+        run: |
+          chmod +x natifs/${{ matrix.cible }}/* || true
+          echo "BIN=natifs/${{ matrix.cible }}" >> "$GITHUB_ENV"
+          mkdir -p rapports
+          git --version; git config --show-origin --get-all core.autocrlf || echo "core.autocrlf non defini"
+          if [ "$RUNNER_OS" = Windows ]; then whoami; whoami //groups | grep -i -E "admin|S-1-16" || true; fi
+      - name: Controle de portabilite du code de construction (tools/verifie_portabilite.py)
+        run: python tools/verifie_portabilite.py
+      - name: Python de fabrication (versions et empreintes fixees)
+        if: ${{ !cancelled() }}
+        run: python -m pip install --disable-pip-version-check --require-hashes -r tools/constructeur/requirements-constructeur.txt
+      - name: Essais (compte du runner)
+        if: ${{ !cancelled() }}
+        run: python "$T" --natifs "$BIN" --rapport rapports/runner.txt
+      - name: Essais des liens, voie sans lien symbolique (HSFA_SANS_LIENS=1)
+        if: ${{ !cancelled() }}
+        run: HSFA_SANS_LIENS=1 python "$T" --parties liens --rapport rapports/sans_liens.txt
+      - name: Mode developpeur de Windows DESACTIVE (actif sur les machines de GitHub ; un PC ordinaire ne l'a pas)
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        shell: pwsh
+        run: |
+          $k = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock"
+          Get-ItemProperty $k | Select-Object AllowDevelopmentWithoutDevLicense | Out-String | Write-Output
+          Set-ItemProperty $k -Name AllowDevelopmentWithoutDevLicense -Value 0 -Type DWord
+          Get-ItemProperty $k | Select-Object AllowDevelopmentWithoutDevLicense | Out-String | Write-Output
+      - name: Essais des liens, jeton SANS droit d'administrateur ni privilege (comme UAC sans elevation)
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        run: python "$T" --non-admin
+      - name: Essais des liens, compte local standard cree pour l'essai
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $mdp = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 24 | ForEach-Object { [char]$_ }) + "-aZ9"
+          Write-Output "::add-mask::$mdp"
+          $sec = ConvertTo-SecureString $mdp -AsPlainText -Force
+          New-LocalUser -Name hsfaessai -Password $sec -AccountNeverExpires | Out-Null
+          Add-LocalGroupMember -Group Users -Member hsfaessai -ErrorAction SilentlyContinue
+          Get-LocalGroupMember -Group Administrators | Format-Table -AutoSize | Out-String | Write-Output
+          $py = (Get-Command python).Source
+          $D = "C:\essai_na"; New-Item -ItemType Directory $D | Out-Null
+          icacls $D /grant "hsfaessai:(OI)(CI)M" | Out-Null
+          icacls "$env:GITHUB_WORKSPACE" /grant "hsfaessai:(OI)(CI)RX" /T /Q | Out-Null
+          icacls (Split-Path (Split-Path $py)) /grant "hsfaessai:(OI)(CI)RX" /T /Q | Out-Null
+          $cred = New-Object System.Management.Automation.PSCredential("hsfaessai", $sec)
+          $p = Start-Process -FilePath $py -Credential $cred -LoadUserProfile -Wait -PassThru `
+               -WorkingDirectory $D -RedirectStandardOutput "$D\sortie.txt" -RedirectStandardError "$D\erreurs.txt" `
+               -ArgumentList @("$env:GITHUB_WORKSPACE\$env:T", "--parties", "liens,maison,encodage", "--exige-sans-droit",
+                               "--rapport", "$D\rapport.txt")
+          Get-Content "$D\sortie.txt", "$D\erreurs.txt" -ErrorAction SilentlyContinue
+          Copy-Item "$D\rapport.txt" rapports\compte_standard.txt -ErrorAction SilentlyContinue
+          Write-Output "code de sortie : $($p.ExitCode)"
+          exit $p.ExitCode
+      - name: Executable (PyInstaller, un seul fichier) + auto-test
+        if: ${{ !cancelled() }}
+        run: python tools/constructeur/fabrique.py --natifs "$BIN" --dist dist
+      - name: Essais de l'executable (auto-test, PYTHONUTF8, l'exe comme python des etapes)
+        if: ${{ !cancelled() }}
+        run: python "$T" --parties exe,umprog --exe "dist/${{ matrix.exe }}" --rapport rapports/exe.txt
+      - name: Executable sous jeton sans droit (etape d'Upper MAX avec l'environnement d'um_prog)
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        run: python "$T" --non-admin --parties umprog,coeur --exe "dist/${{ matrix.exe }}"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9   # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: essai-rapports-${{ matrix.cible }}
+          path: rapports/
+          retention-days: 7
+          if-no-files-found: warn
 
   release:
     # seulement pour une release PUBLIEE par le porteur : on y joint les executables (rien d'autre n'est modifie)

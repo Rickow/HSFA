@@ -126,7 +126,8 @@ Tiger Raid (octets 0, 8, 9, 14). Chun-Li Sen'en Shu est un DÉCALÉ (pas un octe
 - Vérifié (`essais/kiko/`, `OBJLOG=FFBF00`) : objet d'effet vivant 143 images (arcade 143, v150 18, b_r6 144) ;
   Kikoken inchangé et identique à l'arcade. Upper (v150 et b_r6) : objet vivant 143 images ; Hyper Z3 : 108-109 images
   (turbo, = 143 tours) ; Kikoken d'Upper / Hyper identique v150 / b_r6.
-- **MAIS les grands arcs bleus restent absents à l'écran** (image 70 du Kikosho : `essais/kiko/planche_kikosho_upper.png`,
+- **Rectificatif (11/11, journal §214)** : les arcs ne manquent pas ; ils clignotent à 30 Hz et le banc comparait l'autre phase.
+- ~~**MAIS les grands arcs bleus restent absents à l'écran**~~ (image 70 du Kikosho : `essais/kiko/planche_kikosho_upper.png`,
   arcade / Upper v150 / Upper b_r6 / SFA3 b_r6) : dans SFA3 b_r6 comme dans Upper (v150 et b_r6), seules les petites
   étincelles apparaissent. CMPDMEM corrige une vraie perte (durée de vie de l'objet) mais n'est PAS la cause de
   l'absence des arcs : il reste un défaut de rendu ou de données de cet objet (sprites palettes 3/4, codes

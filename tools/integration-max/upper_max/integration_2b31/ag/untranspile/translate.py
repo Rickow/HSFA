@@ -83,7 +83,16 @@ def enc_cmp(size, dst, src):
                "CMP.%s $%04x(A%d),$%04x(A%d)  [memoire-memoire, par D0 sauve]"%(size,src[2],src[3],dst[2],dst[3])
     # (agent_hyper_defauts, CMPX, ESSAI non valide, defaut 0) minuende en memoire, soustrait dans un registre D :
     # 'CMP.x Dn,mem' n'existe pas -> temporaire Dt (!= Dn) sauve ; longs a moities echangees remis par SWAP
-    if CMPX and dst[0]=='mem' and src[0]=='D' and dst[3]!=7:
+    # (v161, CMP_D8) meme forme quand le minuende est D8 A DOMICILE ($87F0(A5)) : 'CMP.B D0,D8' du recompilateur recent
+    # (Upper mips 0x25DE68, Hyper 0x31FD48) rendait None (garde-fou v161) : le BNE lisait les drapeaux de l'appel precedent
+    _d8 = (CMP_D8 and D8_HOME is not None and dst[0]=='mem' and dst[3]==5 and src[0]=='D'
+           and D8_HOME <= (dst[2] & 0xffff) < D8_HOME+4 and not (size=='L' and MEMMODE!='cps2'))
+    # (v161, CMP_MEMDN) toute comparaison « memoire − Dn » (minuende en memoire) par la meme forme : Upper mips 0x41570C /
+    # 0x415810 'CMP.W D0,$12(A6) ; BGE / BGT' (objet de type 121, sortie d'ecran contre le defilement $292(A5), revue E7 bis)
+    _mdn = CMP_MEMDN and dst[0]=='mem' and src[0]=='D' and dst[3]!=7 and not (size=='L' and MEMMODE!='cps2')
+    if (CMPX or _d8 or _mdn) and dst[0]=='mem' and src[0]=='D' and dst[3]!=7:
+        if _d8: CMP_D8_N.append(dst)
+        elif _mdn: CMP_MEMDN_N.append((size,dst,src))
         CMPX_N.append((size,dst,src)); t=1 if src[1]==0 else 0
         mv={'B':0x1028,'W':0x3028,'L':0x2028}[size]|(t<<9)
         ws=[0x2f00|t, mv|(dst[3]&7), dst[2]&0xffff]+([0x4840|t] if size=='L' and MEMMODE=='cps2' else [])
@@ -255,14 +264,20 @@ def aide_recomp(kind, st):
                 AIDE_ROXR_N.add((n,c))
                 return [0xe010|((c&7)<<9)|n], "ROXR.B #%d,D%d  [aide du recompilateur, AIDE_ROXR]"%(c,n)
         return None, None
-    if kind=='abcd':
+    if kind in ('abcd','sbcd'):
+        # (v161, AIDE_SBCD) sbcd = meme aide pour la soustraction BCD (SFA3 mips 0x570BB0, Upper 0x213350 ; absente
+        # d'Hyper) : profils.py ne la declarait pas, ses 4 appels (SFA3 0x20A1A4-0x20A234) etaient des JSR muets
+        if kind=='sbcd' and not AIDE_SBCD: return None, None
+        _op=0xc100 if kind=='abcd' else 0x8100
         def dreg(sy):                                   # pointeur sur la case d'un registre D = son octet bas
             if sy and sy.kind=='const' and isinstance(sy.val,int) and 0x70001124 <= sy.val < 0x70001144 and sy.val % 4 == 0:
                 return (sy.val-0x70001124)//4
             return None
         if dreg(a0) is not None and dreg(a1) is not None:
             y,x=dreg(a0),dreg(a1)
-            return [0xc100|(x<<9)|y], "ABCD D%d,D%d  [aide du recompilateur]"%(y,x)
+            return [_op|(x<<9)|y], "%s D%d,D%d  [aide du recompilateur]"%(kind.upper(),y,x)
+        r_=_bcd_reg(a0, a1, _op)
+        if r_ is not None: return r_
         ops=[]
         for sy in (a0, a1):
             if not (sy and sy.kind=='an' and sy.val[0]!=7): return None, None
@@ -271,10 +286,48 @@ def aide_recomp(kind, st):
         ws=[0x40e7, 0x48e7, 0x8000|(1<<(7-sc[0]))|(1<<(7-sc[1]))]        # MOVE SR,-(SP) ; MOVEM.L D0/As/At,-(SP)
         for k,(n,d) in zip(sc,ops):                     # LEA d(An),Ak ; MOVE.L Ak,D0 ; EORI.W #1,D0 ; ADDQ.L #1,D0 ; MOVEA.L D0,Ak
             ws+=[0x41e8|(k<<9)|n, d & 0xffff, 0x2008|k, 0x0a40, 0x0001, 0x5280, 0x2040|(k<<9)]
-        ws+=[0x44ef, 0x000c, 0xc108|(sc[1]<<9)|sc[0],   # MOVE 12(SP),CCR ; ABCD -(As),-(At)
+        ws+=[0x44ef, 0x000c, (_op|8)|(sc[1]<<9)|sc[0],   # MOVE 12(SP),CCR ; ABCD -(As),-(At)
              0x4cdf, 0x0001|(1<<(8+sc[0]))|(1<<(8+sc[1])), 0x548f]   # MOVEM.L (SP)+ ; ADDQ.L #2,SP (drapeaux gardes)
-        return ws, "ABCD $%04x(A%d)^1,$%04x(A%d)^1  [aide du recompilateur, octets PS2]"%(ops[0][1]&0xffff,ops[0][0],ops[1][1]&0xffff,ops[1][0])
+        return ws, "%s $%04x(A%d)^1,$%04x(A%d)^1  [aide du recompilateur, octets PS2]"%(kind.upper(),ops[0][1]&0xffff,ops[0][0],ops[1][1]&0xffff,ops[1][0])
     return None, None
+
+BCD_REG=__import__('os').environ.get('BCD_REG','1')!='0'; BCD_REG_N=set()
+AIDE_SBCD=__import__('os').environ.get('AIDE_SBCD','1')!='0'
+def _bcd_reg(a0, a1, op):
+    """(v161, BCD_REG) aide abcd sur l'OCTET k de deux CASES DE REGISTRE ('ori a0,0x1144+k ; ori a1,0x1124+k ; jal abcd',
+    4 appels k = 0..3 = addition BCD sur un long, X enchaine) : bonus de score des enchainements, arcade $07EAC4
+    'ADD.L T(PC,D1.W),D0' rendu par le portage en BCD (SFA3 mips 0xBC6B0, Upper 0xFC4B4, Hyper 0x385930). La forme
+    n'etait reconnue que sur l'octet bas de D0-D7 : JSR vers le corps vide de l'aide, D0 restait a 0.
+    Destination : Dx (D0-D7, ou D8 prete) ; source : Dy, D8 prete, ou D8 a domicile ($87F0(A5), octet k en +k^1).
+    Octet k amene en bas par rotation (ROR.L #8 / SWAP / ROL.L #8, X intact), ABCD, rotation inverse. Z n'est pas
+    enchaine (rien ne le relit dans les 3 sites)."""
+    if not BCD_REG: return None
+    def case(sy):
+        if sy and sy.kind=='const' and isinstance(sy.val,int) and 0x70001124 <= sy.val < 0x70001148: return sy.val-0x70001100
+        return None
+    cy,cx=case(a0),case(a1)
+    if cy is None or cx is None or (cy&3)!=(cx&3): return None
+    k=cy&3
+    def reg(c):
+        c4=c&~3
+        if c4==0x44: return ACTIVE_EXTRA[0x1144][1] if (0x1144 in ACTIVE_EXTRA and ACTIVE_EXTRA[0x1144][0]=='D') else None
+        return (c4-0x24)//4
+    x=reg(cx); y=reg(cy)
+    if x is None: return None
+    rot={0:[],1:[0xe098],2:[0x4840],3:[0xe198]}[k]; inv={0:[],1:[0xe198],2:[0x4840],3:[0xe098]}[k]   # ROR.L #8 / SWAP / ROL.L #8
+    R=lambda ws,n: [w|n for w in ws]
+    nm={0xc100:'ABCD',0x8100:'SBCD'}[op]
+    if y is not None:
+        ws=R(rot,x)+(R(rot,y) if y!=x else [])+[op|(x<<9)|y]+R(inv,x)+(R(inv,y) if y!=x else [])
+        mn="%s D%d,D%d  [aide du recompilateur, octet %d des registres, BCD_REG]"%(nm,y,x,k)
+    elif (cy&~3)==0x44 and D8_HOME is not None:
+        t=1 if x==0 else 0; a=(D8_HOME+(k^1))&0xffff
+        ws=[0x2f00|t, 0x102d|(t<<9), a]+R(rot,x)+[op|(x<<9)|t]+R(inv,x)+[0x4cdf, 1<<t]
+        mn="%s $%04x(A5),D%d  [aide du recompilateur, octet %d de D8 a domicile par D%d, BCD_REG]"%(nm,a,x,k,t)
+    else: return None
+    BCD_REG_N.add((nm,cy,cx)); return ws, mn
+# (v161, garde-fou) appel d'une aide du recompilateur qui n'est PAS rendu en ligne (JSR muet vers son corps C vide)
+AIDE_PERDUE=[]
 
 # (HANDOFF §83) masque 32 bits 'lui ; ori' sur un registre D (ANDI.L #$F000F000 des copies de palette,
 # ANDI.L #$03FF03FF / ORI.L #$E0002000 des constructeurs du HUD...). Diagnostic : MASQ_OK=v1,v2 restreint la liste.
@@ -987,44 +1040,105 @@ def byte_after_adda(out):
     MOVE.B D0,(A0)', tableau des resultats de manche : mauvais octet pour les manches d'index pair).
     Adresse exacte a l'execution, comme byte_index_exact :
       MOVE.L An,-(SP) ; LEA d_mips(An),An ; (bascule du bit 0 via la pile) ; <instr> (An) ; MOVEA.L (SP)+,An
-    Juste quelle que soit la parite : appliquee jusqu'a la reaffectation de An ou une rupture."""
-    import m68k
-    res=[]; dirty=set(); N=[0]
-    for va,mn,ws in out:
-        if not ws: res.append((va,mn,ws)); continue
-        # suivi des registres : ADDA Dk,An -> sale ; LEA/MOVEA vers An -> propre ; rupture -> tout propre
-        def scan(words):
+    Juste quelle que soit la parite : appliquee jusqu'a la reaffectation de An ou une rupture.
+    (v161, PARITE_FLOT) la « rupture » (BRA, JMP, RTS, JSR) remettait TOUT a propre : le code qui suit un BRA est
+    atteint par un branchement, avec le meme An (saisie des initiales de SFA3 / Upper, arcade $0087E6 : apres le BRA de
+    $01062E, 14 acces a la 2e / 4e lettre). Desormais : etat propage aux cibles des branchements (union, point fixe),
+    rien apres un BRA / JMP / RTS hors de ce qui y arrive, JSR sans effet ; formes (An) (deplacement MIPS 1) et
+    'MOVE.B d1(An),d2(An)' traitees. (v161, PARITE_SITES) acces octet a forme exacte FORCEE, examines un a un (An
+    impair par flux (An)+, LEA impair ou pointeur range impair : RAPPORT de la revue, A1 b-g)."""
+    import m68k, re as _re
+    flot=PARITE_FLOT; forces=_parite_sites()
+    _tg=_re.compile(r'\(cible ([0-9a-f]+)\)')
+    def decs(words):
+        i=0; n=len(words); r_=[]
+        while i<n:
+            r=m68k.decode_one(words,i,n)
+            if r is None: break
+            r_.append(words[i]); i+=r[0]
+        return r_
+    def scan(words, dirty):
+        if flot:                                       # (v161, E1 de la revue) autres sources d'imparite
             i=0; n=len(words)
             while i<n:
                 r=m68k.decode_one(words,i,n)
                 if r is None: break
-                w=words[i]
-                if (w&0xf0f8) in (0xd0c0,) and (w&0x01c0) in (0x00c0,0x01c0): dirty.add((w>>9)&7)   # ADDA.W/L Dk,An
-                elif (w&0xf1c0)==0x41c0 or ((w&0xc1c0)==0x0040 and (w&0x3000)): dirty.discard((w>>9)&7)          # LEA / MOVEA
-                elif w==0x4e75 or (w&0xffc0) in (0x4ec0,0x4e80) or (w&0xff00)==0x6000: dirty.clear()
-                i+=r[0]
+                w=words[i]; L_=r[0]; ext=words[i+1] if (L_>1 and i+1<n) else None
+                if (w&0xb0c0)==0x90c0 and (w&0x00c0)==0x00c0 and not ((w&0x3f)==0x3c and ext is not None and i+L_-1<n and not (words[i+L_-1]&1)):
+                    dirty.add((w>>9)&7)                          # ADDA / SUBA <ea>,An (sauf #pair)
+                elif (w&0xf038)==0x5008 and (((w>>9)&7)&1):
+                    dirty.add(w&7)                               # ADDQ / SUBQ #impair,An
+                elif (w&0xf1f8)==0x41e8 and ext is not None and (ext&1):
+                    dirty.add((w>>9)&7)                          # LEA d16(An),Am impair
+                elif (w&0xf1c0)==0x41c0 or ((w&0xc1c0)==0x0040 and (w&0x3000)): dirty.discard((w>>9)&7)
+                elif w==0x4e75 or (w&0xffc0)==0x4ec0 or (w&0xff00)==0x6000: dirty.clear()
+                i+=L_
+            return dirty
+        for w in decs(words):
+            if (w&0xf0f8) in (0xd0c0,) and (w&0x01c0) in (0x00c0,0x01c0): dirty.add((w>>9)&7)   # ADDA.W/L Dk,An
+            elif (w&0xf1c0)==0x41c0 or ((w&0xc1c0)==0x0040 and (w&0x3000)): dirty.discard((w>>9)&7)          # LEA / MOVEA
+            elif w==0x4e75 or (w&0xffc0)==0x4ec0 or (w&0xff00)==0x6000: dirty.clear()      # RTS / JMP / BRA
+            elif (w&0xffc0)==0x4e80 and not flot: dirty.clear()                              # JSR (avant v161)
+        return dirty
+    # (v161) etats en entree des cibles de branchement (union), par point fixe
+    entree={}
+    if flot:
+        for _ in range(4):
+            av={k:set(v) for k,v in entree.items()}; dirty=set(); T_=sorted(entree); p_=0
+            for va,mn,ws in out:
+                while p_<len(T_) and T_[p_]<=va: dirty|=entree[T_[p_]]; p_+=1     # cible = 1re entree emise >= cible
+                m_=_tg.search(mn) if ws else None
+                if m_ and dirty: entree.setdefault(int(m_.group(1),16),set()).update(dirty)
+                if ws: scan(ws, dirty)
+            if entree==av: break
+    res=[]; dirty=set(); N=[0]; vu=set(); dold=set()
+    def scan_old(words, d):
+        for w in decs(words):
+            if (w&0xf0f8) in (0xd0c0,) and (w&0x01c0) in (0x00c0,0x01c0): d.add((w>>9)&7)
+            elif (w&0xf1c0)==0x41c0 or ((w&0xc1c0)==0x0040 and (w&0x3000)): d.discard((w>>9)&7)
+            elif w==0x4e75 or (w&0xffc0) in (0x4ec0,0x4e80) or (w&0xff00)==0x6000: d.clear()
+    T_=sorted(entree); p_=0
+    for va,mn,ws in out:
+        while p_<len(T_) and T_[p_]<=va: dirty|=entree[T_[p_]]; p_+=1
+        if not ws: res.append((va,mn,ws)); continue
         r=m68k.decode_one(ws,0,len(ws))
         single = r is not None and r[0]==len(ws)
-        w=ws[0]; new=None
-        if single and dirty and '[' not in mn and ' .B' not in mn and mn.split(' ')[0].endswith('.B'):
+        w=ws[0]; new=None; md_=None
+        force = va in forces and 'adresse XOR 1' not in mn and 'adresse exacte' not in mn
+        if single and (dirty or force) and ('[' not in mn or force) and ' .B' not in mn and mn.split(' ')[0].endswith('.B'):
             is_move=(w&0xf000)==0x1000
             src_mode,src_reg=(w>>3)&7,w&7
             dst_mode,dst_reg=((w>>6)&7,(w>>9)&7) if is_move else (None,None)
+            m2 = flot or force                             # (v161) (An) = deplacement MIPS 1
+            ok=lambda md,rg: (md==5 or (m2 and md==2)) and rg!=7 and (rg in dirty or force)
             n=None
-            if src_mode==5 and src_reg in dirty and src_reg!=7 and not (is_move and dst_mode in (2,3,4,5,6) and dst_reg==src_reg):
-                n=src_reg; k=1 if is_move else len(ws)-1
-                ins=[(w&~0x3f)|0x10|n]+ws[1:k]+ws[k+1:]
-            elif is_move and dst_mode==5 and dst_reg in dirty and dst_reg!=7 and not (src_mode in (2,3,4,5,6) and src_reg==dst_reg):
-                n=dst_reg; k=len(ws)-1
-                ins=[(w&~0x0fc0)|(n<<9)|(2<<6)]+ws[1:k]
-            if n is not None:
-                d=ws[k]^1                                  # deplacement MIPS (le XOR 1 etait sur d16)
+            if ok(src_mode,src_reg) and not (is_move and dst_mode in (2,3,4,5,6) and dst_reg==src_reg):
+                n=src_reg
+                md_=src_mode
+                if src_mode==5: k=1 if is_move else len(ws)-1; d=ws[k]^1; ins=[(w&~0x3f)|0x10|n]+ws[1:k]+ws[k+1:]
+                else: d=1; ins=list(ws)
+            elif is_move and ok(dst_mode,dst_reg) and not (src_mode in (2,3,4,5,6) and src_reg==dst_reg):
+                n=dst_reg
+                md_=dst_mode
+                if dst_mode==5: k=len(ws)-1; d=ws[k]^1; ins=[(w&~0x0fc0)|(n<<9)|(2<<6)]+ws[1:k]
+                else: d=1; ins=list(ws)
+            elif (flot or force) and is_move and src_mode in (2,5) and dst_mode in (2,5) and src_reg==dst_reg and ok(src_mode,src_reg):
+                # (v161) MOVE.B d1(An),d2(An) : l'octet passe par la pile (SP reste pair), An rendu intact
+                n=src_reg; d1=(ws[1]^1) if src_mode==5 else 1; d2=(ws[-1]^1) if dst_mode==5 else 1
                 tog=[0x2f08|n, 0x0a2f,0x0001,0x0003, 0x205f|(n<<9)]
-                new=[0x2f08|n, 0x41e8|(n<<9)|n, d]+tog+ins+[0x205f|(n<<9)]
+                new=[0x2f08|n, 0x41e8|(n<<9)|n, d1&0xffff]+tog+[0x1f10|n, 0x206f|(n<<9), 0x0002, 0x41e8|(n<<9)|n, d2&0xffff]+tog \
+                    +[0x109f|(n<<9), 0x205f|(n<<9)]
+                N[0]+=1; n=None
+                PARITE_N.add(va)
+            if n is not None:
+                tog=[0x2f08|n, 0x0a2f,0x0001,0x0003, 0x205f|(n<<9)]
+                new=[0x2f08|n, 0x41e8|(n<<9)|n, d&0xffff]+tog+ins+[0x205f|(n<<9)]
                 N[0]+=1
-        if new: res.append((va, mn+"  [octet via A apres ADDA : adresse XOR 1 a l'execution]", new))
+                if force or n not in dold or md_!=5 or '[' in mn: PARITE_N.add(va)     # nouveau par rapport a v160
+        if new: res.append((va, mn+("  [octet via A : adresse XOR 1 a l'execution, site examine]" if force else
+                                    "  [octet via A apres ADDA : adresse XOR 1 a l'execution]"), new))
         else: res.append((va,mn,ws))
-        scan(ws)
+        scan(ws, dirty); scan_old(ws, dold)
     BYTE_ADDA[0]+=N[0]
     return res
 BYTE_ADDA=[0]
@@ -1712,6 +1826,61 @@ TAILBR=__import__('os').environ.get('TAILBR','1')!='0'; TAILBR_N=[0]
 # Upper ; plafond de vitesse $900000 -> $FF0000). LUIDN=0 : ancien comportement.
 LUIDN=__import__('os').environ.get('LUIDN','1')!='0'; LUIDN_LOG=[]
 CMPMM=__import__('os').environ.get('CMPMM','1')!='0'; CMPMM_N=[]
+# (v161, garde-fous, sans effet sur le code produit) pertes silencieuses COMPTEES et listees dans build.log :
+# A8_HORS = acces a la case A8 sans registre prete (rien emis) ; CMP_PERDU = comparaison posee par le MIPS (RES ecrit
+# d'une soustraction) dont enc_cmp ne rend aucune forme 68K (le branchement relit des drapeaux perimes).
+A8_HORS=[]; CMP_PERDU=[]
+PARITE_FLOT=__import__('os').environ.get('PARITE_FLOT','1')!='0'; PARITE_N=set()
+# (v161, PARITE_SITES) acces octet a forme exacte forcee (module:va MIPS), examines un a un ; '' = aucun
+_PARITE_DEF=("ro3:88fa8,380a8,38480,a6734,d73f4,d7604,619f8,c5864,c58b4;"
+             "ro5:96878,3c418,3c7f0,e50e4,119c40,119f10,6935c,106418,106468;"
+             "ro9:4d858,4dc30,303644,3be380,3be650,6e2fc")
+def _parite_sites():
+    v=__import__('os').environ.get('PARITE_SITES',_PARITE_DEF); mod=__import__('os').environ.get('MODULE','ro3'); r=set()
+    for part in v.split(';'):
+        if ':' in part and part.split(':')[0]==mod: r|={int(x,16) for x in part.split(':')[1].split(',') if x}
+    return r
+TST_C=__import__('os').environ.get('TST_C','1')!='0'; TST_C_N=set()
+CMP_D8=__import__('os').environ.get('CMP_D8','1')!='0'; CMP_D8_N=[]
+CMP_MEMDN=__import__('os').environ.get('CMP_MEMDN','1')!='0'; CMP_MEMDN_N=[]
+TST_ZX=__import__('os').environ.get('TST_ZX','1')!='0'; TST_ZX_N=set()
+CMP_MEMADD=__import__('os').environ.get('CMP_MEMADD','1')!='0'; CMP_MEMADD_N=set()
+CMP_IDX=__import__('os').environ.get('CMP_IDX','1')!='0'; CMP_IDX_N=set(); CMP_IDX_AT={}
+def _reecrit(L, i, r):
+    """(v161) la valeur du registre MIPS r (ecrit dans RES en L[i]) est-elle aussi rangee en memoire hors des cases de
+    registres (operation en place) dans les 12 instructions avant ou apres, tant que r n'est pas redefini ?"""
+    def case(k):                                     # base = lui 0x7000 (case de registre du recompilateur) ?
+        y=L[k]
+        for q in range(k-1, max(-1,k-6), -1):
+            if dest_reg(L[q])==y.rs or (L[q].m=='lui' and L[q].rt==y.rs):
+                return L[q].m=='lui' and L[q].imm==0x7000
+        return False
+    for k in range(max(0,i-12), i):
+        if L[k].m in ('sw','sh','sb') and L[k].rt==r and not case(k): return True
+    for k in range(i+1, min(len(L), i+13)):
+        y=L[k]
+        if y.m in ('sw','sh','sb') and y.rt==r and not case(k): return True
+        if dest_reg(y)==r or y.m in _BRANCHES or y.m in ('jal','jalr','jr'): break
+    return False
+def _tst_c(pend, f, L, i, pend_va):
+    """(v161, TST_C) test en attente (TST) lu par un branchement sur C, la case C ayant ete ecrite APRES le test (bloc
+    de retenue de la comparaison a zero) : sinon C vient d'une operation anterieure et le TST l'ecraserait"""
+    if not (TST_C and pend and pend[0] in ('tst_mem','tst_dn','tst_idx','tst_abs') and f.val=='C' and pend_va is not None):
+        return False
+    for y in L[max(0,i-40):i]:
+        if y.va>pend_va and y.m=='sw' and (y.simm & 0xffff)==NFLG_SLOT: return True
+    return False
+def _tst_ws(pend):
+    """mots et mnemonique du TST d'un test en attente tst_*"""
+    if pend[0]=='tst_mem':
+        _,sz,disp,an=pend; return enc_tst_an(sz,an,disp), "TST.%s $%04x(A%d)"%(sz,disp,an)
+    if pend[0]=='tst_dn':
+        _,sz,dn=pend; return enc_tst_dn(sz,dn), "TST.%s D%d"%(sz,dn)
+    if pend[0]=='tst_idx':
+        _,sz,n,dn,dsz,d8=pend
+        return [0x4a00|(SZN[sz]<<6)|0x30|(n&7), idx_ext(dn,dsz,d8)], "TST.%s %d(A%d,D%d.%s)%s"%(sz,d8,n,dn,dsz,idx_note(sz))
+    _,sz,host=pend; a,note=abs_addr(host,sz)
+    return [0x4a00|(SZN[sz]<<6)|0x39]+abs_words(a), "TST.%s $%06x.L%s"%(sz,a&0xffffff,note)
 # (hyper_jauge, 07/11) 'op Dn,(An)' sur un long : le portage ajoute SWAP(Dn) au long range a moities echangees
 # ('lw x,d(An) ; addu x,x,swap(Dn) ; sw x,d(An)', Hyper 0x3B85C4 : ADD.L D1,(A1)+ de la jauge des versions anciennes) =
 # l'operation 68K NATURELLE sur le long en memoire (comme MOVE.L Dn,d(An) [ordre naturel], HANDOFF §83). Avant : rien
@@ -1996,6 +2165,7 @@ def flags_to_caller(i, pend, pend_va, absorbed, out):
             elif pend[0]=='cmp':
                 r=enc_cmp(pend[3],pend[1],pend[2])
                 if r: out.append((ins.va,r[1]+"  [drapeaux rendus a l'appelant]",r[0]))
+                else: CMP_PERDU.append((ins.va,pend))      # (v161, garde-fou) comparaison sans forme 68K
             return True
     return False
 
@@ -2225,6 +2395,9 @@ def translate(buf, start, end, verbose=False):
             else: ws=None
             if ws:
                 out.append((ins.va,mn+"  [pile privee 0x114C -> pile 68K]",ws)); i+=1; continue
+        if (m in ('lb','lbu','lh','lhu','lw','sb','sh','sw') and lui.get(ins.rs)==0x7000
+                and 0x1120<=(ins.simm & 0xffff)<0x1124 and 0x1120 not in ACTIVE_EXTRA):
+            A8_HORS.append(ins.va)            # (v161, garde-fou) A8 sans registre prete ni repli : rien n'est emis
         if (D8HI_ON and m in ('lh','lhu') and lui.get(ins.rs)==0x7000 and (ins.simm & 0xffff)==0x1146
                 and 0x1144 in ACTIVE_EXTRA and ACTIVE_EXTRA[0x1144][0]=='D'):
             # (HANDOFF §132) MOT HAUT de D8 prete (case 0x1146) : le domicile est perime dans la zone (D8 recharge depuis
@@ -2411,6 +2584,17 @@ def translate(buf, start, end, verbose=False):
                     pend=('btst_dn', sy.val[2].bit_length()-1, sy.val[1])     # BTST #b,Dn
                 elif sy and sy.kind in ('neg','shift','scaled') and last_sub is not None:
                     pend=None                                  # NEG / decalage ont pose les drapeaux
+                elif CMP_MEMADD and sy and sy.kind=='memadd' and sy.val[1]<0 and sy.val[0][0] in ('B','W','L') \
+                     and not (flags_set is not None and flags_set==('mem',sy.val[0][2],sy.val[0][1],sy.val[0][0])) \
+                     and not _reecrit(ins_list, i, ins.rt):
+                    # (v161, CMP_MEMADD) 'memoire + (-k)' rangee dans RES SEULEMENT (jamais reecrite en memoire) = CMPI #k,mem :
+                    # SFA3 mips 0x31B9DC, arcade $065EEE 'CMPI.L #$06000000,$4(A4) ; BNE' (attente de l'etat 6 de l'objet
+                    # cree). Pris pour un ADDQ/SUBQ en place (« drapeaux deja poses ») : rien n'etait emis, le BNE relisait
+                    # le TST.W $A4(A6) d'avant (toujours pris).
+                    (_ms,_md,_ma),_v=sy.val
+                    pend=('cmp',('mem',_ms,_md,_ma),('imm',(-_v) & SZMASK[_ms]),_ms); CMP_MEMADD_N.add(ins.va)
+                    cb=carry_block(ins_list, i)
+                    if cb: absorbed.update(cb)
                 elif sy and sy.kind in ('memadd','memarith'):
                     pend=None                                  # l'ADDQ/SUBQ en place a pose les drapeaux
                     cb=carry_block(ins_list, i)
@@ -2418,6 +2602,13 @@ def translate(buf, start, end, verbose=False):
                 elif sy and sy.kind=='reg68' and sy.val and sy.val[0]=='D' and ldsize.get(ins.rt) \
                      and moved_d!=('D',sy.val[1]):
                     pend=('tst_dn', ldsize[ins.rt], sy.val[1])
+                elif TST_ZX and sy and sy.kind=='zx' and sy.val[0][0]=='D' and sy.val[1] in ('B','W') \
+                     and moved_d!=sy.val[0] and not any(y.m in ('sw','sh','sb') and
+                         slot_name(y.simm & 0xffff)==sy.val[0] for y in ins_list[max(0,i-14):i]):
+                    # (v161, TST_ZX) comparaison A ZERO d'un Dn lu en octet / mot NON SIGNE (andi $FF) : 'CMPI.B #0,D0 ; BNE'
+                    # (SFA3 mips 0xF5C90, arcade $003A7C : entree $22 de la table $3ABA au combat 9 pour tous les persos).
+                    # Le symbole 'zx' de Dn n'etait pas reconnu : rien n'etait emis, le BNE relisait le CMPI.W precedent.
+                    pend=('tst_dn', sy.val[1], sy.val[0][1]); TST_ZX_N.add(ins.va)
                 elif sy and sy.kind=='dynbit' and sy.val[0]=='btst':
                     pend=('btst_dyn',)+sy.val[1:]                  # (dn, cible)
                 elif TBL_TST and sy and sy.kind=='tblval' and sy.val[2] in ('B','W') and not any(
@@ -3115,6 +3306,11 @@ def translate(buf, start, end, verbose=False):
                 st[ins.rt]=Sym('zx',(base,szz)); lui.pop(ins.rt,None)
                 if mr: memread[ins.rt]=mr
                 i+=1; continue
+            if CMP_IDX and b is None and SI.get(ins.rs) and SI[ins.rs][0]==szz:
+                CMP_IDX_AT[ins.va]=SI[ins.rs]         # (v161) octet indexe non signe : soustrait par le subu qui suit (CMP)
+            elif CMP_IDX and b is None:
+                _j=_producer(ins_list, i, ins.rs, 4)   # 2e 'andi $FF' du meme octet indexe
+                if _j is not None and ins_list[_j].m=='andi' and ins_list[_j].va in CMP_IDX_AT: CMP_IDX_AT[ins.va]=CMP_IDX_AT[ins_list[_j].va]
         if m=='ori' and ins.rs in lui:               # lui + ori = valeur 32 bits (comme lui + addiu)
             st[ins.rt]=Sym('const', ((lui[ins.rs]<<16) | ins.imm) & 0xffffffff)
             lui.pop(ins.rt,None); i+=1; continue
@@ -3371,6 +3567,14 @@ def translate(buf, start, end, verbose=False):
                 elif sb and sb.kind=='reg68' and sb.val and sb.val[0]=='D': src=('D',sb.val[1])
                 elif sb and sb.kind=='imm': src=('imm',sb.val)
                 elif SM.get(ins.rt) and SM[ins.rt][0]==szz: src=('mem',)+SM[ins.rt]
+                elif CMP_IDX and sb is None and base[0]=='D':
+                    # (v161, CMP_IDX) 'CMP.B d8(An,Dk.W),Dn' : l'index + deplacement est calcule en deux temps ('addu ;
+                    # addiu 2 ; lb 0') puis 'andi $FF' : la lecture indexee n'arrivait pas jusqu'au subu -> CMP perdu, le
+                    # BNE lisait les drapeaux de l'appele (SFA3 mips 0x4A084 / 0x4A190, arcade $004B7E / $004B94 : tirage
+                    # « pas deux fois le meme » du decor et du perso)
+                    _j=_producer(ins_list, i, ins.rt, 8)
+                    if _j is not None and ins_list[_j].va in CMP_IDX_AT and CMP_IDX_AT[ins_list[_j].va][0]==szz:
+                        src=('idx',)+tuple(CMP_IDX_AT[ins_list[_j].va]); CMP_IDX_N.add(ins.va)
                 st[ins.rd]=Sym('sub',(base,src,szz)) if src else None
                 lui.pop(ins.rd,None); i+=1; continue
             if m in ('addu','daddu'):
@@ -3432,6 +3636,7 @@ def translate(buf, start, end, verbose=False):
                 out.append((ins.va,mn_,ws_))
                 for r in (2,3): st.pop(r,None)
                 i+=1; continue
+            AIDE_PERDUE.append((ins.va, AIDES_RECOMP[tgt]))       # (v161, garde-fou) rien d'emis en ligne
         if tgt is not None:
             tr=tail_return(ins_list, i)
             if tr is not None: no_rts.add(tr)
@@ -3635,6 +3840,12 @@ def translate(buf, start, end, verbose=False):
                     _,sz,disp,an=pend                  # signe seul : le mot haut suffit
                     out.append((ins.va,"TST.W $%04x(A%d)  [signe du long echange]"%((disp+2)&0xffff,an),
                                 enc_tst_an('W',an,(disp+2)&0xffff)))
+                elif _tst_c(pend, f, ins_list, i, pend_va):
+                    # (v161, TST_C) comparaison A ZERO lue d'abord par un branchement sur C : 'CMPI.B #0,$8(A6) ; BHI' (SFA3
+                    # mips 0x107378 / 0x107580, arcade $021BB8 / $021BE8, tremblement de +-1 px du perso touche) rendu
+                    # 'BCS ; BNE' sans le test (la chaine ne l'emettait que pour un branchement sur Z) : le BNE relisait
+                    # le Z du MOVE.W precedent. Le TST pose C = 0 comme le CMPI #0 (et comme le MIPS : C = x <u x).
+                    _w,_t=_tst_ws(pend); out.append((ins.va,_t+"  [comparaison a zero, lue par C]",_w)); TST_C_N.add(ins.va)
                 elif pend and pend[0]=='tst_mem' and f.val=='Z':
                     _,sz,disp,an=pend
                     out.append((ins.va,"TST.%s $%04x(A%d)"%(sz,disp,an),enc_tst_an(sz,an,disp)))
@@ -3661,6 +3872,7 @@ def translate(buf, start, end, verbose=False):
                         src=('imm',bs32(src[1]))               # constante remise a l'endroit (ROM)
                     r=enc_cmp(sz,dst,src)
                     if r: out.append((ins.va,r[1],r[0]))
+                    else: CMP_PERDU.append((ins.va,pend))  # (v161, garde-fou) comparaison sans forme 68K
                     if len(pend)>4 and pend[4] and f.val=='Z' and m in SIGNED_OF:
                         name,op=SIGNED_OF[m]              # signe de RES = N^V : comparaison signee
                 if pend and pend[0]=='btst' and m in ('beq','bne'):

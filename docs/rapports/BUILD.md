@@ -576,6 +576,17 @@ tuiles nulles jusqu'à G_MAX. Ce correctif est sans effet en voie arcade.
 
 ### 10.5 Écarts connus et limites
 
+- **Upper MAX suit le traducteur courant (v161)** : l'étape `prog_upper_v160` a été retirée (11/11). L'intégration ne lit
+  plus aucune adresse d'image écrite en dur : `integre_max.py` trouve ses sites par motif unique et sauts décodés, puis les
+  recoupe avec les va MIPS de la carte de construction ; une adresse du moteur non résolue par `convertit_max.py` arrête
+  la préparation. Preuves : avec les interrupteurs v161 à 0 (`um_prog.py --env`) et `CONV_SANS_ADRESSES=1B6B6`, le
+  programme est celui du lot max55 à l'octet ; outils de contrôle `tools/integration-max/upper_max/controle/`
+  (`equiv_integration.py`, `equiv_pointeurs.py`) à repasser à chaque version du traducteur qui déplace le code.
+  Marge à surveiller : le code d'Upper finit en `$A0EB8` (+ talon de 78 o), les données commencent en `$A1000` ; au-delà,
+  la base des données saute de `$1000`. Cas exercé le 11/11 sur des bases d'essai (`LONG_POSTINC=0` : code +178 o ;
+  `DROP_SR=0` : code +`$1656`, données +`$2000`) : mêmes 739 va modifiées, aucune différence inexpliquée
+  (`equiv_pointeurs.py maxA maxB 2000`). Ces bases ne sont pas jouées : contrôle statique seulement.
+
 - **Écarts du cache MAX régénéré** face au cache de l'atelier (121/126 identiques) :
   - scripts de fin : lignes opA (vitesse 0 au lieu du décalage PSP), que l'intégration remet de toute façon à 0 ;
   - `parcours_max.json` : commentaires seulement.
@@ -618,20 +629,22 @@ principal :
 
 ## 11. Hyper + Arcade (`--jeux hyperarcade`) : la greffe du mode Arcade d'Upper, depuis l'ISO (expérimental)
 
-Agent `script_ha`, 2026-11-08 (journal §212 proposé). Le jeu `hyperarcade` produit `sfa3hahsfa.zip` (pilote
-`sfa3hahsfa`) à l'état **ro9a35b** de la greffe (programme `sz3ud.03c` `650b1bec…`). Il ajoute `upper` et `hyper` :
-la greffe part de leurs sorties.
+Agent `script_ha`, 2026-11-08 (journal §212) ; passage à ro9a36 le 11/11 (§217, §11.6), à ro9a37 (traducteur v161)
+le 12/11 (§221, §11.7). Le jeu `hyperarcade` produit `sfa3hahsfa.zip` (pilote `sfa3hahsfa`) à l'état **ro9a37** de la
+greffe (programme `sz3ud.03c` `627c98c4…` ; ro9a36 : `93e88fee…` ; ro9a35b : `650b1bec…`). Il ajoute `upper` et `hyper` : la greffe part de leurs sorties.
 
 ### 11.1 Étapes
 
 | Étape | Outil | Durée (08/11, 4 constructions en parallèle) |
 |---|---|---|
-| `greffe_hyperarcade` | `tools/greffe-arcade/construction/greffe_ha.py` : code figé `ro9a35b/` + relevés (`releves_ro9a35b/`, TSV reconstitués par `releves_tsv.py`) matérialisés dans `cache/greffe_ha` ; plan seul → table A5 → module, bloc, traduction (traducteur de la greffe v160) | 150-160 s |
-| `paquet_hyperarcade` | `ro9a35b/paquet/paquet_fbneo.py ro9a` (flux Ogg : encodeur v3 portable) | 8 s |
+| `greffe_hyperarcade` | `tools/greffe-arcade/construction/greffe_ha.py` : code figé `ro9a37/` + relevés (`releves_ro9a37/`, TSV reconstitués par `releves_tsv.py`) matérialisés dans `cache/greffe_ha` ; plan seul → table A5 → module, bloc, traduction (traducteur de la greffe v161) | 150-160 s |
+| `paquet_hyperarcade` | `ro9a37/paquet/paquet_fbneo.py ro9a` (flux Ogg : encodeur v3 portable) | 8 s |
 
 Entrées venues de la construction : modules ro5 / ro9 décompressés, cache des anims, `X_DATA.BIN`, banques d'Hyper et
-d'Upper, module ro9 (corrigé si la table du rejeu est donnée, sinon d'origine). Recette : `ro9a35b/greffe/vars_ro9a35b.txt`
-(interrupteurs de ro9a35b ; `HA_VARS` la remplace). Python + NumPy seulement : pas de MAME, pas de vasm ; la greffe
+d'Upper, module ro9 (corrigé si la table du rejeu est donnée, sinon d'origine). Recette : `ro9a37/greffe/vars_ro9a37.txt`
+(interrupteurs de ro9a36, traducteur v161 ; `HA_VARS` la remplace ; `vars_ro9a36.txt` redonne ro9a36,
+`vars_ro9a35b.txt` ro9a35b). L'état vient d'une seule
+constante de `hsfa_build.py`, `HA_ETAT`. Python + NumPy seulement : pas de MAME, pas de vasm ; la greffe
 relance le traducteur par `sys.executable` (constructeur tout-en-un) et copie au lieu de lier si le système refuse
 les liens symboliques.
 
@@ -646,7 +659,7 @@ redonne des objets égaux aux relevés d'origine. Trois analyses se régénèren
 (`homologues`, `ram_statique_ro9`, `couv_k`) ; `inverse_ro5` se régénère mais diffère (profils faits avec un
 traducteur plus ancien). Sans les journaux, la greffe change de 2,3 Mo ; sans les cartes RAM, la table A5 change.
 
-### 11.3 Preuves (copie `git archive` 847b17c + versement)
+### 11.3 Preuves (08/11, état ro9a35b ; copie `git archive` 847b17c + versement)
 
 1. **Copie figée, entrées d'atelier** (`runA35`) : construction = `ro9a35b_fige` à l'octet (28/29 de MD5SUMS, seul
    `env.sh` : chemins). Depuis les relevés TSV : idem (`c_tsv2`).
@@ -669,12 +682,77 @@ traducteur plus ancien). Sans les journaux, la greffe change de 2,3 Mo ; sans le
    `p_ref` / `p_arc` ; voie du joueur (`p_joueur`, ISO seule, aucune option) : zip identique à l'octet à `p_iso_s`.
 8. **Cœur Linux du 10/11** (partie Arcade de Ryu, pilote de `hsfa_run`) : zip ISO seule + table : journal et musique
    identiques au zip ro9a35b livré sur 25 000 images ; captures toutes les 250 images : 46 / 56 identiques au pixel,
-   les 10 autres diffèrent de 26 à 633 pixels, uniquement l'**ombre au sol** des persos (tramée avec la ROM d'arcade,
-   pleine en voie ISO : tuile retouchée de l'Anthology, §5.3). Sans table : partie complète, voix de SFA3.
+   les 10 autres diffèrent de 26 à 633 pixels, uniquement l'**ombre au sol** des persos (transparente avec la ROM
+   d'arcade, opaque en voie ISO : cause et correctif au §11.5). Sans table : partie complète, voix de SFA3.
 
 ### 11.4 Limites
 
-- Expérimental. Avec la ROM d'arcade et la table du rejeu, le zip est ro9a35b (contrôlé au cœur Linux du 10/11).
-- Voie ISO seule : ombres au sol pleines au lieu de tramées (ci-dessus) ; à confirmer pour Hyper seul.
-- Windows : liens symboliques remplacés par des copies (non essayé) ; constructeur tout-en-un : modules embarqués
-  suffisants (relevé des imports), non essayé.
+- Expérimental. Avec la ROM d'arcade et la table du rejeu, le zip est ro9a37, le zip livré le 12/11, hors
+  `hsfa_info.txt` et la ROM son (sons PS2 du §218 ; `HSFA_SONS_PS2=0` : identique) (§11.7).
+- Voie ISO seule : ombres au sol opaques au lieu de transparentes (Hyper seul aussi) : corrigé, §11.5.
+- Windows : liens symboliques remplacés par des copies ou des jonctions (§215 ; voie Windows simulée sous Linux :
+  zips identiques, §11.6) ; constructeur tout-en-un : modules embarqués suffisants (relevé des imports), non essayé.
+
+### 11.5 Ombre au sol en voie ISO seule (`HSFA_OMBRE_CODES`, 11/11)
+
+- **Symptôme** : avec l'ISO seule, l'ombre au sol des persos ZERO / ZERO 2 d'Hyper et d'Hyper + Arcade est opaque.
+  Avec la ROM d'arcade, elle est transparente (noir à 75 %, patch `0011`). Il n'y a pas de trame : les tuiles d'ombre
+  sont pleines (couleur 14) dans les deux ROM. Avec l'option, on voit simplement le sol au travers.
+- **Cause** : le patch `0011` reconnaît une ombre à sa palette (0x14) et à son code global (`0284A`, `305DF-30613`,
+  `50888-5088A`). Les trois tuiles d'ombre des persos ZERO (banc commun e545, locaux `$2F29-$2F2B`) sont absentes de
+  la ROM de SFA3. Elles vont donc en ROM étendue, où leur code est leur **rang** d'apparition. La ROM reconstruite
+  depuis l'ISO contient d'autres tuiles (retouches de l'Anthology, §5.3), donc il y a moins de tuiles absentes (Upper
+  55 410 au lieu de 55 979, Hyper 67 330 au lieu de 67 906). Les ombres tombent alors en `50648-5064A` : même contenu,
+  mais un code hors de la liste.
+  Preuve au cœur : avec `HSFA_OMBRES=0`, la voie ISO égale la voie arcade au pixel ; seule la transparence les sépare.
+- **Correctif** (`src/hsfa/hsfa_gfx.py`, `ombres_aux_codes_du_coeur`, Hyper / ro9 seulement) : les tuiles de e545
+  `$2F29`, `$2F2A`, `$2F2B` (données du disque, contrôle : couleurs 14 et 15 seulement) sont placées aux codes
+  `50888`, `50889`, `5088A`. Si un code est déjà occupé, les deux tuiles sont échangées, dans le contenu et dans toutes
+  les tables. Si la ROM étendue est plus courte (cas de la voie ISO, fin en `50701`), elle est prolongée par des tuiles
+  transparentes, et l'ancienne copie reste en place sans renvoi. Avec la ROM d'arcade, les tuiles sont déjà à ces
+  codes et rien ne change. La règle ne copie aucune donnée d'arcade : les codes viennent du patch `0011` et les tuiles
+  du disque. `HSFA_OMBRE_CODES=0` donne la sortie d'avant à l'octet.
+- **Preuves** (11/11, `work/ombre_iso`, RAPPORT) :
+  - interrupteur 0, 5 jeux en voie ISO : zips identiques membre à membre à ceux du 08/11, à `hsfa_info.txt` près
+    (date) ; Upper MAX diffère par le commit `3ce06a0` seulement ;
+  - interrupteur 1 : SFA3, Upper et Upper MAX inchangés. Hyper et Hyper + Arcade ne changent que dans `hsfa_gfx.bin`
+    et `hsfa_tab.bin`. La voie arcade est inchangée (voir RAPPORT) ;
+  - cœur 10/11, Hyper (5 affiches VERSUS) et Hyper + Arcade (3 persos), comparé à la voie ISO d'avant : avec
+    `HSFA_OMBRES=0`, 0 pixel d'écart ; avec 1, seules les lignes d'ombre (y 195-221) changent, et la voie ISO égale
+    alors la voie arcade.
+
+### 11.6 Passage à ro9a36 (11/11, §217)
+
+- **Écart ro9a35b → ro9a36** : la copie figée, matérialisée avec les chemins de l'atelier, est identique aux 200
+  fichiers d'origine, aux correctifs de portabilité du §215 près. Seul `etape3/greffe3.py` change (diff de la session
+  e46 : `DECOR_E0`, `CONT_SORTIE`, `CONT_CHIFFRE`, à 0 = ro9a35b) ; les 79 relevés lus sont inchangés.
+- **Report** : le diff de l'atelier, appliqué sur la copie du dépôt (les correctifs Windows restent). Une nouvelle
+  copie les aurait perdus. Le nouveau code lisait les banques par un chemin d'atelier écrit en dur : il passe par les
+  marques `@HA_MAME_RO9@` / `@HA_MAME_RO5@`. Dossiers renommés `ro9a36/`, `releves_ro9a36/` ; recette
+  `vars_ro9a36.txt` ; constante `HA_ETAT` de `hsfa_build.py`.
+- **Preuves** (clone du dépôt + versement ; une construction à la fois) :
+  1. greffe seule, depuis le code et les TSV du dépôt : = `ro9a36_fige` à l'octet (34/35 de MD5SUMS, seul `env.sh` :
+     chemins) ; avec `vars_ro9a35b.txt` : = `ro9a35b_fige` à l'octet ;
+  2. ROM d'arcade + table du rejeu, `--jeux hyperarcade`, `HSFA_OMBRE_CODES=0` (444 s, 1,3 Go) : `sz3ud.03c`
+     `93e88fee` ; zip **31/32 membres identiques au zip livré** (CRC `31F7E170`), seul `hsfa_info.txt` diffère (date
+     et chemins ; md5 et tailles identiques). Avec `HSFA_OMBRE_CODES=1` : les 3 zips identiques à l'octet ;
+  3. ISO seule, aucune option (voie du joueur, 5 jeux, `--psp-iso`, 847 s, 1,9 Go) : règle d'ombre appliquée
+     (`$50648` → `$50888`...) ; zip = voie arcade sauf les écarts connus (§11.3 point 4 et §11.5) : ROM graphique
+     reconstruite, `hsfa_gfx.bin`, `hsfa_tab.bin`, `sz3ud.04c` 12 o, `sz3.06c` 185 o, `hsfa_ext.bin` 113 o, sans rejeu ;
+  4. cœur Linux du 10/11 (partie Arcade de Ryu en ZERO 3) : voie 3 contre voie 2, 32 000 images, 36 manches jusqu'à la
+     fin : **0 capture différente** (31 captures, et 56 jusqu'à l'image 14 000), journal de la partie et flux musicaux
+     identiques ; une seule commande son diffère (image 24 354 : voix de SFA3 sans la table du rejeu, attendu) ;
+  5. SFA3, Upper, Hyper et Upper MAX (voie 3) contre le dépôt sans le versement : **4 zips identiques à l'octet** ;
+  6. Windows simulé (E/S texte cp1252 + CRLF, `HSFA_SANS_LIENS=1`, méthode du §215 ; voie 2) : 358 s, aucun lien
+     symbolique dans la sortie, banques sources intactes (`f351.bin` réécrit seulement dans la construction) ; les 3
+     zips (Upper, Hyper, Hyper + Arcade) **identiques à l'octet** à ceux de Linux.
+
+### 11.7 Passage à ro9a37 : traducteur de la greffe v161 (12/11, §221)
+
+- **Report** : `e47/untranspile3_v161` = `e42/untranspile3_v160` du dépôt + le diff v160 → v161 du traducteur (aucun
+  rejet). Recette `vars_ro9a37.txt` = celle de ro9a36 avec `TRAD=@HA_G@/e47/untranspile3_v161`. Code de la greffe,
+  paquet, décisions et relevés inchangés. Dossiers renommés `ro9a37/`, `releves_ro9a37/` ; `fige35.py` copie aussi
+  le traducteur e47 ; `HA_ETAT = "ro9a37"`. `vars_ro9a36.txt` = recette de ro9a36 (traducteur v160, gardé dans `e42/`).
+- **Atelier** : interrupteurs v161 à 0 = `ro9a36_fige` à l'octet ; ro9a37 : `sz3ud.03c` `627c98c4…`, zip CRC
+  `51882820` ; garde-fous de construction à 0 (comparaisons sans forme 68K, aides non rendues, Bcc après appel).
+- **Preuve** (clone du dépôt + versement, ROM d'arcade + table du rejeu, `HSFA_OMBRE_CODES=0`) : greffe seule (code et TSV du dépôt) = `ro9a37_fige` à l'octet (34/35 de MD5SUMS, seul `env.sh` : chemins) ; avec `HSFA_SONS_PS2=0` (423 s, 1,3 Go) : `sz3ud.03c` `627c98c4`, zip **31/32 membres identiques au zip livré** (CRC `51882820`), seul `hsfa_info.txt` diffère ; par défaut (sons PS2 du §218), en plus `hx3.01`, `hx3.02`, `hx3.14m` (le zip livré garde la ROM son hybride) ; Upper `ac053140`, Hyper `dbfd237d` (v161, inchangés).

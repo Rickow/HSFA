@@ -5094,7 +5094,7 @@ traducteur (fusion de la branche `defauts-banc`), références `work/references/
 VERSUS d'Hyper) ; bancs : Hyper 92,3 % → 98,9 % (exceptions 316 → 0), ro3 KO 63 → 59, ro5 KO 258 → 257, aucune
 régression ; tous les interrupteurs à 0 = v150. Bloc externe d'Hyper +23 Ko (fin `$BD8AF0`), le paquet passe.
 
-**Restent** : les grands arcs du Kikosho restent invisibles en SFA3 et Upper alors que l'objet vit le bon temps
+**Restent** : ~~les grands arcs du Kikosho restent invisibles en SFA3 et Upper~~ (rectifié le 11/11, §214 : artefact du banc, les arcs clignotent à 30 Hz) alors que l'objet vit le bon temps
 (rendu : palettes 3/4, codes `$5009-$5016`) ; aide `sbcd` non traduite (rien n'en dépend) ; lancers aériens = portage ;
 Alpha Counter = artefact du banc.
 
@@ -5974,3 +5974,223 @@ l'arcade. banc_sprites.lua : BANC_OBJ_DIFFERE=1. Agent sfa3_selection.
 - `aiscripts.py` : marche sur `sfa3ud` (28 persos, tables $0DF492-$0DF612), pas sur nos images ; les scripts d'*Alpha 3*
   sont presque tous dans Upper et Hyper, souvent en plusieurs exemplaires dans Hyper (piste pour les versions anciennes).
 - Aucun code de cps2recomp chez nous ; `re/outils/verifie.py` : 0 erreur. Crédits mis à jour.
+
+### 214. 11/11 : Kikosho et Kikoken de Chun-Li : pas de défaut (artefact du banc)
+- Les arcs bleus du Kikosho sont des objets de la palette 25 (codes $303xx-$304xx, pas les palettes 3/4) qui CLIGNOTENT
+  à 30 Hz : deux listes d'objets alternent, une par tour de jeu. En ro3 (v160), listes et palettes = `sfa3ud` tuile pour
+  tuile. L'ancien banc MAME publiait les objets une image trop tôt : une comparaison sur une seule image tombait sur
+  l'autre phase. Avec `BANC_OBJ_DIFFERE=1` (même délai que le patch 0027) : ro3 = arcade au pixel (images 32-82, hors
+  HUD) ; Upper = même suite de pixels d'arcs ; onde du Kikoken à l'image 40 partout. Hyper (turbo) : l'onde dure un tour
+  et tombe parfois sur une image non montrée, comme `sfa3ud` en TURBO2. Cœur du 10/11 : arcs visibles.
+- Rien à corriger (ni traduction, ni données, ni cœur) ; retiré des limites connues. Méthode : un effet qui clignote ne
+  se compare jamais sur une seule image (AGENTS.md §3). Point annexe non vérifié : Kikoken, image 46, une tuile de la
+  palette 24 diffère (`$036AA` au lieu de `$3020A` retourné, décalage −4/+3).
+
+### 215. 11/11 : construction sous Windows sans lien symbolique (ticket #2) ; zips identiques à Linux
+
+- Cause du ticket #2 (v0.1.8, constructeur Windows) : regen_max.py crée des liens symboliques, que Windows refuse sans
+  mode développeur ni droits d'administrateur (WinError 1314). SFA3, Upper et Hyper n'en créent pas.
+- src/hsfa/liens.py (nouveau) : lien() / lien_si_absent() = lien symbolique comme avant ; sinon dossier → jonction
+  NTFS (_winapi.CreateJunction, puis mklink /J), fichier → copie notée dans « .hsfa_liens » ; liens.reel() = realpath
+  qui suit aussi ces copies (hsfa_info.txt inchangé). Pas de lien physique : greffe3 écrirait dans la banque d'Hyper
+  (« si islink : unlink » puis écrit f545.bin). HSFA_SANS_LIENS=1 force cette voie sous Linux / macOS (essai).
+- Appels remplacés : regen_max (3 dossiers, X_DATA.BIN, 270 textes), _lien de la greffe figée (greffe3, mame_test
+  v160), mame_test (src/hsfa, copie 2b31), visu_rom. HSFA_SANS_LIENS transmis par hsfa_build, um_prog, greffe_ha.
+- Autres pannes Windows d'Upper MAX, masquées par l'erreur 1314 :
+  1. os.path.expanduser ignore HOME sous Windows (USERPROFILE) : 59 « ~/.cache/sfa3max » dans max/ et upper_max/son.
+     → regen_max et chaine_son donnent aussi USERPROFILE ;
+  2. fige.py (2b31) et fige35.py (greffe) collent les chemins dans des chaînes Python (« C:\Users » = SyntaxError :
+     19/24 et 105/189 fichiers sous wine) → chemins en « / » sous Windows ;
+  3. encodage cp1252 par défaut (textes_max.py : UnicodeEncodeError) → PYTHONUTF8=1 pour toutes les étapes.
+- Zips identiques à Linux sous Windows : paquet_fbneo (et sa copie ro9a35b) lit les .txt en LF (carte.txt,
+  ext_liste.txt écrits en CRLF sous Windows ; copie Git en CRLF : hsfa_flux_table.txt) et note les chemins en « / ».
+  .gitattributes « * -text » (+ .bat en CRLF).
+- Preuves (Linux, ISO « All Unlocked », 5 jeux) : construction normale, HSFA_SANS_LIENS=1, proposition en CRLF, et
+  simulation des E/S texte de Windows (cp1252 + CRLF) avec HSFA_SANS_LIENS=1 → 5 zips identiques à l'octet à la
+  référence (7e26a1d ; et à 853d16e, voie Windows simulée). Jonction elle-même non vérifiable sous wine 10.
+
+### 216. 11/11 : ombre au sol transparente aussi en voie ISO seule (Hyper, Hyper + Arcade) ; HSFA_OMBRE_CODES
+
+- Constat : avec l'ISO seule, l'ombre au sol des persos ZERO / ZERO 2 était opaque, alors qu'elle est transparente avec
+  la ROM d'arcade. L'hypothèse d'une tuile « tramée » manquante était fausse : les tuiles d'ombre sont pleines
+  (couleur 14 sur 15) dans les deux ROM, et la « trame » observée était la transparence du patch 0011.
+- Cause : 0011 reconnaît une ombre à sa palette (0x14) et à son code global (0284A, 305DF-30613, 50888-5088A).
+  50888-5088A sont en ROM étendue, où le code est un rang d'apparition. La ROM reconstruite depuis l'ISO compte
+  576 tuiles absentes de moins avant ces tuiles : e545 $2F29-$2F2B tombait en 50648-5064A, avec le même contenu.
+  Au cœur, avec HSFA_OMBRES=0, la voie ISO égale la voie arcade au pixel.
+- Correctif (hsfa_gfx.py, ro9) : ces trois tuiles sont placées aux codes du cœur, par échange ou en prolongeant la
+  ROM étendue par des tuiles transparentes. Aucune donnée d'arcade n'est copiée. HSFA_OMBRE_CODES=0 donne la sortie
+  d'avant à l'octet. hsfa_build.py transmet l'interrupteur, qui entre aussi dans la clé de gfx_hyper.
+- Preuves (BUILD §11.5) :
+  - interrupteur 0 : 5 zips = ceux du 08/11 (hsfa_info seul ; MAX : commit 3ce06a0) ;
+  - interrupteur 1 : SFA3, Upper et MAX inchangés ; Hyper et Hyper + Arcade ne changent que dans hsfa_gfx et hsfa_tab ;
+    la voie arcade est inchangée (hsfa_gfx, toutes les tables, membres des zips) ;
+  - cœur 10/11 : la voie ISO corrigée égale la voie arcade au pixel (Hyper, 5 affiches × 40 captures ; Hyper + Arcade,
+    3 persos × 30 captures). Comparée à la voie ISO d'avant, seule l'ombre change (y 195-221), et rien du tout avec
+    HSFA_OMBRES=0.
+- Reste : f357 local $554 (Upper / Hyper) renvoie en voie ISO à 0284A (contenu = arcade 02201, pas une ombre).
+  Ce n'est sans effet que si cette tuile ne s'affiche jamais en palette 0x14 (non vu ; non corrigé).
+
+### 217. 11/11 : `--jeux hyperarcade` construit ro9a36 (report du diff de la greffe dans la copie figée)
+
+- Écart ro9a35b → ro9a36 dans l'atelier, contrôlé fichier par fichier : la copie figée du dépôt a été matérialisée
+  avec les chemins de l'atelier, puis comparée aux 200 fichiers d'origine. Elle est identique, aux correctifs de
+  portabilité du §215 près. Seul `etape3/greffe3.py` a changé (session e46 : `DECOR_E0`, `CONT_SORTIE`,
+  `CONT_CHIFFRE`, défaut 0 = ro9a35b). Le traducteur v160, le paquet, les décisions et les 79 relevés lus sont
+  identiques à l'octet.
+- Report par le diff, pas par une nouvelle copie, pour garder les correctifs Windows (`liens.lien()`, chemins en « / »,
+  `.txt` en LF). Le diff e46 s'applique tel quel. Un chemin d'atelier écrit en dur dans le nouveau code (`_banques_hu`)
+  est remplacé par les marques `@HA_MAME_RO9@` / `@HA_MAME_RO5@` ; sans cela, la construction échouerait hors de
+  l'atelier.
+- `tools/greffe-arcade/construction/` : `ro9a35b/` → `ro9a36/` (code identique, sauf `greffe3.py`) ;
+  `releves_ro9a35b/` → `releves_ro9a36/` (contenu identique) ; recette `vars_ro9a36.txt` = celle de ro9a35b +
+  `DECOR_E0=1 CONT_SORTIE=1 CONT_CHIFFRE=1` + exclusion `64b380`. `vars_ro9a35b.txt` est gardée (`HA_VARS` : ro9a35b
+  à l'octet). `hsfa_build.py` lit l'état dans une seule constante, `HA_ETAT`.
+- Preuves (BUILD §11.6) :
+  - greffe seule (code et TSV du dépôt) = `ro9a36_fige` à l'octet ; avec `vars_ro9a35b.txt` = `ro9a35b_fige` ;
+  - ROM d'arcade + table du rejeu, `HSFA_OMBRE_CODES=0` : zip = zip livré ro9a36 (CRC 31F7E170) sur 31/32 membres,
+    seul `hsfa_info.txt` diffère (date, chemins) ; avec `HSFA_OMBRE_CODES=1` : zips identiques à l'octet ;
+  - ISO seule (voie du joueur) : écarts connus seulement (ROM reconstruite, hsfa_gfx / hsfa_tab, 04c 12 o, 06c 185 o,
+    hsfa_ext 113 o, pas de rejeu) ; cœur 10/11, Ryu ZERO 3, 32 000 images, 36 manches : 0 capture différente contre
+    la voie arcade, journal et flux identiques, une commande son (voix de SFA3 sans la table, attendu) ;
+  - SFA3, Upper, Hyper, Upper MAX : 4 zips identiques à l'octet au dépôt sans le versement ;
+  - Windows simulé (cp1252 + CRLF, `HSFA_SANS_LIENS=1`) : aucun lien, zips identiques à Linux.
+  - `verifie_portabilite.py` (pas encore versé ; essayé depuis sa copie de travail) : aucune occurrence nouvelle, et
+    une de moins (`open` sans `encoding` dans `hsfa_build.py`). Ses exceptions nomment `construction/ro9a35b/...` :
+    à renommer en `ro9a36/` au moment où il sera versé.
+- Reste : à chaque livraison de la greffe, même méthode (LISEZMOI de `construction/`, « Nouvelle livraison »).
+
+### 218. 11/11 : sons propres au portage PS2 d'Hyper (ticket #1 et 20 autres)
+- La parade en Mazi S-ISM d'Hyper était muette : le jeu envoie `077C` (J1) / `027C` (J2), comme sur PS2, mais ce son
+  n'existe que dans la banque son du portage (X_DATA, banque commune e345, échantillon 92 joué une octave plus bas) ;
+  les trois Z80 (SFA3, Upper, hybride) ont ces entrées vides.
+- Le pilote PS2 choisit l'échantillon par la table d'indices de chaque banque (conteneur MOMO), pas par le numéro de
+  commande : inventaire refait avec elle → 21 sons envoyés par le jeu, présents sur PS2, muets au cœur (parade, `0245`,
+  custom combo de ZERO 2 / ALPHA, Birdie ×2, Sagat en Saikyo S-ISM, Cammy ALPHA ×14, provocation de Dee Jay).
+- `tools/son-hyper/sons_ps2.py` (étape `sons_ps2` de `hsfa_build.py`, aussi pour Hyper + Arcade) : ROM son d'Hyper =
+  ROM hybride + ces sons tirés du X_DATA de l'utilisateur, à la hauteur PS2 et à ±0,4 dB du niveau PS2 ;
+  `HSFA_SONS_PS2=0` : copie identique de l'hybride. 3 030 commandes anciennes au contenu identique.
+- Vérifiés sur PS2 (états SPU2 + enregistrements) : parade des deux côtés, custom combo, Cammy, Dee Jay, Birdie, Sagat ;
+  `0245` ajouté sur la foi du code (manip non trouvée). Non-régression : 418 essais d'Hyper (38 persos × versions /
+  S-ISM), le son ne change qu'après une commande ajoutée ; Hyper + Arcade en VERSUS et ARCADE.
+- À suivre : Upper garde la ROM hybride (provocation de Dee Jay sans doute muette aussi, non vérifié). Détail :
+  `docs/rapports/SONS-PS2-HYPER.md`.
+
+### 219. 11/11 : traducteur v161 : correctifs de la revue critique (A8 hors zone, comparaisons perdues, parité des octets, BCD sur registres) ; garde-fous
+- Revue critique du traducteur v160 (`<workspace>/work/revue_traducteur/RAPPORT.md`, deux passes) : pertes silencieuses
+  prouvées par lecture du MIPS, de l'image et de l'arcade. v161 les corrige, une règle par mécanisme, chacune avec son
+  interrupteur (défaut 1) ; **tous à 0 → ROM, cartes et tables identiques à l'octet à v160 dans les 3 jeux**.
+- `A8_ENTREE` (`extra_regs.plan`) : une zone de A8 refusée pour une entrée latérale venue d'AVANT elle (`appel ; bne L ;
+  A8 = MOVEA.W $8B94(A5) ; L: TST.B $EC(A8)`) laissait A8 sans registre ni repli : RIEN n'était émis. Le début de zone
+  est reculé jusqu'au branchement (ouverture qui garde le CCR). Sites examinés : SFA3 `0x3a87c`, Upper `0x3f230`, Hyper
+  `0x5213c`, `0x438ec`, `0x36fe80` (`A8_ENTREE_SITES`, `tous`). Effet : le **bonus de dégâts ×1,5 du mode MAZI**
+  (`$EC` ← `$15A`, posé à la sélection en `$0080A4`, arcade `$024152`) n'était jamais appliqué ; HP de Ryu : arcade 24,
+  v161 24, v160 16.
+- `TST_C` : `CMPI.B #0,$8(A6) ; BHI` (arcade `$021BB8` / `$021BE8`, SFA3 seul) rendu `BCS ; BNE` sans test : le TST
+  n'était émis que pour un branchement sur Z. **Tremblement ±1 px du perso touché** : `ADD.W $D4(A6),D4` exécuté 3 fois
+  par image comme l'arcade (v160 : 1). `TST_ZX` (`CMPI.B #0,D0`, `$003A7C`, entrée `$22` de `$3ABA` au combat 9),
+  `CMP_MEMADD` (`mem + (−k)` rangé dans RES seul = `CMPI` : `$065EEE` et **`$0803A0`, perte que la revue n'avait pas
+  vue**), `CMP_IDX` (`CMP.B 2(A1,D2.W),D0` en deux temps, `$004B7E` / `$004B94` : tirage « pas deux fois le même »),
+  `CMP_D8` (`CMP.B D0,D8` avec D8 à domicile, Upper `0x25de68`, Hyper `0x31fd48`, trouvé par le garde-fou et par la
+  2e passe de la revue, E7) : c'est le test « même perso » d'une routine du portage (ids normalisés par `f`, Hyper
+  `0x31ffe0`, Upper `0x25e0a0`, puis même couleur `$129`) qui décale la **couleur du 2e joueur en match miroir** ; le
+  `BNE` lisait le `CMPI.B #6,D0` de `f` : couleur décalée seulement pour le perso d'id 6. VERSUS d'Hyper, Ryu contre Ryu, même couleur : v161 01 / 00, v160
+  00 / 00 (le joueur qui change reste à confirmer sur PS2).
+  `CMP_MEMDN` (même forme pour toute comparaison « mémoire − Dn ») : Upper `0x41570c` / `0x415810`
+  `CMP.W D0,$12(A6)` de l'objet de type 121 (sortie d'écran contre le défilement ; revue E7 bis) : l'objet passait à
+  l'état 6 tout de suite ou jamais (objet non identifié en jeu).
+- `PARITE_FLOT` : `byte_after_adda` remettait tout à « propre » à chaque BRA / JMP / RTS / JSR ; l'état « parité
+  inconnue » suit maintenant les branchements (union aux cibles, point fixe), avec `(An)`, `MOVE.B d1(An),d2(An)` et les
+  autres sources d'imparité (ADDA/SUBA de toute source, ADDQ #impair, LEA impair). `PARITE_SITES` : 24 accès d'autres
+  origines examinés un à un (flux `(An)+`, `LEA $6EB7(A5)`, pointeur rangé impair : gel du custom combo `$023D52`,
+  garde de J2 `$07955C`, texte défilant `$0B2F9C`, `$080266`, `$0AF2B6`, plafond des initiales `$0088A6`).
+  **Saisie des initiales** (`$0087E6`, SFA3 et Upper) : écritures de la routine identiques à l'arcade (v160 : 1re lettre
+  écrasée par « - »).
+- `BCD_REG` : l'aide `abcd` sur l'octet k de deux CASES DE REGISTRE (D8 → D0, 4 appels) émettait des JSR vers un corps
+  vide : **bonus de score des enchaînements** (`$07EAA4`, table `$07EAD6`) à 0 dans les 3 jeux ; super à 5 coups :
+  `$1200` comme l'arcade (v160 : 0). `AIDE_SBCD` : aide `sbcd` déclarée (`profils.py`, SFA3 `0x570bb0`, Upper
+  `0x213350`).
+- Garde-fous (sans effet sur le code) : `build.log` « GARDE-FOU (v161) » compte les accès à A8 sans registre (reste :
+  code C des aides du portage), les comparaisons sans forme 68K (`enc_cmp` → None : 0 dans les 3 jeux, **échec de la
+  construction** sinon, `GARDE_CMP=0`) et les aides non rendues en ligne (**échec**, `GARDE_AIDES=0`). Après coup :
+  `drapeaux.py` de la revue ne trouve plus aucun site PERDU / TAILLE / APPEL-sans-jal du constat. Garde-fou de la
+  2e passe intégré (« Bcc sur les drapeaux d'un appel alors que le MIPS recalcule RES ») : 0 site dans les 3 jeux.
+- Upper MAX garde le traducteur v160 tant que l'intégration lit des adresses d'image écrites en dur (`$DEE6`,
+  `$DF52`… dans `integre_max.py`) : `hsfa_build.py` construit sa base d'Upper à part (étape `prog_upper_v160`,
+  `mame_ro5_v160`, interrupteurs v161 à 0) ; `sfa3umhsfa.zip` inchangé à l'octet.
+- Non-régression : SFA3 (`fige/a6` = a3 pour ro3) : 3 × aucune exception (20 000, 20 000, 60 000 images), 42 commandes / 0 différente, cadence 5 358 tours en 4 019 images comme v160 sur le même banc (la référence dit 5 359), 32 fins sur 32 avec captures = arcade ; Hyper : VERSUS, 2 manches, aucune exception ; Upper (`fige/a6`) : 20 000 images sans exception, 3 parties fin=finie, 40 fins sur 40. Construction depuis l'ISO : programmes = constructions de contrôle ; `sfa3umhsfa.zip` = HEAD à l'octet. Banc de jour non passé.
+- Report à faire dans les copies figées (greffe `untranspile3_v160`, Upper MAX `ag/untranspile`) : par le diff, puis
+  reconstruire et passer leurs bancs. Détail, sites, essais : `<workspace>/work/v161/RAPPORT.md`.
+- Interrupteurs à revoir (revue, E8) : `EXTRA_REGS=0` et `D8_HOME=none` ne construisent plus SFA3 ; `PRETE_TEST`,
+  `RETAG_BRAW`, `AIG_D1_TOUS` et `MEMMODE` sont sans effet dans les 3 jeux. Proposition : les retirer, ou les marquer
+  « historique » dans le code (non fait ici).
+
+### 220. 11/11 : Upper MAX suit le traducteur v161 ; intégration sans adresse d image en dur ; revue de l intégration
+
+**Upper MAX suit le traducteur v161 (revue `revue_upper_max`, 11/11).** L'intégration des persos MAX lisait des adresses
+d'image écrites en dur dans quatre fonctions de `integre_max.py` (`talon_cond40`, `talon_prises`, `talon_dialogues`,
+`lancer_vertical`) : elles trouvent maintenant leurs sites par motif unique et sauts décodés, recoupés avec les va MIPS de
+la carte de construction. La revue a aussi trouvé deux `jsr $1b6b6.l` (acteurs de fin) restés à une adresse ARCADE : résolus
+(va `0xC8304`), et `prepare_max.py` s'arrête désormais sur toute adresse du moteur non résolue. L'étape `prog_upper_v160` de
+`hsfa_build.py` disparaît. Preuves : base v160 + interrupteurs v161 à 0 + `CONV_SANS_ADRESSES=1B6B6` = lot max55 à l'octet ;
+mêmes 739 va modifiées sur v160 et v161, aucune différence inexpliquée hors code (`controle/equiv_*.py`), y compris sur deux
+bases d'essai dont une où les données glissent de `$2000` ; `hsfa_build --jeux uppermax` depuis les deux ISO (03c `5e1430ee`,
+`sfa3umhsfa.zip` md5 `2fa507af`) ; banc MAX du candidat max57 contre Upper v161 a6 : natifs 3062 identiques / 61 ralentis /
+5 différents (les 5 Rolento X connus), défauts MAX 0, croisés 64/64, Arcade 4/4. Revue de l'intégration : 16 constats
+(`work/revue_upper_max/revue_B/REVUE.md`), 6 majeurs à arbitrer.
+
+- Revue de l intégration (16 constats, 6 majeurs à arbitrer) : `<workspace>/work/revue_upper_max/revue_B/REVUE.md`.
+
+### 221. 12/11 : Hyper + Arcade passe au traducteur v161 (ro9a37) : bonus du mode Mazi, bonus des enchaînements, couleur en match miroir
+
+- **Traducteur de la greffe** : `e47/untranspile3_v161` = la copie figée `e42/untranspile3_v160` + le diff v160 → v161
+  du traducteur (§219), appliqué tel quel (`patch -p1`, aucun rejet ; écarts copie / `src/hsfa` = ceux de la v160).
+  La recette `vars_ro9a37.txt` est celle de ro9a36, sauf `TRAD=@HA_G@/e47/untranspile3_v161`. Rien d'autre ne change :
+  code de la greffe, décisions, paquet et 79 relevés identiques à ro9a36.
+- **Interrupteurs v161 à 0 = ro9a36** : la même recette avec les correctifs v161 coupés (`zero.env`) redonne
+  `ro9a36_fige` à l'octet (33/35 de MD5SUMS ; `construction.log` : lignes de compteurs v161 en plus ; `env.sh` : chemins).
+- **ro9a37** : `sz3ud.03c` md5 `627c98c4…` ; zip `sfa3hahsfa.zip` CRC `51882820`. Contre ro9a36 : `03c`, `04c`, `06c`,
+  `10b`, `hsfa_ext.bin` et `hsfa_info.txt` diffèrent (32 membres, flux musicaux identiques).
+- **Garde-fous de construction** (`construction.log`) : comparaisons sans forme 68K **0** (v160 : 4, dont le test de
+  couleur miroir d'Hyper, fichier `0x31FD48`, et sa copie d'Upper `greffe_u_25dcf0`) ; aides du recompilateur non rendues **0**
+  (v160 : 4) ; Bcc après appel **0** (v160 : 2) ; A8 sans registre : 10 (aides C du portage, comme Hyper v161).
+  Correctifs posés : `CMP_D8` aux 2 sites (Hyper `$0819FE`, copie d'Upper `$0BA158`), `CMP_MEMDN` aux 2 copies
+  (`$0BD2EC`, `$0BD300`), `BCD_REG` 4 formes, `A8_ENTREE` 3, `PARITE` 61 octets. Les 3 sites d'Upper greffés relevés
+  par la revue (0xE13B28, 0xE221B8, 0xE22208) sont en forme exacte ; les 29 talons sont traduits comme dans ro9a36.
+- **Preuves en jeu** (cœur du 12/11, Linux) :
+  - couleur en match miroir (VERSUS, Ryu ZERO 3 contre Ryu ZERO 3) : ro9a36, J1 et J2 du même gris ; ro9a37, J1 en
+    violet, octet `$129` de J1 = 1 (ro9a36 : 0). La copie d'Arcade (`greffe_u_25dcf0`) n'est prouvée que sur la carte ;
+  - bonus des enchaînements (partie Arcade avec supers) : seules les images du score diffèrent ; 2 800 → 3 300
+    (image 1 600), 10 800 → 13 800 (image 3 000) ;
+  - bonus ×1,5 du mode Mazi : le drapeau lu par le moteur est l'octet **image** `$ED` de l'attaquant (`TST.B $ED(A4)`,
+    image `$0DFA4` ; numérotation PS2 : `$EC`, re/connaissances/champs.tsv). Drapeau posé (`FF84EC = 0001`) : dégâts
+    10 / 12 / 11 / 8 / 8 (ro9a36) → 14 / 17 / 16 / 12 / 12 (ro9a37) ; sans drapeau, identiques. Piège : poser l'octet
+    `$EC` de l'image ne change rien (c'est l'octet PS2) ;
+- **Non-régression** : VERSUS sous MAME (60 manches, liste de référence) = ro9a36 **à l'octet**, 0 exception ; banc des
+  décors (jumelle sans tirage du CPU) : **36/40** identiques à ro9a36, les 4 autres (14, 2A, 3C, 3E : « objet 2 0012 »)
+  sont les décors à objets tirés au hasard déjà connus ; contre Upper 28/40, comme ro9a36. Banc des fins (85 parties
+  Arcade jusqu'au générique, avec tirage) : **85/85** abouties (81 + 4 longues). Les 81 parties suivent
+  un autre chemin que dans ro9a36 (score et dégâts changent, donc le tirage : la fin commence à une autre image dans
+  81/81) ; durées des fins = banc 75 à 2 images près (15 à ±1 ou 2 images, toutes à début décalé ; entre les bancs 73
+  et 75, mêmes débuts, 0 écart).
+- **Copie de construction** (`tools/greffe-arcade/construction/`) : `ro9a36/` → `ro9a37/` (+ `greffe/e47/untranspile3_v161`,
+  `vars_ro9a37.txt` ; `vars_ro9a36.txt` et `vars_ro9a35b.txt` gardées), `releves_ro9a36/` → `releves_ro9a37/` (contenu
+  identique) ; `fige35.py` copie aussi le traducteur e47 ; `HA_ETAT = "ro9a37"`. Preuve (BUILD §11.7) : greffe seule (code et TSV du dépôt) = `ro9a37_fige` à l'octet (34/35 de MD5SUMS, seul `env.sh` : chemins) ; avec `HSFA_SONS_PS2=0` (423 s, 1,3 Go) : `sz3ud.03c` `627c98c4`, zip **31/32 membres identiques au zip livré** (CRC `51882820`), seul `hsfa_info.txt` diffère ; par défaut (sons PS2 du §218), en plus `hx3.01`, `hx3.02`, `hx3.14m` (le zip livré garde la ROM son hybride) ; Upper `ac053140`, Hyper `dbfd237d` (v161, inchangés).
+- Hors ro9a37 : un essai séparé (exclusions de pointeurs R1 de la revue de la greffe, 231 cases) ne change aucun décor
+  (40/40 = ro9a37) ; R3 (142 pointeurs prouvés laissés bruts) demande un interrupteur dans la greffe : à faire.
+
+### 222. 11-12/11 : revues critiques (traducteur, Upper MAX, greffe, cœur) : où sont les rapports
+Revues faites par des agents (Fable pour la plupart), en lecture statique puis, pour une partie, au banc. Les correctifs
+qui en sont sortis sont versés (§219 v161, §220 Upper MAX, §221 ro9a37) ; le reste est à reprendre depuis les rapports
+d'atelier (chacun a un ETAT.md avec la prochaine étape exacte) :
+- traducteur (2 passes, E1-E8) : `<workspace>/work/revue_traducteur/RAPPORT.md` ;
+- intégration Upper MAX (16 constats, 6 majeurs à arbitrer) : `<workspace>/work/revue_upper_max/revue_B/REVUE.md`,
+  dossiers d'arbitrage commencés dans `<workspace>/work/arbitrages_um/` ;
+- greffe Hyper + Arcade (2 passes : relogement R1-R5, banques, tables partagées et ids MAX, transitions ; zones
+  floues) : `<workspace>/work/revue_greffe/RAPPORT.md`, essais au banc dans `RESULTATS_ESSAIS.md` (premier confirmé :
+  bases d'Upper gardées à la sélection après un VERSUS sur décor d'Upper, correctif prévu en ro9a38) ;
+- patchs du cœur (revue ciblée v0.1.9 : non bloquant ; robustesse de la zone HSF9 et rembobinage de l'autonome
+  corrigés par 0032 / W06) : `<workspace>/work/revue_coeur/RAPPORT.md` ;
+- commencés puis arrêtés : rattrapage de l'index (`rattrapage_re/`), spécification de la carte à banques
+  (`spec_banques/`).
+Index : lignes des revues versées dans `re/connaissances/` (ro3, ro5, ro9, ro9a, sfa3_arcade, champs, max_psp).

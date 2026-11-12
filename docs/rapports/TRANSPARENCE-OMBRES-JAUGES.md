@@ -43,6 +43,11 @@ Agent `agent_alpha`, 2026-10-18. Mesures :
 | `50888`-`5088A` | Hyper (persos ZERO et ZERO 2) | image : seules les ombres changent (Ryu / Ken, décor de la Muraille) |
 | `0284A` | SFA3 : bout de bande d'ombre, contigu à `305F5` / `305F4` | positions contiguës au sol |
 
+- (11/11) `50888`-`5088A` sont en **ROM étendue** : leur code est un rang d'apparition, qui dépend de la ROM de base. En
+  voie ISO seule, ces tuiles tombaient en `50648`-`5064A` et l'ombre restait opaque. La construction les remet
+  maintenant à ces codes (`HSFA_OMBRE_CODES`, `hsfa_gfx.py`, BUILD §11.5). Toute nouvelle règle du cœur qui s'appuie
+  sur un code de ROM étendue doit être garantie de la même façon.
+
 - **Scène** : dans les 178 000 images, ces codes n'apparaissent que dans les combats, y compris ceux de la démo
   (`$FF8000` = `$10` / `$14`). Jamais à la sélection, sur les portraits, au VS, sur la carte ni au classement.
   - Les **fins** n'ont pas été mesurées : peut-être une ombre dans une scène de fin, ce qui resterait correct.

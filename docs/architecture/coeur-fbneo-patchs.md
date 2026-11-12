@@ -1,271 +1,274 @@
-# Cœur FBNeo « HSFA » : une fiche par patch
+# FBNeo core "HSFA": one sheet per patch
 
-Complète [coeur-fbneo.md](coeur-fbneo.md) (fonctionnement) et [`patches/fbneo/README.md`](../../patches/fbneo/README.md)
-(ordre d'application, construction). Chaque fiche dit : le problème, la solution, les alternatives écartées (avec
-leur source), les fichiers touchés, et comment couper ou vérifier le patch. « § » renvoie au journal
-`docs/journal/HANDOFF.md`. Quand une source ne cite aucune alternative, la fiche le dit.
+**Français : [coeur-fbneo-patchs.fr.md](coeur-fbneo-patchs.fr.md)**
 
-Les numéros sont ceux du tableau du README (colonne « # »). Les fiches s'arrêtent à la ligne 16 (`0012`) : pour les
-lignes 17 à 29 (`0013`-`0025`, `0021b`, `0021c`), le tableau du README tient lieu de fiche (contenu, raison, source). Les rapports anciens disent « patch 8 » pour la ligne 8
-(`0004-…`), « patch 10 » pour `0006-…`, etc.
+Complements [coeur-fbneo.md](coeur-fbneo.md) (how it works) and [`patches/fbneo/README.md`](../../patches/fbneo/README.md)
+(order of application, build). Each sheet gives: the problem, the solution, the rejected alternatives (with
+their source), the files touched, and how to turn off or check the patch. "§" refers to the journal
+`docs/journal/HANDOFF.md`. When a source cites no alternative, the sheet says so.
 
-Vérification commune à tous : `scripts/validation/nonreg_coeur.sh` contre un cœur de référence (`IDENTIQUE` attendu
-sur SFA3, Upper et Hyper, sauf changement voulu ; depuis le patch 15, avec `HSFA_OMBRES=0`).
+The numbers are those of the README table ("#" column). The sheets stop at row 16 (`0012`): for
+rows 17 to 29 (`0013`-`0025`, `0021b`, `0021c`), the README table serves as the sheet (content, reason, source). Older reports say "patch 8" for row 8
+(`0004-…`), "patch 10" for `0006-…`, etc.
 
-## 1. `fbneo-hsfa.patch` — pilotes SFA3 et Upper
+Check common to all: `scripts/validation/nonreg_coeur.sh` against a reference core (`IDENTIQUE` expected
+on SFA3, Upper and Hyper, unless the change is intended; since patch 15, with `HSFA_OMBRES=0`).
 
-- **Problème** : jouer les programmes retraduits sur console, sans MAME ni scripts Lua.
-- **Solution** : `cps_hsfa.cpp` reprend en C++ les trois couches Lua du banc (`banc_mem`, `banc_plans`,
-  `banc_sprites`) et les extensions du fork `sfa3hx` (ROM graphique étendue, codes d'objet sur 20 bits, bases de
-  plans, son hybride). Crochets dans `cps*.cpp`, tous derrière `HsfaMode`. ROM sans CRC cherchées par nom. IRQ du Z80
-  à 250 Hz comme MAME. États de sauvegarde. Lanceur `hsfa_run`. Sous-ensemble `Makefile.hsfa`.
-- **Alternatives** : garder MAME comme produit final, écarté au §109 (le fork reste l'outil de développement, FBNeo le
-  cœur pour Android / RetroArch). `Cps2Turbo` de FBNeo regardé, non repris : format différent du fork (§136).
-- **Fichiers** : `cps_hsfa.cpp` (nouveau), `d_cps2.cpp`, `cps.cpp`, `cps.h`, `cps_mem.cpp`, `cps_obj.cpp`,
+## 1. `fbneo-hsfa.patch` — SFA3 and Upper drivers
+
+- **Problem**: play the retranslated programs on console, without MAME or Lua scripts.
+- **Solution**: `cps_hsfa.cpp` takes over in C++ the three Lua layers of the bench (`banc_mem`, `banc_plans`,
+  `banc_sprites`) and the extensions of the `sfa3hx` fork (extended graphics ROM, 20-bit object codes, plane
+  bases, hybrid sound). Hooks in `cps*.cpp`, all behind `HsfaMode`. CRC-less ROMs looked up by name. Z80 IRQ
+  at 250 Hz like MAME. Savestates. `hsfa_run` launcher. `Makefile.hsfa` subset.
+- **Alternatives**: keep MAME as the final product, rejected in §109 (the fork stays the development tool, FBNeo the
+  core for Android / RetroArch). FBNeo's `Cps2Turbo` looked at, not carried over: different format from the fork (§136).
+- **Files**: `cps_hsfa.cpp` (new), `d_cps2.cpp`, `cps.cpp`, `cps.h`, `cps_mem.cpp`, `cps_obj.cpp`,
   `cps_run.cpp`, `cps_rw.cpp`, `cps_scr.cpp`, `qs.cpp`, `libretro.cpp`, `Makefile.hsfa`, `jni/Android.mk`,
-  `hsfa/hsfa_run.c`, `hsfa/paquet_fbneo.py` (vieille copie).
-- **Couper / vérifier** : seuls les pilotes `*hsfa` posent `HsfaMode` ; les autres jeux CPS gardent le code d'origine.
-  `HSFA_STATS=1` affiche les statistiques des listes d'objets. Validation d'origine : §136.
+  `hsfa/hsfa_run.c`, `hsfa/paquet_fbneo.py` (old copy).
+- **Turn off / check**: only the `*hsfa` drivers set `HsfaMode`; the other CPS games keep the original code.
+  `HSFA_STATS=1` prints the object list statistics. Original validation: §136.
 
-## 2. `fbneo-hsfa-widescreen.patch` — cœur 16:9
+## 2. `fbneo-hsfa-widescreen.patch` — 16:9 core
 
-- **Problème** : écrans larges ; le décor des jeux existe au-delà des 384 px de la CPS2.
-- **Solution** : `-DHSFA_WS` passe les pilotes HSFA à 448 × 224 et 16:9 ; FBNeo recentre plans et objets. Cœur
-  distinct « FinalBurn Neo HSFA Widescreen », **mêmes noms de pilotes**, donc mêmes zips (§139).
-- **Alternatives** : aucune n'est documentée.
-- **Fichiers** : `d_cps2.cpp`, `Makefile.hsfaws`, `libretro.cpp`.
-- **Vérifier** : centre de l'image identique au pixel au 4:3 (520 captures, §139). Défauts connus : coeur-fbneo.md §11.
+- **Problem**: wide screens; the games' stage art exists beyond the CPS2's 384 px.
+- **Solution**: `-DHSFA_WS` switches the HSFA drivers to 448 × 224 and 16:9; FBNeo recentres planes and objects. A
+  separate core "FinalBurn Neo HSFA Widescreen", **same driver names**, hence the same zips (§139).
+- **Alternatives**: none is documented.
+- **Files**: `d_cps2.cpp`, `Makefile.hsfaws`, `libretro.cpp`.
+- **Check**: centre of the picture identical to the pixel to 4:3 (520 captures, §139). Known defects: coeur-fbneo.md §11.
 
-## 3. `fbneo-hsfa-ws-flux.patch` — flux musique ADX
+## 3. `fbneo-hsfa-ws-flux.patch` — ADX music streams
 
-- **Problème** : des musiques n'existent qu'en flux sur le disque PS2 : persos d'Upper (`0030-0036`), musiques ZERO,
-  ZERO 2 et ALPHA d'Hyper. Le Z80 ne les connaît pas.
-- **Solution** : `hsfa_flux.h` (commun avec le fork) lit le `Y_DATA.BIN` de l'utilisateur. Interception à
-  `$61801F = 0` ; une musique jouée en flux devient `FF05` pour le Z80 ; `FFxx` appliqués au flux. DIP
-  « PS2 music » : `Off`, `Missing tracks only`, `All tracks`.
-- **Alternatives** : laisser passer le code au Z80 (il garde sa musique : essai `z_a`) ; envoyer `FF00` (coupe aussi
-  les voix : essai `z_i`). L'intro `0001` n'est jamais en flux : ses repères `$618021` viennent du Z80
+- **Problem**: some music exists only as streams on the PS2 disc: Upper's characters (`0030-0036`), Hyper's ZERO,
+  ZERO 2 and ALPHA music. The Z80 does not know them.
+- **Solution**: `hsfa_flux.h` (shared with the fork) reads the user's `Y_DATA.BIN`. Interception at
+  `$61801F = 0`; a piece of music played as a stream becomes `FF05` for the Z80; `FFxx` applied to the stream. DIP
+  "PS2 music": `Off`, `Missing tracks only`, `All tracks`.
+- **Alternatives**: let the code through to the Z80 (it keeps its music: test `z_a`); send `FF00` (also cuts
+  the voices: test `z_i`). The intro `0001` is never streamed: its `$618021` cues come from the Z80
   ([FLUX](../rapports/FLUX.md) §1.2).
-- **Fichiers** : `hsfa_flux.h` (nouveau), `cps_hsfa.cpp`, `cps_mem.cpp`, `qs.cpp`, `cps.h`, `d_cps2.cpp`.
-- **Couper / vérifier** : DIP `Off`, ou `HSFA_FLUX=0` sur PC ; journal `HSFA_FLUX_LOG=<fichier>`. En mode 1 sans
-  musique hors QSound, WAV identique au cœur d'avant ([FLUX](../rapports/FLUX.md) §3).
+- **Files**: `hsfa_flux.h` (new), `cps_hsfa.cpp`, `cps_mem.cpp`, `qs.cpp`, `cps.h`, `d_cps2.cpp`.
+- **Turn off / check**: DIP `Off`, or `HSFA_FLUX=0` on PC; log `HSFA_FLUX_LOG=<fichier>`. In mode 1 with no
+  music outside the QSound, WAV identical to the previous core ([FLUX](../rapports/FLUX.md) §3).
 
-## 4. `hyper-HSFA-pilote-sfa3hhsfa-Hyper-Street-Fighter-Alpha-mod.patch` — pilote Hyper
+## 4. `hyper-HSFA-pilote-sfa3hhsfa-Hyper-Street-Fighter-Alpha-mod.patch` — Hyper driver
 
-- **Problème** : Hyper (`ro9`) a des blocs externes en `$940000` et `$C84000`, une banque commune 545, et presque
-  toutes ses musiques en flux.
-- **Solution** : pilote `sfa3hhsfa`, mécanismes d'Upper (`HsfaMode = 2`) plus `HsfaHyper = 1`. La base des blocs
-  externes se déduit de la taille de `hsfa_ext.bin` (`$F00000` − taille). DIP musique sur `All tracks`. Crochet
-  d'essai `HSFA_NOROUL`. `hsfa_run` : `PILOTE=hyper`.
-- **Alternatives** : un premier pilote avait un mode propre (`HsfaMode = 3`) ; la version livrée réutilise le mode
-  d'Upper ([FBNEO-HYPER](../rapports/FBNEO-HYPER.md) §1-§2).
-- **Fichiers** : `d_cps2.cpp`, `cps_hsfa.cpp`, `cps.h`, `hsfa/hsfa_run.c`, et les fichiers générés `gamelist.txt`,
-  `driverlist.h` (à exclure à l'application : seul patch de la chaîne qui les contient).
-- **Vérifier** : tournée VERSUS de 13 000 images contre le fork : mêmes 14 choix, 17/26 captures identiques au pixel
+- **Problem**: Hyper (`ro9`) has external blocks at `$940000` and `$C84000`, a common bank 545, and almost
+  all its music as streams.
+- **Solution**: driver `sfa3hhsfa`, Upper's mechanisms (`HsfaMode = 2`) plus `HsfaHyper = 1`. The base of the external
+  blocks is deduced from the size of `hsfa_ext.bin` (`$F00000` − size). Music DIP on `All tracks`. Test
+  hook `HSFA_NOROUL`. `hsfa_run`: `PILOTE=hyper`.
+- **Alternatives**: a first driver had its own mode (`HsfaMode = 3`); the delivered version reuses Upper's
+  mode ([FBNEO-HYPER](../rapports/FBNEO-HYPER.md) §1-§2).
+- **Files**: `d_cps2.cpp`, `cps_hsfa.cpp`, `cps.h`, `hsfa/hsfa_run.c`, and the generated files `gamelist.txt`,
+  `driverlist.h` (to be excluded when applying: the only patch of the chain that contains them).
+- **Check**: VERSUS tour of 13,000 frames against the fork: same 14 choices, 17/26 captures identical to the pixel
   ([FBNEO-HYPER](../rapports/FBNEO-HYPER.md) §4).
 
-## 5. `0001-HSFA-rejeu-QSound-…` — sons SFA1 / SFA2, données dans le zip
+## 5. `0001-HSFA-rejeu-QSound-…` — SFA1 / SFA2 sounds, data in the zip
 
-- **Problème** : les versions ZERO et ZERO 2 d'Hyper doivent avoir leurs voix et bruitages d'origine. La ROM QSound
-  de 16 Mo est pleine, le pilote Z80 n'a plus de numéro de commande libre.
-- **Solution** : un 2ᵉ QSound (`hsfa_qsound.h`) rejoue chaque son tel que le pilote d'origine l'écrivait
-  (`hsfa_rejeu.h`, 1 323 sons). Le Z80 reçoit un code vide. Toutes les données (flux, rejeu) sont des membres
-  **stockés** du zip, lus sur place.
-- **Alternatives** : (a) ROM QSound étendue à 32 Mo, écartée : il faudrait opérer le pilote Z80 (ni numéros libres,
-  ni entrées libres, ni bit de banque) ; lecteur d'échantillons « maison », écarté : volume, panoramique, écho et
-  séquences à réécrire ([SON-HYPER-ROM](../rapports/SON-HYPER-ROM.md) §12.1). Données hors du zip : remplacé par
-  « tout dans le zip », décision de l'utilisateur ([REJEU-FBNEO](../rapports/REJEU-FBNEO.md) §0).
-- **Fichiers** : `hsfa_qsound.h`, `hsfa_rejeu.h` (nouveaux), `cps_hsfa.cpp`, `hsfa_flux.h`, `cps_mem.cpp`, `qs.cpp`,
+- **Problem**: Hyper's ZERO and ZERO 2 versions must have their original voices and sound effects. The 16 MB QSound
+  ROM is full, the Z80 driver has no free command number left.
+- **Solution**: a 2nd QSound (`hsfa_qsound.h`) replays each sound as the original driver wrote it
+  (`hsfa_rejeu.h`, 1,323 sounds). The Z80 receives an empty code. All the data (streams, replay) are **stored**
+  members of the zip, read in place.
+- **Alternatives**: (a) QSound ROM extended to 32 MB, rejected: the Z80 driver would need surgery (no free numbers,
+  no free entries, no bank bit); "home-made" sample player, rejected: volume, panning, echo and
+  sequences to rewrite ([SON-HYPER-ROM](../rapports/SON-HYPER-ROM.md) §12.1). Data outside the zip: replaced by
+  "everything in the zip", the user's decision ([REJEU-FBNEO](../rapports/REJEU-FBNEO.md) §0).
+- **Files**: `hsfa_qsound.h`, `hsfa_rejeu.h` (new), `cps_hsfa.cpp`, `hsfa_flux.h`, `cps_mem.cpp`, `qs.cpp`,
   `cps.h`, `burn.cpp`, `burn.h`, `libretro.cpp`, `hsfa/hsfa_run.c`.
-- **Couper / vérifier** : `HSFA_REJEU=0` ; `HSFA_REJEU_LOG=<fichier>` ; `HSFA_REJEU_SEUL=1`. Hyper sans aucun membre :
-  identique à l'octet au cœur d'avant. Coût mesuré : 0,16 ms par image sur PC, +14 Mo de mémoire.
+- **Turn off / check**: `HSFA_REJEU=0`; `HSFA_REJEU_LOG=<fichier>`; `HSFA_REJEU_SEUL=1`. Hyper without any member:
+  identical to the byte to the previous core. Measured cost: 0.16 ms per frame on PC, +14 MB of memory.
 
-## 6. `0002-HSFA-chargement-differe-emplacement-4.patch` — portrait du face-à-face
+## 6. `0002-HSFA-chargement-differe-emplacement-4.patch` — face-off portrait
 
-- **Problème** : dans Upper, 5 images de tuiles de l'écran VS à la place du grand portrait, quand le dialogue d'avant
-  le 1ᵉʳ combat se ferme.
-- **Solution** : le nouveau fichier de l'emplacement 4 attend qu'aucun objet de cet emplacement ne soit plus affiché
-  (10 images au plus), comme la lecture mise en file de la PS2.
-- **Alternatives** : retarder l'écriture du pointeur `$C0BC` dans le traducteur, écarté : le jeu lit ce pointeur tout
-  de suite (animation de la paire, acteurs de fin). Pistes « défaut de traduction », « ordre des écritures » et
-  « double tampon » réfutées ([PORTRAITS](../rapports/PORTRAITS.md) §2.3, §3.2).
-- **Fichiers** : `cps_hsfa.cpp` (`HsfaSuivre4`, `HsfaFrameDone`, `HsfaScan`).
-- **Couper / vérifier** : `HSFA_LAT4=0` ou `lat4=0` dans la configuration du zip (identique au pixel à l'ancien
-  cœur) ; `HSFA_LAT4_MAX`. La taille des états change.
+- **Problem**: in Upper, 5 frames of VS-screen tiles instead of the large portrait, when the dialogue before
+  the 1st fight closes.
+- **Solution**: the new file of slot 4 waits until no object of that slot is displayed any more
+  (10 frames at most), like the PS2's queued read.
+- **Alternatives**: delay the write of the `$C0BC` pointer in the translator, rejected: the game reads that pointer straight
+  away (animation of the pair, ending actors). Leads "translation fault", "write order" and
+  "double buffer" refuted ([PORTRAITS](../rapports/PORTRAITS.md) §2.3, §3.2).
+- **Files**: `cps_hsfa.cpp` (`HsfaSuivre4`, `HsfaFrameDone`, `HsfaScan`).
+- **Turn off / check**: `HSFA_LAT4=0` or `lat4=0` in the zip's configuration (identical to the pixel to the old
+  core); `HSFA_LAT4_MAX`. The size of the states changes.
 
-## 7. `0003-HSFA-options-du-coeur.patch` — réglages de l'écran OPTION
+## 7. `0003-HSFA-options-du-coeur.patch` — OPTION screen settings
 
-- **Problème** : l'écran OPTION de l'Anthology est du C natif, non traduit ; sa recopie des réglages dans la RAM du
-  jeu est perdue.
-- **Solution** : 24 réglages en DIP B-H, écrits dans les octets du jeu à chaque passage au menu des modes. « Game
-  default » n'écrit rien.
-- **Alternatives** : (a) écran d'options en 68K dans le programme, 1,5 à 3 jours ; (c) menu de test et EEPROM de
-  l'arcade, greffe d'environ 10 Ko, SFA3 seulement, et le jeu ne lit plus l'EEPROM. Écriture aussi à la sélection des
-  persos : essayée puis retirée, elle écrasait le chrono infini du TRAINING ([OPTIONS](../rapports/OPTIONS.md) §2,
+- **Problem**: the Anthology's OPTION screen is native C, not translated; its copy of the settings into the game's
+  RAM is lost.
+- **Solution**: 24 settings in DIP B-H, written into the game's bytes each time through the mode menu. "Game
+  default" writes nothing.
+- **Alternatives**: (a) options screen in 68K in the program, 1.5 to 3 days; (c) arcade test menu and EEPROM,
+  graft of about 10 KB, SFA3 only, and the game no longer reads the EEPROM. Writing at character select
+  as well: tried then removed, it overwrote TRAINING's infinite timer ([OPTIONS](../rapports/OPTIONS.md) §2,
   §4).
-- **Fichiers** : `cps_hsfa.cpp` (`HsfaOptions`), `d_cps2.cpp` (DIP), `cps.h`. La partie lanceur d'essai est le patch 11b.
-- **Couper / vérifier** : `HSFA_OPTIONS=0`. Tous DIP par défaut : 60/60 captures d'Hyper identiques
+- **Files**: `cps_hsfa.cpp` (`HsfaOptions`), `d_cps2.cpp` (DIP), `cps.h`. The test launcher part is patch 11b.
+- **Turn off / check**: `HSFA_OPTIONS=0`. All DIPs at default: 60/60 Hyper captures identical
   ([OPTIONS](../rapports/OPTIONS.md) §4).
 
-## 8. `0004-HSFA-stb_vorbis.patch` — décodeur Ogg Vorbis
+## 8. `0004-HSFA-stb_vorbis.patch` — Ogg Vorbis decoder
 
-- **Problème** : le zip d'Hyper fait environ 710 Mo avec les flux ADX.
-- **Solution** : stb_vorbis 1.22 (un seul fichier C, domaine public / MIT), API mémoire seulement
-  (`STB_VORBIS_NO_STDIO`, `STB_VORBIS_NO_PUSHDATA_API`) ; `-DHSFA_FLUX_VORBIS` dans `Makefile.hsfa`.
-- **Alternatives** : libvorbis (0,40 s CPU pour 120 s de musique contre 0,14 s) et Opus (0,92 s), plus lents ; une
-  version antérieure à 1.22 de stb_vorbis (corrections de `seek`) ([PLAN-VORBIS](../rapports/PLAN-VORBIS.md) §2.1,
+- **Problem**: Hyper's zip is about 710 MB with the ADX streams.
+- **Solution**: stb_vorbis 1.22 (a single C file, public domain / MIT), memory API only
+  (`STB_VORBIS_NO_STDIO`, `STB_VORBIS_NO_PUSHDATA_API`); `-DHSFA_FLUX_VORBIS` in `Makefile.hsfa`.
+- **Alternatives**: libvorbis (0.40 s CPU for 120 s of music versus 0.14 s) and Opus (0.92 s), slower; a
+  version of stb_vorbis older than 1.22 (`seek` fixes) ([PLAN-VORBIS](../rapports/PLAN-VORBIS.md) §2.1,
   §6).
-- **Fichiers** : `src/dep/libs/stb_vorbis/` (nouveau), `Makefile.hsfa`.
-- **Vérifier** : compilation Linux, Android, ROCKNIX, Windows.
+- **Files**: `src/dep/libs/stb_vorbis/` (new), `Makefile.hsfa`.
+- **Check**: builds on Linux, Android, ROCKNIX, Windows.
 
-## 9. `0005-HSFA-flux-musique-Ogg-Vorbis.patch` — flux Ogg
+## 9. `0005-HSFA-flux-musique-Ogg-Vorbis.patch` — Ogg streams
 
-- **Problème** : lire des flux Ogg sans rien changer au comportement du jeu.
-- **Solution** : une entrée de l'AFS peut être un Ogg complet (reconnu à `OggS`). Boucle par `LOOPSTART` /
-  `LOOPEND` ; anneau de 2,7 s ; ADX et Ogg cohabitent.
-- **Alternatives** : de nouveaux champs d'état avec un numéro de version, prévus par le plan ; remplacés par la
-  réutilisation de `pos_abs` et `boucle_ok` : l'état garde sa taille, un état écrit avec un zip ADX se recharge avec un
-  zip Ogg ([PLAN-VORBIS](../rapports/PLAN-VORBIS.md), « Écarts avec le plan »).
-- **Fichiers** : `hsfa_flux.h`, `cps_hsfa.cpp`.
-- **Vérifier** : `tools/flux/tests/lance_tests.sh` (23 contrôles). Un cœur sans ce patch ne lit pas un zip Ogg.
+- **Problem**: play Ogg streams without changing anything in the game's behaviour.
+- **Solution**: an AFS entry can be a complete Ogg (recognised by `OggS`). Loop through `LOOPSTART` /
+  `LOOPEND`; 2.7 s ring buffer; ADX and Ogg live side by side.
+- **Alternatives**: new state fields with a version number, planned by the plan; replaced by
+  reusing `pos_abs` and `boucle_ok`: the state keeps its size, a state written with an ADX zip reloads with an
+  Ogg zip ([PLAN-VORBIS](../rapports/PLAN-VORBIS.md), "Écarts avec le plan" (differences from the plan)).
+- **Files**: `hsfa_flux.h`, `cps_hsfa.cpp`.
+- **Check**: `tools/flux/tests/lance_tests.sh` (23 checks). A core without this patch cannot read an Ogg zip.
 
-## 10. `0006-HSFA-carte-musique.patch` — partitions ZERO / ZERO 2
+## 10. `0006-HSFA-carte-musique.patch` — ZERO / ZERO 2 scores
 
-- **Problème** : les musiques ZERO et ZERO 2 d'Hyper sont des enregistrements (environ 112 Mo d'ADX) alors que leurs
-  pilotes son d'origine sont dans le `X_DATA.BIN` de l'utilisateur.
-- **Solution** : « carte musique » : un 2ᵉ Z80 (Zet n° 1) exécute le pilote SFA1 ou SFA2 (photo prise après son
-  démarrage, restaurée à chaque morceau), un 3ᵉ QSound lit la ROM déjà chargée pour le rejeu. Aiguillage : carte,
-  puis flux, puis Z80 principal.
-- **Alternatives** : B, partitions converties en v1.71 pour le Z80 principal (ni numéros, ni entrées, ni bit de
-  banque libres) ; C, partager le QSound du rejeu (les deux pilotes écriraient sur les mêmes voies) ; D, rejouer des
-  écritures QSound enregistrées (raccord de boucle non garanti), gardée en repli
+- **Problem**: Hyper's ZERO and ZERO 2 music are recordings (about 112 MB of ADX) while their
+  original sound drivers are in the user's `X_DATA.BIN`.
+- **Solution**: "music board": a 2nd Z80 (Zet no. 1) runs the SFA1 or SFA2 driver (snapshot taken after it
+  starts, restored for each piece), a 3rd QSound reads the ROM already loaded for the replay. Routing: board,
+  then stream, then main Z80.
+- **Alternatives**: B, scores converted to v1.71 for the main Z80 (no free numbers, entries or bank
+  bit); C, share the replay's QSound (both drivers would write to the same channels); D, replay recorded
+  QSound writes (loop seam not guaranteed), kept as a fallback
   ([PLAN-PARTITIONS-HYPER](../rapports/PLAN-PARTITIONS-HYPER.md) §2).
-- **Fichiers** : `hsfa_musique.h` (nouveau), `cps_hsfa.cpp`, `hsfa_flux.h`, `qs.cpp`, `cps.h`.
-- **Couper / vérifier** : `HSFA_MUSIQUE=0`, ou un zip sans `hsfa_musique.bin`. Le Z80 n° 1 est toujours créé pour
-  Hyper, pour que la disposition des états ne dépende pas des données. Banc : `lance_tests_carte.sh`.
+- **Files**: `hsfa_musique.h` (new), `cps_hsfa.cpp`, `hsfa_flux.h`, `qs.cpp`, `cps.h`.
+- **Turn off / check**: `HSFA_MUSIQUE=0`, or a zip without `hsfa_musique.bin`. Z80 no. 1 is always created for
+  Hyper, so that the state layout does not depend on the data. Bench: `lance_tests_carte.sh`.
 
-## 11. `0007-HSFA-roulette-touche-piece.patch` — roulette sur Select
+## 11. `0007-HSFA-roulette-touche-piece.patch` — roulette on Select
 
-- **Problème** : la traduction recopie le bit de Start dans l'octet de roulette `$D3` : Start tenu à la validation
-  donnait un perso au hasard, ce qui gênait les EX.
-- **Solution** : sur la grille des persos seulement, le cœur écrit `$FF84D3` / `$FF88D3` d'après la touche Pièce
-  (Select) du joueur, comme Select sur PS2. Start reste au jeu (EX, EX Balrog, S-ISM).
-- **Alternatives** : forcer l'octet à 0 (`HSFA_NOROUL`, comme `NOROUL` du banc), gardé pour les essais seulement : la
-  roulette disparaîtrait ([ETATS-HYPER](../rapports/ETATS-HYPER.md) §1.1).
-- **Fichiers** : `cps_hsfa.cpp` (`HsfaRoulette`, prise d'écriture `$FF8400-$FF8BFF`).
-- **Vérifier** : tournée de 151 VERSUS identique avec et sans `HSFA_NOROUL` (§157).
+- **Problem**: the translation copies the Start bit into the roulette byte `$D3`: Start held on confirmation
+  gave a random character, which got in the way of the EX versions.
+- **Solution**: on the character grid only, the core writes `$FF84D3` / `$FF88D3` from the player's Coin
+  (Select) button, like Select on PS2. Start stays with the game (EX, EX Balrog, S-ISM).
+- **Alternatives**: force the byte to 0 (`HSFA_NOROUL`, like the bench's `NOROUL`), kept for tests only: the
+  roulette would disappear ([ETATS-HYPER](../rapports/ETATS-HYPER.md) §1.1).
+- **Files**: `cps_hsfa.cpp` (`HsfaRoulette`, write tap `$FF8400-$FF8BFF`).
+- **Check**: tour of 151 VERSUS identical with and without `HSFA_NOROUL` (§157).
 
-## 11b. `0007b-HSFA-hsfa_run-options-du-coeur-HSFA_VARS.patch` — options du cœur dans le lanceur
+## 11b. `0007b-HSFA-hsfa_run-options-du-coeur-HSFA_VARS.patch` — core options in the launcher
 
-- **Problème** : essayer les options du cœur sans RetroArch, y compris un changement en cours de partie.
-- **Solution** : `hsfa_run` sert `HSFA_VARS="clé=valeur;…"` aux demandes `GET_VARIABLE` du cœur ; `HSFA_VARS2`
-  remplace `HSFA_VARS` à partir de l'image `HSFA_VARS2_IMAGE`, et `GET_VARIABLE_UPDATE` répond vrai une fois.
-- **Pourquoi un patch à part** : ce morceau du diff d'origine ([OPTIONS](../rapports/OPTIONS.md) §3.2) manquait au
-  patch 7 publié. Il a été extrait du commit `bca36de` de l'arbre de référence. Le patch 12 s'applique avec ou sans.
-- **Alternatives** : sans objet.
-- **Fichiers** : `hsfa/hsfa_run.c` seulement : le cœur `.so` n'est pas touché.
-- **Vérifier** : avec `HSFA_VARS="fbneo-dipswitch-sfa3hsfa-Option__Timer_speed=Infinity"` et `DUMPRAM=1400`, une
-  partie de SFA3 arrêtée au menu des modes a `$FF80A3 = 4` (1 sans la variable) ; vérifié le 2026-10-18.
+- **Problem**: try the core options without RetroArch, including a change during the game.
+- **Solution**: `hsfa_run` serves `HSFA_VARS="clé=valeur;…"` to the core's `GET_VARIABLE` requests; `HSFA_VARS2`
+  replaces `HSFA_VARS` from frame `HSFA_VARS2_IMAGE` on, and `GET_VARIABLE_UPDATE` answers true once.
+- **Why a separate patch**: this piece of the original diff ([OPTIONS](../rapports/OPTIONS.md) §3.2) was missing from
+  the published patch 7. It was extracted from commit `bca36de` of the reference tree. Patch 12 applies with or without it.
+- **Alternatives**: not applicable.
+- **Files**: `hsfa/hsfa_run.c` only: the `.so` core is not touched.
+- **Check**: with `HSFA_VARS="fbneo-dipswitch-sfa3hsfa-Option__Timer_speed=Infinity"` and `DUMPRAM=1400`, an
+  SFA3 game stopped in the mode menu has `$FF80A3 = 4` (1 without the variable); checked on 2026-10-18.
 
-## 12. `0008-HSFA-registres-des-plans-ro9a.patch` — plans de `ro9a`
+## 12. `0008-HSFA-registres-des-plans-ro9a.patch` — `ro9a` planes
 
-- **Problème** : dans `ro9a` (Hyper + Arcade d'Upper), le programme écrit les bases `$400/$440/$4A0` des écrans
-  d'Upper. Elles tombaient au-delà de la région de 64 Mo ; le masque d'adresse les ramenait sur les tuiles de SFA3.
-- **Solution** : écriture de mot traitée en une fois (masque d'octet gardé pour les octets) ; `nCpsGfxScroll` mis à
-  jour seulement au changement ; taille de la région déduite de `hsfa_gfx.bin` (80 Mo pour `ro9a`, Upper et Hyper
-  inchangés) ; `hsfa_gfx.bin` converti sur place (pas de tampon de 32 à 48 Mo) ; pilote d'essai `sfa3hahsfa` ;
-  `HSFA_PLANS_LOG` ; `hsfa_run` `PILOTE=arcade`.
-- **Alternatives** : l'invalidation `mark_all_dirty` du fork n'a pas d'équivalent à écrire, FBNeo n'ayant pas de cache
-  de tuiles. Remplacer tout de suite le pilote d'Hyper : différé, il suffira de passer la taille dans
+- **Problem**: in `ro9a` (Hyper + Upper's Arcade), the program writes the bases `$400/$440/$4A0` of Upper's
+  screens. They fell beyond the 64 MB region; the address mask brought them back onto SFA3's tiles.
+- **Solution**: word write handled in one go (byte mask kept for bytes); `nCpsGfxScroll` updated
+  only on change; region size deduced from `hsfa_gfx.bin` (80 MB for `ro9a`, Upper and Hyper
+  unchanged); `hsfa_gfx.bin` converted in place (no 32 to 48 MB buffer); test driver `sfa3hahsfa`;
+  `HSFA_PLANS_LOG`; `hsfa_run` `PILOTE=arcade`.
+- **Alternatives**: the fork's `mark_all_dirty` invalidation has no equivalent to write, since FBNeo has no tile
+  cache. Replacing the Hyper driver straight away: deferred, it will be enough to pass the size in
   `Sfa3hhsfaRomDesc` ([COEUR-BANQUES](../rapports/COEUR-BANQUES.md) §A.2).
-- **Fichiers** : `cps_hsfa.cpp`, `cps_rw.cpp`, `cps.h`, `d_cps2.cpp`, `hsfa/hsfa_run.c`.
-- **Vérifier** : `HSFA_PLANS_LOG=<f>` : suite `300` → `400` → `300` aux mêmes images que le banc ; `STATETEST=700`.
-  Le pilote `sfa3hahsfa` n'existe dans le `.so` que si les en-têtes ont été régénérés (`REGEN_HEADERS=1`).
+- **Files**: `cps_hsfa.cpp`, `cps_rw.cpp`, `cps.h`, `d_cps2.cpp`, `hsfa/hsfa_run.c`.
+- **Check**: `HSFA_PLANS_LOG=<f>`: sequence `300` → `400` → `300` at the same frames as the bench; `STATETEST=700`.
+  The `sfa3hahsfa` driver only exists in the `.so` if the headers were regenerated (`REGEN_HEADERS=1`).
 
-## 13. `0009-HSFA-prototype-trous-carte-68K.patch` — trous de la carte en ROM
+## 13. `0009-HSFA-prototype-trous-carte-68K.patch` — holes of the map as ROM
 
-- **Problème** : la ROM programme est pleine et les blocs externes de `ro9a` sont saturés (marge d'environ 28 Ko).
-- **Solution** : les 7 plages libres de la carte 68K (5,08 Mo) servies en ROM depuis le membre facultatif
-  `hsfa_trous.bin`, déclaré par `sfa3hahsfa` seul. Coût en cycles nul.
-- **Alternatives** : banque de données commutée par un registre `$804210`, chiffrée mais gardée pour plus tard (un
-  pointeur n'a de sens que si la bonne page est en place ; utile au-delà d'environ 5 Mo) ; données mortes d'Hyper ;
-  `$F20000-$F7FFFF` (`ro9` seulement) ; au-delà de 16 Mo, impossible (bus de 24 bits)
+- **Problem**: the program ROM is full and the external blocks of `ro9a` are saturated (margin of about 28 KB).
+- **Solution**: the 7 free ranges of the 68K map (5.08 MB) served as ROM from the optional member
+  `hsfa_trous.bin`, declared by `sfa3hahsfa` alone. Zero cost in cycles.
+- **Alternatives**: data bank switched by a `$804210` register, estimated but kept for later (a
+  pointer only makes sense if the right page is in place; useful beyond about 5 MB); Hyper's dead data;
+  `$F20000-$F7FFFF` (`ro9` only); beyond 16 MB, impossible (24-bit bus)
   ([COEUR-BANQUES](../rapports/COEUR-BANQUES.md) §B.2-§B.4).
-- **Fichiers** : `cps_hsfa.cpp` (`HsfaTrous`, `HsfaLoadData`, `HsfaInit`), `d_cps2.cpp`.
-- **Couper / vérifier** : sans le membre, rien n'est projeté. Le journal du cœur lit le 1ᵉʳ et le dernier mot de
-  chaque trou (`HSFA : trou $…`). Limites : pas de code dans les trous ; plus grand trou de 2 Mo ; +5,1 Mo de RAM.
+- **Files**: `cps_hsfa.cpp` (`HsfaTrous`, `HsfaLoadData`, `HsfaInit`), `d_cps2.cpp`.
+- **Turn off / check**: without the member, nothing is mapped. The core log reads the 1st and last word of
+  each hole (`HSFA : trou $…`). Limits: no code in the holes; largest hole 2 MB; +5.1 MB of RAM.
 
-## 14. `0010-HSFA-melange-des-objets-transparence.patch` — mélange des objets
+## 14. `0010-HSFA-melange-des-objets-transparence.patch` — object blending
 
-- **Problème** : sur PSP, les effets des persos MAX sont dessinés en **additif saturé** (mode choisi par objet, champ
-  `+0xAA` du moteur PSP). La CPS2 n'a aucune transparence : les mêmes effets sortaient opaques, avec un contour sombre.
-- **Solution** : des modes de mélange posés par le programme et appliqués par le cœur au dessin des objets.
-  - `$804220-$80423F` : un octet par palette OBJ (0 opaque au reset, 1 additif, 2 alpha 50 %, 3 alpha 75 %,
-    4 soustractif ; 5 noir à 75 % depuis 0011) ;
-  - `$804240-$804241` : octet bas = mode des objets **marqués**, c'est-à-dire dont le mot X de la liste brute a le
-    bit 12 (posé par le talon EFFET_W des persos MAX) ; 0 = bit ignoré ;
-  - priorité : objet marqué avec `$804240` ≠ 0, puis palette, puis option des ombres (0011), puis opaque ;
-  - `HsfaEclater` garde le bit 12 (`x & $F000`) ; `Cps2ObjDraw` passe `nCpsBlend = 0x100 | mode` ; mélange dans
-    `cps_mix()` (24/32 bits) et `cps_mix16()` (16 bits, 565 ou 1555) ;
-  - états : les registres sont la dernière zone de l'état libretro, lue seulement si elle existe : les anciens états
-    se rechargent (registres à 0), et les nouveaux se rechargent dans un ancien cœur.
-- **Alternatives** :
-  - (v1) registres par palette seuls : la PSP décide par objet, pas par palette ([TRANSPARENCE](../rapports/TRANSPARENCE.md)
-    §9) ;
-  - (b) bloc de palettes « additives » : 5 palettes non prouvées libres, et des copies de couleurs qui ne suivraient
-    pas les flashs et assombrissements de super ; écarté au profit du bit 12, jamais posé par les programmes traduits
-    (0 sur 10,99 M d'entrées) ([TRANSPARENCE-PAR-OBJET](../rapports/TRANSPARENCE-PAR-OBJET.md) §2-§3) ;
-  - registres sauvés par `SCAN_VAR` (v1) : 32 octets de plus, anciens états illisibles ; remplacé par la zone finale
-    facultative (§9.2).
-- **Fichiers** : `cps_hsfa.cpp`, `cps.h`, `cps_obj.cpp`, `ctv.cpp`, `ctv_do.h`, `src/burner/libretro/retro_memory.cpp`.
-- **Couper / vérifier** : registres jamais écrits = image identique au pixel (`nonreg_coeur` ×3 en 32 et 16 bits, 4:3
-  et 16:9). Essais : `HSFA_OBJMIX=oo:m[,…]` (décalage depuis `$804220` ; `21` = objets marqués) impose des valeurs au
-  reset, `HSFA_MIX_LOG=<fichier>` journalise les changements. Mode 2 seulement (Upper, Hyper, `ro9a`).
+- **Problem**: on PSP, the MAX characters' effects are drawn with **saturated additive** blending (mode chosen per
+  object, field `+0xAA` of the PSP engine). The CPS2 has no transparency at all: the same effects came out opaque,
+  with a dark outline.
+- **Solution**: blending modes set by the program and applied by the core when drawing the objects.
+  - `$804220-$80423F`: one byte per OBJ palette (0 opaque at reset, 1 additive, 2 alpha 50 %, 3 alpha 75 %,
+    4 subtractive; 5 black at 75 % since 0011);
+  - `$804240-$804241`: low byte = mode of the **marked** objects, that is those whose X word in the raw list has
+    bit 12 set (set by the EFFET_W stub of the MAX characters); 0 = bit ignored;
+  - priority: marked object with `$804240` ≠ 0, then palette, then shadow option (0011), then opaque;
+  - `HsfaEclater` keeps bit 12 (`x & $F000`); `Cps2ObjDraw` passes `nCpsBlend = 0x100 | mode`; blending in
+    `cps_mix()` (24/32 bits) and `cps_mix16()` (16 bits, 565 or 1555);
+  - states: the registers are the last area of the libretro state, read only if it exists: old states
+    reload (registers at 0), and new ones reload in an old core.
+- **Alternatives**:
+  - (v1) per-palette registers only: the PSP decides per object, not per palette ([TRANSPARENCE](../rapports/TRANSPARENCE.md)
+    §9);
+  - (b) block of "additive" palettes: 5 palettes not proven free, and colour copies that would not follow
+    the super flashes and darkening; rejected in favour of bit 12, never set by the translated programs
+    (0 out of 10.99 M entries) ([TRANSPARENCE-PAR-OBJET](../rapports/TRANSPARENCE-PAR-OBJET.md) §2-§3);
+  - registers saved by `SCAN_VAR` (v1): 32 more bytes, old states unreadable; replaced by the optional final
+    area (§9.2).
+- **Files**: `cps_hsfa.cpp`, `cps.h`, `cps_obj.cpp`, `ctv.cpp`, `ctv_do.h`, `src/burner/libretro/retro_memory.cpp`.
+- **Turn off / check**: registers never written = picture identical to the pixel (`nonreg_coeur` ×3 in 32 and 16 bits, 4:3
+  and 16:9). Tests: `HSFA_OBJMIX=oo:m[,…]` (offset from `$804220`; `21` = marked objects) forces values at
+  reset, `HSFA_MIX_LOG=<fichier>` logs the changes. Mode 2 only (Upper, Hyper, `ro9a`).
 
-## 15. `0011-HSFA-option-ombres-transparentes-PSP.patch` — ombres transparentes
+## 15. `0011-HSFA-option-ombres-transparentes-PSP.patch` — transparent shadows
 
-- **Problème** : la PSP dessine les ombres des persos en noir à 75 % ; les programmes traduits les dessinent opaques
-  (tuiles OBJ de la palette `0x14`).
-- **Solution** : option du cœur « Transparent shadows (PSP) », bit 7 du DIP A, **activée par défaut**, pour tous les
-  pilotes HSFA (modes 1 et 2). Une tuile est une ombre si sa palette OBJ vaut `0x14` **et** son code global est
-  `0x0284A`, `0x305DF-0x30613` ou `0x50888-0x5088A` (les mêmes dans les quatre jeux). Nouveau mode 5 : noir à 75 %.
-  Les modes posés par le jeu (0010) passent avant l'option.
-- **Alternatives** :
-  - la palette `0x14` seule : elle sert aussi au décor (poteaux du premier plan), qui doit rester opaque ;
-  - ajouter un test d'état (`$FF8000 = 2`, `$FF8004 = 4`) : les ombres des combats de démo resteraient opaques ; non
-    recommandé ;
-  - le mode 3 (alpha 75 % de la couleur) teinterait l'ombre de la palette `0x14` : d'où le mode 5
-    ([TRANSPARENCE-OMBRES-JAUGES](../rapports/TRANSPARENCE-OMBRES-JAUGES.md) §3) ;
-  - jauges à 50 % (D5) : abandonnées, la PSP ne teinte pas les jauges, elle remplit les barres d'un dégradé.
-- **Fichiers** : `cps_hsfa.cpp`, `cps.h`, `cps_obj.cpp`, `ctv.cpp`, `d_cps2.cpp`.
-- **Couper / vérifier** : DIP coupé, ou `HSFA_OMBRES=0` (prioritaire sur le DIP) : image identique au pixel. Contrôle
-  automatique sur 7 parties et 980 captures : 0 pixel modifié hors d'une tuile d'ombre ; les codes n'apparaissent
-  qu'en combat (démo comprise), jamais dans un menu, un portrait ou une fin ([TRANSPARENCE](../rapports/TRANSPARENCE.md)
-  §10). **Toute non-régression contre une référence antérieure se lance avec `HSFA_OMBRES=0`.**
+- **Problem**: the PSP draws the characters' shadows in black at 75 %; the translated programs draw them opaque
+  (OBJ tiles of palette `0x14`).
+- **Solution**: core option "Transparent shadows (PSP)", bit 7 of DIP A, **on by default**, for all
+  HSFA drivers (modes 1 and 2). A tile is a shadow if its OBJ palette is `0x14` **and** its global code is
+  `0x0284A`, `0x305DF-0x30613` or `0x50888-0x5088A` (the same in all four games). New mode 5: black at 75 %.
+  The modes set by the game (0010) take precedence over the option.
+- **Alternatives**:
+  - palette `0x14` alone: it is also used by the stage (foreground posts), which must stay opaque;
+  - add a state test (`$FF8000 = 2`, `$FF8004 = 4`): the shadows of demo fights would stay opaque; not
+    recommended;
+  - mode 3 (alpha 75 % of the colour) would tint the shadow with palette `0x14`: hence mode 5
+    ([TRANSPARENCE-OMBRES-JAUGES](../rapports/TRANSPARENCE-OMBRES-JAUGES.md) §3);
+  - gauges at 50 % (D5): abandoned, the PSP does not tint the gauges, it fills the bars with a gradient.
+- **Files**: `cps_hsfa.cpp`, `cps.h`, `cps_obj.cpp`, `ctv.cpp`, `d_cps2.cpp`.
+- **Turn off / check**: DIP off, or `HSFA_OMBRES=0` (takes priority over the DIP): picture identical to the pixel. Automatic
+  check over 7 games and 980 captures: 0 pixel changed outside a shadow tile; the codes only appear
+  in fights (demo included), never in a menu, a portrait or an ending ([TRANSPARENCE](../rapports/TRANSPARENCE.md)
+  §10). **Every non-regression run against an earlier reference is launched with `HSFA_OMBRES=0`.**
 
-## 16. `0012-HSFA-16-9-format-remplir-la-hauteur.patch` — cœur 16:9, « remplir la hauteur »
+## 16. `0012-HSFA-16-9-format-remplir-la-hauteur.patch` — 16:9 core, "fill height"
 
-- **Problème** : sur un écran moins large que 16:9 (4:3, 3:2, 16:10…), le cœur 16:9 réduisait toute l'image et
-  laissait des bandes en haut et en bas.
-- **Solution** : option `fbneo-hsfa-format`, « Screen format (fill height) », dans le **cœur 16:9 seulement** et pour
-  les pilotes HSFA : Off (défaut, inchangé), 4:3, 3:2, 14:9, 16:10, 5:3, 16:9. L'image remplit la hauteur et les deux
-  côtés sont rognés (centré). Largeur montrée = format × 288 (pixels arcade : 384 px ↔ 4:3), paire, plafonnée à 448 :
-  4:3 → 384, 3:2 → 432, 14:9 et plus → 448. Le rognage se fait à la sortie vidéo (pointeur décalé) ; la géométrie
-  libretro suit l'option (`SET_GEOMETRY`). Ce n'est pas un registre : le jeu n'en sait rien.
-- **Alternatives** : le numéro 0012 était prévu pour les jauges (D5), abandonnées. La valeur 14:9 (pleine largeur,
-  pixels arcade) a été proposée pour le mode Off, qui reste inchangé par choix
-  ([TRANSPARENCE](../rapports/TRANSPARENCE.md) §13). Même principe que les forks « remplir la hauteur » de
-  l'utilisateur pour d'autres émulateurs.
-- **Fichiers** : `src/burner/libretro/libretro.cpp`, `retro_common.cpp`, `retro_common.h`.
-- **Couper / vérifier** : Off = image identique au pixel. Chaque format est exactement la découpe centrée de l'image
-  Off ; géométrie annoncée : 4:3 → 384 × 224 à 1,3333, 3:2 → 432 × 224 à 1,5, 14:9 → 448 × 224 à 1,5556.
+- **Problem**: on a screen narrower than 16:9 (4:3, 3:2, 16:10…), the 16:9 core shrank the whole picture and
+  left bands at the top and bottom.
+- **Solution**: option `fbneo-hsfa-format`, "Screen format (fill height)", in the **16:9 core only** and for
+  the HSFA drivers: Off (default, unchanged), 4:3, 3:2, 14:9, 16:10, 5:3, 16:9. The picture fills the height and both
+  sides are cropped (centred). Width shown = format × 288 (arcade pixels: 384 px ↔ 4:3), even, capped at 448:
+  4:3 → 384, 3:2 → 432, 14:9 and above → 448. The cropping is done at the video output (offset pointer); the libretro
+  geometry follows the option (`SET_GEOMETRY`). It is not a register: the game knows nothing about it.
+- **Alternatives**: number 0012 was planned for the gauges (D5), abandoned. The 14:9 value (full width,
+  arcade pixels) was proposed for the Off mode, which stays unchanged by choice
+  ([TRANSPARENCE](../rapports/TRANSPARENCE.md) §13). Same principle as the user's "fill height" forks for
+  other emulators.
+- **Files**: `src/burner/libretro/libretro.cpp`, `retro_common.cpp`, `retro_common.h`.
+- **Turn off / check**: Off = picture identical to the pixel. Each format is exactly the centred crop of the Off
+  picture; announced geometry: 4:3 → 384 × 224 at 1.3333, 3:2 → 432 × 224 at 1.5, 14:9 → 448 × 224 at 1.5556.
 
-## Hors chaîne
+## Outside the chain
 
-- **`fbneo-hsfa-decors.patch`** — décors widescreen injectés dans SFA3. Problème : bandes du 16:9 vides ou fausses.
-  Solution : le mode « bases de plans » vaut pour tout jeu dont la configuration donne `plans=`, SFA3 compris ;
-  `hsfa_gfx.bin` facultatif. Posé sur les patchs 1-2 ; ne s'applique pas après le patch 6 sans adaptation de
+- **`fbneo-hsfa-decors.patch`** — widescreen stages injected into SFA3. Problem: 16:9 bands empty or wrong.
+  Solution: the "plane bases" mode applies to any game whose configuration gives `plans=`, SFA3 included;
+  `hsfa_gfx.bin` optional. Applied on top of patches 1-2; does not apply after patch 6 without adapting
   `cps_hsfa.cpp` ([INJECTION-FORK](../rapports/INJECTION-FORK.md) §7).
-- **`hsfa_run-sysdir.diff`** — le lanceur passait `getenv("SYSDIR")` au cœur, qui en lit `MAX_PATH` octets : plantage
-  quand la chaîne est en fin de pile ([ROCKNIX](../rapports/ROCKNIX.md) §3). Correctif : copie dans un tampon. Il
-  s'applique sur la chaîne actuelle par `patch -p1` (décalage de 143 lignes), pas par `git apply`.
+- **`hsfa_run-sysdir.diff`** — the launcher passed `getenv("SYSDIR")` to the core, which reads `MAX_PATH` bytes from it: crash
+  when the string is at the end of the stack ([ROCKNIX](../rapports/ROCKNIX.md) §3). Fix: copy into a buffer. It
+  applies to the current chain with `patch -p1` (offset of 143 lines), not with `git apply`.

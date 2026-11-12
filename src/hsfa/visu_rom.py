@@ -3,6 +3,7 @@
 les autres fichiers (graphismes, son, cle) sont des liens vers roms_tr. Le rendu est fait par mame/visu.lua.
 Usage : visu_rom.py   puis   ETAT=<etats_ps2/ee/nom> mame sfa3ud -rompath roms_vis -autoboot_script visu.lua"""
 import os, struct
+import liens   # (Windows : sans droit de lien symbolique)
 W = "<workspace>/work/mame"
 out = os.path.join(W, "roms_vis", "sfa3ud"); os.makedirs(out, exist_ok=True)
 names = ["sz3ud.03c", "sz3ud.04c", "sz3.05c", "sz3.06c", "sz3.07c", "sz3.08c", "sz3.09c", "sz3.10b"]
@@ -11,7 +12,7 @@ for f in os.listdir(src):
     if f not in names:
         d = os.path.join(out, f)
         if os.path.lexists(d): os.remove(d)
-        os.symlink(os.path.realpath(os.path.join(src, f)), d)
+        liens.lien(os.path.realpath(os.path.join(src, f)), d)
 img = bytearray(0x400000)
 struct.pack_into('>II', img, 0, 0x00FFF000, 0x400)
 for v in range(2, 64): struct.pack_into('>I', img, 4 * v, 0x406)

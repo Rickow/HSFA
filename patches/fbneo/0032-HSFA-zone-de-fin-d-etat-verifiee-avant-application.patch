@@ -1,0 +1,226 @@
+From 0c03dc0fb1729f59d73c9664ae2980a6ce406c8b Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Thu, 12 Nov 2026 12:00:00 +0100
+Subject: [PATCH] HSFA: end-of-state zone checked before it is applied, values
+ bounded
+
+- Loading the "HSF9" end-of-state zone (patch 0029) is now done in two
+  steps: the zone is first read into a copy (nothing applied), its header
+  is checked on the copy, and only then is the copy replayed into the
+  variables, in the same order and with the same side effects as before
+  (valid states load exactly as with patch 0031).
+- Unreadable zone or unknown header (state padded with zeros by a
+  front-end, damaged file, future version of the zone): the whole zone is
+  ignored, like the zone of a state made before patch 0029, with a
+  message. Before: the zone was applied, then the header was compared
+  (volume 0 = no sound, black palette, possible out-of-bounds index).
+- Values used as an index or a loop bound are bounded after the replay:
+  nGetNext (0 to nFrameCount - 1), of[i].nCount (0 to nMax), QSound
+  nDelta (0 to 0xfff), Cps2Volume (0 to 39), with a message if any was
+  out of bounds. Valid states never are (no change).
+- Saving and state size unchanged (same bytes).
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 88 ++++++++++++++++++++++++++------
+ src/burn/drv/capcom/cps_obj.cpp  | 13 ++++-
+ src/burn/drv/capcom/qs_c.cpp     |  7 ++-
+ 3 files changed, 89 insertions(+), 19 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 24a3478..63d0084 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -2119,8 +2119,13 @@ void HsfaWsSortie()
+ // (nRestant) : les etats d'avant 0029 se chargent (rien de cette zone n'est lu ; le 16:9 reprend son suivi a zero),
+ // et les etats 0029 se chargent dans un coeur plus ancien (octets en trop ignores). En-tete Â« HSF9 Â» + version.
+ // HSFA_ETATS_FIN=0 (essais) : zone absente, etats identiques a l'octet a ceux du coeur 0027.
+-void QscScanHsfa(INT32 nAction);
+-void CpsObjScanHsfa(INT32 nAction);
++// (patch 0032) Chargement en deux temps : la zone est d'abord lue dans une copie (rien n'est applique) ; l'en-tete est
++// verifie sur la copie ; s'il est bon, la copie est rejouee (memes ecritures, dans le meme ordre qu'avant 0032 : etats
++// valides charges a l'octet comme avant), puis les valeurs servant d'indice ou de borne sont bornees (nGetNext,
++// nCount, nDelta, Cps2Volume). Zone illisible ou en-tete inconnu (etat complete de zeros par un frontal, fichier
++// abime, version future de la zone) : zone ignoree en entier, comme celle d'un etat d'avant 0029, avec un message.
++INT32 QscScanHsfa(INT32 nAction);
++INT32 CpsObjScanHsfa(INT32 nAction);
+ void CpsPalScanHsfa(INT32 nAction);
+ 
+ static INT32 nHsfaEtatsFin = -1;
+@@ -2141,11 +2146,38 @@ static INT32 __cdecl HsfaFinAcbFiltre(struct BurnArea *pba)
+ 	return pFinAcbVrai(&b);
+ }
+ 
+-static void HsfaFinZones(INT32 nAction, UINT32 *pEntete)
++// (patch 0032) 1er temps du chargement : chaque partie est lue dans la copie FinCopie, pas dans la variable. La copie
++// part de la valeur courante : une partie que l'Acb ne remplit pas (bloc absent d'un etat de l'autonome, passe de
++// longueur) reste inchangee, comme avant 0032. 2e temps : la copie est servie dans le meme ordre (HsfaFinRejoue).
++static std::vector<UINT8> FinCopie;
++static size_t nFinPos = 0;
++static INT32 nFinErreur = 0;
++static INT32 (__cdecl *pFinAcbLu)(struct BurnArea *) = NULL;
++static INT32 __cdecl HsfaFinCopie(struct BurnArea *pba)
++{
++	if (pba->nLen == 0) return 0;
++	const size_t o = FinCopie.size();
++	FinCopie.resize(o + pba->nLen);
++	memcpy(&FinCopie[o], pba->Data, pba->nLen);
++	struct BurnArea b = *pba; b.Data = &FinCopie[o];
++	if (pFinAcbLu(&b)) nFinErreur = 1;
++	return 0;
++}
++static INT32 __cdecl HsfaFinRejoue(struct BurnArea *pba)
++{
++	if (pba->nLen == 0) return 0;
++	if (nFinPos + pba->nLen > FinCopie.size()) { nFinErreur = 1; return 1; }
++	memcpy(pba->Data, &FinCopie[nFinPos], pba->nLen);
++	nFinPos += pba->nLen;
++	return 0;
++}
++
++static void HsfaFinZones(INT32 nAction, UINT32 *pEntete, INT32 *pBornes)
+ {
++	INT32 nBornes = 0;
+ 	SCAN_VAR(*pEntete);
+-	nFinPart = 1; QscScanHsfa(nAction);
+-	nFinPart = 2; CpsObjScanHsfa(nAction);
++	nFinPart = 1; nBornes += QscScanHsfa(nAction);
++	nFinPart = 2; nBornes += CpsObjScanHsfa(nAction);
+ 	nFinPart = 4; CpsPalScanHsfa(nAction);
+ 	nFinPart = 8;
+ 	{	// registres « F » verrouilles en fin d'image (decalage des plans et des objets de l'image suivante)
+@@ -2155,6 +2187,9 @@ static void HsfaFinZones(INT32 nAction, UINT32 *pEntete)
+ 		ba.Data = CpsSaveFrg[1]; ba.nLen = 0x10; ba.szName = "HsfaSaveFrg1"; BurnAcb(&ba);
+ 	}
+ 	nFinPart = 16; SCAN_VAR(Cps2Volume);			// volume (touches de volume) : gains du QSound recalcules au chargement
++	if ((nAction & ACB_WRITE) && (Cps2Volume < 0 || Cps2Volume > 39)) {	// (patch 0032) indice de Cps2VolumeStates[40]
++		Cps2Volume = (Cps2Volume < 0) ? 0 : 39; nBornes++;
++	}
+ 	nFinPart = 32; SCAN_VAR(nProvocPiece);
+ 	SCAN_VAR(nProvocAttente);
+ 	nFinPart = 64; SCAN_VAR(nOptExtra);
+@@ -2169,6 +2204,7 @@ static void HsfaFinZones(INT32 nAction, UINT32 *pEntete)
+ 	SCAN_VAR(nWsKDecor); SCAN_VAR(nWsK); SCAN_VAR(bWsK); SCAN_VAR(bWsAuto); SCAN_VAR(nWsKCam0); SCAN_VAR(nWsKU0);
+ 	SCAN_VAR(nWsKCamPrec); SCAN_VAR(nWsAutoN); SCAN_VAR(nWsExtG); SCAN_VAR(nWsExtD); SCAN_VAR(bWsExt);
+ #endif
++	if (pBornes) *pBornes = nBornes;
+ }
+ 
+ INT32 HsfaScanFin(INT32 nAction, INT64 nRestant)
+@@ -2181,7 +2217,7 @@ INT32 HsfaScanFin(INT32 nAction, INT64 nRestant)
+ 	if ((nAction & ACB_WRITE) && nRestant >= 0) {
+ 		// chargement : la zone entiere est-elle dans l'etat ? (taille comptee sans rien lire)
+ 		INT32 (__cdecl *pSauve)(struct BurnArea *) = BurnAcb;
+-		nFinTaille = 0; BurnAcb = HsfaFinCompte; HsfaFinZones(nAction & ~ACB_WRITE, &nEntete); BurnAcb = pSauve;
++		nFinTaille = 0; BurnAcb = HsfaFinCompte; HsfaFinZones(nAction & ~ACB_WRITE, &nEntete, NULL); BurnAcb = pSauve;
+ 		if (nRestant < nFinTaille) {				// etat d'avant 0029 : suivi du 16:9 repris a zero
+ #ifdef HSFA_WS
+ 			bWsS1Init = 0; nWsKDecor = -1;
+@@ -2189,24 +2225,46 @@ INT32 HsfaScanFin(INT32 nAction, INT64 nRestant)
+ 			return 0;
+ 		}
+ 	}
++	if (!(nAction & ACB_WRITE)) {						// sauvegarde, taille : inchange
++		HsfaFinZones(nAction, &nEntete, NULL);
++		nFinPart = 0;
++		return 0;
++	}
++	// (patch 0032) chargement, 1er temps : zone lue dans la copie, rien n'est applique
++	INT32 (__cdecl *pSauve)(struct BurnArea *) = BurnAcb;
++	FinCopie.clear(); nFinPos = 0; nFinErreur = 0;
++	pFinAcbLu = pSauve; BurnAcb = HsfaFinCopie;
++	HsfaFinZones(nAction & ~ACB_WRITE, &nEntete, NULL);
++	BurnAcb = pSauve; nFinPart = 0;
++	UINT32 nLu = 0;
++	if (FinCopie.size() >= sizeof(nLu)) memcpy(&nLu, &FinCopie[0], sizeof(nLu));
++	if (nFinErreur || nLu != nAttendu) {				// zone ignoree en entier (comme un etat d'avant 0029)
++		bprintf(PRINT_ERROR, _T("HSFA : zone de fin d'etat ignoree (en-tete %08X%s)\n"), nLu, nFinErreur ? _T(", lecture incomplete") : _T(""));
++#ifdef HSFA_WS
++		bWsS1Init = 0; nWsKDecor = -1;
++#endif
++		return 0;
++	}
++	// 2e temps : la copie est rejouee avec le vrai nAction (memes ecritures et memes effets qu'avant 0032), puis bornes
++	INT32 nBornes = 0;
+ 	if (nHsfaEtatsSans < 0) nHsfaEtatsSans = getenv("HSFA_ETATS_SANS") ? atoi(getenv("HSFA_ETATS_SANS")) : 0;
+-	if ((nAction & ACB_WRITE) && nHsfaEtatsSans) {
++	if (nHsfaEtatsSans) {
+ 		extern INT32 bCpsPalCharge;
+ 		const INT32 bPal = bCpsPalCharge;
+-		pFinAcbVrai = BurnAcb; BurnAcb = HsfaFinAcbFiltre;
+-		HsfaFinZones(nAction, &nEntete);
+-		BurnAcb = pFinAcbVrai;
++		pFinAcbVrai = HsfaFinRejoue; BurnAcb = HsfaFinAcbFiltre;
++		HsfaFinZones(nAction, &nEntete, &nBornes);
+ 		if (nHsfaEtatsSans & 4) bCpsPalCharge = bPal;
+ 	} else {
+-		HsfaFinZones(nAction, &nEntete);
++		BurnAcb = HsfaFinRejoue;
++		HsfaFinZones(nAction, &nEntete, &nBornes);
+ 	}
+-	nFinPart = 0;
+-	if ((nAction & ACB_WRITE) && Cps == 2) {			// gains du QSound (sinon recalcules toutes les 5 images)
++	BurnAcb = pSauve; nFinPart = 0;
++	if (Cps == 2) {									// gains du QSound (sinon recalcules toutes les 5 images)
+ 		QscSetRoute(BURN_SND_QSND_OUTPUT_1, Cps2Volume / 39.0, BURN_SND_ROUTE_LEFT);
+ 		QscSetRoute(BURN_SND_QSND_OUTPUT_2, Cps2Volume / 39.0, BURN_SND_ROUTE_RIGHT);
+ 	}
+-	if ((nAction & ACB_WRITE) && nEntete != nAttendu) {
+-		bprintf(PRINT_ERROR, _T("HSFA : zone de fin d'etat inconnue (%08X)\n"), nEntete);
++	if (nBornes || nFinErreur) {
++		bprintf(PRINT_ERROR, _T("HSFA : zone de fin d'etat : %d valeur(s) hors bornes corrigee(s)%s\n"), nBornes, nFinErreur ? _T(", copie incomplete") : _T(""));
+ 	}
+ 	return 0;
+ }
+diff --git a/src/burn/drv/capcom/cps_obj.cpp b/src/burn/drv/capcom/cps_obj.cpp
+index 2892213..1eb661e 100644
+--- a/src/burn/drv/capcom/cps_obj.cpp
++++ b/src/burn/drv/capcom/cps_obj.cpp
+@@ -165,14 +165,23 @@ INT32 CpsObjExit()
+ // (HSFA, patch 0029) etats complets : copies des listes d'objets des images precedentes (objets retardes d'une image,
+ // double tampon) et tampon suivant. Sans elles, la 1re image apres un chargement montre les objets d'avant le
+ // chargement. Appele par HsfaScanFin (pilotes HSFA seulement).
+-void CpsObjScanHsfa(INT32 nAction)
++// (patch 0032) au chargement, les valeurs lues qui servent d'indice (nGetNext : of[]) ou de borne de boucle (nCount :
++// objets dessines) sont ramenees dans leurs bornes ; retour = nombre de valeurs corrigees (0 pour un etat sain).
++INT32 CpsObjScanHsfa(INT32 nAction)
+ {
+-	(void)nAction;
+ 	struct BurnArea ba;
+ 	memset(&ba, 0, sizeof(ba));
+ 	ba.Data = ObjMem; ba.nLen = (nMax << 3) * 2; ba.szName = "HsfaObjMem"; BurnAcb(&ba);
+ 	SCAN_VAR(nGetNext);
+ 	for (INT32 i = 0; i < 2; i++) { SCAN_VAR(of[i].nShiftX); SCAN_VAR(of[i].nShiftY); SCAN_VAR(of[i].nCount); }
++	INT32 nBornes = 0;
++	if (nAction & ACB_WRITE) {
++		if (nGetNext < 0 || nGetNext >= nFrameCount) { nGetNext = 0; nBornes++; }
++		for (INT32 i = 0; i < 2; i++) {
++			if (of[i].nCount < 0 || of[i].nCount > nMax) { of[i].nCount = (of[i].nCount < 0) ? 0 : nMax; nBornes++; }
++		}
++	}
++	return nBornes;
+ }
+ 
+ // Get CPS sprites into Obj
+diff --git a/src/burn/drv/capcom/qs_c.cpp b/src/burn/drv/capcom/qs_c.cpp
+index 1ae3b16..b1540da 100644
+--- a/src/burn/drv/capcom/qs_c.cpp
++++ b/src/burn/drv/capcom/qs_c.cpp
+@@ -800,11 +800,14 @@ INT32 QscScan(INT32 nAction)
+ // eux, apres un chargement, la puce produit ses echantillons a d'autres instants de l'image : ready_flag change a
+ // d'autres cycles du Z80 (pilote son decale) et le son differe de la partie sans chargement. Appele par HsfaScanFin
+ // (derniere zone de l'etat libretro, pilotes HSFA seulement : les etats des autres jeux sont inchanges).
+-void QscScanHsfa(INT32 nAction)
++// (patch 0032) au chargement, nDelta est ramene dans ses bornes (0 a 0xfff apres chaque echantillon : une valeur
++// enorme ferait tourner la boucle de reechantillonnage) ; retour = nombre de valeurs corrigees.
++INT32 QscScanHsfa(INT32 nAction)
+ {
+-	(void)nAction;
+ 	SCAN_VAR(nDelta);
+ 	SCAN_VAR(interpolate_buffer);
++	if ((nAction & ACB_WRITE) && (nDelta < 0 || nDelta > 0xfff)) { nDelta = 0; return 1; }
++	return 0;
+ }
+ 
+ void QscNewFrame()
+-- 
+2.53.0
+

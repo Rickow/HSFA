@@ -1,0 +1,87 @@
+From c1427659b5707a70fc0e08f56e798c41829ee9c1 Mon Sep 17 00:00:00 2001
+From: hsfa <hsfa@invalid>
+Date: Wed, 11 Nov 2026 11:40:42 +0100
+Subject: [PATCH 3/5] HSFA win32: HSFA state zones in save states (0010
+ blending registers, 0029 end zone)
+
+---
+ src/burner/state.cpp  |  5 +++++
+ src/burner/statec.cpp | 14 ++++++++++----
+ 2 files changed, 15 insertions(+), 4 deletions(-)
+
+diff --git a/src/burner/state.cpp b/src/burner/state.cpp
+index fd03054a6..2dca307b4 100644
+--- a/src/burner/state.cpp
++++ b/src/burner/state.cpp
+@@ -28,6 +28,9 @@ static INT32 __cdecl StateLenAcb(struct BurnArea* pba)
+ 	return 0;
+ }
+ 
++INT32 HsfaScanMelange(INT32 nAction, INT64 nRestant);	// HSFA mod (cps_hsfa.cpp, patch 0010)
++INT32 HsfaScanFin(INT32 nAction, INT64 nRestant);		// HSFA mod (cps_hsfa.cpp, patch 0029)
++
+ static INT32 StateInfo(int* pnLen, int* pnMinVer, INT32 bAll, INT32 bRead = 1)
+ {
+ 	INT32 nMin = 0;
+@@ -45,6 +48,8 @@ static INT32 StateInfo(int* pnLen, int* pnMinVer, INT32 bAll, INT32 bRead = 1)
+ 			nMin = m;
+ 		}
+ 		BurnAreaScan(ACB_VOLATILE | (bRead ? ACB_READ : ACB_WRITE), &m);					// Scan volatile ram
++		HsfaScanMelange(ACB_VOLATILE | (bRead ? ACB_READ : ACB_WRITE), -1);			// HSFA mod (see statec.cpp)
++		HsfaScanFin(ACB_VOLATILE | (bRead ? ACB_READ : ACB_WRITE), -1);				// HSFA mod, patch 0029
+ 		if (m > nMin) {									// Up the minimum, if needed
+ 			nMin = m;
+ 		}
+diff --git a/src/burner/statec.cpp b/src/burner/statec.cpp
+index 8d1bab93a..d4cced5e2 100644
+--- a/src/burner/statec.cpp
++++ b/src/burner/statec.cpp
+@@ -139,6 +139,12 @@ static INT32 __cdecl LoadAcb(struct BurnArea* pba)
+ 	return 0;
+ }
+ 
++// HSFA mod (cps_hsfa.cpp, patch 0010): Upper / Hyper object blending registers, last area of a full state
++// (libretro: retro_memory.cpp). Does nothing for any other driver.
++INT32 HsfaScanMelange(INT32 nAction, INT64 nRestant);
++// HSFA mod (cps_hsfa.cpp, patch 0029): end of state zone (QSound, sprites, palette, taunt, 16:9 tracking), after it
++INT32 HsfaScanFin(INT32 nAction, INT64 nRestant);
++
+ // Save a state, "Compress" == organized into a buffer
+ INT32 BurnStateCompress(UINT8** pDef, INT32* pnDefLen, INT32 bAll)
+ {
+@@ -148,7 +154,7 @@ INT32 BurnStateCompress(UINT8** pDef, INT32* pnDefLen, INT32 bAll)
+ 	nCalculatedVars = 0;
+ 	BurnAcb = LenAcb; // Get length of state buffer
+ 
+-	if (bAll) BurnAreaScan(ACB_FULLSCAN | ACB_READ, NULL);				// scan all ram (read from driver variables)
++	if (bAll) { BurnAreaScan(ACB_FULLSCAN | ACB_READ, NULL); HsfaScanMelange(ACB_FULLSCAN | ACB_READ, -1); HsfaScanFin(ACB_FULLSCAN | ACB_READ, -1); }				// scan all ram (read from driver variables) (HSFA mod: + blending registers, end zone)
+ 	else      BurnAreaScan(ACB_NVRAM | nAddEEPROM | ACB_READ, NULL);	// scan nvram
+ 
+ 	stateclog((0, _T("BurnStateCompress(Save): Sizes, Calculated:  %x  Entries:  %x\n"), nCalculatedLength, nCalculatedVars));
+@@ -164,7 +170,7 @@ INT32 BurnStateCompress(UINT8** pDef, INT32* pnDefLen, INT32 bAll)
+ 	AddToBuffer((void *)&BLOCK_ID_STATE, sizeof(UINT32));
+ 	AddToBuffer(&future_use, sizeof(UINT32));
+ 
+-	if (bAll) BurnAreaScan(ACB_FULLSCAN | ACB_READ, NULL);				// scan all ram (read from driver variables)
++	if (bAll) { BurnAreaScan(ACB_FULLSCAN | ACB_READ, NULL); HsfaScanMelange(ACB_FULLSCAN | ACB_READ, -1); HsfaScanFin(ACB_FULLSCAN | ACB_READ, -1); }				// scan all ram (read from driver variables) (HSFA mod: + blending registers, end zone)
+ 	else      BurnAreaScan(ACB_NVRAM | nAddEEPROM | ACB_READ, NULL);	// scan nvram
+ 
+ 	if (pDef) *pDef = Buffer;
+@@ -184,7 +190,7 @@ INT32 BurnStateDecompress(UINT8* Def, INT32 nDefLen, INT32 bAll)
+ 	nCalculatedVars = 0;
+ 	BurnAcb = LenAcb; // Get length of state buffer
+ 
+-	if (bAll) BurnAreaScan(ACB_FULLSCAN | ACB_WRITE, NULL);				// scan all ram (write to driver variables)
++	if (bAll) { BurnAreaScan(ACB_FULLSCAN | ACB_WRITE, NULL); HsfaScanMelange(ACB_FULLSCAN | ACB_WRITE, -1); HsfaScanFin(ACB_FULLSCAN | ACB_WRITE, -1); }				// scan all ram (write to driver variables) (HSFA mod: + blending registers, end zone)
+ 	else      BurnAreaScan(ACB_NVRAM | nAddEEPROM | ACB_WRITE, NULL);	// scan nvram
+ 
+ 	stateclog((0, _T("BurnStateDecompress(Load): Sizes, Calculated:  %x  Loaded:  %x\n"), nCalculatedLength, nDefLen));
+@@ -204,7 +210,7 @@ INT32 BurnStateDecompress(UINT8* Def, INT32 nDefLen, INT32 bAll)
+ 		return 1;
+ 	}
+ 
+-	if (bAll) BurnAreaScan(ACB_FULLSCAN | ACB_WRITE, NULL);             // scan all ram (write to driver variables)
++	if (bAll) { BurnAreaScan(ACB_FULLSCAN | ACB_WRITE, NULL); HsfaScanMelange(ACB_FULLSCAN | ACB_WRITE, -1); HsfaScanFin(ACB_FULLSCAN | ACB_WRITE, -1); }             // scan all ram (write to driver variables) (HSFA mod: + blending registers, end zone)
+ 	else      BurnAreaScan(ACB_NVRAM | nAddEEPROM | ACB_WRITE, NULL);	// scan nvram
+ 
+ 	return 0;

@@ -358,8 +358,11 @@ def charge_corr():
         a = int(r['arcade'][1:], 16)
         C[a] = dict(nom=r['nom'], va=r['va_mips_instr'], statut=r['statut'], remarque=r['remarque'],
                     ancien=r['upper_68k'], source='correspondances.tsv')
+    # (revue_upper_max) CONV_SANS_ADRESSES="1B6B6,…" : lignes du complément ignorées (reproduire un lot ancien)
+    sans = {int(x, 16) for x in os.environ.get('CONV_SANS_ADRESSES', '').replace('$', '').split(',') if x.strip()}
     for r in csv.DictReader(open(COMPL), delimiter='\t'):
         a = int(r['arcade'][1:], 16)
+        if a in sans: continue
         if a not in C:
             C[a] = dict(nom=r['nom'], va=r['va_mips_instr'], statut=r['statut'], remarque=r.get('remarque') or r['source'], ancien='-',
                         source='complément : ' + r['source'][:80])

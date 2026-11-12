@@ -34,5 +34,8 @@ a = Analysis([os.path.join(ICI, "hsfa_constructeur.py")], pathex=[ICI],
              hiddenimports=["imports_embarques", "chd_iso"], datas=datas, binaries=binaries,
              excludes=["matplotlib", "scipy", "IPython", "pytest"], noarchive=False)
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, a.binaries, a.datas, [], name=os.environ.get("HSFA_NOM", "hsfa-constructeur"),
+# Mode UTF-8 de Python TOUJOURS : l'executable gele ignore les variables PYTHON* (PYTHONUTF8=1 de hsfa_build.env() sans
+# effet) ; sans ceci, sous Windows, open() des etapes est en cp1252 (textes_max.py d'Upper MAX : UnicodeEncodeError)
+exe = EXE(pyz, a.scripts, a.binaries, a.datas, [("X utf8=1", None, "OPTION")],
+          name=os.environ.get("HSFA_NOM", "hsfa-constructeur"),
           console=True, upx=False, strip=False, debug=False, runtime_tmpdir=None)

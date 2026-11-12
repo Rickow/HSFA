@@ -1,0 +1,74 @@
+From 498d8aadcd9f25b1b5968e073dda16c1aa77bfc0 Mon Sep 17 00:00:00 2001
+From: hsfa <hsfa@invalid>
+Date: Wed, 11 Nov 2026 17:00:00 +0100
+Subject: [PATCH] HSFA win32: 16:9 "Widescreen edges" default is now Raw (patch
+ 0031)
+
+Same default as the libretro core option fbneo-hsfa-ws-edges since
+patch 0031: nHsfaWsEdges = 4 (Raw) when the .ini has no value (or an
+invalid one); "(default)" moved from "Stage-locked view" to "Raw" in
+Video > HSFA widescreen > Widescreen edges; .ini comment updated.
+Values unchanged (0 stage-locked view ... 4 raw): an .ini written by an
+older build keeps its saved choice.
+---
+ src/burner/win32/app.rc         | 4 ++--
+ src/burner/win32/cona.cpp       | 2 +-
+ src/burner/win32/hsfa_win32.cpp | 4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/src/burner/win32/app.rc b/src/burner/win32/app.rc
+index c4966edbf..bb067e84c 100644
+--- a/src/burner/win32/app.rc
++++ b/src/burner/win32/app.rc
+@@ -1306,11 +1306,11 @@ BEGIN
+         BEGIN
+             POPUP "Widescreen edges"
+             BEGIN
+-                MENUITEM "Stage-locked view\t(default)",		MENU_HSFA_EDGES_STAGE
++                MENUITEM "Stage-locked view",				MENU_HSFA_EDGES_STAGE
+                 MENUITEM "Mirror",							MENU_HSFA_EDGES_MIRROR
+                 MENUITEM "Repeat",							MENU_HSFA_EDGES_REPEAT
+                 MENUITEM "Black",							MENU_HSFA_EDGES_BLACK
+-                MENUITEM "Raw",								MENU_HSFA_EDGES_RAW
++                MENUITEM "Raw\t(default)",						MENU_HSFA_EDGES_RAW
+             END
+             POPUP "Screen format (fill height)"
+             BEGIN
+diff --git a/src/burner/win32/cona.cpp b/src/burner/win32/cona.cpp
+index 20cd17fd0..18af12a64 100644
+--- a/src/burner/win32/cona.cpp
++++ b/src/burner/win32/cona.cpp
+@@ -667,7 +667,7 @@ int ConfigAppSave()
+ 	_ftprintf(h, _T("\n// If non-zero, try to synchronise to DWM on Windows 7+, this fixes frame stuttering problems.\n"));
+ 	VAR(bVidDWMSync);
+ #ifdef HSFA_WS
+-	_ftprintf(h, _T("\n// HSFA mod, 16:9 build: widescreen edges, 0 = stage-locked view (default), 1 = mirror, 2 = repeat, 3 = black, 4 = raw\n"));
++	_ftprintf(h, _T("\n// HSFA mod, 16:9 build: widescreen edges, 0 = stage-locked view, 1 = mirror, 2 = repeat, 3 = black, 4 = raw (default)\n"));
+ 	VAR(nHsfaWsEdges);
+ 	_ftprintf(h, _T("\n// HSFA mod, 16:9 build: screen format (fill height), 0 = off (16:9, 512 px, default), 1 = 4:3, 2 = 3:2, 3 = 14:9, 4 = 16:10, 5 = 5:3, 6 = 16:9\n"));
+ 	VAR(nHsfaFormat);
+diff --git a/src/burner/win32/hsfa_win32.cpp b/src/burner/win32/hsfa_win32.cpp
+index 26425ccbf..947214869 100644
+--- a/src/burner/win32/hsfa_win32.cpp
++++ b/src/burner/win32/hsfa_win32.cpp
+@@ -10,7 +10,7 @@
+ 
+ extern INT32 nHsfaWsBords, nHsfaWsCale, nHsfaWsVisible;	// cps_hsfa.cpp (patches 0022, 0023)
+ 
+-INT32 nHsfaWsEdges = 0;		// "Widescreen edges" : 0 Stage-locked view (default), 1 Mirror, 2 Repeat, 3 Black, 4 Raw
++INT32 nHsfaWsEdges = 4;		// "Widescreen edges" : 0 Stage-locked view, 1 Mirror, 2 Repeat, 3 Black, 4 Raw (default since patch 0031)
+ INT32 nHsfaFormat = 0;		// "Screen format (fill height)" : 0 Off (default), 1..6 = 4:3, 3:2, 14:9, 16:10, 5:3, 16:9
+ INT32 nHsfaWsCropW = 0;		// width shown when the format crops the 16:9 picture (0 = no crop) ; read by vid_interface.cpp
+ 
+@@ -26,7 +26,7 @@ static bool HsfaDriverActive()
+ // same mapping as the libretro option fbneo-hsfa-ws-edges (retro_common.cpp, patches 0022 / 0023)
+ void HsfaWsApplyEdges()
+ {
+-	if (nHsfaWsEdges < 0 || nHsfaWsEdges > 4) nHsfaWsEdges = 0;
++	if (nHsfaWsEdges < 0 || nHsfaWsEdges > 4) nHsfaWsEdges = 4;
+ 	nHsfaWsCale  = (nHsfaWsEdges == 0);					// stage-locked view (what is still missing: mirror)
+ 	nHsfaWsBords = (nHsfaWsEdges == 0) ? 0 : nHsfaWsEdges - 1;
+ }
+-- 
+2.53.0
+

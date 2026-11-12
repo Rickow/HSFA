@@ -22,6 +22,14 @@ It contains no game data. Licences: `TIERS.md`. User guide: `LISEZMOI.txt` (FR),
 | `requirements-constructeur.txt` | build environment, pinned with hashes (`pip install --require-hashes`) |
 | `../../.github/workflows/constructeur.yml` | CI: natives (zig), one executable per system, Ogg determinism check on each system, attached to published releases |
 
+Output format (`--cible`, also a menu in the window): `fbneo-hsfa` (default, the current zips, unchanged);
+`fbneo-autonome` (standalone FinalBurn Neo HSFA for Windows, test build, `patches/fbneo-autonome`): the builder announces
+its concession (RetroArch save states do not load in it), asks for confirmation, then builds the same zips as
+`fbneo-hsfa`, byte for byte; `mister` and `cps2-banques` do not exist yet: the builder announces, per game, the
+concessions of that format and the measured budgets (`scripts/construction/cibles.py`), asks for confirmation and builds
+nothing (report mode). `--oui` / `--yes` confirms without asking. The announcements are in French or English
+(`HSFA_LANGUE=fr|en`, otherwise the system language).
+
 Local build (Linux):
 
 ```
@@ -34,3 +42,11 @@ python3 tools/constructeur/fabrique.py --natifs natifs     # -> tools/constructe
 image PS2 (`.iso` ou `.chd`) et, s'il le veut, l'ISO PSP de SFA3 MAX ; il obtient les zips. Comme `hsfa_oggenc` est
 portable, les zips ont les mêmes empreintes sur Windows, macOS et Linux (x86_64, ARM). Aucune donnée de jeu dans
 l'exécutable.
+
+Format de sortie (`--cible`, ou menu de la fenêtre) : `fbneo-hsfa` par défaut (les zips actuels, inchangés) ;
+`fbneo-autonome` (FinalBurn Neo HSFA autonome pour Windows, version d'essai, `patches/fbneo-autonome`) : le constructeur
+annonce sa concession (les sauvegardes d'état de RetroArch ne s'y chargent pas), demande confirmation, puis construit les
+mêmes zips que `fbneo-hsfa`, à l'octet ; `mister` et `cps2-banques` n'existent pas encore : le constructeur annonce les
+concessions de ce format pour chaque jeu et les budgets mesurés (`scripts/construction/cibles.py`), demande confirmation
+et ne construit rien (mode bilan). `--oui` / `--yes` confirme sans question. Annonces en français ou en anglais
+(`HSFA_LANGUE=fr|en`, sinon la langue du système).

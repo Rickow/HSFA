@@ -1,108 +1,112 @@
-# Démarrer avec HSFA
+# Getting started with HSFA
 
-Ce guide va de l'ISO à un jeu traduit qui tourne au banc MAME, puis à la non-régression. Pour seulement construire
-les jeux et les installer sur une console, [construction-iso.md](construction-iso.md) suffit.
+**Français : [demarrage.fr.md](demarrage.fr.md)**
 
-## 1. Ce qu'il faut
+This guide goes from the ISO to a translated game running on the MAME bench, then to non-regression. To only build
+the games and install them on a console, [construction-iso.md](construction-iso.md) is enough.
 
-| Élément | Rôle | Obligatoire |
+## 1. What you need
+
+| Item | Role | Required |
 |---|---|---|
-| ISO de *Street Fighter Alpha Anthology* (USA, `SLUS-21317`) | toutes les données de jeu | oui |
-| Python 3.8+ et `pip install -r requirements.txt` | traducteur, construction | oui |
-| MAME 0.285 (`mame`) | banc de référence (`sfa3ud`) : diagnostic, test des commandes | pour le banc |
-| fork MAME `sfa3hx` (`cps2f`, [patches/mame-fork](../../patches/mame-fork/README.md)) | Upper et Hyper au banc, non-régression d'Upper | pour le banc |
-| ROM arcade `sfa3ud` (Phoenix) | oracle : comparaisons avec l'arcade, test des commandes | pour la validation |
+| ISO of *Street Fighter Alpha Anthology* (USA, `SLUS-21317`) | all the game data | yes |
+| Python 3.8+ and `pip install -r requirements.txt` | translator, build | yes |
+| MAME 0.285 (`mame`) | reference bench (`sfa3ud`): diagnosis, controls test | for the bench |
+| MAME fork `sfa3hx` (`cps2f`, [patches/mame-fork](../../patches/mame-fork/README.md)) | Upper and Hyper on the bench, Upper non-regression | for the bench |
+| arcade ROM `sfa3ud` (Phoenix) | oracle: comparisons with the arcade, controls test | for validation |
 
-Le dépôt ne contient aucune donnée de jeu. Les fichiers produits (ROM traduites, archives) restent sur votre poste.
+The repository contains no game data. The files produced (translated ROMs, archives) stay on your machine.
 
-## 2. L'espace de travail
+## 2. The workspace
 
-Les scripts ont été écrits pour un espace de travail fixe, dont les chemins sont publiés sous la forme
-`<workspace>/...`. Disposition attendue :
+The scripts were written for a fixed workspace, whose paths are published in the form
+`<workspace>/...`. Expected layout:
 
 ```
 $HSFA_WORKSPACE/
-  anthology_extract/        manifest.csv, decompressed/roN_usa_prog68k.bin (modules MIPS)   = $HSFA_EXTRACT
+  anthology_extract/        manifest.csv, decompressed/roN_usa_prog68k.bin (MIPS modules)   = $HSFA_EXTRACT
   work/                                                                                     = $HSFA_WORK
-    xdata/X_DATA.BIN        extrait de l'ISO (lecture seule)
-    mame/                   banc SFA3 : scripts Lua, roms/ (arcade de référence), roms_tr/ (traduction)
-    mame_ro5/, mame_ro9/    bancs d'Upper et d'Hyper (roms_ro5/, roms_ro9/, roms_fork/, banques_hx/...)
-    cps2/                   ROM CPS2 intermédiaires (sfa3ud_prog.bin...)
-  mame-fork/mame/cps2f      binaire du fork                                                  = $HSFA_CPS2F
+    xdata/X_DATA.BIN        extracted from the ISO (read-only)
+    mame/                   SFA3 bench: Lua scripts, roms/ (reference arcade), roms_tr/ (translation)
+    mame_ro5/, mame_ro9/    Upper and Hyper benches (roms_ro5/, roms_ro9/, roms_fork/, banques_hx/...)
+    cps2/                   intermediate CPS2 ROMs (sfa3ud_prog.bin...)
+  mame-fork/mame/cps2f      fork binary                                                      = $HSFA_CPS2F
 ```
 
-1. Copier `config.example.env` en `config.env`, adapter les chemins, puis `source config.env`.
-2. Fabriquer une copie exécutable du dépôt, où `<workspace>` est remplacé par vos chemins :
+1. Copy `config.example.env` to `config.env`, adjust the paths, then `source config.env`.
+2. Make a runnable copy of the repository, where `<workspace>` is replaced by your paths:
    ```bash
    python3 scripts/localiser.py ~/hsfa-local --lua
    ```
-   `--lua` copie aussi les scripts du banc (`src/hsfa/mame/*.lua`) dans `$HSFA_WORK/mame`, d'où MAME les lance.
-   Le dépôt n'est pas modifié. Détail des variables : [`hsfa_config.py`](../../src/hsfa/hsfa_config.py).
-3. Extraire les modules et `X_DATA.BIN` : le plus simple est de lancer une fois la construction depuis l'ISO
-   ([construction-iso.md](construction-iso.md)), qui fait l'extraction et vérifie les empreintes.
+   `--lua` also copies the bench scripts (`src/hsfa/mame/*.lua`) into `$HSFA_WORK/mame`, from where MAME runs them.
+   The repository is not modified. Variables in detail: [`hsfa_config.py`](../../src/hsfa/hsfa_config.py).
+3. Extract the modules and `X_DATA.BIN`: the simplest way is to run the build from the ISO once
+   ([construction-iso.md](construction-iso.md)), which does the extraction and checks the fingerprints.
 
-## 3. Traduire un module
+## 3. Translate a module
 
-Depuis `~/hsfa-local/src/hsfa` (copie localisée) :
+From `~/hsfa-local/src/hsfa` (localised copy):
 
 ```bash
 MODULE=ro3 XDATA=$HSFA_XDATA nice -n 19 python3 mame_test.py      # SFA3   -> work/mame/roms_tr/sfa3ud/
 MODULE=ro5 XDATA=$HSFA_XDATA nice -n 19 python3 mame_test.py      # Upper  -> work/mame_ro5/roms_ro5/
-MODULE=ro5 nice -n 19 python3 banques.py tout                      # tables des banques d'Upper
+MODULE=ro5 nice -n 19 python3 banques.py tout                      # Upper's bank tables
 ```
 
-Surveiller dans le compte rendu les compteurs « écritures de registre tombées » et « non résolus » : toute hausse est
-une régression. Ne jamais construire une référence avec `MAX_DEMO` ou `MAX_PAL`. Le rôle de chaque script est décrit
-dans [architecture/traducteur.md](../architecture/traducteur.md) et, en détail, dans
+In the report, watch the "écritures de registre tombées" (dropped register writes) and "non résolus" (unresolved)
+counters: any increase is a regression. Never build a reference with `MAX_DEMO` or `MAX_PAL`. The role of each
+script is described in [architecture/traducteur.md](../architecture/traducteur.md) and, in detail, in
 [OUTILS.md](../architecture/OUTILS.md).
 
-## 4. Lancer le banc
+## 4. Run the bench
 
-Toujours `-video none` (la fenêtre bloque MAME), `nice -n 19`, et jamais `-state` en ligne de commande. Depuis
-`$HSFA_WORK/mame` :
+Always `-video none` (the window blocks MAME), `nice -n 19`, and never `-state` on the command line. From
+`$HSFA_WORK/mame`:
 
 ```bash
-# SFA3 traduit : pièce, Start, bouton 1 en continu ; captures aux images 3000 et 6000
+# translated SFA3: coin, Start, button 1 held; snapshots at frames 3000 and 6000
 INPUTS="1500-1508::IN2:Coin 1;1600-1608::IN2:Coin 2;2000-2006::IN2:1 Player Start;3500-19900%200,6::IN0:P1 Button 1" \
 NF=20000 OUT=journal.txt SNAPS=3000,6000 nice -n 19 mame sfa3ud -rompath roms_tr -video none -sound none \
   -nothrottle -skip_gameinfo -snapshot_directory captures -autoboot_script jeu.lua
 ```
 
-Upper et Hyper tournent sur le fork (`cps2f sfa3hx`) : voir [architecture/banc-mame.md](../architecture/banc-mame.md)
-pour les variables (`HSFA_GFX`, `HSFA_PLANS`, `BANC_BANQUES`…) et les scripts de scénario (`tournee.lua`,
+Upper and Hyper run on the fork (`cps2f sfa3hx`): see [architecture/banc-mame.md](../architecture/banc-mame.md)
+for the variables (`HSFA_GFX`, `HSFA_PLANS`, `BANC_BANQUES`…) and the scenario scripts (`tournee.lua`,
 `commandes.lua`…).
 
-## 5. Chercher une faute
+## 5. Look for a fault
 
 ```bash
-MAXF=20000 nice -n 19 python3 diag.py 30 --nobuild              # ro3 ; sans --nobuild : reconstruit d'abord
+MAXF=20000 nice -n 19 python3 diag.py 30 --nobuild              # ro3; without --nobuild: rebuilds first
 MODULE=ro5 MAXF=12000 nice -n 19 python3 diag.py 30 --nobuild   # Upper
 ```
 
-`diag.py` s'arrête à la première exception et remonte à l'instruction MIPS fautive grâce à `carte_image.txt`. Fin
-attendue : « aucune exception ». Méthode complète : [methodes/oracle-et-non-regression.md](../methodes/oracle-et-non-regression.md).
+`diag.py` stops at the first exception and traces it back to the faulty MIPS instruction through `carte_image.txt`.
+Expected end: "aucune exception" (no exception). Full method:
+[methodes/oracle-et-non-regression.md](../methodes/oracle-et-non-regression.md).
 
-## 6. Valider
+## 6. Validate
 
-Après **chaque** correctif du traducteur, depuis la copie localisée (`~/hsfa-local`) :
+After **every** translator fix, from the localised copy (`~/hsfa-local`):
 
 ```bash
-bash scripts/validation/nonreg.sh        # SFA3 : 3 diagnostics + 42 commandes (jusqu'à ~2 h)
-bash scripts/validation/nonreg_ro5.sh    # Upper, sur le fork
-bash scripts/validation/valide_tout.sh   # tout : reconstruit ro3/ro5/ro9, non-régressions, VERSUS d'Hyper, fins (~3 h)
+bash scripts/validation/nonreg.sh        # SFA3: 3 diagnoses + 42 controls (up to ~2 h)
+bash scripts/validation/nonreg_ro5.sh    # Upper, on the fork
+bash scripts/validation/valide_tout.sh   # everything: rebuilds ro3/ro5/ro9, non-regressions, Hyper VERSUS, endings (~3 h)
 ```
 
-Ces scripts lisent `HSFA_WORKSPACE` et prennent les outils dans le `src/hsfa` voisin (ou dans `HSFA_SRC`) : lancés
-depuis le dépôt lui-même, ils trouveraient des scripts aux chemins `<workspace>` non remplacés. Résultats
-attendus : 3 × « aucune exception », « 42 actions, 0 différentes », 133,3 % ; Upper « fin=finie » pour chaque perso.
+These scripts read `HSFA_WORKSPACE` and take the tools from the neighbouring `src/hsfa` (or from `HSFA_SRC`): run
+from the repository itself, they would find scripts with unreplaced `<workspace>` paths. Expected results:
+3 × "aucune exception", "42 actions, 0 différentes" (42 actions, 0 different), 133.3 %; Upper "fin=finie" (ending
+finished) for each character.
 
-## 7. Pièges à connaître dès le début
+## 7. Pitfalls to know from the start
 
-- Un octet PS2 à l'adresse `a` est à `a ^ 1` côté 68K ; un long est rangé moitiés échangées : tout script de
-  comparaison avec l'arcade doit normaliser ([architecture/memoire-cps2.md](../architecture/memoire-cps2.md)).
-- L'EEPROM du banc (`~/.mame/nvram/sfa3ud`) est réécrite à chaque sortie : la figer, sinon les parties divergent.
-- `pkill -f` ou `pgrep -f` avec un motif présent dans la ligne de commande tue le shell : utiliser `ps -C mame`.
-- Après chaque reconstruction, les adresses 68K bougent : relire `carte_image.txt` avant de poser un point d'arrêt.
+- A PS2 byte at address `a` is at `a ^ 1` on the 68K side; a long is stored with its halves swapped: any script that
+  compares with the arcade must normalise ([architecture/memoire-cps2.md](../architecture/memoire-cps2.md)).
+- The bench EEPROM (`~/.mame/nvram/sfa3ud`) is rewritten on every exit: freeze it, otherwise games diverge.
+- `pkill -f` or `pgrep -f` with a pattern present in the command line kills the shell: use `ps -C mame`.
+- After each rebuild, the 68K addresses move: read `carte_image.txt` again before setting a breakpoint.
 
-Liste complète : [methodes/pieges-du-traducteur.md](../methodes/pieges-du-traducteur.md) et
+Full list: [methodes/pieges-du-traducteur.md](../methodes/pieges-du-traducteur.md) and
 [journal/ETAT-DES-LIEUX.md](../journal/ETAT-DES-LIEUX.md) §7.

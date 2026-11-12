@@ -3,7 +3,7 @@
 `build_android.sh` construit les deux cœurs HSFA pour RetroArch Android avec le NDK r28c :
 
 ```sh
-NDK=<android-ndk-r28c> FBNEO=<arbre libretro/FBNeo af5d3f3 + patchs 0001-0014 et 0007b de patches/fbneo/> tools/android/build_android.sh <sortie>
+NDK=<android-ndk-r28c> FBNEO=<arbre libretro/FBNeo af5d3f3 + chaîne de patches/fbneo/README.md> tools/android/build_android.sh <sortie>
 ```
 
 - Sortie : `fbneo_hsfa_libretro_android.so` (4:3) et `fbneo_hsfa_ws_libretro_android.so` (16:9), noms des notices

@@ -1,93 +1,95 @@
-# Le traducteur MIPS → 68000
+# The MIPS → 68000 translator
 
-Vue d'ensemble. Le détail de chaque script (entrées, sorties, variables, fonctions) est dans
-[OUTILS.md](OUTILS.md) ; le code est dans [`src/hsfa/`](../../src/hsfa/README.md).
+**Français : [traducteur.fr.md](traducteur.fr.md)**
 
-## 1. Pourquoi c'est possible
+Overview. The details of each script (inputs, outputs, variables, functions) are in
+[OUTILS.md](OUTILS.md); the code is in [`src/hsfa/`](../../src/hsfa/README.md).
 
-Les jeux de l'Anthology ne sont pas émulés : le 68000 d'origine a été **recompilé statiquement en MIPS R5900**. Le
-recompilateur range chaque registre 68K dans une case du scratchpad (`0x70001100…`) et tient les drapeaux en mémoire.
-Il produit des **idiomes stéréotypés** : une instruction 68000 donne toujours la même suite d'instructions MIPS.
-Le traducteur **reconnaît ces idiomes et réémet l'instruction d'origine**. Ce n'est pas un décompilateur : il ne
-comprend pas le programme, il défait une transformation mécanique (§1-§21 du journal).
+## 1. Why it is possible
 
-La ROM arcade de SFA3 sert de **corrigé** : 91 % du code de SFA3 s'aligne fonction par fonction sur elle. Upper et
-Hyper n'ont pas de corrigé, mais partagent la même machine (§30) : ce qui est validé sur SFA3 se transporte.
+The Anthology games are not emulated: the original 68000 was **statically recompiled to MIPS R5900**. The
+recompiler keeps each 68K register in a scratchpad slot (`0x70001100…`) and holds the flags in memory.
+It produces **stereotyped idioms**: a 68000 instruction always gives the same sequence of MIPS instructions.
+The translator **recognises these idioms and re-emits the original instruction**. It is not a decompiler: it does not
+understand the program, it undoes a mechanical transformation (§1-§21 of the journal).
+
+The SFA3 arcade ROM serves as the **answer key**: 91 % of the SFA3 code aligns with it function by function. Upper and
+Hyper have no answer key, but share the same machine (§30): what is validated on SFA3 carries over.
 
 ## 2. Modules
 
-| Module | Jeu | Code 68K recompilé (fichier) | RAM PS2 émulée | Dossier de travail |
+| Module | Game | Recompiled 68K code (file) | Emulated PS2 RAM | Working folder |
 |---|---|---|---|---|
 | `ro3` | SFA3 | `0x22B00-0x393C40` | `0x900000` | `work/mame` |
 | `ro5` | Upper | `0x22B00-0x41ACC0` | `0xA00000` | `work/mame_ro5` |
 | `ro9` | Hyper | `0x22DE0-0x3BF140` | `0xB80000` | `work/mame_ro9` |
 
-Base de chargement `0x1F0000` pour les trois. Avant le 68K, le fichier contient du **Z80 recompilé** (le programme
-son), jamais retraduit (§16). Les autres modules de l'Anthology (SFA, SFA2 et variantes, Pocket Fighter) passent aussi
-le traducteur à 98-99 % : [carte des modules](../reference/carte-modules.md).
+Load base `0x1F0000` for all three. Before the 68K, the file holds **recompiled Z80** (the sound
+program), never retranslated (§16). The other Anthology modules (SFA, SFA2 and variants, Pocket Fighter) also go
+through the translator at 98-99 %: [module map](../reference/carte-modules.md).
 
-`profils.py` réunit les constantes de chaque module (`MODULE=ro3|ro5|ro9`) : points d'entrée, aides du recompilateur,
-routines patchées, tables. Une valeur absente désactive la fonction correspondante.
+`profils.py` gathers the constants of each module (`MODULE=ro3|ro5|ro9`): entry points, recompiler helpers,
+patched routines, tables. A missing value disables the matching feature.
 
-## 3. La chaîne
+## 3. The chain
 
 ```
-module MIPS (roN_usa_prog68k.bin) ──► translate.py ──► assemble.py ──► mame_test.py ──► ROM programme CPS2 (4 Mo)
-        X_DATA.BIN (ISO) ─────────────────────────────────────────────┘  (noyau 68K,      + blocs externes ext_*.bin
-                                                                          ressources,     + carte_image.txt, chutes.json
-                                                                          talons)
-X_DATA.BIN ──► banques.py / hsfa_gfx.py / hsfa_plans.py ──► tables de banques, ROM graphique étendue, plans
-X_DATA.BIN ──► gen_son.py / gen_hybride.py ──► ROM son (SFA3 ; hybride pour Upper)
+module MIPS (roN_usa_prog68k.bin) ──► translate.py ──► assemble.py ──► mame_test.py ──► CPS2 program ROM (4 MB)
+        X_DATA.BIN (ISO) ─────────────────────────────────────────────┘  (68K kernel,     + external blocks ext_*.bin
+                                                                          resources,      + carte_image.txt, chutes.json
+                                                                          stubs)
+X_DATA.BIN ──► banques.py / hsfa_gfx.py / hsfa_plans.py ──► bank tables, extended graphics ROM, planes
+X_DATA.BIN ──► gen_son.py / gen_hybride.py ──► sound ROM (SFA3; hybrid for Upper)
 ```
 
-| Étape | Script | Rôle |
+| Step | Script | Role |
 |---|---|---|
-| profil | `profils.py` | constantes du module |
-| traduction | `translate.py` | suivi symbolique des registres MIPS ; quand un motif complet est reconnu, émission de l'instruction 68000 ; pré-passes (paires non alignées, pile privée, zones de registres prêtés) et post-passes (raccourcissements, flux d'octets, fusion des `(An)+`) |
-| | `extra_regs.py` | registres supplémentaires du recompilateur, « A8 » et « D8 » (§53) : prêtés à un registre libre par zone, sinon rangés à un domicile en RAM |
-| | `dn_alu.py` | écritures de registre perdues (audit, §107) |
-| assemblage | `assemble.py` | placement itératif, branchements courts ou longs, tables d'aiguillage et de données PC-relatives |
-| image | `mame_test.py` | point d'entrée : profil → traduction → assemblage, puis noyau de tâches (`kernel68k.py`), ressources chargées par le code natif (`assets_natifs.py`), talons du portage ; écrit la ROM et ses annexes |
-| contrôle | `diag.py`, `watch.py` | première exception au banc et instruction MIPS fautive (par `carte_image.txt`) ; point d'observation |
-| graphismes | `banques.py`, `anthgfx.py`, `cps2rom.py`, `hsfa_gfx.py`, `hsfa_plans.py` | banques et plans de l'Anthology → codes de la ROM CPS2 ; ROM graphique étendue du fork |
-| son | `gen_son.py`, `gen_hybride.py`, `z80son.py` | ROM son au format MAME ; ROM hybride d'Upper |
+| profile | `profils.py` | module constants |
+| translation | `translate.py` | symbolic tracking of the MIPS registers; when a complete pattern is recognised, emission of the 68000 instruction; pre-passes (unaligned pairs, private stack, zones of lent registers) and post-passes (shortenings, byte streams, merging of `(An)+`) |
+| | `extra_regs.py` | extra recompiler registers, "A8" and "D8" (§53): lent to a free register per zone, otherwise kept at a home in RAM |
+| | `dn_alu.py` | lost register writes (audit, §107) |
+| assembly | `assemble.py` | iterative placement, short or long branches, PC-relative jump and data tables |
+| image | `mame_test.py` | entry point: profile → translation → assembly, then task kernel (`kernel68k.py`), resources loaded by the native code (`assets_natifs.py`), stubs of the port; writes the ROM and its side files |
+| check | `diag.py`, `watch.py` | first exception on the bench and faulty MIPS instruction (through `carte_image.txt`); watchpoint |
+| graphics | `banques.py`, `anthgfx.py`, `cps2rom.py`, `hsfa_gfx.py`, `hsfa_plans.py` | Anthology banks and planes → CPS2 ROM codes; extended graphics ROM of the fork |
+| sound | `gen_son.py`, `gen_hybride.py`, `z80son.py` | sound ROM in MAME format; Upper's hybrid ROM |
 
-Les autres scripts de `src/hsfa` (`census.py`, `verify.py`, `e2e.py`, `diverge.py`, `chain*.py`, `rosetta*.py`…)
-sont des outils de mesure ou des étapes historiques : [OUTILS.md](OUTILS.md) §3.
+The other scripts of `src/hsfa` (`census.py`, `verify.py`, `e2e.py`, `diverge.py`, `chain*.py`, `rosetta*.py`…)
+are measuring tools or historical steps: [OUTILS.md](OUTILS.md) §3.
 
-## 4. Ce que le portage a ajouté, et comment on le remplace
+## 4. What the port added, and how it is replaced
 
-Le code recompilé n'est pas seul dans le module. Le portage PS2 a ajouté une **couche matérielle** (registres CPS-A/B,
-QSound, entrées « mirroités » en variables, §57-§58), des **crochets**, du **code C natif** (aiguilleurs par table de
-longs, §140) et un **noyau de tâches**. HSFA remplace :
-- le noyau par un noyau 68K reconstruit (`kernel68k.py`, §60-§61) ;
-- les variables matérielles par les vrais registres CPS2 (`HWREG`, `ADDRMAP` de `translate.py`) ;
-- les ressources lues par le code natif (animations, fichier de frames à adresse fixe) par des blocs préparés à la
-  construction (`assets_natifs.py`, §75) ;
-- `setjmp` / `longjmp`, la manette et quelques routines par des talons écrits à la main.
+The recompiled code is not alone in the module. The PS2 port added a **hardware layer** (CPS-A/B registers,
+QSound, inputs "mirrored" into variables, §57-§58), **hooks**, **native C code** (dispatchers through tables of
+longs, §140) and a **task kernel**. HSFA replaces:
+- the kernel with a rebuilt 68K kernel (`kernel68k.py`, §60-§61);
+- the hardware variables with the real CPS2 registers (`HWREG`, `ADDRMAP` of `translate.py`);
+- the resources read by the native code (animations, frame file at a fixed address) with blocks prepared at
+  build time (`assets_natifs.py`, §75);
+- `setjmp` / `longjmp`, the joypad and a few routines with hand-written stubs.
 
-## 5. Mémoire
+## 5. Memory
 
-Le code PS2 voit une mémoire **petit-boutiste** ; la CPS2 est gros-boutiste. Plutôt que de retrouver la disposition
-arcade champ par champ, le traducteur applique une **recette universelle** (§29) : mot à la même adresse, octet à
-l'adresse XOR 1, long avec ses moitiés échangées. Les pointeurs restent des adresses PS2, convertis à l'usage. Détail
-et pièges : [memoire-cps2.md](memoire-cps2.md). Le coût de ces adaptateurs (~20 % du temps 68K en combat, §138) est
-l'objet de la [réorganisation des données](ARCHI-Reorganisation-Donnees.md).
+The PS2 code sees a **little-endian** memory; the CPS2 is big-endian. Rather than recover the arcade layout
+field by field, the translator applies a **universal recipe** (§29): word at the same address, byte at
+the address XOR 1, long with its halves swapped. Pointers stay PS2 addresses, converted on use. Details
+and pitfalls: [memoire-cps2.md](memoire-cps2.md). The cost of these adapters (~20 % of the 68K time in fights, §138) is
+the subject of the [data relayout](ARCHI-Reorganisation-Donnees.md).
 
-## 6. Interrupteurs
+## 6. Switches
 
-Chaque règle ajoutée a une variable d'environnement ; `=0` rend l'ancien comportement et doit redonner des ROM
-**identiques à l'octet**. Exemples : `TAILBR`, `LUIDN` (§143), `CMPMM` (§145), `EXT_MEM` (§128), `FTC_AVANT`,
-`EXG_PILE` (§126), `EXTRA_REGS`, `A8_HOME`, `D8_HOME`. Liste : [journal/ETAT-DES-LIEUX.md](../journal/ETAT-DES-LIEUX.md)
-§6 et [OUTILS.md](OUTILS.md) §2.4. Méthode : [methodes/oracle-et-non-regression.md](../methodes/oracle-et-non-regression.md).
+Each added rule has an environment variable; `=0` restores the old behaviour and must give back ROMs
+**identical to the byte**. Examples: `TAILBR`, `LUIDN` (§143), `CMPMM` (§145), `EXT_MEM` (§128), `FTC_AVANT`,
+`EXG_PILE` (§126), `EXTRA_REGS`, `A8_HOME`, `D8_HOME`. List: [journal/ETAT-DES-LIEUX.md](../journal/ETAT-DES-LIEUX.md)
+§6 and [OUTILS.md](OUTILS.md) §2.4. Method: [methodes/oracle-et-non-regression.md](../methodes/oracle-et-non-regression.md).
 
-## 7. Sorties à connaître
+## 7. Outputs worth knowing
 
-| Fichier | Contenu |
+| File | Content |
 |---|---|
-| `roms_tr/sfa3ud/sz3ud.03c…sz3.10b` (ro3 ; `roms_ro5`, `roms_ro9`) | ROM programme de 4 Mo, en 8 × 512 Ko |
-| `ext_<adresse>.bin`, `ext_liste.txt` | blocs servis hors de la ROM programme (données coupées, fichiers à adresse fixe) |
-| `carte_image.txt` | une ligne par instruction émise : adresse 68K, va MIPS, mnémonique |
-| `chutes.json` | écritures de registre sans traduction (audit des pertes silencieuses) |
+| `roms_tr/sfa3ud/sz3ud.03c…sz3.10b` (ro3; `roms_ro5`, `roms_ro9`) | 4 MB program ROM, as 8 × 512 KB |
+| `ext_<adresse>.bin`, `ext_liste.txt` | blocks served outside the program ROM (cut data, files at a fixed address) |
+| `carte_image.txt` | one line per emitted instruction: 68K address, MIPS va, mnemonic |
+| `chutes.json` | register writes without a translation (audit of silent losses) |
 
-Formats : [OUTILS.md](OUTILS.md) §5 et [reference/formats.md](../reference/formats.md).
+Formats: [OUTILS.md](OUTILS.md) §5 and [reference/formats.md](../reference/formats.md).

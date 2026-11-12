@@ -1,7 +1,7 @@
 # DECOR-CAMMY — plans manquants dans le décor de Cammy (Upper, ro5)
 
 Dossier : `<workspace>/work/agent_decor_cammy/` (rien n'a été écrit ailleurs ; aucun commit). Base : constructions figées
-`references/v149` (copiées dans `v149/`), traducteur `scripts/untranspile` à l'étiquette `v149` (worktree `untranspile/`).
+`references/v149` (copiées dans `v149/`), traducteur `<workspace>/scripts/untranspile` à l'étiquette `v149` (worktree `untranspile/`).
 
 ## 1. Conclusion
 

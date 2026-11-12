@@ -498,6 +498,21 @@ des acteurs ; scripts de fin (`converti/plXX/fin/script_fin_XX.s`) dans les tabl
 conversion (`$1B6B6`, `$1A.w` des acteurs) ; décors (`decor_fin_*.s`, tables `$81522` / `$301FA2` / `$2F4284` à
 retrouver dans Upper, banque de l'emplacement 4 : lignes `anim` de `carte.txt`).
 
+### 8 bis. v161 : plus aucune adresse d'image en dur ; `$1B6B6` résolu (11/11, revue `revue_upper_max`)
+
+- Le traducteur v161 allonge le code d'Upper (rien avant l'image `$4C5E`, puis +16 à +812 octets ; fin du code `$A0B8C` →
+  `$A0EB8` ; données et blocs externes à la même place). Quatre fonctions de `integre_max.py` lisaient des adresses
+  écrites en dur : `talon_cond40` (interpréteur de l'IA `$DEE6`, suite, saut, aléa, saut de bloc), `talon_prises` (3 sites
+  et leur lecteur), `talon_dialogues` (2 lecteurs et leurs tables), `lancer_vertical` (3 tables). Elles trouvent
+  maintenant leurs sites par motif et sauts décodés, recoupés avec les va MIPS de la carte (`_recoupe`).
+- **`jsr $1b6b6.l` des acteurs de fin** (2 sites, dont l'acteur `$4F/$19` des fins de Maki et de Yun) restait une adresse
+  ARCADE : le saut tombait au milieu d'une routine d'Upper (va `0xD0440` en v160, ailleurs en v161). Résolu par une ligne
+  de `conv/correspondances_complement.tsv` (arcade `$1B6B6` = va `0xC8304`, corps comparé) ; `prepare_max.py` s'arrête
+  désormais sur toute adresse du moteur non résolue. Effet en jeu de l'ancien saut : non mesuré (les fins « finissaient »).
+- Preuves : base v160 + interrupteurs v161 à 0 + `CONV_SANS_ADRESSES=1B6B6` = lot max55 à l'octet ; sur v160 et v161,
+  l'intégration modifie les mêmes 739 va (`controle/equiv_integration.py`) et, hors du code d'Upper, toute différence
+  est un pointeur relogé de même va (`controle/equiv_pointeurs.py`) ; banc MAX sur la construction v161 (max57).
+
 ## 9. Questions pour la session MAX
 
 1. **Gestionnaires d'Eagle** (§4) : `brouillons.py` découpe les modules à la racine, or les gestionnaires des persos
@@ -532,5 +547,5 @@ retrouver dans Upper, banque de l'emplacement 4 : lignes `anim` de `carte.txt`).
 | `max_trad/rosette_code/` | copie des sources MAX + `brouillon_eagle_gestionnaires.py/.s`, `psp_1b07bc_main.s`, `psp_1b33c8_main.s`, `eagle_complements.s` |
 | `lua/` | `tournee_max.lua` (copie de `tournee.lua` : code MAX, `PERSO2`, `ALEA`, `SEQ`), `trace_etat.lua`, `wp_etat.lua`, `etat_ram.lua`, `objets.lua` |
 | `fbneo/` | `paquet_fbneo.py` (entrée `upper_max`), `sfa3uhsfa.zip` |
-| `diffs/` | diffs contre `scripts/untranspile`, `agent_conv_max`, `work/fbneo`, `work/mame/tournee.lua` |
+| `diffs/` | diffs contre `<workspace>/scripts/untranspile`, `agent_conv_max`, `work/fbneo`, `work/mame/tournee.lua` |
 | `banc_ref/`, `banc_max/`, `prep/`, `essais/`, `captures/` | constructions, préparation, journaux, captures |

@@ -161,6 +161,16 @@ def date_texte(t):
         return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t))
     return time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(min(t, DATE_FIXE)))
 
+def _reel(chemin):
+    """os.path.realpath ; sans lien symbolique (Windows), liens.reel suit aussi les copies notees par liens.py"""
+    try:
+        sys.path.append(os.path.join(OUTILS, "..", "src", "hsfa")); import liens
+    except ImportError:
+        return os.path.realpath(chemin)
+    finally:
+        sys.path.pop()
+    return liens.reel(chemin)
+
 def lit(chemin):
     """lit un fichier (stable : relu si modifie pendant la lecture) et note md5 / date"""
     for _ in range(10):
@@ -171,7 +181,12 @@ def lit(chemin):
         time.sleep(2)
     else:
         raise SystemExit("fichier instable (reconstruction en cours ?) : " + chemin)
-    rel = os.path.relpath(os.path.realpath(chemin), WORK) if os.path.realpath(chemin).startswith(WORK) else os.path.basename(chemin)
+    if chemin.endswith(".txt"):       # (Windows) texte ecrit en mode texte ou copie Git en CRLF : octets de Linux
+        d = d.replace(b"\r\n", b"\n")
+    reel = _reel(chemin)              # realpath, copies faites a la place d'un lien comprises (src/hsfa/liens.py)
+    w = os.path.realpath(WORK)        # (Windows) meme forme que reel : noms courts 8.3 (RUNNER~1), casse
+    rel = os.path.relpath(reel, w) if os.path.normcase(reel).startswith(os.path.normcase(w)) else os.path.basename(chemin)
+    rel = rel.replace(os.sep, "/")                    # hsfa_info.txt identique sous Windows (« \ » sinon)
     journal.append("%s  %s  %s  %d" % (hashlib.md5(d).hexdigest(), date_texte(st.st_mtime), rel, len(d)))
     return d
 
@@ -571,6 +586,8 @@ def construit(cle):
     for f in PRG + GFX + ["phoenix.key"]:
         fichiers.append((f, lit(os.path.join(roms, f))))
     sd, sl = J["son"]
+    if cle == "hyper" and os.environ.get("HSFA_SON_HYPER"):   # (hyper_parade) hybride + sons PS2 seuls (sons_ps2.py)
+        sd = os.environ["HSFA_SON_HYPER"]
     for f in sl:
         fichiers.append((f, lit(os.path.join(WORK, sd, f))))
     trous = bytearray(TROUS_LEN) if J.get("trous") else None

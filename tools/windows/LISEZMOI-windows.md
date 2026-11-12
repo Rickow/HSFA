@@ -3,7 +3,7 @@
 Mêmes cœurs que pour Android, Linux et ROCKNIX : mêmes jeux, mêmes zips, mêmes réglages. Seul le fichier du cœur
 change (`.dll` au lieu de `.so`).
 
-Ces cœurs (patchs 0001-0014 et 0007b ; licence : `LICENSE-FBNeo.txt`, jointe) lisent les musiques d'Hyper en ADX **et** en Ogg Vorbis : les anciens zips restent valables,
+Ces cœurs (chaîne de patchs de `patches/fbneo/README.md` ; licence : `LICENSE-FBNeo.txt`, jointe) lisent les musiques d'Hyper en ADX **et** en Ogg Vorbis : les anciens zips restent valables,
 et les zips construits avec `HSFA_FLUX_FORMAT=ogg` (environ 5 fois plus légers) aussi. Ils contiennent aussi la carte
 musique (musiques ZERO / ZERO 2 par leurs pilotes d'origine) : elle ne s'active qu'avec un zip construit avec
 `HSFA_PARTITIONS=1`.

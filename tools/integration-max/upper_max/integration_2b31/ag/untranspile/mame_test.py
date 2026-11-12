@@ -717,7 +717,8 @@ def main():
     for k, n in enumerate(names): open(os.path.join(out, n), "wb").write(sw[k*0x80000:(k+1)*0x80000])
     src = os.path.join("@UM_MAME@", "roms", "sfa3ud")
     for f in os.listdir(src):
-        if f not in names and not os.path.exists(os.path.join(out, f)): os.symlink(os.path.join(src, f), os.path.join(out, f))
+        if f not in names and not os.path.exists(os.path.join(out, f)):
+            import liens; liens.lien(os.path.join(src, f), os.path.join(out, f))   # src/hsfa/liens.py (PYTHONPATH d'um_prog)
     with open(os.path.join(W, "carte_image.txt"), "w") as f:          # adresse 68K -> va MIPS + mnemonique
         for it in its:
             if it.ws or it.kind!='fixed': f.write("%06x %07x %s\n" % (it.off, it.va, it.mn))
@@ -736,6 +737,39 @@ def main():
     print("comparaisons Dn - memoire rendues au branchement : %d (agent_defauts_banc, CMPDMEM)" % len(T.CMPDMEM_N))
     print("BCLR/BSET/BCHG #b,Dn testes avant l'operation : %d (agent_defauts_banc, BITOP_DN)" % len(T.BITOP_DN_N))
     print("comparaisons memoire-memoire par un temporaire : %d appels, %d formes (agent_hyper_defauts, CMPMM)" % (len(T.CMPMM_N), len(set(T.CMPMM_N))))
+    import extra_regs as _X8
+    print("(v161) zones de A8 a entree laterale (debut recule) : %d (A8_ENTREE) %s" % (len(set(_X8.A8_ENTREE_N)),
+          ' '.join('%x->%x' % (a, b) for f, a, b in sorted(set(_X8.A8_ENTREE_N)))))
+    print("(v161) comparaisons a zero lues par C (TST) : %d (TST_C) %s" % (len(T.TST_C_N), ' '.join('%x' % v for v in sorted(T.TST_C_N))))
+    print("(v161) comparaisons a zero d'un Dn non signe (TST) : %d (TST_ZX) %s" % (len(T.TST_ZX_N), ' '.join('%x' % v for v in sorted(T.TST_ZX_N))))
+    print("(v161) CMPI #k,mem ('mem + -k' range dans RES seul) : %d (CMP_MEMADD) %s" % (len(T.CMP_MEMADD_N), ' '.join('%x' % v for v in sorted(T.CMP_MEMADD_N))))
+    print("(v161) CMP d'un octet indexe calcule en deux temps : %d (CMP_IDX) %s" % (len(T.CMP_IDX_N), ' '.join('%x' % v for v in sorted(T.CMP_IDX_N))))
+    print("(v161) octets via An rendus exacts (flot des branchements, (An), sites examines) : %d (PARITE_FLOT, PARITE_SITES) %s" % (len(T.PARITE_N), ' '.join('%x' % v for v in sorted(T.PARITE_N))))
+    print("(v161) CMP.x Dn,D8 avec D8 a domicile (par un temporaire) : %d formes (CMP_D8)" % len(set(T.CMP_D8_N)))
+    print("(v161) CMP.x Dn,memoire (minuende en memoire, par un temporaire) : %d formes (CMP_MEMDN)" % len(set(map(str, T.CMP_MEMDN_N))))
+    print("(v161) aides BCD sur octets de cases de registre : %d formes (BCD_REG) %s" % (len(T.BCD_REG_N), ' '.join('%s:%x>%x' % c for c in sorted(T.BCD_REG_N))))
+    # (v161, garde-fou de la 2e passe de la revue, principe de bcc_apres_appel.py) Bcc emis juste apres un JSR alors que le
+    # MIPS recalcule RES entre l'appel et le branchement : comparaison du 68K d'origine non emise
+    import re as _re
+    _L = sorted((it.off, it.va, it.mn) for it in its if it.ws or it.kind != 'fixed'); _bj = []
+    _BCC = _re.compile(r'^B(EQ|NE|PL|MI|CS|CC|GT|LE|LT|GE|HI|LS|VC|VS) ')
+    for _k in range(1, len(_L)):
+        _a, _v, _t = _L[_k]; _h = _t.split('  [')[0].strip(); _ph = _L[_k - 1][2].split('  [')[0].strip(); _pv = _L[_k - 1][1]
+        if not _BCC.match(_h) or not (_ph.startswith('JSR') or 'JSR ' in _ph.split(' ; ')[-1]) or 'T_' in _ph: continue
+        if not (_pv < _v <= _pv + 0x400): continue
+        for _va in range(_pv + 8, _v + 4, 4):
+            _w = struct.unpack_from('<I', buf, _va)[0]
+            if (_w >> 26) == 0x2b and (_w & 0xffff) == 0x1150 and ((_w >> 21) & 31) != 29: _bj.append(_v); break
+    print("GARDE-FOU (v161) Bcc sur les drapeaux d'un appel alors que le MIPS recalcule RES : %d %s" % (len(_bj), ' '.join('%x' % v for v in _bj)))
+    _ap = sorted(set(T.AIDE_PERDUE))
+    print("GARDE-FOU (v161) appels d'aides du recompilateur NON rendus en ligne : %d %s" % (len(_ap), ' '.join('%x:%s' % a for a in _ap)))
+    if _ap and os.environ.get("GARDE_AIDES", "1") != "0":
+        print("ECHEC (v161) : appel d'aide du recompilateur non rendu (GARDE_AIDES=0 pour passer outre)"); sys.exit(3)
+    _a8 = sorted(set(T.A8_HORS)); _cp = sorted(set((v, str(p)) for v, p in T.CMP_PERDU))
+    print("GARDE-FOU (v161) acces a A8 sans registre prete, RIEN EMIS : %d %s" % (len(_a8), ' '.join('%x' % v for v in _a8)))
+    print("GARDE-FOU (v161) comparaisons sans forme 68K (enc_cmp), RIEN EMIS : %d %s" % (len(_cp), ' ; '.join('%x %s' % c for c in _cp)))
+    if _cp and os.environ.get("GARDE_CMP", "1") != "0":
+        print("ECHEC (v161) : comparaison sans forme 68K (GARDE_CMP=0 pour passer outre)"); sys.exit(3)
     if T.CMPX: print("ESSAI CMPX : minuendes en memoire contre Dn : %d formes" % len(set(T.CMPX_N)))
     print("valeurs de table seulement testees : %d (HANDOFF §126)" % T.TBL_TST_N[0])
     print("echanges An<->Am par la pile MIPS : %d (HANDOFF §126)" % T.EXG_PILE_N[0])

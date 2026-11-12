@@ -2,8 +2,8 @@
 
 Version du 2026-10-20. La recherche documentaire faite pour le livre « Street Fighter Alpha — Histoire d'une
 renaissance » (11 axes, sources anglaises et japonaises, presse d'époque, code de MAME / FBNeo / HBMAME, guide
-officiel BradyGames de l'Anthology) a été relue sous l'angle du projet. Trois fiches détaillées, chacune sourcée et
-avec un niveau de confiance par fait :
+officiel BradyGames de l'Anthology) a été relue sous l'angle du projet. Trois fiches détaillées (A à C), chacune sourcée et
+avec un niveau de confiance par fait, puis les fiches D à R des sessions suivantes :
 
 | Fiche | Contenu |
 |---|---|
@@ -16,6 +16,15 @@ avec un niveau de confiance par fait :
 | [G — Méthode Capcom des persos MAX](G-METHODE-CAPCOM-MAX.md) | préfixes CvS2 / CFE (Eagle pl23, Maki pl24, Yun pl2c, Ingrid pl22), convention de découpage Capcom (atck, special_ck, spN → phases spNM, nml / sit / jatck, tirs pshl, effets pls), 409 appariements avec les fonctions PSP, ce que les noms disent des défauts de Yun et d'Ingrid ; 2026-10-27 |
 | [H — Sprites ×2](H-SPRITES-HD.md) | plan et faisabilité d'un paquet HD dans le cœur (68000 inchangé) : règle de réduction exacte, chaîne par lot, méthodes comparées (Scale2x, petit modèle entraîné sur nos sprites, diffusion + LoRA), pilote sur Ryu ; étude du 2026-10-29, rien de lancé |
 | [I — Décors de *SF2* façon *Alpha*](I-DECORS-SF2.md) | idée de pilote : importer des décors de *Super SF2 Turbo* dans Hyper et les recolorer par règles (palettes, tramage) ; 2026-10-30, rien de lancé |
+| [J — Croisement avec cps2recomp](J-CROISEMENT-CPS2RECOMP-SFA3.md) | adresses d'*Alpha 3* nommées par cps2recomp face à notre index : 4 contradictions (tranchées au banc MAME le 2026-11-11, journal §213), 31 adresses nouvelles ; outil `tools/sondes-recherche/croise_cps2recomp.py` (2026-11-10) |
+| [K — Pistes de cps2recomp](K-CPS2RECOMP-PISTES.md) | ce qui peut servir à HSFA chez cps2recomp : `portmap.py`, `aiscripts.py`, sauvegardes d'état (2026-11-10) |
+| [L — Projets ouverts](L-PROJETS-OUVERTS-2026-11.md) | projets voisins autour de la CPS-2 et des *Alpha*, dont la décompilation d'*Alpha 3 MAX* (transmise à la session MAX) (2026-11-10) |
+| [M — Réutilisation des tuiles](M-REUTILISATION-TUILES.md) | essai ciblé sur les tuiles graphiques d'*Alpha 3* (exactes, miroirs, quarts, palettes) ; outils `tools/sondes-recherche/tuiles_cps2*.py` (2026-11-10) |
+| [N — Faire tenir plus que la machine](N-PARADIGMES-LIMITES-ROM.md) | comment d'autres projets ont dépassé les limites de ROM (2026-11-10) |
+| [O — Possibilités de la CPS-2](O-CPS2-POSSIBILITES.md) | ce que la CPS-2 permet au 68000 et comment y faire tenir plus (2026-11-10) |
+| [P — Synthèse : place sur CPS-2](P-SYNTHESE-PLACE-CPS2.md) | faire tenir Upper (et Hyper) sur une vraie CPS-2 : banques, leviers mesurés ; renvoie à M, N, O, Q et R (2026-11-10) |
+| [Q — Optimisation des images](Q-OPTIMISATION-IMAGES.md) | techniques anciennes et récentes appliquées aux tuiles CPS-2, mesures sur la ROM de l'utilisateur (2026-11-10) |
+| [R — Solution par jeu](R-SOLUTIONS-PAR-JEU.md) | quelle solution pour quel jeu (2026-11-10) |
 
 Les premières sondes ont été lancées : [D — Sondes](D-SONDES.md) (Mazi, S-ISM rose, Bison en S-ISM rouge, test CFC2
 sur Upper + MAX, matrice des coups Hyper contre arcade : 24 écarts, dont le Killer Bee Assault de Cammy, cause trouvée et prouvée au banc, D §4). Le reste, ce sont des protocoles. Aucune donnée de jeu dans le dépôt ; le guide BradyGames reste

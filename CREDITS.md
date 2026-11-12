@@ -27,6 +27,7 @@ HSFA stands on the work of many people. Thank you all.
   makes the single executable, **zig** (Andrew Kelley and contributors) cross-compiles its native tools; see
   `tools/constructeur/TIERS.md`.
 - **Recalbox**, **ROCKNIX** and **Android** retro communities: the platforms the cores run on.
+- **Wine** and **GitHub Actions**: test runs of the Windows builds (Wine on Linux, real Windows runners).
 
 ## Projects that helped (ideas, cross-checks; no code copied unless stated)
 
@@ -48,6 +49,17 @@ HSFA stands on the work of many people. Thank you all.
   lists and frame data checked against our bench, hidden content of the Anthology, CPS-2 music loops.
 - **omegakatana92**, [Street-Fighter-Alpha-Recomp](https://github.com/omegakatana92/Street-Fighter-Alpha-Recomp-):
   *Street Fighter Alpha* port made with cps2recomp; its memory map of SFA1 was read as a reference. No code taken.
+- **theweathervane**, [sfa3max-decomp](https://github.com/theweathervane/sfa3max-decomp): C decompilation of the PSP
+  *Street Fighter Alpha 3 MAX* (US); its table of per-character round behaviour led us to align the MAX characters of
+  Upper MAX on the PSP (addresses converted to the European release and checked on it). Ideas only: no code taken
+  (GPL-3.0).
+- For the study of a real CPS-2 target (`docs/rapports/recherche/`, notes M to R): **Jotego**'s CPS-2 FPGA core
+  (jtcps, MiSTer) and **Darksoft**'s SD-loaded multi-game boards, cited as references; **Valley Bell**'s
+  [qsound-hle](https://github.com/ValleyBell/qsound-hle) kept as the reference for the replay QSound.
+
+## Bug reports
+
+- **pokeshark**: the first public reports (missing parry sound in Hyper's B-ISM, #1; Upper MAX build on Windows, #2).
 
 ## Books and guides consulted (cited by page; nothing reproduced)
 
@@ -70,5 +82,7 @@ constructeur tout-en-un : libchdr, PyInstaller, zig) ;
 projets voisins qui ont aidé par leurs idées ou leurs recoupements, sans reprise de code (irnutsmurt : Street Alpha 3
 Dreamcast Recomp ; Zer0-NexuS : patcheur Upper NAOMI et SFZ2A-DASH-CPS2 ; wikis SuperCombo, StrategyWiki,
 Street Fighter Wiki, TCRF et VGMRips pour les recoupements ; tmcleroy : cps2recomp et sfa2-recomp, d'où vient l'idée de la
-vue 16:9 calée sur le décor ; omegakatana92 : Street Fighter Alpha Recomp) ; livres et guides cités par page, rien de
+vue 16:9 calée sur le décor ; omegakatana92 : Street Fighter Alpha Recomp ; theweathervane : sfa3max-decomp, d'où vient
+l'alignement du comportement de manche des MAX sur la PSP ; Jotego, Darksoft et Valley Bell cités pour l'étude d'une vraie
+CPS-2) ; tests Windows avec Wine et GitHub Actions ; signalements : pokeshark ; livres et guides cités par page, rien de
 reproduit ; auteurs : Rickow, avec Claude (Anthropic) comme assistant de programmation.*

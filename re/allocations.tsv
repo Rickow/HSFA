@@ -415,3 +415,56 @@ ram68k_ro9a	$FF7E20	$FF7E22	greffe voie B (greffe_arcade, TIRAGE_CPU : coupé / 
 trous68k	$4D9000	$4DA17F	greffe voie B (greffe_arcade, TIRAGE_CPU : T_TIR, T_BASE, T_VER, T_D4A)	utilisé	<workspace>/work/greffe_arcade/ETAT.md (08/11, session e43)	PS2 $FE1000-$FE217F (fenêtre des décors)
 ram68k_ro9a	$FF7E23	$FF7E23	greffe voie B (greffe_arcade, TIRAGE_MODES : valeur tirée)	utilisé	<workspace>/work/greffe_arcade/ETAT.md (08/11, session e44)	id de version tiré (< $80) ou $80 + mode ZERO 3 (4/5/6 = S-ISM rouge / bleu / vert)
 trous68k	$4DA180	$4DA1A7	greffe voie B (greffe_arcade, TIRAGE_MODES : T_M132 + 4 tables de champs de mode, 8 o chacune)	utilisé	<workspace>/work/greffe_arcade/ETAT.md (08/11, session e44)	PS2 $FE2180-$FE21A7 (fenêtre des décors), indice = mode
+sons	$0245	$0245	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0745 (ligne suivante)
+sons	$0745	$0745	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0245
+sons	$027C	$027C	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $077C (ligne suivante)
+sons	$077C	$077C	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $027C
+sons	$027D	$027D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $077D (ligne suivante)
+sons	$077D	$077D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $027D
+sons	$040F	$040F	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $090F (ligne suivante)
+sons	$090F	$090F	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $040F
+sons	$041F	$041F	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $091F (ligne suivante)
+sons	$091F	$091F	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $041F
+sons	$047A	$047A	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $097A (ligne suivante)
+sons	$097A	$097A	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $047A
+sons	$0549	$0549	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A49 (ligne suivante)
+sons	$0A49	$0A49	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0549
+sons	$054A	$054A	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A4A (ligne suivante)
+sons	$0A4A	$0A4A	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $054A
+sons	$054B	$054B	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A4B (ligne suivante)
+sons	$0A4B	$0A4B	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $054B
+sons	$054C	$054C	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A4C (ligne suivante)
+sons	$0A4C	$0A4C	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $054C
+sons	$054D	$054D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A4D (ligne suivante)
+sons	$0A4D	$0A4D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $054D
+sons	$054F	$054F	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A4F (ligne suivante)
+sons	$0A4F	$0A4F	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $054F
+sons	$0550	$0550	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A50 (ligne suivante)
+sons	$0A50	$0A50	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0550
+sons	$0551	$0551	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A51 (ligne suivante)
+sons	$0A51	$0A51	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0551
+sons	$0553	$0553	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A53 (ligne suivante)
+sons	$0A53	$0A53	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0553
+sons	$0554	$0554	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A54 (ligne suivante)
+sons	$0A54	$0A54	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0554
+sons	$0555	$0555	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A55 (ligne suivante)
+sons	$0A55	$0A55	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0555
+sons	$0556	$0556	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A56 (ligne suivante)
+sons	$0A56	$0A56	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $0556
+sons	$055D	$055D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A5D (ligne suivante)
+sons	$0A5D	$0A5D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $055D
+sons	$055E	$055E	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A5E (ligne suivante)
+sons	$0A5E	$0A5E	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $055E
+sons	$057D	$057D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 1 ; vide dans tous les Z80 avant sons_ps2.py ; côté 2 = $0A7D (ligne suivante)
+sons	$0A7D	$0A7D	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	côté 2 de $057D
+z80_son	$6B3E	$6B3F	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	NEWPT[23] -> $7F80 (dernier mot libre avant les tables SFA3 en $6B40) ; ROM son d'Hyper seulement (roms_hyper)
+z80_son	$78D5	$7974	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	entrées d'échantillon 1515-1535 (21 sons, en descendant depuis 1535) ; dans la zone libre $77D5-$7974
+z80_son	$7F80	$7FD3	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	table de programmes (21 x 4 o) ; réservé jusqu'à $7FFF (32 sons) ; dans la zone libre $797D-$7FFF
+z80_son	0x4F400	0x4FBB5	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	banque 15 (décalage fichier) : 42 morceaux de 47 o ; dans la zone libre 0x4DE9A-0x4FFFF
+qsound_rom	$FF0000	$FFFFFF	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	banques entières non référencées par l'hybride (règle prudente de gen_voix_max.py) ni par les voix MAX (7D-D5) ; FF : 64 944 o
+qsound_rom	$FD0000	$FDFFFF	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	65 104 o
+qsound_rom	$FC0000	$FCFFFF	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	65 408 o
+qsound_rom	$F70000	$F7FFFF	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	62 048 o
+qsound_rom	$F50000	$F5FFFF	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	64 960 o
+qsound_rom	$F20000	$F2FFFF	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	64 320 o
+qsound_rom	$F10000	$F1FFFF	sons PS2 seuls d'Hyper (hyper_parade, sons_ps2.py)	utilisé	docs/rapports/SONS-PS2-HYPER.md (work/hyper_parade/RAPPORT.md) §8	13 632 o (reste libre) ; NB : D6/E0/E5/E9, notées « libres », SONT référencées selon la règle prudente

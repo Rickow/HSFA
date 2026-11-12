@@ -1,10 +1,10 @@
 # État des lieux — Hyper SFA / Anthology vers CPS2 (2026-10-04)
 
 > **État au 2026-10-24 : ce document n'est plus tenu à jour.** L'état des chantiers est dans
-> [`AGENTS.md`](../../AGENTS.md) §5 (tableau des chantiers et des décisions D1-D7), le point transverse dans
+> [`AGENTS.md`](../../AGENTS.md) §5 (état du jour, décisions D1-D7), le point transverse dans
 > [`POINT-ETAPE-2026-10-21`](../rapports/POINT-ETAPE-2026-10-21.md), la reprise dans
 > [`TRANSMISSION-2026-10-21`](TRANSMISSION-2026-10-21.md), ce qui a été livré dans
-> [`docs/guide/LIVRAISONS.md`](../guide/LIVRAISONS.md), et le journal va jusqu'au §201 (index :
+> [`docs/guide/LIVRAISONS.md`](../guide/LIVRAISONS.md), et le journal se poursuit (§215 au 2026-11-11 ; index :
 > [`INDEX-HANDOFF.md`](INDEX-HANDOFF.md) §13). En bref, au 2026-10-24 : traducteur v150 validée et v151 en préparation (§171) ;
 > greffe Arcade sur Hyper à `ro9a7_fige` (60/85 fins) ; persos MAX dans Upper au lot 2b16 ; cœur FBNeo à 16 patchs
 > plus le 11b. Ce qui suit reste utile pour ses commandes, ses variables et ses pièges.

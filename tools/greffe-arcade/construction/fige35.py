@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""fige35.py -- copie figee des outils de la greffe Arcade (etat ro9a35b, 08/11) et materialisation parametree.
+"""fige35.py -- copie figee des outils de la greffe Arcade (figee a l'etat ro9a35b le 08/11 ; ro9a36 = report du diff de greffe3.py, ro9a37 = traducteur de la greffe v161, LISEZMOI) et materialisation parametree.
 (derive de fige.py, etat ro9a22 du 01/11)
 
   python3 fige.py figer        : copie (UNE fois) les outils de l'atelier dans fige_ro9a22/ ; les chemins d'atelier
@@ -69,6 +69,9 @@ def sources():
     # (ro9a35b) traducteur de la greffe v160 (TRAD=@HA_G@/e42/untranspile3_v160) et fichiers des interrupteurs
     dossier(os.path.join(GA, "e42", "untranspile3_v160"), "greffe/e42/untranspile3_v160", "*.py")
     dossier(os.path.join(GA, "e42", "untranspile3_v160"), "greffe/e42/untranspile3_v160", "*.json")
+    # (ro9a37) traducteur de la greffe v161 (TRAD=@HA_G@/e47/untranspile3_v161 = v160 + diff v160 -> v161 du traducteur)
+    dossier(os.path.join(GA, "e47", "untranspile3_v161"), "greffe/e47/untranspile3_v161", "*.py")
+    dossier(os.path.join(GA, "e47", "untranspile3_v161"), "greffe/e47/untranspile3_v161", "*.json")
     for f in ("e35/hom_partages_50.txt", "e42/ptr_exclus_pal_att.txt", "e43/ptr_exclus_e43.txt"):
         L.append(("greffe/" + f, os.path.join(GA, f)))
     # traces RAM (MAME) d'Hyper et d'Upper lues par relogement_a5_v3.py (carte_dyn ; absentes -> autre table A5)
@@ -111,6 +114,8 @@ def figer():
 def materialiser(dest, valeurs, racines=None):
     """recopie les racines (defaut : la copie figee complete ; sinon code + releves) dans dest, marques remplacees"""
     val = dict(valeurs)
+    if os.sep == "\\":   # Windows : chemins en « / » (ils vont dans des chaines Python : « C:\Users », « \t »... casseraient)
+        val = {m: v.replace("\\", "/") for m, v in val.items()}
     for _a, m in MARQUES:
         val.setdefault(m, "/chemin/atelier/absent/" + m.strip("@"))
     n = 0

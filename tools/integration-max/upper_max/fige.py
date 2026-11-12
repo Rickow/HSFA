@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """fige.py -- matérialise la copie figée de l'intégration MAX (integration_2b31/ : état du lot 2b31 = banc_max52,
-traducteur v154 + crochets MAX, + PRETE_TEST / MEMSWAPD de la v159, + PRETE_CMP de la v160) dans un dossier de travail, en remplaçant les marques de chemins @UM_xxx@.
+traducteur v154 + crochets MAX, + PRETE_TEST / MEMSWAPD de la v159, + PRETE_CMP de la v160, + règles de la v161) dans un dossier de travail, en remplaçant les marques de chemins @UM_xxx@.
 Une marque non donnée devient /chemin/atelier/absent/<marque> : une fuite vers l'atelier échoue au lieu de lire
 silencieusement un fichier du poste de développement."""
 import os, re, shutil
@@ -15,6 +15,8 @@ TEXTE = (".py", ".sh", ".lua")
 
 def materialiser(dest, valeurs, fige=None):
     fige = fige or FIGE; val = dict(valeurs)
+    if os.sep == "\\":   # Windows : chemins en « / » (ils vont dans des chaines Python : « C:\Users », « \t »... casseraient)
+        val = {m: v.replace("\\", "/") for m, v in val.items()}
     for m in MARQUES: val.setdefault(m, "/chemin/atelier/absent/" + m.strip("@"))
     cles = sorted(val, key=len, reverse=True); n = 0
     for racine, ds, fs in os.walk(fige):

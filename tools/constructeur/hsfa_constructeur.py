@@ -8,7 +8,14 @@ Constructeur HSFA : un seul executable, de VOS images de disque aux archives des
       ISO_PSP : optional / facultatif : Street Fighter Alpha 3 MAX (PSP, Europe, ULES-00235), .iso or .chd
                 -> also builds Upper MAX (sfa3umhsfa.zip) / construit aussi Upper MAX
       Windows : drag the PS2 image onto the executable / glisser l'image PS2 sur l'executable
-  options : --console ; anything after « -- » goes to hsfa_build.py as is / le reste apres « -- » va a hsfa_build.py
+  options : --console ; --cible fbneo-hsfa (default / defaut) | fbneo-autonome | mister | cps2-banques ; --oui / --yes ;
+            anything after « -- » goes to hsfa_build.py as is / le reste apres « -- » va a hsfa_build.py
+  fbneo-autonome (standalone FBNeo HSFA for Windows, test build): its concession is announced and confirmed, then the
+  SAME archives as fbneo-hsfa are built / annonce et confirmation, puis les MEMES archives que fbneo-hsfa.
+  mister, cps2-banques: not available yet; the builder announces their concessions per game and the measured budgets,
+  asks for confirmation, and builds nothing (report mode) / pas encore disponibles : annonce des concessions par jeu et
+  des budgets mesures, confirmation, rien n'est construit (bilan).
+  Language of these announcements / langue des annonces : HSFA_LANGUE=fr|en, else the system's / sinon celle du systeme.
 
 Embeds / embarque : Python, NumPy, the HSFA scripts (scripts/, src/, tools/, max/), hsfa_oggenc (portable Ogg Vorbis
 encoder, tools/flux/oggenc), fluxtool (tools/flux) and libchdr. No game data / aucune donnee de jeu. Licences: TIERS.md.
@@ -78,7 +85,7 @@ def _image_vers_iso(image, sortie, psp=False, journal=print):
     marque = iso + ".source"
     sig = "%s %d %d\n" % (os.path.abspath(image), os.path.getsize(image), int(os.path.getmtime(image)))
     if os.path.exists(iso) and os.path.exists(marque) and open(marque).read() == sig:
-        journal("CHD deja decompresse / CHD already unpacked: %s" % iso); return iso
+        journal("CHD déjà décompressé / CHD already unpacked: %s" % iso); return iso
     journal("CHD -> ISO%s: %s" % ("" if psp else " (fichiers utiles seulement / needed files only)", iso))
     vu = set()
     def progres(n, t):                       # une ligne tous les 10 %
@@ -89,8 +96,63 @@ def _image_vers_iso(image, sortie, psp=False, journal=print):
     return iso
 
 
-def construit(image, sortie, psp=None, extra=(), journal=print):
-    """construction complete ; rend le code de sortie de hsfa_build"""
+CIBLE_DEFAUT = "fbneo-hsfa"
+
+
+def _cibles():
+    d = os.path.join(DEPOT, "scripts", "construction")
+    if d not in sys.path:
+        sys.path.insert(0, d)
+    import cibles
+    return cibles
+
+
+def jeux_construits(psp=None):
+    return ["sfa3", "upper", "hyper"] + (["uppermax"] if psp else [])
+
+
+def produit(cible):
+    """True si le format produit des archives (fbneo-hsfa, fbneo-autonome en essai) ; False : bilan seulement"""
+    return cible == CIBLE_DEFAUT or _cibles().CIBLES[cible]["dispo"]
+
+
+def annonce(cible, psp=None, journal=print, demande=None, oui=False):
+    """format autre que fbneo-hsfa : annonce (concessions, budgets) puis confirmation ; True = confirme.
+    demande(cible, langue) -> bool : question par la fenetre ; None : question dans le terminal"""
+    K = _cibles(); lg = K.langue_defaut()
+    jeux = jeux_construits(psp)
+    if demande is None or oui:                            # console (ou --oui) : question dans le terminal
+        ok = K.confirme(cible, jeux, oui=oui, ecrit=journal, langue=lg)
+    else:                                                 # fenetre : texte au journal, question par la fenetre
+        journal(K.rapport(cible, jeux, lg))
+        ok = demande(cible, lg)
+    journal("")
+    if not ok:
+        journal("Format non confirmé : rien n'est fait." if lg == "fr" else "Format not confirmed: nothing done.")
+    elif produit(cible):
+        journal("Format confirmé : construction des mêmes archives que pour FinalBurn Neo HSFA." if lg == "fr" else
+                "Format confirmed: building the same archives as for FinalBurn Neo HSFA.")
+    return ok
+
+
+def bilan(cible, psp=None, journal=print, demande=None, oui=False):
+    """format qui ne produit rien (mister, cps2-banques) : annonce, confirmation, AUCUNE sortie ; rend 0 / 2"""
+    if not annonce(cible, psp, journal, demande, oui):
+        return 2
+    lg = _cibles().langue_defaut()
+    journal("Mode bilan : format pas encore disponible ; aucune archive n'est produite." if lg == "fr" else
+            "Report mode: format not available yet; no archive is produced.")
+    return 0
+
+
+def construit(image, sortie, psp=None, extra=(), journal=print, cible=CIBLE_DEFAUT, demande=None, oui=False,
+              confirme=False):
+    """construction complete ; rend le code de sortie de hsfa_build. Format qui ne produit rien : bilan seulement ;
+    fbneo-autonome : annonce et confirmation (sauf confirme=True, deja faites), puis les memes archives que fbneo-hsfa"""
+    if not produit(cible):
+        return bilan(cible, psp, journal, demande, oui)
+    if cible != CIBLE_DEFAUT and not confirme and not annonce(cible, psp, journal, demande, oui):
+        return 2
     _outils_natifs()
     H = _hsfa_build()
     sortie = os.path.abspath(sortie); os.makedirs(sortie, exist_ok=True)
@@ -103,10 +165,13 @@ def construit(image, sortie, psp=None, extra=(), journal=print):
     if r == 0:
         A = os.path.join(sortie, "archives")
         journal("")
-        journal("Termine / Done. Archives : %s" % A)
+        journal("Terminé / Done. Archives : %s" % A)
         for f in sorted(os.listdir(A)):
             if f.endswith(".zip"): journal("  " + f)
         journal("Copiez-les dans le dossier des ROM de FinalBurn Neo HSFA / copy them to your FBNeo HSFA ROM folder.")
+        if cible == "fbneo-autonome":
+            journal("FinalBurn Neo HSFA autonome : fbneo64.exe (4:3) ou fbneo64ws.exe (16:9) / standalone: fbneo64.exe "
+                    "(4:3) or fbneo64ws.exe (16:9).")
     return r
 
 
@@ -123,21 +188,58 @@ def _demande(texte):
     return input(texte).strip().strip("\"'")
 
 
-def console(image=None, sortie=None, psp=None, extra=(), questions=True):
+def _choix_cible():
+    K = _cibles(); noms = list(K.CIBLES)
+    print("Format de sortie / output format :")
+    for k, n in enumerate(noms, 1):
+        print("  %d. %s / %s" % (k, K.libelle(n, "fr"), K.libelle(n, "en")))
+    r = _demande("Choix / choice [1] : ")
+    return noms[int(r) - 1] if r.isdigit() and 1 <= int(r) <= len(noms) else noms[0]
+
+
+def console(image=None, sortie=None, psp=None, extra=(), questions=True, cible=None, oui=False):
     print("Constructeur HSFA %s / HSFA builder" % VERSION)
+    if cible is None:
+        cible = _choix_cible() if questions else CIBLE_DEFAUT
+    if not produit(cible):
+        if questions and psp is None and sys.stdin and sys.stdin.isatty():
+            psp = _demande("Upper MAX aussi (ISO PSP) ? o/N / Upper MAX too? y/N : ").lower() in ("o", "y") or None
+        return bilan(cible, psp, oui=oui)
+    confirme = False
+    if cible != CIBLE_DEFAUT and not image:              # annonce avant les questions sur les images
+        if not annonce(cible, psp, oui=oui):
+            return 2
+        confirme = True
     if not image:
         image = _demande("Image PS2 de l'Anthology (.iso ou .chd ; glissez le fichier ici) / PS2 disc image: ")
         if questions and psp is None:
-            psp = _demande("ISO PSP de SFA3 MAX (Europe), facultatif : Entree pour passer / optional PSP ISO, "
+            psp = _demande("ISO PSP de SFA3 MAX (Europe), facultatif : Entrée pour passer / optional PSP ISO, "
                            "Enter to skip: ") or None
     if not os.path.isfile(image):
         print("Introuvable / not found: %s" % image); return 1
     if psp and not os.path.isfile(psp):
         print("Introuvable / not found: %s" % psp); return 1
-    return construit(image, sortie or sortie_defaut(), psp, extra)
+    return construit(image, sortie or sortie_defaut(), psp, extra, cible=cible, oui=oui, confirme=confirme)
 
 
-def fenetre(image=None, sortie=None, psp=None):
+def _boite_confirmation(cible, langue):
+    """boite « Confirmer malgre ces concessions ? » (fenetre) ; True = oui"""
+    from tkinter import messagebox
+    K = _cibles(); nom = K.CIBLES[cible][langue]
+    if langue == "fr":
+        texte = ("Format « %s » : les concessions et les budgets sont dans le journal ci-dessous.\n\n"
+                 "Confirmer malgré ces concessions ?" % nom)
+        texte += ("\n\n(Les archives seront les mêmes que pour FinalBurn Neo HSFA.)" if produit(cible) else
+                  "\n\n(Rien ne sera construit : format pas encore disponible.)")
+    else:
+        texte = ("Format \u201c%s\u201d: the concessions and budgets are in the log below.\n\n"
+                 "Confirm despite these concessions?" % nom)
+        texte += ("\n\n(The archives will be the same as for FinalBurn Neo HSFA.)" if produit(cible) else
+                  "\n\n(Nothing will be built: format not available yet.)")
+    return messagebox.askyesno("HSFA", texte)
+
+
+def fenetre(image=None, sortie=None, psp=None, cible=None):
     import queue, tkinter as tk
     from tkinter import filedialog, scrolledtext
     racine = tk.Tk(); racine.title("HSFA – constructeur / builder %s" % VERSION)
@@ -156,8 +258,14 @@ def fenetre(image=None, sortie=None, psp=None):
     ligne(2, "Sortie / output", v_out, lambda: v_out.set(filedialog.askdirectory() or v_out.get()))
     tk.Label(f, text="Avec l'ISO PSP : Upper MAX en plus / with the PSP ISO: Upper MAX too",
              fg="grey").grid(row=3, column=1, sticky="w")
+    K = _cibles()
+    lg = K.langue_defaut()
+    libelles = {K.libelle(n, lg): n for n in K.CIBLES}
+    v_cib = tk.StringVar(value=[l for l, n in libelles.items() if n == (cible or CIBLE_DEFAUT)][0])
+    tk.Label(f, text="Format de sortie / output", anchor="w").grid(row=4, column=0, sticky="w")
+    tk.OptionMenu(f, v_cib, *libelles).grid(row=4, column=1, sticky="w")
     log = scrolledtext.ScrolledText(f, width=100, height=24, state="disabled")
-    log.grid(row=5, column=0, columnspan=3, pady=6)
+    log.grid(row=6, column=0, columnspan=3, pady=6)
     f.columnconfigure(1, weight=1)
     q = queue.Queue()
 
@@ -176,23 +284,30 @@ def fenetre(image=None, sortie=None, psp=None):
 
     def lance():
         img, ps = v_img.get().strip(), v_psp.get().strip() or None
+        cib = libelles[v_cib.get()]
+        if not produit(cib):                             # bilan : ni image ni sortie necessaires
+            r = bilan(cib, ps, journal=lambda m: q.put(m + "\n"), demande=_boite_confirmation)
+            q.put("\n%s\n" % (("BILAN" if lg == "fr" else "REPORT") if r == 0 else
+                               ("ANNULÉ" if lg == "fr" else "CANCELLED"))); return
         for p in [img] + ([ps] if ps else []):
             if not os.path.isfile(p):
                 q.put("Introuvable / not found: %s\n" % p); return
+        if cib != CIBLE_DEFAUT and not annonce(cib, ps, journal=lambda m: q.put(m + "\n"), demande=_boite_confirmation):
+            q.put("\n%s\n" % ("ANNULÉ" if lg == "fr" else "CANCELLED")); return
         bouton.configure(state="disabled")
 
         def travail():
             sys.stdout = sys.stderr = Flux()
             try:
-                r = construit(img, v_out.get().strip(), ps, journal=lambda m: q.put(m + "\n"))
-                q.put("\n%s\n" % ("OK" if r == 0 else "ECHEC / FAILED (journal.txt)"))
+                r = construit(img, v_out.get().strip(), ps, journal=lambda m: q.put(m + "\n"), cible=cib, confirme=True)
+                q.put("\n%s\n" % ("OK" if r == 0 else "ÉCHEC / FAILED (journal.txt)"))
             except BaseException as x:          # noqa : SystemExit de hsfa_build compris
                 q.put("\nERREUR / ERROR: %s\n" % x)
             finally:
                 racine.after(0, lambda: bouton.configure(state="normal"))
         threading.Thread(target=travail, daemon=True).start()
 
-    bouton = tk.Button(f, text="Construire / Build", command=lance); bouton.grid(row=4, column=1, pady=6)
+    bouton = tk.Button(f, text="Construire / Build", command=lance); bouton.grid(row=5, column=1, pady=6)
     pompe(); racine.mainloop()
     return 0
 
@@ -240,7 +355,11 @@ def main(argv):
     ap.add_argument("--psp", "--psp-iso", dest="psp",
                     help="ISO ou .chd PSP de SFA3 MAX (Europe, ULES-00235), facultatif : Upper MAX en plus")
     ap.add_argument("--sortie", "--output", dest="sortie")
-    ap.add_argument("--console", action="store_true", help="sans fenetre / no window")
+    ap.add_argument("--console", action="store_true", help="sans fenêtre / no window")
+    ap.add_argument("--cible", choices=("fbneo-hsfa", "fbneo-autonome", "mister", "cps2-banques"), default=None,
+                    help="format de sortie / output format (défaut / default : fbneo-hsfa)")
+    ap.add_argument("--oui", "--yes", dest="oui", action="store_true",
+                    help="(--cible autre que fbneo-hsfa) confirmer sans question / confirm without asking")
     ap.add_argument("--version", action="version", version="hsfa-constructeur %s" % VERSION)
     args, extra = argv[1:], []
     if "--" in args:
@@ -249,11 +368,12 @@ def main(argv):
     graphique = not a.console and (os.name == "nt" or sys.platform == "darwin" or os.environ.get("DISPLAY")
                                    or os.environ.get("WAYLAND_DISPLAY"))
     if a.image or not graphique:
-        return console(a.image, a.sortie, a.psp, extra, questions=not a.image)
+        return console(a.image, a.sortie, a.psp, extra, questions=not a.image,
+                       cible=a.cible or (CIBLE_DEFAUT if a.image else None), oui=a.oui)
     try:
-        return fenetre(a.image, a.sortie, a.psp)
+        return fenetre(a.image, a.sortie, a.psp, a.cible)
     except Exception:                                     # pas de Tk / pas d'ecran : questions en texte
-        return console(None, a.sortie, a.psp, extra)
+        return console(None, a.sortie, a.psp, extra, cible=a.cible, oui=a.oui)
 
 
 if __name__ == "__main__":
@@ -261,5 +381,5 @@ if __name__ == "__main__":
         import multiprocessing; multiprocessing.freeze_support()
     r = main(sys.argv) or 0
     if GELE and os.name == "nt" and len(sys.argv) == 2 and not sys.argv[1].startswith("-"):
-        input("Entree pour fermer / press Enter to close")   # image glissee sur l'exe : garder la console ouverte
+        input("Entrée pour fermer / press Enter to close")   # image glissee sur l'exe : garder la console ouverte
     sys.exit(r)

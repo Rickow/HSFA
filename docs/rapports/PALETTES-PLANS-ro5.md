@@ -4,7 +4,7 @@
 > texte d'origine inchangé). Les chemins `work/…` et `<workspace>/…` désignent des dossiers de travail, hors dépôt.
 > Note du 2026-10-04 ; suite donnée dans le journal §119-§120 (fork : une base par plan, `hsfa_plans.py`).
 
-Note d'agent, 2026-10-04. Travail fait uniquement dans `work/agent_pal_ro5/`. Les dépôts, `scripts/untranspile`,
+Note d'agent, 2026-10-04. Travail fait uniquement dans `work/agent_pal_ro5/`. Les dépôts, `<workspace>/scripts/untranspile`,
 `work/mame`, `work/mame_ro5` et `mame-fork` n'ont été que lus. Rien n'a été commité.
 
 Conventions : `fichier` = décalage dans `ro5_usa_prog68k.bin` ; `exéc.` = fichier + `0x1F0000` ; « 68K $xxxxxx » =
@@ -100,7 +100,7 @@ qu'on n'a pas.
 
 ### 1.3 Correctifs proposés (non appliqués)
 
-1. **`scripts/untranspile/profils.py` ligne 35** :
+1. **`<workspace>/scripts/untranspile/profils.py` ligne 35** :
    `palettes=0x5072B0,  # table moteur des palettes par perso (exéc. 0x6F72B0) : 40 décalages SIGNÉS, 30 palettes/perso`.
    Cette valeur ne sert qu'à l'injection des palettes MAX (`mame_test.py`), pas à l'attraction.
 2. **`mame_test.py` lignes 279-280** : `struct.unpack_from('<32H', …)` doit devenir `'<%dh' % NID`, avec
@@ -165,7 +165,7 @@ qu'on n'a pas.
   montre la scène `$2E` aux rayons bleus, désormais correcte.
 - Le logo du titre reste un aplat blanc : ce n'est pas scroll3 (hypothèse : objets d'Upper absents de la ROM SFA3).
 
-**Correctif proposé** : `scripts/untranspile/banques.py`, ligne 26 (`MOD`) et ligne 149 (`if n == 312:`).
+**Correctif proposé** : `<workspace>/scripts/untranspile/banques.py`, ligne 26 (`MOD`) et ligne 149 (`if n == 312:`).
 
 - Ajouter au profil `f32=312` (ro3) / `f32=525` (ro5).
 - Remplacer le test par `if n == MOD['f32']:`, en écrivant toujours `f312.bin`, le nom attendu par

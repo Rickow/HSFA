@@ -91,3 +91,18 @@ PS2 de Capcom) extraite par `objcopy -O binary --only-section=.debug JEU.elf sor
 structures (nom, taille, nombre de champs) ; avec un nom (`_PlayerWork_`), ses champs et leurs décalages. Exemple :
 l'exécutable de *Capcom Fighting Evolution* (README de la recherche, §5).
 
+
+## Ajoutés le 2026-11-11 (fiches J à R de la recherche)
+
+- **`croise_cps2recomp.py SORTIE.tsv`** : croise les adresses nommées dans `games/sfa3` d'un clone local de
+  cps2recomp (lecture seule, GPL-3 : aucun code repris) avec notre index `re/`. Fiche
+  [J](../../docs/rapports/recherche/J-CROISEMENT-CPS2RECOMP-SFA3.md). Le chemin du clone est écrit en dur dans le
+  script : à adapter.
+- **`tuiles_cps2.py DOSSIER_ROM --apercu SORTIE.png | --mesure`** : décode les tuiles graphiques de la ROM `sfa3` de
+  l'utilisateur (jamais versée) et mesure leur réutilisation (exactes, miroirs, quarts 8×8, décalages). Fiches
+  [M](../../docs/rapports/recherche/M-REUTILISATION-TUILES.md) et [Q](../../docs/rapports/recherche/Q-OPTIMISATION-IMAGES.md).
+- **`tuiles_cps2_detail.py`, `tuiles_cps2_palette.py`, `tuiles_cps2_voisines.py`** : mesures annexes des mêmes fiches
+  (décalages, formes à palette près, tuiles voisines à quelques pixels près). Scripts de session : le chemin de
+  `tuiles_cps2.py` et le dossier `sfa3rom` sont écrits en dur, à adapter.
+- **`ocr_gamemachine.sh DOSSIER_PDF DOSSIER_TESSDATA DOSSIER_SORTIE`** : OCR japonais (tesseract) de revues scannées,
+  pour la recherche du livre ; PDF et textes restent hors dépôt.

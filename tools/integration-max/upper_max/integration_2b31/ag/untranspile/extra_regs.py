@@ -22,6 +22,11 @@ D8_EARLY = os.environ.get("D8_EARLY", "1") != "0"   # (HANDOFF §132)
 LATERAL = {}; LATERAL_N = [0]   # (case, debut de zone) -> va MIPS des branchements de sortie laterale
 DBG_PLAN = tuple(int(x, 16) for x in os.environ["DBG_PLAN"].split("-")) if os.environ.get("DBG_PLAN") else None
 LOOP_EXT = int(os.environ.get("LOOP_EXT", "0x100"), 16)
+A8_ENTREE = os.environ.get("A8_ENTREE", "1") != "0"   # (v161) zone de A8 a entree laterale venue d'avant : debut recule
+# sites examines un a un (module:1er acces a A8 de la zone, hex) ; 'tous' = toute zone de A8 refusee pour cette raison
+# (les autres sont dans le code C des aides du portage : ro3 0x388b7c..., ro5 0x40f640..., ro9 0x3b42a0...)
+A8_ENTREE_SITES = os.environ.get("A8_ENTREE_SITES", "ro3:3a87c,ro5:3f230,ro9:5213c,ro9:438ec,ro9:36fe80")
+A8_ENTREE_N = []; A8_ENTREE_REFUS = []
 POOL = {'A': [4, 3, 2, 1, 0, 6], 'D': [7, 6, 5, 4, 3, 2, 1, 0]}     # A5 (globales) jamais preté
 
 def analyse(buf, runtime_base=0x1f0000):
@@ -179,6 +184,23 @@ def plan(buf, runtime_base=0x1f0000):
                 elif dest in live: live.discard(dest)
                 if not live: break
         _dbg = DBG_PLAN and DBG_PLAN[0] <= lo <= DBG_PLAN[1]
+        # (v161, A8_ENTREE) ENTREE LATERALE venue d'AVANT la zone de A8 : 'appel ; bne L ; A8 = MOVEA.W x ; L: TST.B $EC(A8)'
+        # (SFA3 mips 0x3A858, bonus x1,5 de la routine de degats, arcade $024152 ; Upper 0x3F20C ; Hyper 0x52118, 0x438B8,
+        # 0x36FE5C). La zone etait refusee et, A8 n'ayant pas de repli, RIEN n'etait emis (ni le MOVEA, ni le TST). Le debut
+        # est recule jusqu'au branchement (l'ouverture garde les drapeaux), sans appel ni 'jr' entre les deux, sans
+        # chevaucher une autre zone de A8 ; les registres lus juste avant (test en attente du branchement) sont exclus du pret.
+        pre = None
+        _site = "%s:%x" % (os.environ.get("MODULE", "ro3"), lo)
+        if A8_ENTREE and s == 0x1120 and A8_HOME_PLAN and (A8_ENTREE_SITES == "tous" or _site in A8_ENTREE_SITES.split(",")):
+            for _ in range(4):
+                ent = [b_ for b_, t_ in brs[f] if b_ < lo and lo < t_ <= hi]
+                if not ent: break
+                nlo = min(ent)
+                if lo - nlo > 0x100 or any(nlo <= c <= lo for c in calls[f]) \
+                   or any(x.m == 'jr' for x in L[pos[nlo]:pos[lo]]) \
+                   or any(ss == s and not (a1 < nlo or a0 > hi) for (kk, rr, ss, a0, a1) in out[f]):
+                    A8_ENTREE_REFUS.append((f, lo, nlo)); break
+                A8_ENTREE_N.append((f, lo, nlo)); pre = nlo; lo = nlo
         if any(lo < c < hi for c in calls[f]):
             if _dbg: print("PLAN refus appel", hex(f), hex(s), hex(lo), hex(hi))
             refus['appel pendant la duree de vie'] += 1; continue
@@ -227,7 +249,8 @@ def plan(buf, runtime_base=0x1f0000):
             # (HANDOFF §65) le registre prete est SAUVE puis RESTAURE autour de la zone : il suffit qu'il
             # ne soit pas utilise DANS la zone (sans appel). Ex. remplissage video $92A000 : D0-D7 servent
             # dans la fonction, mais la boucle interne sur D8 n'en lit aucun.
-            zt = {r for r in POOL[kind] if any(lo <= va <= hi and sl == base + 4*r for va, sl in usedva[f])}
+            zt = {r for r in POOL[kind] if any((pre - 0x80 if pre is not None else lo) <= va <= hi and sl == base + 4*r
+                                               for va, sl in usedva[f])}
             zt |= {r for (kk, r, ss, a0, a1) in out[f] if kk == kind and not (a1 < lo or a0 > hi)}
             free = [r for r in POOL[kind] if r not in zt]
             if free: refus['registre libre dans la zone seulement (sauve/restaure)'] += 1

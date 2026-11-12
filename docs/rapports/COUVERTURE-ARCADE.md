@@ -208,11 +208,11 @@ Les **sites `0x38xxxx`–`0x39xxxx`** (menus du portage, 52 sites vers le moteur
    - 127 de ses 177 fonctions s'alignent sur l'arcade `$A4FB0`–`$ABBFE` ;
    - le §21 s'appuyait probablement sur `sfa3_prog.bin`, dont `$0`–`$BFFFF` est faux ;
    - **c'est du code d'origine.**
-2. **`scripts/untranspile/reach.py`** :
+2. **`<workspace>/scripts/untranspile/reach.py`** :
    - la lecture des tables d'aiguillage s'arrête après la 1re entrée (`off >= lim` avec `lim` = plus petite cible) ;
    - `rom_code.json` n'a donc que 46 instructions ;
    - le parcours corrigé atteint 126 029 instructions.
-3. **`scripts/untranspile/m68k.decode_one`** se trompe de taille sur quatre cas :
+3. **`<workspace>/scripts/untranspile/m68k.decode_one`** se trompe de taille sur quatre cas :
    - `EXT.W`/`EXT.L` (pris pour `MOVEM` : 2 mots au lieu de 1) ;
    - `ADDA.W`/`SUBA.W`/`CMPA.W #imm` (immédiat compté en long) ;
    - `MOVE USP` (+1 mot) ;

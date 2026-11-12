@@ -23,7 +23,8 @@ import argparse, json, os, shutil, struct, subprocess, sys, time, zipfile
 ICI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ICI, "..", "..", "max"))       # tools/max du dépôt (iso_psp.py)
 sys.path.insert(0, ICI)
-import iso_psp
+sys.path.append(os.path.join(ICI, "..", "..", "..", "src", "hsfa"))   # liens.py (Windows sans droit de lien symbolique)
+import iso_psp, liens
 
 PRG = "sz3ud.03c sz3ud.04c sz3.05c sz3.06c sz3.07c sz3.08c sz3.09c sz3.10b".split()
 GFX = ["sz3.%dm" % k for k in range(13, 21)]
@@ -58,7 +59,9 @@ class Regen:
 
     def env(s, **k):
         R = s.R
-        e = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HOME=os.path.join(R, "home"), SFA3MAX_CACHE=R,
+        # Windows : os.path.expanduser lit USERPROFILE, pas HOME (« ~/.cache/sfa3max » en dur dans les outils de max/)
+        e = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HOME=os.path.join(R, "home"), USERPROFILE=os.path.join(R, "home"),
+                 SFA3MAX_CACHE=R,
                  SFA3MAX_PAC_DIR=os.path.join(R, "psp", "pac"), SFA3MAX_EBOOT=s.eboot,
                  SFA3MAX_EFCT_DIR=os.path.join(R, "psp", "data"), SFA3MAX_ISO=os.path.abspath(s.a.psp_iso),
                  SFA3_ZIP=os.path.join(R, "sfa3_gfx.zip"), ANTHOLOGY_DIR=os.path.join(s.S, "cache", "anthology_extract"),
@@ -80,7 +83,7 @@ class Regen:
         R, S = s.R, s.S
         for d in ("journaux", "home/.cache", "work/cps2/anims", "work/xdata", "psp/pac", "psp/data/textes"):
             os.makedirs(os.path.join(R, d), exist_ok=True)
-        lien = lambda cible, l: os.path.lexists(l) or os.symlink(cible, l)
+        lien = liens.lien_si_absent      # lien symbolique ; Windows sans droit : jonction / lien physique / copie
         lien(R, os.path.join(R, "home", ".cache", "sfa3max"))
         lien(os.path.join(R, "psp", "pac"), os.path.join(R, "pac")); lien(os.path.join(R, "psp", "data"), os.path.join(R, "data"))
         if os.path.exists(os.path.join(R, "depot")): shutil.rmtree(os.path.join(R, "depot"))

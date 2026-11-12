@@ -15,7 +15,7 @@ MAME et `max/` n'ont pas été touchés.
 
 ## 0. En bref
 
-- **Base** : copie de `scripts/untranspile` du 11/10 (étape B par défaut, FLUXEA, OPTION_RETOUR / EXIT_RETOUR), figée
+- **Base** : copie de `<workspace>/scripts/untranspile` du 11/10 (étape B par défaut, FLUXEA, OPTION_RETOUR / EXIT_RETOUR), figée
   dans `untranspile.orig/`. Elle est identique au traducteur partagé validé. Avec tous les nouveaux interrupteurs à 0,
   ma copie donne exactement les ROM de référence : SFA3 `7e22b1ec…`, Upper `1908ec9e…`, Hyper `964943b1…` (md5 de
   `sz3ud.03c`) ; programme complet SFA3 `9565d25e…`.
@@ -349,7 +349,7 @@ Chaque palier a été contrôlé par le test des commandes et par `outils/cadenc
 
 ## 8. Fichiers
 
-**Diffs contre `scripts/untranspile`** (dans `diff/`, format `patch -p3` comme l'étape B ; `scripts/diffs.sh` les
+**Diffs contre `<workspace>/scripts/untranspile`** (dans `diff/`, format `patch -p3` comme l'étape B ; `scripts/diffs.sh` les
 régénère) :
 - à appliquer **sur le traducteur partagé actuel**, qui contient déjà l'étape B (RELOGE_* à 1), FLUXEA et
   OPTION_RETOUR / EXIT_RETOUR : `cd scripts/untranspile ; for f in …/diff/*.diff ; do patch -p3 < $f ; done` ;

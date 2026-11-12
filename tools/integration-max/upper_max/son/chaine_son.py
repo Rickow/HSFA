@@ -26,7 +26,9 @@ def main():
     R, D, O = (os.path.abspath(x) for x in (a.cache, a.depot, a.sortie))
     for d in ("communs", "sequences", "journaux"): os.makedirs(os.path.join(O, d), exist_ok=True)
     SONS = os.path.join(D, "max", "outils", "sons"); SRC = os.path.join(D, "src", "hsfa")
-    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HOME=os.path.join(R, "home"), SFA3MAX_CACHE=R,
+    # (Windows : os.path.expanduser lit USERPROFILE, pas HOME)
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HOME=os.path.join(R, "home"), USERPROFILE=os.path.join(R, "home"),
+               SFA3MAX_CACHE=R,
                SFA3MAX_PAC_DIR=os.path.join(R, "psp", "pac"), HSFA_TOOLS_MAX=os.path.join(D, "tools", "max"),
                SON_MAX_OUTILS_SONS=SONS, SON_MAX_COMMUNS=os.path.join(O, "communs"),
                SON_MAX_SEQ=os.path.join(O, "sequences"), SON_MAX_SRC_HSFA=SRC, SON_MAX_HYBRIDE=os.path.abspath(a.hybride),

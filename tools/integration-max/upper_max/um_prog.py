@@ -12,6 +12,10 @@ Enchaîne (= construit_max.sh de l'intégration, BANC=banc_max52, MAX_FINS=1, MA
   5. mame_test.py MAX=1 (traducteur de l'intégration) ; 6. contrôle des marques de fin (outils/audit/marques.py).
 Sortie : DIR/banc (roms_ro5/sfa3ud, ext_*.bin, banques_hx/, max_plus_gfx.bin, sfa3max_cache.txt).
 Audit (développement) : si UM_AUDIT_DIR est défini, PYTHONPATH et UM_* sont transmis aux outils.
+Base d'Upper : n'importe quelle version du traducteur, pourvu que la copie figée (ag/untranspile) soit la même : la
+préparation relit carte_image.txt de --upper, et integre_max.py tire ses sites de l'image (motifs uniques, sauts décodés)
+et les recoupe avec les va MIPS de la carte ; aucune adresse d'image n'est écrite en dur (v161). --env VAR=VAL
+(développement) passe un interrupteur du traducteur aux outils (ex. base v160 : tous les interrupteurs v161 à 0).
 """
 import argparse, json, os, shutil, subprocess, sys
 
@@ -58,6 +62,8 @@ def main():
         ap.add_argument("--" + k.replace("_", "-"), required=True)
     ap.add_argument("--vasm", default="", help="vasmm68k_mot : seulement avec HSFA_ASM=vasm ou compare (sinon hsfa_asm68k)")
     ap.add_argument("--python", default=sys.executable)
+    ap.add_argument("--env", action="append", default=[], metavar="VAR=VAL",
+                    help="variable transmise aux outils (developpement : interrupteurs du traducteur, ex. A8_ENTREE=0)")
     a = ap.parse_args()
     D = os.path.abspath(a.dest); O = os.path.join(D, "outils_max"); AG = os.path.join(O, "ag"); BANC = os.path.join(D, "banc")
     for d in (O, BANC):
@@ -77,11 +83,15 @@ def main():
     shutil.copyfile(os.path.join(a.upper, "carte_image.txt"), os.path.join(R, "carte_image.txt"))
     for n in PRG:
         shutil.copyfile(os.path.join(a.upper, "roms_ro5", "sfa3ud", n), os.path.join(R, "roms_ro5", "sfa3ud", n))
+    # Windows : USERPROFILE (« ~ »), TEMP / TMP (sinon dossier temporaire = C:\Windows) ; constructeur tout-en-un :
+    # _PYI_* (chargeur PyInstaller : sinon chaque etape re-extrait l'executable, dans ce dossier temporaire)
     env = {k: v for k, v in os.environ.items() if k in ("PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "SYSTEMROOT",
-                                                        "HSFA_ASM", "HSFA_VASM")}
+                                                        "USERPROFILE", "TEMP", "TMP", "HSFA_ASM", "HSFA_VASM",
+                                                        "HSFA_SANS_LIENS", "PYTHONUTF8") or k.startswith("_PYI_")}
     env.update(ENV_MAX, PYTHONDONTWRITEBYTECODE="1", PYTHONIOENCODING="utf-8", MAX_RACINE=AG,
                SFA3MAX_CACHE=absp(a.cache_max), SFA3MAX_EBOOT=absp(a.eboot), SFA3MAX_PAC_DIR=absp(a.pac),
                PYTHONPATH=os.path.join(absp(a.depot), "src", "hsfa"))          # mwo3_codec
+    env.update(dict(kv.split("=", 1) for kv in a.env))
     if os.environ.get("UM_AUDIT_DIR"):                                         # (développement) audit des lectures
         env.update({k: v for k, v in os.environ.items() if k.startswith("UM_")})
         env["PYTHONPATH"] = os.environ.get("PYTHONPATH", "") + os.pathsep + env["PYTHONPATH"]

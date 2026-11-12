@@ -6,7 +6,7 @@
 > originaux d'alors. Suite : [BANQUES-ET-MODES-ro9](BANQUES-ET-MODES-ro9.md), [ETATS-HYPER](ETATS-HYPER.md).
 
 Agent `agent_ro9`, 2026-10-04. Tout le travail est dans `<workspace>/work/agent_ro9/`. Rien n'a été modifié
-dans `scripts/untranspile`, `work/mame`, `work/mame_ro5`, `github/`, `mame-fork/` ni `sfa3max-psp-widescreen`.
+dans `<workspace>/scripts/untranspile`, `work/mame`, `work/mame_ro5`, `github/`, `mame-fork/` ni `sfa3max-psp-widescreen`.
 Les scripts Lua communs de `work/mame` ont seulement été chargés par `dofile`. Aucun commit.
 
 ## 0. En bref
@@ -126,7 +126,7 @@ Les diffs complets sont en annexe et dans `correctifs/*.diff` (`diff -u` contre 
 | 3 | `mame_test.py` + `lua/banc_mem_liste.lua` + `diag.py` | `mame_test` écrit `ext_liste.txt` (bases des blocs externes) ; `banc_mem_liste.lua` installe un tap par bloc absent de la liste figée de `banc_mem.lua` ; `diag.py` le charge après `banc_mem.lua` | `banc_mem.lua` ne connaît que `a04000…c80000` : `$940000` et `$C84000` n'étaient pas servis. `banc_mem.lua` n'est pas modifié |
 | 4 | `mame_test.py` | `SYSC` des natifs d'animation seulement s'ils existent ; plage `VBASE` ajoutée seulement si le bloc n'est pas vide ; correctif `objets_intro` sauté si `None` | ro9 n'a ni chargeur d'animation ni table d'objets de l'intro (plantages `None + int` / `addr_to_68k(None)`) |
 | 5 | `assets_natifs.py` | bloc `ro9` (§1.1) ; cache en écriture `ANIM_CACHE` (lecture : cache partagé d'abord) | valeurs ; ne pas écrire dans `work/cps2/anims` |
-| 6 | `translate.py` | `sys.path` pointe vers le dossier du script | le chemin en dur vers `scripts/untranspile` faisait charger le `profils.py` **original** (KeyError `ro9`) |
+| 6 | `translate.py` | `sys.path` pointe vers le dossier du script | le chemin en dur vers `<workspace>/scripts/untranspile` faisait charger le `profils.py` **original** (KeyError `ro9`) |
 | 7 | `extra_regs.py` (**traducteur**) | `BACK_AFTER` : un retour de boucle venu d'**après** une zone de registre prêté et qui vise `after` (l'instruction qui suit la zone) marque la zone « restauration atteinte de l'extérieur ». La zone A8, ou D8 dans ce cas précis, passe en **fermeture anticipée** (`EARLY_CLOSE`), et non sur `after` | **cause de la 1re faute** (§4.1). La restauration émise sur `after` était rejouée à chaque tour : `MOVEA.L (SP)+` en trop (pile déséquilibrée) et domicile de A8 écrasé. D8 est ajouté : refuser sa zone renvoyait au repli mémoire, qui perdait `LSL.W #2` et l'`ADDA` de `0x33C42C` |
 | 8 | `translate.py` (**traducteur**) | passe `byte_streams_pre` : `SUBQ.W #1,An ; MOVE.B 1(An),<ea>` → adresse exacte à l'exécution (An XOR 1 par la pile, drapeaux du `MOVE.B` gardés). Interrupteur `BYTE_PRE=0` | flux d'octets **décroissant** (`A8 -= 1 ; lb 0(A8)`, mips `0x33C4F0`) : le déplacement `0 XOR 1 = +1` suppose An pair, alors que le premier octet est à adresse **impaire** → octet du perso suivant. 1 site dans ro9, **0 dans ro3 et ro5** |
 | 9 | `mame_test.py` | deux lignes de compte rendu (correctifs 7 et 8) | suivi |

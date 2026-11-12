@@ -84,6 +84,57 @@ def verif(dump):
         n += 1; ok += encode(T[c]) == d[128*c:128*c+128]
     print("encodage : %d/%d tuiles identiques au vidage MAME" % (ok, n))
 
+# (ombre_iso, 11/11) OMBRES AUX CODES DU COEUR. Le patch FBNeo 0011 (« ombres transparentes (PSP) ») reconnait une
+# ombre par la palette OBJ 0x14 ET le CODE global de la tuile : 0284A, 305DF-30613 (ROM de base) et 50888-5088A (Hyper :
+# ombres des persos ZERO et ZERO 2, en ROM etendue). Les codes de la ROM etendue sont des RANGS d'apparition des tuiles
+# absentes de la ROM de base : avec la ROM reconstruite depuis l'ISO (autres tuiles, retouches de l'Anthology), il y a
+# moins de tuiles absentes et les trois ombres tombaient en 50648-5064A (contenu identique, hors de la liste du coeur) :
+# ombre OPAQUE en voie ISO seule, transparente avec la ROM d'arcade. Regle : les tuiles du banc commun d'Hyper (e545,
+# donnees du disque) aux numeros locaux 2F29, 2F2A, 2F2B (ombres ZERO, une seule couleur 14 sur fond 15) sont placees aux
+# codes 50888, 50889, 5088A du coeur : par ECHANGE avec la tuile qui y est (contenu et tables), ou, si la ROM etendue est
+# plus courte, en la prolongeant par des tuiles transparentes (la tuile d'origine reste en place, sans renvoi). Avec la
+# ROM d'arcade, elles y sont deja : rien ne change. HSFA_OMBRE_CODES=0 : sortie d'avant a l'octet.
+OMBRE_CODES = os.environ.get("HSFA_OMBRE_CODES", "1") != "0" and banques.MODULE == 'ro9'
+OMBRES_COEUR = ((545, 0x2F29, 0x50888), (545, 0x2F2A, 0x50889), (545, 0x2F2B, 0x5088A))
+CODE_MASQUE = 0x0FFFFFFF                             # bits 29-30 : drapeaux de miroir (SFA3 seul)
+
+def ombres_aux_codes_du_coeur(blob, tables):
+    """deplace les tuiles d'ombre ZERO d'Hyper aux codes du patch 0011 (blob et tables modifies en place)"""
+    def tab(n):
+        return next((t for p, t in tables.items() if os.path.basename(p) == "f%d.bin" % n), None)
+    vide = encode(np.full((16, 16), 15, np.uint8))
+    for n, local, cible in OMBRES_COEUR:
+        t = tab(n)
+        if t is None or local >= len(t) or t[local] == VIDE:
+            print("ombres : f%d local $%x absent, rien a faire" % (n, local)); continue
+        src = int(t[local]) & CODE_MASQUE
+        if src < EXT0:
+            print("ombres : f%d local $%x en ROM de base ($%x), rien a faire" % (n, local, src)); continue
+        ks, kc = src - EXT0, cible - EXT0
+        px = np.unpackbits(np.frombuffer(bytes(blob[128*ks:128*ks+128]), np.uint8).reshape(16, 2, 4, 1), axis=-1)
+        px = (px.astype(np.uint8) << np.arange(4, dtype=np.uint8).reshape(1, 1, 4, 1)).sum(2).astype(np.uint8).reshape(16, 16)
+        if set(np.unique(px).tolist()) != {14, 15}:
+            print("!! ombres : f%d local $%x ($%x) n'est pas une ombre (couleurs %s), rien a faire"
+                  % (n, local, src, sorted(set(np.unique(px).tolist())))); continue
+        if src == cible: continue
+        if kc * 128 < len(blob):                      # echange des deux tuiles, et des codes dans toutes les tables
+            a, b = bytes(blob[128*ks:128*ks+128]), bytes(blob[128*kc:128*kc+128])
+            blob[128*ks:128*ks+128], blob[128*kc:128*kc+128] = b, a
+            for u in tables.values():
+                c = u & CODE_MASQUE; ok = u != VIDE
+                ma, mb = ok & (c == src), ok & (c == cible)
+                u[ma] = (u[ma] & ~np.uint32(CODE_MASQUE)) | cible
+                u[mb] = (u[mb] & ~np.uint32(CODE_MASQUE)) | src
+            print("ombres : f%d local $%x : tuile $%x <-> $%x (code du coeur 0011)" % (n, local, src, cible))
+        else:                                         # ROM etendue plus courte : prolongee par des tuiles transparentes
+            a = bytes(blob[128*ks:128*ks+128])
+            while len(blob) < 128 * kc: blob += vide
+            blob += a
+            for u in tables.values():
+                c = u & CODE_MASQUE; ma = (u != VIDE) & (c == src)
+                u[ma] = (u[ma] & ~np.uint32(CODE_MASQUE)) | cible
+            print("ombres : f%d local $%x : tuile $%x -> $%x (ROM etendue prolongee, code du coeur 0011)" % (n, local, src, cible))
+
 def main():
     if sys.argv[1:2] == ["--verif"]: verif(sys.argv[2]); return
     W = profils.P['travail']
@@ -100,6 +151,7 @@ def main():
     idx = banques.index_rom()
     neuf = {}                                        # contenu -> code etendu
     blob = bytearray()
+    tables = {}                                      # (ombre_iso) tables etendues, ecrites apres ombres_aux_codes_du_coeur
     base = os.environ.get("HSFA_GFX_BASE")           # (agent_ro9) ROM etendue existante (ex. celle d'Upper) reprise EN TETE :
     if base:                                         # ses tuiles gardent leurs codes, seules les absentes sont ajoutees apres
         b0 = open(base, "rb").read(); b0 = b0[:len(b0) // 128 * 128]
@@ -123,8 +175,10 @@ def main():
             if cle not in neuf:
                 neuf[cle] = EXT0 + len(blob) // 128; blob += encode(px)   # (= EXT0 + len(neuf) sans HSFA_GFX_BASE)
             t[m] = neuf[cle]; ajout += 1
-        t.astype('<u4').tofile(p)
         if ajout: print("f%d : %d tuiles vers la ROM etendue" % (n, ajout))
+        tables[p] = t
+    if OMBRE_CODES: ombres_aux_codes_du_coeur(blob, tables)
+    for p, t in tables.items(): t.astype('<u4').tofile(p)
     if EXT_MAX is not None and EXT0 + len(blob) // 128 > EXT_MAX:
         raise SystemExit("ROM etendue SFA3 : %d tuiles depassent la zone $%x-$%x" % (len(blob) // 128, EXT0, EXT_MAX - 1))
     open(os.path.join(W, "hsfa_gfx.bin"), "wb").write(blob)

@@ -1,65 +1,77 @@
 # Documentation
 
-Documentation de travail du projet HSFA, en français. Présentation et état : [README](../README.fr.md).
+**Français : [README.fr.md](README.fr.md)**
 
-## Guide — pour s'en servir
+Working documentation of the HSFA project. Overview and status: [README](../README.md).
 
-| Document | Sujet |
+> **Language**: English is the default language of the repository since 2026-11-12. The key documents (entry pages,
+> guides, architecture, translator methods) are in English; each keeps its French version next to it as
+> `<name>.fr.md`. The journal (`journal/`), the reports (`rapports/`), the reference pages (`reference/`) and the
+> other documents not yet translated are in French.
+
+## Guide — using it
+
+| Document | Topic |
 |---|---|
-| [guide/demarrage.md](guide/demarrage.md) | de l'ISO au jeu traduit au banc MAME, diagnostic, non-régression |
-| [guide/construction-iso.md](guide/construction-iso.md) | construire les trois jeux et les archives du cœur depuis l'ISO (`hsfa_build.py`) |
-| [guide/installation-android.md](guide/installation-android.md) | cœur FBNeo HSFA sur RetroArch Android |
-| [guide/installation-rocknix.md](guide/installation-rocknix.md) | cœur sur RGB10X / ROCKNIX |
-| [guide/installation-recalbox.md](guide/installation-recalbox.md) | cœur sur Recalbox 10 (Raspberry Pi) |
-| [guide/LIVRAISONS.md](guide/LIVRAISONS.md) | registre des cœurs et archives remis (noms, md5), jusqu'au 2026-10-24 ; ensuite : page des releases |
+| [guide/demarrage.md](guide/demarrage.md) | from the ISO to the translated game on the MAME bench, diagnosis, non-regression |
+| [guide/construction-iso.md](guide/construction-iso.md) | building the three games and the core archives from the ISO (`hsfa_build.py`) |
+| [guide/installation-android.md](guide/installation-android.md) | FBNeo HSFA core on RetroArch Android |
+| [guide/installation-rocknix.md](guide/installation-rocknix.md) | core on RGB10X / ROCKNIX |
+| [guide/installation-recalbox.md](guide/installation-recalbox.md) | core on Recalbox 10 (Raspberry Pi) |
+| [guide/installation-fbneo-autonome-windows.md](guide/installation-fbneo-autonome-windows.md) | standalone FinalBurn Neo HSFA for Windows, without RetroArch (test build, planned with the next version) |
+| [guide/installation-batocera.md](guide/installation-batocera.md) | cores and five games on Batocera 43 (installer and service; tried on PC); RetroBat: [untested note](../tools/retrobat/NOTE-RETROBAT.md) |
+| [guide/LIVRAISONS.md](guide/LIVRAISONS.md) | register of the cores and archives handed over (names, md5) up to 2026-10-24; after that, the cores of each release and the unpublished batches (§4) |
 
-## Architecture — comment c'est fait
+## Architecture — how it is built
 
-| Document | Sujet |
+| Document | Topic |
 |---|---|
-| [architecture/traducteur.md](architecture/traducteur.md) | le traducteur MIPS → 68000 : principe, chaîne, ce que le portage a ajouté |
-| [architecture/memoire-cps2.md](architecture/memoire-cps2.md) | la recette mémoire « mode CPS2 » (§29), conversion des adresses, pièges |
-| [architecture/banc-mame.md](architecture/banc-mame.md) | banc MAME, scripts Lua, fork `sfa3hx` |
-| [architecture/coeur-fbneo.md](architecture/coeur-fbneo.md) | cœur libretro FBNeo « HSFA » : pilotes, archives, son, plates-formes |
-| [architecture/coeur-fbneo-patchs.md](architecture/coeur-fbneo-patchs.md) | une fiche par patch du cœur (lignes 1 à 16 du tableau de `patches/fbneo/README.md`) |
-| [architecture/ARCHI-Reorganisation-Donnees.md](architecture/ARCHI-Reorganisation-Donnees.md) | réorganisation des données : supprimer les adaptateurs, disposition arcade |
-| [architecture/voie-b-greffe.md](architecture/voie-b-greffe.md) | voie B : greffer le mode Arcade d'Upper sur Hyper |
-| [architecture/OUTILS.md](architecture/OUTILS.md) | **référence détaillée** : pipeline, fiche de chaque script, banc, formats, recettes, incohérences connues |
+| [architecture/traducteur.md](architecture/traducteur.md) | the MIPS → 68000 translator: principle, chain, what the port added |
+| [architecture/memoire-cps2.md](architecture/memoire-cps2.md) | the "CPS2 mode" memory recipe (§29), address conversion, pitfalls |
+| [architecture/banc-mame.md](architecture/banc-mame.md) | MAME bench, Lua scripts, `sfa3hx` fork |
+| [architecture/coeur-fbneo.md](architecture/coeur-fbneo.md) | FBNeo libretro core "HSFA": drivers, archives, sound, platforms |
+| [architecture/coeur-fbneo-patchs.md](architecture/coeur-fbneo-patchs.md) | one sheet per core patch (rows 1 to 16 of the table in `patches/fbneo/README.md`) |
+| [architecture/ARCHI-Reorganisation-Donnees.md](architecture/ARCHI-Reorganisation-Donnees.md) | data relayout: removing the adapters, arcade layout |
+| [architecture/voie-b-greffe.md](architecture/voie-b-greffe.md) | route B: grafting Upper's Arcade mode onto Hyper |
+| [architecture/OUTILS.md](architecture/OUTILS.md) | **detailed reference**: pipeline, sheet of each script, bench, formats, recipes, known inconsistencies |
 
-## Référence — à consulter
+## Reference — to look things up (in French)
 
-| Document | Sujet |
+| Document | Topic |
 |---|---|
-| [reference/adresses.md](reference/adresses.md) | adresses utiles (RAM de jeu, matériel, image produite) |
-| [reference/carte-modules.md](reference/carte-modules.md) | modules de l'Anthology, groupes de `X_DATA.BIN` |
-| [reference/formats.md](reference/formats.md) | formats des fichiers produits, des données de l'Anthology, des décors et du son |
-| [reference/SYMBOLES.md](reference/SYMBOLES.md) | carte des symboles de SFA3 dans les trois espaces d'adresses |
-| [reference/FRAMES-Anthology.md](reference/FRAMES-Anthology.md) | format des frames de sprites |
-| [reference/sfz2a-dash-cps2.md](reference/sfz2a-dash-cps2.md) | projet tiers SFZ2A-DASH-CPS2 (Cammy de Gold sur l'arcade Zero 2 Alpha) |
-| [MAX-Etude-Contenu-Persos.md](MAX-Etude-Contenu-Persos.md) | SFA3 MAX (PSP) : contenu des persos, conversion vers la CPS2 (document de la session MAX, laissé à la racine de `docs/`) |
+| [reference/adresses.md](reference/adresses.md) | useful addresses (game RAM, hardware, produced image) |
+| [reference/carte-modules.md](reference/carte-modules.md) | Anthology modules, groups of `X_DATA.BIN` |
+| [reference/formats.md](reference/formats.md) | formats of the produced files, of the Anthology data, of the stages and of the sound |
+| [reference/SYMBOLES.md](reference/SYMBOLES.md) | map of SFA3's symbols in the three address spaces |
+| [reference/FRAMES-Anthology.md](reference/FRAMES-Anthology.md) | sprite frame format |
+| [reference/sfz2a-dash-cps2.md](reference/sfz2a-dash-cps2.md) | third-party project SFZ2A-DASH-CPS2 (Gold Cammy on the Zero 2 Alpha arcade board) |
+| [MAX-Etude-Contenu-Persos.md](MAX-Etude-Contenu-Persos.md) | SFA3 MAX (PSP): content of the characters, conversion to the CPS2 (document of the MAX session, left at the root of `docs/`) |
 
-## Méthodes — comment travailler
+## Methods — how to work
 
-| Document | Sujet |
+| Document | Topic |
 |---|---|
-| [methodes/oracle-et-non-regression.md](methodes/oracle-et-non-regression.md) | oracle arcade, batterie de non-régression, interrupteurs, pertes silencieuses |
-| [methodes/pieges-du-traducteur.md](methodes/pieges-du-traducteur.md) | pièges rencontrés, par famille |
+| [methodes/oracle-et-non-regression.md](methodes/oracle-et-non-regression.md) | arcade oracle, non-regression battery, switches, silent losses |
+| [methodes/pieges-du-traducteur.md](methodes/pieges-du-traducteur.md) | pitfalls met, by family |
 
-## Journal et rapports
+## Journal and reports (in French)
 
-| Document | Sujet |
+| Document | Topic |
 |---|---|
-| [journal/README.md](journal/README.md) | le journal (`HANDOFF.md`, §1-§201), son index, l'état des lieux ; correspondance des anciens chemins |
-| [rapports/README.md](rapports/README.md) | rapports d'études détaillés (depuis le 2026-10-07) |
+| [journal/README.md](journal/README.md) | the journal (`HANDOFF.md`, §1-§221), its index, the state of play; mapping of the old paths |
+| [rapports/README.md](rapports/README.md) | detailed study reports (since 2026-10-07) |
+| [rapports/recherche/README.md](rapports/recherche/README.md) | research: sheets A to R (arcade versions and bugs, probes, MAX moves, neighbouring projects, cross-check with cps2recomp, room on a real CPS-2); sheets J to R (2026-11-10, revised on 11/11): [J](rapports/recherche/J-CROISEMENT-CPS2RECOMP-SFA3.md), [K](rapports/recherche/K-CPS2RECOMP-PISTES.md), [L](rapports/recherche/L-PROJETS-OUVERTS-2026-11.md), [M](rapports/recherche/M-REUTILISATION-TUILES.md), [N](rapports/recherche/N-PARADIGMES-LIMITES-ROM.md), [O](rapports/recherche/O-CPS2-POSSIBILITES.md), [P](rapports/recherche/P-SYNTHESE-PLACE-CPS2.md) (synthesis), [Q](rapports/recherche/Q-OPTIMISATION-IMAGES.md), [R](rapports/recherche/R-SOLUTIONS-PAR-JEU.md) |
 
-## Ailleurs dans le dépôt
+## Elsewhere in the repository
 
-- [src/hsfa/README.md](../src/hsfa/README.md) : les scripts du traducteur ;
-- [scripts/README.md](../scripts/README.md) : construction, validation, qualité ;
-- [tools/README.md](../tools/README.md) : outils par thème ;
-- [patches/README.md](../patches/README.md) : patchs des forks MAME et FBNeo ;
-- [legacy/README.md](../legacy/README.md) : époque PNACH ;
-- [max/README.md](../max/README.md) : session SFA3 MAX.
+- [src/hsfa/README.md](../src/hsfa/README.md): the translator's scripts;
+- [scripts/README.md](../scripts/README.md): build, validation, quality;
+- [tools/README.md](../tools/README.md): tools by topic;
+- [patches/README.md](../patches/README.md): patches of the MAME and FBNeo forks;
+- [legacy/README.md](../legacy/README.md): PNACH era;
+- [max/README.md](../max/README.md): SFA3 MAX session.
 
-Les chemins absolus sont remplacés par `<workspace>` (espace de travail du développeur) ; voir
+The maintainer's decisions and expectations: `ATTENTES-ET-DECISIONS.md`, in the private repository only (not exported).
+
+Absolute paths are replaced by `<workspace>` (the developer's workspace); see
 [scripts/correspondances.tsv](../scripts/correspondances.tsv).

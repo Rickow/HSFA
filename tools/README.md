@@ -1,58 +1,63 @@
-# Outils par thème
+# Tools by theme
 
-Outils d'étude et de production écrits au fil des chantiers. Chaque dossier correspond à un rapport de
-[`docs/rapports/`](../docs/rapports/README.md), qui en décrit l'usage et les résultats. Le traducteur lui-même est dans
-[`src/hsfa/`](../src/hsfa/README.md) ; les chaînes de construction et de validation dans [`scripts/`](../scripts/README.md).
+**Français : [README.fr.md](README.fr.md)**
 
-| Dossier | Thème | Rapport |
+Study and production tools written as the work went along. Each folder matches a report in
+[`docs/rapports/`](../docs/rapports/README.md), which describes its use and results. The translator itself is in
+[`src/hsfa/`](../src/hsfa/README.md); the build and validation chains are in [`scripts/`](../scripts/README.md).
+
+| Folder | Theme | Report |
 |---|---|---|
-| [`carto-modules/`](carto-modules/) | cartographie de tous les modules de l'Anthology (SFA, SFA2 et variantes, Pocket Fighter, menu) | [CARTE-MODULES](../docs/rapports/CARTE-MODULES.md) |
-| [`decors/export/`](decors/export/) | export exact des décors en PSD (balayage de caméra, recollage) | [DECORS-WS](../docs/rapports/DECORS-WS.md) |
-| [`decors/reimport/`](decors/reimport/) | PSD → tuiles CPS2, palettes, blocs libres | [REIMPORT](../docs/rapports/REIMPORT.md) |
-| [`decors/injection/`](decors/injection/) | injection des décors widescreen dans le programme traduit (fork, cœur) | [INJECTION-FORK](../docs/rapports/INJECTION-FORK.md) |
-| [`decors/sfa2/`](decors/sfa2/) | import d'un décor de SFA2 dans SFA3 traduit | [DECOR-SFA2](../docs/rapports/DECOR-SFA2.md), [DECOR-SFA2-EXPORT](../docs/rapports/DECOR-SFA2-EXPORT.md) |
-| [`diagnostics/`](diagnostics/) | enquêtes ponctuelles : `banque-1a`, `coups` (Sakura / Akuma), `explosion`, `portraits`, `zangief` | [BANQUE-1A](../docs/rapports/BANQUE-1A.md), [COUPS](../docs/rapports/COUPS.md), [EXPLOSION](../docs/rapports/EXPLOSION.md), [PORTRAITS](../docs/rapports/PORTRAITS.md), [ZANGIEF](../docs/rapports/ZANGIEF.md) |
-| [`etude-upper-hyper/`](etude-upper-hyper/) | voie A / voie B pour « Upper + modes d'Hyper » | [ETUDE-UPPER-HYPER](../docs/rapports/ETUDE-UPPER-HYPER.md) |
-| [`fbneo-hsfa/`](fbneo-hsfa/README.md) | archives du cœur (`paquet_fbneo.py`) et notices d'installation | [FBNEO-HYPER](../docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](../docs/rapports/REJEU-FBNEO.md) |
-| [`flux/`](flux/) | lecteur de flux musique (ADX et Ogg Vorbis) : table des flux, lanceurs d'essai, encodeur Vorbis `flux_ogg.py` / `fluxtool.cpp`, banc `tests/lance_tests.sh` | [FLUX](../docs/rapports/FLUX.md), [PLAN-VORBIS](../docs/rapports/PLAN-VORBIS.md) |
-| [`greffe-arcade/`](greffe-arcade/) | voie B : greffe du mode Arcade d'Upper sur Hyper (outils, données, décors) | [GREFFE-PREPARATION](../docs/rapports/GREFFE-PREPARATION.md), [GREFFE-DECORS](../docs/rapports/GREFFE-DECORS.md) |
-| [`hyper-etats/`](hyper-etats/) | machine à états d'Hyper, écran de mode, tournée de référence `tournee_hyper.lua` | [ETATS-HYPER](../docs/rapports/ETATS-HYPER.md) |
-| [`integration-max/`](integration-max/) | conversion du code et des frames MAX vers l'image d'Upper ; voix MAX | [CONV-MAX](../docs/rapports/CONV-MAX.md), [VOIX-MAX](../docs/rapports/VOIX-MAX.md) |
-| [`reorg/`](reorg/) | réorganisation des données, étape A : journal des conversions, oracle RAM, `disposition.lua` | [ETAPE-A](../docs/rapports/ETAPE-A.md) |
-| [`rocknix/`](rocknix/) | cœurs pour ROCKNIX (RGB10X) : compilation croisée, système EmulationStation, notice | [ROCKNIX](../docs/rapports/ROCKNIX.md) |
-| [`son-hyper/`](son-hyper/) | son d'Hyper : voix SFA1/SFA2 par version, rejeu QSound, redirection | [SON-HYPER-ROM](../docs/rapports/SON-HYPER-ROM.md) |
-| [`son-hyper/partitions/`](son-hyper/partitions/README.md) | musique d'Hyper en partitions : pilotes v1.0x, bancs Z80, appariement des variantes | [PARTITIONS-HYPER](../docs/rapports/PARTITIONS-HYPER.md) |
-| [`symboles/`](symboles/) | carte des symboles de SFA3 (`symboles_ro3.csv`) et ses outils | [SYMBOLES](../docs/reference/SYMBOLES.md) |
-| [`max/`](max/README.md) | outils de la session SFA3 MAX (PSP) — **ne pas déplacer** : la session MAX les importe par ce chemin | [MAX-Etude-Contenu-Persos](../docs/MAX-Etude-Contenu-Persos.md) |
-| [`android/`](android/README.md) | construction des deux cœurs Android (arm64-v8a, NDK r28c) | [installation-android](../docs/guide/installation-android.md) |
-| [`windows/`](windows/LISEZMOI-windows.md) | cœurs Windows x64 (MinGW-w64 depuis Linux) et notice | [LISEZMOI-windows](windows/LISEZMOI-windows.md) |
-| [`recalbox/`](recalbox/LISEZMOI-recalbox.md) | cœurs Recalbox 10 (armhf / aarch64), installation | [installation-recalbox](../docs/guide/installation-recalbox.md) |
-| [`ps2-patchs/`](ps2-patchs/README.md) | patcheurs de l'ISO PS2 : tout débloqué, 16:9 natif | [README](ps2-patchs/README.md) |
-| [`options/`](options/) | écran OPTION et retour au menu (diffs du traducteur et du cœur), BGM d'Hyper dans Upper | [OPTIONS](../docs/rapports/OPTIONS.md), [OPTIONS-HYPER-UPPER](../docs/rapports/OPTIONS-HYPER-UPPER.md) |
-| [`sondes-recherche/`](sondes-recherche/README.md) | sonde de PC du cœur, déchiffreur CPS2, désassembleur, banc des coups FBNeo | [D-SONDES](../docs/rapports/recherche/D-SONDES.md) |
-| [`guide-coups/`](guide-coups/README.md) | relevé des commandes du guide officiel (sans son texte) et vérification SuperCombo | [BANC-COUPS](../docs/rapports/BANC-COUPS.md) |
-| [`ppsspp-banc/`](ppsspp-banc/PPSSPP-BANC.md), [`banc-max-psp/`](banc-max-psp/BANC-PSP.md) | PPSSPP comme oracle des persos MAX ; mode B du banc des coups (PSP contre Upper MAX) | [PPSSPP-BANC](ppsspp-banc/PPSSPP-BANC.md), [BANC-PSP](banc-max-psp/BANC-PSP.md) |
-| [`bancs/`](bancs/README.md) | **outils communs des mesures** : lanceur `lance_emu` (places, registre, arrêts par PID), empreinte de ce que l'émulateur charge, banc de jour (non-régression des 4 jeux sur versions figées), `compare_zips.py` | [README](bancs/README.md) |
-| [`banc-coups/`](banc-coups/README.md) | banc des coups sous MAME (oracle arcade), **banc de non-régression MAX** `banc_max.sh` (condition de livraison d'un lot MAX), frame data contre SuperCombo | [BANC-COUPS](../docs/rapports/BANC-COUPS.md) |
-| [`frame-data-max/`](frame-data-max/README.md) | données d'images des persos MAX en tours de jeu : PSP (oracle) contre Upper MAX, passé à chaque lot MAX | [README](frame-data-max/README.md) |
-| [`decors/sfa1-iso/`](decors/sfa1-iso/README.md), [`decors/sfa2-iso/`](decors/sfa2-iso/README.md) | décors de SFA1 (13) et SFA2 (18) extraits de l'ISO seule (plans, animations), contrôles contre l'arcade sous MAME | [README SFA1](decors/sfa1-iso/README.md), [README SFA2](decors/sfa2-iso/README.md) |
-| [`decors/integration/`](decors/integration/README.md) | convertisseur commun SFA1 / SFA2 → lots « HSFADC01 » de la zone des décors de la greffe, aller-retour prouvé | [README](decors/integration/README.md) |
-| [`coeurs/`](coeurs/README.md) | construction et contrôles statiques du lot des 12 cœurs (Linux, Windows, Android, ROCKNIX, Recalbox) | [LIVRAISONS](../docs/guide/LIVRAISONS.md) |
-| [`ps2-oracle/`](ps2-oracle/README.md) | PCSX2 comme oracle : Xvfb dédié, xdotool sur le PID lancé, PINE (lecture ; écritures limitées) | [README](ps2-oracle/README.md) |
-| [`asm68k/`](asm68k/README.md) | assembleur 68000 maison `hsfa_asm68k` (remplace vasm dans la construction) | [README](asm68k/README.md) |
-| [`constructeur/`](constructeur/README.md) | constructeur tout-en-un (un exécutable par système, CI) | [README](constructeur/README.md) |
+| [`carto-modules/`](carto-modules/) | map of every module of the Anthology (SFA, SFA2 and variants, Pocket Fighter, menu) | [CARTE-MODULES](../docs/rapports/CARTE-MODULES.md) |
+| [`decors/export/`](decors/export/) | exact export of the stages to PSD (camera sweep, stitching) | [DECORS-WS](../docs/rapports/DECORS-WS.md) |
+| [`decors/reimport/`](decors/reimport/) | PSD → CPS2 tiles, palettes, free blocks | [REIMPORT](../docs/rapports/REIMPORT.md) |
+| [`decors/injection/`](decors/injection/) | injection of the widescreen stages into the translated program (fork, core) | [INJECTION-FORK](../docs/rapports/INJECTION-FORK.md) |
+| [`decors/sfa2/`](decors/sfa2/) | import of an SFA2 stage into translated SFA3 | [DECOR-SFA2](../docs/rapports/DECOR-SFA2.md), [DECOR-SFA2-EXPORT](../docs/rapports/DECOR-SFA2-EXPORT.md) |
+| [`diagnostics/`](diagnostics/) | one-off investigations: `banque-1a`, `coups` (Sakura / Akuma), `explosion`, `portraits`, `zangief` | [BANQUE-1A](../docs/rapports/BANQUE-1A.md), [COUPS](../docs/rapports/COUPS.md), [EXPLOSION](../docs/rapports/EXPLOSION.md), [PORTRAITS](../docs/rapports/PORTRAITS.md), [ZANGIEF](../docs/rapports/ZANGIEF.md) |
+| [`etude-upper-hyper/`](etude-upper-hyper/) | route A / route B for "Upper + Hyper's modes" | [ETUDE-UPPER-HYPER](../docs/rapports/ETUDE-UPPER-HYPER.md) |
+| [`fbneo-hsfa/`](fbneo-hsfa/README.md) | core archives (`paquet_fbneo.py`) and installation notes | [FBNEO-HYPER](../docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](../docs/rapports/REJEU-FBNEO.md) |
+| [`flux/`](flux/) | music stream player (ADX and Ogg Vorbis): stream table, test launchers, Vorbis encoder `flux_ogg.py` / `fluxtool.cpp`, bench `tests/lance_tests.sh` | [FLUX](../docs/rapports/FLUX.md), [PLAN-VORBIS](../docs/rapports/PLAN-VORBIS.md) |
+| [`greffe-arcade/`](greffe-arcade/) | route B: graft of Upper's Arcade mode onto Hyper (tools, data, stages); `construction/` ([LISEZMOI](greffe-arcade/construction/LISEZMOI.md)): frozen copy ro9a37 used by `hsfa_build.py --jeux hyperarcade` (§212, §217, §221) | [GREFFE-PREPARATION](../docs/rapports/GREFFE-PREPARATION.md), [GREFFE-DECORS](../docs/rapports/GREFFE-DECORS.md), [BUILD §11](../docs/rapports/BUILD.md) |
+| [`hyper-etats/`](hyper-etats/) | Hyper's state machine, mode screen, reference tour `tournee_hyper.lua` | [ETATS-HYPER](../docs/rapports/ETATS-HYPER.md) |
+| [`integration-max/`](integration-max/README.md) | conversion of the MAX code and frames to Upper's image; MAX voices; `upper_max/`: Upper MAX steps in `hsfa_build.py --jeux uppermax` (`regen_max.py`, frozen copy `integration_2b31`, §202) | [CONV-MAX](../docs/rapports/CONV-MAX.md), [VOIX-MAX](../docs/rapports/VOIX-MAX.md) |
+| [`reorg/`](reorg/) | data relayout, step A: conversion log, RAM oracle, `disposition.lua` | [ETAPE-A](../docs/rapports/ETAPE-A.md) |
+| [`rocknix/`](rocknix/) | cores for ROCKNIX (RGB10X): cross-compilation, EmulationStation system, notes | [ROCKNIX](../docs/rapports/ROCKNIX.md) |
+| [`son-hyper/`](son-hyper/) | Hyper's sound: per-version SFA1/SFA2 voices, QSound replay, redirection | [SON-HYPER-ROM](../docs/rapports/SON-HYPER-ROM.md) |
+| [`son-hyper/partitions/`](son-hyper/partitions/README.md) | Hyper's music as scores: v1.0x drivers, Z80 benches, matching of the variants | [PARTITIONS-HYPER](../docs/rapports/PARTITIONS-HYPER.md) |
+| [`symboles/`](symboles/) | SFA3 symbol map (`symboles_ro3.csv`) and its tools | [SYMBOLES](../docs/reference/SYMBOLES.md) |
+| [`max/`](max/README.md) | tools of the SFA3 MAX (PSP) session — **do not move**: the MAX session imports them by this path | [MAX-Etude-Contenu-Persos](../docs/MAX-Etude-Contenu-Persos.md) |
+| [`android/`](android/README.md) | build of the two Android cores (arm64-v8a, NDK r28c) | [installation-android](../docs/guide/installation-android.md) |
+| [`windows/`](windows/LISEZMOI-windows.md) | Windows x64 cores (MinGW-w64 from Linux) and notes | [LISEZMOI-windows](windows/LISEZMOI-windows.md) |
+| [`recalbox/`](recalbox/LISEZMOI-recalbox.md) | Recalbox 10 cores (armhf / aarch64), installation | [installation-recalbox](../docs/guide/installation-recalbox.md) |
+| [`batocera/`](batocera/INSTALL-batocera-EN.md) | Batocera 43: installer `installer-hsfa-batocera.sh` (an `hsfa` service that puts the cores back at every boot; `retirer` to uninstall), system `es_systems_hsfa.cfg`, `gamelist.xml`, English notes | [installation-batocera](../docs/guide/installation-batocera.md) |
+| [`linux/`](linux/README.md) | Linux x86_64 core compatible with glibc 2.27 (the one of v0.1.7 / v0.1.8 needs 2.43): recipe `build_x86_glibc_ancienne.sh`, shims `hsfa_x86_compat.{c,h}` | [README](linux/README.md) |
+| [`retrobat/`](retrobat/NOTE-RETROBAT.md) | RetroBat (Windows): installation note and system `es_systems_hsfa.cfg`, **not tried** | [NOTE-RETROBAT](retrobat/NOTE-RETROBAT.md) |
+| [`ps2-patchs/`](ps2-patchs/README.md) | PS2 ISO patchers: all unlocked, native 16:9 | [README](ps2-patchs/README.md) |
+| [`options/`](options/) | OPTION screen and return to the menu (translator and core diffs), Hyper's BGM in Upper | [OPTIONS](../docs/rapports/OPTIONS.md), [OPTIONS-HYPER-UPPER](../docs/rapports/OPTIONS-HYPER-UPPER.md) |
+| [`sondes-recherche/`](sondes-recherche/README.md) | core PC probe, CPS2 decrypter, disassembler, FBNeo moves bench; added on 11/11: `croise_cps2recomp.py` (index against the cps2recomp notes), `tuiles_cps2*.py` (reuse of the tiles of a CPS-2 ROM), `ocr_gamemachine.sh` (OCR of scanned magazines, search for the book) | [D-SONDES](../docs/rapports/recherche/D-SONDES.md), [J](../docs/rapports/recherche/J-CROISEMENT-CPS2RECOMP-SFA3.md), [M](../docs/rapports/recherche/M-REUTILISATION-TUILES.md), [Q](../docs/rapports/recherche/Q-OPTIMISATION-IMAGES.md) |
+| [`guide-coups/`](guide-coups/README.md) | list of the commands of the official guide (without its text) and SuperCombo check | [BANC-COUPS](../docs/rapports/BANC-COUPS.md) |
+| [`ppsspp-banc/`](ppsspp-banc/PPSSPP-BANC.md), [`banc-max-psp/`](banc-max-psp/BANC-PSP.md) | PPSSPP as the oracle of the MAX characters; mode B of the moves bench (PSP against Upper MAX) | [PPSSPP-BANC](ppsspp-banc/PPSSPP-BANC.md), [BANC-PSP](banc-max-psp/BANC-PSP.md) |
+| [`bancs/`](bancs/README.md) | **common measurement tools**: launcher `lance_emu` (slots, registry, stops by PID), fingerprint of what the emulator loads, daily bench (non-regression of the 4 games on frozen versions), `compare_zips.py` | [README](bancs/README.md) |
+| [`banc-coups/`](banc-coups/README.md) | moves bench under MAME (arcade oracle), **MAX non-regression bench** `banc_max.sh` (delivery condition of a MAX batch), frame data against SuperCombo | [BANC-COUPS](../docs/rapports/BANC-COUPS.md) |
+| [`frame-data-max/`](frame-data-max/README.md) | frame data of the MAX characters in game rounds: PSP (oracle) against Upper MAX, run on every MAX batch | [README](frame-data-max/README.md) |
+| [`decors/sfa1-iso/`](decors/sfa1-iso/README.md), [`decors/sfa2-iso/`](decors/sfa2-iso/README.md) | SFA1 (13) and SFA2 (18) stages extracted from the ISO alone (layers, animations), checks against the arcade under MAME | [README SFA1](decors/sfa1-iso/README.md), [README SFA2](decors/sfa2-iso/README.md) |
+| [`decors/integration/`](decors/integration/README.md) | common SFA1 / SFA2 converter → "HSFADC01" batches of the graft's stage area, round trip proven | [README](decors/integration/README.md) |
+| [`coeurs/`](coeurs/README.md) | build and static checks of the batch of 12 cores (Linux, Windows, Android, ROCKNIX, Recalbox) | [LIVRAISONS](../docs/guide/LIVRAISONS.md) |
+| [`ps2-oracle/`](ps2-oracle/README.md) | PCSX2 as the oracle: dedicated Xvfb, xdotool on the launched PID, PINE (reads; limited writes) | [README](ps2-oracle/README.md) |
+| [`asm68k/`](asm68k/README.md) | in-house 68000 assembler `hsfa_asm68k` (replaces vasm in the build) | [README](asm68k/README.md) |
+| [`constructeur/`](constructeur/README.md) | all-in-one builder (one executable per system, CI) | [README](constructeur/README.md) |
 
-## Chemins
+## Paths
 
-Ces outils ont été écrits dans l'espace de travail du développeur ; leurs chemins sont publiés sous la forme
-`<workspace>/...`. Beaucoup lisent des dossiers de travail (`<workspace>/work/agent_*`, `work/carto_ro9`…) qui ne sont
-pas publiés : ce sont des **archives d'étude**, réutilisables en adaptant les chemins. Correspondance des dossiers
-publiés : [`scripts/correspondances.tsv`](../scripts/correspondances.tsv) ; copie exécutable :
-[`scripts/localiser.py`](../scripts/localiser.py). Les imports de chaque script sont vérifiés par
-[`scripts/qualite/verifier_imports.py`](../scripts/qualite/verifier_imports.py) (dépendances non publiées classées
-« externes »).
+These tools were written in the developer's workspace; their paths are published in the form
+`<workspace>/...`. Many read working folders (`<workspace>/work/agent_*`, `work/carto_ro9`…) that are not
+published: they are **study archives**, reusable by adapting the paths. Mapping of the published
+folders: [`scripts/correspondances.tsv`](../scripts/correspondances.tsv); runnable copy:
+[`scripts/localiser.py`](../scripts/localiser.py). The imports of each script are checked by
+[`scripts/qualite/verifier_imports.py`](../scripts/qualite/verifier_imports.py) (unpublished dependencies classed as
+"external").
 
-Les outils communs (`bancs/`, `banc-coups/`, `coeurs/`, `ps2-oracle/`) se règlent par variables d'environnement
-(`HSFA_WORKSPACE`, `HSFA_BANC_LUA`, `LOT`, `PS2_*` : voir leur README) et se lancent depuis le dépôt. Dans l'espace de
-travail, `lance_emu`, `empreinte.*` et `banc_jour.*` vivent dans `<workspace>/work/outils/` : les autres bancs les y
-appellent.
+The common tools (`bancs/`, `banc-coups/`, `coeurs/`, `ps2-oracle/`) are set through environment variables
+(`HSFA_WORKSPACE`, `HSFA_BANC_LUA`, `LOT`, `PS2_*`: see their README) and run from the repository. In the
+workspace, `lance_emu`, `empreinte.*` and `banc_jour.*` live in `<workspace>/work/outils/`: the other benches call
+them there.

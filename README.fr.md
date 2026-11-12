@@ -1,19 +1,21 @@
 # HSFA — Street Fighter Alpha Anthology (PS2) retraduit en 68000 CPS2
 
-**English: [README.md](README.md)**
+**English: [README.md](README.md)** (page principale : l'anglais est la langue par défaut du dépôt ; traductions françaises des documents clés en `<nom>.fr.md`)
 
 ## Jouer en 3 étapes
 
 > **Aucune donnée de jeu n'est fournie.** Il faut votre propre copie de *Street Fighter Alpha Anthology* (PS2, USA,
-> `SLUS-21317`). Pas dans cette release : **Upper MAX** (les quatre persos de SFA3 MAX) et la **greffe du mode
-> Arcade** sur Hyper.
+> `SLUS-21317`). **Upper MAX** (les quatre persos de SFA3 MAX) et **Hyper + Arcade** (mode Arcade d'Upper greffé sur
+> Hyper) sont expérimentaux : voir plus bas.
 
-1. **Télécharger les cœurs** depuis la page des [releases](../../releases) : `hsfa-v0.1.6-cores-<plateforme>.zip` pour
-   Android (arm64), ROCKNIX (aarch64 : RGB10X, R36S…), Windows (x64), Linux (x86_64) ou Recalbox 10 (Raspberry Pi ;
-   essayé sur un Pi 3B). Chaque archive contient le
-   cœur 4:3 (`fbneo_hsfa`) et le cœur 16:9 (`fbneo_hsfaws`), avec leur licence.
-2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes). Le plus simple : télécharger
-   `hsfa-v0.1.6-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
+1. **Télécharger les cœurs** depuis la page des [releases](../../releases) : `hsfa-<version>-cores-<plateforme>.zip`
+   pour Android (arm64), ROCKNIX (aarch64 : RGB10X, R36S…), Windows (x64), Linux (x86_64) ou Recalbox 10 (Raspberry
+   Pi ; essayé sur un Pi 3B) ; Batocera 43 : voir son guide (ses cœurs arrivent avec la prochaine version, voir le
+   [CHANGELOG](CHANGELOG.md), « En cours »). Chaque archive contient le cœur 4:3 (`fbneo_hsfa`) et le cœur 16:9
+   (`fbneo_hsfaws`), avec leur licence. Les pré-versions (v0.1.8 : Hyper + Arcade) sont sur la même page.
+2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes). Sans rien installer : le constructeur
+   tout-en-un `hsfa-constructeur-<système>.zip` de la release (Windows, Linux, macOS). Sinon : télécharger
+   `hsfa-<version>-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
    double-cliquer sur **`construire.bat`** (Windows, expérimental : pas encore testé) et lui donner votre ISO. Il prépare
    Python, compile l'encodeur Ogg si `gcc` est là et construit les trois jeux dans `sortie/archives/`. À la main :
    ```bash
@@ -29,11 +31,11 @@
      `g++`, ajouter `--flux-format adx` (zip d'Hyper plus gros).
    - `--arcade sfa3.zip` (facultatif) prend la ROM graphique de SFA3 dans votre jeu d'arcade au lieu de la
      reconstruire depuis l'ISO ; les zips sont alors identiques à ceux de la construction de référence du projet. Détails :
-     [docs/guide/construction-iso.md](docs/guide/construction-iso.md).
+     [docs/guide/construction-iso.fr.md](docs/guide/construction-iso.fr.md).
 3. **Installer et jouer** : copier le cœur dans le dossier `cores` de RetroArch et les trois zips dans le dossier des
    ROM (sans les renommer), puis charger un zip avec « FinalBurn Neo HSFA » (4:3) ou « FinalBurn Neo HSFA
-   Widescreen » (16:9). Guides : [Android](docs/guide/installation-android.md),
-   [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md), [Recalbox](docs/guide/installation-recalbox.md),
+   Widescreen » (16:9). Guides : [Android](docs/guide/installation-android.fr.md),
+   [ROCKNIX / RGB10X](docs/guide/installation-rocknix.fr.md), [Recalbox](docs/guide/installation-recalbox.md), [Batocera](docs/guide/installation-batocera.fr.md),
    [Windows](tools/windows/LISEZMOI-windows.md) ; sous
    Linux, copier les `.so` dans `~/.config/retroarch/cores/`.
 
@@ -61,9 +63,10 @@ ROM programme CPS2 et la fait tourner sur une CPS2 émulée. Trois jeux sont tra
 Ils tournent dans deux environnements :
 - un **fork de MAME** : banc de développement, jeu `sfa3hx` ;
 - un **cœur libretro FBNeo « HSFA »** pour RetroArch : Android (arm64), Linux (x86_64), Windows (x64), ROCKNIX (RGB10X,
-  aarch64) et Recalbox 10 (Raspberry Pi : armhf et aarch64), en 4:3 et en 16:9 (12 cœurs par release). Les cœurs
-  contiennent aussi deux pilotes plus récents : `sfa3umhsfa` (Upper MAX, constructible depuis vos disques depuis le
-  2026-11-07, voir plus bas) et `sfa3hahsfa` (Hyper + Arcade, versions d'essai seulement).
+  aarch64) et Recalbox 10 (Raspberry Pi : armhf et aarch64), en 4:3 et en 16:9 (12 cœurs par release) ; Batocera 43
+  par un installeur ([guide](docs/guide/installation-batocera.fr.md)). Les cœurs contiennent aussi deux pilotes
+  expérimentaux : `sfa3umhsfa` (Upper MAX, constructible depuis vos deux disques depuis la v0.1.7) et `sfa3hahsfa`
+  (Hyper + Arcade, constructible depuis votre ISO depuis la pré-version v0.1.8).
 
 > **Aucune donnée de jeu ici.** Le dépôt ne contient que des outils, des patchs et de la documentation. Tout ce qui
 > vient du jeu (programmes, graphismes, sons) est reconstruit **depuis votre propre ISO** de l'Anthology.
@@ -71,53 +74,63 @@ Ils tournent dans deux environnements :
 
 > **Reprendre le projet** (personne ou agent) : lire [AGENTS.md](AGENTS.md), qui condense règles, méthode, acquis et chantiers, tenu à jour à chaque découverte.
 
-## État (2026-11-08, release v0.1.6)
+## État (2026-11-11 ; release stable v0.1.7, pré-version v0.1.8)
+
+« Prochaine version » ci-dessous = ce qui est dans ce dépôt mais pas encore dans une release (section « En cours » du
+[CHANGELOG](CHANGELOG.md)).
 
 **Ce qui marche**
 
 | | État | Détails |
 |---|---|---|
-| SFA3 (`ro3`) | complet : attraction ; mode Arcade jusqu'au générique, **32/32 fins** conformes à l'arcade (v0.1.6 : les poupées de Shadaloo redessinées par le portage PS2 dans quatre fins sont revenues, avec les cœurs v0.1.6) ; VERSUS, SURVIVAL, DRAMATIC, TRAINING ; commandes **42/42** identiques à l'arcade ; cadence turbo de l'arcade (133,3 %) ; son validé | [journal §110-§113](docs/journal/HANDOFF.md), [non-régression](docs/methodes/oracle-et-non-regression.md) |
+| SFA3 (`ro3`) | complet : attraction ; mode Arcade jusqu'au générique, **32/32 fins** conformes à l'arcade (v0.1.6 : les poupées de Shadaloo redessinées par le portage PS2 dans quatre fins sont revenues, avec les cœurs v0.1.6) ; VERSUS, SURVIVAL, DRAMATIC, TRAINING ; commandes **42/42** identiques à l'arcade ; cadence turbo de l'arcade (133,3 %) ; son validé | [journal §110-§113](docs/journal/HANDOFF.md), [non-régression](docs/methodes/oracle-et-non-regression.fr.md) |
 | Upper (`ro5`) | jouable de bout en bout, **40/40 fins** ; ROM son hybride (musiques de SFA3 + voix d'Upper) ; les musiques qui n'existent qu'en flux sur le disque sont rangées dans le zip en Ogg Vorbis | [§122-§128](docs/journal/HANDOFF.md), [FLUX](docs/rapports/FLUX.md) |
-| Hyper (`ro9`) | VERSUS sans exception (tournée de 151 combats) ; les supers des versions ZERO / ZERO 2 / ALPHA ne plantent plus ; jauge de super et TRAINING corrigés ; musiques ZERO / ZERO 2 / ALPHA dans le zip (Ogg Vorbis) ; voix SFA1 / SFA2 par version, rejouées sur un 2ᵉ QSound, quand la table du rejeu est là (voir plus bas) | [§145-§173](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md) |
+| Hyper (`ro9`) | VERSUS sans exception (tournée de 151 combats) ; les supers des versions ZERO / ZERO 2 / ALPHA ne plantent plus ; jauge de super et TRAINING corrigés ; musiques ZERO / ZERO 2 / ALPHA dans le zip (Ogg Vorbis) ; voix SFA1 / SFA2 par version, rejouées sur un 2ᵉ QSound, quand la table du rejeu est là (voir plus bas). Prochaine version : 21 sons propres au portage PS2, muets jusque-là (parade en Mazi S-ISM, ticket #1 ; custom combo de ZERO 2 / ALPHA, Birdie, Sagat en Saikyo S-ISM, Cammy ALPHA, provocation de Dee Jay…), ajoutés à la ROM son depuis votre ISO (aussi dans Hyper + Arcade) ; ombre au sol des persos ZERO / ZERO 2 transparente aussi avec l'ISO seule | [§145-§173](docs/journal/HANDOFF.md), [§216, §218](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md), [SONS-PS2-HYPER](docs/rapports/SONS-PS2-HYPER.md) |
 | Menus | OPTION et EXIT ramènent au menu des modes ; les réglages de l'écran d'options PS2 (difficulté, dégâts, chrono, vitesse, manches) sont des options du cœur | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
-| Cœur FBNeo HSFA | Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, essayé sur un Pi 3B) ; option « Blood » (sang rouge, non censuré, par défaut) ; option « Skip idle loops » (activée par défaut : 33 à 41 % de calcul en moins par image, même résultat) ; vrai 16:9 (v0.1.5 : 512 × 224, rapport exact, vue calée sur le décor aux bouts de l'arène, HUD centré) ; 4:3 et 16:9 (avec « Screen format (fill height) » pour les écrans de 4:3 à 16:10) ; ombres transparentes comme sur PSP ; provocation sur Select en combat ; persos cachés d'Upper (v0.1.2 : Start tenu + un bouton sur Akuma / Balrog pour Shin Akuma / EX Balrog, Pièce pour la roulette) ; essayé par l'utilisateur sur RG477M et RGB10X | [patchs](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
-| Construction depuis l'ISO | `hsfa_build.py` construit les trois jeux depuis votre ISO seule ; ROM programme identiques (md5) aux archives officielles v154 (SFA3 `e0f1cfdc`, Upper `0b8ecca2`, Hyper `b8e699cf` avec la table du rejeu) ; zips identiques d'une construction à l'autre | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
+| Traducteur | **v161** pour SFA3, Upper, Hyper, Hyper + Arcade et Upper MAX (prochaine version ; releases : v160) : pertes silencieuses trouvées par la revue critique du traducteur, corrigées et prouvées contre l'arcade : bonus de dégâts ×1,5 du mode Mazi jamais appliqué, bonus de score des enchaînements jamais ajouté, tremblement du perso touché absent (SFA3), 2ᵉ lettre des initiales écrite sur la 4ᵉ (SFA3, Upper), et neuf autres comparaisons ou accès d'octet (gel du custom combo, texte défilant, couleur du 2ᵉ joueur en match miroir d'Upper et d'Hyper…) ; la construction compte ces pertes et s'arrête sur une comparaison ou une aide du recompilateur non traduite. **Hyper + Arcade** garde sa copie figée du traducteur v160 (état ro9a36) tant que l'état ro9a37 (v161) n'est pas versé | [journal §219-§220](docs/journal/HANDOFF.md), [pièges](docs/methodes/pieges-du-traducteur.fr.md) |
+| Cœur FBNeo HSFA | patchs 0001-0026 (v0.1.7), 0001-0027 (v0.1.8) ; prochaine version : 0029, 0030 et 0031 en plus (sauvegardes d'état complètes et déterministes : run-ahead, rembobinage, jeu en ligne ; dossier système de l'autonome sous Windows ; 16:9 : « Widescreen edges » = Raw par défaut) et cœur Linux x86_64 qui ne demande que glibc 2.27 ; Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, essayé sur un Pi 3B), Batocera 43 (essayé sur PC) ; option « Blood » (sang rouge, non censuré, par défaut) ; option « Skip idle loops » (activée par défaut : 33 à 41 % de calcul en moins par image, même résultat) ; vrai 16:9 (v0.1.5 : 512 × 224, rapport exact ; vue calée sur le décor aux bouts de l'arène avec HUD centré, par défaut jusqu'à la v0.1.8, en option depuis 0031) ; 4:3 et 16:9 (avec « Screen format (fill height) » pour les écrans de 4:3 à 16:10) ; ombres transparentes comme sur PSP ; provocation sur Select en combat ; persos cachés d'Upper (v0.1.2 : Start tenu + un bouton sur Akuma / Balrog pour Shin Akuma / EX Balrog, Pièce pour la roulette) ; essayé par l'utilisateur sur RG477M et RGB10X | [patchs](patches/fbneo/README.fr.md), [Android](docs/guide/installation-android.fr.md), [ROCKNIX](docs/guide/installation-rocknix.fr.md) |
+| Construction depuis l'ISO | `hsfa_build.py` (ou le constructeur tout-en-un) construit les trois jeux depuis votre ISO seule ; programmes du traducteur v161 (prochaine version) : SFA3 `a569c361`, Upper `ac053140`, Hyper `dbfd237d` avec la table du rejeu (`ffc5eac1` sans) ; v160 (v0.1.7, v0.1.8) : SFA3 `9b06c7cf`, Upper `3a9b7fd9`, Hyper `0baed6af` (`e3806660`) ; zips identiques d'une construction et d'un système à l'autre ; prochaine version : Upper MAX se construit sous Windows sans droit de lien symbolique (ticket #2) | [guide](docs/guide/construction-iso.fr.md), [BUILD](docs/rapports/BUILD.md) |
+| Formats de sortie | prochaine version : `--cible` (constructeur : menu *Format de sortie*) : `fbneo-hsfa` (défaut, zips inchangés) ; `fbneo-autonome` (FinalBurn Neo HSFA autonome pour Windows, version d'essai : mêmes zips, annonce des concessions puis confirmation) ; `mister` et `cps2-banques` : bilan seulement (concessions et budgets mesurés, rien n'est construit) | [`cibles.py`](scripts/construction/cibles.py), [étude](docs/rapports/recherche/P-SYNTHESE-PLACE-CPS2.md) |
+| FinalBurn Neo HSFA autonome (Windows x64) | **version d'essai** (prochaine version), sans RetroArch : FBNeo officiel `84faab7` + chaîne de patchs du dépôt + 5 patchs de l'interface Windows (W01-W05) ; deux programmes (4:3, 16:9) ; options HSFA dans les DIP, 16:9 dans le menu Vidéo ; essayé sous Wine : images, états du jeu et son identiques au cœur RetroArch (±1 sur quelques échantillons des flux Ogg) ; pas encore essayé sur un vrai Windows | [guide](docs/guide/installation-fbneo-autonome-windows.fr.md), [patchs](patches/fbneo-autonome/README.md) |
+| Batocera 43 | prochaine version : installeur `tools/batocera/installer-hsfa-batocera.sh` (service `hsfa` qui remet les cœurs en place à chaque démarrage : survit aux redémarrages et aux mises à jour ; désinstallation `retirer`) et système `hsfa` ; essayé sur l'image officielle 43.1 PC en machine virtuelle : les cinq jeux depuis la liste de jeux jusqu'au combat, en 4:3 et 16:9, avec le son | [guide](docs/guide/installation-batocera.fr.md) |
+| Upper MAX (`sfa3umhsfa`) | **expérimental** : Eagle, Maki, Yun et Ingrid (SFA3 MAX, PSP) dans Upper, construit depuis vos deux disques (Anthology PS2 + ISO PSP européenne de *SFA3 MAX*, ULES-00235) : `hsfa_build.py --jeux uppermax --psp-iso <ISO PSP>` ; sans l'ISO PSP, Upper normal. Prochaine version : traducteur v161 (plus aucune adresse d'image écrite en dur dans l'intégration ; l'appel `$1B6B6` des acteurs de fin, fins de Maki et de Yun, vise la bonne routine) ; comportement de manche des MAX aligné sur la PSP | [guide §5](docs/guide/construction-iso.fr.md), [CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md) |
+| Hyper + Arcade (`sfa3hahsfa`) | **expérimental** (pré-version v0.1.8) : mode Arcade d'Upper greffé sur Hyper (« voie B ») ; prochaine version : état ro9a37 (CONTINUE, décors de Ryu, Sodom et Cammy, fin de Ken ; traducteur v161 : bonus ×1,5 du mode Mazi, bonus de score des enchaînements, couleur du 2ᵉ joueur en match miroir), `hsfa_build.py --jeux hyperarcade` ; avec la ROM d'arcade et la table du rejeu, zip de ro9a37 à l'octet hors `hsfa_info.txt` et les sons propres au portage PS2 (`HSFA_SONS_PS2=0` : à l'octet) | [guide §6](docs/guide/construction-iso.fr.md), [architecture](docs/architecture/voie-b-greffe.fr.md) |
 
 **Limites connues de la v0.1.x**
 
 - **Voix d'Hyper par version** : il faut la table du rejeu QSound de SFA1 / SFA2 (`--rejeu-table`, voir le
-  [guide de construction](docs/guide/construction-iso.md)). Sans elle, `hsfa_build.py` garde les voix de SFA3 pour toutes les versions d'Hyper (programme `dda35430` au lieu de
-  `b8e699cf`) et le zip n'a pas de rejeu. Prévu en v0.2 : la construction recréera la table depuis votre ISO.
-- Kikosho et Kikoken de Chun-Li : les grands arcs du Kikosho et l'onde du Kikoken restent invisibles (l'effet vit le
-  bon temps depuis le traducteur v151 ; le dessin est en cours d'analyse).
-- Avec l'ISO seule (sans ROM d'arcade), l'ombre au sol d'Hyper et d'Hyper + Arcade est pleine au lieu de tramée (les
-  tuiles tramées sont dans la ROM reconstruite ; les tables de tuiles de la voie ISO pointent ailleurs ; correctif en
-  cours).
-- Sauvegardes d'état : charger un état (et le run-ahead / rembobinage de RetroArch) ne reprend pas exactement le même
-  son ni la même première image, déjà vrai du QSound de FBNeo d'origine ; correctif du cœur (patch `0029`) en essai.
+  [guide de construction](docs/guide/construction-iso.fr.md)). Sans elle, `hsfa_build.py` garde les voix de SFA3 pour toutes les versions d'Hyper (traducteur v161 : programme
+  `ffc5eac1` au lieu de `dbfd237d`) et le zip n'a pas de rejeu. Prévu en v0.2 : la construction recréera la table depuis votre ISO.
+- Sauvegardes d'état : avec les cœurs des v0.1.7 / v0.1.8, charger un état (et le run-ahead / rembobinage de
+  RetroArch) ne reprend pas exactement le même son ni la même première image, déjà vrai du QSound de FBNeo d'origine ;
+  corrigé par le patch `0029` (cœurs de la prochaine version).
 - Le cœur Linux x86_64 des v0.1.7 / v0.1.8 exige glibc 2.43 (refusé par Batocera 43 et la plupart des distributions
-  actuelles) ; une reconstruction contre glibc 2.27, identique en sortie, est en essai.
+  actuelles) ; la recette d'un cœur compatible glibc 2.27, identique en sortie, est dans
+  [`tools/linux/`](tools/linux/README.md) (cœurs de la prochaine version).
+- Construction sous Windows : Upper MAX demandait le droit de créer des liens symboliques (ticket #2) ; corrigé dans le
+  dépôt (prochaine version).
+- 16:9 en *Raw* (défaut depuis le patch `0031`) : l'image telle que le jeu la dessine, donc, aux bouts de l'arène, les
+  bandes des côtés peuvent montrer des colonnes noires ou périmées ; la vue calée (*Stage-locked view*, en option)
+  garde le décor d'arcade jusqu'à son bord.
+- FinalBurn Neo autonome pour Windows : version d'essai, essayée sous Wine seulement ; les sauvegardes d'état de
+  RetroArch ne s'y chargent pas (ni l'inverse).
+- Batocera : ARM 64 bits pas essayé sur une vraie machine (seule la compatibilité des fichiers est vérifiée) ; ARM
+  32 bits non pris en charge.
 - Un flux musique d'Hyper (Y27) reste en ADX dans le zip (sa version Ogg ne passe pas notre contrôle de qualité ; inaudible).
 - Le patcheur PS2 16:9 n'est validé que sur Upper et Hyper ; quelques écrans hors combat sont décalés.
 - Les cœurs ROCKNIX et Android ont été vérifiés sur PC (émulation ARM) et par l'utilisateur sur deux consoles, pas
   sur tous les appareils.
 
-**En cours (pas dans cette release)**
+**En cours (pas terminé)**
 
-- **Voie B, « Hyper + Arcade »** : mode Arcade d'Upper greffé sur Hyper (« ro9 augmenté », pilote `sfa3hahsfa`), avec
-  Upper comme oracle ; versions d'essai pour l'instant. **Construction expérimentale depuis l'ISO** (état ro9a35b) :
-  `hsfa_build.py --jeux hyperarcade` ; avec la ROM d'arcade et la table du rejeu, zip de ro9a35b à l'octet hors
-  `hsfa_info.txt` ([guide §6](docs/guide/construction-iso.md)). Ensuite : décors SFA1 / SFA2 extraits de l'ISO avec leurs
-  animations, puis les quatre persos MAX ([architecture](docs/architecture/voie-b-greffe.md)).
-- **Upper MAX** : Eagle, Maki, Yun et Ingrid (SFA3 MAX, PSP) dans Upper, pilote `sfa3umhsfa`. **Construction expérimentale
-  depuis vos deux disques** (Anthology PS2 + ISO PSP européenne de *SFA3 MAX*, ULES-00235), rien d'autre à installer
-  (assembleur 68000 du projet) : `hsfa_build.py --jeux uppermax --psp-iso <ISO PSP>` ; sans l'ISO PSP, Upper normal
-  ([guide §5](docs/guide/construction-iso.md), [CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md)).
+- **Hyper + Arcade** : suite de la greffe (Upper comme oracle) ; ensuite, décors SFA1 / SFA2 extraits de l'ISO avec
+  leurs animations,
+  puis les quatre persos MAX ([architecture](docs/architecture/voie-b-greffe.fr.md)).
+- **Upper MAX** : mises au point par lots ([CHANGELOG](CHANGELOG.md)).
 - **Réorganisation des données** : phases 1-2 faites et étiquetées, non activées (gain faible sur l'hôte ; en pause
-  jusqu'à l'arrivée des MAX dans la greffe) ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.md)).
-- **Décors widescreen redessinés** (export PSD exact, réimportation, injection au fork et au cœur) : en attente ; la vue
-  16:9 se cale sur le décor d'arcade à la place
+  jusqu'à l'arrivée des MAX dans la greffe) ([architecture](docs/architecture/ARCHI-Reorganisation-Donnees.fr.md)).
+- **Décors widescreen redessinés** (export PSD exact, réimportation, injection au fork et au cœur) : en attente ; le
+  cœur 16:9 montre l'image dessinée par le jeu (*Raw*) ou, en option, se cale sur le décor d'arcade à la place
   ([DECORS-WS](docs/rapports/DECORS-WS.md), [INJECTION-FORK](docs/rapports/INJECTION-FORK.md)).
 
 ## Démarrer
@@ -131,13 +144,13 @@ Ils tournent dans deux environnements :
    python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
        --sortie hsfa_sortie --jeux sfa3,upper,hyper
    ```
-   Options et empreintes attendues : [docs/guide/construction-iso.md](docs/guide/construction-iso.md).
+   Options et empreintes attendues : [docs/guide/construction-iso.fr.md](docs/guide/construction-iso.fr.md).
 4. **Installer les cœurs** : les télécharger depuis les releases ou les compiler depuis
-   [`patches/fbneo/`](patches/fbneo/README.md), puis suivre le guide [Android](docs/guide/installation-android.md),
-   [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md), [Recalbox](docs/guide/installation-recalbox.md) ou
-   [Windows](tools/windows/LISEZMOI-windows.md).
+   [`patches/fbneo/`](patches/fbneo/README.fr.md), puis suivre le guide [Android](docs/guide/installation-android.fr.md),
+   [ROCKNIX / RGB10X](docs/guide/installation-rocknix.fr.md), [Recalbox](docs/guide/installation-recalbox.md),
+   [Batocera](docs/guide/installation-batocera.fr.md) ou [Windows](tools/windows/LISEZMOI-windows.md).
 
-Le parcours complet (banc MAME, diagnostic, non-régression) : [docs/guide/demarrage.md](docs/guide/demarrage.md).
+Le parcours complet (banc MAME, diagnostic, non-régression) : [docs/guide/demarrage.fr.md](docs/guide/demarrage.fr.md).
 
 ## Organisation du dépôt
 
@@ -147,22 +160,22 @@ AGENTS.md, CLAUDE.md    reprendre le projet (règles, méthode, acquis)
 construire.sh/.bat      construction en un clic depuis l'ISO
 config.example.env      chemins locaux (HSFA_WORKSPACE, HSFA_EXTRACT...) ; requirements.txt
 docs/
-  guide/                démarrage, construction depuis l'ISO, installation Android / ROCKNIX / Recalbox, livraisons
+  guide/                démarrage, construction depuis l'ISO, installation Android / ROCKNIX / Recalbox / Batocera, livraisons
   architecture/         traducteur, mémoire CPS2, banc MAME, cœur FBNeo, réorganisation des données, voie B
   reference/            symboles, formats, carte des modules, adresses
   methodes/             oracle et non-régression, pièges du traducteur
-  journal/              HANDOFF.md (journal §1-§201) et son index
+  journal/              HANDOFF.md (journal §1-§221) et son index
   rapports/             rapports d'études détaillés
 src/hsfa/               traducteur MIPS -> 68000 et chaîne de construction (mame/ : scripts Lua du banc)
 scripts/                construction/ (depuis l'ISO), validation/ (non-régression), qualite/, localiser.py
-tools/                  outils par thème (décors, son d'Hyper, greffe, réorganisation, flux, ROCKNIX...)
+tools/                  outils par thème (bancs, décors, son d'Hyper, greffe, cœurs, Batocera, flux...)
 patches/                mame-fork/ (jeu sfa3hx), fbneo/ (cœur HSFA), traducteur/ (diff du traducteur de la greffe)
 re/                     index des connaissances : adresses, champs, zones mémoire (outils dans re/outils/)
 max/, tools/max/        travaux de la session SFA3 MAX (PSP)
 legacy/                 époque PNACH (PCSX2) : patchs, anciens outils, anciens documents
 ```
 
-Index de la documentation : [docs/README.md](docs/README.md). Les « §N » cités partout renvoient au
+Index de la documentation : [docs/README.fr.md](docs/README.fr.md). Les « §N » cités partout renvoient au
 [journal](docs/journal/HANDOFF.md) ; index thématique : [INDEX-HANDOFF](docs/journal/INDEX-HANDOFF.md).
 
 ## Jouer l'Anthology sur PS2 / PCSX2

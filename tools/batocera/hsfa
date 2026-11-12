@@ -1,0 +1,27 @@
+#!/bin/bash
+# Service Batocera « hsfa » (v43 et plus) : /userdata/system/services/hsfa
+# Batocera ne charge les coeurs libretro que depuis /usr/lib/libretro (+ fichier .info dans /usr/share/libretro/info),
+# qui sont en lecture seule et refaits a chaque demarrage. Ce service y recopie les coeurs HSFA gardes dans
+# /userdata/system/hsfa/ a chaque demarrage : l'installation survit aux redemarrages ET aux mises a jour de Batocera.
+# Gerer : batocera-services enable|disable|start|stop|status hsfa   (ou Menu > Reglages systeme > Services)
+SRC=/userdata/system/hsfa
+CORES="fbneo_hsfa fbneo_hsfaws"
+case "$1" in
+  start)
+    for c in $CORES; do
+      [ -f "$SRC/cores/${c}_libretro.so" ] && install -m 644 "$SRC/cores/${c}_libretro.so" "/usr/lib/libretro/${c}_libretro.so"
+      [ -f "$SRC/info/${c}_libretro.info" ] && install -m 644 "$SRC/info/${c}_libretro.info" "/usr/share/libretro/info/${c}_libretro.info"
+    done
+    ;;
+  stop)
+    for c in $CORES; do
+      rm -f "/usr/lib/libretro/${c}_libretro.so" "/usr/share/libretro/info/${c}_libretro.info"
+    done
+    ;;
+  status)
+    for c in $CORES; do
+      if [ -f "/usr/lib/libretro/${c}_libretro.so" ]; then echo "$c : en place"; else echo "$c : absent"; fi
+    done
+    ;;
+esac
+exit 0

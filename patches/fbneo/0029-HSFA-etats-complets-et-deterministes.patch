@@ -1,0 +1,373 @@
+From 546a0cfe26ef33a5c13b2dd7566b44bb9a9213dc Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Wed, 11 Nov 2026 12:00:00 +0100
+Subject: [PATCH] HSFA: complete and deterministic savestates (run-ahead,
+ rewind, netplay)
+
+Loading a state did not give back the same game as playing on without
+loading: picture of the first frame, sound sample by sample, then the
+QSound Z80 timing, all differed (also on the plain arcade sfa3 driver).
+Missing from the states, and now saved for the HSFA drivers only:
+
+- QSound (qs_c.cpp): resampler position nDelta and interpolation samples.
+  They decide when the chip produces its samples, hence when ready_flag
+  rises for the Z80: after a load the sound driver ran on other cycles;
+- CPS2 sprite list copies of the previous frames (cps_obj.cpp);
+- converted palette (cps_pal.cpp): kept as the words last converted per
+  page, converted again at the first draw after a load (cps_draw.cpp)
+  instead of re-reading the palette RAM at that time;
+- latched "F" registers CpsSaveFrg (layer / sprite shift of the next
+  frame, wrong in a fresh instance);
+- Cps2Volume, QSound routes set again on load (only every 5 frames before);
+- Taunt on Select (patch 0014): previous Coin and pending taunt;
+- secret options already written (patch 0003);
+- widescreen (patches 0022 / 0023): scroll1 ring tracking and slope k. The
+  tracking now runs on every frame from Cps2Frame (HsfaWsSuivi), drawn or
+  not, so that the saved tracking follows the game when run-ahead skips the
+  draw of the real frames; drawing every frame gives the same picture as
+  before.
+
+The data is one zone ("HSF9", version 1) at the very end of the libretro
+state, after the blending registers of patch 0010, and is read only when
+the loaded state holds it whole: states saved before this patch still
+load (the widescreen tracking restarts), and new states load in older
+cores (extra bytes ignored). HSFA_ETATS_FIN=0: no zone, states identical
+to the byte to the previous core. HSFA_ETATS_SANS=<mask> (tests): parts
+read but not applied on load.
+
+Checked on the 5 games, 4:3 and 16:9 (headless libretro harness): load
+then play on, simulated run-ahead (1 and 2 frames, real frame without
+picture or sound), two loads in a row, load into a fresh instance:
+picture, sound (sample by sample) and final state identical to the game
+without load. Without loads, picture and sound identical to the previous
+core on every frame.
+---
+ src/burn/drv/capcom/cps.h            |   1 +
+ src/burn/drv/capcom/cps_draw.cpp     |   8 ++
+ src/burn/drv/capcom/cps_hsfa.cpp     | 128 ++++++++++++++++++++++++++-
+ src/burn/drv/capcom/cps_obj.cpp      |  13 +++
+ src/burn/drv/capcom/cps_pal.cpp      |  29 ++++++
+ src/burn/drv/capcom/cps_run.cpp      |   3 +
+ src/burn/drv/capcom/qs_c.cpp         |  11 +++
+ src/burner/libretro/retro_memory.cpp |   4 +
+ 8 files changed, 193 insertions(+), 4 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index 6a89d87..d1a1496 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -596,6 +596,7 @@ static inline INT32 HsfaWsHud(UINT32 n, INT32 nPal, UINT32 nY)
+ }
+ #define HSFA_WS_AUCUN	(-0x10000)
+ void HsfaWsAvantDessin();
++void HsfaWsSuivi();										// (patch 0029) suivi du 16:9 a chaque image
+ void HsfaWsApresDessin();
+ void HsfaWsSortie();
+ void HsfaWsPasse(INT32 nPasse, INT32 x0, INT32 w);		// cps_draw.cpp
+diff --git a/src/burn/drv/capcom/cps_draw.cpp b/src/burn/drv/capcom/cps_draw.cpp
+index a386056..2197b9a 100644
+--- a/src/burn/drv/capcom/cps_draw.cpp
++++ b/src/burn/drv/capcom/cps_draw.cpp
+@@ -498,12 +498,20 @@ void CpsClearScreen()
+ 	}
+ }
+ 
++extern INT32 bCpsPalCharge;							// (HSFA, patch 0029) cps_pal.cpp
++void CpsPalDepuisBrut();
++
+ static void DoDraw(INT32 Recalc)
+ {
+ 	CtvReady();								// Point to correct tile drawing functions
+ 
++	if (bCpsPalCharge && !bCpsUpdatePalEveryFrame) {		// (HSFA, patch 0029) etat charge : palette de l'etat
++		bCpsPalCharge = 0;
++		CpsPalDepuisBrut();
++	} else {
+ 	if (CpsRecalcPal || bCpsUpdatePalEveryFrame) GetPalette(0, 6);
+ 	if (Recalc || bCpsUpdatePalEveryFrame) CpsPalUpdate(CpsSavePal);		// recalc whole palette if needed
++	}
+ 
+ 	CpsClearScreen();
+ #ifdef HSFA_WS
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index deb9cf5..50b57e9 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -1946,8 +1946,11 @@ static void WsCale()
+ 	nWsE1 = o + sv; nCpsGlobalXOffset = nWsE1; nHsfaWsObjDx = nWsE1 - nWsBase;
+ }
+ 
+-// appele apres l'effacement de l'image, avant les plans et les objets
+-void HsfaWsAvantDessin()
++// (patch 0029) suivi de l'image (anneau scroll1, pente k) : fait a CHAQUE image par Cps2Frame, au point du dessin, que
++// l'image soit dessinee ou non (run-ahead : images reelles sans dessin ; saut d'images), pour que l'etat sauve (zone de
++// fin) suive le jeu ; HsfaWsAvantDessin s'en sert. Ailleurs (CpsRedraw, CPS1) : fait par HsfaWsAvantDessin, comme avant.
++static INT32 bWsSuiviFait = 0;
++void HsfaWsSuivi()
+ {
+ 	bHsfaWsS1Filtre = 0;
+ 	nWsBase = nCpsGlobalXOffset;
+@@ -1960,8 +1963,17 @@ void HsfaWsAvantDessin()
+ 		if (nWsBande > nWsE1) nWsBande = nWsE1;
+ 	}
+ 	bWsCombat = nWsBande > 0 && HsfaWsEnCombat();
+-	if (!bWsCombat) { bWsS1Init = 0; return; }
+-	WsS1Suivi();
++	if (!bWsCombat) bWsS1Init = 0;
++	else WsS1Suivi();
++	bWsSuiviFait = 1;
++}
++
++// appele apres l'effacement de l'image, avant les plans et les objets
++void HsfaWsAvantDessin()
++{
++	if (!bWsSuiviFait) HsfaWsSuivi();
++	bWsSuiviFait = 0;
++	if (!bWsCombat) return;
+ 	if (nHsfaWsCale) {
+ 		WsCale();
+ 		nHsfaWsS1U += nWsBase - nWsE1;								// repere de dessin de scroll1 (fenetre deplacee)
+@@ -2090,3 +2102,111 @@ void HsfaWsSortie()
+ 	WsS1Copie = NULL; WsCacheTuile = NULL; WsCacheEtat = NULL; bWsS1Init = 0; bHsfaWsS1Filtre = 0; bWsCombat = 0; nWsBande = 0;
+ }
+ #endif
++
++// --------------------------------------------------------------------------------------------------------------
++// (patch 0029, agent etats_coeur) ETATS COMPLETS : ce que HsfaScan ne sauvait pas et dont depend la suite de la partie
++// (run-ahead, rembobinage, jeu en ligne, sauvegarde / chargement) :
++//  - QSound principal (qs_c.cpp, FBNeo d'origine) : position du reechantillonneur et interpolation -> instants des
++//    echantillons de la puce, donc ready_flag lu par le Z80 (pilote son decale apres un chargement, son different) ;
++//  - listes d'objets des images precedentes (cps_obj.cpp, FBNeo d'origine) : 1re image apres un chargement ;
++//  - palette convertie (cps_pal.cpp, FBNeo d'origine : relue dans la RAM au dessin suivant le chargement) et registres
++//    « F » verrouilles (CpsSaveFrg : decalage de l'image qui suit le chargement dans une nouvelle instance) ;
++//  - volume (Cps2Volume) : gains du QSound, sinon remis a jour toutes les 5 images seulement (nouvelle instance) ;
++//  - provocation sur Select (patch 0014) : Piece de l'image precedente (front), provocation en attente ;
++//  - options secretes deja ecrites (patch 0003) ;
++//  - 16:9 (patchs 0022 / 0023) : suivi de l'anneau scroll1 et pente k (colonnes montrees dans les bandes).
++// Zone placee APRES HsfaScanMelange, en fin d'etat libretro, lue seulement si l'etat charge la contient en entier
++// (nRestant) : les etats d'avant 0029 se chargent (rien de cette zone n'est lu ; le 16:9 reprend son suivi a zero),
++// et les etats 0029 se chargent dans un coeur plus ancien (octets en trop ignores). En-tete Â« HSF9 Â» + version.
++// HSFA_ETATS_FIN=0 (essais) : zone absente, etats identiques a l'octet a ceux du coeur 0027.
++void QscScanHsfa(INT32 nAction);
++void CpsObjScanHsfa(INT32 nAction);
++void CpsPalScanHsfa(INT32 nAction);
++
++static INT32 nHsfaEtatsFin = -1;
++static INT64 nFinTaille = 0;
++static INT32 __cdecl HsfaFinCompte(struct BurnArea *pba) { nFinTaille += pba->nLen; return 0; }
++
++// HSFA_ETATS_SANS=<masque> (essais) : au chargement, les parties choisies sont lues sans etre appliquees (la variable garde
++// sa valeur d'avant le chargement), pour mesurer l'effet de chacune : 1 QSound, 2 objets, 4 palette, 8 registres F,
++// 16 volume, 32 provocation, 64 options, 128 16:9.
++static INT32 nHsfaEtatsSans = -1, nFinPart = 0;
++static INT32 (__cdecl *pFinAcbVrai)(struct BurnArea *) = NULL;
++static INT32 __cdecl HsfaFinAcbFiltre(struct BurnArea *pba)
++{
++	if (!(nHsfaEtatsSans & nFinPart)) return pFinAcbVrai(pba);
++	static std::vector<UINT8> t;
++	t.resize(pba->nLen ? pba->nLen : 1);
++	struct BurnArea b = *pba; b.Data = &t[0];
++	return pFinAcbVrai(&b);
++}
++
++static void HsfaFinZones(INT32 nAction, UINT32 *pEntete)
++{
++	SCAN_VAR(*pEntete);
++	nFinPart = 1; QscScanHsfa(nAction);
++	nFinPart = 2; CpsObjScanHsfa(nAction);
++	nFinPart = 4; CpsPalScanHsfa(nAction);
++	nFinPart = 8;
++	{	// registres « F » verrouilles en fin d'image (decalage des plans et des objets de l'image suivante)
++		struct BurnArea ba;
++		memset(&ba, 0, sizeof(ba));
++		ba.Data = CpsSaveFrg[0]; ba.nLen = 0x10; ba.szName = "HsfaSaveFrg0"; BurnAcb(&ba);
++		ba.Data = CpsSaveFrg[1]; ba.nLen = 0x10; ba.szName = "HsfaSaveFrg1"; BurnAcb(&ba);
++	}
++	nFinPart = 16; SCAN_VAR(Cps2Volume);			// volume (touches de volume) : gains du QSound recalcules au chargement
++	nFinPart = 32; SCAN_VAR(nProvocPiece);
++	SCAN_VAR(nProvocAttente);
++	nFinPart = 64; SCAN_VAR(nOptExtra);
++	nFinPart = 128;
++#ifdef HSFA_WS
++	if (WsS1Copie == NULL) { WsS1Copie = (UINT8*)BurnMalloc(0x4000); if (WsS1Copie) memset(WsS1Copie, 0, 0x4000); }
++	struct BurnArea ba;
++	memset(&ba, 0, sizeof(ba));
++	ba.Data = WsS1Copie; ba.nLen = WsS1Copie ? 0x4000 : 0; ba.szName = "HsfaWsS1Copie"; if (ba.nLen) BurnAcb(&ba);
++	SCAN_VAR(WsS1Col); SCAN_VAR(WsS1Ok);
++	SCAN_VAR(bWsS1Init); SCAN_VAR(nWsS1Prec); SCAN_VAR(nWsS1Track); SCAN_VAR(nWsS1Base); SCAN_VAR(nWsS1D);
++	SCAN_VAR(nWsKDecor); SCAN_VAR(nWsK); SCAN_VAR(bWsK); SCAN_VAR(bWsAuto); SCAN_VAR(nWsKCam0); SCAN_VAR(nWsKU0);
++	SCAN_VAR(nWsKCamPrec); SCAN_VAR(nWsAutoN); SCAN_VAR(nWsExtG); SCAN_VAR(nWsExtD); SCAN_VAR(bWsExt);
++#endif
++}
++
++INT32 HsfaScanFin(INT32 nAction, INT64 nRestant)
++{
++	if (!HsfaMode || !(nAction & ACB_DRIVER_DATA)) return 0;
++	if (nHsfaEtatsFin < 0) nHsfaEtatsFin = (getenv("HSFA_ETATS_FIN") && atoi(getenv("HSFA_ETATS_FIN")) == 0) ? 0 : 1;
++	if (!nHsfaEtatsFin) return 0;
++	const UINT32 nAttendu = 0x48534639;				// Â« HSF9 Â», version 1 de la zone
++	UINT32 nEntete = nAttendu;
++	if ((nAction & ACB_WRITE) && nRestant >= 0) {
++		// chargement : la zone entiere est-elle dans l'etat ? (taille comptee sans rien lire)
++		INT32 (__cdecl *pSauve)(struct BurnArea *) = BurnAcb;
++		nFinTaille = 0; BurnAcb = HsfaFinCompte; HsfaFinZones(nAction & ~ACB_WRITE, &nEntete); BurnAcb = pSauve;
++		if (nRestant < nFinTaille) {				// etat d'avant 0029 : suivi du 16:9 repris a zero
++#ifdef HSFA_WS
++			bWsS1Init = 0; nWsKDecor = -1;
++#endif
++			return 0;
++		}
++	}
++	if (nHsfaEtatsSans < 0) nHsfaEtatsSans = getenv("HSFA_ETATS_SANS") ? atoi(getenv("HSFA_ETATS_SANS")) : 0;
++	if ((nAction & ACB_WRITE) && nHsfaEtatsSans) {
++		extern INT32 bCpsPalCharge;
++		const INT32 bPal = bCpsPalCharge;
++		pFinAcbVrai = BurnAcb; BurnAcb = HsfaFinAcbFiltre;
++		HsfaFinZones(nAction, &nEntete);
++		BurnAcb = pFinAcbVrai;
++		if (nHsfaEtatsSans & 4) bCpsPalCharge = bPal;
++	} else {
++		HsfaFinZones(nAction, &nEntete);
++	}
++	nFinPart = 0;
++	if ((nAction & ACB_WRITE) && Cps == 2) {			// gains du QSound (sinon recalcules toutes les 5 images)
++		QscSetRoute(BURN_SND_QSND_OUTPUT_1, Cps2Volume / 39.0, BURN_SND_ROUTE_LEFT);
++		QscSetRoute(BURN_SND_QSND_OUTPUT_2, Cps2Volume / 39.0, BURN_SND_ROUTE_RIGHT);
++	}
++	if ((nAction & ACB_WRITE) && nEntete != nAttendu) {
++		bprintf(PRINT_ERROR, _T("HSFA : zone de fin d'etat inconnue (%08X)\n"), nEntete);
++	}
++	return 0;
++}
+diff --git a/src/burn/drv/capcom/cps_obj.cpp b/src/burn/drv/capcom/cps_obj.cpp
+index f1545b9..2892213 100644
+--- a/src/burn/drv/capcom/cps_obj.cpp
++++ b/src/burn/drv/capcom/cps_obj.cpp
+@@ -162,6 +162,19 @@ INT32 CpsObjExit()
+ 	return 0;
+ }
+ 
++// (HSFA, patch 0029) etats complets : copies des listes d'objets des images precedentes (objets retardes d'une image,
++// double tampon) et tampon suivant. Sans elles, la 1re image apres un chargement montre les objets d'avant le
++// chargement. Appele par HsfaScanFin (pilotes HSFA seulement).
++void CpsObjScanHsfa(INT32 nAction)
++{
++	(void)nAction;
++	struct BurnArea ba;
++	memset(&ba, 0, sizeof(ba));
++	ba.Data = ObjMem; ba.nLen = (nMax << 3) * 2; ba.szName = "HsfaObjMem"; BurnAcb(&ba);
++	SCAN_VAR(nGetNext);
++	for (INT32 i = 0; i < 2; i++) { SCAN_VAR(of[i].nShiftX); SCAN_VAR(of[i].nShiftY); SCAN_VAR(of[i].nCount); }
++}
++
+ // Get CPS sprites into Obj
+ INT32 CpsObjGet()
+ {
+diff --git a/src/burn/drv/capcom/cps_pal.cpp b/src/burn/drv/capcom/cps_pal.cpp
+index 03c2c2e..222e786 100644
+--- a/src/burn/drv/capcom/cps_pal.cpp
++++ b/src/burn/drv/capcom/cps_pal.cpp
+@@ -35,6 +35,34 @@ INT32 CpsPalExit()
+ 	return 0;
+ }
+ 
++// (HSFA, patch 0029) etats complets : la palette convertie (CpsPal) est un etat de la machine (copiee par le jeu a
++// l'ecriture du registre $10B, pages actives seulement), absent des etats de FBNeo ; au chargement, FBNeo la relisait
++// dans la RAM au moment du dessin suivant (couleurs fausses une image, ou jusqu'a la copie suivante). CpsPalBrut garde
++// les mots de chaque page tels qu'ils ont ete convertis ; sauve par HsfaScanFin (pilotes HSFA), reconverti au dessin
++// qui suit le chargement (bCpsPalCharge).
++static UINT16 CpsPalBrut[0xc00];
++INT32 bCpsPalCharge = 0;
++
++void CpsPalScanHsfa(INT32 nAction)
++{
++	SCAN_VAR(CpsPalBrut);
++	if (nAction & ACB_WRITE) bCpsPalCharge = 1;
++}
++
++void CpsPalDepuisBrut()
++{
++	for (INT32 nPage = 0; nPage < 6; nPage++) {
++		for (INT32 Offset = 0; Offset < 0x200; ++Offset) {
++			INT32 Palette = BURN_ENDIAN_SWAP_INT16(CpsPalBrut[(0x200 * nPage) + Offset]);
++			INT32 Bright = 0x0f + ((Palette >> 12) << 1);
++			INT32 r = ((Palette >> 8) & 0x0f) * 0x11 * Bright / 0x2d;
++			INT32 g = ((Palette >> 4) & 0x0f) * 0x11 * Bright / 0x2d;
++			INT32 b = ((Palette >> 0) & 0x0f) * 0x11 * Bright / 0x2d;
++			CpsPal[(0x200 * nPage) + (Offset ^ 15)] = BurnHighCol(r, g, b, 0);
++		}
++	}
++}
++
+ // Update CpsPal with the new palette at pNewPal (length 0xc00 bytes)
+ INT32 CpsPalUpdate(UINT8* pNewPal)
+ {
+@@ -51,6 +79,7 @@ INT32 CpsPalUpdate(UINT8* pNewPal)
+ 	for (INT32 nPage = 0; nPage < 6; nPage++) {
+ 		if (BIT(nCtrl, nPage)) {
+ 			for (INT32 Offset = 0; Offset < 0x200; ++Offset) {
++				CpsPalBrut[(0x200 * nPage) + Offset] = *PaletteRAM;	// (HSFA, patch 0029) copie convertie, pour les etats
+ 				INT32 Palette = BURN_ENDIAN_SWAP_INT16(*(PaletteRAM++));
+ 				INT32 r, g, b, Bright;
+ 				
+diff --git a/src/burn/drv/capcom/cps_run.cpp b/src/burn/drv/capcom/cps_run.cpp
+index 8092f35..d0d1493 100644
+--- a/src/burn/drv/capcom/cps_run.cpp
++++ b/src/burn/drv/capcom/cps_run.cpp
+@@ -526,6 +526,9 @@ INT32 Cps2Frame()
+ //	nDone += SekRun(nCpsCyclesSegment[0] - nDone);
+ 
+ 	SekSetIRQLine(2, CPU_IRQSTATUS_AUTO);				// VBlank
++#ifdef HSFA_WS
++	HsfaWsSuivi();										// (HSFA, patch 0029) suivi du 16:9 a chaque image, dessinee ou non
++#endif
+ 	if (pBurnDraw) {
+ 		CpsDraw();
+ 	}
+diff --git a/src/burn/drv/capcom/qs_c.cpp b/src/burn/drv/capcom/qs_c.cpp
+index f692ef0..1ae3b16 100644
+--- a/src/burn/drv/capcom/qs_c.cpp
++++ b/src/burn/drv/capcom/qs_c.cpp
+@@ -796,6 +796,17 @@ INT32 QscScan(INT32 nAction)
+ 	return 0;
+ }
+ 
++// (HSFA, patch 0029) etats complets : position du reechantillonneur (nDelta) et echantillons d'interpolation. Sans
++// eux, apres un chargement, la puce produit ses echantillons a d'autres instants de l'image : ready_flag change a
++// d'autres cycles du Z80 (pilote son decale) et le son differe de la partie sans chargement. Appele par HsfaScanFin
++// (derniere zone de l'etat libretro, pilotes HSFA seulement : les etats des autres jeux sont inchanges).
++void QscScanHsfa(INT32 nAction)
++{
++	(void)nAction;
++	SCAN_VAR(nDelta);
++	SCAN_VAR(interpolate_buffer);
++}
++
+ void QscNewFrame()
+ {
+ 	nPos = 0;
+diff --git a/src/burner/libretro/retro_memory.cpp b/src/burner/libretro/retro_memory.cpp
+index 40a4dc5..8d0cbdc 100644
+--- a/src/burner/libretro/retro_memory.cpp
++++ b/src/burner/libretro/retro_memory.cpp
+@@ -264,6 +264,7 @@ static int StateLenAcb(BurnArea *pba)
+ 
+ #ifdef HSFA_CORE
+ INT32 HsfaScanMelange(INT32 nAction, INT64 nRestant);	// cps_hsfa.cpp (patch 0010)
++INT32 HsfaScanFin(INT32 nAction, INT64 nRestant);		// cps_hsfa.cpp (patch 0029)
+ #endif
+ 
+ static INT32 LibretroAreaScan(INT32 nAction)
+@@ -290,6 +291,9 @@ static INT32 LibretroAreaScan(INT32 nAction)
+ 	// lue seulement dans la mesure ou l'etat charge la contient (etats anterieurs : registres absents -> 0)
+ 	HsfaScanMelange(nAction, ((nAction & ACB_WRITE) && BurnAcb == StateReadAcb)
+ 		? (INT64)nTempSize - (INT64)nStateTmpLen[nSavestateContext] : (INT64)-1);
++	// (HSFA, patch 0029) zone de fin d'etat (QSound, objets, provocation, 16:9), meme regle : lue si l'etat la contient
++	HsfaScanFin(nAction, ((nAction & ACB_WRITE) && BurnAcb == StateReadAcb)
++		? (INT64)nTempSize - (INT64)nStateTmpLen[nSavestateContext] : (INT64)-1);
+ #endif
+ 
+ 	return 0;
+-- 
+2.53.0
+

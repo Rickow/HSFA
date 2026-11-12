@@ -1,0 +1,52 @@
+From bb738bf6f92cc1ded947467a68b8c0de1217feaa Mon Sep 17 00:00:00 2001
+From: hsfa <hsfa@invalid>
+Date: Wed, 11 Nov 2026 11:40:42 +0100
+Subject: [PATCH 1/5] HSFA win32: build the HSFA drivers (cps_hsfa.cpp,
+ stb_vorbis Ogg streams), HSFA_WS=1 for the 16:9 build
+
+---
+ makefile.burn_rules | 6 +++---
+ makefile.mingw      | 6 ++++++
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/makefile.burn_rules b/makefile.burn_rules
+index fab004f35..f9f5ceec6 100644
+--- a/makefile.burn_rules
++++ b/makefile.burn_rules
+@@ -4,7 +4,7 @@ alldir	= 	burn burn/devices burn/snd burn/drv burn/drv/atari burn/drv/capcom bur
+ 			burn/drv/toaplan cpu cpu/a68k cpu/arm cpu/arm7 cpu/arm9 cpu/e132xs cpu/f8 cpu/h6280 cpu/hd6309 cpu/hmcs40 cpu/i386 cpu/i8039 cpu/i8x41 cpu/i8051 cpu/i8085 cpu/adsp2100 cpu/konami cpu/m377 cpu/mips3 cpu/m68k \
+ 			cpu/mb88xx cpu/m6502 cpu/m6800 cpu/m6805 cpu/m6809 cpu/nec cpu/pic16c5x cpu/s2650 cpu/tlcs90 cpu/tlcs900 cpu/sh2 cpu/sh4 cpu/tms32010 cpu/tms34 cpu/upd7725 cpu/upd7810 \
+ 			cpu/v60 cpu/z80 cpu/z180 \
+-			dep/libs/dr_libs
++			dep/libs/dr_libs dep/libs/stb_vorbis
+ 
+ drvsrc	= 	d_akkaarrh.o d_arcadecl.o d_atarig1.o d_atarisy1.o d_badlands.o d_batman.o d_blstroid.o d_eprom.o d_gauntlet.o d_klax.o d_marblmd2.o d_missile.o d_offtwall.o d_rampart.o \
+ 			d_relief.o d_shuuz.o d_skullxbo.o d_thunderj.o d_toobin.o d_vindictr.o d_xybots.o \
+@@ -129,8 +129,8 @@ depobj	= 	burn.o burn_bitmap.o burn_gun.o burn_led.o burn_shift.o burn_memory.o
+ 			\
+ 			cave.o cave_palette.o cave_sprite.o cave_tile.o \
+ 			\
+-			cps2_crpt.o cps.o cps_config.o cps_draw.o cps_mem.o cps_obj.o cps_pal.o cps_run.o cps_rw.o cps_scr.o cpsr.o cpsrd.o cpst.o ctv.o fcrash_snd.o \
+-			kabuki.o ps.o ps_m.o ps_z.o qs.o qs_c.o qs_z.o sf2mdt_snd.o \
++			cps2_crpt.o cps.o cps_config.o cps_draw.o cps_hsfa.o cps_mem.o cps_obj.o cps_pal.o cps_run.o cps_rw.o cps_scr.o cpsr.o cpsrd.o cpst.o ctv.o fcrash_snd.o \
++			kabuki.o ps.o ps_m.o ps_z.o qs.o qs_c.o qs_z.o sf2mdt_snd.o hsfa_stb_vorbis.o \
+ 			\
+ 			cps3run.o cps3snd.o \
+ 			\
+diff --git a/makefile.mingw b/makefile.mingw
+index 282305625..8aa226362 100644
+--- a/makefile.mingw
++++ b/makefile.mingw
+@@ -309,6 +309,12 @@ ASFLAGS	=  -O1 -f coff -w-orphan-labels
+ 
+ 	DEF	:= -DBUILD_WIN32 -DUSE_SPEEDHACKS -DFILENAME=$(NAME) -DMMX=$(MMX)
+ 
++# HSFA : Ogg Vorbis music streams (stb_vorbis) ; HSFA_WS=1 builds the 16:9 (512 x 224) variant
++	DEF	:= $(DEF) -DHSFA_FLUX_VORBIS
++ifdef HSFA_WS
++	DEF	:= $(DEF) -DHSFA_WS
++endif
++
+ ifdef UNICODE
+ 	DEF	:= $(DEF) -D_UNICODE
+ endif

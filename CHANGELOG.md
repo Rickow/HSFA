@@ -4,19 +4,76 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/). Dep
 par release publique ; avant, les entrées sont datées par jalon (date à laquelle la fonction a marché en jeu). Le détail de chaque point
 est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports](docs/rapports/README.md).
 
-## En cours (pas encore publié)
+> **Language**: from 2026-11-12 on, the entries of this changelog are written in English (starting with the
+> v0.1.9 section below); the older entries stay in French.
 
-- **Hyper** : son de la parade en B-ISM (ticket #1) : ce son n'existe que dans la banque son du portage PS2 (commandes
-  `077C` / `027C` vides dans les Z80 d'arcade) ; la construction l'ajoutera à la ROM son d'Hyper depuis votre ISO.
-- **Construction sous Windows** (ticket #2) : sans liens symboliques, chemins et fins de ligne Windows, encodage des
-  textes ; mêmes zips à l'octet.
-- **Hyper + Arcade** (ro9a36) : CONTINUE, décors de Ryu, Sodom et Cammy, fin de Ken.
-- **Upper MAX** : comportement de manche des MAX aligné sur la PSP (4 octets).
-- **Cœurs** : sauvegardes d'état complètes (patch `0029` en essai) ; cœur Linux x86_64 compatible glibc 2.27.
-- **Index `re/`** : quatre contradictions avec les notes de cps2recomp tranchées au banc MAME (cps2recomp avait raison) ;
-  homologues Upper → Hyper proposés par son outil `portmap.py` lancé en local (ro5 +284, ro9 +1 404) ; journal §213.
-- **Recherche** : fiches J à R (`docs/rapports/recherche/`) : croisement avec cps2recomp, projets voisins, place sur
-  une vraie CPS-2 (banques, budgets).
+## v0.1.9 (2026-11-12, pre-release)
+
+- **Savestates: HSFA zone checked before being applied** (patch `0032`, core batch of 12/11b; v0.1.9
+  review): a damaged state, padded with zeros by a frontend or from a future version, is no longer applied blindly
+  (before: silent game and black 1st frame, or even a crash); it loads like a state from before v0.1.9, with a
+  message. Valid states load as before, byte for byte. **Standalone FBNeo** (test, `W06`): rewind
+  and run-ahead also restore the sound, the objects, the palette and the transparency of Upper / Hyper (like the
+  file states): same sequence of pictures and sound as the libretro core.
+- Upper MAX follows translator v161: the integration of the MAX characters no longer reads any hard-coded image address (sites found by pattern and cross-checked with the build map); the `$1B6B6` call of the ending actors (Maki's and Yun's endings) finally targets the right routine; the `prog_upper_v160` step is gone.
+- **16:9: "Widescreen edges" = *Raw* by default** (patch `0031`, core batch of 12/11; standalone FBNeo: `W05`):
+  the picture drawn by the game, free view in the PSP manner, as before v0.1.5. The view locked onto the stage art
+  (*Stage-locked view*), *Mirror*, *Repeat* and *Black* remain options. Reason: near the ends of the arena, the locked
+  view freezes the ground and makes the far layers slide the other way, up to three times faster than in the arcade,
+  and some background tiles arrived late (filtered columns shown mirrored, then replaced). The 4:3 core does not
+  change (byte for byte); in 16:9 with the option on *Stage-locked view*, pictures and sound are identical to the
+  batch of 11/11. A setting already saved by RetroArch (or in `fbneo64ws.ini`) is kept: choose *Raw* in the menu.
+- **Translator v161** (SFA3, Upper, Hyper, Hyper + Arcade): silent losses found by the critical review of the translator, fixed
+  and proven against the arcade: MAZI mode ×1.5 damage bonus never applied, combo score bonus never added,
+  hit character's shake missing (SFA3), 2nd letter of the initials written on the 4th (SFA3, Upper),
+  and nine other comparisons or byte accesses (custom combo freeze, scrolling text, 2nd player's colour in mirror matches of Upper
+  and Hyper…). The build now counts these losses and stops on an untranslated comparison or recompiler
+  helper (§219).
+  Upper MAX benefits too (see the Upper MAX line above, §220).
+- **Hyper and Hyper + Arcade**: 21 sounds of the PS2 port were silent (empty commands in the arcade Z80s):
+  parry in Mazi S-ISM (issue #1), ZERO 2 / ALPHA custom combo, Birdie, Sagat in Saikyo S-ISM, Cammy ALPHA (×14),
+  Dee Jay's taunt, `0245`. The build adds them to Hyper's sound ROM from your ISO
+  (`tools/son-hyper/sons_ps2.py`, `HSFA_SONS_PS2`), at the pitch and level of the PS2
+  ([report](docs/rapports/SONS-PS2-HYPER.md)).
+- **Building on Windows** (issue #2, fixed): Upper MAX builds without the right to create symbolic links (junctions or
+  copies, `src/hsfa/liens.py`); three other Windows failures fixed (home folder, paths in the generated code,
+  encoding); zips identical to Linux's (line endings, `.gitattributes`) (§215).
+- **Hyper + Arcade** (ro9a36): CONTINUE, stages of Ryu, Sodom and Cammy, Ken's ending. `hsfa_build.py --jeux hyperarcade`
+  now builds ro9a36 (with the arcade ROM and the replay table: zip as delivered, byte for byte except `hsfa_info.txt`) (§217).
+- **Hyper + Arcade** (ro9a37) moves to translator v161: Mazi mode ×1.5 damage bonus, combo score bonus
+  and 2nd player's colour in mirror matches, as in Hyper; VERSUS identical to ro9a36, stages
+  unchanged. `hsfa_build.py --jeux hyperarcade` builds ro9a37 (zip as delivered, byte for byte except `hsfa_info.txt`, with `HSFA_SONS_PS2=0`) (§221).
+- **Upper MAX**: round behaviour of the MAX characters aligned on the PSP (4 bytes).
+- **Chun-Li**: the Kikosho arcs and the Kikoken wave were not missing (they flicker at 30 Hz as in the arcade;
+  the old bench compared the wrong frame): removed from the known limits, nothing to fix (§214).
+- **Ground shadow on the ISO-only route** (Hyper, Hyper + Arcade, ZERO / ZERO 2 characters): opaque instead of transparent, because
+  its tiles took other codes in the extended ROM than the ones patch `0011` recognises. The build places these
+  tiles (taken from the disc) at the core's codes (`HSFA_OMBRE_CODES`, `hsfa_gfx.py`); only `hsfa_gfx.bin` and
+  `hsfa_tab.bin` change, and only the shadow changes on screen: ISO route = arcade route to the pixel (§216).
+- **Cores** (batch of 11/11): complete and deterministic savestates (patch `0029`: run-ahead, rewind, netplay);
+  Linux x86_64 core compatible with glibc 2.27 (the one of v0.1.7 / v0.1.8 required 2.43: refused by
+  Batocera 43 and older distributions), same output byte for byte (`tools/linux/`). Batch of 12/11: patch `0030`
+  (system folder of standalone FBNeo under Windows; libretro cores identical byte for byte) and `0031` (16:9, see above).
+- **Output formats** (`--cible`, also a menu in the builder): `fbneo-hsfa` stays the default, with the same
+  zips byte for byte. `fbneo-autonome` (standalone FinalBurn Neo HSFA for Windows, test build) states its concession
+  (RetroArch savestates do not load in it), asks for confirmation, then builds the same zips byte for
+  byte. `mister` and `cps2-banques` do not exist yet: the build states, game by game, the concessions of
+  that format and the measured budgets, asks for confirmation, then stops without building anything
+  (`scripts/construction/cibles.py`). Messages in French or English (`HSFA_LANGUE`, otherwise the system language).
+- **Standalone FinalBurn Neo HSFA (Windows x64)**, test build, without RetroArch: official FBNeo `84faab7` (common
+  base of libretro `af5d3f3`) + the repository's chain (0001-0027, 0029-0031) + 5 patches of the Windows interface
+  (`patches/fbneo-autonome/`); two programs (4:3, 16:9); HSFA options in the DIPs, 16:9 in the Video menu;
+  tried under Wine: pictures, game states and sound identical to the RetroArch core (within ±1 on a few samples of the
+  Ogg streams). Not tried on a real Windows yet.
+- **Batocera** (v43, tried on the official 43.1 PC image in a virtual machine): installer
+  `tools/batocera/installer-hsfa-batocera.sh` (an `hsfa` service puts the cores in place at every boot: survives
+  reboots and updates; uninstall with `retirer`), `es_systems_hsfa.cfg` system, guide FR + EN; the 5
+  games up to the fight from the game list, in 4:3 and 16:9, with sound. ARM 64-bit: glibc checked, not tried;
+  ARM 32-bit: not supported. **RetroBat**: installation note (`tools/retrobat/`, not tried).
+- **`re/` index**: four contradictions with cps2recomp's notes settled on the MAME bench (cps2recomp was right);
+  Upper → Hyper counterparts proposed by its `portmap.py` tool run locally (ro5 +284, ro9 +1,404); journal §213.
+- **Research**: sheets J to R (`docs/rapports/recherche/`): cross-check with cps2recomp, neighbouring projects, room on
+  a real CPS-2 (banks, budgets).
 
 ## v0.1.8 (2026-11-08, pré-version)
 

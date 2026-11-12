@@ -1,0 +1,361 @@
+From 543911bf12490d96bc5f54838980f51292b7a01d Mon Sep 17 00:00:00 2001
+From: hsfa <hsfa@invalid>
+Date: Wed, 11 Nov 2026 11:40:42 +0100
+Subject: [PATCH 4/5] HSFA win32: 16:9 settings of the libretro core
+ (widescreen edges, screen format) in Video menu and config ini
+
+---
+ makefile.burner_win32_rules      |  2 +-
+ src/burner/win32/app.rc          | 22 +++++++++
+ src/burner/win32/burner_win32.h  |  7 +++
+ src/burner/win32/cona.cpp        | 10 ++++
+ src/burner/win32/drv.cpp         |  3 ++
+ src/burner/win32/hsfa_win32.cpp  | 78 ++++++++++++++++++++++++++++++++
+ src/burner/win32/menu.cpp        |  9 ++++
+ src/burner/win32/resource.h      | 13 ++++++
+ src/burner/win32/scrn.cpp        | 24 ++++++++++
+ src/intf/video/vid_interface.cpp | 45 ++++++++++++++++++
+ 10 files changed, 212 insertions(+), 1 deletion(-)
+ create mode 100644 src/burner/win32/hsfa_win32.cpp
+
+diff --git a/makefile.burner_win32_rules b/makefile.burner_win32_rules
+index ffe3f2ace..b94a40131 100644
+--- a/makefile.burner_win32_rules
++++ b/makefile.burner_win32_rules
+@@ -6,7 +6,7 @@ depobj	+= 	about.o bzip.o choose_monitor.o cona.o debugger.o drv.o d3dkmt_sync.o
+ 			inpc.o inpcheat.o inpd.o inpdipsw.o inps.o ips_manager.o localise.o localise_download.o localise_gamelist.o main.o \
+ 			media.o memcard.o menu.o misc_win32.o neocdlist.o neocdsel.o numdial.o paletteviewer.o placeholder.o popup_win32.o \
+ 			progress.o replay.o res.o roms.o run.o scrn.o sel.o sfactd.o splash.o stated.o support_paths.o systeminfo.o wave.o \
+-			romdata.o mbtwc.o zip.o \
++			romdata.o mbtwc.o zip.o hsfa_win32.o \
+ 			\
+ 			conc.o cong.o dat.o inputbuf.o gamc.o gami.o image.o ioapi.o misc.o nvram.o sshot.o state.o statec.o unzip.o zipfn.o \
+ 			luaconsole.o luaengine.o luasav.o \
+diff --git a/src/burner/win32/app.rc b/src/burner/win32/app.rc
+index a419a4dc5..c4966edbf 100644
+--- a/src/burner/win32/app.rc
++++ b/src/burner/win32/app.rc
+@@ -1301,6 +1301,28 @@ BEGIN
+ 		MENUITEM "Enable DWM Sync (Windowed)",				MENU_DWMFIX
+ 		MENUITEM "Auto Frameskip",								MENU_AUTOFRAMESKIP
+ 		MENUITEM "Enable RunAhead",								MENU_RUNAHEAD
++        MENUITEM SEPARATOR
++        POPUP "HSFA widescreen (16:9 build)"
++        BEGIN
++            POPUP "Widescreen edges"
++            BEGIN
++                MENUITEM "Stage-locked view\t(default)",		MENU_HSFA_EDGES_STAGE
++                MENUITEM "Mirror",							MENU_HSFA_EDGES_MIRROR
++                MENUITEM "Repeat",							MENU_HSFA_EDGES_REPEAT
++                MENUITEM "Black",							MENU_HSFA_EDGES_BLACK
++                MENUITEM "Raw",								MENU_HSFA_EDGES_RAW
++            END
++            POPUP "Screen format (fill height)"
++            BEGIN
++                MENUITEM "Off\t(16:9, 512 px, default)",		MENU_HSFA_FORMAT_OFF
++                MENUITEM "4:3",								MENU_HSFA_FORMAT_4_3
++                MENUITEM "3:2",								MENU_HSFA_FORMAT_3_2
++                MENUITEM "14:9\t(448 px)",					MENU_HSFA_FORMAT_14_9
++                MENUITEM "16:10",							MENU_HSFA_FORMAT_16_10
++                MENUITEM "5:3",								MENU_HSFA_FORMAT_5_3
++                MENUITEM "16:9",							MENU_HSFA_FORMAT_16_9
++            END
++        END
+     END
+     POPUP "Audio"
+     BEGIN
+diff --git a/src/burner/win32/burner_win32.h b/src/burner/win32/burner_win32.h
+index bcafb17c6..7066121f8 100644
+--- a/src/burner/win32/burner_win32.h
++++ b/src/burner/win32/burner_win32.h
+@@ -231,6 +231,13 @@ void EnableHighResolutionTiming();
+ void DisableHighResolutionTiming();
+ 
+ // drv.cpp
++// hsfa_win32.cpp (HSFA mod: settings of the libretro HSFA cores)
++void HsfaWsApplyFormat();
++void HsfaWsExit();
++#ifdef HSFA_WS
++extern INT32 nHsfaWsEdges, nHsfaFormat, nHsfaWsCropW;
++#endif
++
+ extern int bDrvOkay;								// 1 if the Driver has been initted okay, and it's okay to use the BurnDrv functions
+ extern TCHAR szAppRomPaths[DIRS_MAX][MAX_PATH];
+ extern TCHAR szAppQuickPath[MAX_PATH];
+diff --git a/src/burner/win32/cona.cpp b/src/burner/win32/cona.cpp
+index ece90e487..20cd17fd0 100644
+--- a/src/burner/win32/cona.cpp
++++ b/src/burner/win32/cona.cpp
+@@ -294,6 +294,10 @@ int ConfigAppLoad()
+ 		VAR(bVidDX9WinFullscreen);
+ 		VAR(bVidVSync);
+ 		VAR(bVidDWMSync);
++#ifdef HSFA_WS
++		VAR(nHsfaWsEdges);								// HSFA mod (hsfa_win32.cpp)
++		VAR(nHsfaFormat);
++#endif
+ 
+ 		VAR(bVidScanlines);
+ 		VAR(nVidScanIntensity);
+@@ -662,6 +666,12 @@ int ConfigAppSave()
+ 	VAR(bVidVSync);
+ 	_ftprintf(h, _T("\n// If non-zero, try to synchronise to DWM on Windows 7+, this fixes frame stuttering problems.\n"));
+ 	VAR(bVidDWMSync);
++#ifdef HSFA_WS
++	_ftprintf(h, _T("\n// HSFA mod, 16:9 build: widescreen edges, 0 = stage-locked view (default), 1 = mirror, 2 = repeat, 3 = black, 4 = raw\n"));
++	VAR(nHsfaWsEdges);
++	_ftprintf(h, _T("\n// HSFA mod, 16:9 build: screen format (fill height), 0 = off (16:9, 512 px, default), 1 = 4:3, 2 = 3:2, 3 = 14:9, 4 = 16:10, 5 = 5:3, 6 = 16:9\n"));
++	VAR(nHsfaFormat);
++#endif
+ 	_ftprintf(h, _T("\n// Transfer method:  0 = blit from system memory / use driver/DirectX texture management;\n"));
+ 	_ftprintf(h, _T("//                   1 = copy to a video memory surface, then use bltfast();\n"));
+ 	_ftprintf(h, _T("//                  -1 = autodetect for DirectDraw, equals 1 for Direct3D\n"));
+diff --git a/src/burner/win32/drv.cpp b/src/burner/win32/drv.cpp
+index 516ddf2c9..50611e750 100644
+--- a/src/burner/win32/drv.cpp
++++ b/src/burner/win32/drv.cpp
+@@ -261,6 +261,8 @@ int DrvInit(int nDrvNum, bool bRestore)
+ 
+ 	bDrvOkay = 1;						// Okay to use all BurnDrv functions
+ 
++	HsfaWsApplyFormat();				// HSFA: 16:9 edges and screen format (nothing for other games)
++
+ 	if (BurnDrvGetFlags() & BDF_ORIENTATION_VERTICAL) {
+ 		nScreenSize = nScreenSizeVer;
+ 		bVidArcaderes = bVidArcaderesVer;
+@@ -309,6 +311,7 @@ int DrvExit()
+ 		NeoCDZRateChangeback();
+ 		StopReplay();
+ 		VidExit();
++		HsfaWsExit();					// HSFA: no more crop of the 16:9 picture
+ 
+ 		InvalidateRect(hScrnWnd, NULL, 1);
+ 		UpdateWindow(hScrnWnd);			// Blank screen window
+diff --git a/src/burner/win32/hsfa_win32.cpp b/src/burner/win32/hsfa_win32.cpp
+new file mode 100644
+index 000000000..26425ccbf
+--- /dev/null
++++ b/src/burner/win32/hsfa_win32.cpp
+@@ -0,0 +1,78 @@
++// HSFA (Hyper Street Fighter Alpha mod), Windows front-end glue.
++// The libretro HSFA cores expose a few settings as core options (src/burner/libretro, HSFA patches 0012, 0022, 0023).
++// This file carries them over to the standalone Windows front-end: values are kept in config/<exe>.ini, set from the
++// Video > HSFA widescreen menu, and applied here. Defaults are the libretro defaults.
++// Everything below only exists in the 16:9 build (-DHSFA_WS, makefile.mingw HSFA_WS=1); the 4:3 build has none of it.
++
++#include "burner.h"
++
++#ifdef HSFA_WS
++
++extern INT32 nHsfaWsBords, nHsfaWsCale, nHsfaWsVisible;	// cps_hsfa.cpp (patches 0022, 0023)
++
++INT32 nHsfaWsEdges = 0;		// "Widescreen edges" : 0 Stage-locked view (default), 1 Mirror, 2 Repeat, 3 Black, 4 Raw
++INT32 nHsfaFormat = 0;		// "Screen format (fill height)" : 0 Off (default), 1..6 = 4:3, 3:2, 14:9, 16:10, 5:3, 16:9
++INT32 nHsfaWsCropW = 0;		// width shown when the format crops the 16:9 picture (0 = no crop) ; read by vid_interface.cpp
++
++static const INT32 HsfaFormats[7][2] = { { 0, 0 }, { 4, 3 }, { 3, 2 }, { 14, 9 }, { 16, 10 }, { 5, 3 }, { 16, 9 } };
++
++static bool HsfaDriverActive()
++{
++	if (!bDrvOkay || nBurnDrvActive >= nBurnDrvCount) return false;
++	const char* pszName = BurnDrvGetTextA(DRV_NAME);
++	return pszName && strstr(pszName, "hsfa") != NULL;
++}
++
++// same mapping as the libretro option fbneo-hsfa-ws-edges (retro_common.cpp, patches 0022 / 0023)
++void HsfaWsApplyEdges()
++{
++	if (nHsfaWsEdges < 0 || nHsfaWsEdges > 4) nHsfaWsEdges = 0;
++	nHsfaWsCale  = (nHsfaWsEdges == 0);					// stage-locked view (what is still missing: mirror)
++	nHsfaWsBords = (nHsfaWsEdges == 0) ? 0 : nHsfaWsEdges - 1;
++}
++
++// same rule as HsfaFormat() of the libretro core (libretro.cpp, patch 0012): shown width = format x 288 (arcade pixel
++// shape, 384 px <-> 4:3), even, capped to the game width; centred crop. Here the driver keeps drawing its full 512 px
++// (nCpsScreenWidth is read once at init) into a private buffer, vid_interface.cpp copies the centre, and the blitters
++// see a game of the cropped width and of the chosen aspect ratio.
++void HsfaWsApplyFormat()
++{
++	HsfaWsApplyEdges();
++
++	nHsfaWsVisible = 0;
++	nHsfaWsCropW = 0;
++	if (!HsfaDriverActive()) return;
++
++	INT32 nW = 0, nH = 0;
++	BurnDrvGetOriginalVisibleSize(&nW, &nH);			// size of the driver, cached by BurnDrvInit()
++	if (nW <= 0 || nH <= 0) return;
++
++	if (nHsfaFormat < 1 || nHsfaFormat > 6) {
++		nHsfaFormat = 0;
++		BurnDrvSetVisibleSize(nW, nH);
++		BurnDrvSetAspect(nW, 288);						// as the driver: HSFA_ASPX = width, HSFA_ASPY = 288
++		return;
++	}
++
++	INT32 w = (HsfaFormats[nHsfaFormat][0] * 288 / HsfaFormats[nHsfaFormat][1]) & ~1;
++	if (w < nW) {
++		nHsfaWsVisible = nHsfaWsCropW = w;
++		BurnDrvSetVisibleSize(w, nH);
++	} else {
++		BurnDrvSetVisibleSize(nW, nH);
++	}
++	BurnDrvSetAspect(HsfaFormats[nHsfaFormat][0], HsfaFormats[nHsfaFormat][1]);
++}
++
++void HsfaWsExit()
++{
++	nHsfaWsVisible = 0;
++	nHsfaWsCropW = 0;
++}
++
++#else
++
++void HsfaWsApplyFormat() { }
++void HsfaWsExit() { }
++
++#endif
+diff --git a/src/burner/win32/menu.cpp b/src/burner/win32/menu.cpp
+index 3147377d9..594d9f037 100644
+--- a/src/burner/win32/menu.cpp
++++ b/src/burner/win32/menu.cpp
+@@ -1139,6 +1139,15 @@ void MenuUpdate()
+ 	CheckMenuItem(hMenu, MENU_ROTATEVERTICAL, !(nVidRotationAdjust & 1) ? MF_CHECKED : MF_UNCHECKED);
+ 	CheckMenuItem(hMenu, MENU_FORCE60HZ, bForce60Hz ? MF_CHECKED : MF_UNCHECKED);
+ 	CheckMenuItem(hMenu, MENU_VIDEOVSYNC, bVidVSync ? MF_CHECKED : MF_UNCHECKED);
++
++	// HSFA mod: Video > HSFA widescreen (16:9 build only; greyed in the 4:3 build)
++#ifdef HSFA_WS
++	CheckMenuRadioItem(hMenu, MENU_HSFA_EDGES_STAGE, MENU_HSFA_EDGES_RAW, MENU_HSFA_EDGES_STAGE + nHsfaWsEdges, MF_BYCOMMAND);
++	CheckMenuRadioItem(hMenu, MENU_HSFA_FORMAT_OFF, MENU_HSFA_FORMAT_16_9, MENU_HSFA_FORMAT_OFF + nHsfaFormat, MF_BYCOMMAND);
++#else
++	for (INT32 i = MENU_HSFA_EDGES_STAGE; i <= MENU_HSFA_EDGES_RAW; i++) EnableMenuItem(hMenu, i, MF_GRAYED | MF_BYCOMMAND);
++	for (INT32 i = MENU_HSFA_FORMAT_OFF; i <= MENU_HSFA_FORMAT_16_9; i++) EnableMenuItem(hMenu, i, MF_GRAYED | MF_BYCOMMAND);
++#endif
+ 	CheckMenuItem(hMenu, MENU_AUTOFRAMESKIP, !bAlwaysDrawFrames ? MF_CHECKED : MF_UNCHECKED);
+ 	CheckMenuItem(hMenu, MENU_RUNAHEAD, bRunAhead ? MF_CHECKED : MF_UNCHECKED);
+ 
+diff --git a/src/burner/win32/resource.h b/src/burner/win32/resource.h
+index 7325a914d..cf714aedc 100644
+--- a/src/burner/win32/resource.h
++++ b/src/burner/win32/resource.h
+@@ -744,6 +744,19 @@
+ #define MENU_LANGUAGE_RESET					10635
+ #define MENU_BLITTEROPTIONS					10643
+ #define MENU_VIDEOVSYNC						10646
++// HSFA mod (hsfa_win32.cpp): Video > HSFA widescreen ; keep each group contiguous (CheckMenuRadioItem)
++#define MENU_HSFA_EDGES_STAGE				18900
++#define MENU_HSFA_EDGES_MIRROR				18901
++#define MENU_HSFA_EDGES_REPEAT				18902
++#define MENU_HSFA_EDGES_BLACK				18903
++#define MENU_HSFA_EDGES_RAW					18904
++#define MENU_HSFA_FORMAT_OFF				18910
++#define MENU_HSFA_FORMAT_4_3				18911
++#define MENU_HSFA_FORMAT_3_2				18912
++#define MENU_HSFA_FORMAT_14_9				18913
++#define MENU_HSFA_FORMAT_16_10				18914
++#define MENU_HSFA_FORMAT_5_3				18915
++#define MENU_HSFA_FORMAT_16_9				18916
+ #define MENU_MONITORAUTOCHECK				10650
+ #define MENU_CLRMAME_PRO_XML				10651
+ #define MENU_CLRMAME_PRO_XML_NEOGEO_ONLY	10652
+diff --git a/src/burner/win32/scrn.cpp b/src/burner/win32/scrn.cpp
+index dc33e39f8..4b3c357d7 100644
+--- a/src/burner/win32/scrn.cpp
++++ b/src/burner/win32/scrn.cpp
+@@ -2521,6 +2521,30 @@ static void OnCommand(HWND /*hDlg*/, int id, HWND /*hwndCtl*/, UINT codeNotify)
+ 			bForce60Hz = !bForce60Hz;
+ 			break;
+ 
++#ifdef HSFA_WS
++		// HSFA mod (hsfa_win32.cpp): same values as the libretro options fbneo-hsfa-ws-edges / fbneo-hsfa-format
++		case MENU_HSFA_EDGES_STAGE:
++		case MENU_HSFA_EDGES_MIRROR:
++		case MENU_HSFA_EDGES_REPEAT:
++		case MENU_HSFA_EDGES_BLACK:
++		case MENU_HSFA_EDGES_RAW:
++			nHsfaWsEdges = id - MENU_HSFA_EDGES_STAGE;
++			HsfaWsApplyFormat();
++			break;
++
++		case MENU_HSFA_FORMAT_OFF:
++		case MENU_HSFA_FORMAT_4_3:
++		case MENU_HSFA_FORMAT_3_2:
++		case MENU_HSFA_FORMAT_14_9:
++		case MENU_HSFA_FORMAT_16_10:
++		case MENU_HSFA_FORMAT_5_3:
++		case MENU_HSFA_FORMAT_16_9:
++			nHsfaFormat = id - MENU_HSFA_FORMAT_OFF;
++			HsfaWsApplyFormat();
++			POST_INITIALISE_MESSAGE;				// new picture size: the blitter is set up again
++			break;
++#endif
++
+ 		case MENU_VIDEOVSYNC:
+ 			bVidVSync = !bVidVSync;
+ 			if (bVidVSync && bVidDWMSync)
+diff --git a/src/intf/video/vid_interface.cpp b/src/intf/video/vid_interface.cpp
+index 225329c06..373ae0a5c 100644
+--- a/src/intf/video/vid_interface.cpp
++++ b/src/intf/video/vid_interface.cpp
+@@ -411,8 +411,49 @@ static INT32 VidDoFrame(bool bRedraw)
+ 	return nRet;
+ }
+ 
++#if defined (BUILD_WIN32) && defined (HSFA_WS)
++// HSFA mod, 16:9 build (hsfa_win32.cpp): "Screen format (fill height)". The driver keeps drawing its full width into
++// this buffer; the centred part (nHsfaWsCropW pixels) is copied into the blitter's image, which has that width.
++extern INT32 nHsfaWsCropW;
++static UINT8* pHsfaWsImage = NULL;
++static INT32 nHsfaWsImageSize = 0;
++
++static UINT8* HsfaWsCropBegin(INT32* pnFullW, INT32* pnH)
++{
++	if (nHsfaWsCropW <= 0 || pBurnDraw == NULL || (BurnDrvGetFlags() & BDF_16BIT_ONLY)) return NULL;
++	BurnDrvGetOriginalVisibleSize(pnFullW, pnH);
++	if (*pnFullW <= nHsfaWsCropW || *pnH <= 0) return NULL;
++	INT32 nSize = *pnFullW * *pnH * nBurnBpp;
++	if (nSize > nHsfaWsImageSize) {
++		free(pHsfaWsImage);
++		pHsfaWsImage = (UINT8*)malloc(nSize);
++		nHsfaWsImageSize = pHsfaWsImage ? nSize : 0;
++		if (pHsfaWsImage == NULL) return NULL;
++		memset(pHsfaWsImage, 0, nSize);
++	}
++	UINT8* pDest = pBurnDraw;
++	pBurnDraw = pHsfaWsImage;
++	nBurnPitch = *pnFullW * nBurnBpp;
++	return pDest;
++}
++
++static void HsfaWsCropEnd(UINT8* pDest, INT32 nDestPitch, INT32 nFullW, INT32 nH)
++{
++	const INT32 nLeft = ((nFullW - nHsfaWsCropW) / 2) * nBurnBpp;
++	for (INT32 y = 0; y < nH; y++) {
++		memcpy(pDest + y * nDestPitch, pHsfaWsImage + y * nFullW * nBurnBpp + nLeft, nHsfaWsCropW * nBurnBpp);
++	}
++	pBurnDraw = pDest;
++	nBurnPitch = nDestPitch;
++}
++#endif
++
+ INT32 VidFrameCallback(bool bRedraw)        // Called from blitter  (VidFrame() -> VidDoFrame() -> Blitter -> this.)
+ {
++#if defined (BUILD_WIN32) && defined (HSFA_WS)
++	INT32 nHsfaFullW = 0, nHsfaH = 0, nHsfaPitch = nBurnPitch;
++	UINT8* pHsfaDest = bDrvOkay ? HsfaWsCropBegin(&nHsfaFullW, &nHsfaH) : NULL;
++#endif
+ 	if (bDrvOkay) {
+ 		if (bRedraw) {						// Redraw current frame
+ 			if (BurnDrvRedraw()) {
+@@ -422,6 +463,10 @@ INT32 VidFrameCallback(bool bRedraw)        // Called from blitter  (VidFrame()
+ 			BurnDrvFrame();					// Run one frame and draw the screen
+ 		}
+ 
++#if defined (BUILD_WIN32) && defined (HSFA_WS)
++		if (pHsfaDest) HsfaWsCropEnd(pHsfaDest, nHsfaPitch, nHsfaFullW, nHsfaH);
++#endif
++
+ 		if (BurnDrvGetFlags() & BDF_16BIT_ONLY) {
+ 			VidDoTransTopVidImage();
+ 		}

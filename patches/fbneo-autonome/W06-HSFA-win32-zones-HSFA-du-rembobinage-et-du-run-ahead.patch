@@ -1,0 +1,103 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: hsfa <hsfa@invalid>
+Date: Thu, 12 Nov 2026 12:00:00 +0100
+Subject: [PATCH] HSFA win32: rewind and run-ahead also save / load the HSFA
+ areas of a full state (patches 0010, 0029, 0032)
+
+W03 added the HSFA areas (object blending registers of patch 0010, end
+of state zone of patch 0029) to state files only (state.cpp, statec.cpp).
+The rewind (Game > Rewind) and the run-ahead (Video > RunAhead) of this
+front-end save and load states through BurnAreaScan alone (burn.cpp):
+after a rewind or with run-ahead on, the QSound resampler, the sprite
+lists, the palette and, for Upper / Hyper, the object blending
+registers were not restored (sound shifted, wrong transparency until
+the game writes the registers again).
+HsfaBurnAreaScan() = BurnAreaScan + HsfaScanMelange + HsfaScanFin, in
+the order of state files, for the 6 calls of the run-ahead and of the
+rewind (size, save, load). Both functions do nothing for any other
+driver: states of other games are unchanged.
+---
+ src/burn/burn.cpp | 27 +++++++++++++++++++++------
+ 1 file changed, 21 insertions(+), 6 deletions(-)
+
+diff --git a/src/burn/burn.cpp b/src/burn/burn.cpp
+--- a/src/burn/burn.cpp
++++ b/src/burn/burn.cpp
+@@ -1228,6 +1228,21 @@
+ // for drivers, hiscore, etc, to recognize that this is the "runahead frame"
+ INT32 bBurnRunAheadFrame = 0;
+ 
++#if defined (INCLUDE_RUNAHEAD_SUPPORT) || defined (INCLUDE_REWIND_SUPPORT)
++// HSFA mod (patch W06): run-ahead and rewind also save / load the HSFA areas of a full state, after the driver areas
++// and in the same order as state files (statec.cpp, patch W03): object blending registers (cps_hsfa.cpp, patch 0010)
++// and end-of-state zone (QSound resampler, sprite lists, palette, taunt, 16:9 tracking; patches 0029 / 0032).
++// Both functions do nothing for any other driver (state size and contents unchanged).
++INT32 HsfaScanMelange(INT32 nAction, INT64 nRestant);
++INT32 HsfaScanFin(INT32 nAction, INT64 nRestant);
++static void HsfaBurnAreaScan(INT32 nAction)
++{
++	BurnAreaScan(nAction, NULL);
++	HsfaScanMelange(nAction, -1);
++	HsfaScanFin(nAction, -1);
++}
++#endif
++
+ #if defined (INCLUDE_RUNAHEAD_SUPPORT)
+ static INT32 nTotalLenRunAhead = 0;
+ static UINT8 *RunAheadBuffer = NULL;
+@@ -1290,7 +1305,7 @@
+ {
+ 	nTotalLenRunAhead = 0;
+ 	BurnAcb = RunAheadLenAcb; // Get length of RunAhead buffer
+-	BurnAreaScan(ACB_FULLSCAN | ACB_READ | ACB_RUNAHEAD, NULL);
++	HsfaBurnAreaScan(ACB_FULLSCAN | ACB_READ | ACB_RUNAHEAD);		// HSFA mod (W06)
+ 
+ 	return nTotalLenRunAhead;
+ }
+@@ -1308,14 +1323,14 @@
+ 	}
+ 	pRunAheadBuffer = RunAheadBuffer;
+ 	BurnAcb = RunAheadReadAcb;
+-	BurnAreaScan(ACB_FULLSCAN | ACB_READ | ACB_RUNAHEAD, NULL);
++	HsfaBurnAreaScan(ACB_FULLSCAN | ACB_READ | ACB_RUNAHEAD);		// HSFA mod (W06)
+ }
+ 
+ void StateRunAheadLoad()
+ {
+ 	pRunAheadBuffer = RunAheadBuffer;
+ 	BurnAcb = RunAheadWriteAcb;
+-	BurnAreaScan(ACB_FULLSCAN | ACB_WRITE | ACB_RUNAHEAD, NULL);
++	HsfaBurnAreaScan(ACB_FULLSCAN | ACB_WRITE | ACB_RUNAHEAD);		// HSFA mod (W06)
+ }
+ #endif
+ 
+@@ -1427,7 +1442,7 @@
+ {
+ 	nTotalLenRewind = 0;
+ 	BurnAcb = RewindLenAcb; // Get length of Rewind buffer
+-	BurnAreaScan(ACB_FULLSCAN | ACB_READ, NULL);
++	HsfaBurnAreaScan(ACB_FULLSCAN | ACB_READ);		// HSFA mod (W06)
+ 	return nTotalLenRewind;
+ }
+ 
+@@ -1576,7 +1591,7 @@
+ 
+ 		pRewindBuffer = RewindBuffer + pRewindIndex[nRewindFrames].pos;
+ 		BurnAcb = RewindReadAcb;
+-		BurnAreaScan(ACB_FULLSCAN | ACB_READ, NULL);
++		HsfaBurnAreaScan(ACB_FULLSCAN | ACB_READ);		// HSFA mod (W06)
+ 
+ 		pRewindIndex[nRewindFrames].this_frame = GetCurrentFrame() - nStartFrame;
+ 
+@@ -1667,7 +1682,7 @@
+ 
+ 		pRewindBuffer = RewindBuffer + pRewindIndex[nRewindFrames].pos;
+ 		BurnAcb = RewindWriteAcb;
+-		BurnAreaScan(ACB_FULLSCAN | ACB_WRITE, NULL);
++		HsfaBurnAreaScan(ACB_FULLSCAN | ACB_WRITE);		// HSFA mod (W06)
+ 
+ 		BurnRecalcPal();
+ 
+-- 
+2.43.0
+

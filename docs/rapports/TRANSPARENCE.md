@@ -139,7 +139,7 @@ construction).
 
 Non-régression :
 
-- `tests/nonreg_coeur.sh` : copie de `scripts/untranspile/nonreg_coeur.sh`, avec les sorties dans `tests/essais/` et
+- `tests/nonreg_coeur.sh` : copie de `<workspace>/scripts/untranspile/nonreg_coeur.sh` (dans le dépôt : `scripts/validation/nonreg_coeur.sh`), avec les sorties dans `tests/essais/` et
   le lanceur `tests/hsfa_run` compilé depuis `fbneo/hsfa/hsfa_run.c`.
 - `COEUR=coeurs/linux_hsfa_0010a.so` contre `references/coeurs/linux_hsfa_501aebd.so` : **sfa3 IDENTIQUE (30), upper
   IDENTIQUE (30), hyper IDENTIQUE (40)** (`tests/nonreg_0010a.txt`).

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""greffe_ha.py -- etape « greffe » du jeu hyperarcade : enchaine la greffe (copie figee ro9a35b, fige35.py ;
+"""greffe_ha.py -- etape « greffe » du jeu hyperarcade : enchaine la greffe (copie figee ro9a37 = HA_ETAT de hsfa_build.py, fige35.py ;
 HA_FIGE=fige_ro9a22 + fige.py pour l'ancienne) comme
 outils/construit_e3.sh, dans un dossier materialise, a partir d'entrees donnees par variables.
 
@@ -76,7 +76,7 @@ def main():
     # environnement propre (determinisme) ; Windows : variables systeme indispensables a Python ; constructeur
     # tout-en-un : chargeur PyInstaller (_PYI_*, sinon chaque etape re-extrait l'executable)
     GARDE = ("PATH", "HOME", "LANG", "LC_ALL", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "WINDIR", "COMSPEC", "USERPROFILE",
-             "LOCALAPPDATA", "APPDATA", "PATHEXT")
+             "LOCALAPPDATA", "APPDATA", "PATHEXT", "HSFA_SANS_LIENS", "PYTHONUTF8")
     env = {k: v for k, v in os.environ.items() if k.upper() in GARDE or k.startswith("_PYI_")}
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     if a.audit:

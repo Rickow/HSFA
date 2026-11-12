@@ -762,6 +762,12 @@ def main():
     st = json.load(open(os.path.join(out, "conv", "stats.json")))
     print("conversion : %s réécrites, %s NON RÉSOLUES, %s/%s adresses du moteur" % (st.get("réécrit"), st.get("NON RÉSOLU"),
           st.get("adresses_resolues"), st.get("adresses_resolues", 0) + st.get("adresses_non_resolues", 0)))
+    # (revue_upper_max, constat B1) une adresse du moteur non résolue reste une adresse ARCADE dans le code MAX (jsr vers
+    # un endroit quelconque de l'image d'Upper, qui change à chaque version du traducteur) : la construction s'arrête.
+    # CONV_SANS_ADRESSES (même vide) la laisse passer, pour reproduire un lot ancien (max55 : CONV_SANS_ADRESSES=1B6B6).
+    if st.get("adresses_non_resolues") and os.environ.get("CONV_SANS_ADRESSES") is None:
+        sys.exit("ÉCHEC : %d adresse(s) du moteur non résolue(s) (« appel moteur … absente des correspondances » dans "
+                 "%s/conv/*.s et conversion.txt) : compléter conv/correspondances_complement.tsv" % (st["adresses_non_resolues"], out))
     # 2. blocs externes (frames, animations de combat et de fin)
     env = dict(os.environ, CONV_SORTIE=os.path.join(out, "blocs"), BLOC_EAGLE="%X" % BLOC_EAGLE)
     env["DECOR_BASE"] = ",".join("%s:%d" % kv for kv in decor_base().items())

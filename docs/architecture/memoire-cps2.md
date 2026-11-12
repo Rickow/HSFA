@@ -1,76 +1,78 @@
-# La mémoire en « mode CPS2 » (§29)
+# Memory in "CPS2 mode" (§29)
 
-## 1. Le problème
+**Français : [memoire-cps2.fr.md](memoire-cps2.fr.md)**
 
-Le code PS2 lit et écrit la mémoire en **petit-boutiste**, à des adresses PS2. Le 68000 de la CPS2 est
-**gros-boutiste**, avec sa propre carte (RAM `$FF0000`, vidéo `$900000`, objets `$700000`…). Le recompilateur a en
-plus typé la mémoire **champ par champ** (§44) : le même octet 68K n'est pas toujours au même endroit selon la façon
-dont le champ est lu. Retrouver la disposition arcade exacte demande de typer chaque champ ; c'est le but, à terme, de
-la [réorganisation des données](ARCHI-Reorganisation-Donnees.md).
+## 1. The problem
 
-## 2. La recette universelle
+The PS2 code reads and writes memory as **little-endian**, at PS2 addresses. The CPS2's 68000 is
+**big-endian**, with its own map (RAM `$FF0000`, video `$900000`, objects `$700000`…). On top of that, the recompiler
+typed memory **field by field** (§44): the same 68K byte is not always in the same place, depending on how
+the field is read. Recovering the exact arcade layout requires typing each field; that is the eventual goal of
+the [data relayout](ARCHI-Reorganisation-Donnees.md).
 
-Décision du §29 : pour un jeu **qui fonctionne**, il suffit que le 68K voie la mémoire **comme le code PS2 la voit**.
+## 2. The universal recipe
 
-| Accès PS2 (adresse hôte h) | Traduction 68K |
+Decision of §29: for a game **that works**, it is enough for the 68K to see memory **the way the PS2 code sees it**.
+
+| PS2 access (host address h) | 68K translation |
 |---|---|
-| mot | même adresse h |
-| octet | h XOR 1 |
-| long | même adresse, moitiés échangées (`SWAP`) |
+| word | same address h |
+| byte | h XOR 1 |
+| long | same address, halves swapped (`SWAP`) |
 
-La recette ne demande aucune connaissance des champs. Elle vaut pour les longs à 2 mod 4 et pour les trois jeux. Coût :
-un `SWAP` par accès long, sauf les copies mémoire → mémoire et les immédiats, pré-échangés à la traduction.
+The recipe needs no knowledge of the fields. It holds for longs at 2 mod 4 and for all three games. Cost:
+one `SWAP` per long access, except memory → memory copies and immediates, pre-swapped at translation.
 
-## 3. Conversion des adresses
+## 3. Address conversion
 
-`translate.addr_to_68k` convertit les constantes d'adresse, dans cet ordre :
-1. variables du portage qui « mirroitent » le matériel → vrais registres CPS-A/B, entrées `$804000…` (§57, §62) ;
-2. RAM PS2 → `$FF0000`, QSound → `$618000`, objets → `$700000/$708000`, vidéo → `$900000` (`ADDRMAP`) ;
-3. données du module → `DATA_BASE` en ROM, ou `DATA_EXT` quand le programme dépasse 4 Mo (`$C80000` Upper,
-   `$940000` Hyper) ;
-4. variables propres au portage → `PORT_RAM` (`$F00000`).
+`translate.addr_to_68k` converts address constants, in this order:
+1. port variables that "mirror" the hardware → real CPS-A/B registers, inputs `$804000…` (§57, §62);
+2. PS2 RAM → `$FF0000`, QSound → `$618000`, objects → `$700000/$708000`, video → `$900000` (`ADDRMAP`);
+3. module data → `DATA_BASE` in ROM, or `DATA_EXT` when the program exceeds 4 MB (`$C80000` Upper,
+   `$940000` Hyper);
+4. variables of the port itself → `PORT_RAM` (`$F00000`).
 
-Les adresses matérielles reçoivent l'octet haut `$01` (`HW_TAG`), ignoré par le bus 24 bits, pour ne pas être
-reconverties (§63).
+Hardware addresses get the high byte `$01` (`HW_TAG`), ignored by the 24-bit bus, so that they are not
+converted again (§63).
 
-**Pointeurs lus en mémoire** : ce sont des adresses PS2. Un pointeur de données est converti après chaque `MOVEA` qui
-le charge (talons « convertir An » en `$000400`, §63, §104). Un pointeur de code passe par une **table de hachage**
-adresse PS2 → 68K (`$3C0000`, 16 384 entrées, §98) avant chaque `JSR/JMP (An)`.
+**Pointers read from memory**: they are PS2 addresses. A data pointer is converted after each `MOVEA` that
+loads it ("convert An" stubs at `$000400`, §63, §104). A code pointer goes through a **hash table**
+PS2 address → 68K (`$3C0000`, 16,384 entries, §98) before each `JSR/JMP (An)`.
 
-## 4. Banc de registres du recompilateur (version juste)
+## 4. Register bank of the recompiler (correct version)
 
-| Case `0x7000xxxx` | Registre 68K |
+| Slot `0x7000xxxx` | 68K register |
 |---|---|
-| `0x1100-0x111C` | A0-A7 (A7 = pile MIPS du portage) |
-| `0x1120` | **A8** (supplémentaire) |
+| `0x1100-0x111C` | A0-A7 (A7 = MIPS stack of the port) |
+| `0x1120` | **A8** (extra) |
 | `0x1124-0x1140` | D0-D7 |
-| `0x1144` | **D8** (supplémentaire) |
-| `0x114C` | pile privée |
+| `0x1144` | **D8** (extra) |
+| `0x114C` | private stack |
 | `0x1150` | RES (Z, N) |
 | `0x1154` | X |
-| `0x1158` | **C (retenue)** |
+| `0x1158` | **C (carry)** |
 
-Base d'exécution `0x1F0000` ; le 68K commence à `0x22B00` (ro3, ro5) ou `0x22DE0` (ro9). Voir aussi
+Execution base `0x1F0000`; the 68K starts at `0x22B00` (ro3, ro5) or `0x22DE0` (ro9). See also
 [OUTILS.md](OUTILS.md) §2.4.1.
 
-## 5. Exceptions et pièges
+## 5. Exceptions and pitfalls
 
-1. **Déplacements A5 signés** : `$BE48(A5)` = `$FF3E48`, `-$7178(A5)` = `$FF0E88` (§67, §86, §108).
-2. **Octets exacts** (pas de XOR) : ports d'entrée et QSound (§62, §78) ; flux `(An)+`, index impairs, octet après
-   `ADDA Dk,An` : l'adresse exacte est calculée à l'exécution (§65, §66, §97).
-3. **Longs à moitiés échangées en mémoire** : X/Y d'un objet en `+$12/+$16` au lieu de `+$10/+$14` ; octets d'état
-   `$4-$7` échangés par mot ; un long empilé tel quel reste échangé (§77).
-4. Mot à octets inversés lu dans une table **indexée** (§92, §100) ; long rangé octet par octet (`bswap32`, §90).
-5. Une constante **impaire** n'est jamais une adresse de données (§101).
+1. **Signed A5 displacements**: `$BE48(A5)` = `$FF3E48`, `-$7178(A5)` = `$FF0E88` (§67, §86, §108).
+2. **Exact bytes** (no XOR): input ports and QSound (§62, §78); `(An)+` streams, odd indexes, byte after
+   `ADDA Dk,An`: the exact address is computed at run time (§65, §66, §97).
+3. **Longs with swapped halves in memory**: an object's X/Y at `+$12/+$16` instead of `+$10/+$14`; state bytes
+   `$4-$7` swapped per word; a long pushed as is stays swapped (§77).
+4. Byte-reversed word read from an **indexed** table (§92, §100); long stored byte by byte (`bswap32`, §90).
+5. An **odd** constant is never a data address (§101).
 
-**Conséquence pour les outils** : tout script qui compare la traduction à l'arcade doit normaliser (octet `a` de la
-ROM = octet `a ^ 1` de la traduction, X/Y décalés, octets d'état échangés). L'accesseur `disposition.lua`
-([tools/reorg](../../tools/reorg/)) lit la RAM traduite par adresse arcade.
+**Consequence for the tools**: any script that compares the translation with the arcade must normalise (byte `a` of the
+ROM = byte `a ^ 1` of the translation, X/Y shifted, state bytes swapped). The accessor `disposition.lua`
+([tools/reorg](../../tools/reorg/)) reads the translated RAM by arcade address.
 
-## 6. Carte de l'image produite
+## 6. Map of the produced image
 
-La ROM programme de 4 Mo contient les vecteurs, les talons de conversion, le noyau de tâches (`$000B00`), le code
-traduit (`$001000…`), les données du module, les ressources, la table de hachage (`$3C0000`) et la table des débuts de
-fonction (`$3E0000`). Hors ROM : piles des tâches (`$660000`), mémoire d'objets, vidéo, blocs externes (`$A00000-$EFFFFF`),
-RAM de travail (`$FF0000`). Table complète : [OUTILS.md](OUTILS.md) §1.4 ; adresses utiles :
+The 4 MB program ROM holds the vectors, the conversion stubs, the task kernel (`$000B00`), the translated
+code (`$001000…`), the module data, the resources, the hash table (`$3C0000`) and the table of function
+starts (`$3E0000`). Outside the ROM: task stacks (`$660000`), object memory, video, external blocks (`$A00000-$EFFFFF`),
+work RAM (`$FF0000`). Full table: [OUTILS.md](OUTILS.md) §1.4; useful addresses:
 [reference/adresses.md](../reference/adresses.md).

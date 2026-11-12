@@ -19,7 +19,7 @@ mkdir -p banc_max/roms_fork && ln -sfn ../roms_ro5/sfa3ud banc_max/roms_fork/sfa
   - 20 000 images sans exception ;
   - trois parties Arcade finies : 00 en 27 manches, 04 en 24, 02 en 34.
 - Paquet FBNeo (pilote `sfa3umhsfa`, patch 0013) : `MAX_BANC=<banc relatif à HSFA_WORK> python3 tools/fbneo-hsfa/paquet_fbneo.py upper_max`.
-  Le paquet importe `max_cache.py` depuis `scripts/untranspile` (`src/hsfa` du dépôt), ou depuis `HSFA_MAX_CACHE_DIR` :
+  Le paquet importe `max_cache.py` depuis `<workspace>/scripts/untranspile` (`src/hsfa` du dépôt), ou depuis `HSFA_MAX_CACHE_DIR` :
   `max_cache.py` doit donc être publié à cet endroit.
 
 ## Variables

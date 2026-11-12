@@ -1,0 +1,40 @@
+diff --git a/src/burn/drv/capcom/cps.h b/src/burn/drv/capcom/cps.h
+index d1a149645..feee08908 100644
+--- a/src/burn/drv/capcom/cps.h
++++ b/src/burn/drv/capcom/cps.h
+@@ -621,3 +621,13 @@ extern INT32 Cps2DisableDigitalVolume;
+ extern UINT8 Cps2VolUp;
+ extern UINT8 Cps2VolDwn;
+ extern UINT8 AspectDIP;
++
++// (HSFA, P01) format du dossier "<systeme>/hsfa/" (cps_hsfa.cpp) : szAppHiscorePath est un TCHAR, wchar_t dans FBNeo pour
++// Windows (Unicode), char dans libretro ; "%s" avec une chaine large n'en donnait que le 1er caractere ("shsfa/").
++// Hors Unicode (libretro), format inchange. Place en fin de fichier : aucun numero de ligne ne bouge (__LINE__ des
++// BurnMalloc), le coeur libretro reste identique a l'octet.
++#if defined(_UNICODE)
++#define HSFA_FMT_DOSSIER	"%.*lshsfa/"
++#else
++#define HSFA_FMT_DOSSIER	"%.*shsfa/"
++#endif
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 50b57e98c..fe3248576 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -1114,7 +1114,7 @@ static void HsfaFluxInit()
+ 	UINT64 zo = 0; UINT32 zn = 0;
+ 	szHsfaYdata[0] = 0;
+ 	HsfaResoutArchive();
+-	snprintf(dir, sizeof(dir), "%.*shsfa/", MAX_PATH - 8, szAppHiscorePath);	// <systeme>/fbneo/hsfa/
++	snprintf(dir, sizeof(dir), HSFA_FMT_DOSSIER, MAX_PATH - 8, szAppHiscorePath);	// <systeme>/fbneo/hsfa/ (P01 : cps.h)
+ 	nHsfaFluxForce = getenv("HSFA_FLUX") ? atoi(getenv("HSFA_FLUX")) : -1;
+ 	if (getenv("HSFA_YDATA")) snprintf(y, sizeof(y), "%s", getenv("HSFA_YDATA"));
+ 	else if (HsfaZipMembre(szBurnHsfaArchive, "hsfa_flux.bin", &zo, &zn)) {
+@@ -1318,7 +1318,7 @@ static void HsfaRejeuInit()
+ 	bRejeuSeul = getenv("HSFA_REJEU_SEUL") && atoi(getenv("HSFA_REJEU_SEUL")) == 1;
+ 	if (!HsfaHyper) return;
+ 	char dir[MAX_PATH];
+-	snprintf(dir, sizeof(dir), "%.*shsfa/", MAX_PATH - 8, szAppHiscorePath);
++	snprintf(dir, sizeof(dir), HSFA_FMT_DOSSIER, MAX_PATH - 8, szAppHiscorePath);
+ 	if (HsfaRejeuCharge(dir)) HsfaRejeuLibere();
+ }
+ 

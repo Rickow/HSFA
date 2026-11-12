@@ -1,8 +1,11 @@
 # Index thématique de `docs/journal/HANDOFF.md`
 
-> Journal indexé : `docs/journal/HANDOFF.md` (5 832 lignes, état du 2026-11-08, jusqu'à §207). Les sections §116 à §207
+> **English**: the journal (`docs/journal/`) is a historical archive kept in French, like this index; the key
+> documents of the repository are in English (see [docs/README.md](../README.md)).
+
+> Journal indexé : `docs/journal/HANDOFF.md` (6 177 lignes, état du 2026-11-12, jusqu'à §221). Les sections §116 à §221
 > ont une ligne chacune au §13 (§173-§201 : titre seul, ajoutées le 2026-11-07) ; numéros de ligne recalés le 2026-11-07 pour
-> §173-§201 ; la grille de fin s'arrête à §172.
+> §173-§201 et le 2026-11-11 pour §212-§215 ; la grille de fin s'arrête à §172.
 > Les numéros de ligne renvoient aux **titres** de section (`sed -n 'L,+40p' HANDOFF.md`, ou `Read` avec `offset=L`).
 > ⚠ Ils changent dès qu'on insère du texte au-dessus. Pour les recalculer : `grep -n '^#' HANDOFF.md`.
 
@@ -14,7 +17,7 @@ Le journal mélange **trois séries de numéros**. Un « §5 » peut désigner t
 |---|---|---|---|
 | **R§0 … R§8** (+ R§6bis) | chapitres « racine » `## N.` | 13–617 | les plus anciens ; ordre 0,1,2,3,4,5,**8**,6,6bis,7 ; beaucoup sont **dépassés** |
 | **C1 … C5** | chapitre « Carte MIPS↔68K… » (l. 618), `### N.` | 620–713 | métrique et impasses de la carte |
-| **§1 … §207** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–5832 | **série canonique** : §1-§21 puis §22-§207 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
+| **§1 … §221** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–6177 | **série canonique** : §1-§21 puis §22-§221 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
 
 La ligne 1543 commence par `#imm,…` : ce n'est pas un titre (faux positif de `grep '^#'`).
 
@@ -320,7 +323,7 @@ Légende : ⛔ = **dépassé** (lire la section qui corrige) · ⭐ = section cl
 
 ---
 
-## 13. Suite du journal, §116-§201 (une ligne par section)
+## 13. Suite du journal, §116-§221 (une ligne par section)
 
 Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au §8 bis ; les rapports cités sont dans
 `docs/rapports/`.
@@ -423,7 +426,17 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §209 | 5900 | SFA3 | départ du curseur de sélection sur la case aléatoire (v157/v158), corrigé par v159 |
 | §210 | 5908 | cœur | patch 0027 : publication différée des objets (aperçu du choix aléatoire aux couleurs du précédent) ; cœurs du 10/11 |
 | §211 | 5918 | atelier | journée du 08/11 : banc de jour vert, v0.1.7, greffe ro9a32 → ro9a34, études décors / traducteur ro1-ro4 / MAX dans la greffe |
-| §212 | (fin) | sfa3ha | Hyper + Arcade constructible depuis l'ISO (--jeux hyperarcade, ro9a35b) ; relevés de la greffe en tableaux d'adresses |
+| §212 | 5942 | sfa3ha | Hyper + Arcade constructible depuis l'ISO (--jeux hyperarcade, ro9a35b) ; relevés de la greffe en tableaux d'adresses |
+| §213 | 5961 | hsfa | Index d'Alpha 3 recoupé avec cps2recomp (4 contradictions tranchées au banc MAME) ; portmap ro5 +284, ro9 +1 404 |
+| §214 | 5978 | sfa3 | Kikosho / Kikoken de Chun-Li : arcs clignotants à 30 Hz, artefact du banc ; pas de défaut |
+| §215 | 5989 | hsfa | Windows : Upper MAX sans lien symbolique (liens.py), expanduser, chemins, cp1252, CRLF ; 5 zips = Linux |
+| §216 | 6012 | sfa3h | Ombre au sol transparente en voie ISO seule (HSFA_OMBRE_CODES, hsfa_gfx.py) ; pas de trame, codes du 0011 |
+| §217 | 6034 | sfa3ha | `--jeux hyperarcade` construit ro9a36 (report du diff de greffe3.py, HA_ETAT) ; zip = livré hors hsfa_info |
+| §218 | 6063 | sfa3h | 21 sons propres au portage PS2 d'Hyper (parade du ticket #1…) ajoutés à la ROM son (sons_ps2.py) |
+| §219 | 6079 | hsfa | Traducteur v161 : correctifs de la revue critique (bonus ×1,5 MAZI, enchaînements, tremblement, initiales, couleur miroir…), garde-fous de construction ; Upper MAX sur v160 (prog_upper_v160) |
+| §220 | 6128 | hsfa | Upper MAX suit v161 : intégration sans adresse d'image en dur ; JSR $1B6B6 arcade corrigé ; banc max57 vert ; revue (16 constats) |
+| §221 | 6144 | sfa3ha | Hyper + Arcade passe au traducteur v161 (ro9a37) : Mazi ×1,5 (octet image $ED), enchaînements, couleur miroir ; =0 → ro9a36 ; VERSUS = ro9a36 ; banc des fins 85/85 |
+| §222 | 6182 | hsfa | Revues critiques (traducteur, Upper MAX, greffe, cœur) : où sont les rapports et les reprises |
 
 ---
 
@@ -478,4 +491,3 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 Racine : R§0 13 · R§1 30 · R§2 57 · R§3 81 · R§4 122 · R§5 151 · R§8 421 · R§6 496 · R§6bis 511 · R§7 598.
 Chapitre carte : C1 620 · C2 632 · C3 653 · C4 683 · C5 700. En-têtes de chapitre : « Carte MIPS↔68K » 618 ·
 « Recensement du traducteur » 715 · « Assembleur, test de bout en bout » 1048.
-| §213 | (fin) | hsfa | Index d'Alpha 3 recoupé avec cps2recomp (4 contradictions tranchées au banc MAME) ; portmap ro5 +284, ro9 +1 404 |

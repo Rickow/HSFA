@@ -1,73 +1,75 @@
-# Architecture de la réorganisation des données (projet, 2026-10-07)
+# Architecture of the data relayout (project, 2026-10-07)
 
-But : supprimer les adaptateurs mesurés au §138 (conversions de pointeurs 13 %, longs échangés ~7 %, octets XOR 1,
-registres prêtés : ~20-22 % du travail du 68000 en combat) ET rendre la mémoire identique à l'arcade (disposition
-CPS2 réelle). Cible ultime : SFA3 traduit = arcade octet pour octet là où le code est aligné ; Upper/Hyper/MAX dans
-la disposition arcade.
+**Français : [ARCHI-Reorganisation-Donnees.fr.md](ARCHI-Reorganisation-Donnees.fr.md)**
 
-## 1. État de départ
+Goal: remove the adapters measured in §138 (pointer conversions 13 %, swapped longs ~7 %, XOR 1 bytes,
+lent registers: ~20-22 % of the 68000's work in fights) AND make memory identical to the arcade (real CPS2
+layout). Ultimate target: translated SFA3 = arcade byte for byte where the code is aligned; Upper/Hyper/MAX in
+the arcade layout.
 
-| couche | aujourd'hui | coût mesuré (§138) | volume (SFA3 / Upper) |
+## 1. Starting point
+
+| layer | today | measured cost (§138) | volume (SFA3 / Upper) |
 |---|---|---|---|
-| pointeurs de données | adresses PS2 brutes dans les tables et la RAM, `JSR CONV_An` après chaque `MOVEA` venu de la mémoire | 8,6 % + appels 0,8 % | ~630 sites d'appel |
-| pointeurs de code | adresse PS2 → table de hachage `$3C0000` avant chaque `JSR/JMP (An)` | 3,7 % | quelques dizaines de sites, chauds |
-| longs | « recette universelle » §29 : moitiés échangées en mémoire, `SWAP` (+ `MOVE SR/CCR`, pile) | ~6,7 % | 4 693 / 5 096 émissions |
-| octets | adresse XOR 1 (indexés : bascule à l'exécution) | 0,3 % | 128 / 130 sites à l'exécution |
-| registres A8/D8 | domiciles `$87E0`/`$87F0(A5)`, prêts par zones | 0,2 % | 371 / 435 |
+| data pointers | raw PS2 addresses in the tables and the RAM, `JSR CONV_An` after each `MOVEA` loaded from memory | 8.6 % + calls 0.8 % | ~630 call sites |
+| code pointers | PS2 address → hash table `$3C0000` before each `JSR/JMP (An)` | 3.7 % | a few dozen sites, hot |
+| longs | "universal recipe" §29: halves swapped in memory, `SWAP` (+ `MOVE SR/CCR`, stack) | ~6.7 % | 4,693 / 5,096 emissions |
+| bytes | address XOR 1 (indexed: toggle at run time) | 0.3 % | 128 / 130 sites at run time |
+| A8/D8 registers | homes `$87E0`/`$87F0(A5)`, lent per zone | 0.2 % | 371 / 435 |
 
-## 2. Principe : une carte unique, des étapes réversibles, un oracle
+## 2. Principle: a single map, reversible steps, an oracle
 
-1. **Une seule source de vérité : `carte_types`** (JSON + module Python, lu par le traducteur, l'assembleur des
-   données, les outils Lua et le cœur FBNeo) :
-   - zones de RAM : variables A5 par ADRESSE (sans ambiguïté) ; structures par TYPE (joueurs `$FF8400+$400·k`,
-     réservoirs d'objets, projectiles `$100`, tampons de sprites…) avec leur PROVENANCE (d'où vient le pointeur) ;
-   - pour chaque champ : décalage PS2, type (`u8`, `s16`, `s32`, `u8[4]`, `s16[2]`, `ptr_donnees`, `ptr_code`),
-     décalage arcade ;
-   - tables de données en ROM : plage, taille d'élément, champs (dont pointeurs), adresse arcade correspondante.
-   Sources : `typed_rule.py` (tailles d'accès, 94 %), `const_evidence.json` (constantes ROM, 95 %), paires des
-   fonctions alignées sur l'arcade (`layout_pairs.json`, alignement de l'agent couverture : 91 % du code SFA3),
-   traces d'exécution (journal des conversions, `watch.py`).
-2. **Chaque étape a son interrupteur** (comme tout le traducteur : variable `=0` → ancien comportement) et la
-   recette actuelle reste le **filet de sécurité** pour tout ce qui n'est pas encore typé. On bascule zone par zone.
-3. **Oracle** :
-   - SFA3 : **RAM comparée à l'arcade** (même partie jouée par `tournee.lua`, `REF=1` contre traduction, vidages
-     `DUMPC` au début des manches et pendant l'attraction) ; une fois typée, une zone doit être IDENTIQUE à l'arcade
-     (hors variables propres au portage). Upper partage 72 % des variables A5 de SFA3, Hyper 77 % (§30) : ce qui est
-     validé sur SFA3 se transporte.
-   - Tous : non-régression, 42 commandes, balayage des 72 fins, captures ±1, **journal des conversions vide**
-     (aucune adresse PS2 brute vue par les talons), profil `_prof_adapt.lua`.
-4. **ROM auto-descriptive** : un petit en-tête à adresse fixe dans la ROM programme (version de disposition, adresses
-   des variables lues par le banc : liste d'objets, pointeur d'animations `$FF40BC`, bases de plans…). Le fork MAME,
-   les scripts Lua et le cœur FBNeo lisent cet en-tête au lieu d'adresses en dur → **une nouvelle disposition ne
-   demande pas de recompiler le cœur**, seulement un nouveau zip (`paquet_fbneo.py`, format inchangé).
+1. **A single source of truth: `carte_types`** (JSON + Python module, read by the translator, the data
+   assembler, the Lua tools and the FBNeo core):
+   - RAM zones: A5 variables by ADDRESS (unambiguous); structures by TYPE (players `$FF8400+$400·k`,
+     object pools, projectiles `$100`, sprite buffers…) with their ORIGIN (where the pointer comes from);
+   - for each field: PS2 offset, type (`u8`, `s16`, `s32`, `u8[4]`, `s16[2]`, `ptr_donnees`, `ptr_code`),
+     arcade offset;
+   - data tables in ROM: range, element size, fields (including pointers), matching arcade address.
+   Sources: `typed_rule.py` (access sizes, 94 %), `const_evidence.json` (ROM constants, 95 %), pairs of
+   functions aligned with the arcade (`layout_pairs.json`, alignment by the coverage agent: 91 % of the SFA3 code),
+   execution traces (conversion log, `watch.py`).
+2. **Each step has its switch** (like the whole translator: variable `=0` → old behaviour) and the
+   current recipe remains the **safety net** for everything not yet typed. We switch over zone by zone.
+3. **Oracle**:
+   - SFA3: **RAM compared with the arcade** (same game played by `tournee.lua`, `REF=1` against the translation, `DUMPC`
+     dumps at the start of the rounds and during attract mode); once typed, a zone must be IDENTICAL to the arcade
+     (apart from the port's own variables). Upper shares 72 % of SFA3's A5 variables, Hyper 77 % (§30): what is
+     validated on SFA3 carries over.
+   - All: non-regression, 42 controls, sweep of the 72 endings, screenshots ±1, **empty conversion log**
+     (no raw PS2 address seen by the stubs), profile `_prof_adapt.lua`.
+4. **Self-describing ROM**: a small header at a fixed address in the program ROM (layout version, addresses
+   of the variables read by the bench: object list, animation pointer `$FF40BC`, plane bases…). The MAME fork,
+   the Lua scripts and the FBNeo core read this header instead of hard-coded addresses → **a new layout does not
+   require recompiling the core**, only a new zip (`paquet_fbneo.py`, format unchanged).
 
-## 3. Étapes
+## 3. Steps
 
-| # | étape | gain | risque | validation |
+| # | step | gain | risk | validation |
 |---|---|---|---|---|
-| A | **Instrumentation** : talons `CONV` en mode journal (Lua : valeur, instruction source `MOVEA.L d(Ax),An` → case mémoire d'origine) ; outil de comparaison RAM traduction/arcade ; accesseur Lua `disposition.lua` (tous les outils lisent la RAM par la carte) | 0 | nul | — |
-| B | **Pointeurs de code** relogés à l'assemblage (tables et cases identifiées par le journal → étiquettes 68K) ; suppression du hachage aux sites dont toutes les provenances sont relogées | ~3,7 % | faible (un oubli = saut faux, visible tout de suite) | journal vide sur les 72 fins + modes |
-| C | **Pointeurs de données des tables ROM** relogés (journal + vérification contre la table arcade quand elle existe) | | moyen | idem |
-| D | **Pointeurs en RAM** : quand toutes leurs sources sont relogées, suppression des `JSR CONV` après les `MOVEA` | ~9,4 % | moyen | journal vide, puis talons retirés |
-| E | **RAM typée** : variables A5 (adresses fixes) → structures joueurs (A6 du code des persos) → objets/projectiles → A0-A4 par provenance. Longs natifs (plus de `SWAP`), octets/mots aux décalages arcade | ~7 % | ÉLEVÉ (champ mal typé = corruption silencieuse) | RAM identique à l'arcade zone par zone (SFA3), puis Upper/Hyper |
-| F | **Tables de données typées** (gros-boutistes par élément, comme 3SX `section_element_sizes`) ; pour SFA3, copie/contrôle depuis la ROM arcade | fidélité | moyen | octets identiques aux tables arcade |
-| G | **Registres prêtés** : allocation globale (A8/D8 dans de vrais registres libres par fonction) | ~0,2 % + taille | faible | non-régression |
+| A | **Instrumentation**: `CONV` stubs in log mode (Lua: value, source instruction `MOVEA.L d(Ax),An` → original memory slot); RAM comparison tool translation/arcade; Lua accessor `disposition.lua` (all tools read the RAM through the map) | 0 | none | — |
+| B | **Code pointers** relocated at assembly (tables and slots identified by the log → 68K labels); removal of the hash at the sites whose origins are all relocated | ~3.7 % | low (a miss = wrong jump, visible at once) | empty log over the 72 endings + modes |
+| C | **Data pointers of the ROM tables** relocated (log + check against the arcade table when it exists) | | medium | same |
+| D | **Pointers in RAM**: when all their sources are relocated, removal of the `JSR CONV` after the `MOVEA`s | ~9.4 % | medium | empty log, then stubs removed |
+| E | **Typed RAM**: A5 variables (fixed addresses) → player structures (A6 of the character code) → objects/projectiles → A0-A4 by origin. Native longs (no more `SWAP`), bytes/words at arcade offsets | ~7 % | HIGH (wrongly typed field = silent corruption) | RAM identical to the arcade zone by zone (SFA3), then Upper/Hyper |
+| F | **Typed data tables** (big-endian per element, like 3SX `section_element_sizes`); for SFA3, copy/check from the arcade ROM | fidelity | medium | bytes identical to the arcade tables |
+| G | **Lent registers**: global allocation (A8/D8 in real free registers per function) | ~0.2 % + size | low | non-regression |
 
-Ordre proposé : A → B → C → D (gain de performance rapide, risque contenu), puis E par zones, F, G.
-Points durs connus : unions (`s16[2]` / `s32` selon la fonction, §44), registres de base qui désignent des
-structures différentes (A4 `$0/$2/$4/$8`), copies génériques (MOVEM, boucles de copie : indifférentes à la
-disposition si les deux côtés sont de même type et alignés sur 4), le code C du portage (laissé en recette).
+Proposed order: A → B → C → D (quick performance gain, contained risk), then E by zones, F, G.
+Known hard points: unions (`s16[2]` / `s32` depending on the function, §44), base registers that point to different
+structures (A4 `$0/$2/$4/$8`), generic copies (MOVEM, copy loops: indifferent to the
+layout if both sides are of the same type and aligned on 4), the C code of the port (left on the recipe).
 
-## 4. Ce que ça apporte au-delà de la vitesse
+## 4. What it brings beyond speed
 
-- **Disposition arcade** : les adresses et cartes RAM connues de SFA3 (codes de triche MAME, outils d'entraînement,
-  documentation) valent pour Upper et Hyper ; les comparaisons avec l'arcade deviennent exactes.
-- **MAX** : la session MAX raisonne déjà en adresses arcade (`$32F46`, `$1C1C8`, champs `$362`/`$3F3`) → intégration
-  directe, sans transposition PS2.
-- **Outils plus simples** : plus de longs écrits en deux mots inversés dans les scripts (`FORCE="L…"`).
+- **Arcade layout**: the known addresses and RAM maps of SFA3 (MAME cheat codes, training tools,
+  documentation) hold for Upper and Hyper; comparisons with the arcade become exact.
+- **MAX**: the MAX session already reasons in arcade addresses (`$32F46`, `$1C1C8`, fields `$362`/`$3F3`) → direct
+  integration, with no PS2 transposition.
+- **Simpler tools**: no more longs written as two swapped words in the scripts (`FORCE="L…"`).
 
-## 5. Ce que ça n'apporte pas
+## 5. What it does not bring
 
-Sur une petite console (RGB10X), l'émulateur simule le 68000 à cadence fixe, boucle d'attente comprise : la charge de
-l'hôte ne baisse pas. Le gain est pour le jeu lui-même : plus de marge (turbo sans images répétées, §104, sans
-surcadençage). La charge hôte se joue sur le rendu CPS2 et le QSound du cœur.
+On a small console (RGB10X), the emulator simulates the 68000 at a fixed rate, wait loop included: the load on
+the host does not drop. The gain is for the game itself: more headroom (turbo without repeated frames, §104, without
+overclocking). The host load depends on the core's CPS2 rendering and QSound.

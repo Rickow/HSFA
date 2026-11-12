@@ -1,73 +1,77 @@
-# Oracle et non-régression
+# Oracle and non-regression
 
-Méthode de travail du traducteur, valable pour tout projet de retraduction d'un binaire recompilé (HSFA, et la
-transcription PSP de SFA3 MAX). Les « §N » renvoient au [journal](../journal/HANDOFF.md).
+**Français : [oracle-et-non-regression.fr.md](oracle-et-non-regression.fr.md)**
 
-## 1. Un oracle d'abord, jamais l'œil
+Working method of the translator, valid for any project retranslating a recompiled binary (HSFA, and the
+PSP transcription of SFA3 MAX). The "§N" references point to the [journal](../journal/HANDOFF.md).
 
-1. **La référence est l'arcade sous MAME** (ROM `sfa3ud`, `REF=1`), pas l'émulateur de la console.
-2. Une même partie **scriptée** (Lua, entrées à l'image près) tourne des deux côtés : `tournee.lua`, `commandes.lua`,
+## 1. An oracle first, never the eye
+
+1. **The reference is the arcade under MAME** (ROM `sfa3ud`, `REF=1`), not the console emulator.
+2. The same **scripted** game (Lua, inputs to the frame) runs on both sides: `tournee.lua`, `commandes.lua`,
    `jeu.lua` ([banc-mame](../architecture/banc-mame.md)).
-3. On compare des **grandeurs** : RAM, positions d'objets image par image, captures, nombre d'images jusqu'à un
-   événement. Un défaut qui « se voit » se prouve par une grandeur : le texte du gros A qui défilait mal a été réduit
-   à la position de 6 sous-objets, égale à l'arcade sur 346 images une fois corrigé.
-4. Avant de toucher au traducteur, vérifier que l'écart vient du **jeu traduit** : le glitch du portrait d'Upper
-   venait du banc et du cœur, qui changeaient de banque graphique trop tôt (§146). Comparer d'abord l'ordre des
-   écritures du jeu à l'arcade.
+3. We compare **quantities**: RAM, object positions frame by frame, screenshots, number of frames until an
+   event. A defect that "shows" is proven by a quantity: the big A's text that scrolled wrongly was reduced
+   to the position of 6 sub-objects, equal to the arcade over 346 frames once fixed.
+4. Before touching the translator, check that the difference comes from the **translated game**: the glitch of Upper's portrait
+   came from the bench and the core, which switched graphics bank too early (§146). First compare the order of the
+   game's writes with the arcade.
 
-## 2. La batterie de non-régression
+## 2. The non-regression suite
 
-Relancée après **chaque** règle ajoutée au traducteur ([`scripts/validation/`](../../scripts/validation/)) :
+Run again after **each** rule added to the translator ([`scripts/validation/`](../../scripts/validation/)):
 
-| Script | Contrôle | Attendu | Durée |
+| Script | Check | Expected | Duration |
 |---|---|---|---|
-| `nonreg.sh` | SFA3 : attraction 20 000 images sans entrée, 20 000 avec pièce / Start / bouton, partie offensive de 60 000 images, puis test des 42 commandes | 3 × « aucune exception », « 42 actions, 0 différentes », 5 359 tours en 4 019 images (133,3 %) | ~2 h |
-| `nonreg_ro5.sh` | Upper : attraction 20 000 images, puis trois parties Arcade (Ryu, Chun-Li, Akuma) sur le fork | « aucune exception », « fin=finie » ×3 | ~15 min |
-| `balayage_fins.sh` | une partie Arcade par perso jusqu'à sa fin (32 SFA3, 40 Upper) | SFA3 : captures = arcade ± 1 ; Upper : « fin=finie » | long |
-| `valide_tout.sh` | reconstruit ro3, ro5, ro9, puis tout ce qui précède + une partie VERSUS d'Hyper | aucune ligne « ECART » | ~3 h |
+| `nonreg.sh` | SFA3: attract mode 20,000 frames without input, 20,000 with coin / Start / button, offensive game of 60,000 frames, then test of the 42 controls | 3 × "aucune exception" (no exception), "42 actions, 0 différentes" (0 different), 5,359 turns in 4,019 frames (133.3 %) | ~2 h |
+| `nonreg_ro5.sh` | Upper: attract mode 20,000 frames, then three Arcade games (Ryu, Chun-Li, Akuma) on the fork | "aucune exception", "fin=finie" (ending finished) ×3 | ~15 min |
+| `balayage_fins.sh` | one Arcade game per character up to its ending (32 SFA3, 40 Upper) | SFA3: screenshots = arcade ± 1; Upper: "fin=finie" | long |
+| `valide_tout.sh` | rebuilds ro3, ro5, ro9, then all of the above + one Hyper VERSUS game | no "ECART" (difference) line | ~3 h |
 
-Beaucoup de régressions ne se voyaient **que dans les fins** (§137) : le balayage des fins n'est pas facultatif.
+Many regressions showed **only in the endings** (§137): the ending sweep is not optional.
 
-## 3. Un interrupteur par règle
+## 3. One switch per rule
 
-- Chaque règle du traducteur a sa variable d'environnement ; `=0` rend l'ancien comportement.
-- **`=0` doit redonner des ROM identiques à l'octet (md5).** On peut alors bissecter, isoler l'effet d'une règle et
-  livrer un correctif sous forme de diff sans risque.
-- Exemples : `TAILBR`, `LUIDN` (§143), `CMPMM` (§145), `FLUXEA` (flux d'octets `(An)+`, gros A), `EXT_MEM` (§128).
-- Chaque construction affiche un **compteur par règle** (« CMP mémoire-mémoire : n sites ») : une variation
-  inattendue est un signal.
+- Each translator rule has its environment variable; `=0` restores the old behaviour.
+- **`=0` must give back ROMs identical to the byte (md5).** Then you can bisect, isolate the effect of a rule and
+  deliver a fix as a diff without risk.
+- Examples: `TAILBR`, `LUIDN` (§143), `CMPMM` (§145), `FLUXEA` (`(An)+` byte streams, big A), `EXT_MEM` (§128).
+- Each build prints a **counter per rule** ("CMP mémoire-mémoire : n sites"): an unexpected
+  change is a signal.
 
-## 4. « 0 non résolu » ne veut pas dire correct
+## 4. "0 unresolved" does not mean correct
 
-Les pires défauts sont des **pertes silencieuses** : une instruction source qui ne produit rien, ou une forme fausse
-mais qui assemble. Outils :
+The worst defects are **silent losses**: a source instruction that produces nothing, or a wrong form
+that still assembles. Tools:
 
-| Outil | Rôle | § |
+| Tool | Role | § |
 |---|---|---|
-| `census.py` | ce que le traducteur rate, sur tout le binaire | §17-§18 |
-| `chutes.json` (audit des écritures de registre) | registres écrits sans aucune instruction émise | §107, §132, §137 |
-| `AUDIT_MEM=1` → `mem_miss.json` | écritures mémoire sans trace | §107, §138 |
-| `audit_exacts.txt` | comparaisons « drapeaux exacts » à opérande inconnu | §126 |
-| `diverge.py` | **première** divergence face à l'arcade | §37 |
-| `verify.py` | vérificateur indépendant (fiable là où le traducteur a émis quelque chose) | §3 |
-| `e2e.py` | oracle **statique** : traduire, assembler, comparer à la ROM arcade fonction par fonction | §23 |
-| `hooks.py` | carte des zones : code d'origine, code ajouté par le portage, données, veneers | §21 |
+| `census.py` | what the translator misses, over the whole binary | §17-§18 |
+| `chutes.json` (audit of register writes) | registers written with no instruction emitted | §107, §132, §137 |
+| `AUDIT_MEM=1` → `mem_miss.json` | memory writes with no trace | §107, §138 |
+| `audit_exacts.txt` | "exact flags" comparisons with an unknown operand | §126 |
+| `diverge.py` | **first** divergence from the arcade | §37 |
+| `verify.py` | independent checker (reliable where the translator emitted something) | §3 |
+| `e2e.py` | **static** oracle: translate, assemble, compare with the arcade ROM function by function | §23 |
+| `hooks.py` | map of the zones: original code, code added by the port, data, veneers | §21 |
+| "GARDE-FOU (v161)" in `build.log` | access to A8 without a lent register, Bcc on the flags of a call while the MIPS recomputes RES, comparison with no 68K form (`enc_cmp`) and recompiler helper not inlined (these last two: the build fails) | §219 |
+| `drapeaux.py`, `a8_hors_zone.py` (critical review, `<workspace>/work/revue_traducteur/outils`) | after the fact: per branch, last 68K setter against last MIPS write of RES / C; A8 / D8 accesses outside a zone | §219 |
 
-91 % du code de SFA3 s'aligne fonction par fonction sur la ROM arcade (`layout_pairs.json`) ; pour un binaire sans
-corrigé, chercher l'homologue de chaque routine dans un jeu qui en a un (Upper pour MAX).
+91 % of the SFA3 code aligns function by function with the arcade ROM (`layout_pairs.json`); for a binary without
+an answer key, look for the counterpart of each routine in a game that has one (Upper for MAX).
 
-## 5. Oracle RAM et journal des conversions
+## 5. RAM oracle and conversion log
 
-L'étape A de la réorganisation des données ([ETAPE-A](../rapports/ETAPE-A.md), outils dans
-[`tools/reorg/`](../../tools/reorg/)) ajoute deux oracles :
-- **RAM traduction ↔ arcade** (`compare_ram.py`) : même partie, vidages au début des manches ; une zone typée doit être
-  identique à l'arcade ;
-- **journal des conversions** (`journal_conv.lua`) : chaque adresse PS2 brute vue par un talon de conversion ; le but
-  est un journal vide.
+Step A of the data relayout ([ETAPE-A](../rapports/ETAPE-A.md), tools in
+[`tools/reorg/`](../../tools/reorg/)) adds two oracles:
+- **RAM translation ↔ arcade** (`compare_ram.py`): same game, dumps at the start of the rounds; a typed zone must be
+  identical to the arcade;
+- **conversion log** (`journal_conv.lua`): each raw PS2 address seen by a conversion stub; the goal
+  is an empty log.
 
-## 6. Hygiène
+## 6. Hygiene
 
-- Ne jamais tracer sur une construction qu'un autre peut refaire : figer une copie des ROM, noter les md5.
-- Un calcul lourd à la fois, `nice -n 19`.
-- MAME : `-nvram_directory` et `-cfg_directory` temporaires, jamais `-state` en ligne de commande, jamais `pkill -f`.
-- Après chaque reconstruction, relire `carte_image.txt` avant de poser un point d'arrêt.
+- Never trace on a build that someone else may redo: freeze a copy of the ROMs, note the md5s.
+- One heavy computation at a time, `nice -n 19`.
+- MAME: temporary `-nvram_directory` and `-cfg_directory`, never `-state` on the command line, never `pkill -f`.
+- After each rebuild, read `carte_image.txt` again before setting a breakpoint.

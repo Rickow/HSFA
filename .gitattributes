@@ -1,3 +1,8 @@
+# Octets identiques sur tous les systèmes : sans ceci, Git pour Windows (core.autocrlf=true, réglage par défaut de
+# son installateur, et semble-t-il des machines Windows de GitHub Actions) met les fichiers texte en CRLF : tables
+# .txt / .tsv lues en binaire, membres des zips (hsfa_flux_table.txt) différents de Linux. Les .bat restent en CRLF.
+* -text
+*.bat text eol=crlf
 docs/ATTENTES-ET-DECISIONS.md export-ignore
 docs/rapports/recherche/PRIVE-livre.md export-ignore
 docs/journal/POUR-LE-LIVRE-2026-10-28.md export-ignore

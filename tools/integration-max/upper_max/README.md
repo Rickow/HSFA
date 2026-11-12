@@ -35,9 +35,20 @@ Sans `--psp-iso`, `uppermax` donne Upper sans les persos MAX, identique à `--je
 - `traduire_2b31.py` : copie du `max/outils/rosette_code/traduire.py` de **d98c4f1**. Il sert seulement à produire
   `s/acteurs_fins_max.s` à l'état du lot 2b31 ; la session MAX passera aux acteurs actuels après un lot d'essai.
 - `um_prog.py`, `fige.py` et `integration_2b31/` : construction MAX=1 de l'intégration, figée à l'état 2b31
-  (traducteur v154 + crochets MAX ; + `PRETE_TEST` / `MEMSWAPD` de la v159, §204, et `PRETE_CMP` de la v160, §207,
-  pour que la carte d'Upper reste celle de la préparation). On n'y trouve que les fichiers que la construction lit, avec des marques de
+  (traducteur v154 + crochets MAX ; + `PRETE_TEST` / `MEMSWAPD` de la v159, §204, `PRETE_CMP` de la v160, §207, et
+  les règles de la v161, pour que la carte d'Upper reste celle de la préparation). On n'y trouve que les fichiers que la construction lit, avec des marques de
   chemins `@UM_*@`, plus 2 relevés d'adresses.
+- `controle/` : contrôles à repasser quand une version du traducteur déplace le code d'Upper (v161, 11/11) :
+  - `compare_cartes.py carteA carteB` : où le décalage change entre deux `carte_image.txt` ;
+  - `equiv_integration.py baseA maxA baseB maxB` : l'intégration modifie les mêmes va MIPS sur les deux bases (un site
+    modifié d'un seul côté = une dépendance à une adresse d'image) ;
+  - `equiv_pointeurs.py maxA maxB [décalage des données]` : hors du code d'Upper (code MAX, talons, données, `ext_*.bin`), tout octet
+    différent appartient à un pointeur dont les deux valeurs désignent la même va.
+
+  - `litteraux_figes.py maxA maxB` : dans le code MAX et les talons, adresses absolues IDENTIQUES des deux côtés
+    qui visent la zone déplacée (adresse littérale non relogée, comme l'ancien `jsr $1b6b6.l` ; à passer sur deux
+    constructions où tout a bougé, par exemple une base d'essai `DROP_SR=0`). `prepare_max.py` refuse déjà les
+    adresses du moteur non résolues (« adresse(s) du moteur non résolue(s) »).
 - `son/` : chaîne de la ROM son. Elle contient :
   - `extrait_psp.py` et `rend_seq.py` (banque commune PSP) ;
   - `gen_voix_max.py` (agent voix) ;
@@ -45,6 +56,15 @@ Sans `--psp-iso`, `uppermax` donne Upper sans les persos MAX, identique à `--je
   - `numeros_max.json` : numéros de commandes libres et commandes vues. Ce ne sont que des contrôles.
 
   Elle utilise aussi `max/outils/sons/voix_max.py` et `banque_commune.py` (session MAX).
+
+## Indépendance aux adresses de l'image (11/11, v161)
+
+L'intégration ne lit plus aucune adresse d'image écrite en dur : chaque site d'Upper est trouvé par un motif unique et
+par les sauts décodés, puis recoupé avec la va MIPS que la carte de construction lui donne (`_recoupe` de
+`integre_max.py`) ; un motif absent, ambigu ou rattaché à une autre va arrête la construction avec un message nommé.
+La base d'Upper est donc celle du traducteur courant (plus d'étape `prog_upper_v160`). Pour reproduire le lot max55 à
+l'octet : `um_prog.py … --upper <Upper v160> --env A8_ENTREE=0 …` (tous les interrupteurs v161 à 0) et
+`--env CONV_SANS_ADRESSES=1B6B6` (sans la correspondance `$1B6B6` des acteurs de fin, ajoutée le 11/11).
 
 ## Garanties (07/11, agent script_um)
 

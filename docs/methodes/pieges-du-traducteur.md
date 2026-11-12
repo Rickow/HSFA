@@ -1,127 +1,135 @@
-# Pièges du traducteur
+# Translator pitfalls
 
-Catalogue des pièges rencontrés en retraduisant le MIPS du recompilateur en 68000, classés par famille. Ils valent
-pour tout binaire produit par un recompilateur statique (la session SFA3 MAX s'en sert pour la PSP). Les « §N »
-renvoient au [journal](../journal/HANDOFF.md) ; méthode de détection : [oracle-et-non-regression.md](oracle-et-non-regression.md).
+**Français : [pieges-du-traducteur.fr.md](pieges-du-traducteur.fr.md)**
 
-## 1. Adresses et bornes
+Catalogue of the pitfalls met while retranslating the recompiler's MIPS into 68000, grouped by family. They hold
+for any binary produced by a static recompiler (the SFA3 MAX session uses them for the PSP). The "§N"
+references point to the [journal](../journal/HANDOFF.md); detection method: [oracle-et-non-regression.md](oracle-et-non-regression.md).
 
-- **Base d'exécution fausse de 8 octets** (§5) et **bornes de la zone de code fausses** (§4) : tout a l'air de marcher
-  à 99 %. Les vérifier sur des références croisées sûres (vecteurs, tables de saut).
-- La zone de code contenait **deux processeurs** : Z80 puis 68000 (§16). Dans d'autres modules, le Z80 n'est pas en
-  tête ([carte des modules](../reference/carte-modules.md)).
-- Les écritures d'An **convertissent** les adresses 68K en adresses hôte (§10). Un pointeur de données lu en mémoire
-  est une adresse hôte, à reconvertir à l'usage (talons de conversion, §76).
-- Les pointeurs de **code** sont des adresses hôte : il faut une table de correspondance, et un hachage pour la
+## 1. Addresses and bounds
+
+- **Execution base off by 8 bytes** (§5) and **wrong code zone bounds** (§4): everything seems to work
+  at 99 %. Check them against reliable cross-references (vectors, jump tables).
+- The code zone held **two processors**: Z80 then 68000 (§16). In other modules, the Z80 is not at the
+  start ([module map](../reference/carte-modules.md)).
+- Writes to An **convert** 68K addresses into host addresses (§10). A data pointer read from memory
+  is a host address, to be converted back on use (conversion stubs, §76).
+- **Code** pointers are host addresses: a lookup table is needed, and a hash for
   performance (§98).
-- Une table d'aiguillage peut être indexée par un **index brut** au lieu d'un index ×2 / ×4 (§102, §112 : SURVIVAL
-  plantait).
-- Découper le MIPS en fonctions par les cibles de `jal`, jamais par `jr ra`.
+- A jump table can be indexed by a **raw index** instead of an index ×2 / ×4 (§102, §112: SURVIVAL
+  crashed).
+- Split the MIPS into functions by the `jal` targets, never by `jr ra`.
 
-## 2. Disposition mémoire (le plus traître)
+## 2. Memory layout (the most treacherous)
 
-- Le recompilateur type **par champ** (§44) : le même octet 68K n'est pas toujours au même endroit selon la lecture.
-- Recette retenue ([memoire-cps2](../architecture/memoire-cps2.md)) : octet = adresse XOR 1, mot = même adresse,
-  long = moitiés échangées. Pièges propres à cette recette :
-  - mot à octets inversés lu dans une table **indexée** (§92, §100) ;
-  - long rangé octet par octet (`bswap32`, §90) ;
-  - octet lu via un registre d'adresse de **parité inconnue** (après `ADDA Dn,An`) : l'adresse exacte se calcule à
-    l'exécution, l'XOR fixe est faux (§97) ;
-  - **flux d'octets `(An)+`** (§65) : après `MOVE.B (A3)+,x ; MOVE.B (A3)+,y`, la forme `ADDQ #1,A3 ; MOVE.B -2(A3)`
-    n'est juste que si A3 est impair ; sinon on lit l'octet voisin. Cause du texte du gros A qui défilait mal dans les
-    trois jeux (16 sites, règle `FLUXEA`) ;
-  - unions (`s16[2]` / `s32` selon la fonction, §44).
-- Hyper a été produit par une version **plus récente** du recompilateur (§52), avec d'autres idiomes : ne jamais
-  supposer qu'un binaire suit les règles d'un autre.
+- The recompiler types **per field** (§44): the same 68K byte is not always in the same place, depending on the read.
+- Recipe chosen ([memoire-cps2](../architecture/memoire-cps2.md)): byte = address XOR 1, word = same address,
+  long = halves swapped. Pitfalls specific to this recipe:
+  - byte-reversed word read from an **indexed** table (§92, §100);
+  - long stored byte by byte (`bswap32`, §90);
+  - byte read through an address register of **unknown parity** (after `ADDA Dn,An`): the exact address is computed at
+    run time, the fixed XOR is wrong (§97);
+  - **`(An)+` byte streams** (§65): after `MOVE.B (A3)+,x ; MOVE.B (A3)+,y`, the form `ADDQ #1,A3 ; MOVE.B -2(A3)`
+    is only correct if A3 is odd; otherwise the neighbouring byte is read. Cause of the big A's text that scrolled wrongly in all
+    three games (16 sites, rule `FLUXEA`);
+  - unions (`s16[2]` / `s32` depending on the function, §44).
+- Hyper was produced by a **more recent** version of the recompiler (§52), with other idioms: never
+  assume that one binary follows the rules of another.
 
-- **Temporaire de pile chargé depuis la mémoire pris pour la constante d'un `lui` périmé du même registre** (§162, `PILE_LUI`) : le CMP n'est pas émis et le branchement lit les drapeaux de l'appelant ; signe distinctif : fonctions à prologue `sq`.
+- **Stack temporary loaded from memory taken for the constant of a stale `lui` of the same register** (§162, `PILE_LUI`): the CMP is not emitted and the branch reads the caller's flags; telltale sign: functions with an `sq` prologue.
 
-## 3. Drapeaux et branchements
+## 3. Flags and branches
 
-- Les cases d'état ne sont pas celles qu'on croit : `0x1158` est la **retenue**, pas N (§11).
-- Les drapeaux de `CMP` / `SUB` doivent être exacts (§20) ; ceux de `SUBI` en place aussi (§90).
-- **Drapeaux rendus à l'appelant** : une routine finit par un `BTST` / `CMP` et c'est l'appelant qui branche (§87, §93,
-  §125). Un épilogue partagé peut les écraser (§126). Suivre les drapeaux à travers les retours.
-- **`CMP` mémoire-mémoire** (pas de forme 68K directe) : il était perdu, et le branchement relisait des drapeaux
-  périmés. Cause de la jauge sans plafond d'Hyper (`CMPMM`, §145).
-- Le **DBRA** du recompilateur boucle tant que ≥ 0 (`SUBQ.W ; BPL`), pas tant que ≠ −1 (§74).
-- Branchements lointains ; appels terminaux supprimés alors qu'ils étaient cibles de branchements (`TAILBR`, §143) ;
-  fusion de branchements par l'assembleur (§91).
+- The status slots are not the ones you would expect: `0x1158` is the **carry**, not N (§11).
+- The flags of `CMP` / `SUB` must be exact (§20); those of in-place `SUBI` too (§90).
+- **Flags returned to the caller**: a routine ends with a `BTST` / `CMP` and it is the caller that branches (§87, §93,
+  §125). A shared epilogue can overwrite them (§126). Follow the flags across returns.
+- **Memory-to-memory `CMP`** (no direct 68K form): it was lost, and the branch read stale
+  flags again. Cause of Hyper's gauge with no ceiling (`CMPMM`, §145).
+- The recompiler's **DBRA** loops while ≥ 0 (`SUBQ.W ; BPL`), not while ≠ −1 (§74).
+- Far branches; tail calls removed even though they were branch targets (`TAILBR`, §143);
+  branch merging by the assembler (§91).
 
-## 4. Pertes silencieuses vues
+## 4. Silent losses seen
 
-Toutes trouvées par un symptôme en jeu, puis prouvées contre l'arcade.
+Since v161, `build.log` counts the ones we know how to recognise: "GARDE-FOU (v161)" lines (A8 without a lent register; Bcc on the flags of a call while the MIPS recomputes RES; comparison with no 68K form and recompiler helper not inlined: **the build fails**, `GARDE_CMP=0` / `GARDE_AIDES=0` to override).
 
-| Défaut | Symptôme | § |
+All found through an in-game symptom, then proven against the arcade.
+
+| Defect | Symptom | § |
 |---|---|---|
-| `ADDI.L` perdu | portraits faux | §85 |
-| `MOVEA.W An,Am` perdu | blocs dans le décor au K.O. | §86 |
-| extension de signe en trop | son | §79 |
-| lecture signée étendue perdue | plantage du perso `$22` d'Upper | §128 |
-| constante `lui` seule rangée dans un registre de données, prise pour une adresse | supers d'Akuma et de Dan, boules multi-coups de Sakura (`LUIDN`) | §143 |
-| registre écrit sans aucune instruction émise | divers | §107, §132, §137 |
-| `CMP` mémoire-mémoire | jauge d'Hyper, plantage TRAINING (`CMPMM`) | §145 |
-| `EXG Dx,Dy` du recompilateur (cases de registres) rendu par deux `MOVE` : la case relue après son écrasement ; `BCLR` testé après l'effacement ; aide `roxr` inconnue traduite en talon vide | Killer Bee Assault de Cammy raté dans Hyper et Upper (angle 0) ; `paires_exg.py` trouve les autres `EXG` perdus | §171 |
+| `ADDI.L` lost | wrong portraits | §85 |
+| `MOVEA.W An,Am` lost | blocks in the stage at K.O. | §86 |
+| extra sign extension | sound | §79 |
+| sign-extended read lost | crash of Upper's character `$22` | §128 |
+| lone `lui` constant stored in a data register, taken for an address | Akuma's and Dan's supers, Sakura's multi-hit fireballs (`LUIDN`) | §143 |
+| register written with no instruction emitted | various | §107, §132, §137 |
+| memory-to-memory `CMP` | Hyper's gauge, TRAINING crash (`CMPMM`) | §145 |
+| recompiler's `EXG Dx,Dy` (register slots) rendered as two `MOVE`s: the slot read back after being overwritten; `BCLR` tested after the clear; unknown `roxr` helper translated as an empty stub | Cammy's Killer Bee Assault missing in Hyper and Upper (angle 0); `paires_exg.py` finds the other lost `EXG`s | §171 |
+| access to A8 outside a lent zone (side entry coming from before the zone): nothing emitted | MAZI mode ×1.5 damage bonus never applied (3 games); Hyper: animation table, table slot (`A8_ENTREE`) | §219 |
+| zero test read first by a branch on C; `zx` of a Dn; `mem + (−k)` stored in RES only; indexed byte in two steps | ±1 px shake of the character hit, table entry at fight 9, wait for an object, "not twice the same" draw, `CMP.B D0,D8` with D8 at home (2nd player's colour in mirror matches), "memory − Dn" (`TST_C`, `TST_ZX`, `CMP_MEMADD`, `CMP_IDX`, `CMP_D8`, `CMP_MEMDN`) | §219 |
+| parity of An forgotten after BRA / JSR / RTS; odd An from a stream, odd LEA, stored pointer | initials entry (2nd letter on the 4th), custom combo freeze, scrolling text (`PARITE_FLOT`, `PARITE_SITES`) | §219 |
+| `abcd` helper on bytes of **register slots**; undeclared `sbcd` helper: JSR to an empty body | combo score bonus never added (`BCD_REG`, `AIDE_SBCD`) | §219 |
 
-## 5. Registres et pile
+## 5. Registers and stack
 
-- Le recompilateur a des registres **supplémentaires** « A8 » et « D8 » (§53). HSFA les prête à des registres libres
-  par zones, avec des domiciles en RAM (`$87E0` / `$87F0(A5)`).
-- Les **sorties latérales** de ces zones coûtent cher : combat miroir (§130).
-- Pile privée du recompilateur en `0x114C` (§72), ramenée sur la pile 68K.
+- The recompiler has **extra** registers "A8" and "D8" (§53). HSFA lends them to free registers
+  per zone, with homes in RAM (`$87E0` / `$87F0(A5)`).
+- **Side exits** from these zones are costly: mirror match (§130).
+- Private stack of the recompiler at `0x114C` (§72), brought back onto the 68K stack.
 
-## 6. Code ajouté par le portage
+## 6. Code added by the port
 
-- Crochets dans les fonctions ancrées elles-mêmes (§7, §12).
-- Ressources chargées par le code natif, `setjmp` / `longjmp` (§75).
-- Noyau de tâches à reconstruire (§60-§61).
-- Couche matérielle « mirroitée » en variables (§57-§58).
-- Code **C** du portage : ses propres idiomes (aiguilleurs par table de longs, `lb ; bne r,zero`, §140). Ne pas le
-  traduire comme du 68K recompilé.
+- Hooks inside the anchored functions themselves (§7, §12).
+- Resources loaded by the native code, `setjmp` / `longjmp` (§75).
+- Task kernel to rebuild (§60-§61).
+- Hardware layer "mirrored" into variables (§57-§58).
+- **C** code of the port: its own idioms (dispatchers through tables of longs, `lb ; bne r,zero`, §140). Do not
+  translate it as recompiled 68K.
 
-## 7. Assembleur
+## 7. Assembler
 
-- Entrées de table d'aiguillage hors de portée 16 bits (§94).
-- Placement itératif nécessaire (§22).
-- `assemble.py` relit des **marqueurs dans les mnémoniques** produits par `translate.py` (`(cible …)`, `[mips …]`,
-  `T_…`, `CODE_…`, `_ECH`) : ne pas changer leur format.
+- Jump table entries out of 16-bit range (§94).
+- Iterative placement needed (§22).
+- `assemble.py` reads back **markers in the mnemonics** produced by `translate.py` (`(cible …)`, `[mips …]`,
+  `T_…`, `CODE_…`, `_ECH`): do not change their format.
 
-## 8. Banc et données
+## 8. Bench and data
 
-- Une écriture relevée à « l'image N » a lieu pendant N+1 ; `-debug` décale le minutage ; les prises d'opcodes voient
-  la prélecture (§67, §81, §82, §114).
-- `sfa3_prog.bin` a des données fausses dans `$0-$BFFFF` : les tables se lisent dans `sfa3ud_prog.bin` (§96).
-- Couverture : toujours en union, et distinguer « étendue » et « utilisable » (R§6bis, C2).
-- Profil : les adaptateurs mémoire (conversions de pointeurs, longs échangés, octets XOR, registres prêtés) coûtent
-  ~20 % du temps 68K en combat (§138) : c'est l'objet de la
-  [réorganisation des données](../architecture/ARCHI-Reorganisation-Donnees.md).
+- A write recorded at "frame N" happens during N+1; `-debug` shifts the timing; opcode taps see
+  the prefetch (§67, §81, §82, §114).
+- `sfa3_prog.bin` has wrong data in `$0-$BFFFF`: the tables are read from `sfa3ud_prog.bin` (§96).
+- Coverage: always as a union, and tell "extent" from "usable" apart (R§6bis, C2).
+- Profile: the memory adapters (pointer conversions, swapped longs, XOR bytes, lent registers) cost
+  ~20 % of the 68K time in fights (§138): that is the subject of the
+  [data relayout](../architecture/ARCHI-Reorganisation-Donnees.md).
 
-## 9. Pièges propres à la PSP (traducteur MIPS PSP → 68K de la session MAX)
+## 9. PSP-specific pitfalls (PSP MIPS → 68K translator of the MAX session)
 
-Traducteur : `max/outils/rosette_code/traduire.py` ; détails : [max-integration-upper](../../max/notes/max-integration-upper.md),
+Translator: `max/outils/rosette_code/traduire.py`; details: [max-integration-upper](../../max/notes/max-integration-upper.md),
 [max-portage-code](../../max/notes/max-portage-code.md).
 
-- **Cibles de `jal` 0-based** : le PRX est relogé au chargement ; cible = `imm26 << 2` (`tools/max/modules.py`).
-- **Créneau de délai pointé par une donnée** : un mot de données peut viser l'instruction qui suit un saut. Ce n'est
-  pas un début de fonction, sinon la fonction est coupée (`0x1B3450`, `tools/max/charcode2.py`).
-- **Découpage en modules** : les gestionnaires des persos MAX sont rangés AVANT la racine. Couper à la dernière
-  fonction atteinte depuis la racine, pas à la racine suivante (114 fonctions d'Eagle oubliées).
-- **Taille de lecture** : le C élargit des champs. Lire à la plus petite des tailles PSP et 68K ; une lecture d'octet
-  (`lb`) utilisée dans un calcul sur mot se lit en octet puis s'étend, jamais `MOVE.W` à une adresse impaire
+- **0-based `jal` targets**: the PRX is relocated at load time; target = `imm26 << 2` (`tools/max/modules.py`).
+- **Delay slot pointed to by data**: a data word can point at the instruction that follows a jump. It is
+  not a function start, otherwise the function is cut (`0x1B3450`, `tools/max/charcode2.py`).
+- **Splitting into modules**: the handlers of the MAX characters are stored BEFORE the root. Cut at the last
+  function reached from the root, not at the next root (114 of Eagle's functions forgotten).
+- **Read size**: the C widens fields. Read at the smaller of the PSP and 68K sizes; a byte read
+  (`lb`) used in a word computation is read as a byte then extended, never `MOVE.W` at an odd address
   (`lb 0x4D` → `$35`).
-- **Champs PSP sans équivalent** (position d'impact `0x2CA-0x2DE`, effet attaché `0x38`) : omettre l'écriture ET la
-  lecture de la source.
-- **Champs privés** : ne pas loger les champs propres aux persos MAX dans `$28-$2F` (pris par le moteur générique) ;
-  `$5C` / `$60` libres.
-- **Structures de taille différente** : joueur PSP de `0x498` o contre `$400` ; une boucle d'effacement PSP (72 longs depuis
-  `+0x350`) débordait sur le joueur suivant.
-- **Tables de pointeurs de fonctions** lues à tort comme des scripts d'animation : trancher avec Ghidra (extension
-  Allegrex, `max/outils/ghidra/ghidra_decomp.py`).
-- **Repère des octets** : un même octet a deux numéros selon le repère. Dans l'image en mémoire CPS2, l'octet 0 d'un pas porte
-  les drapeaux ; dans l'arcade et dans les octets bruts du fichier, l'octet 0 est la durée. Toujours dire dans quel
-  repère on écrit.
-- **Données recopiées** : tables lues par adresse recopiées en gros-boutiste ; attaques : octets `$12` / `$14` ×2.
-- **vasm** : `cnop` bourre avec `$4E71` (NOP), pas avec des zéros : bourrer explicitement (`dcb.b`) quand un octet
-  compte.
+- **PSP fields with no equivalent** (impact position `0x2CA-0x2DE`, attached effect `0x38`): omit both the write AND the
+  read of the source.
+- **Private fields**: do not put the fields specific to the MAX characters in `$28-$2F` (taken by the generic engine);
+  `$5C` / `$60` are free.
+- **Structures of different size**: PSP player of `0x498` bytes against `$400`; a PSP clearing loop (72 longs from
+  `+0x350`) overflowed into the next player.
+- **Tables of function pointers** wrongly read as animation scripts: settle it with Ghidra (Allegrex
+  extension, `max/outils/ghidra/ghidra_decomp.py`).
+- **Byte frame of reference**: the same byte has two numbers depending on the frame of reference. In the CPS2 memory image, byte 0 of a step holds
+  the flags; in the arcade and in the raw bytes of the file, byte 0 is the duration. Always say in which
+  frame of reference you are writing.
+- **Copied data**: tables read by address copied as big-endian; attacks: bytes `$12` / `$14` ×2.
+- **vasm**: `cnop` pads with `$4E71` (NOP), not with zeros: pad explicitly (`dcb.b`) when a byte
+  matters.
 
-Liste des pièges du banc et de l'environnement : [journal/ETAT-DES-LIEUX.md](../journal/ETAT-DES-LIEUX.md) §7.
+List of the pitfalls of the bench and the environment: [journal/ETAT-DES-LIEUX.md](../journal/ETAT-DES-LIEUX.md) §7.

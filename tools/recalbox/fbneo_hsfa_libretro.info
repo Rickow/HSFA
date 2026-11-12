@@ -1,4 +1,4 @@
-# Fichier d'information RetroArch pour le coeur FinalBurn Neo HSFA (fork FBNeo, commit 4bcdd94), compile pour Recalbox 10 (armhf ou aarch64, glibc <= 2.31)
+# Fichier d'information RetroArch pour le coeur FinalBurn Neo HSFA (fork FBNeo, commit 0c03dc0), compile pour Recalbox 10 (aarch64, glibc <= 2.31)
 display_name = "Arcade (FinalBurn Neo HSFA: SFA3 / Upper / Hyper, 4:3)"
 authors = "FBNeo Team|HSFA"
 supported_extensions = "zip|7z"
@@ -6,7 +6,7 @@ corename = "FinalBurn Neo HSFA"
 categories = "Emulator"
 license = "Non-commercial"
 permissions = ""
-display_version = "v1.0.0.03 HSFA af5d3f3 patchs 0001-0015+0007b (4bcdd94)"
+display_version = "v1.0.0.03 HSFA af5d3f3 patchs 0001-0027+0029-0032+0007b (0c03dc0)"
 manufacturer = "Capcom"
 systemname = "CPS-2"
 systemid = "arcade"

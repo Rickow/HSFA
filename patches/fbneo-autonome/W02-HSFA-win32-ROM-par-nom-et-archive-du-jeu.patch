@@ -1,0 +1,53 @@
+From 00720cc0ea8879f0bcc0fc0e17220c2f5b8e2926 Mon Sep 17 00:00:00 2001
+From: hsfa <hsfa@invalid>
+Date: Wed, 11 Nov 2026 11:40:42 +0100
+Subject: [PATCH 2/5] HSFA win32: HSFA games, ROMs found by name whatever their
+ CRC, game archive given to the driver
+
+---
+ src/burner/win32/bzip.cpp | 25 ++++++++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/src/burner/win32/bzip.cpp b/src/burner/win32/bzip.cpp
+index 1d68f0b18..b90ccaffc 100644
+--- a/src/burner/win32/bzip.cpp
++++ b/src/burner/win32/bzip.cpp
+@@ -596,6 +596,29 @@ INT32 BzipOpen(bool bootApp)
+ 
+ 	const INT32 nAllCount = (nLoadMenuShowY & (1 << 26)) ? BZIP_MAX + _SubDirsZip.nCount : BZIP_MAX;
+ 
++	// HSFA mod: games rebuilt from the PS2 / PSP discs by the HSFA scripts (drivers *hsfa). Their ROMs are made again at
++	// each build: like the libretro core (libretro.cpp), a ROM found by name with the right length is accepted whatever
++	// its CRC (the graphics ROMs rebuilt from the disc differ from the arcade dumps).
++	const char* pszHsfaDrv = BurnDrvGetTextA(DRV_NAME);
++	const bool bHsfaDriver = (pszHsfaDrv && strstr(pszHsfaDrv, "hsfa"));
++
++	// HSFA mod: archive of the game, without extension (as libretro.cpp gives it). The HSFA drivers read stored members
++	// that are not in their ROM list in place (music streams hsfa_flux.bin / hsfa_flux_table.txt, voice replay
++	// hsfa_rejeu.bin / hsfa_rejeu_table.txt; cps_hsfa.cpp). Empty for any other driver.
++	szBurnHsfaArchive[0] = 0;
++	{
++		if (bHsfaDriver) {
++			const TCHAR* pszHsfaZip = NULL;
++			for (INT32 z = 0; z < nAllCount && pszHsfaZip == NULL; z++) {
++				pszHsfaZip = (z < BZIP_MAX) ? szBzipName[z] : _SubDirsZip.pszZipName[z - BZIP_MAX];
++			}
++			char szHsfaZip[MAX_PATH * 2] = "";			// TCHARToANSI() may write up to 2 x nOutSize bytes
++			if (pszHsfaZip && TCHARToANSI(pszHsfaZip, szHsfaZip, MAX_PATH) && strlen(szHsfaZip) < MAX_PATH) {
++				strcpy(szBurnHsfaArchive, szHsfaZip);
++			}
++		}
++	}
++
+ 	// Locate the ROM data in the zip files
+ 	for (INT32 z = 0; z < nAllCount; z++) {
+ 		const TCHAR* pszBzipName = (z < BZIP_MAX) ? szBzipName[z] : _SubDirsZip.pszZipName[z - BZIP_MAX];
+@@ -636,7 +659,7 @@ INT32 BzipOpen(bool bootApp)
+ 				}
+ 
+ 				if (List[nFind].nLen == ri.nLen) {
+-					if (ri.nCrc) {										// If we know the CRC
++					if (ri.nCrc && !bHsfaDriver) {						// If we know the CRC
+ 						if (List[nFind].nCrc != ri.nCrc) {				// Length okay, but CRC wrong
+ 							RomFind[i].nState = 2;
+ 						}

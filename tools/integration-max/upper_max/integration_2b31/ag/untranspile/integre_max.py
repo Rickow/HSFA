@@ -1070,15 +1070,20 @@ def lancer_vertical(img, a):
     if os.environ.get("MAX_LANCER_VERTICAL", "1") != "1": return a
     eb = open(os.environ.get("SFA3MAX_EBOOT", "@UM_EBOOT@"), "rb").read()[0x74:]
     sw = lambda b: bytes(b[i ^ 1] for i in range(len(b)))
-    tabs = [(0xB0FB0, 0x2140C8, 4 * 80, 4 * 84), (0xB10F0, 0x214218, 2 * 80, 2 * 0x53), (0xB1190, 0x2142C0, 16 * 0x60, 16 * 0x63)]
-    pat = [0x525AE, 0x525CE, 0x525F0]
+    # (v161) adresses des 3 tables (v160 : $B0FB0, $B10F0, $B1190) lues dans les LEA du lecteur, plus écrites en dur ;
+    # contrôle : contenu = EBOOT sur toute la longueur d'Upper, et les 3 tables se suivent sans se chevaucher
+    tabs = [(None, 0x2140C8, 4 * 80, 4 * 84), (None, 0x214218, 2 * 80, 2 * 0x53), (None, 0x2142C0, 16 * 0x60, 16 * 0x63)]
     # lecteur repéré par motif (MOVE.B $29E(A6),D0 ; LSL.W #2,D0 ; ADD.B $25E(A6),D0 ; LEA T1,A0)
     m = bytes.fromhex("102e029ee548d02e025e41f9")
     k = img.find(m, 0x1000, 0x3A0000); assert k > 0 and img.find(m, k + 2, 0x3A0000) < 0, "lancer : lecteur T1-T3"
     leas = [k + 10, k + 10 + 0x20, k + 10 + 0x42]
     a = (a + 0xF) & ~0xF
+    prec_ = 0
     for (adr, psp, n0, n1), l in zip(tabs, leas):
-        assert struct.unpack_from(">HI", img, l) == (0x41F9, adr), "lancer : LEA $%x attendu en $%x" % (adr, l)
+        assert struct.unpack_from(">H", img, l)[0] == 0x41F9, "lancer : LEA abs.l attendu en $%x" % l
+        adr = struct.unpack_from(">I", img, l + 2)[0]
+        assert prec_ <= adr < 0x3A0000, "lancer : table $%x (LEA $%x) hors de l'image ou avant la précédente" % (adr, l)
+        prec_ = adr + n0
         assert img[adr:adr + n0] == sw(eb[psp:psp + n0]), "lancer : table $%x différente de la PSP" % adr
         img[a:a + n1] = sw(eb[psp:psp + n1])
         struct.pack_into(">I", img, l + 2, a)
@@ -1086,33 +1091,85 @@ def lancer_vertical(img, a):
         a = (a + n1 + 0xF) & ~0xF
     return a
 
+# (v161) adresses d'image tirées de l'image elle-même (motifs, sauts décodés) et non plus écrites en dur : le traducteur
+# v161 allonge le code d'Upper (ex. +$8E avant l'interpréteur de l'IA). Chaque site trouvé est recoupé avec la va MIPS que
+# la carte de la construction lui donne (CTX[0] = éléments traduits, comme carte_image.txt) : même instruction PS2 d'origine.
+def _va_image():
+    """adresse d'image -> va MIPS (fichier) du premier élément écrit à cette adresse (= 1re ligne de carte_image.txt)"""
+    d = {}
+    for it in CTX[0]:
+        if (it.ws or it.kind != 'fixed') and it.off not in d: d[it.off] = it.va
+    return d
+
+def _sites(img, motif, lo=0x1000, hi=0x3A0000):
+    """positions PAIRES de motif dans [lo, hi)"""
+    r = []; k = img.find(motif, lo, hi)
+    while k >= 0:
+        if k % 2 == 0: r.append(k)
+        k = img.find(motif, k + 1, hi)
+    return r
+
+def _site_unique(img, motif, nom):
+    r = _sites(img, motif)
+    assert len(r) == 1, "%s : motif %s trouvé %d fois (%s)" % (nom, motif.hex(), len(r), ", ".join("$%x" % k for k in r))
+    return r[0]
+
+def _cible(img, k):
+    """(cible, longueur) du saut en k : BRA / BSR (.S ou .W), JMP / JSR abs.l"""
+    op = struct.unpack_from(">H", img, k)[0]
+    if op in (0x4EB9, 0x4EF9): return struct.unpack_from(">I", img, k + 2)[0] & 0xFFFFFF, 6
+    if op & 0xFE00 == 0x6000:
+        if op & 0xFF == 0: return k + 2 + struct.unpack_from(">h", img, k + 2)[0], 4
+        return k + 2 + struct.unpack(">b", bytes([op & 0xFF]))[0], 2
+    raise AssertionError("saut attendu en $%x (%04x)" % (k, op))
+
+def _recoupe(vi, nom, adr, va):
+    """la va MIPS d'origine de l'adresse trouvée est celle du site connu (carte v160 : mêmes va)"""
+    assert vi.get(adr) == va, "%s : $%x porte la va MIPS %s, %x attendue" % (nom, adr, "%x" % vi[adr] if adr in vi else "aucune", va)
+
 def talon_cond40(img, a):
     """(2b24, N20) condition 40 de l'IA PSP (0x75B94 : op = (A0)+ ; op >= aléa & 31 -> suite, sinon saut de bloc). La table
-    des conditions est EN LIGNE ($DEEC : MOVE.W T(PC,D0.W),D1 ; JMP T(PC,D1.W), T = $DEF4, 39 entrées, gestionnaire 0
-    collé derrière) : aucune place pour l'index $50. Crochet en $DEE6 (MOVE.W (A0)+,D0 ; MOVE.W D0,$20A(A6) = 6 octets ->
-    JMP talon) : talon = ces deux instructions, index $50 -> COND40, sinon JMP $DEEC. Suite = $ED48, saut = $E432
-    (comme la condition 0, image $DF52 / $DF58), aléa = $1A720 (condition 2)."""
+    des conditions est EN LIGNE (v160 : $DEEC : MOVE.W T(PC,D0.W),D1 ; JMP T(PC,D1.W), T = $DEF4, 39 entrées, gestionnaire 0
+    collé derrière) : aucune place pour l'index $50. Crochet sur « MOVE.W (A0)+,D0 ; MOVE.W D0,$20A(A6) » (6 octets, v160
+    $DEE6 -> JMP talon) : talon = ces deux instructions, index $50 -> COND40, sinon retour à l'aiguillage. Suite / saut =
+    les 2 BSR du gestionnaire 0 (v160 $DF52 -> $ED48, $DF58 -> $E432), aléa = le JSR du gestionnaire 2 (v160 $1A720).
+    (v161) adresses tirées du motif et des sauts décodés, recoupées avec les va MIPS de la carte."""
     if os.environ.get("MAX_IA", "1") != "1" or "IA_T0_26" not in SYM: return a
-    k = 0xDEE6
-    assert bytes(img[k:k + 14]) == bytes.fromhex("30183d40020a323b00064efb1002"), "IA : motif de l'interpréteur en $DEE6"
-    assert bytes(img[0xDF52:0xDF54]) == bytes.fromhex("6100") and bytes(img[0xDF78:0xDF7A]) == bytes.fromhex("4eb9")
-    w = [0x3018, 0x3D40, 0x020A, 0x0C40, 0x0050, 0x6706, 0x4EF9, 0x0000, 0xDEEC,
-         0x3218, 0x3F01, 0x4EB9, 0x0001, 0xA720, 0x321F, 0x0240, 0x001F, 0xB240, 0x6506,
-         0x4EF9, 0x0000, 0xED48, 0x4EF9, 0x0000, 0xE432]
+    vi = _va_image()
+    k = _site_unique(img, bytes.fromhex("30183d40020a323b00064efb1002"), "IA : interpréteur (MOVE.W (A0)+,D0 ; aiguillage)")
+    _recoupe(vi, "IA : interpréteur", k, 0x78A58)
+    aig = k + 6; T_ = k + 14                                    # MOVE.W T(PC,D0.W),D1 ; JMP T(PC,D1.W) ; table en ligne
+    h0 = T_ + struct.unpack_from(">h", img, T_)[0]; h2 = T_ + struct.unpack_from(">h", img, T_ + 4)[0]
+    bs = []; q = h0                                             # gestionnaire 0 : … BSR suite ; BRA.S ; BSR saut ; RTS
+    while struct.unpack_from(">H", img, q)[0] != 0x4E75 and q < h0 + 0x40:
+        if struct.unpack_from(">H", img, q)[0] in (0x6100, 0x4EB9): bs.append(q); q += 4 if img[q] == 0x61 else 6
+        else: q += 2
+    assert len(bs) == 2, "IA : gestionnaire 0 ($%x) : %d BSR (2 attendus)" % (h0, len(bs))
+    suite, saut = _cible(img, bs[0])[0], _cible(img, bs[1])[0]
+    assert struct.unpack_from(">H", img, h2)[0] == 0x4EB9, "IA : gestionnaire 2 ($%x) : JSR aléa attendu" % h2
+    alea = _cible(img, h2)[0]
+    for nom_, adr_, va_ in (("suite", suite, 0x81150), ("saut", saut, 0x7C698), ("aléa", alea, 0xCB360)):
+        _recoupe(vi, "IA : " + nom_, adr_, va_)
+    w = [0x3018, 0x3D40, 0x020A, 0x0C40, 0x0050, 0x6706, 0x4EF9, aig >> 16, aig & 0xFFFF,
+         0x3218, 0x3F01, 0x4EB9, alea >> 16, alea & 0xFFFF, 0x321F, 0x0240, 0x001F, 0xB240, 0x6506,
+         0x4EF9, suite >> 16, suite & 0xFFFF, 0x4EF9, saut >> 16, saut & 0xFFFF]
     assert not any(img[a:a + 2 * len(w)])
     struct.pack_into(">%dH" % len(w), img, a, *w)
     struct.pack_into(">HI", img, k, 0x4EF9, a)
-    log("IA : condition 40 (index $50) : crochet $%x -> talon $%x" % (k, a))
+    log("IA : condition 40 (index $50) : crochet $%x -> talon $%x (suite $%x, saut $%x, aléa $%x)" % (k, a, suite, saut, alea))
     a += 2 * len(w)
-    # saut de bloc ($F944 : ADDQ.B #1,$214(A6) ; MOVE.W (A0)+,D0 ; MOVE.W T(PC,D0.W),D1 ; JSR T(PC,D1.W), T = $F956,
-    # 39 entrées : $F9FC = 1 opérande, $FA00 = aucune) : la condition 40 a 1 opérande -> ADDQ.W #2,A0 puis BRA $FB60
-    k2 = 0xF944
-    assert bytes(img[k2:k2 + 18]) == bytes.fromhex("522e02143018323b000a4ebb10066000020c"), "IA : motif du saut de bloc en $F944"
-    w2 = [0x522E, 0x0214, 0x3018, 0x0C40, 0x0050, 0x6608, 0x5448, 0x4EF9, 0x0000, 0xFB60, 0x4EF9, 0x0000, 0xF94A]
+    # saut de bloc (v160 $F944 : ADDQ.B #1,$214(A6) ; MOVE.W (A0)+,D0 ; MOVE.W T(PC,D0.W),D1 ; JSR T(PC,D1.W) ; BRA.W fin,
+    # T = $F956, 39 entrées : $F9FC = 1 opérande, $FA00 = aucune) : la condition 40 a 1 opérande -> ADDQ.W #2,A0 puis BRA fin
+    k2 = _site_unique(img, bytes.fromhex("522e02143018323b000a4ebb1006"), "IA : saut de bloc")
+    _recoupe(vi, "IA : saut de bloc", k2, 0x873E8)
+    assert struct.unpack_from(">H", img, k2 + 14)[0] == 0x6000, "IA : BRA.W attendu en $%x" % (k2 + 14)
+    fin_b = _cible(img, k2 + 14)[0]; _recoupe(vi, "IA : fin du saut de bloc", fin_b, 0x889E0)
+    aig2 = k2 + 6
+    w2 = [0x522E, 0x0214, 0x3018, 0x0C40, 0x0050, 0x6608, 0x5448, 0x4EF9, fin_b >> 16, fin_b & 0xFFFF, 0x4EF9, aig2 >> 16, aig2 & 0xFFFF]
     assert not any(img[a:a + 2 * len(w2)])
     struct.pack_into(">%dH" % len(w2), img, a, *w2)
     struct.pack_into(">HI", img, k2, 0x4EF9, a)
-    log("IA : condition 40 dans le saut de bloc : crochet $%x -> talon $%x" % (k2, a))
+    log("IA : condition 40 dans le saut de bloc : crochet $%x -> talon $%x (fin $%x)" % (k2, a, fin_b))
     return a + 2 * len(w2)
 
 # (2b28, Q25 / N28) ids PSP des persos MAX (EBOOT : Eagle $26, Maki $27, Yun $28, Ingrid $29 ; ids Upper $26 $27 $2D $2E)
@@ -1129,12 +1186,27 @@ def talon_prises(img, a):
     if os.environ.get("MAX_PRISES", "1") != "1": return a
     eb = open(os.environ.get("SFA3MAX_EBOOT", "@UM_EBOOT@"), "rb").read()[0x74:]
     m48 = lambda va: int.from_bytes(eb[va:va + 6], "little")
-    lec = 0x52A32
-    assert bytes(img[lec:lec + 8]) == bytes.fromhex("0700660000946002"), "prises : lecteur BTST.L D3,D0 en $%x" % lec
-    # (site, octets d origine remplacés, masque PSP 48 bits, nom)
-    sites = ((0x52A28, "060300e070176102", 0x213F68, "sol KK"),
-             (0x52AA2, "060300e070296188", 0x213F7A, "air PP"),
-             (0x52ABE, "060300e070176100ff6c", 0x213F80, "air KK"))
+    # (v161) sites « ADDI.B #$E0,D3 ; MOVEQ #m,D0 ; BSR » dont le BSR vise le lecteur BTST.L D3,D0 (v160 : $52A28, $52AA2,
+    # $52ABE -> $52A32), tirés de l'image (sauts décodés) et recoupés avec les va MIPS de la carte
+    vi = _va_image(); cand = []
+    for k in _sites(img, bytes.fromhex("060300e070")):
+        if img[k + 6] == 0x61:
+            c_, n_ = _cible(img, k + 6)
+            if bytes(img[c_:c_ + 2]) == bytes.fromhex("0700"): cand.append((k, c_, 6 + n_))
+    # le motif a aussi les 2 sites « sol avant-arrière » (PSP = Upper, rien à faire) : les 3 sites voulus sont ceux que
+    # la carte rattache aux va MIPS 0x240E38 (sol KK), 0x24146C (air PP), 0x241594 (air KK) ; chacun doit être trouvé
+    # une fois et une seule, et tous les candidats doivent viser le même lecteur
+    assert len({c_ for _, c_, _ in cand}) == 1, "prises : lecteurs %s" % ["$%x -> $%x" % (k, c_) for k, c_, _ in cand]
+    lec = cand[0][1]; _recoupe(vi, "prises : lecteur", lec, 0x240ED0)
+    # (site, octets d'origine remplacés, masque PSP 48 bits, nom)
+    sites = []
+    for va_, psp_, nom_, m_ in ((0x240E38, 0x213F68, "sol KK", 0x17), (0x24146C, 0x213F7A, "air PP", 0x29),
+                                (0x241594, 0x213F80, "air KK", 0x17)):
+        c3 = [(k, n_) for k, _, n_ in cand if vi.get(k) == va_]
+        assert len(c3) == 1, "prises : %s (va MIPS %x) : %d site(s) parmi %s" % (nom_, va_, len(c3), ["$%x (va %s)" % (
+            k, "%x" % vi[k] if k in vi else "aucune") for k, _, _ in cand])
+        k, n_ = c3[0]; assert img[k + 5] == m_, "prises : %s, MOVEQ #$%x attendu en $%x" % (nom_, m_, k)
+        sites.append((k, bytes(img[k:k + n_]).hex(), psp_, nom_))
     a = (a + 0xF) & ~0xF
     for site, orig, psp, nom in sites:
         o_ = bytes.fromhex(orig)
@@ -1166,7 +1238,16 @@ def talon_dialogues(img, a):
     LSL.W #2,D1 -> #3 (×24) aux deux sites, copies de 3 x 48 octets (ordre image : index logique j en j ^ 1), LEA redirigés."""
     if not DLG_CHOIX or os.environ.get("MAX_DIALOGUES", "1") != "1": return a
     a = (a + 0xF) & ~0xF
-    for site, tab, ps2 in ((0x588A6, 0xB18C0, 0x61B580), (0x5957C, 0xB1940, 0x61B600)):
+    # (v161) les deux lecteurs (v160 $588A6 / $5957C) tirés du motif « … ; LEA T,A0 » et recoupés avec les va MIPS de la carte
+    vi = _va_image(); T = CTX[1]
+    ks_ = {struct.unpack_from(">I", img, k + 20)[0]: k for k in _sites(img, bytes.fromhex("102d013e51403200e948e549d041d02e010341f9"))}
+    lect = []
+    for ps2, va_ in ((0x61B580, 0x267378), (0x61B600, 0x26E5EC)):
+        tab = T.addr_to_68k(ps2) & 0xFFFFFF
+        assert tab in ks_, "dialogues : lecteur de $%x (0x%X) introuvable (%s)" % (tab, ps2, ks_)
+        _recoupe(vi, "dialogues 0x%X" % ps2, ks_[tab], va_); lect.append((ks_[tab], tab, ps2))
+    assert len(ks_) == 2, "dialogues : %d lecteurs" % len(ks_)
+    for site, tab, ps2 in lect:
         assert bytes(img[site:site + 18]) == bytes.fromhex("102d013e51403200e948e549d041d02e0103"), "dialogues : motif en $%x" % site
         assert struct.unpack_from(">HI", img, site + 18) == (0x41F9, tab), "dialogues : LEA $%x attendu" % tab
         lig = [[img[tab + ((r * 40 + i) ^ 1)] for i in range(40)] + [0xFF] * 8 for r in range(3)]

@@ -1,138 +1,146 @@
-# Construire les jeux depuis l'ISO
+# Building the games from the ISO
 
-`scripts/construction/hsfa_build.py` reconstruit SFA3, Upper et Hyper à partir de **votre** ISO de *Street Fighter
-Alpha Anthology* : extraction, traduction des trois modules, ROM graphique, son, tables, et archives du cœur FBNeo.
-Rapport complet : [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 du journal).
+**Français : [construction-iso.fr.md](construction-iso.fr.md)**
 
-## 1. Prérequis
+`scripts/construction/hsfa_build.py` rebuilds SFA3, Upper and Hyper from **your** ISO of *Street Fighter
+Alpha Anthology*: extraction, translation of the three modules, graphics ROM, sound, tables, and FBNeo core archives.
+Full report: [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 of the journal).
 
-- Python 3.8+ et les modules de `requirements.txt` (`pip install -r requirements.txt`, de préférence dans un venv) ;
-  numpy sert aux étapes graphiques (`gfx_*`). Ni MAME, ni assembleur externe : l'assembleur 68000 de la chaîne est en
+## 1. Requirements
+
+- Python 3.8+ and the modules of `requirements.txt` (`pip install -r requirements.txt`, preferably in a venv);
+  numpy is used by the graphics steps (`gfx_*`). No MAME, no external assembler: the chain's 68000 assembler is in
   Python.
-- Pour la musique des archives d'Upper et d'Hyper en Ogg Vorbis (par défaut) : `gcc` et `g++`. L'encodeur
-  `hsfa_oggenc` (`tools/flux/oggenc/`, README) est compilé une fois, depuis les sources officielles de libvorbis,
-  libogg et musl (`construit_oggenc.py --sources DIR --telecharge`, puis `HSFA_OGGENC_SOURCES=DIR`, ou un binaire
-  tout fait par `HSFA_OGGENC`). Plus de ffmpeg depuis le 08/11 (§206). Sans `gcc` / `g++` : `--flux-format adx` (zip
-  d'Hyper d'environ 740 Mo au lieu de 190) ou `--sans-flux`. Sans rien installer : le constructeur tout-en-un
-  (`tools/constructeur/`, un exécutable par système joint aux releases), qui lit aussi les `.chd`.
-- L'ISO USA (`SLUS-21317`, 2 048 o/secteur). Les images `.chd`, `.bin` et `.cso` sont refusées : convertir d'abord en
-  `.iso`. Un dossier qui contient `X_DATA.BIN` est aussi accepté.
-- Facultatif : `--arcade sfa3.zip` (ROM graphique d'arcade de SFA3) au lieu de la reconstruire depuis l'ISO.
-- Pour **Upper MAX** (Upper + Eagle, Maki, Yun, Ingrid ; §5) : l'ISO PSP **européenne** de *Street Fighter Alpha 3
-  MAX* (ULES-00235 v1.01, `.iso`). Rien d'autre à installer : le code des MAX est assemblé par l'assembleur 68000 du
-  projet (`tools/asm68k/`, Python). vasm reste utilisable pour comparer (`HSFA_ASM=vasm`, ou `HSFA_ASM=compare`).
+- For the music of the Upper and Hyper archives in Ogg Vorbis (the default): `gcc` and `g++`. The encoder
+  `hsfa_oggenc` (`tools/flux/oggenc/`, README) is compiled once, from the official sources of libvorbis,
+  libogg and musl (`construit_oggenc.py --sources DIR --telecharge`, then `HSFA_OGGENC_SOURCES=DIR`, or a ready-made
+  binary through `HSFA_OGGENC`). No more ffmpeg since 08/11 (§206). Without `gcc` / `g++`: `--flux-format adx` (Hyper
+  zip of about 740 MB instead of 190) or `--sans-flux`. Without installing anything: the all-in-one builder
+  (`tools/constructeur/`, one executable per system attached to the releases), which also reads `.chd` files.
+- The USA ISO (`SLUS-21317`, 2,048 bytes/sector). `.chd`, `.bin` and `.cso` images are refused: convert to `.iso`
+  first. A folder that contains `X_DATA.BIN` is accepted too.
+- Optional: `--arcade sfa3.zip` (SFA3 arcade graphics ROM) instead of rebuilding it from the ISO.
+- For **Upper MAX** (Upper + Eagle, Maki, Yun, Ingrid; §5): the **European** PSP ISO of *Street Fighter Alpha 3
+  MAX* (ULES-00235 v1.01, `.iso`). Nothing else to install: the MAX code is assembled by the project's 68000
+  assembler (`tools/asm68k/`, Python). vasm can still be used for comparison (`HSFA_ASM=vasm`, or `HSFA_ASM=compare`).
 
-## 2. Configurer
+## 2. Configure
 
-Rien à configurer : les outils sont pris dans le dépôt lui-même. `config.env` (copie de `config.example.env`) ne sert
-que pour prendre d'autres outils (`HSFA_OUTILS_*`) ou pour le banc MAME.
+Nothing to configure: the tools are taken from the repository itself. `config.env` (copy of `config.example.env`) is
+only used to take other tools (`HSFA_OUTILS_*`) or for the MAME bench.
 
-Les scripts appelés gardent des chemins `<workspace>/...` : `hsfa_build.py` les remplace à l'exécution (table
-`PARAMETRAGES` du script) et lance chaque outil dans un sous-processus à l'environnement propre.
+The scripts called keep `<workspace>/...` paths: `hsfa_build.py` replaces them at run time (`PARAMETRAGES` table
+of the script) and runs each tool in a subprocess with a clean environment.
 
-## 3. Construire
+## 3. Build
 
 ```bash
 python3 scripts/construction/hsfa_build.py \
     --anthology "Street Fighter Alpha Anthology (USA).iso" --sortie hsfa_sortie --jeux sfa3,upper,hyper
 ```
 
-| Option | Effet |
+| Option | Effect |
 |---|---|
-| `--jeux sfa3,upper,hyper` | jeux à construire (défaut : les trois) ; `uppermax` en plus : Upper MAX (§5) ; `hyperarcade` : Hyper + Arcade (§6, expérimental) |
-| `--psp-iso ISO` | (Upper MAX) ISO PSP européenne de SFA3 MAX ; sans elle, `uppermax` = Upper |
-| `--vasm CHEMIN` | (Upper MAX, facultatif) chemin de `vasmm68k_mot` pour `HSFA_ASM=vasm` ou `compare` |
-| `--arcade ZIP\|DOSSIER` | ROM graphique d'arcade (sinon voie « ISO seule », par défaut) |
-| `--liste` | liste des étapes |
-| `--etape NOM` / `--jusqua NOM` | refaire à partir de NOM / s'arrêter après NOM |
-| `--force` | tout refaire (à utiliser après une modification de `hsfa_build.py` lui-même) |
-| `--comparer DOSSIER` | comparer les sorties à un banc existant |
-| `--date-source SECONDES` | date des membres des zips (défaut `$SOURCE_DATE_EPOCH`, sinon 1980-01-01) |
-| `--plans-fenetre auto\|oui\|non` | tables de plans limitées aux codes honorés par le banc et le cœur |
-| `--flux-format ogg\|adx` | format des flux musique d'Upper et d'Hyper dans les zips (défaut `ogg`) |
-| `--sans-flux` | ni table de flux, ni flux dans les zips (musiques du disque absentes) |
-| `--rejeu-table FICHIER` | (Hyper) table du rejeu des sons SFA1 / SFA2 (défaut : `tools/son-hyper/rejeu/hsfa_rejeu_table.txt` si elle est là) ; avec elle, redirection des voix par version et rejeu (§4) |
-| `--sans-redirection` | (Hyper) ni redirection des voix ni rejeu, même avec la table |
-| `--greffe-releves DOSSIER` | (Hyper + Arcade) autres relevés de la greffe que ceux du dépôt (§6) |
-| `--outils-*` | emplacement de chaque groupe d'outils (sinon `HSFA_OUTILS_*`) |
+| `--jeux sfa3,upper,hyper` | games to build (default: the three); `uppermax` as well: Upper MAX (§5); `hyperarcade`: Hyper + Arcade (§6, experimental) |
+| `--psp-iso ISO` | (Upper MAX) European PSP ISO of SFA3 MAX; without it, `uppermax` = Upper |
+| `--vasm CHEMIN` | (Upper MAX, optional) path of `vasmm68k_mot` for `HSFA_ASM=vasm` or `compare` |
+| `--arcade ZIP\|DOSSIER` | arcade graphics ROM (otherwise "ISO only" route, the default) |
+| `--liste` | list of the steps |
+| `--etape NOM` / `--jusqua NOM` | redo from NOM / stop after NOM |
+| `--force` | redo everything (to use after a change to `hsfa_build.py` itself) |
+| `--comparer DOSSIER` | compare the outputs with an existing bench |
+| `--date-source SECONDES` | date of the zip members (default `$SOURCE_DATE_EPOCH`, otherwise 1980-01-01) |
+| `--plans-fenetre auto\|oui\|non` | layer tables limited to the codes honoured by the bench and the core |
+| `--flux-format ogg\|adx` | format of the Upper and Hyper music streams in the zips (default `ogg`) |
+| `--sans-flux` | no stream table and no streams in the zips (disc music missing) |
+| `--rejeu-table FICHIER` | (Hyper) replay table of the SFA1 / SFA2 sounds (default: `tools/son-hyper/rejeu/hsfa_rejeu_table.txt` if it is there); with it, per-version voice redirection and replay (§4) |
+| `--sans-redirection` | (Hyper) neither voice redirection nor replay, even with the table |
+| `--greffe-releves DOSSIER` | (Hyper + Arcade) graft records other than the repository's (§6) |
+| `--outils-*` | location of each group of tools (otherwise `HSFA_OUTILS_*`) |
 
-Chaque étape est **idempotente** : elle est sautée si ses entrées, ses outils et ses paramètres n'ont pas changé
-(`etat.json`). Une construction complète prend environ 6 min (dont 1 min 30 d'encodage Ogg) ; une relance sans changement, quelques secondes.
+Each step is **idempotent**: it is skipped if its inputs, its tools and its parameters have not changed
+(`etat.json`). A full build takes about 6 min (including 1 min 30 of Ogg encoding); a rerun without changes, a few seconds.
 
-## 4. Sorties et vérification
+## 4. Outputs and checking
 
-- `hsfa_sortie/EMPREINTES.txt` : md5 de toutes les ROM produites et du contenu des archives.
-- `hsfa_sortie/journal.txt` (marques `>>` étape, `ok`, `!!` anomalie) et `journaux/<étape>.log`.
-- Archives du cœur : `archives/sfa3hsfa.zip`, `sfa3uhsfa.zip`, `sfa3hhsfa.zip`. Elles sont déterministes : deux
-  constructions donnent les mêmes octets, Ogg compris. Depuis le 08/11 (§206, `hsfa_oggenc`), c'est vrai d'un
-  système à l'autre (Linux, Windows, macOS, x86_64, ARM) : mêmes empreintes partout.
+- `hsfa_sortie/EMPREINTES.txt`: md5 of all the ROMs produced and of the archive contents.
+- `hsfa_sortie/journal.txt` (marks `>>` step, `ok`, `!!` anomaly) and `journaux/<étape>.log`.
+- Core archives: `archives/sfa3hsfa.zip`, `sfa3uhsfa.zip`, `sfa3hhsfa.zip`. They are deterministic: two
+  builds give the same bytes, Ogg included. Since 08/11 (§206, `hsfa_oggenc`), this holds from one
+  system to another (Linux, Windows, macOS, x86_64, ARM): same fingerprints everywhere.
 
-Ce qui est garanti (rapport BUILD §0, §3, §5 ; contrôle du 2026-10-27 contre les zips officiels v151, refait le 2026-10-28 en v153 et le 2026-11-03 en v154
-(depuis l'ISO, sans table : Hyper `dda35430…`), ISO « All Unlocked », `--arcade`) :
-- les ROM programme sont **identiques (md5)** à celles des zips officiels : SFA3 `e0f1cfdc…`, Upper `0b8ecca2…`, Hyper
-  `b8e699cf…` (avec la table du rejeu) ; depuis le traducteur v160 (2026-11-08, §207) : SFA3 `9b06c7cf…` (comme en
-  v159), Upper `3a9b7fd9…`, Hyper `0baed6af…` (avec la table ; sans : `e3806660…`) ; v159 (§203-§204) : Upper
-  `45fd0244…`, Hyper `8e4f9ef2…` / `1f06234d…` ;
-- avec `--arcade`, les archives aussi, membre à membre, hors `hsfa_info.txt` (journal de construction) et
-  `hsfa_flux.bin` : ses flux Ogg ont le même audio, paquet Vorbis par paquet Vorbis, et seul leur en-tête de
-  commentaires change (chaîne d'encodeur sans version depuis `+bitexact`) ;
-- en voie « ISO seule », `sz3.14m`, `16m`, `18m`, `20m` sont identiques à l'arcade ; `13m`, `15m`, `17m`, `19m` ne
-  peuvent pas l'être (9 tuiles de l'arcade n'existent pas dans l'ISO), sans effet sur les jeux HSFA ;
-- l'ISO est vérifiée **par groupe de jeu** : la variante « All Unlocked » de `X_DATA.BIN` convient aussi.
+What is guaranteed (BUILD report §0, §3, §5; check of 2026-10-27 against the official v151 zips, redone on 2026-10-28 in v153 and on 2026-11-03 in v154
+(from the ISO, without table: Hyper `dda35430…`), "All Unlocked" ISO, `--arcade`):
+- the program ROMs are **identical (md5)** to those of the official zips: SFA3 `e0f1cfdc…`, Upper `0b8ecca2…`, Hyper
+  `b8e699cf…` (with the replay table); since translator v161 (2026-11-11, §219): SFA3 `a569c361…`, Upper
+  `ac053140…`, Hyper `dbfd237d…` (with the table; without: `ffc5eac1…`); v160 (§207): SFA3 `9b06c7cf…`, Upper `3a9b7fd9…`,
+  Hyper `0baed6af…` / `e3806660…`; v159 (§203-§204): Upper
+  `45fd0244…`, Hyper `8e4f9ef2…` / `1f06234d…`;
+- with `--arcade`, the archives too, member by member, except `hsfa_info.txt` (build log) and
+  `hsfa_flux.bin`: its Ogg streams have the same audio, Vorbis packet by Vorbis packet, and only their comment
+  header changes (encoder string without version since `+bitexact`);
+- on the "ISO only" route, `sz3.14m`, `16m`, `18m`, `20m` are identical to the arcade; `13m`, `15m`, `17m`, `19m`
+  cannot be (9 arcade tiles do not exist in the ISO), with no effect on the HSFA games;
+- the ISO is checked **per game group**: the "All Unlocked" variant of `X_DATA.BIN` is fine too.
 
-**Hyper : voix par version et rejeu** (étape `son_hyper`, SON-HYPER-ROM §12-§13) :
-- `gen_redirection.py` relit le module `ro9` extrait de **votre** ISO et produit le module corrigé (70 mots, md5
-  `dcda2bb…`) et le bloc de données `$E70000` (`son_donnees_ro9.bin`, 19 712 o, `ebefd8b2…`). Les deux contiennent des
-  octets du jeu : ils sont **régénérés à chaque construction** et jamais publiés. Le dépôt ne fournit que des tables :
-  `ids_102.tsv` (versions), `correspondance.tsv` (code SFA3 → commande SFA1 / SFA2).
-- La **table du rejeu** (traces QSound des pilotes SFA1 / SFA2, 3,2 Mo) est une entrée à part : `--rejeu-table` ou
-  `tools/son-hyper/rejeu/hsfa_rejeu_table.txt`. La construction y ajoute la section des cris par version. Avec elle,
-  le programme d'Hyper est celui de la v160 (`0baed6af…` ; v159 : `8e4f9ef2…` ; v154-v158 : `b8e699cf…`) et le zip contient `hsfa_rejeu.bin` (8 Mo, copiés depuis le
-  `X_DATA.BIN` de l'ISO, CRC contrôlés) et `hsfa_rejeu_table.txt`.
-- Sans table, Hyper garde les voix de SFA3 pour toutes ses versions (programme `e3806660…` en v160, `1f06234d…` en v159, `dda35430…` en v154-v158) et le zip n'a pas de
-  rejeu : sans table, les codes de rejeu n'auraient pas de son.
+**Hyper: per-version voices and replay** (step `son_hyper`, SON-HYPER-ROM §12-§13):
+- `gen_redirection.py` reads the `ro9` module extracted from **your** ISO and produces the patched module (70 words, md5
+  `dcda2bb…`) and the `$E70000` data block (`son_donnees_ro9.bin`, 19,712 bytes, `ebefd8b2…`). Both contain game
+  bytes: they are **regenerated at every build** and never published. The repository only provides tables:
+  `ids_102.tsv` (versions), `correspondance.tsv` (SFA3 code → SFA1 / SFA2 command).
+- The **replay table** (QSound traces of the SFA1 / SFA2 drivers, 3.2 MB) is a separate input: `--rejeu-table` or
+  `tools/son-hyper/rejeu/hsfa_rejeu_table.txt`. The build adds the per-version shouts section to it. With it,
+  Hyper's program is the v161 one (`dbfd237d…`; v160: `0baed6af…`; v159: `8e4f9ef2…`; v154-v158: `b8e699cf…`) and the zip contains `hsfa_rejeu.bin` (8 MB, copied from the
+  ISO's `X_DATA.BIN`, CRCs checked) and `hsfa_rejeu_table.txt`.
+- Without the table, Hyper keeps SFA3's voices for all its versions (program `ffc5eac1…` in v161, `e3806660…` in v160, `1f06234d…` in v159, `dda35430…` in v154-v158) and the zip has no
+  replay: without the table, the replay codes would have no sound.
 
-## 5. Upper MAX (persos de SFA3 MAX)
+## 5. Upper MAX (SFA3 MAX characters)
 
 ```bash
 python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
     --psp-iso "Street Fighter Alpha 3 MAX (Europe).iso" --sortie hsfa_sortie --jeux upper,uppermax
 ```
 
-- Résultat : `archives/sfa3umhsfa.zip` (pilote `sfa3umhsfa` du cœur). C'est l'état du lot **2b31**. Le programme et
-  la ROM son sont identiques à ce lot. Avec `--arcade`, l'archive entière l'est aussi, hors `hsfa_info.txt`.
-- Il ne faut pas de dump PPSSPP ni d'EBOOT déchiffré : le `BOOT.BIN` de l'ISO est déjà en clair. L'ISO est
-  contrôlée : identité et empreintes des fichiers lus. Une ISO patchée (16:9 par exemple), un EBOOT chiffré ou une
-  autre région sont refusés avec un message.
-- Seule l'**édition européenne** est prise en charge. Les éditions US et JP ont un code décalé.
-- Durée : environ 2 min 30 de plus qu'Upper seul ; place : environ 500 Mo de plus.
-- Détail et preuves : [rapports/BUILD.md](../rapports/BUILD.md) §10 ;
+- Result: `archives/sfa3umhsfa.zip` (driver `sfa3umhsfa` of the core). It is the state of batch **2b31**, ported to the current translator (v161: the
+  program follows Upper's). The sound ROM is identical to that batch; with `--arcade`, the graphics too, except `hsfa_info.txt`.
+- No PPSSPP dump and no decrypted EBOOT are needed: the ISO's `BOOT.BIN` is already in the clear. The ISO is
+  checked: identity and fingerprints of the files read. A patched ISO (16:9 for example), an encrypted EBOOT or
+  another region are refused with a message.
+- Only the **European edition** is supported. The US and JP editions have shifted code.
+- Time: about 2 min 30 more than Upper alone; space: about 500 MB more.
+- Details and proof: [rapports/BUILD.md](../rapports/BUILD.md) §10;
   [tools/integration-max/upper_max](../../tools/integration-max/upper_max/README.md).
 
-## 6. Hyper + Arcade (mode Arcade d'Upper greffé sur Hyper, expérimental)
+## 6. Hyper + Arcade (Upper's Arcade mode grafted onto Hyper, experimental)
 
 ```bash
 python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
     --sortie hsfa_sortie --jeux hyperarcade [--rejeu-table hsfa_rejeu_table.txt] [--arcade sfa3.zip]
 ```
 
-- Résultat : `archives/sfa3hahsfa.zip` (pilote `sfa3hahsfa` du cœur), état **ro9a35b** (08/11). `hyperarcade`
-  ajoute `upper` et `hyper` : la greffe part de leurs sorties (modules, anims, banques, son). Étapes en plus :
-  `greffe_hyperarcade` (code figé de `tools/greffe-arcade/construction/`, environ 3 min) et `paquet_hyperarcade`.
-- **Avec la ROM d'arcade et la table du rejeu** : le zip est celui de ro9a35b, hors `hsfa_info.txt` (provenance).
-- **Sans la table du rejeu** : la greffe part du module d'Hyper d'origine. Hyper garde les voix de SFA3 pour toutes
-  les versions, et le zip n'a pas de rejeu (`hsfa_rejeu.bin`, `hsfa_rejeu_table.txt` absents), comme Hyper seul.
-- **Sans la ROM d'arcade** (voie ISO seule) : ROM graphique reconstruite depuis l'ISO, comme pour Hyper ; seuls la
-  ROM graphique, `hsfa_gfx.bin` et `hsfa_tab.bin` changent (codes de tuiles), le programme est le même. Au cœur, la
-  partie est la même ; seule l'ombre au sol des persos est pleine au lieu de tramée (tuile retouchée de l'Anthology).
-- **Relevés** : la greffe relit des tableaux tirés de passes MAME et d'analyses de l'atelier (adresses et numéros
-  seulement, 4,5 Mo de TSV dans `tools/greffe-arcade/construction/releves_ro9a35b/`) ; `--greffe-releves` en donne
-  d'autres. Détail : [tools/greffe-arcade/construction](../../tools/greffe-arcade/construction/LISEZMOI.md).
-- Durée : environ 2 min 30 de plus qu'Upper + Hyper (greffe 130-160 s, paquet 8 s) ; place : environ 0,4 Go de plus.
-- Détail et preuves : [rapports/BUILD.md](../rapports/BUILD.md) §11.
+- Translator: the graft has its frozen copy of translator **v161** (`untranspile3_v161`, state ro9a37, §221): the
+  v161 fixes (§219) reach Hyper + Arcade.
+- Result: `archives/sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a37** (11/11). `hyperarcade`
+  adds `upper` and `hyper`: the graft starts from their outputs (modules, animations, banks, sound). Extra steps:
+  `greffe_hyperarcade` (frozen code of `tools/greffe-arcade/construction/`, about 3 min) and `paquet_hyperarcade`.
+- **With the arcade ROM and the replay table**: the zip is the ro9a37 one (delivered on 12/11, CRC `51882820`), except
+  `hsfa_info.txt` (provenance) and the sound ROM (`hx3.01`, `hx3.02`, `hx3.14m`: sounds specific to the PS2 port added,
+  §218; with `HSFA_SONS_PS2=0`, identical).
+- **Without the replay table**: the graft starts from Hyper's original module. Hyper keeps SFA3's voices for all
+  the versions, and the zip has no replay (`hsfa_rejeu.bin`, `hsfa_rejeu_table.txt` absent), like Hyper alone.
+- **Without the arcade ROM** ("ISO only" route): graphics ROM rebuilt from the ISO, as for Hyper; only the
+  graphics ROM, `hsfa_gfx.bin` and `hsfa_tab.bin` change (tile codes), the program is the same. In the core, the
+  game and the picture are the same (the ground shadow of the ZERO / ZERO 2 characters is transparent on both routes
+  since `HSFA_OMBRE_CODES`, BUILD §11.5).
+- **Records**: the graft reads tables taken from MAME passes and workshop analyses (addresses and numbers
+  only, 4.5 MB of TSV in `tools/greffe-arcade/construction/releves_ro9a37/`); `--greffe-releves` provides
+  others. Details: [tools/greffe-arcade/construction](../../tools/greffe-arcade/construction/LISEZMOI.md).
+- Time: about 2 min 30 more than Upper + Hyper (graft 130-160 s, package 8 s); space: about 0.4 GB more.
+- Details and proof: [rapports/BUILD.md](../rapports/BUILD.md) §11.
 
-## 7. Ensuite
+## 7. Next
 
-- Copier les zips sur la console : [installation-android.md](installation-android.md),
+- Copy the zips to the console: [installation-android.md](installation-android.md),
   [installation-rocknix.md](installation-rocknix.md).
-- Les cœurs se compilent à part : [patches/fbneo](../../patches/fbneo/README.md).
+- The cores are compiled separately: [patches/fbneo](../../patches/fbneo/README.md).
