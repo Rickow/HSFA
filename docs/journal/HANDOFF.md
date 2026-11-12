@@ -6194,3 +6194,44 @@ d'atelier (chacun a un ETAT.md avec la prochaine étape exacte) :
 - commencés puis arrêtés : rattrapage de l'index (`rattrapage_re/`), spécification de la carte à banques
   (`spec_banques/`).
 Index : lignes des revues versées dans `re/connaissances/` (ro3, ro5, ro9, ro9a, sfa3_arcade, champs, max_psp).
+
+### 223. 12/11: Hyper + Arcade ro9a38: four fixes from the critical review of the graft (R3, X6, A2a, E2b)
+Agent `greffe38` (sfa3ha). Fixes found by the review of the graft (§222, `<workspace>/work/revue_greffe/RAPPORT.md`,
+`RESULTATS_ESSAIS.md`, `flou/RAPPORT_FLOU.md`) and confirmed on the bench, each behind its own switch; all switches at 0
+(code of ro9a38, nothing on) = `ro9a37_fige` byte for byte (34/35 of MD5SUMS, only `env.sh`: paths).
+- **R3** (`R3_CREUX=1 R3_CIBLES=1`, `etape2/donnees2.py`, `etape3/greffe3.py`, diff of the review): 142 data cells proven
+  to be pointers (Upper's conversion log) were left raw in the data copied from Upper: a proven cell is never treated as
+  a bank hole, and the target of a proven cell in a copied region is always followed. No visible effect measured (stages
+  and endings unchanged): a background fix.
+- **X6** (`X6_FINS=1`, `etape3/force3.py`): 13 states / handlers of Upper's ending actors were still sent to a non-injective
+  Hyper "homologue" (0xA0FD0 and 0x84EA0 = fight routines, 0x31F50 = release into the other pool, 0x65180 =
+  `ADDQ.B #2` instead of `#4`): 204BB0 207530 207780 20B2A0 20B430 (Guy), 20C6E0 (Sagat), 2094A0 ($18), 21D6C0 21DD90
+  21EA50 21EDC0 (emitters of endings 0F 10 19 1A), 20FCE0 ($1C), 21F670: now grafted. Entry probe in the endings
+  (review test 04b): 13 real entries into Hyper's routines from a copy -> 5, all `JSR (A0)` of Upper 0x1197D4 into
+  0x31F50 through 0x11AD00, the routine the review proved equivalent.
+- **A2a** (`A2A_VS=1`): after a VERSUS played on an Upper stage, the fork's plane bases stayed those of the stage
+  ($4400/$440/$4A0) through the result screen and the whole next character select (background in wrong tiles). The
+  `scene2_bases` stub (scene A5+4 = 2) now sets Hyper's bases outside Arcade too; the select itself keeps the layers
+  off for its first frames ($32 = $1B00), so the switch is invisible.
+- **E2b** (`E2B_DEFI=1`): a challenger accepted during Upper's map, face-off or an Arcade fight went to the select with
+  no mask (copy u1353A0): 2-3 frames of full-screen wrong tiles. New stub `defi_sortie` on the `JSR u1354E0` of the
+  exit path (Upper 0x1353EC): original call, then layers masked in `$32(A5)` and in the CPS-B layer register $804166
+  (form of `masque_sortie`, §217) and counter `$FF7E0A` = 6; `scene2_bases` keeps the stage bases and the mask while the
+  counter runs, then sets Hyper's bases and `ORI.W #$E,$32(A5)`. Map, face-off and fight: no wrong tiles (6-7 black
+  frames under the banner).
+- Recipe `ro9a38/greffe/vars_ro9a38.txt` = that of ro9a37 + `R3_CREUX=1 R3_CIBLES=1 X6_FINS=1 A2A_VS=1 E2B_DEFI=1`.
+  Translator of the graft unchanged (v161). `sz3ud.03c` `2dfdb15c…`.
+- **Checks**: v161 build guards identical to ro9a37 (only the addresses of the 61 PARITE sites move with the X6 code);
+  VERSUS under MAME (60 rounds, reference list) = ro9a37 **byte for byte**; stage bench (twin without CPU draw) **40/40**
+  identical to ro9a37's twin (28/40 against Upper, as before: not a regression criterion); endings bench (85 Arcade games up to the credits, with the CPU draw): **85/85** reached, no exception, ending durations and states identical to ro9a37's bench (0/81 and 0/4 differ by more than 2 frames).
+- **X2 (MAX ids) is NOT in ro9a38** (coordinator's decision): the code is there behind `X2_TABLES=0`. With it on, ids
+  $28 / $2D / $2E forced during the map, face-off and victory screens play 11 rounds with no exception (review test
+  05c), but the table list had to grow well beyond the review's 9 (offset-header tables, per-character animation banks
+  of Hyper and of the stage zone, two half-tables of the victory screen) and two of the 9 are object-indexed (not
+  extendable). Findings: `<workspace>/work/greffe_ro9a38/ETAT.md` (X2 section); a complete inventory is in progress
+  separately.
+- **Build copy** (`tools/greffe-arcade/construction/`): `ro9a37/` -> `ro9a38/` (code diff of `donnees2.py`, `force3.py`,
+  `greffe3.py`), `releves_ro9a37/` -> `releves_ro9a38/` (unchanged), `HA_ETAT = "ro9a38"`. Proof (BUILD §11.8):
+  graft alone from the repository = `ro9a38_fige` byte for byte (34/35, only `env.sh`); with the arcade ROM, the replay table and `HSFA_SONS_PS2=0`, the zip has 31/32 members identical to the delivered zip (CRC `AC7D9F00`), only `hsfa_info.txt` differs; Upper and Hyper unchanged.
+
+- Added 12/11: the review reports and their tools are now in the repository: `docs/rapports/reviews/` (English summary + original French text) and `tools/reviews/`.

@@ -119,12 +119,12 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
     --sortie hsfa_sortie --jeux hyperarcade [--rejeu-table hsfa_rejeu_table.txt] [--arcade sfa3.zip]
 ```
 
-- Traducteur : la greffe a sa copie figée du traducteur **v161** (`untranspile3_v161`, état ro9a37, §221) : les
+- Traducteur : la greffe a sa copie figée du traducteur **v161** (`untranspile3_v161`, états ro9a37 et ro9a38, §221, §223) : les
   correctifs de la v161 (§219) atteignent Hyper + Arcade.
-- Résultat : `archives/sfa3hahsfa.zip` (pilote `sfa3hahsfa` du cœur), état **ro9a37** (11/11). `hyperarcade`
+- Résultat : `archives/sfa3hahsfa.zip` (pilote `sfa3hahsfa` du cœur), état **ro9a38** (12/11). `hyperarcade`
   ajoute `upper` et `hyper` : la greffe part de leurs sorties (modules, anims, banques, son). Étapes en plus :
   `greffe_hyperarcade` (code figé de `tools/greffe-arcade/construction/`, environ 3 min) et `paquet_hyperarcade`.
-- **Avec la ROM d'arcade et la table du rejeu** : le zip est celui de ro9a37 (livré le 12/11, CRC `51882820`), hors
+- **Avec la ROM d'arcade et la table du rejeu** : le zip est celui de ro9a38 (livré le 12/11, CRC `AC7D9F00`), hors
   `hsfa_info.txt` (provenance) et la ROM son (`hx3.01`, `hx3.02`, `hx3.14m` : sons propres au portage PS2 ajoutés,
   §218 ; avec `HSFA_SONS_PS2=0`, identique).
 - **Sans la table du rejeu** : la greffe part du module d'Hyper d'origine. Hyper garde les voix de SFA3 pour toutes
@@ -134,7 +134,7 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
   partie et l'image sont les mêmes (l'ombre au sol des persos ZERO / ZERO 2 est transparente dans les deux voies depuis
   `HSFA_OMBRE_CODES`, BUILD §11.5).
 - **Relevés** : la greffe relit des tableaux tirés de passes MAME et d'analyses de l'atelier (adresses et numéros
-  seulement, 4,5 Mo de TSV dans `tools/greffe-arcade/construction/releves_ro9a37/`) ; `--greffe-releves` en donne
+  seulement, 4,5 Mo de TSV dans `tools/greffe-arcade/construction/releves_ro9a38/`) ; `--greffe-releves` en donne
   d'autres. Détail : [tools/greffe-arcade/construction](../../tools/greffe-arcade/construction/LISEZMOI.md).
 - Durée : environ 2 min 30 de plus qu'Upper + Hyper (greffe 130-160 s, paquet 8 s) ; place : environ 0,4 Go de plus.
 - Détail et preuves : [rapports/BUILD.md](../rapports/BUILD.md) §11.

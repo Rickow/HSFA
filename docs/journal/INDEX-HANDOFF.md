@@ -3,7 +3,7 @@
 > **English**: the journal (`docs/journal/`) is a historical archive kept in French, like this index; the key
 > documents of the repository are in English (see [docs/README.md](../README.md)).
 
-> Journal indexé : `docs/journal/HANDOFF.md` (6 177 lignes, état du 2026-11-12, jusqu'à §221). Les sections §116 à §221
+> Journal indexé : `docs/journal/HANDOFF.md` (6 235 lignes, état du 2026-11-12, jusqu'à §223). Les sections §116 à §223
 > ont une ligne chacune au §13 (§173-§201 : titre seul, ajoutées le 2026-11-07) ; numéros de ligne recalés le 2026-11-07 pour
 > §173-§201 et le 2026-11-11 pour §212-§215 ; la grille de fin s'arrête à §172.
 > Les numéros de ligne renvoient aux **titres** de section (`sed -n 'L,+40p' HANDOFF.md`, ou `Read` avec `offset=L`).
@@ -17,7 +17,7 @@ Le journal mélange **trois séries de numéros**. Un « §5 » peut désigner t
 |---|---|---|---|
 | **R§0 … R§8** (+ R§6bis) | chapitres « racine » `## N.` | 13–617 | les plus anciens ; ordre 0,1,2,3,4,5,**8**,6,6bis,7 ; beaucoup sont **dépassés** |
 | **C1 … C5** | chapitre « Carte MIPS↔68K… » (l. 618), `### N.` | 620–713 | métrique et impasses de la carte |
-| **§1 … §221** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–6177 | **série canonique** : §1-§21 puis §22-§221 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
+| **§1 … §223** | chapitre « Recensement du traducteur… » (l. 715), puis « Assembleur… » (l. 1048) | 717–6235 | **série canonique** : §1-§21 puis §22-§223 sans rupture. Les renvois « §NN » du journal et de la mémoire (≥ 22) suivent cette série |
 
 La ligne 1543 commence par `#imm,…` : ce n'est pas un titre (faux positif de `grep '^#'`).
 
@@ -323,7 +323,7 @@ Légende : ⛔ = **dépassé** (lire la section qui corrige) · ⭐ = section cl
 
 ---
 
-## 13. Suite du journal, §116-§221 (une ligne par section)
+## 13. Suite du journal, §116-§223 (une ligne par section)
 
 Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au §8 bis ; les rapports cités sont dans
 `docs/rapports/`.
@@ -437,6 +437,7 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §220 | 6128 | hsfa | Upper MAX suit v161 : intégration sans adresse d'image en dur ; JSR $1B6B6 arcade corrigé ; banc max57 vert ; revue (16 constats) |
 | §221 | 6144 | sfa3ha | Hyper + Arcade passe au traducteur v161 (ro9a37) : Mazi ×1,5 (octet image $ED), enchaînements, couleur miroir ; =0 → ro9a36 ; VERSUS = ro9a36 ; banc des fins 85/85 |
 | §222 | 6182 | hsfa | Revues critiques (traducteur, Upper MAX, greffe, cœur) : où sont les rapports et les reprises |
+| §223 | 6198 | sfa3ha | Hyper + Arcade ro9a38 : correctifs R3 (pointeurs prouvés), X6 (13 états d'acteurs de fin), A2a (bases après un VERSUS), E2b (nouveau challenger) ; =0 → ro9a37 ; X2 (ids MAX) hors lot |
 
 ---
 

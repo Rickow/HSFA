@@ -7,6 +7,22 @@ est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports
 > **Language**: from 2026-11-12 on, the entries of this changelog are written in English (starting with the
 > v0.1.9 section below); the older entries stay in French.
 
+## Unreleased
+
+- **Hyper + Arcade** (ro9a38): four fixes from the critical review of the graft. After a VERSUS played on an Upper
+  stage, the next character select no longer shows its background in wrong tiles; when a new challenger joins during
+  Upper's map, face-off or an Arcade fight, the 2-3 frames of full-screen wrong tiles are gone (a few black frames
+  under the banner instead); 13 pieces of Upper's ending actors (Guy, Sagat and the endings of characters 0F, 10, 18,
+  19, 1A, 1C) no longer run Hyper fight routines; 142 proven pointers of Upper's data are now converted. With the fixes
+  off, the build gives ro9a37 byte for byte; VERSUS identical to ro9a37, stages unchanged, all endings reached.
+  `hsfa_build.py --jeux hyperarcade` builds ro9a38 (§223).
+- **Upper and Upper MAX: Dee Jay's taunt is no longer silent.** Like Hyper before v0.1.9, Upper keeps the hybrid sound
+  ROM, whose Z80 has no sound for two commands that the PS2 port plays from its own sound banks: Dee Jay's taunt
+  (`057D`) and entry 15 of Birdie's sound table (`040F`). The build adds them to Upper's and Upper MAX's sound ROMs from
+  your ISO (`tools/son-hyper/sons_ps2.py --jeu upper|uppermax`, steps `sons_ps2_upper` / `sons_ps2_uppermax`, same
+  switch `HSFA_SONS_PS2`; `0` = previous ROMs byte for byte); Hyper's sound ROM does not change
+  ([report](docs/rapports/SONS-PS2-UPPER.md)).
+
 ## v0.1.9 (2026-11-12, pre-release)
 
 - **Savestates: HSFA zone checked before being applied** (patch `0032`, core batch of 12/11b; v0.1.9

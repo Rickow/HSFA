@@ -293,6 +293,33 @@ def donnees(buf, data, end, T, W=None):
                 else: b_ = ORIG[t - RB + 32 * (i & 0x1F):][:32]
                 pose(t, i, b_)
         log("défense par victime : lignes $20-$2F des 3 tables (0x697FE0 MAX = PSP 0x2190C8) ; ANDI #$1F -> #$3F en image")
+    # (arbitrages_um, 12/11, revue B4 / B5 ; arbitrage du porteur : « alignés sur la PSP après mesure ») entrées MAX lues
+    # dans l'EBOOT (id PSP : Eagle $26, Maki $27, Yun $28, Ingrid $29). À 0 PAR DÉFAUT tant que le banc ne les a pas
+    # validées. Contrôle d'alignement : les natifs 0-$25 qui diffèrent entre PSP et Upper doivent être exactement ceux du
+    # relevé (empreinte), sinon la table PSP n'est pas celle qu'on croit.
+    #   MAX_615940_PSP=1 : effet lié (dx, dy) de 0x615940 (lu par l'état du sous-type 6 de la classe 7, arcade $82C98) <-
+    #     PSP 0x2205E8 : Eagle (-37, 84) -> (-40, 96), Maki (-37, 84) -> (32, 80), Yun (0, 0) -> (-16, 72), Ingrid (0, 0)
+    #     -> (-18, 77) ; contrôle en plus : Vega (pseudo-id 40 / 41 d'Upper = 42 / 43 de la PSP) ;
+    #   MAX_MASQUES_PSP=1 : masques de l'Arcade (non nul -> $162(A5) = $FF) 0x61B540 (combat secret) <- PSP 0x20B676,
+    #     0x61B4E0 ($13E = 8) <- 0x20B6A0 (déjà égal), 0x61B510 ($13E = $A) <- 0x20B6CA : Eagle 0 -> 1 et 1 -> 0, Yun 0 -> 1
+    #     (tous les natifs qui ont un combat secret dans 0x61B680 ont 1 dans 0x61B540).
+    PSPID_ = {"26": 0x26, "27": 0x27, "2d": 0x28, "2e": 0x29}
+    for var_, tu_, tp_, e_, ecarts_ in (("MAX_615940_PSP", 0x615940, 0x2205E8, 4, ()),
+                                        ("MAX_MASQUES_PSP", 0x61B540, 0x20B676, 1, (0x12, 0x15, 0x17, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23)),
+                                        ("MAX_MASQUES_PSP", 0x61B4E0, 0x20B6A0, 1, (0x12, 0x14)),
+                                        ("MAX_MASQUES_PSP", 0x61B510, 0x20B6CA, 1, (0x12, 0x1B, 0x1C))):
+        if os.environ.get(var_, "0") != "1": continue
+        eb = open(os.environ.get("SFA3MAX_EBOOT", "@UM_EBOOT@"), "rb").read()[0x74:]
+        dif_ = tuple(i for i in range(0x26) if eb[tp_ + e_ * i:tp_ + e_ * (i + 1)] != ORIG[tu_ - RB + e_ * i:tu_ - RB + e_ * (i + 1)])
+        assert dif_ == ecarts_, "%s : PSP 0x%X / Upper 0x%X : natifs différents %s, attendu %s" % (var_, tp_, tu_, dif_, ecarts_)
+        if tu_ == 0x615940:
+            assert eb[tp_ + 4 * 42:tp_ + 4 * 44] == ORIG[tu_ - RB + 4 * 40:tu_ - RB + 4 * 42], "MAX_615940_PSP : Vega (40 / 41 = PSP 42 / 43)"
+        av_ = []
+        for p in ACTIFS:
+            b_ = eb[tp_ + e_ * PSPID_[p]:][:e_]
+            av_.append("%s %s" % (PERSOS[p]["nom"], struct.unpack("<hh" if e_ == 4 else "<B", b_)))
+            pose(tu_, int(p, 16), b_)
+        log("%s : 0x%X <- PSP 0x%X : %s" % (var_, tu_, tp_, ", ".join(av_)))
     pose_generique(pose)
     # (2b24, N21) dialogues Arcade des MAX (converti/dialogues/dialogues_upper_max.s, disposition ARCADE) : répliques ->
     # 0x683C28 (US, rel16n, n° 756+ ; octets tels quels comme les textes de fin), scénarios -> 0x970F40 (rel16n, n° 154+ ;
@@ -1388,11 +1415,21 @@ def deplace_palettes(data, end, T_ps2, zone, fichier, nom):
     for b in blocs:
         if b < 0 < b + tailles[b]: tailles[b] = -b
     corps = {b: bytes(data[t0 + b:t0 + b + tailles[b]]) for b in blocs}
+    # (arbitrages_um, 12/11, revue B7) palettes d'EFFETS au-delà de 30 : 36 sur PSP (Ingrid 72), comme pour TOUS les persos
+    # de la PSP ; le moteur d'Upper lit la palette D0 du bloc (image $2643C, va 0x116750) sans borne : une palette 30+
+    # demandée pour un MAX lirait le bloc suivant de la zone. Coupure à 30 gardée (défaut) et désormais SIGNALÉE ;
+    # MAX_PALE_PLEINES=1 : blocs d'effets MAX entiers (réservation de MAX_PALE_ZONE +$800 dans prepare_max), pour l'essai.
+    pleines = os.environ.get("MAX_PALE_PLEINES", "0") == "1" and "effets" in fichier
     for p in ACTIFS:
         f_ = MC.CV + "%s/%s" % (PERSOS[p]["pl"], fichier)
         fu_ = f_.replace(".bin", "_upper.bin")        # Ingrid : 48 palettes PSP -> 6 x 5 (session MAX, point 7)
         d = open(fu_ if os.path.exists(fu_) else f_, "rb").read()
-        corps["max" + p] = d[:N] if len(d) >= N else d + bytes(N - len(d))
+        if len(d) > N:
+            nz_ = sum(1 for k in range(N, len(d), 32) if any(d[k:k + 30]))
+            log("%s de %s : %d palettes dans %s, %s (%d non nulles au-delà de 30)" % (nom, PERSOS[p]["nom"], len(d) // 32,
+                os.path.basename(fu_ if os.path.exists(fu_) else f_), "toutes posées (MAX_PALE_PLEINES=1)" if pleines else
+                "COUPÉES À 30", nz_))
+        corps["max" + p] = d if pleines and len(d) > N else d[:N] if len(d) >= N else d + bytes(N - len(d))
     cles = blocs + ["max" + p for p in ACTIFS]
     taille = lambda k: len(corps[k])
     avant, apres, tot = [], [], sum(taille(k) for k in cles)
@@ -1406,6 +1443,7 @@ def deplace_palettes(data, end, T_ps2, zone, fichier, nom):
     tab = [pos[b] - tz for b in off] + [pos[off[0]] - tz] * 24     # au-delà de 40 : bloc de Ryu par défaut
     for p in ACTIFS: tab[int(p, 16)] = pos["max" + p] - tz
     assert all(-0x8000 <= x <= 0x7FFF - N for x in tab)
+    assert all(-0x8000 <= pos[k] - tz <= 0x8000 - len(corps[k]) for k in cles), "%s : bloc hors de portée des décalages s16" % nom
     struct.pack_into("<64h", Z, tz, *tab)
     za = S(zone)
     im = bytes(x for i in range(0, len(Z), 2) for x in (Z[i + 1], Z[i]))   # PS2 -> image (mots échangés)

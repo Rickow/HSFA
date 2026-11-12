@@ -66,6 +66,21 @@ La base d'Upper est donc celle du traducteur courant (plus d'étape `prog_upper_
 l'octet : `um_prog.py … --upper <Upper v160> --env A8_ENTREE=0 …` (tous les interrupteurs v161 à 0) et
 `--env CONV_SANS_ADRESSES=1B6B6` (sans la correspondance `$1B6B6` des acteurs de fin, ajoutée le 11/11).
 
+## Unresolved conversion lines and switches of the 12/11 arbitrations (agent arbitrages_um)
+
+- **Blocking "NON RÉSOLU"**: every line that `convertit_max.py` cannot type (left in arcade layout, so it would read the
+  neighbouring byte) must be listed in `integration_2b31/ag/conv/non_resolus_admis.tsv` (file, entry label, normalised
+  instruction, count, verdict, reason); `prepare_max.py` stops on any other. Verdicts: `admis` (hand-written in image
+  layout, word access, symbol checked elsewhere), `mort` (crossed intros skipped by the `bra` of `sources()`; checked:
+  the line must lie in the skipped zone), `defaut_connu` (Yun `$32D`, to be removed when its fix lands). A listed line
+  that disappears is reported (`AVIS`), not blocking. `CONV_NON_RESOLUS_LIBRES` (even empty) lets everything through, to
+  rebuild old batches; an engine address let through by `CONV_SANS_ADRESSES` is not counted.
+- **Switches, default 0 until the test bench validates them** (default build = batch max57, byte for byte):
+  `MAX_615940_PSP=1` (linked effect offset table `0x615940` <- PSP `0x2205E8`), `MAX_MASQUES_PSP=1` (Arcade masks
+  `0x61B540` / `0x61B4E0` / `0x61B510` <- PSP `0x20B676` / `0x20B6A0` / `0x20B6CA`): MAX entries read from the EBOOT, the
+  set of native entries that differ is checked; `MAX_PALE_PLEINES=1`: full MAX effect palette blocks (36, Ingrid 72)
+  instead of 30 (the cut is now written to the build log).
+
 ## Garanties (07/11, agent script_um)
 
 - Toutes les sorties régénérées sont identiques au lot 2b31, avec la ROM graphique d'arcade : cache (121/126),

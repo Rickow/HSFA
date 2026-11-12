@@ -21,6 +21,13 @@ Interrupteur : HSFA_SONS_PS2=0 (ou HSFA_PARADE=0) -> ROM de base recopiée telle
 HSFA_SONS_PS2=nom1,nom2 -> seulement ces sons (noms de SONS_SPEC).
 
 Usage : sons_ps2.py --base DOSSIER_HX3 --xdata X_DATA.BIN --manifeste manifest.csv --sortie DOSSIER [--journal F]
+        [--jeu hyper|upper|uppermax]
+
+Upper and Upper MAX (--jeu upper / uppermax; docs/rapports/SONS-PS2-UPPER.md): same hybrid driver, same native table
+(ro5 = ro9), but Upper's code reaches only two of these sounds (static inventory of the ro5 module and of the translated
+image): Birdie, entry 15 of his sound table (040F), and Dee Jay's taunt, entry 34 (057D). Base = the hybrid ROM (Upper)
+or the MAX sound ROM (Upper MAX, step son_uppermax); same switch HSFA_SONS_PS2 (0 = byte-identical copy). Their pieces
+go to bank 6 (MORC_JEU): bank 15 is full in the MAX sound ROM.
 """
 import os, sys, struct, hashlib, zlib, argparse, shutil, wave
 import numpy as np
@@ -40,6 +47,9 @@ NT = 23                                        # NEWPT[23] ($6B3E) : dernier mot
 # de la fin de la ROM vers le début ; l'outil vérifie qu'aucune n'est référencée par la ROM de base
 BANQUES = (0xFF, 0xFD, 0xFC, 0xF7, 0xF5, 0xF2, 0xF1, 0xF0, 0xEF, 0xEE, 0xED, 0xEC, 0xEA, 0xE8, 0xE2)
 MORC = 0x4F400                                 # région audiocpu (banque 15, zone libre 0x4DE9A-0x4FFFF) : morceaux de 47 o
+# Upper / Upper MAX: bank 15 is used up to 0x4FDCF by the MAX voices in the MAX sound ROM, so their pieces go to bank 6
+# (free 0x29B55-0x2BBFF in the hybrid and in the MAX ROM, SON-HYPER-ROM §6); Hyper keeps 0x4F400 (ROM unchanged)
+MORC_JEU = {"hyper": MORC, "upper": 0x2A000, "uppermax": 0x2A000}
 NOTE, OCTAVE = 0xB9, 3
 CRETE, GAIN_MAX = 124, 4.0
 VOL_REF, G_REF = 0x10DF, 0.98                  # parade : op 07 $75 (table $2E92 = $10DF) pour un gain de conversion 0,98,
@@ -59,6 +69,15 @@ SONS_SPEC = [
                      0x055D, 0x055E], 344, [9, 10, 11, 12, 13, 15, 16, 17, 19, 20, 21, 22, 29, 30], None),   # Cammy ALPHA ($7E)
     ("dee_jay", [0x057D], 342, [29], None),                        # Dee Jay, toutes versions (jeu)
 ]
+
+# Upper (ro5) and Upper MAX: the sounds that Upper's code can send (static inventory, SONS-PS2-UPPER.md §2: Birdie's
+# table at ro5 0x763F6C has 35 entries, so no 041F; no sender of the parry, custom combo, S-ISM, Cammy ALPHA nor 0245
+# in Upper). Same samples and levels (VOLUMES) as for Hyper.
+SONS_UPPER = [
+    ("birdie", [0x040F], 322, [15], None),                         # Birdie: entry 15 of his sound table (also silent in SFA3 arcade)
+    ("dee_jay", [0x057D], 342, [29], None),                        # Dee Jay: taunt, entry 34 of his sound table
+]
+SPECS = {"hyper": SONS_SPEC, "upper": SONS_UPPER, "uppermax": SONS_UPPER}
 
 
 VOLUMES = {  # op 07 par commande (côté 2 identique), calibré au cœur (outils/calibre.py sur des rendus isolés) :
@@ -295,12 +314,24 @@ def choisis():
     noms = set(v.split(",")); return [x for x in SONS_SPEC if x[0] in noms]
 
 
+def choisis_jeu(jeu):
+    """sons de SPECS[jeu] retenus par HSFA_SONS_PS2 (Hyper : choisis())"""
+    if jeu == "hyper": return choisis()
+    v = os.environ.get("HSFA_SONS_PS2", "1")
+    if v == "0": return []
+    if v == "1": return list(SPECS[jeu])
+    noms = set(v.split(",")); return [x for x in SPECS[jeu] if x[0] in noms]
+
+
 def main():
+    global MORC
     a = argparse.ArgumentParser()
     a.add_argument("--base", required=True); a.add_argument("--sortie", required=True)
     a.add_argument("--xdata"); a.add_argument("--manifeste"); a.add_argument("--journal")
+    a.add_argument("--jeu", choices=sorted(SPECS), default="hyper")
     o = a.parse_args()
-    spec = choisis()
+    MORC = MORC_JEU[o.jeu]                       # région des morceaux du jeu (lue par construit)
+    spec = choisis_jeu(o.jeu)
     if not spec:
         os.makedirs(o.sortie, exist_ok=True)
         for n in ROMS: shutil.copyfile(os.path.join(o.base, n), os.path.join(o.sortie, n))

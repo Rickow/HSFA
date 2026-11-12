@@ -132,4 +132,33 @@ Translator: `max/outils/rosette_code/traduire.py`; details: [max-integration-upp
 - **vasm**: `cnop` pads with `$4E71` (NOP), not with zeros: pad explicitly (`dcb.b`) when a byte
   matters.
 
+## 10. Historical switches
+
+Every translator rule has a switch whose `=0` value is meant to give back the previous ROM byte for byte (method:
+[oracle-et-non-regression.md](oracle-et-non-regression.md)). The critical review of the translator (11/11, finding E8,
+one build per switch: 73 on SFA3, then Hyper and Upper; report:
+[rapports/reviews/translator.md](../rapports/reviews/translator.md); tools: `tools/reviews/translator/interrupteurs*.sh`,
+`interrupteurs_bilan.py`) found switches that no longer do that. **Decision of 2026-11-12: they are marked historical, not
+removed.** Do not use them to bisect; read this list before trusting a "switch off = old ROM" comparison.
+
+| switch (default) | state since v160 / v161 | why |
+|---|---|---|
+| `EXTRA_REGS=0` (default 1) | **broken on SFA3**: the build fails (`AssertionError: routine 898e0 : place 32 < 38`, `mame_test.py`); still builds Hyper | the 5 hand-written routines of SFA3 are laid OVER the translated routine and need it to be at least as long; without borrowed registers it is shorter. Any change that shortens one of these 5 routines breaks the build in the same way |
+| `D8_HOME=none` (default `87f0`) | **broken on SFA3**, same failure | same cause (D8 without a home makes the routine shorter) |
+| `PRETE_TEST=0` (default 1) | no effect in the three games | masked by `PRETE_CMP` (v160). It still acts with `PRETE_CMP=0`; the comment "PRETE_TEST=0 -> v158 byte for byte" (`translate.py`) is true only then |
+| `RETAG_BRAW=0` (default 1) | no effect in ro3 / ro5 / ro9 | no site in the three games (rule written for the graft's ro9a) |
+| `AIG_D1_TOUS=1` (default 0) | no effect | `AIG_D1_SEUL` (default `181d20,2ef020`) still restricts the sites; set `AIG_D1_SEUL=tous` as well to widen |
+| `MEMMODE` (environment) | no effect on a build | `mame_test.py` forces `MEMMODE=cps2`; the `MEMMODE=='type'` / `'hote'` branches of `translate.py` and `typed_rule.py` are dead code for the build |
+
+Also seen by the same audit (not switches to remove, but to know):
+- trials left at 0 and never validated: `CMPX` (its 4 lost comparisons of Upper and Hyper are fixed in v161 by
+  `CMP_D8` / `CMP_MEMDN`, §219), `PARTIAL_LIVE` (42 map lines on SFA3) and `MEMSHIFT_GARDE` ("faux ici"): setting them
+  to 1 changes the image;
+- several switches at 0 do not give an old form back, they **lose** code (register writes "fallen"): `TBLMASK`,
+  `ABSEXT`, `D8HI`, `ROT`, `MEMSHIFT`, `MULS`, `TBLBYTE`, `LOGIC_ZERO`, `EXT_MEM`;
+- the `SHIFT_MR` counter of `build.log` moves (SFA3 8 -> 0, Hyper 15 -> 0) while the image does not: it does not
+  measure an effect;
+- rules with no switch (cannot be bisected): `byte_streams`, `byte_index_exact`, `byte_after_adda`, `vram_shift_const`,
+  `swap_or`, `bswap16_mem`, `bswap32_or`, `aide_recomp`, "native result assumed zero" (B3), the memory fallback of D8.
+
 List of the pitfalls of the bench and the environment: [journal/ETAT-DES-LIEUX.md](../journal/ETAT-DES-LIEUX.md) §7.

@@ -60,6 +60,7 @@ Working documentation of the HSFA project. Overview and status: [README](../READ
 |---|---|
 | [journal/README.md](journal/README.md) | the journal (`HANDOFF.md`, §1-§221), its index, the state of play; mapping of the old paths |
 | [rapports/README.md](rapports/README.md) | detailed study reports (since 2026-10-07) |
+| [rapports/reviews/README.md](rapports/reviews/README.md) | critical reviews of 2026-11-11 / 12 (translator, graft, MAX tables, Upper MAX, core, Japanese disc): English summary of each, original French text; their tools: [tools/reviews/README.md](../tools/reviews/README.md) |
 | [rapports/recherche/README.md](rapports/recherche/README.md) | research: sheets A to R (arcade versions and bugs, probes, MAX moves, neighbouring projects, cross-check with cps2recomp, room on a real CPS-2); sheets J to R (2026-11-10, revised on 11/11): [J](rapports/recherche/J-CROISEMENT-CPS2RECOMP-SFA3.md), [K](rapports/recherche/K-CPS2RECOMP-PISTES.md), [L](rapports/recherche/L-PROJETS-OUVERTS-2026-11.md), [M](rapports/recherche/M-REUTILISATION-TUILES.md), [N](rapports/recherche/N-PARADIGMES-LIMITES-ROM.md), [O](rapports/recherche/O-CPS2-POSSIBILITES.md), [P](rapports/recherche/P-SYNTHESE-PLACE-CPS2.md) (synthesis), [Q](rapports/recherche/Q-OPTIMISATION-IMAGES.md), [R](rapports/recherche/R-SOLUTIONS-PAR-JEU.md) |
 
 ## Elsewhere in the repository

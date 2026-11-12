@@ -588,6 +588,8 @@ def construit(cle):
     sd, sl = J["son"]
     if cle == "hyper" and os.environ.get("HSFA_SON_HYPER"):   # (hyper_parade) hybride + sons PS2 seuls (sons_ps2.py)
         sd = os.environ["HSFA_SON_HYPER"]
+    if cle == "upper" and os.environ.get("HSFA_SON_UPPER"):   # hybride + Birdie / Dee Jay (sons_ps2.py --jeu upper)
+        sd = os.environ["HSFA_SON_UPPER"]
     for f in sl:
         fichiers.append((f, lit(os.path.join(WORK, sd, f))))
     trous = bytearray(TROUS_LEN) if J.get("trous") else None

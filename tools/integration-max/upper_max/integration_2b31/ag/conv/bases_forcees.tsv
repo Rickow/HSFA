@@ -33,3 +33,4 @@ contre_ingrid	a3	donnee:attaque:0	contres_max.s : « A3 = attaque reçue (enregi
 psp_cf560.copies	a4	objet	(2b27, R22) psp_cf560 écrite à la main (session MAX 5259a0e) : A4 / A3 / A2 = les 3 copies (classe $03) créées par $804DA, qui pose $2A0 = 8 seulement s'il les crée (branche .copies)
 psp_cf560.copies	a3	objet	idem (2e copie)
 psp_cf560.copies	a2	objet	idem (3e copie)
+psp_raz_alpha	a4	objet	(arbitrages_um) appelée par psp_raz_alloc (« bsr psp_raz_alpha », A4 = objet neuf rendu par l'allocateur) ; commentaire de la source : « A4 = objet neuf, remis à 0 (allocateur PSP 0x1F0F4) » ; était 2 NON RÉSOLU (clr.l $28 / $2C(a4))

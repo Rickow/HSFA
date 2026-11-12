@@ -834,13 +834,93 @@ def _copie_mot(src, dst):
 # la sortie ; la selection d'Hyper reecrit $32 entier ($1B00 a l'init, $1B0E ensuite). =0 : comme ro9a35b.
 CONT_SORTIE = os.environ.get("CONT_SORTIE", "0") == "1"
 H_SCENE2 = 0x286590 - 0x1F0000                     # (e46) scene 2 d'Hyper (exec 0x286590, table 0x5B5E84)
+# (ro9a38, revue de la greffe A2a) A2A_VS=1 : hors ARCADE (VERSUS), le talon scene2_bases pose AUSSI les bases d'Hyper :
+# apres un VERSUS sur un decor d'Upper (talon plans_vs : $4400/$440/$4A0), les bases restaient celles du decor pendant
+# l'ecran de resultat ET toute la selection suivante (fond en tuiles fausses, essais 06/06b) jusqu'au match suivant.
+# Pose a chaque image de la scene 2 (valeurs d'Hyper : sans effet quand elles sont deja posees). =0 : comme ro9a37.
+A2A_VS = os.environ.get("A2A_VS", "0") == "1"
+# (ro9a38, revue de la greffe E2b) E2B_DEFI=1 : nouveau challenger accepte pendant la carte, le face-a-face ou un combat de
+# l'Arcade : la copie d'Upper u1353A0 (sous-etat 2 de la tache u1346A0) passe a la selection d'Hyper sans masque ; le talon
+# scene2_bases posait les bases d'Hyper sur la VRAM d'Upper -> 2 a 3 images de paves plein ecran (+ 2 aux couleurs du decor
+# depuis un combat). Ici (forme masque_sortie d'e46) : talon defi_sortie a l'appel JSR u1354E0 du chemin de sortie (Upper
+# 0x1353EC) : appel d'origine, puis scroll1-3 masques ($32(A5) et registre des couches $804166) et compteur DEFI_CPT =
+# E2B_IMAGES ; scene2_bases : tant que le compteur n'est pas nul, bases du decor GARDEES et couches masquees (compteur - 1) ;
+# a 0 : bases d'Hyper + ORI.W #$E,$32(A5) (et $804166). =0 : comme ro9a37.
+E2B_DEFI = os.environ.get("E2B_DEFI", "0") == "1"
+# (ro9a38, revue de la greffe X2, sorties/2e_passe_axe3.md ; decision de l'utilisateur du 12/11 : AGRANDIR, pas de
+# renumerotation) X2_TABLES=1 : les tables par perso lues par les copies d'Upper (index $116 = perso de base, ou $7F(A6))
+# ont 40 entrees ($00-$27) ; un id de base $28-$2F (MAX) lisait la table suivante (erreur d'adresse $A08 a la carte /
+# au face-a-face : essai 05c). Chaque table est recopiee a la fin du bloc de donnees de la greffe (fenetre PS2
+# $F18000-$FE0000 = 68K $410000-$4D8000, avant la table D4) avec X2_N entrees : ses 40 entrees, puis l'entree $00 (Ryu, valeur neutre : c'est ce que lit
+# aujourd'hui un MAX, T_BASE[$26-$2F] = 0) ; la constante lui/addiu de chaque lecteur copie est redirigee (les lecteurs
+# d'Hyper gardent l'original). Pointeurs de code recopies : ajoutes a greffe_ptrs. Les MAX ne sont pas integres : tables
+# seulement. =0 : comme ro9a37.
+X2_TABLES = os.environ.get("X2_TABLES", "0") == "1"
+X2_N0, X2_N = 0x28, 0x30
+# (table exec, table d'Hyper ?, taille d'une entree, acces dans Upper (decalage fichier, copie greffee))
+X2_LISTE = ((0x74C358, False, 4, (0x1711A4,)),       # longs (pointeurs absolus) ; copie e4a564 (ro9a37)
+            (0x617290, False, 2, (0x1A75A4,)),       # mots ; e6e0e4
+            (0x61BBC0, False, 4, (0x2500C4,)),       # 4 o, masque $3F ; ebf544 / ebf56c (meme constante)
+            (0x699408, False, 1, (0x401A0,)),        # octets ; copie basse 0x9780
+            (0x63B5A4, True, 1, (0x3FF80,)),         # table d'HYPER partagee (40 octets $30) ; copie basse 0x9560
+            (0x97CA90, False, 4, (0x18A718,)),       # longs (pointeurs absolus), zone des decors ; e5ab58
+            # tables a EN-TETE de decalages (40 mots relatifs a la table, puis le corps ; ('dec', avant, apres) = octets
+            # recopies avant la table (decalages negatifs) et depuis son debut) : en-tete prolonge (+$10 a chaque decalage
+            # positif, entrees $28-$2F = celle de $00), corps recopie autour
+            (0x6F72B0, False, ('dec', 0x780, 0x7FD0), (0x2132EC,)),   # mots ; ead80c ($24/$25 : decalages negatifs)
+            (0x978D1C, False, ('dec', 0, 0x14F0), (0x2501D8,)),       # zone des decors ; ebf658 (5 mots par perso)
+            # (ro9a38, essai 05c + sonde de lecture x2_lect.sh) lues par la carte d'Upper avec l'id ($117)
+            (0x7251A0, False, ('dec', 0, 0x6C50), (0x25D9CC,)),       # palettes des portraits de la carte (6 x $80 o)
+            (0x960090, False, ('dec', 0, 0x100), (0x25D170,)),        # suites d'octets par perso (zone des decors)
+            # (ro9a38, sonde de lecture a l'ecran de victoire) : lecteur de l'ecran de victoire SEULEMENT (le lecteur copie
+            # 0x5F7E0 lit aussi la suite, des mots de donnees ; 0x211FE0 = fins, index $7F(A6)) : 40 pointeurs par perso
+            (0x72BDF0, False, 4, (0x196CAC,), False),
+            # deux demi-tables de 40 octets (id, ou id + $28 si $90(A5)) : demi-tables prolongees, ADDI.W #$28 -> #$30
+            (0x616850, False, ('demi', 0x194B4C), (0x194B7C,)),
+            # banque d'animations d'HYPER partagee (en-tete de 66 decalages ; 18 groupes de 40 x 8 octets par perso, puis
+            # des entrees isolees) lue par 11 copies d'Upper (carte : id x 8 -> l'id $2E bloquait la carte) : groupes
+            # prolonges de 8 entrees (= entree $00), decalages recalcules ; les 3 lecteurs d'Hyper gardent l'original
+            (0x62EBA0, True, ('banque', 8), (0x19DCB4,)),
+            # (ro9a38, sonde d'ecriture : objet de la carte de J1, anim = banque + groupe + id x 8 ; id $2E -> pas nul, boucle
+            # sans fin en Upper 0x1992E8) les deux autres banques du meme lecteur (Upper 0x19DBC4 / 0x19DD24) : meme forme
+            (0x967F2A, False, ('banque', 8), (0x19DD64,)),            # zone des decors
+            (0x648BC8, False, ('banque', 8), (0x19DC04,)))
+# ecartees (essai : la carte plante a l'image 677 SANS falsifier l'id quand TOUS leurs lecteurs passent a la copie) :
+# T_619B50 (lue par $7F(A6) x 4, id d'OBJET des fins : entrees >= $28 = pointeurs 0x3FF3A0... d'autres objets) ; T_72BDF0
+# n'est prolongee que pour le lecteur de l'ecran de victoire (le lecteur copie 0x5F7E0 lit aussi les mots qui la suivent).
+X2_SAUF = {int(x, 16) for x in os.environ.get("X2_SAUF", "").split(',') if x}   # (essais) tables laissees telles quelles
+X2_LISTE = tuple(t[:4] + ((t[4],) if len(t) > 4 else (True,)) for t in X2_LISTE if t[0] not in X2_SAUF)   # 5e champ : tous les lecteurs copies
+DEFI_CPT = 0xFE0A                                     # $FF7E0A : compteur de la sortie de defi (zone fixe de la greffe, D2)
+DEFI_N = int(os.environ.get("E2B_IMAGES", "6"))
+U_DEFI_JSR, U_DEFI_CIBLE = 0x1353EC, 0x1354E0         # Upper : JSR du chemin « challenger accepte » de u1353A0 et sa cible
+_MASQUE_COUCHES = [0x3c027000, 0x8c421114, 0x94430032, 0x3063fff1, 0xa4430032,      # ANDI.W #$FFF1,$32(A5)
+                   0x3c027000, 0x8c421114, 0x84440032, 0x3c0200be, 0xa4442146]      # MOVE.W $32(A5),$804166 (forme d'Hyper)
+_DEMASQUE_COUCHES = [0x3c027000, 0x8c421114, 0x94430032, 0x3463000e, 0xa4430032,    # ORI.W #$E,$32(A5)
+                     0x3c027000, 0x8c421114, 0x84440032, 0x3c0200be, 0xa4442146]
+def stub_defi_sortie(cible):
+    """(ro9a38, E2B_DEFI) a la place du JSR u1354E0 de la sortie « challenger accepte » : JSR cible, couches masquees,
+    compteur DEFI_CPT = DEFI_N"""
+    return [0x27bdfff0, 0xffbf0000, j_(3, cible), 0x00000000] + _MASQUE_COUCHES + _pose_octet(DEFI_CPT, DEFI_N) + \
+           [0xdfbf0000, 0x27bd0010, 0x03e00008, 0x00000000]
 def stub_scene2_bases(cible):
     """(e46, CONT_SORTIE) scene A5+4 = 2 (selection d'Hyper) : en partie ARCADE (drapeau FLAG), bases de plans d'Hyper
-    puis JSR cible (scene 2 d'Hyper) ; hors ARCADE (VERSUS...) : JSR cible seul"""
-    w = [0x27bdfff0, 0xffbf0000] + _test_octet(FLAG); i = len(w); w += [0x10600000, 0]     # beq (pas ARCADE) -> L
+    puis JSR cible (scene 2 d'Hyper) ; hors ARCADE (VERSUS...) : JSR cible seul (A2A_VS=1 : bases d'Hyper aussi) ;
+    E2B_DEFI=1 : sortie de defi en cours (DEFI_CPT) -> attente masquee, puis bases d'Hyper et couches demasquees"""
+    w = [0x27bdfff0, 0xffbf0000]; br = []
+    if E2B_DEFI:
+        w += _test_octet(DEFI_CPT); i0 = len(w); w += [0x10600000, 0]                        # beq (pas de defi) -> Ln
+        w += [0x3c027000, 0x8c421114, 0x80430000 | ((DEFI_CPT ^ 1) & 0xffff), 0x2463ffff,
+              0xa0430000 | ((DEFI_CPT ^ 1) & 0xffff)]                                           # SUBQ.B #1,DEFI_CPT(A5)
+        w += _test_octet(DEFI_CPT); i1 = len(w); w += [0x10600000, 0]                        # beq (fini) -> Ld
+        w += _MASQUE_COUCHES; j0 = len(w); w += [0x10000000, 0]                                 # attente : -> L
+        Ld = len(w); w += _bases(PLANS_HYPER) + _DEMASQUE_COUCHES; j1 = len(w); w += [0x10000000, 0]   # -> L
+        Ln = len(w); br += [(i0, Ln), (i1, Ld)]
+    if not A2A_VS: w += _test_octet(FLAG); i = len(w); w += [0x10600000, 0]                 # beq (pas ARCADE) -> L
     w += _bases(PLANS_HYPER)
     L = len(w); w += [j_(3, cible), 0x00000000, 0xdfbf0000, 0x27bd0010, 0x03e00008, 0x00000000]
-    w[i] |= (L - i - 1) & 0xffff
+    if not A2A_VS: w[i] |= (L - i - 1) & 0xffff
+    if E2B_DEFI: br += [(j0, L), (j1, L)]
+    for k_, L_ in br: w[k_] |= (L_ - k_ - 1) & 0xffff
     return w
 def stub_plans_scene(cible, restaure=False, bases=None, efface=(), masque_s1=False, masque_sortie=False):
     """scenes 6/8/A d'Upper (CONTINUE, GAME OVER, fin) : plans d'Upper, JSR cible, puis si la scene est quittee vers
@@ -1575,7 +1655,17 @@ def main():
     if OBJETS_DECOR and os.environ.get("OBJETS_DONNEES", "1") == "1":
         n0_ = len(D2.PREUVES); D2.PREUVES.update(preuves_objets_decor(D2))
         print("objets de decor : %d cases de pointeurs prouvees en plus" % (len(D2.PREUVES) - n0_))
-    if os.environ.get("DONNEES_LUES", "1") == "1": FD = D2.Fermeture(Pl.donnees, LU_)
+    if os.environ.get("DONNEES_LUES", "1") == "1":
+        FD = D2.Fermeture(Pl.donnees, LU_)
+        if D2.R3_CIBLES:                             # (revue_greffe R3) cibles prouvees manquantes : point fixe (4 tours au plus)
+            plus_ = set()
+            for _t in range(4):
+                m_ = D2.cibles_prouvees_manquantes(FD, FD.regions()) - plus_
+                if not m_: break
+                plus_ |= m_; FD = D2.Fermeture(Pl.donnees, LU_, plus=plus_)
+                print("R3_CIBLES tour %d : + %d cibles prouvees (%s)" % (_t + 1, len(m_), ' '.join('%x' % x for x in sorted(m_)[:16])))
+            m_ = D2.cibles_prouvees_manquantes(FD, FD.regions())
+            if m_: print("R3_CIBLES : %d cibles prouvees ENCORE manquantes (%s)" % (len(m_), ' '.join('%x' % x for x in sorted(m_)[:16])))
     else:                                            # fermeture STATIQUE (tous les pointeurs prouves) ; les lectures
         FD = D2.Fermeture(Pl.donnees, None); FD.lu = LU_   # d'Upper ne servent qu'a prolonger les regions
     synth = []
@@ -1607,6 +1697,7 @@ def main():
         if GARDE_LISTE: SYN += [('garde_liste', stub_garde_liste(0))]
         if DAN_SUPER: SYN += [('dan_super', stub_dan_super())]
         if PLANS and CONT_SORTIE: SYN += [('scene2_bases', stub_scene2_bases(4))]   # (e46) en dernier
+        if PLANS and CONT_SORTIE and E2B_DEFI: SYN += [('defi_sortie', stub_defi_sortie(4))]   # (ro9a38) en dernier
     g = Greffe2(routines, Pl.dec, a5, synth=SYN)
     FEN, TROUS = fenetres() if FENETRES else (None, TROU_SON)
     if FENETRES:
@@ -1695,6 +1786,7 @@ def main():
         if GARDE_LISTE: g.synth += [('garde_liste', stub_garde_liste(X(0xC67B0)))]
         if DAN_SUPER: g.synth += [('dan_super', stub_dan_super())]
         if PLANS and CONT_SORTIE: g.synth += [('scene2_bases', stub_scene2_bases(H_SCENE2 + BASE))]   # (e46) en dernier
+        if PLANS and CONT_SORTIE and E2B_DEFI: g.synth += [('defi_sortie', stub_defi_sortie(X(U_DEFI_CIBLE)))]   # (ro9a38)
         if GARDE_ANIM0: g.synth += [('garde_anim0', stub_garde_anim0(struct.unpack_from('<13I', open(MODULE_SOURCE, 'rb').read(), GA_SITE)))]
         if DECORS_UPPER and VS_UPPER:
             g.synth += [('moteur_plans', stub_moteur([X(0x151B80)] + ([X(0xFD620)] if OBJETS_DECOR and OBJETS_PARCOURS else []), [0x30EC10 + BASE], S1_MASQUE, EFFET_12A)),
@@ -1734,6 +1826,66 @@ def main():
             assert struct.unpack_from('<I', blob, o4)[0] == X(0x26F930), hex(struct.unpack_from('<I', blob, o4)[0])
             struct.pack_into('<I', blob, o4, g.synth_place['plans_vict'] + BASE)
     SITE_PERSO_J1 = g.synth_place['fin_selection'] + 4 * stub_fin_selection(0, 0)[1]
+    x2_sites = []
+    if X2_TABLES:                                      # (ro9a38) tables par perso prolongees a X2_N entrees, a la fin du bloc
+        assert ZONE_DECORS and FENETRES and TROUS and D4_TABLE, "X2_TABLES : zone des decors et fenetres attendues"
+        src_ = open(MODULE_SOURCE, 'rb').read(); ptr_s = set(ptr_code); zp_s = set(FD.zone_ptr); zl_ = FD.zone[0]
+        blob += bytes(-len(blob) & 0xFF)
+        for xu_, xhyp_, xt_, xsites_, xtous_ in X2_LISTE:
+            if xhyp_: xa_ = xu_; xlit_ = lambda k, n: src_[xa_ - BASE + k:xa_ - BASE + k + n]; xptr_ = lambda k: False
+            elif zl_ <= xu_ < FD.zone[1]:
+                xa_ = FD.zone[2] + xu_ - zl_; xz_ = (zl_ & 15) + xu_ - zl_
+                xlit_ = lambda k, n: zbuf[xz_ + k:xz_ + k + n]; xptr_ = lambda k: (xu_ - zl_ + k) in zp_s
+            else:
+                xa_ = exec_donnee(g, xu_); xb_ = xa_ - GRF_X; assert 0 <= xb_ < len(blob), hex(xa_)
+                xlit_ = lambda k, n: blob[xb_ + k:xb_ + k + n]; xptr_ = lambda k: (xb_ + k) in ptr_s
+            while len(blob) % 16 != (xa_ & 15): blob += b'\0'
+            xaddi_ = None
+            if isinstance(xt_, tuple) and xt_[0] == 'demi':  # deux demi-tables d'octets : [40 + 8] [40 + 8]
+                xaddi_ = xt_[1]; xh0_ = bytes(xlit_(0, X2_N0)); xh1_ = bytes(xlit_(X2_N0, X2_N0))
+                assert len(xh0_) == len(xh1_) == X2_N0, hex(xu_)
+                xnv_ = GRF_X + len(blob); blob += xh0_ + xh0_[:1] * (X2_N - X2_N0) + xh1_ + xh1_[:1] * (X2_N - X2_N0)
+                xtxt_ = "deux demi-tables de %d octets, ADDI #$%X -> #$%X en Upper 0x%X" % (X2_N0, X2_N0, X2_N, xaddi_)
+            elif isinstance(xt_, tuple) and xt_[0] == 'banque':   # en-tete de decalages vers des groupes de 40 entrees
+                xe_ = xt_[1]; xg_ = X2_N0 * xe_; xd0_ = struct.unpack_from('<h', bytes(xlit_(0, 2)))[0]; xhn_ = xd0_ // 2
+                xd_ = list(struct.unpack('<%dh' % xhn_, bytes(xlit_(0, xd0_)))); xs_ = sorted(set(v_ for v_ in xd_ if v_))
+                xfin_ = xs_[-1] + xg_                       # dernier segment : taille inconnue -> traite comme un groupe de 40
+                xcorps0_ = bytes(xlit_(0, xfin_)); assert len(xcorps0_) == xfin_ and xs_[0] == xd0_, hex(xu_)
+                xnouv_ = {0: 0}; xc_ = bytearray(); xpos_ = xd0_; xng_ = 0
+                while xpos_ < xfin_:
+                    xsuiv_ = min([v_ for v_ in xs_ if v_ > xpos_] + [xfin_])
+                    xnouv_[xpos_] = xd0_ + len(xc_)
+                    xc_ += xcorps0_[xpos_:xsuiv_]
+                    if xsuiv_ - xpos_ == xg_: xc_ += xcorps0_[xpos_:xpos_ + xe_] * (X2_N - X2_N0); xng_ += 1
+                    xpos_ = xsuiv_
+                xnv_ = GRF_X + len(blob)
+                blob += struct.pack('<%dh' % xhn_, *[xnouv_[v_] for v_ in xd_]) + bytes(xc_)
+                assert max(xnouv_.values()) < 0x8000, hex(xu_)
+                xtxt_ = "banque : %d decalages, %d groupes de %d x %d o prolonges, %x o -> %x o" % (xhn_, xng_, X2_N0, xe_, xfin_, xd0_ + len(xc_))
+            elif isinstance(xt_, tuple):                     # en-tete de decalages (mots signes relatifs a la table)
+                _, xav_, xap_ = xt_; xh_ = 2 * X2_N0; xp_ = 2 * (X2_N - X2_N0)
+                xd_ = struct.unpack('<%dh' % X2_N0, bytes(xlit_(0, xh_)))
+                assert xd_[0] == xh_ and all(v_ >= xh_ or -xav_ <= v_ < 0 for v_ in xd_) and max(xd_) + xp_ < 0x8000, hex(xu_)
+                xd_ = [v_ + xp_ if v_ >= xh_ else v_ for v_ in xd_]
+                xavant_ = bytes(xlit_(-xav_, xav_)) if xav_ else b''; xcorps_ = bytes(xlit_(xh_, xap_ - xh_))
+                assert len(xavant_) == xav_ and len(xcorps_) == xap_ - xh_, hex(xu_)
+                blob += xavant_; xnv_ = GRF_X + len(blob)
+                blob += struct.pack('<%dh' % X2_N, *(xd_ + [xd_[0]] * (X2_N - X2_N0))) + xcorps_
+                xtxt_ = "en-tete de decalages, %x o avant, %x o de corps" % (xav_, xap_ - xh_)
+            else:
+                xn0_ = X2_N0 * xt_; xcorps_ = bytes(xlit_(0, xn0_)); assert len(xcorps_) == xn0_, hex(xu_)
+                xneutre_ = bytes(xlit_(0, xt_))             # entree $00 (Ryu) : ce que lisent aujourd'hui les ids >= $26 (T_BASE = 0)
+                xnv_ = GRF_X + len(blob); blob += xcorps_ + xneutre_ * (X2_N - X2_N0)
+                if xt_ >= 4:
+                    for xk_ in range(0, xn0_, 4):
+                        if xptr_(xk_): ptr_code.append(xnv_ - GRF_X + xk_)
+                    if xptr_(0):
+                        for xe_ in range(X2_N0, X2_N): ptr_code.append(xnv_ - GRF_X + xe_ * xt_)
+                xtxt_ = "%d o x %d" % (xt_, X2_N0)
+            x2_sites.append((xu_, xa_, xnv_, xsites_, xtous_, xaddi_))
+            print("X2_TABLES : T_%x (%s %x, %s) -> %x (%d entrees, $%02X-$%02X = entree $00)" % (xu_, 'Hyper' if xhyp_ else 'copie', xa_, xtxt_, xnv_, X2_N, X2_N0, X2_N - 1))
+        assert GRF_X + len(blob) <= FEN_DECORS[0], "X2_TABLES : bloc sur la fenetre des decors (%x)" % (GRF_X + len(blob))
+        print("X2_TABLES : bloc de donnees %d o, fin %x (fenetre des decors : %x)" % (len(blob), GRF_X + len(blob), FEN_DECORS[0]))
     T_D4 = None
     if FENETRES and TROUS and D4_TABLE:                   # fenetre des decors (T1b) : table D4 en tete
         assert GRF_X + len(blob) <= FEN_DECORS[0], "bloc de donnees sur la fenetre des decors (%x)" % (GRF_X + len(blob))
@@ -1765,6 +1917,30 @@ def main():
         old = (((w1 & 0xffff) << 16) + ((w2 & 0xffff) - (0x10000 if w2 & 0x8000 else 0))) & 0xffffffff
         struct.pack_into('<II', mod, f9, (w1 & 0xffff0000) | (((cible + 0x8000) >> 16) & 0xffff), (w2 & 0xffff0000) | (cible & 0xffff))
         patchs.append(dict(type='constante', site=hex(f9), avant=hex(old), apres=hex(cible), quoi=quoi))
+    if x2_sites:                                       # (ro9a38, X2_TABLES) constantes lui/addiu des tables -> copies prolongees
+        xpl_ = sorted((n_, n_ + b_ - a_) for a_, b_, n_ in g.place)   # code d'Upper copie (fichier du module)
+        xv_ = {xa_: (xu_, xnv_, xsites_, xtous_, xaddi_) for xu_, xa_, xnv_, xsites_, xtous_, xaddi_ in x2_sites}; xvu_ = collections.defaultdict(list)
+        for xd0_, xd1_ in xpl_:
+            for xc_ in range(xd0_, xd1_ - 4, 4):
+                xw1_, xw2_ = struct.unpack_from('<II', mod, xc_)
+                if (xw1_ >> 26) == 0x0f and (xw2_ >> 26) == 0x09 and ((xw1_ >> 16) & 31) == ((xw2_ >> 21) & 31) == ((xw2_ >> 16) & 31):
+                    xval_ = (((xw1_ & 0xffff) << 16) + ((xw2_ & 0xffff) - (0x10000 if xw2_ & 0x8000 else 0))) & 0xffffffff
+                    if xval_ in xv_: xvu_[xval_].append(xc_)
+        for xa_, (xu_, xnv_, xsites_, xtous_, xaddi_) in xv_.items():
+            xpris_ = []
+            for xus_ in xsites_:                       # les acces releves par la revue / la sonde : constante trouvee avant eux
+                xn_ = g.neuf(xus_); xc0_ = [c_ for c_ in xvu_[xa_] if xn_ - 0x600 < c_ < (xn_ or 0)]
+                assert xn_ is not None and xc0_, "X2_TABLES : constante %x introuvable avant %x (Upper %x)" % (xa_, xn_ or 0, xus_)
+                xpris_.append(max(xc0_))
+            if not xtous_: xvu_[xa_] = sorted(set(xpris_))   # lecteurs listes seulement
+            if xaddi_ is not None:                     # demi-tables : ADDI.W #X2_N0 -> #X2_N (addiu rt,rs,X2_N0)
+                xn_ = g.neuf(xaddi_); xw_ = struct.unpack_from('<I', mod, xn_)[0]
+                assert (xw_ >> 26) == 0x09 and (xw_ & 0xffff) == X2_N0, (hex(xaddi_), hex(xw_))
+                struct.pack_into('<I', mod, xn_, (xw_ & 0xffff0000) | X2_N)
+                patchs.append(dict(type='mips', site=hex(xn_ + BASE), quoi="X2_TABLES : Upper 0x%X ADDI.W #$%X -> #$%X (deuxieme demi-table de T_%x)" % (xaddi_, X2_N0, X2_N, xu_)))
+            for xc_ in xvu_[xa_]:
+                const_(xc_, xnv_, "X2_TABLES : T_%x (%x) -> copie prolongee %x (%d entrees), lecteur copie d'Upper" % (xu_, xa_, xnv_, X2_N))
+            print("X2_TABLES : T_%x : %d constante(s) redirigee(s) (%s)" % (xu_, len(xvu_[xa_]), ' '.join('%x' % c_ for c_ in xvu_[xa_])))
     long_(0x5B4210, a_exec(g, 0x4E1C0), "lanceur ARCADE du menu (entree 0) -> lanceur d'Upper 0x4E1C0")
     # (etape 7) MENU_ARCADE=1 : le menu du titre d'Hyper ne propose pas l'entree 0 (curseur $C201 : tables « suivant »
     # 0x5B41F0 (Bas) et « precedent » 0x5B4200 (Haut) sans 0 : VERSUS 1, TRAINING 4, OPTION 5, EXIT 6) -> ARCADE (0)
@@ -1780,6 +1956,10 @@ def main():
     if COMBAT_HYPER and PLANS and CONT_SORTIE:          # (e46) scene A5+4 = 2 : bases d'Hyper en ARCADE (apres CONTINUE)
         assert struct.unpack_from('<I', mod, 0x5B5E84 - BASE)[0] == H_SCENE2 + BASE
         long_(0x5B5E84, g.synth_place['scene2_bases'] + BASE, "scene A5+4=2 (selection d'Hyper) : ARCADE -> bases de plans d'Hyper puis Hyper 0x%X" % H_SCENE2)
+        if E2B_DEFI:                                   # (ro9a38) sortie « challenger accepte » de la copie u1353A0
+            n_ = g.neuf(U_DEFI_JSR); w_ = struct.unpack_from('<I', mod, n_)[0]
+            assert (w_ >> 26) == 3 and ((w_ & 0x3ffffff) << 2) == a_exec(g, U_DEFI_CIBLE), (hex(n_), hex(w_))
+            jal_(n_, g.synth_place['defi_sortie'] + BASE, "Upper 0x%X (u1353A0, defi accepte) : JSR 0x%X -> talon defi_sortie (couches masquees, bases d'Hyper retardees de %d images)" % (U_DEFI_JSR, U_DEFI_CIBLE, DEFI_N))
     for k, f5, q in ((3, 0x2614A0, 'CONTINUE'), (4, 0x2614D0, 'GAME OVER'), (5, 0x261500, 'FIN + generique')):
         if g.neuf(f5) is not None:
             if COMBAT_HYPER and PLANS:

@@ -217,8 +217,32 @@ def est_pointeur(case, p, REFS):
         return False
     return True
 
+# (revue_greffe R3, 12/11) R3_CREUX=1 : une case PROUVEE (journal des conversions d'Upper) n'est jamais dans un creux de
+# banque (son enregistrement est joue par Upper meme si aucun journal de LECTURE ne l'a vu) : 130 pointeurs prouves
+# restaient bruts dans ro9a37. R3_CIBLES=1 : la cible d'une case prouvee situee dans une region copiee est toujours
+# suivie (greffe3 relance la fermeture avec plus=cibles manquantes) : 12 cases (0x613208, 0x7A0E44..., 0x8E5784...).
+# Les deux a 0 (defaut) : comme ro9a37, a l'octet.
+R3_CREUX = os.environ.get("R3_CREUX", "0") == "1"
+R3_CIBLES = os.environ.get("R3_CIBLES", "0") == "1"
+def cibles_prouvees_manquantes(F, reg):
+    """(R3) cibles des cases PROUVEES situees dans une region copiee, qui ne sont ni copiees ni reutilisees"""
+    reg = sorted(tuple(r) for r in reg); ra = [a for a, b in reg]
+    def copie(u):
+        k = bisect.bisect_right(ra, u) - 1
+        return k >= 0 and reg[k][0] <= u < reg[k][1]
+    ru = sorted((v, v + n) for v, (h, n) in F.reutil.items()); rv = [a for a, b in ru]
+    def reut(u):
+        k = bisect.bisect_right(rv, u) - 1
+        return k >= 0 and u < ru[k][1]
+    out = set()
+    for c in PREUVES:
+        if not source(c) or not copie(c) or c + 4 > fin_source(c): continue
+        p = struct.unpack_from('<I', octets(c, 4))[0]
+        if source(p) and not copie(p) and not reut(p): out.add(p)
+    return out
+
 class Fermeture:
-    def __init__(self, depart, lu=None, reutil=True):
+    def __init__(self, depart, lu=None, reutil=True, plus=()):
         self.lu = lu; lus = sorted(lu) if lu else None
         def lu_dans(a, b):
             if lus is None: return True
@@ -228,6 +252,8 @@ class Fermeture:
         self.REFSL = sorted(REFS | {HI, F390, F390_1}); self.depart = depart
         self.segments = {}; self.pointeurs = {}; self.reutil = {}; self.non_suivis = collections.Counter()
         self.cibles_prouvees = set()                  # (etape 3) cibles de pointeurs prouves : suivies meme non lues
+        plus = {v for v in plus if source(v)}         # (R3_CIBLES) cibles prouvees a suivre sans etre des departs
+        self.cibles_prouvees |= plus
         depart = {v for v in depart if source(v)}
         # (etape 7) BANQUES_LU=1 : animations des banques par perso (T_619B50 : base + decalage 16 bits) lues par Upper :
         # departs de la fermeture (leurs pointeurs d'images sont suivis), jamais reutilisees chez Hyper (base + decalage
@@ -296,7 +322,7 @@ class Fermeture:
                 if fin:
                     old_ = [e for e in self.tx_ext if e[0] == base]
                     self.tx_ext = [e for e in self.tx_ext if e[0] != base] + [(base, max([fin] + [e[1] for e in old_]))]
-        todo = sorted(depart); vus = set()
+        todo = sorted(depart | plus); vus = set()
         Fl = sorted(front)
         while todo:
             v = todo.pop()
@@ -478,6 +504,8 @@ class Fermeture:
                 occ = [(a, b) for a, b in cov if b > base and a < fin]
                 i_ = bisect.bisect_left(lus_, base)
                 while i_ < len(lus_) and lus_[i_] < fin: occ.append((lus_[i_] - 8, lus_[i_] + 10)); i_ += 1
+                if R3_CREUX:                          # (R3) enregistrement d'une case prouvee : hors creux
+                    occ += [(c_ - 8, c_ + 0x18) for c_ in PREUVES if base <= c_ < fin]
                 occ.append((base, base + w0 + 0x10)); occ.sort()
                 pos = base
                 for a, b in occ:

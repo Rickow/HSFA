@@ -132,4 +132,13 @@ Traducteur : `max/outils/rosette_code/traduire.py` ; détails : [max-integration
 - **vasm** : `cnop` bourre avec `$4E71` (NOP), pas avec des zéros : bourrer explicitement (`dcb.b`) quand un octet
   compte.
 
+## 10. Interrupteurs historiques
+
+Décision du 12/11 : marqués « historiques », pas supprimés (revue du traducteur, constat E8,
+[rapports/reviews/translator.md](../rapports/reviews/translator.md)). `EXTRA_REGS=0` et `D8_HOME=none` ne construisent
+plus SFA3 (`routine 898e0 : place 32 < 38`) ; `PRETE_TEST=0` (masqué par `PRETE_CMP`), `RETAG_BRAW=0`, `AIG_D1_TOUS=1`
+(restreint par `AIG_D1_SEUL`) et `MEMMODE` (imposé à `cps2` par `mame_test.py`) sont sans effet dans les trois jeux.
+Détail, causes et autres constats de l'audit : version anglaise,
+[pieges-du-traducteur.md §10](pieges-du-traducteur.md).
+
 Liste des pièges du banc et de l'environnement : [journal/ETAT-DES-LIEUX.md](../journal/ETAT-DES-LIEUX.md) §7.

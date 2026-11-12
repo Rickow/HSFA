@@ -160,7 +160,7 @@ Agent `hyper_parade`, 11/11/2026. J'ai écrit uniquement dans `work/hyper_parade
     - étape `sons_ps2` (après `son_upper`), qui écrit `agent_son_ro5/hybride/roms_hyper` ;
     - `paquet_hyper` et `paquet_hyperarcade` en dépendent ;
     - `env_paquet` passe `HSFA_SON_HYPER` ;
-  - `tools/fbneo-hsfa/paquet_fbneo.py` et `tools/greffe-arcade/construction/ro9a37/paquet/paquet_fbneo.py` : pour
+  - `tools/fbneo-hsfa/paquet_fbneo.py` et `tools/greffe-arcade/construction/ro9a38/paquet/paquet_fbneo.py` : pour
     `hyper` (et `ro9a`), le dossier son vient de `HSFA_SON_HYPER`.
 - Simulation de l'étape (même appel, X_DATA de l'ISO et manifeste du cache de la construction v160) : mêmes md5 que
   `roms/sons_v4` (`hx3.01` 349593e9, `hx3.02` d3affb3c, `hx3.14m` 3aaf2675). Avec `HSFA_SONS_PS2=0`, la ROM sort
@@ -257,7 +257,7 @@ Agent `hyper_parade`, 11/11/2026. J'ai écrit uniquement dans `work/hyper_parade
     - Cammy ALPHA : pilote et journal identiques ; WAV différent à partir de l'image 800, qui est celle de la première
       commande ajoutée.
   - Aucun fichier de `work/greffe_arcade` n'a été touché. Le branchement passe par le paquet de la greffe du dépôt
-    (`tools/greffe-arcade/construction/ro9a37/paquet/paquet_fbneo.py`, variable `HSFA_SON_HYPER`).
+    (`tools/greffe-arcade/construction/ro9a38/paquet/paquet_fbneo.py`, variable `HSFA_SON_HYPER`).
 - Note pour `musique_ha` : son `hsfa_run` (journal `MJ`) ne lit que 16 des 256 entrées de la file : des commandes
   manquent dans ses journaux.
 

@@ -36,3 +36,9 @@
 <workspace>/work/agent_zangief/py	tools/diagnostics/zangief
 <workspace>/work/agent_portraits/outils	tools/diagnostics/portraits
 <workspace>/work/agent_coups	tools/diagnostics/coups
+<workspace>/work/revue_traducteur/outils	tools/reviews/translator
+<workspace>/work/revue_greffe/flou/outils	tools/reviews/graft
+<workspace>/work/revue_greffe/outils	tools/reviews/graft
+<workspace>/work/tables_max_greffe/outils	tools/reviews/max-tables
+<workspace>/work/revue_upper_max/revue_B/outils	tools/reviews/upper-max
+<workspace>/work/arbitrages_um/outils	tools/reviews/upper-max

@@ -57,7 +57,7 @@ OUTILS_DEFAUT = {
 }
 # (hyperarcade) etat fige de la greffe Arcade dans tools/greffe-arcade/construction : code <HA_ETAT>/, recette
 # <HA_ETAT>/greffe/vars_<HA_ETAT>.txt, releves releves_<HA_ETAT>/ ; seule ligne a changer a chaque nouvelle livraison
-HA_ETAT = "ro9a37"
+HA_ETAT = "ro9a38"
 PYTHON_NUMPY_DEFAUT = os.environ.get("HSFA_PYTHON_NUMPY", _d("venv", "bin", "python"))
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -626,6 +626,42 @@ class Construction:
                                                      else "hybride + sons PS2 seuls"))
         return res
 
+    # ---- (sons_ps2_upper) les mêmes sons PS2 seuls pour Upper et Upper MAX : provocation de Dee Jay 057D, Birdie 040F ----
+    def son_upper_dossier(self):
+        """ROM son d'Upper : hybride + sons PS2 seuls (docs/rapports/SONS-PS2-UPPER.md)"""
+        return os.path.join(self.W, "agent_son_ro5", "hybride", "roms_upper")
+
+    def son_uppermax_dossier(self):
+        """ROM son d'Upper MAX : ROM son MAX + les mêmes sons"""
+        return os.path.join(self.W, "agent_son_max", "roms_son_max_ps2")
+
+    def sons_ps2_jeu(self, etape, jeu, base, out, ref, nom):
+        """sons_ps2.py --jeu JEU : copie de la ROM son BASE + sons propres au portage PS2 tirés du X_DATA de
+        l'utilisateur, écrite dans OUT ; HSFA_SONS_PS2=0 : copie identique de BASE"""
+        os.makedirs(out, exist_ok=True)
+        argv = ["sons_ps2.py", "--base", base, "--sortie", out, "--xdata", self.xdata, "--jeu", jeu,
+                "--manifeste", os.path.join(self.ext, "manifest.csv"), "--journal", os.path.join(out, "sons_ps2.log")]
+        self.lance(etape, dict(cwd=out, sys_path=[self.O["son_hyper"], self.O["son_hybride"]], argv=argv,
+                               code="import sys\nsys.argv = %r\nimport sons_ps2\nsons_ps2.main()\n" % argv),
+                   self.env(HSFA_DEPOT=DEPOT, HSFA_SONS_PS2=os.environ.get("HSFA_SONS_PS2", "1")), python=self.python_numpy())
+        res = []
+        for n in ref:
+            p = os.path.join(out, n); res.append(p)
+            self.log("%s (%s) : %s %s" % (n, nom, md5_fichier(p), "= base" if md5_fichier(p) == ref[n] else "base + sons PS2 seuls"))
+        return res
+
+    def e_sons_ps2_upper(self):
+        """ROM son d'Upper : hybride + Birdie 040F / 090F et provocation de Dee Jay 057D / 0A7D (sons_ps2.py --jeu upper).
+        HSFA_SONS_PS2=0 : copie identique de l'hybride."""
+        return self.sons_ps2_jeu("sons_ps2_upper", "upper", os.path.join(self.W, "agent_son_ro5", "hybride", "roms_hybride"),
+                                 self.son_upper_dossier(), REF_SON_UPPER, "Upper")
+
+    def e_sons_ps2_uppermax(self):
+        """ROM son d'Upper MAX : ROM son MAX (son_uppermax) + les mêmes sons (sons_ps2.py --jeu uppermax).
+        HSFA_SONS_PS2=0 : copie identique de la ROM son MAX."""
+        return self.sons_ps2_jeu("sons_ps2_uppermax", "uppermax", os.path.join(self.W, "agent_son_max", "roms_son_max_pas"),
+                                 self.son_uppermax_dossier(), REF_SON_MAX, "Upper MAX")
+
     def e_prog(self, jeu):
         J = JEUX[jeu]; W = self.travail(jeu); os.makedirs(W, exist_ok=True)
         U = self.O["untranspile"]
@@ -777,6 +813,8 @@ class Construction:
             e["HSFA_CODES_HYPER"] = os.path.join(self.O["flux"], "codes_musique_hyper.txt")
         if os.path.isdir(self.son_hyper_dossier()):     # (hyper_parade) ROM son d'Hyper (e_sons_ps2)
             e["HSFA_SON_HYPER"] = self.son_hyper_dossier()
+        if os.path.isdir(self.son_upper_dossier()):     # (sons_ps2_upper) ROM son d'Upper (e_sons_ps2_upper)
+            e["HSFA_SON_UPPER"] = self.son_upper_dossier()
         table = os.path.join(self.cache, "son_hyper", "hsfa_rejeu_table.txt")
         if self.redirection() and os.path.exists(table):
             e["HSFA_REJEU_TABLE"] = table       # table du rejeu completee (e_son_hyper)
@@ -1007,7 +1045,7 @@ class Construction:
         W = self.travail("uppermax")
         self.lance("paquet_uppermax", spec, self.env(HSFA_WORK=self.W, HSFA_SORTIE=dest, HSFA_STRICT="1",
                    SOURCE_DATE_EPOCH=self.a.date_source, MAX_BANC=os.path.relpath(os.path.join(W, "banc"), self.W),
-                   MAX_SON="agent_son_max/roms_son_max_pas", SFA3MAX_CACHE=self.max_donnees(),
+                   MAX_SON=os.path.relpath(self.son_uppermax_dossier(), self.W), SFA3MAX_CACHE=self.max_donnees(),
                    HSFA_MAX_CACHE_DIR=os.path.join(W, "outils_max", "ag", "untranspile"), **self.env_paquet()), nice=False)
         return [os.path.join(dest, J["zip"] + ".zip")]
 
@@ -1071,6 +1109,10 @@ class Construction:
             E.append(("sons_ps2", ["son_upper", "afs"], [os.path.join(self.O["son_hyper"], "sons_ps2.py")],
                       self.e_sons_ps2, "sons propres au portage PS2 (parade, custom combo, Cammy ALPHA...) : ROM son "
                       "d'Hyper = hybride + sons tires du X_DATA (sons_ps2.py)"))
+        if "upper" in self.jeux:          # (sons_ps2_upper) provocation de Dee Jay 057D, Birdie 040F (SONS-PS2-UPPER.md)
+            E.append(("sons_ps2_upper", ["son_upper", "afs"], [os.path.join(self.O["son_hyper"], "sons_ps2.py")],
+                      self.e_sons_ps2_upper, "sons propres au portage PS2 d'Upper (provocation de Dee Jay, Birdie) : ROM "
+                      "son d'Upper = hybride + sons tires du X_DATA (sons_ps2.py --jeu upper)"))
         if "hyper" in self.jeux:
             sh = self.O["son_hyper"]
             E.append(("son_hyper", ["module_ro9"], [os.path.join(sh, f) for f in ("gen_redirection.py", "gen_rejeu.py",
@@ -1099,7 +1141,7 @@ class Construction:
                       + arbre(os.path.join(G, HA_ETAT)) + arbre(self.releves_greffe()),
                       self.e_greffe, "greffe du mode Arcade d'Upper dans Hyper (code fige %s, greffe_ha.py)" % HA_ETAT))
         for j in [j for j in self.jeux if j != "hyperarcade"]:
-            son = {"sfa3": ["son_sfa3"], "upper": ["son_upper"], "hyper": ["son_upper", "sons_ps2", "son_hyper"]}.get(j, [])
+            son = {"sfa3": ["son_sfa3"], "upper": ["son_upper", "sons_ps2_upper"], "hyper": ["son_upper", "sons_ps2", "son_hyper"]}.get(j, [])
             E.append(("paquet_" + j, ["prog_" + j, "gfx_" + j, "arcade"] + son, [self.O["paquet"]],
                       lambda j=j: self.e_paquet(j), "archive FBNeo %s.zip (paquet_fbneo.py)" % (JEUX[j]["zip"] or j)))
         if "hyperarcade" in self.jeux:
@@ -1119,10 +1161,13 @@ class Construction:
                    "donnees MAX regenerees depuis l'ISO PSP (outils de max/, regen_max.py)"),
                   ("son_uppermax", ["son_upper", "max_donnees"], [os.path.join(OUTILS_UM, "son"), os.path.join(DEPOT, "max", "outils", "sons")],
                    self.e_son_uppermax, "ROM son MAX (voix, cris, voix d'Ingrid) depuis l'ISO PSP et la ROM hybride d'Upper"),
+                  ("sons_ps2_uppermax", ["son_uppermax", "afs"], [os.path.join(self.O["son_hyper"], "sons_ps2.py")],
+                   self.e_sons_ps2_uppermax, "sons propres au portage PS2 (provocation de Dee Jay, Birdie) : ROM son "
+                   "d'Upper MAX = ROM son MAX + sons tires du X_DATA (sons_ps2.py --jeu uppermax)"),
                   ("prog_uppermax", ["prog_upper", "gfx_upper", "psp", "max_donnees", "son_uppermax", "afs", "module_ro5"],
                    [os.path.join(OUTILS_UM, "um_prog.py"), os.path.join(OUTILS_UM, "fige.py"), os.path.join(OUTILS_UM, "integration_2b31")],
                    self.e_prog_uppermax, "programme d'Upper MAX (integration MAX=1, etat 2b31 : prepare_max + mame_test)"),
-                  ("paquet_uppermax", ["prog_uppermax", "son_uppermax", "gfx_upper", "arcade"], [self.O["paquet"]],
+                  ("paquet_uppermax", ["prog_uppermax", "son_uppermax", "sons_ps2_uppermax", "gfx_upper", "arcade"], [self.O["paquet"]],
                    self.e_paquet_uppermax, "archive FBNeo sfa3umhsfa.zip (paquet_fbneo.py upper_max)")]
         E.append(("max", [], [], self.e_max, "persos MAX depuis l'ISO PSP (--psp-iso ; avec --jeux ...,uppermax)"))
         E.append(("empreintes", [], [], self.e_empreintes, "empreintes de toutes les ROM et archives produites"))
@@ -1157,6 +1202,8 @@ class Construction:
                               voix=self.voix_greffe(), releves=self.releves_greffe())
             if nom in ("son_hyper", "prog_hyper"):
                 params.update(rejeu=self.table_rejeu_source(), redirection=self.redirection())
+            if nom.startswith("sons_ps2"):       # (sons_ps2_upper) l'interrupteur change la sortie : il entre dans la cle
+                params["sons_ps2"] = os.environ.get("HSFA_SONS_PS2", "1")
             if nom == "arcade": params["source"] = "arcade" if self.a.arcade else "iso"
             if nom.startswith("gfx_"): params["plans_fenetre"] = self.plans_fenetre()
             if nom == "gfx_hyper": params["ombre_codes"] = self.ombre_codes()

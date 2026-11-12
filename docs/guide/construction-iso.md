@@ -119,12 +119,12 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
     --sortie hsfa_sortie --jeux hyperarcade [--rejeu-table hsfa_rejeu_table.txt] [--arcade sfa3.zip]
 ```
 
-- Translator: the graft has its frozen copy of translator **v161** (`untranspile3_v161`, state ro9a37, §221): the
+- Translator: the graft has its frozen copy of translator **v161** (`untranspile3_v161`, states ro9a37 and ro9a38, §221, §223): the
   v161 fixes (§219) reach Hyper + Arcade.
-- Result: `archives/sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a37** (11/11). `hyperarcade`
+- Result: `archives/sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a38** (12/11). `hyperarcade`
   adds `upper` and `hyper`: the graft starts from their outputs (modules, animations, banks, sound). Extra steps:
   `greffe_hyperarcade` (frozen code of `tools/greffe-arcade/construction/`, about 3 min) and `paquet_hyperarcade`.
-- **With the arcade ROM and the replay table**: the zip is the ro9a37 one (delivered on 12/11, CRC `51882820`), except
+- **With the arcade ROM and the replay table**: the zip is the ro9a38 one (delivered on 12/11, CRC `AC7D9F00`), except
   `hsfa_info.txt` (provenance) and the sound ROM (`hx3.01`, `hx3.02`, `hx3.14m`: sounds specific to the PS2 port added,
   §218; with `HSFA_SONS_PS2=0`, identical).
 - **Without the replay table**: the graft starts from Hyper's original module. Hyper keeps SFA3's voices for all
@@ -134,7 +134,7 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
   game and the picture are the same (the ground shadow of the ZERO / ZERO 2 characters is transparent on both routes
   since `HSFA_OMBRE_CODES`, BUILD §11.5).
 - **Records**: the graft reads tables taken from MAME passes and workshop analyses (addresses and numbers
-  only, 4.5 MB of TSV in `tools/greffe-arcade/construction/releves_ro9a37/`); `--greffe-releves` provides
+  only, 4.5 MB of TSV in `tools/greffe-arcade/construction/releves_ro9a38/`); `--greffe-releves` provides
   others. Details: [tools/greffe-arcade/construction](../../tools/greffe-arcade/construction/LISEZMOI.md).
 - Time: about 2 min 30 more than Upper + Hyper (graft 130-160 s, package 8 s); space: about 0.4 GB more.
 - Details and proof: [rapports/BUILD.md](../rapports/BUILD.md) §11.

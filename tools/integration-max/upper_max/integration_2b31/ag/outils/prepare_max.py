@@ -262,8 +262,8 @@ def integration():
           "MAX_T_EFFETS:", "        ds.l    64",
           "; table des palettes par perso (T_6f72b0) DÉPLACÉE : 64 entrées + blocs recopiés + blocs MAX (remplie à la construction)",
           "MAX_PAL_ZONE:", "        ds.b    $A000",
-          "; table des palettes d'EFFETS par perso (T_700540) DÉPLACÉE, même schéma",
-          "MAX_PALE_ZONE:", "        ds.b    $A000",
+          "; table des palettes d'EFFETS par perso (T_700540) DÉPLACÉE, même schéma (MAX_PALE_PLEINES=1 : blocs MAX entiers, +$800)",
+          "MAX_PALE_ZONE:", "        ds.b    $%X" % (0xA800 if os.environ.get("MAX_PALE_PLEINES", "0") == "1" else 0xA000),
 
           "MAX_FIN:"]
     # (18/10 nuit, session MAX) positions de projection (table 7495b8) : lignes MAX (PROJ_POS_xx) et lignes natives
@@ -743,6 +743,86 @@ def decor_base():
         r[noms[p]] = os.path.getsize(f) // 4 if g and os.path.exists(f) else 0
     return r
 
+# (arbitrages_um, 12/11, revue B3) « NON RÉSOLU » de la conversion BLOQUANTS : un accès que convertit_max.py ne sait pas
+# typer reste en disposition arcade et lit l'octet voisin sans bruit (défaut Yun $32D de la revue B2). Tout NON RÉSOLU
+# doit figurer dans conv/non_resolus_admis.tsv (motif, nombre) ; les « morts » sont vérifiés derrière le « bra » des
+# intros croisées. CONV_NON_RESOLUS_LIBRES (même vide) laisse passer, pour reproduire un lot ancien.
+NR_ADMIS = os.path.join(RACINE, "conv", "non_resolus_admis.tsv")
+
+def normalise_ins(t):
+    """instruction comparable : texte avant le « ; », étiquette de tête retirée, mnémonique + opérandes sans blancs, minuscules"""
+    p = re.sub(r"^\s*[A-Za-z_.][\w.]*:", "", t.split(";", 1)[0]).split(None, 1)
+    return (p[0] + (" " + re.sub(r"\s+", "", p[1]) if len(p) > 1 else "")).lower() if p else ""
+
+def zones_mortes(src):
+    """intros croisées neutralisées par sources() (« bra L_x » en tête du rappel 19) : {fichier: [(1re, dernière ligne)]},
+    n° de ligne à partir de 1 ; contrôle : les étiquettes définies dans la zone ne sont citées nulle part ailleurs"""
+    Z = {}
+    srcs = {f: open(os.path.join(src, f), encoding="utf-8", errors="replace").read().split("\n")
+            for f in os.listdir(src) if f.endswith(".s")}
+    for pid, P in PERSOS.items():
+        if pid.startswith("_"): continue
+        lab = P["rappels"]["7491f8"]
+        for f, L in srcs.items():
+            if not f.startswith("brouillon_"): continue
+            i = next((k for k, l in enumerate(L) if l.startswith(lab + ":")), None)
+            if i is None: continue
+            j = next(k for k in range(i + 1, len(L)) if L[k].strip() and not L[k].lstrip().startswith(";"))
+            m = re.match(r"\s+bra\s+(\w+)", L[j])
+            if not m: break
+            k = next(x for x in range(j + 1, len(L)) if L[x].startswith(m.group(1) + ":"))
+            for x in range(j + 1, k):
+                e = re.match(r"^(\w+):", L[x])
+                if not e: continue
+                for g, M in srcs.items():
+                    for y, l in enumerate(M):
+                        if (g != f or not j < y < k) and re.search(r"\b%s\b" % re.escape(e.group(1)), l.split(";", 1)[0]):
+                            sys.exit("ÉCHEC : intro croisée de %s : l'étiquette %s (zone sautée) est citée en %s:%d" % (
+                                P["nom"], e.group(1), g, y + 1))
+            Z.setdefault(f, []).append((j + 2, k))
+            break
+    return Z
+
+def controle_non_resolus(out, src):
+    nr = open(os.path.join(out, "conv", "non_resolus.tsv"), encoding="utf-8").read().splitlines()[1:]
+    vus = {}
+    for l in nr:
+        c = l.split("\t")
+        vus.setdefault((c[0], c[4] if len(c) > 4 else "", normalise_ins(c[3])), []).append((int(c[1]), c[2]))
+    admis = {}
+    for l in open(NR_ADMIS, encoding="utf-8").read().splitlines():
+        if not l.strip() or l.startswith("#") or l.startswith("fichier\t"): continue
+        c = l.split("\t")
+        assert len(c) == 6 and c[4] in ("admis", "mort", "defaut_connu"), "%s : ligne mal formée : %s" % (NR_ADMIS, l)
+        admis[(c[0], c[1], normalise_ins(c[2]))] = (int(c[3]), c[4], c[5])
+    Z = zones_mortes(src)
+    err, avis = [], []
+    sa = os.environ.get("CONV_SANS_ADRESSES")
+    for k, occ in sorted(vus.items()):
+        # adresse du moteur non résolue laissée passer par CONV_SANS_ADRESSES (ci-dessus) : déjà gouvernée par cet interrupteur
+        occ = [(n, r) for n, r in occ if not (sa is not None and re.search(r"adresse arcade \$([0-9A-F]+) absente", r) and
+               (not sa or re.search(r"adresse arcade \$([0-9A-F]+) absente", r).group(1) in sa.upper().split(",")))]
+        if not occ: continue
+        if k not in admis:
+            err += ["%s:%d (%s) « %s » : %s" % (k[0], n, k[1], k[2], r) for n, r in occ]; continue
+        n, verdict, motif = admis[k]
+        if len(occ) > n: err.append("%s (%s) « %s » : %d fois, %d admis" % (k[0], k[1], k[2], len(occ), n))
+        if verdict == "mort":
+            for x, r in occ:
+                if not any(a <= x <= b for a, b in Z.get(k[0], [])):
+                    err.append("%s:%d (%s) « %s » : admis comme mort, hors de la zone sautée des intros croisées" % (k[0], x, k[1], k[2]))
+        if verdict == "defaut_connu": avis.append("défaut connu admis : %s (%s) « %s » : %s" % (k[0], k[1], k[2], motif))
+    for k, (n, verdict, motif) in sorted(admis.items()):
+        if len(vus.get(k, [])) < n: avis.append("admis absent (%d/%d) : %s (%s) « %s » : retirer la ligne de %s" % (
+            len(vus.get(k, [])), n, k[0], k[1], k[2], os.path.basename(NR_ADMIS)))
+    print("NON RÉSOLU : %d, dont %d non admis (liste : %d entrées)" % (len(nr), len(err), len(admis)))
+    for a in avis: print("AVIS : " + a)
+    if err:
+        for e in err: print("NON ADMIS : " + e)
+        if os.environ.get("CONV_NON_RESOLUS_LIBRES") is None:
+            sys.exit("ÉCHEC : %d « NON RÉSOLU » non admis (%s/conv/non_resolus.tsv) : typer le champ / la base "
+                     "(conv/types_complement.tsv, conv/bases_forcees.tsv) ou, motif à l'appui, compléter %s" % (len(err), out, NR_ADMIS))
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ref", default=os.path.join(RACINE, "banc_ref"))
@@ -768,6 +848,7 @@ def main():
     if st.get("adresses_non_resolues") and os.environ.get("CONV_SANS_ADRESSES") is None:
         sys.exit("ÉCHEC : %d adresse(s) du moteur non résolue(s) (« appel moteur … absente des correspondances » dans "
                  "%s/conv/*.s et conversion.txt) : compléter conv/correspondances_complement.tsv" % (st["adresses_non_resolues"], out))
+    controle_non_resolus(out, src)
     # 2. blocs externes (frames, animations de combat et de fin)
     env = dict(os.environ, CONV_SORTIE=os.path.join(out, "blocs"), BLOC_EAGLE="%X" % BLOC_EAGLE)
     env["DECOR_BASE"] = ",".join("%s:%d" % kv for kv in decor_base().items())

@@ -55,6 +55,7 @@ Documentation de travail du projet HSFA, en français. Présentation et état : 
 |---|---|
 | [journal/README.md](journal/README.md) | le journal (`HANDOFF.md`, §1-§221), son index, l'état des lieux ; correspondance des anciens chemins |
 | [rapports/README.md](rapports/README.md) | rapports d'études détaillés (depuis le 2026-10-07) |
+| [rapports/reviews/README.md](rapports/reviews/README.md) | revues critiques des 11-12/11 (traducteur, greffe, tables MAX, Upper MAX, cœur, disque japonais) : résumé anglais de chacune, texte d'origine en français ; leurs outils : [tools/reviews/README.md](../tools/reviews/README.md) |
 | [rapports/recherche/README.md](rapports/recherche/README.md) | recherche : fiches A à R (versions et bogues de l'arcade, sondes, coups MAX, projets voisins, croisement avec cps2recomp, place sur une vraie CPS-2) ; fiches J à R (2026-11-10, reprises le 11/11) : [J](rapports/recherche/J-CROISEMENT-CPS2RECOMP-SFA3.md), [K](rapports/recherche/K-CPS2RECOMP-PISTES.md), [L](rapports/recherche/L-PROJETS-OUVERTS-2026-11.md), [M](rapports/recherche/M-REUTILISATION-TUILES.md), [N](rapports/recherche/N-PARADIGMES-LIMITES-ROM.md), [O](rapports/recherche/O-CPS2-POSSIBILITES.md), [P](rapports/recherche/P-SYNTHESE-PLACE-CPS2.md) (synthèse), [Q](rapports/recherche/Q-OPTIMISATION-IMAGES.md), [R](rapports/recherche/R-SOLUTIONS-PAR-JEU.md) |
 
 ## Ailleurs dans le dépôt

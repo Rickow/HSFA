@@ -33,6 +33,8 @@ désignent le dossier de travail local (données de jeu, jamais publiées).
 | [CARTE-MODULES.md](CARTE-MODULES.md) | tous les modules de l'Anthology (SFA, SFA2 et variantes, Pocket Fighter, menu) | `tools/carto-modules` |
 | [INJECTION-FORK.md](INJECTION-FORK.md) | injection des décors widescreen dans le programme traduit (fork, FBNeo) | `tools/decors/injection` |
 | [SON-HYPER-ROM.md](SON-HYPER-ROM.md) | ROM son d'Hyper avec les voix SFA1/SFA2 par version | `tools/son-hyper` |
+| [SONS-PS2-HYPER.md](SONS-PS2-HYPER.md) | sons propres au portage PS2, muets dans les Z80 : 21 sons ajoutés à la ROM son d'Hyper (ticket n° 1, parade) | `tools/son-hyper/sons_ps2.py` |
+| [SONS-PS2-UPPER.md](SONS-PS2-UPPER.md) | (English) the same for Upper and Upper MAX: Dee Jay's taunt and Birdie's entry 15 | `tools/son-hyper/sons_ps2.py` |
 | [PLAN-SON-HYPER.md](PLAN-SON-HYPER.md) | musique d'Hyper : origine des flux (jeu A = *Super SF2*), partitions SFA1/SFA2/SSF2, compression du reste | `tools/son-hyper` |
 | [PLAN-VORBIS.md](PLAN-VORBIS.md) | flux musique en Ogg Vorbis dans le cœur FBNeo (stb_vorbis, boucles, états, encodage) | `tools/flux`, `tools/fbneo-hsfa` |
 | [PLAN-PARTITIONS-HYPER.md](PLAN-PARTITIONS-HYPER.md) | musiques ZERO / ZERO 2 d'Hyper par leurs pilotes d'origine (carte musique : 2ᵉ Z80 + 3ᵉ QSound) | `tools/son-hyper` |
@@ -65,3 +67,4 @@ désignent le dossier de travail local (données de jeu, jamais publiées).
 | [BANC-GREFFE-UPPER.md](BANC-GREFFE-UPPER.md) | dégâts de la greffe (ro9a18) contre Upper, persos en version ZERO 3 | `tools/greffe-arcade` |
 | [TRI-ECARTS-HYPER-UPPER.md](TRI-ECARTS-HYPER-UPPER.md) | tri des 50 écarts robustes Hyper ≠ Upper (ZERO 3), 01/11 | — |
 | [TRANSPARENCE.md](TRANSPARENCE.md), [TRANSPARENCE-PAR-OBJET.md](TRANSPARENCE-PAR-OBJET.md), [TRANSPARENCE-OMBRES-JAUGES.md](TRANSPARENCE-OMBRES-JAUGES.md) | transparence des effets MAX (PSP, registres, patch 0010), mélange par objet, ombres et jauges comme la PSP (patch 0011) | `patches/fbneo` |
+| [reviews/README.md](reviews/README.md) | **revues critiques des 11-12/11** (traducteur, greffe, tables MAX, Upper MAX et arbitrages, cœur, disque japonais) : résumé anglais en tête de chaque rapport, texte d'origine en français | `tools/reviews` |

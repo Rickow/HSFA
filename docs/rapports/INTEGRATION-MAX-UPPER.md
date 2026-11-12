@@ -513,6 +513,23 @@ retrouver dans Upper, banque de l'emplacement 4 : lignes `anim` de `carte.txt`).
   l'intégration modifie les mêmes 739 va (`controle/equiv_integration.py`) et, hors du code d'Upper, toute différence
   est un pointeur relogé de même va (`controle/equiv_pointeurs.py`) ; banc MAX sur la construction v161 (max57).
 
+### 8 ter. Arbitrations of 12/11: blocking unresolved lines, PSP tables under switches (agent `arbitrages_um`)
+
+- **Unresolved conversion lines are blocking**: 29 -> 26 lines (`ifnd MAX_ALPHA` is now skipped as an assembler
+  directive; `psp_raz_alpha` gets a forced base `a4 = objet` in `conv/bases_forcees.tsv`, same bytes). The 26 left are
+  listed with their reason in `conv/non_resolus_admis.tsv` (15 hand-written / word / checked symbol, 10 dead lines of
+  the crossed intros, 1 known defect: Yun `$32D`). `non_resolus.tsv` gains a 5th column, the entry label.
+- **PSP alignment, switches at 0**: `MAX_615940_PSP` (Eagle (-37, 84) -> (-40, 96), Maki (-37, 84) -> (32, 80), Yun
+  (0, 0) -> (-16, 72), Ingrid (0, 0) -> (-18, 77)) and `MAX_MASQUES_PSP` (`0x61B540`: Eagle and Yun 0 -> 1, like every
+  native that has a secret fight in `0x61B680`; `0x61B510`: Eagle 1 -> 0). Only `sz3ud.04c` and `ext_e80000.bin` change.
+- **Effect palettes beyond 30** (`MAX_PALE_PLEINES`, at 0): Eagle, Maki, Yun have 36, Ingrid 72 (all PSP characters
+  have 36 or more). The only per-character reader (image `$2643C`) is unbounded: palette 30 + k of Eagle would be palette
+  k of Maki (Maki -> Yun, Yun -> Ingrid, Ingrid -> mostly zeros). Native callers use small indices; whether a MAX ever
+  asks for 30+ is to be measured.
+- Proofs: default build = max57 byte for byte; v160 base + v161 switches at 0 + `CONV_SANS_ADRESSES=1B6B6` = max55; with
+  the Yun `$32D` fix = the b2 test batch (`sz3.10b` `295a44eb`). Bench tests (written, not run yet):
+  `<workspace>/work/arbitrages_um/essais/`.
+
 ## 9. Questions pour la session MAX
 
 1. **Gestionnaires d'Eagle** (§4) : `brouillons.py` découpe les modules à la racine, or les gestionnaires des persos

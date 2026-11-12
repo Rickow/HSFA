@@ -229,5 +229,14 @@ def force():
     # les fins d'Upper (couverture e39/couv, e39/resume_couv.py) -> GREFFE. Vide : comme ro9a30.
     for _x in os.environ.get("FIN_A0FD0", "").split(','):
         if _x.strip(): d[int(_x, 16)] = ('GREFFE',)
+    # (ro9a38, revue de la greffe X6, flou/p2_homologues.md) X6_FINS=1 : 13 etats / gestionnaires d'acteurs de fin d'Upper
+    # encore renvoyes a un homologue d'Hyper non injectif, ENTRES pendant les fins (essai flou/04b : retour dans une copie) :
+    # -> 0xA0FD0 (combat) : 204bb0 207530 207780 20b2a0 20b430 (Guy 07), 20c6e0 (Sagat 0b), 2094a0 ($18) ;
+    # -> 0x84EA0 (combat) : 21d6c0 21dd90 21ea50 21edc0 (emetteurs des fins 0f 10 19 1a) ;
+    # -> 0x31F50 : 20fce0 (fin $1C : liberation dans le reservoir principal) ; -> 0x65180 : 21f670 (ADDQ.B #4, pas #2).
+    # GREFFE (comme FIN_A0FD0). =0 : comme ro9a37.
+    if os.environ.get("X6_FINS", "0") == "1":
+        for _f in (0x204BB0, 0x207530, 0x207780, 0x20B2A0, 0x20B430, 0x20C6E0, 0x2094A0,
+                   0x21D6C0, 0x21DD90, 0x21EA50, 0x21EDC0, 0x20FCE0, 0x21F670): d[_f] = ('GREFFE',)
     return d
 FORCE = force()

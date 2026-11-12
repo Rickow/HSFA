@@ -630,19 +630,19 @@ principal :
 ## 11. Hyper + Arcade (`--jeux hyperarcade`) : la greffe du mode Arcade d'Upper, depuis l'ISO (expérimental)
 
 Agent `script_ha`, 2026-11-08 (journal §212) ; passage à ro9a36 le 11/11 (§217, §11.6), à ro9a37 (traducteur v161)
-le 12/11 (§221, §11.7). Le jeu `hyperarcade` produit `sfa3hahsfa.zip` (pilote `sfa3hahsfa`) à l'état **ro9a37** de la
-greffe (programme `sz3ud.03c` `627c98c4…` ; ro9a36 : `93e88fee…` ; ro9a35b : `650b1bec…`). Il ajoute `upper` et `hyper` : la greffe part de leurs sorties.
+le 12/11 (§221, §11.7), à ro9a38 le 12/11 (§223, §11.8). Le jeu `hyperarcade` produit `sfa3hahsfa.zip` (pilote `sfa3hahsfa`) à l'état **ro9a38** de la
+greffe (programme `sz3ud.03c` `2dfdb15c…` ; ro9a37 : `627c98c4…` ; ro9a36 : `93e88fee…` ; ro9a35b : `650b1bec…`). Il ajoute `upper` et `hyper` : la greffe part de leurs sorties.
 
 ### 11.1 Étapes
 
 | Étape | Outil | Durée (08/11, 4 constructions en parallèle) |
 |---|---|---|
-| `greffe_hyperarcade` | `tools/greffe-arcade/construction/greffe_ha.py` : code figé `ro9a37/` + relevés (`releves_ro9a37/`, TSV reconstitués par `releves_tsv.py`) matérialisés dans `cache/greffe_ha` ; plan seul → table A5 → module, bloc, traduction (traducteur de la greffe v161) | 150-160 s |
-| `paquet_hyperarcade` | `ro9a37/paquet/paquet_fbneo.py ro9a` (flux Ogg : encodeur v3 portable) | 8 s |
+| `greffe_hyperarcade` | `tools/greffe-arcade/construction/greffe_ha.py` : code figé `ro9a38/` + relevés (`releves_ro9a38/`, TSV reconstitués par `releves_tsv.py`) matérialisés dans `cache/greffe_ha` ; plan seul → table A5 → module, bloc, traduction (traducteur de la greffe v161) | 150-160 s |
+| `paquet_hyperarcade` | `ro9a38/paquet/paquet_fbneo.py ro9a` (flux Ogg : encodeur v3 portable) | 8 s |
 
 Entrées venues de la construction : modules ro5 / ro9 décompressés, cache des anims, `X_DATA.BIN`, banques d'Hyper et
-d'Upper, module ro9 (corrigé si la table du rejeu est donnée, sinon d'origine). Recette : `ro9a37/greffe/vars_ro9a37.txt`
-(interrupteurs de ro9a36, traducteur v161 ; `HA_VARS` la remplace ; `vars_ro9a36.txt` redonne ro9a36,
+d'Upper, module ro9 (corrigé si la table du rejeu est donnée, sinon d'origine). Recette : `ro9a38/greffe/vars_ro9a38.txt`
+(interrupteurs de ro9a37 + R3, X6, A2a, E2b ; `HA_VARS` la remplace ; `vars_ro9a37.txt` redonne ro9a37, `vars_ro9a36.txt` ro9a36,
 `vars_ro9a35b.txt` ro9a35b). L'état vient d'une seule
 constante de `hsfa_build.py`, `HA_ETAT`. Python + NumPy seulement : pas de MAME, pas de vasm ; la greffe
 relance le traducteur par `sys.executable` (constructeur tout-en-un) et copie au lieu de lier si le système refuse
@@ -687,8 +687,8 @@ traducteur plus ancien). Sans les journaux, la greffe change de 2,3 Mo ; sans le
 
 ### 11.4 Limites
 
-- Expérimental. Avec la ROM d'arcade et la table du rejeu, le zip est ro9a37, le zip livré le 12/11, hors
-  `hsfa_info.txt` et la ROM son (sons PS2 du §218 ; `HSFA_SONS_PS2=0` : identique) (§11.7).
+- Expérimental. Avec la ROM d'arcade et la table du rejeu, le zip est ro9a38, le zip livré le 12/11, hors
+  `hsfa_info.txt` et la ROM son (sons PS2 du §218 ; `HSFA_SONS_PS2=0` : identique) (§11.8).
 - Voie ISO seule : ombres au sol opaques au lieu de transparentes (Hyper seul aussi) : corrigé, §11.5.
 - Windows : liens symboliques remplacés par des copies ou des jonctions (§215 ; voie Windows simulée sous Linux :
   zips identiques, §11.6) ; constructeur tout-en-un : modules embarqués suffisants (relevé des imports), non essayé.
@@ -756,3 +756,14 @@ traducteur plus ancien). Sans les journaux, la greffe change de 2,3 Mo ; sans le
 - **Atelier** : interrupteurs v161 à 0 = `ro9a36_fige` à l'octet ; ro9a37 : `sz3ud.03c` `627c98c4…`, zip CRC
   `51882820` ; garde-fous de construction à 0 (comparaisons sans forme 68K, aides non rendues, Bcc après appel).
 - **Preuve** (clone du dépôt + versement, ROM d'arcade + table du rejeu, `HSFA_OMBRE_CODES=0`) : greffe seule (code et TSV du dépôt) = `ro9a37_fige` à l'octet (34/35 de MD5SUMS, seul `env.sh` : chemins) ; avec `HSFA_SONS_PS2=0` (423 s, 1,3 Go) : `sz3ud.03c` `627c98c4`, zip **31/32 membres identiques au zip livré** (CRC `51882820`), seul `hsfa_info.txt` diffère ; par défaut (sons PS2 du §218), en plus `hx3.01`, `hx3.02`, `hx3.14m` (le zip livré garde la ROM son hybride) ; Upper `ac053140`, Hyper `dbfd237d` (v161, inchangés).
+
+### 11.8 Moving to ro9a38: four fixes from the review of the graft (12/11, §223)
+
+- **Carry-over**: diff of the workshop code (`etape2/donnees2.py`, `etape3/force3.py`, `etape3/greffe3.py`) applied to the
+  build copy; folders renamed `ro9a38/`, `releves_ro9a38/` (records unchanged); `HA_ETAT = "ro9a38"`. Recipe
+  `vars_ro9a38.txt` = `vars_ro9a37.txt` + `R3_CREUX=1 R3_CIBLES=1 X6_FINS=1 A2A_VS=1 E2B_DEFI=1`. Translator and package
+  unchanged. `X2_TABLES` (MAX ids) is in the code, off.
+- **Workshop**: all switches at 0 = `ro9a37_fige` byte for byte; ro9a38: `sz3ud.03c` `2dfdb15c…`, zip CRC `AC7D9F00`;
+  v161 build guards as in ro9a37.
+- **Proof** (clone of the repository + hand-over, arcade ROM + replay table, `HSFA_OMBRE_CODES=0`, `HSFA_SONS_PS2=0`):
+  graft alone (code and TSV of the repository) = `ro9a38_fige` byte for byte (34/35 of MD5SUMS, only `env.sh`: paths); full build (488 s, 1.3 GB): `sz3ud.03c` `2dfdb15c`, zip **31/32 members identical to the delivered zip** (CRC `AC7D9F00`), only `hsfa_info.txt` differs; Upper `ac053140`, Hyper `dbfd237d` (unchanged).

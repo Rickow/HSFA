@@ -545,6 +545,9 @@ def meet(a, b):
     return {r: meet1(a[r], b[r]) for r in REGS}
 
 LOCALES = ('L_', 'T_', 'AL_', 'AT_')       # étiquettes locales (cibles de branchement) : pas des entrées de fonction
+# (arbitrages_um) directives d'assemblage conditionnel (« ifnd MAX_ALPHA » de moteur_max_main.s était compté « NON RÉSOLU » :
+# taille d'accès inconnue) ; pas marquées « directive » pour ne rien changer au repérage des fonctions feuilles
+DIRECTIVES_COND = ('if', 'ifd', 'ifnd', 'ifeq', 'ifne', 'ifgt', 'ifge', 'iflt', 'ifle', 'else', 'endif', 'endc')
 ALLOC = {0x1C1C8, 0x1C2C8, 0x1C2DE, 0x1C368, 0x1C37E, 0x1C278, 0x1C28E, 0x1C318, 0x1C32E, 0x1C3AC, 0x1C3C2}
 CAMERA = {0x1BD68, 0x1BD5C}
 # fonctions MAX écrites à la main (acteurs_fins_main.s) : registres modifiés et genre rendu, d'après leur en-tête
@@ -574,6 +577,7 @@ class Convertisseur:
     def __init__(s, args):
         s.args = args
         s.journal = []; s.stats = Counter(); s.adresses = {}     # arcade -> info résolue
+        s.fonction = ''; s.non_resolus = []     # (arbitrages_um) fonction (étiquette d'entrée) en cours ; NON RÉSOLU + fonction
         s.va2img, s.n_carte = charge_carte(args.carte)
         s.corr = charge_corr()
         s.img = None if args.sans_image else charge_image(args.roms)
@@ -588,6 +592,7 @@ class Convertisseur:
     def log(s, ins, statut, regle, orig, nouv=''):
         s.journal.append((ins.fichier, ins.num, statut, regle, orig.strip(), nouv))
         s.stats[statut] += 1
+        if statut == 'NON RÉSOLU': s.non_resolus.append((ins.fichier, ins.num, regle, orig.strip(), s.fonction))
 
     # ---------------------------------------------------------------- résolution d'une adresse du moteur
     def resout(s, a):
@@ -944,8 +949,11 @@ class Convertisseur:
         etat = s.flux(code, labels_idx, entrees)
         classe_ins = s.classes_acteurs(code, labels_idx) if nom in FICHIERS_ACTEURS else {}
         sortie = []
+        s.fonction = ''
         for i, ins in enumerate(code):
             st = etat[i] or etat_entree()
+            for lb in ins.labels:                   # (arbitrages_um) fonction en cours, pour non_resolus.tsv
+                if not ins.equ and not lb.startswith(LOCALES) and '.' not in lb: s.fonction = lb
             s.modele_ins = classe_ins.get(i, s.modele_objet)
             try:
                 nouv = s.reecrit(ins, st, code, i, labels_idx)
@@ -1006,6 +1014,7 @@ class Convertisseur:
         if mn == 'dc':
             return s.reecrit_dc(ins)
         if ins.directive: return None
+        if mn in DIRECTIVES_COND: return None       # (arbitrages_um) assemblage conditionnel : rien à convertir
         ops = [EA(o) for o in ins.ops]
         # ---- appels / sauts vers le moteur arcade
         if mn in ('jsr', 'jmp', 'bsr', 'bra') and ops and ops[0].mode == 'abs':
@@ -1346,6 +1355,7 @@ class Convertisseur:
             try:
                 nouv = s.permute_bloc(genre, elems)
             except NonResolu as e:
+                s.fonction = lab
                 s.log(pseudo, 'NON RÉSOLU', 'données %s : %s' % (lab, e), L[0])
                 out.extend(x.rstrip('\n') + '  ; ⚠ CONV NON RÉSOLU' if j == 0 else x.rstrip('\n') for j, x in enumerate(L))
                 num_ligne += len(L); continue
@@ -1487,10 +1497,11 @@ def main():
     with open(os.path.join(args.sortie, 'journal.tsv'), 'w') as o:
         o.write('fichier\tligne\tstatut\tregle\toriginal\tconverti\n')
         for j in C.journal: o.write('\t'.join(str(x).replace('\t', ' ') for x in j) + '\n')
-    with open(os.path.join(args.sortie, 'non_resolus.tsv'), 'w') as o:
-        o.write('fichier\tligne\traison\toriginal\n')
-        for j in C.journal:
-            if j[2] == 'NON RÉSOLU': o.write('%s\t%s\t%s\t%s\n' % (j[0], j[1], j[3], j[4]))
+    # (arbitrages_um) 5e colonne « fonction » = étiquette d'entrée qui contient la ligne (clé de ag/conv/non_resolus_admis.tsv,
+    # contrôlée par outils/prepare_max.py : tout NON RÉSOLU absent de cette liste arrête la construction)
+    with open(os.path.join(args.sortie, 'non_resolus.tsv'), 'w', encoding='utf-8') as o:
+        o.write('fichier\tligne\traison\toriginal\tfonction\n')
+        for j in C.non_resolus: o.write('\t'.join(str(x).replace('\t', ' ') for x in j) + '\n')
     # assemblage d'essai
     with open(os.path.join(args.sortie, 'tout_max_upper.s'), 'w') as o:
         o.write('        org     $200000\n')

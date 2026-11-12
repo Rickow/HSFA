@@ -1,0 +1,35 @@
+# (arbitrages_um, 12/11, revue B3) « NON RÉSOLU » ADMIS de la conversion (convertit_max.py -> prep/conv/non_resolus.tsv).
+# outils/prepare_max.py arrête la construction sur tout NON RÉSOLU absent de cette liste, ou présent plus de « nombre » fois
+# (CONV_NON_RESOLUS_LIBRES, même vide, laisse passer : lots anciens). Clé = fichier + fonction (étiquette d'entrée, 5e colonne
+# de non_resolus.tsv) + instruction (texte avant le « ; », étiquette de tête retirée, blancs réduits, minuscules) ; pas de
+# n° de ligne (il change à chaque régénération des sources).
+# verdict : admis = laissé tel quel à raison (motif vérifiable) ; mort = derrière le « bra » des intros croisées posé par
+# sources() (contrôlé : la ligne doit être dans la zone sautée, et les étiquettes de la zone citées seulement depuis elle) ;
+# defaut_connu = défaut établi, correctif en essai : à RETIRER d'ici quand le correctif est versé.
+# Un admis qui disparaît est signalé (AVIS), pas bloquant : retirer sa ligne.
+fichier	fonction	instruction	nombre	verdict	motif
+moteur_max_main.s	psp_1d9b0	lea $14(a0), a0	1	admis	a0 = pas d'animation ($1C de l'objet) ; +$14 = pas suivant : taille du pas identique arcade / image (pointeur, pas un champ)
+moteur_max_main.s	psp_78408	move.b $103(a0), d2	1	admis	écrit à la main en disposition IMAGE (commentaire « image : $102 arcade ») : id du perso, octet image $103 = arcade $102
+moteur_max_main.s	psp_cec94	move.w 2(a0), d0	1	admis	a0 = entrée de TAB_VOIX_MAX (données propres au bloc MAX, assemblées en 68K natif, jamais converties) ; accès mot
+moteur_max_main.s	psp_cf72c	tst.w $50(a1)	1	admis	accès MOT : les mots restent en place (arcade $235E8 « tst.w $50(a1) » : même champ, image $50)
+moteur_max_main.s	psp_cf560	move.b $2a1(a6), -(sp)	1	admis	écrit à la main en disposition IMAGE (« $2A0 » arcade = image $2A1) ; vérifié : Upper $328CC / $329CC / $32A98 « move.b #8,$2A1(..) »
+moteur_max_main.s	psp_cf560	clr.b $2a1(a6)	1	admis	idem (psp_cf560, $2A1 image)
+moteur_max_main.s	psp_cf560	cmpi.b #8, $2a1(a6)	1	admis	idem (psp_cf560, $2A1 image)
+moteur_max_main.s	psp_cf560	move.b (sp)+, $2a1(a6)	1	admis	idem (psp_cf560, $2A1 image)
+gestionnaires_main.s	psp_1b07bc	move.b 0(a0), d1	1	admis	psp_1b07bc remplacée par max_trad/mes_fichiers/psp_1b07bc_main.s (sources()) : boucle écrite en disposition IMAGE (octet 0 = drapeaux $80/$40)
+gestionnaires_main.s	psp_1b07bc	lea 20(a0), a0	1	admis	idem : pas suivant de la table (20 octets), pointeur
+gestionnaires_main.s	psp_1b07bc	move.b 1(a0), d1	1	admis	idem : octet 1 image = durée
+gestionnaires_main.s	psp_1b07bc	tst.b 8(a0)	1	admis	idem : octet 8 image = attaque
+contres_max.s	CONTRE_MAX_11	move.w #1, CONTRE_DECLENCHE(a5)	1	admis	déplacement symbolique (equ de symboles_externes_max.s) contrôlé par prepare_max.py (TST.W du dispatcher des contres de l'image native) ; accès mot
+contres_max.s	CONTRE_MAX_12	move.w #1, CONTRE_DECLENCHE(a5)	1	admis	idem (CONTRE_DECLENCHE)
+contres_max.s	contre_ingrid	move.w #1, CONTRE_DECLENCHE(a5)	1	admis	idem (CONTRE_DECLENCHE)
+brouillon_eagle.s	psp_1b03cc	cmpi.b #$10, $102(a1)	1	mort	intro croisée (adversaire $10) sautée par le « bra » de sources() (rappel 19)
+brouillon_eagle.s	psp_1b03cc	movea.l 0(a0,d0.w), a0	2	mort	intros croisées ($10, $0B) sautées
+brouillon_eagle.s	psp_1b03cc	cmpi.b #$b, $102(a1)	1	mort	intro croisée (adversaire $0B) sautée
+brouillon_maki.s	psp_1b445c	cmpi.b #$e, $102(a1)	1	mort	intro croisée (adversaire $0E) sautée
+brouillon_maki.s	psp_1b445c	movea.l 0(a0,d0.w), a0	1	mort	intro croisée ($0E) sautée
+brouillon_yun.s	psp_1baf6c	cmpi.b #$21, $102(a1)	1	mort	intro croisée (adversaire $21) sautée
+brouillon_yun.s	psp_1baf6c	movea.l 0(a0,d0.w), a0	1	mort	intro croisée ($21) sautée
+brouillon_ingrid.s	psp_1c208c	cmpi.b #$19, $102(a1)	1	mort	intro croisée (adversaire $19) sautée
+brouillon_ingrid.s	psp_1c208c	movea.l 0(a0,d0.w), a0	1	mort	intro croisée ($19) sautée
+brouillon_yun.s	psp_1bc300	tst.b $32d(a1)	1	defaut_connu	revue B2 : champ $32D non typé, l'image lit l'octet voisin (doit lire image $32C) ; correctif = ligne « objet $32D » de types_complement.tsv, en essai au banc : RETIRER cette ligne quand il est versé
