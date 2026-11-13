@@ -5,7 +5,7 @@ Constructeur HSFA : un seul executable, de VOS images de disque aux archives des
   hsfa-constructeur                          window (or text prompts without a display) / fenetre (ou questions)
   hsfa-constructeur IMAGE [--psp ISO_PSP] [--sortie DIR]
       IMAGE   : Street Fighter Alpha Anthology (PS2, USA, SLUS-21317), .iso or .chd
-      ISO_PSP : optional / facultatif : Street Fighter Alpha 3 MAX (PSP, Europe, ULES-00235), .iso or .chd
+      ISO_PSP : optional / facultatif : Street Fighter Alpha 3 MAX (PSP, USA ULUS-10062 or Europe ULES-00235), .iso or .chd
                 -> also builds Upper MAX (sfa3umhsfa.zip) / construit aussi Upper MAX
       Windows : drag the PS2 image onto the executable / glisser l'image PS2 sur l'executable
   options : --console ; --cible fbneo-hsfa (default / defaut) | fbneo-autonome | mister | cps2-banques ; --oui / --yes ;
@@ -213,7 +213,7 @@ def console(image=None, sortie=None, psp=None, extra=(), questions=True, cible=N
     if not image:
         image = _demande("Image PS2 de l'Anthology (.iso ou .chd ; glissez le fichier ici) / PS2 disc image: ")
         if questions and psp is None:
-            psp = _demande("ISO PSP de SFA3 MAX (Europe), facultatif : Entrée pour passer / optional PSP ISO, "
+            psp = _demande("ISO PSP de SFA3 MAX (USA ou Europe), facultatif : Entrée pour passer / optional PSP ISO, "
                            "Enter to skip: ") or None
     if not os.path.isfile(image):
         print("Introuvable / not found: %s" % image); return 1
@@ -353,7 +353,7 @@ def main(argv):
     ap = argparse.ArgumentParser(description="HSFA builder / constructeur HSFA %s" % VERSION)
     ap.add_argument("image", nargs="?", help=".iso ou .chd de Street Fighter Alpha Anthology (PS2, USA, SLUS-21317)")
     ap.add_argument("--psp", "--psp-iso", dest="psp",
-                    help="ISO ou .chd PSP de SFA3 MAX (Europe, ULES-00235), facultatif : Upper MAX en plus")
+                    help="ISO ou .chd PSP de SFA3 MAX (USA ULUS-10062 ou Europe ULES-00235), facultatif : Upper MAX en plus")
     ap.add_argument("--sortie", "--output", dest="sortie")
     ap.add_argument("--console", action="store_true", help="sans fenêtre / no window")
     ap.add_argument("--cible", choices=("fbneo-hsfa", "fbneo-autonome", "mister", "cps2-banques"), default=None,

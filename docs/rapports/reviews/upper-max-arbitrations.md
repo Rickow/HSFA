@@ -14,7 +14,7 @@ Workshop: `<workspace>/work/arbitrages_um/` (bench batch `essais/lot_um_arbitrag
   checked); at 1 the values equal the PSP (`releve_tables.py`). **Open**: bench trials E1 / E2.
 - **A6 (B7, effect palettes cut at 30)**: the cut is now logged; `MAX_PALE_PLEINES` (default 0) keeps every palette;
   every PSP character has 36 or more effect palettes. **Open**: bench trial E3.
-- With every switch at 0 the build equals max57 byte for byte (journal and CHANGELOG "En cours").
+- With every switch at 0 the build equals max57 byte for byte (journal and CHANGELOG, v0.1.10).
 - **Tools kept**: `releve_tables.py`, `releve_palettes.py`, `essai_nr.py` in
   [`tools/reviews/upper-max/`](../../../tools/reviews/upper-max/).
 

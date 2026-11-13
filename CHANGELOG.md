@@ -7,8 +7,54 @@ est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports
 > **Language**: from 2026-11-12 on, the entries of this changelog are written in English (starting with the
 > v0.1.9 section below); the older entries stay in French.
 
-## Unreleased
+## v0.1.10 (2026-11-13)
 
+Stable version: it replaces v0.1.7 as the recommended version (v0.1.9 was a pre-release). Same cores as v0.1.9 (core
+batch of 12/11b: 0001-0027, 0029-0032, 0007b); rebuild your games from your ISO with this version.
+
+- **Upper MAX** (max58): the 7 ending pieces that were missing are back (Ingrid's portrait in her dialogues, the scenes
+  of her ending, Yun's credits in slot 4, `MAX_DECORS49`, `MAX_GENERIQUE_E4`); the fades of the converted PSP ending
+  scripts follow the arcade's rules (`max/outils/convert/convertir_fin.py`), so Yun's final credits and Maki's scene with
+  Bison are no longer black; Guy is drawn with his own tile bank in Maki's ending (`MAX_FIN_INVITE`); the scene palette
+  sets match the PSP (Ingrid, Maki, Yun; `MAX_FIN_3204_IMAGE`). The PSP-aligned tables are on by default
+  (`MAX_615940_PSP`: linked effect positions of the 4 MAX = PSP; `MAX_MASQUES_PSP`: route to the secret fight in Arcade
+  like the natives); Yun's `$32D` is typed. Each switch at `0` gives back the previous build byte for byte. The 35
+  natives' endings are identical to max57; Arcade of the 4 MAX to the end; cross fights 64/64. `hsfa_build.py` now
+  hashes every file under `max/outils` and `integration_2b31` (sub-folders included), so a change there rebuilds the MAX
+  steps (§229; [report](docs/rapports/INTEGRATION-MAX-UPPER.md) §8 quater).
+- **Benches**: the endings bench no longer reports an empty measurement as OK (`VIDE`; `tools/banc-coups`, §229).
+- **Reviews**: critical reviews of the translator, the graft, the MAX tables and Upper MAX in
+  [`docs/rapports/reviews/`](docs/rapports/reviews/README.md).
+- **Hyper + Arcade** (ro9a41): in the graft's data, 10 pairs of signed words (the (dx, dy) of an object attached to
+  Ryu and to character 6, of a linked effect, offsets of Vega's claw, the child object of player 2 at the K.O.) were relocated as code
+  pointers; they keep Upper's values again (`PAIRES_CODE`). No change was seen in the games played: none of these
+  values is read there. Forcing ending $27 crashes Upper itself; it cannot be reached in Hyper + Arcade. The
+  four stages whose objects still differ from Upper depend on the camera, the frame counter or the combat flags of
+  Hyper's engine, not on the graft. With the switch off, the build gives ro9a40 byte for byte; VERSUS identical,
+  all endings reached. `hsfa_build.py --jeux hyperarcade` builds ro9a41 (§230).
+- **Hyper + Arcade** (ro9a40): three fixes seen in play. A CPU opponent or a player in ZERO, ZERO 2 or ALPHA keeps the
+  colour of its version from the face-off to the end; it no longer jumps to another colour at "FIGHT" and back at each
+  round (§225). The portraits of the map, the face-off and the victory screen of a character in a version use colour 2,
+  as Hyper does for its own portraits (§226). Before the dialogue screen of a ZERO 3 rival (for example Sakura against
+  Ryu) or of the final fight, the big green "A" of the transition no longer leaves a band of letter pieces in the middle
+  of the screen (§227). With the four switches off, the build gives ro9a39 byte for byte; VERSUS identical, all endings
+  reached. `hsfa_build.py --jeux hyperarcade` builds ro9a40 (§228).
+- **Upper MAX: the US PSP disc of *SFA3 MAX* (ULUS-10062) is accepted**, as well as the European one (ULES-00235),
+  original or "decrypted" ISO. Both give the same `sfa3umhsfa.zip`, byte for byte. The edition is read from the disc
+  (`PARAM.SFO`); the Japanese one is refused with a message that names it. The US `BOOT.BIN` has its code 8 bytes
+  lower (one screen function of the engine is shorter): the build moves it back to the European addresses that the
+  MAX tools use. On the US disc, 6 lines of Eagle's, Yun's and Ingrid's texts spell "Shadowloo": they are rewritten
+  "Shadaloo", as on the European disc and everywhere in the Anthology (`tools/integration-max/upper_max/psp_region.py`;
+  BUILD §10.7).
+- **Hyper + Arcade** (ro9a39): step L1 of the MAX characters' integration, **invisible to the player**. 54 per-character
+  tables read by Upper's grafted code are now copied with 48 entries instead of 40 (entries 40-44 keep what the
+  pseudo-ids read before, the new entries copy Ryu's), and their grafted readers point to the copies; Yun and Ingrid
+  move to ids `$2D` / `$2E` in the stage table. No new character, portrait or sound: a character id `$28-$2F` forced
+  by a cheat no longer reads past these tables (map, face-off, victory screen and ending tested with no exception
+  for the MAX ids `$2D` / `$2E`; `$26` / `$27` are Upper's own slots). With the switches
+  off, the build gives ro9a38 byte for byte; VERSUS identical to ro9a38, stages 40/40 unchanged. The sound tool gets a
+  `hypermax` game (Hyper's PS2-only sounds moved to `0x2A000` on the MAX sound ROM, for the future driver with MAX);
+  Hyper's and the graft's sound ROMs do not change. `hsfa_build.py --jeux hyperarcade` builds ro9a39 (§224).
 - **Hyper + Arcade** (ro9a38): four fixes from the critical review of the graft. After a VERSUS played on an Upper
   stage, the next character select no longer shows its background in wrong tiles; when a new challenger joins during
   Upper's map, face-off or an Arcade fight, the 2-3 frames of full-screen wrong tiles are gone (a few black frames

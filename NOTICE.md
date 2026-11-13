@@ -17,7 +17,7 @@ HSFA mixes code of its own with modifications to two emulators. Each part keeps 
 ## FinalBurn Neo HSFA cores
 
 The cores are FinalBurn Neo built from libretro/FBNeo commit `af5d3f3` with the patches of `patches/fbneo/` (chain
-`0001`-`0027` and `0029`-`0031` plus `0007b`, `0021b`, `0021c`, see [patches/fbneo/README.md](patches/fbneo/README.md)). They are distributed under the
+`0001`-`0027` and `0029`-`0032` plus `0007b`, `0021b`, `0021c`, see [patches/fbneo/README.md](patches/fbneo/README.md)). They are distributed under the
 FinalBurn Neo licence, which is reproduced verbatim in `patches/fbneo/LICENSE-FBNeo.txt` and in every core archive.
 In short:
 

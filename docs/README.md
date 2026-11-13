@@ -18,7 +18,7 @@ Working documentation of the HSFA project. Overview and status: [README](../READ
 | [guide/installation-android.md](guide/installation-android.md) | FBNeo HSFA core on RetroArch Android |
 | [guide/installation-rocknix.md](guide/installation-rocknix.md) | core on RGB10X / ROCKNIX |
 | [guide/installation-recalbox.md](guide/installation-recalbox.md) | core on Recalbox 10 (Raspberry Pi) |
-| [guide/installation-fbneo-autonome-windows.md](guide/installation-fbneo-autonome-windows.md) | standalone FinalBurn Neo HSFA for Windows, without RetroArch (test build, planned with the next version) |
+| [guide/installation-fbneo-autonome-windows.md](guide/installation-fbneo-autonome-windows.md) | standalone FinalBurn Neo HSFA for Windows, without RetroArch (test build, attached to v0.1.9 and v0.1.10) |
 | [guide/installation-batocera.md](guide/installation-batocera.md) | cores and five games on Batocera 43 (installer and service; tried on PC); RetroBat: [untested note](../tools/retrobat/NOTE-RETROBAT.md) |
 | [guide/LIVRAISONS.md](guide/LIVRAISONS.md) | register of the cores and archives handed over (names, md5) up to 2026-10-24; after that, the cores of each release and the unpublished batches (§4) |
 

@@ -55,6 +55,7 @@ RX_1108 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$1108, (?:\$[0-9a-f]{4
 def jeux_k(pid):
     """jeux PSP k employés (scènes 1108 + x9 autres que l'initial et le final d'Eagle)"""
     return sorted(set(K_1108.get(pid, [])) | set(k for k in JEUX_PSP.get(pid, []) if k))
+RX_3204 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$3204, )\$([0-9a-f]{4})(, .*)$", re.M)
 RX_X9 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$0904, \$0004, )\$([0-9a-f]{4})(, \$0000, \$0008)$", re.M)
 
 # (18/10 nuit, 5, session MAX) IMAGES DE PALETTES prêtes : converti/plXX/fin/jeux_palettes_cps2.bin (images de 32
@@ -73,7 +74,7 @@ def corrige_images(pid, s, J):
     S = lambda i: n0 + 2 * i; P = lambda i: n0 + 2 * i + 1; NR = n0 + 2 * ni
     ev = J["evenements"]
     sc = [e for e in ev if e["op"] == "scene"]; x5 = [e for e in ev if e["op"] == "x5"]; x9 = [e for e in ev if e["op"] == "x9"]
-    out = []; i9 = i5 = isc = 0
+    out = []; i9 = i5 = isc = 0; s_cour = None
     for l in s.split("\n"):
         if RX_X9.match(l) or re.match(r"^        dc\.w    \$[0-9a-f]{4}, \$0904, ", l):
             e = x9[i9]; i9 += 1
@@ -82,9 +83,15 @@ def corrige_images(pid, s, J):
             d = re.match(r"^        dc\.w    (\$[0-9a-f]{4}), ", l).group(1)
             out.append("        dc.w    %s, $0904, $0004, $%04x, $0000, $001E  ; (agent_integration_max) x9 -> image %d (30 palettes : OBJ 30-31 = texte)" % (d, P(e["image"]), e["image"]))
             continue
+        m3 = RX_3204.match(l)
+        if m3 and s_cour is not None and os.environ.get("MAX_FIN_3204_IMAGE", "1") == "1":
+            # (13/11, session MAX) 3204 a,b,c,d (sortie du blanc, règle F1 « scene » de convertir_fin) : a = jeu OBJ -> le
+            # MÊME jeu neuf que le 1108 de la scène (image MAX), sinon il recharge le jeu du modèle (Ingrid « The catalyst… »)
+            out.append(m3.group(1) + "$%04x" % s_cour + m3.group(3) + "  ; (agent_integration_max) a (OBJ) -> jeu de la scène")
+            continue
         m = RX_1108.match(l)
         if m:
-            e = sc[isc]; isc += 1
+            e = sc[isc]; isc += 1; s_cour = S(e["image"])
             reste = m.group(3)
             if pid in NOIR:
                 reste = ", $%04x, $%04x, $%04x" % (NR, NR, NR)
@@ -140,6 +147,20 @@ def corrige_script(pid, s):
 # n° = rang ajouté ; 1er pas (decor_fin_<perso>.s, decor_nouveaux_max.md)
 ND_81522 = {"ND26_4": 12, "ND27_4": 13, "ND29_4": 14}
 ND_PAS = {"ND26_4": "P8_26_0", "ND27_4": "P8_27_0", "ND29_4": "P8_29_0"}
+# (13/11, session MAX, revue B6) les 7 décors restés « equ 0 » ne sont pas de classe $48 :
+# - classe $49 (sous-types $00 / $11 ; arcade $2F4284 = Upper 0x649798, 114 entrées de mots relatifs vers des pas de 8 o) :
+#   ND = n° PSP (>= 114) ; integre_max.talon_decors49 : aux sites de fin « MOVE.B $71(A6),D0 … LEA 0x649798 ; JSR/JMP anim »,
+#   D0 >= 114 -> A0 = FIN118_xx (table +$118 de la fin assemblée par la session MAX : mêmes mots relatifs, mêmes n° PSP) et
+#   $1A = $8000 (emplacement 4 = fichier de fin, codes LOCAUX des frames FD) ; la table native n'est pas copiée
+ND_49 = {"ND29_123": 123, "ND29_125": 125, "ND29_126": 126, "ND29_127": 127, "ND29_128": 128}
+if os.environ.get("MAX_DECORS49", "1") != "1": ND_49 = {}   # MAX_DECORS49=0 : sans le talon, n° 0 (provisoire) comme avant
+# - classe $4A/01 (arcade $301FA2 = Upper 0x674C00, liste $BB(A5)+2 = poses 2 / 3 des portraits, rang = ID du perso :
+#   Maki « $4A/01 rang 7 », Ingrid rangs 9 / 10 = portraits d'invités) : n° PSP 41 = ID PSP d'Ingrid ($29), dont la
+#   table +$118 de la fin vaut 0 (entrée vide) -> le portrait d'Ingrid = rang de son ID Upper, déjà posé par portraits ;
+ND_ID = {"ND29_41": 0x2E}
+# - classe $4E/00 (liste $E / $F de 0x674C00 selon $90(A5), = 0x674C00 + 3012, 62 rangs) : n° PSP 114 de la fin de Yun =
+#   +$118[114] = pas 15 (1 image, fin) -> rang libre $3C (rangs pris : ID natifs, $26 $27 $2D $2E, $3D ; 2e pose de Yun)
+ND_GENERIQUE = {"ND28_114": (0x3C, "P8_28_15")}
 JEU_NEUF = {"26": (0x10, 0, 20), "27": (0x07, 0, 20), "2d": (0x06, 0, 20), "2e": (0x10, 0, 20)}      # (palier 4 : palettes relatives 0-19 du bloc de fin, invités compris)       # perso -> (fin modèle, 1re palette PSP, nombre)
 P4 = os.environ.get("MAX_P4", "1") == "1"          # (palier 4) 0 : état du palier 3 (lot 2b6) pour les fins
 if not P4:
@@ -149,7 +170,7 @@ if not P4:
                    "27": [("        dc.w    $0000, $0904, $0004, $0000, $0000, $0008", None)],
                    "2d": [("        dc.w    $0000, $0904, $0004, $0000, $0000, $0008", None)],
                    "2e": [("        dc.w    $0000, $0904, $0004, $0000, $0000, $0008", None)]}
-    ND_81522 = {}
+    ND_81522 = {}; ND_49 = {}; ND_ID = {}; ND_GENERIQUE = {}
     JEUX_PSP = {}
     K_1108 = {}
 
@@ -259,12 +280,24 @@ def prepare(out, persos):
             # décors propres à la fin (ND<fin>_<n° PSP> = rang de l'entrée ajoutée aux tables globales de décor) : palier 4 ;
             # en attendant, n° 0 de la table (PROVISOIRE : le décor affiché n'est pas le bon)
             nd = sorted(set(re.findall(r"\bND[0-9a-f]{2}_\d+\b", s)))
+            # (13/11) contrôle : le 1er pas annoncé par la session MAX (commentaire « 1er pas P8_xx ») = celui des tables
+            for n_, p8_ in re.findall(r"\b(ND[0-9a-f]{2}_\d+)\b[^\n]*1er pas (P8_\w+)", open(af, encoding="utf-8").read()):
+                attendu = ND_PAS.get(n_) or ND_GENERIQUE.get(n_, (0, None))[1]
+                assert attendu in (None, p8_) or n_ in ND_ID or n_ in ND_49, "décor %s : 1er pas %s (session MAX), %s attendu" % (n_, p8_, attendu)
+            def nd_ligne(n):
+                if n in ND_81522: return "%s equ %d   ; (agent_integration_max) décor MAX ajouté à la table 0x960180 (arcade $81522)" % (n, ND_81522[n])
+                if n in ND_49: return "%s equ %d   ; décor MAX de classe $49 : n° PSP de FIN118 (talon_decors49, emplacement 4)" % (n, ND_49[n])
+                if n in ND_ID: return "%s equ $%02X   ; portrait du perso (classe $4A, 0x674C00 poses 2 / 3, rang = ID Upper)" % (n, ND_ID[n])
+                if n in ND_GENERIQUE: return "%s equ $%02X   ; décor MAX au rang $%02X de 0x674C00 + 3012 (classe $4E, listes $E / $F)" % (n, ND_GENERIQUE[n][0], ND_GENERIQUE[n][0])
+                return "%s equ 0   ; (agent_integration_max) PROVISOIRE : décor de fin au palier 4" % n
             L += ["        even", "; ---- fin $%s : acteurs (session MAX : acteurs_fin_%s.s, disposition IMAGE)" % (pid, suf)]
-            L += ["%s equ %d   ; (agent_integration_max) %s" % (n, ND_81522[n], "décor MAX ajouté à la table 0x960180 (arcade $81522)")
-                  if n in ND_81522 else "%s equ 0   ; (agent_integration_max) PROVISOIRE : décor de fin au palier 4" % n for n in nd]
+            L += [nd_ligne(n) for n in nd]
             L += [s]
-            I["acteurs"] = True; I["nd_provisoires"] = [n for n in nd if n not in ND_81522]
+            I["acteurs"] = True
+            I["nd_provisoires"] = [n for n in nd if not (n in ND_81522 or n in ND_49 or n in ND_ID or n in ND_GENERIQUE)]
             I["nd_81522"] = {n: (ND_81522[n], ND_PAS[n]) for n in nd if n in ND_81522}
+            I["nd_49"] = sorted(n for n in nd if n in ND_49)
+            I["nd_generique"] = {n: ND_GENERIQUE[n] for n in nd if n in ND_GENERIQUE}
     L += jeu_source_max()
     # (palier 4) PLANS VIDES des fins MAX (session MAX, 18/10 nuit) : les images des fins MAX sont des sprites FD.. ;
     # le seul x6 des 4 scripts (« $0603, 0, 1, 2 ») prend les entrées 0/1/2 de la liste de plans (0x60B700[ID]) :

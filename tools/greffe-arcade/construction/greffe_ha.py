@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""greffe_ha.py -- etape « greffe » du jeu hyperarcade : enchaine la greffe (copie figee ro9a38 = HA_ETAT de hsfa_build.py, fige35.py ;
+"""greffe_ha.py -- etape « greffe » du jeu hyperarcade : enchaine la greffe (copie figee ro9a41 = HA_ETAT de hsfa_build.py, fige35.py ;
 HA_FIGE=fige_ro9a22 + fige.py pour l'ancienne) comme
 outils/construit_e3.sh, dans un dossier materialise, a partir d'entrees donnees par variables.
 

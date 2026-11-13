@@ -294,8 +294,8 @@ def donnees(buf, data, end, T, W=None):
                 pose(t, i, b_)
         log("défense par victime : lignes $20-$2F des 3 tables (0x697FE0 MAX = PSP 0x2190C8) ; ANDI #$1F -> #$3F en image")
     # (arbitrages_um, 12/11, revue B4 / B5 ; arbitrage du porteur : « alignés sur la PSP après mesure ») entrées MAX lues
-    # dans l'EBOOT (id PSP : Eagle $26, Maki $27, Yun $28, Ingrid $29). À 0 PAR DÉFAUT tant que le banc ne les a pas
-    # validées. Contrôle d'alignement : les natifs 0-$25 qui diffèrent entre PSP et Upper doivent être exactement ceux du
+    # dans l'EBOOT (id PSP : Eagle $26, Maki $27, Yun $28, Ingrid $29). À 0 par défaut jusqu'à max57 ; à 1 depuis max58
+    # (validées au banc). Contrôle d'alignement : les natifs 0-$25 qui diffèrent entre PSP et Upper doivent être exactement ceux du
     # relevé (empreinte), sinon la table PSP n'est pas celle qu'on croit.
     #   MAX_615940_PSP=1 : effet lié (dx, dy) de 0x615940 (lu par l'état du sous-type 6 de la classe 7, arcade $82C98) <-
     #     PSP 0x2205E8 : Eagle (-37, 84) -> (-40, 96), Maki (-37, 84) -> (32, 80), Yun (0, 0) -> (-16, 72), Ingrid (0, 0)
@@ -308,7 +308,9 @@ def donnees(buf, data, end, T, W=None):
                                         ("MAX_MASQUES_PSP", 0x61B540, 0x20B676, 1, (0x12, 0x15, 0x17, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23)),
                                         ("MAX_MASQUES_PSP", 0x61B4E0, 0x20B6A0, 1, (0x12, 0x14)),
                                         ("MAX_MASQUES_PSP", 0x61B510, 0x20B6CA, 1, (0x12, 0x1B, 0x1C))):
-        if os.environ.get(var_, "0") != "1": continue
+        # (max58, 13/11) À 1 PAR DÉFAUT depuis max58 (banc : E1 / E1-bis 0x615940, E2 masques ; work/max58/RAPPORT.md) ;
+        # =0 redonne max57 (avec le correctif Yun $32D : b2_v161).
+        if os.environ.get(var_, "1") != "1": continue
         eb = open(os.environ.get("SFA3MAX_EBOOT", "@UM_EBOOT@"), "rb").read()[0x74:]
         dif_ = tuple(i for i in range(0x26) if eb[tp_ + e_ * i:tp_ + e_ * (i + 1)] != ORIG[tu_ - RB + e_ * i:tu_ - RB + e_ * (i + 1)])
         assert dif_ == ecarts_, "%s : PSP 0x%X / Upper 0x%X : natifs différents %s, attendu %s" % (var_, tp_, tu_, dif_, ecarts_)
@@ -624,11 +626,14 @@ def fins(data, end, pose):
             I["texte0"], I["texte0"] + len(I["textes"]) - 1, m,
             (" ; décors PROVISOIRES : " + ", ".join(I.get("nd_provisoires", []))) if I.get("nd_provisoires") else ""))
     # (palier 4) décors MAX ajoutés à la table de classe $48 (0x960180) : pas de 8 o recopiés depuis le bloc externe
-    # assemblé (decor_fin_<perso>.s, disposition image) jusqu'au pas qui boucle (bit 7, reprise) ou s'arrête (bit 6)
-    nd = {}
+    # assemblé (decor_fin_<perso>.s, disposition image) jusqu'au pas qui boucle (bit 7, reprise) ou s'arrête (bit 6) ;
+    # (13/11) classe $4E : 1 pas au rang choisi de 0x674C00 + 3012 ; classe $49 : talon_decors49 (ND49)
+    nd = {}; ng = {}
     for p in ACTIFS:
-        nd.update((info.get(p) or {}).get("nd_81522", {}))
-    if nd:
+        nd.update({n: (0x960180, k, lab) for n, (k, lab) in ((info.get(p) or {}).get("nd_81522", {})).items()})
+        ND49.update({n: PERSOS[p]["suffixe"] for n in (info.get(p) or {}).get("nd_49", [])})
+        ng.update((info.get(p) or {}).get("nd_generique", {}))
+    if nd or ng:
         import re as _re, glob as _gl
         sy, bl = {}, {}
         for lst in _gl.glob(os.path.join(DIR, "blocs", "bloc_*.lst")):
@@ -640,7 +645,7 @@ def fins(data, end, pose):
                 m = _re.match(r"^(P8_\w+)\s+A:([0-9A-Fa-f]{8})", l) if dans else None
                 if m: sy[m.group(1)] = (int(m.group(2), 16), org)
             bl[org] = open(os.path.join(DIR, "blocs", "ext_%06x.bin" % org), "rb").read()
-        for n, (k, lab) in sorted(nd.items(), key=lambda x: x[1][0]):
+        for n, (tab, k, lab) in sorted(nd.items(), key=lambda x: x[1][:2]):
             a, org = sy[lab]; b = bl[org]; o = a - org; pas = bytearray()
             while True:
                 fl = b[o]                                  # image : octet 0 = drapeaux (octet 1 arcade)
@@ -649,8 +654,13 @@ def fins(data, end, pose):
                 if fl & 0xC0: break
                 assert len(pas) < 0x400, "décor %s : pas sans fin" % lab
             ps2 = bytes(x for i in range(0, len(pas), 2) for x in (pas[i + 1], pas[i]))
-            AG.bloc_rel16(0x960180, k, ps2)
-            log("décor de fin %s = entrée %d de 0x960180 (%s, %d pas)" % (n, k, lab, len(pas) // 8))
+            AG.bloc_rel16(tab, k, ps2)
+            log("décor de fin %s = entrée %d de 0x%X (%s, %d pas)" % (n, k, tab, lab, len(pas) // 8))
+        for n, (rang, lab) in sorted(ng.items()):           # classe $4E : un seul pas (1 image, drapeau fin) au rang
+            a, org = sy[lab]; o = a - org; pas = bl[org][o:o + 8]
+            assert pas[0] & 0xC0 == 0x40, "décor %s (%s) : 1 pas avec drapeau de fin attendu" % (n, lab)
+            pose(0x674C00 + 3012, rang, bytes(x for i in range(0, 8, 2) for x in (pas[i + 1], pas[i])), e=8); GEN_MAX.add(rang)
+            log("décor de fin %s = rang $%02X de 0x674C00 + 3012 (listes $E / $F, %s)" % (n, rang, lab))
     # banques d'animation des acteurs (octet +$1F = n° de banque ; numérotation MAX $26-$29) -> FIN_ANIM_xx
     for p in ACTIFS:
         suf = PERSOS[p]["suffixe"]
@@ -795,6 +805,18 @@ def talon_apercu_pal(img, its, a):
 T_TEXTES_FIN = 0x68DC72         # textes de fin (rel16, 789 entrées) : textes MAX à la suite (agrandit_max.REL16_N)
 T_BANQUES_ACTEURS = 0x619B50    # banques d'animation des acteurs (40 longs, LEA en $4B51A) : agrandie à 48
 
+# (13/11, session MAX) invités des fins MAX dessinés avec la banque d'un perso qui n'est ni J1 ni J2 (fin de Maki : Guy,
+# « anim PSP 24 -> arcade 64 (banque 7) » ; J1 = Maki, J2 = Bison pendant la fin) : l'acteur $4B choisit son emplacement en
+# comparant T_61c0e0[banque] à T_61c0e0[$103] des 4 objets joueurs (image $3213C : J1 $4000, J2 $6000, $FF8C00 $C000,
+# $FF9000 $E000) ; sans correspondance : mosaïque. Le talon du chargeur de fin (mame_test) pose l'objet joueur 3 ($FF8C01 = 1,
+# $FF8D03 = ID) pour ces fins -> emplacement 6 = banque de l'invité. MAX_FIN_INVITE=0 : sans.
+FIN_INVITE = {"27": 0x07}
+def fin_invites():
+    """[(n° de fin = ID Upper, ID de l'invité)] des fins MAX actives"""
+    if os.environ.get("MAX_FIN_INVITE", "1") != "1": return []
+    charge()
+    return [(int(p, 16), FIN_INVITE[p]) for p in ACTIFS if p in FIN_INVITE]
+
 def fins_fichiers(afin):
     """(palier 3) table du talon du chargeur de FIN (index = octet bas de D8) : 48 entrées (40-47 = entrée 0) ; une fin
     MAX bâtie sur un modèle charge le fichier d'animation de fin (emplacement 4) du modèle"""
@@ -868,7 +890,7 @@ def pose_generique(pose):
         rang = int(m.group(1), 16)
         b = bytes(int(x.strip().lstrip("$"), 16) for x in m.group(2).split(","))
         assert len(b) == 4 and m.group(3) in SB, "pose du générique %s : %s" % (m.group(1), m.group(3))
-        pose(0x674C00 + 3012, rang, b + struct.pack("<I", SB[m.group(3)]), e=8); n += 1
+        pose(0x674C00 + 3012, rang, b + struct.pack("<I", SB[m.group(3)]), e=8); n += 1; GEN_MAX.add(rang)
     log("générique : %d poses finales MAX (0x674C00 + 3012, rangs %s)" % (n, ", ".join("$" + x for x in re.findall(r"^MAXPOSE_([0-9A-F]{2})", t, re.M))))
 
 def citations(data, end):
@@ -1201,6 +1223,63 @@ def talon_cond40(img, a):
 
 # (2b28, Q25 / N28) ids PSP des persos MAX (EBOOT : Eagle $26, Maki $27, Yun $28, Ingrid $29 ; ids Upper $26 $27 $2D $2E)
 ID_PSP = {"26": 0x26, "27": 0x27, "2d": 0x28, "2e": 0x29}
+ND49 = {}                                               # (13/11) décors $49 des fins MAX : n° -> suffixe de la fin
+def talon_decors49(img, a):
+    """(13/11, session MAX, revue B6) décors des fins MAX de classe $49 (ND = n° PSP >= 114, au-delà des 114 entrées de
+    0x649798) : les acteurs de fin $49 font « CLR.W $1A(A6) » (emplacement 0 = banque commune) puis « MOVE.B $71(A6),D0 ;
+    LEA 0x649798,A0 ; JSR / JMP anim » (anim : A0 += mot[A0 + 2·D0], pas en A0). Le LEA (6 o) de ces sites devient
+    JSR talon (6 o) : D0.B < 114 -> LEA d'origine (natifs : même table, même $1A) ; sinon A0 = FIN118_xx (table +$118
+    de la fin, session MAX : mots relatifs vers les pas P8_xx, n° PSP) et $1A = $8000 (emplacement 4 = fichier de fin :
+    codes LOCAUX des frames FD). La table native n'est ni copiée ni redirigée. MAX_DECORS49=0 : sans (témoin : ROM programme = max57)."""
+    if os.environ.get("MAX_DECORS49", "1") != "1" or not ND49: return a
+    fins = set(ND49.values()); assert len(fins) == 1, "décors $49 : une seule fin prévue (%s)" % fins
+    lab = "FIN118_%s" % fins.pop(); SB = sym_blocs(); assert lab in SB, "décors $49 : %s absent des blocs" % lab
+    f118 = SB[lab]
+    t49 = CTX[1].addr_to_68k(0x649798) & 0xFFFFFF; sites = []                        # image $DFAD8
+    for k in _sites(img, bytes.fromhex("41f9")):
+        if struct.unpack_from(">I", img, k + 2)[0] & 0xFFFFFF != t49: continue        # LEA 0x649798
+        if struct.unpack_from(">H", img, k + 6)[0] not in (0x4EB9, 0x4EF9): continue  # suivi du lanceur (JSR / JMP)
+        sites.append(k)
+    anim = {struct.unpack_from(">I", img, k + 8)[0] for k in sites}
+    assert len(anim) == 1 and len(sites) == 9, "décors $49 : %d sites, lanceurs %s (9 sites, 1 lanceur attendus)" % (len(sites), anim)
+    orig = struct.unpack_from(">I", img, sites[0] + 2)[0]
+    assert all(struct.unpack_from(">I", img, k + 2)[0] == orig for k in sites)
+    w = [0x0C00, 0x0072, 0x6408, 0x41F9, orig >> 16, orig & 0xFFFF, 0x4E75,          # CMPI.B #114,D0 ; BCC.S max ; LEA orig ; RTS
+         0x41F9, f118 >> 16, f118 & 0xFFFF, 0x3D7C, 0x8000, 0x001A, 0x4E75]         # max : LEA FIN118 ; MOVE.W #$8000,$1A(A6) ; RTS
+    a = (a + 0xF) & ~0xF
+    assert not any(img[a:a + 2 * len(w)])
+    struct.pack_into(">%dH" % len(w), img, a, *w)
+    for k in sites: struct.pack_into(">HI", img, k, 0x4EB9, a)
+    log("décors $49 des fins MAX (%s, n° >= 114 -> %s $%x, emplacement 4) : %d sites (%s) -> talon $%x" % (
+        ", ".join(sorted(ND49)), lab, f118, len(sites), ", ".join("$%x" % k for k in sites), a))
+    return a + 2 * len(w)
+
+GEN_MAX = set()                                         # (13/11) rangs MAX des listes $E / $F (poses finales, décors $4E)
+def talon_generique(img, a):
+    """(13/11, session MAX) acteur $4E/00 du générique final (pose du perso, décors $4E des fins MAX ; site unique
+    « MOVE.W #$2000,$1A(A6) ; MOVEQ #14,D0 ; LEA 0x674C00,A0 ; JSR anim », puis pas += 8 × $71(A6)) : emplacement 1
+    pour tous ; les frames FD des rangs MAX (MAXPOSE_xx, ND28_114) sont des codes LOCAUX de l'emplacement 4 -> le
+    MOVE.W (6 o) devient JSR talon (6 o) : $1A = $2000, puis $8000 si $71(A6) est un rang MAX (D0 libre : MOVEQ #14
+    suit). Natifs : $2000 comme avant. MAX_GENERIQUE_E4=0 : sans (témoin)."""
+    if os.environ.get("MAX_GENERIQUE_E4", "1") != "1" or not GEN_MAX: return a
+    t = AG.NOUVEAU[0x674C00]
+    sites = _sites(img, bytes.fromhex("3d7c2000001a700e41f9") + struct.pack(">I", t))
+    assert len(sites) == 1, "générique : %d sites « MOVE.W #$2000,$1A(A6) ; MOVEQ #14,D0 ; LEA 0x674C00 »" % len(sites)
+    k = sites[0]
+    rangs = sorted(GEN_MAX); assert all(0x26 <= r < 0x40 for r in rangs), rangs
+    w = [0x3D7C, 0x2000, 0x001A, 0x102E, 0x0071]                                   # MOVE.W #$2000,$1A(A6) ; MOVE.B $71(A6),D0
+    for j, r in enumerate(rangs):                                                  # CMPI.B #r,D0 ; BEQ.S max
+        reste = len(rangs) - 1 - j
+        w += [0x0C00, r, 0x6700 | (6 * reste + 2)]
+    w += [0x4E75, 0x3D7C, 0x8000, 0x001A, 0x4E75]                                  # RTS ; max : MOVE.W #$8000,$1A(A6) ; RTS
+    a = (a + 0xF) & ~0xF
+    assert not any(img[a:a + 2 * len(w)])
+    struct.pack_into(">%dH" % len(w), img, a, *w)
+    struct.pack_into(">HI", img, k, 0x4EB9, a)
+    log("générique : acteur $4E, rangs MAX %s -> emplacement 4 ($1A = $8000) : site $%x -> talon $%x" % (
+        ", ".join("$%02X" % r for r in rangs), k, a))
+    return a + 2 * len(w)
+
 def talon_prises(img, a):
     """(2b28, Q25) masques de prise par id (image $52A18-$52AC8 = PSP 0x5FB40) : bit [id] d'un masque 32 bits (ids < $20)
     ou d'un MOVEQ (ids $20-$3F, id - $20), lu par BTST.L D3,D0 en $52A32. Les MOVEQ (sol KK #$17, air PP #$29, air KK
@@ -1612,6 +1691,12 @@ def fin(img):
     z_ = (fin_ + 0xF) & ~0xF
     while any(img[z_:z_ + 0x100]): z_ += 0x10
     fin_ = max(fin_, talon_prises(img, z_))
+    z_ = (fin_ + 0xF) & ~0xF                              # (13/11) après talon_prises : les talons précédents gardent leurs adresses
+    while any(img[z_:z_ + 0x100]): z_ += 0x10
+    fin_ = max(fin_, talon_decors49(img, z_))
+    z_ = (fin_ + 0xF) & ~0xF
+    while any(img[z_:z_ + 0x100]): z_ += 0x10
+    fin_ = max(fin_, talon_generique(img, z_))
     assert fin_ <= 0x3C0000
     AG.journal(W)
     open(os.path.join(W, "max_journal.txt"), "a").write("\n".join(AG.JOURNAL) + "\n")

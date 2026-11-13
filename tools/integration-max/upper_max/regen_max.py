@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """regen_max.py -- (script_uppermax) régénération du cache MAX « v2 étirée » (converti/, fork/, s/, sources .s de
-rosette_code) depuis l'ISO PSP EU et les sorties de hsfa_build, avec les outils PUBLIÉS de max/ et tools/max/.
+rosette_code) depuis l'ISO PSP (européenne, ou américaine ramenée à l'européenne par psp_region.py) et les sorties de hsfa_build, avec les outils PUBLIÉS de max/ et tools/max/.
 Remplace regen_max.sh (bash) : même ordre d'étapes (pièges : RAPPORT §5), plus les « compléments » (scripts de fin,
 jeux de palettes de fin, portraits de victoire, sauts / physique, parcours) et SANS programme d'arcade par défaut.
 
@@ -24,7 +24,7 @@ ICI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ICI, "..", "..", "max"))       # tools/max du dépôt (iso_psp.py)
 sys.path.insert(0, ICI)
 sys.path.append(os.path.join(ICI, "..", "..", "..", "src", "hsfa"))   # liens.py (Windows sans droit de lien symbolique)
-import iso_psp, liens
+import iso_psp, liens, psp_region
 
 PRG = "sz3ud.03c sz3ud.04c sz3.05c sz3.06c sz3.07c sz3.08c sz3.09c sz3.10b".split()
 GFX = ["sz3.%dm" % k for k in range(13, 21)]
@@ -90,14 +90,20 @@ class Regen:
         for sous in ("max", os.path.join("tools", "max"), os.path.join("src", "hsfa")):
             shutil.copytree(os.path.join(s.a.depot, sous), os.path.join(R, "depot", sous),
                             ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-        # données PSP : DATA de l'ISO (minuscules ; plXX_e.pac -> pac/, le reste -> data/ et data/textes/)
-        L = iso_psp.liste(s.a.psp_iso, "PSP_GAME/USRDIR/EUR/DATA")
-        for nom in sorted(L):
-            low = nom.lower(); sous = "pac" if low.startswith("pl") and low.endswith("_e.pac") else "data"
-            p = os.path.join(R, "psp", sous, low)
-            if not os.path.exists(p): open(p, "wb").write(iso_psp.lit(s.a.psp_iso, "PSP_GAME/USRDIR/EUR/DATA/" + nom))
-            if sous == "data": lien("../" + low, os.path.join(R, "psp", "data", "textes", low))
-        s.log("données PSP : %d fichiers de DATA" % len(L))
+        # données PSP : DATA de l'ISO, sous les noms européens en minuscules (plXX_e.pac -> pac/, le reste -> data/ et
+        # data/textes/) ; disque américain : USA/DATA, *_u.pac -> *_e.pac, 6 lignes de texte normalisées (psp_region.py)
+        try:
+            ident, v = psp_region.version(s.a.psp_iso)
+            n = 0
+            for low, d in psp_region.donnees(s.a.psp_iso, v):
+                sous = "pac" if low.startswith("pl") and low.endswith("_e.pac") else "data"
+                p = os.path.join(R, "psp", sous, low); n += 1
+                if not os.path.exists(p) or os.path.getsize(p) != len(d) or open(p, "rb").read() != d:
+                    open(p, "wb").write(d)      # réécrit si un autre disque a servi avant (même sortie)
+                if sous == "data": lien("../" + low, os.path.join(R, "psp", "data", "textes", low))
+        except psp_region.Refus as x:
+            raise SystemExit("regen_max : %s" % x)
+        s.log("données PSP : %d fichiers de %s (disque %s)" % (n, psp_region.dossier(v), v["nom"]))
         for f in sorted(os.listdir(os.path.join(S, "cache", "anims"))):
             if f.endswith(".bin") and not os.path.exists(os.path.join(R, "work", "cps2", "anims", f)):
                 shutil.copyfile(os.path.join(S, "cache", "anims", f), os.path.join(R, "work", "cps2", "anims", f))
@@ -165,7 +171,14 @@ class Regen:
         s.etape("convert", ["noms_max.py"], nom="noms_max_2")              # 1er passage : dossier noms/ absent
         s.etape("convert", ["portraits_fork.py"], nom="portraits_fork_2")  # APRÈS l'habillage
         for o in ("bandeau_noms_max.py", "carte_noms_max.py", "winner_noms_max.py"): s.etape("convert", [o, "source"])
-        for o in ("recul_max.py", "flammes_max.py", "tables_id_max.py", "ia_max.py", "dialogues_max.py"): s.etape("convert", [o])
+        for o in ("recul_max.py", "flammes_max.py", "tables_id_max.py", "ia_max.py"): s.etape("convert", [o])
+        # dialogues_max.py relit l'ISO (« eur/data/bdXX_e.pac » en dur) : lu ici dans le cache (noms européens, textes
+        # normalisés), pour les deux disques ; max/ inchangé
+        code = ("import os, runpy, sys, iso_psp\n"
+                "iso_psp.lit = lambda iso, chemin: open(os.path.join(%r, os.path.basename(chemin).lower()), 'rb').read()\n"
+                "sys.argv = ['dialogues_max.py']\nrunpy.run_path('dialogues_max.py', run_name='__main__')\n"
+                % os.path.join(s.R, "psp", "data"))
+        s.etape("convert", ["-c", code], nom="dialogues_max")
         s.etape("convert", ["convert_max.py", "pl28"]); s.etape("convert", ["efct_fork.py", "pl28"])
         for o, besoin in ROSETTE:
             if besoin and not arc: continue

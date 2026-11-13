@@ -75,9 +75,9 @@ Dernière vérification complète écrite ici : le 2026-10-24, depuis un arbre n
 de l'époque (16 plus le 11b) s'appliquent sans erreur (un avertissement d'espace pour le patch 4), et l'arbre obtenu est identique, hors fichiers
 générés, à l'arbre de référence `94c666a` (`git diff` vide). Les cœurs 4:3 et 16:9 se construisent. Depuis, chaque lot de cœurs est construit avec la chaîne entière sur
 `af5d3f3`. Lots relevés : 0001-0026 (lot du 2026-11-09, 12 cœurs), puis 0027 (lot du 10/11, journal §210), puis
-0029 (lot du 11/11, CHANGELOG « En cours »), puis 0030 et 0031 (lot du 12/11), puis 0032 (lot du 12/11b). Cœur Linux compatible glibc 2.27 : recette
-[`tools/linux/`](../../tools/linux/README.md), faite sur l'arbre Linux du lot du 10/11. Cœurs publiés : 0001-0026 et 0007b en v0.1.7, 0001-0027 et 0007b en pré-version v0.1.8
-(notes des releases) ; 0029-0031 : prochaine version (CHANGELOG « En cours ») ; détail : [LIVRAISONS](../../docs/guide/LIVRAISONS.fr.md) §4.
+0029 (lot du 11/11), puis 0030 et 0031 (lot du 12/11), puis 0032 (lot du 12/11b). Cœur Linux compatible glibc 2.27 : recette
+[`tools/linux/`](../../tools/linux/README.md), faite sur l'arbre Linux du lot du 10/11. Cœurs publiés : 0001-0026 et 0007b en v0.1.7, 0001-0027 et 0007b en pré-version v0.1.8, 0001-0027, 0029-0032 et 0007b (lot du 12/11b) en pré-version v0.1.9 et en v0.1.10
+(notes des releases) ; détail : [LIVRAISONS](../../docs/guide/LIVRAISONS.fr.md) §4.
 
 **Numéros.** Le numéro `0028` est réservé : zone graphique des persos MAX dans la greffe (région de tuiles de 80 à
 96 Mo), prouvé à l'atelier le 08/11 (journal §211), donc avant 0029, mais **pas versé** ; la chaîne passe de 0027 à 0029.

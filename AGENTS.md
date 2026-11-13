@@ -11,7 +11,7 @@ Working language: **English** for the documentation and reports (since 2026-11-1
 | need | where to look |
 |---|---|
 | mandatory rules | §2 below; the maintainer's decisions and expectations: `docs/ATTENTES-ET-DECISIONS.md` (private repository only, not exported) |
-| current state | §5 below, then `CHANGELOG.md` ("En cours" section); releases: v0.1.7 stable, v0.1.8 pre-release; the next version (unreleased) = "En cours" in the CHANGELOG |
+| current state | §5 below, then `CHANGELOG.md` (top section); releases: **v0.1.10 stable** (2026-11-13), v0.1.9 and v0.1.8 pre-releases; work not released yet goes into an "Unreleased" section at the top of the CHANGELOG |
 | journal | `docs/journal/HANDOFF.md` (§1-§220, chronological order); index `docs/journal/INDEX-HANDOFF.md` (§0: the three numbering series; §13: one line per recent section) |
 | addresses, fields, memory areas | `re/` index: `re/README.md`, `python3 re/outils/quoi.py <adresse\|nom>`, `re/allocations.tsv`, `python3 re/outils/zones.py --verifie` |
 | benches and measurements | `tools/bancs/README.md` (`lance_emu`, fingerprint, daily bench); translator validation: `scripts/validation/`; method: `docs/methodes/oracle-et-non-regression.md` |
@@ -34,14 +34,14 @@ recompiler's idioms, **re-emits the 68000**, assembles a CPS2 program ROM and ru
 |---|---|---|
 | `ro3` | Street Fighter Alpha 3 | complete: 32/32 endings = arcade, 42/42 commands, turbo rate 133.3% |
 | `ro5` | SFA3 **Upper** | complete: 40/40 endings; **Upper MAX** (MAX characters, driver `sfa3umhsfa`): experimental, built from the two discs (`--jeux uppermax --psp-iso`, §202), released in v0.1.7; follows the current translator (v161, §220) |
-| `ro9` | **Hyper** SFA (ZERO / ZERO 2 / ALPHA / ZERO 3 versions) | VERSUS complete; sounds specific to the PS2 port added to the sound ROM (§218); **Hyper + Arcade** (Upper's Arcade mode grafted, "route B", driver `sfa3hahsfa`): experimental, built from the ISO (`--jeux hyperarcade`, state ro9a38, §212, §217, §221, §223), released as the v0.1.8 pre-release; translator of the graft v161 (§221) |
+| `ro9` | **Hyper** SFA (ZERO / ZERO 2 / ALPHA / ZERO 3 versions) | VERSUS complete; sounds specific to the PS2 port added to the sound ROM (§218); **Hyper + Arcade** (Upper's Arcade mode grafted, "route B", driver `sfa3hahsfa`): experimental, built from the ISO (`--jeux hyperarcade`, state ro9a41, §212, §217, §221, §223, §224, §225, §226, §227, §228, §230), released as the v0.1.8 pre-release; translator of the graft v161 (§221) |
 
 Environments: **MAME fork** (development bench, game `sfa3hx`) and **FBNeo libretro core "HSFA"** (Android,
 Linux, Windows, ROCKNIX, Recalbox armhf / aarch64: 12 cores; 4:3 and 16:9; Batocera 43 through the installer in
 `tools/batocera/`); **standalone FinalBurn Neo HSFA** for Windows (test build, `patches/fbneo-autonome/`).
 Everything is rebuilt **from the user's ISO** (`docs/guide/construction-iso.md`).
 
-Then read, in order: §0 and §5 below → `CHANGELOG.md` ("En cours") → `docs/journal/INDEX-HANDOFF.md` →
+Then read, in order: §0 and §5 below → `CHANGELOG.md` (top section) → `docs/journal/INDEX-HANDOFF.md` →
 the last sections of `docs/journal/HANDOFF.md` → `docs/methodes/`. `docs/journal/ETAT-DES-LIEUX.md` (2026-10-04,
 no longer kept up to date) is still useful for the commands and variables of the MAME bench.
 
@@ -216,21 +216,21 @@ Full hand-off of the MAX session: `max/notes/SAVOIR-MAX.md`. Exchanges with the 
 
 ## 5. Open work (state on 2026-11-11)
 
-Short, with references: the details are in the journal (§201-§221), in `CHANGELOG.md` ("En cours" section) and,
+Short, with references: the details are in the journal (§201-§221), in `CHANGELOG.md` (top section) and,
 for the maintainer's choices, in `docs/ATTENTES-ET-DECISIONS.md` (private repository). Keep this table up to date with the journal.
 
 | workstream | state | where |
 |---|---|---|
-| Releases | **v0.1.7** stable (translator v159-v160, cores 0001-0026, all-in-one builder); **v0.1.8** pre-release (Hyper + Arcade, cores 0001-0027). Next version (unreleased): "En cours" in the CHANGELOG | `CHANGELOG.md`, §211 |
+| Releases | **v0.1.10** stable (2026-11-13: translator v161, cores 0001-0027 + 0029-0032 of 12/11b, Upper MAX max58 with the US PSP disc, Hyper + Arcade ro9a41, Upper's PS2-only sounds); **v0.1.9** pre-release (same cores, `--cible`, standalone Windows test build, Batocera); v0.1.8 pre-release (Hyper + Arcade, cores 0001-0027); v0.1.7 (translator v159-v160, cores 0001-0026, all-in-one builder) | `CHANGELOG.md`, §211 |
 | Translator | **v161** (fixes from the critical review: `A8_ENTREE`, `TST_C`, `TST_ZX`, `CMP_MEMADD`, `CMP_IDX`, `CMP_D8`, `CMP_MEMDN`, `PARITE_FLOT` / `PARITE_SITES`, `BCD_REG`, `AIDE_SBCD`, safeguards in `build.log`, §219); v160: `PRETE_CMP`, §207; v159: §203-§204; v158: §201. Trial on ro1 / ro2 / ro4: 0 unresolved (§211) | `docs/methodes/pieges-du-traducteur.md` |
-| FBNeo core | chain 0001-0027 + **0029-0032** (0029: complete and deterministic savestates, approved on 11/11; 0030: system folder of the standalone build on Windows; 0031: 16:9 "Widescreen edges" = *Raw* by default); 0028 approved, not handed over; batches of 11/11 (0029, Linux core compatible with glibc 2.27) and of 12/11 (0030, 0031) not released (next version) | `patches/fbneo/README.md`, `tools/coeurs/`, `tools/linux/README.md` |
+| FBNeo core | chain 0001-0027 + **0029-0032** (0029: complete and deterministic savestates, approved on 11/11; 0030: system folder of the standalone build on Windows; 0031: 16:9 "Widescreen edges" = *Raw* by default); 0028 approved, not handed over; batches of 11/11 (0029, Linux core compatible with glibc 2.27), 12/11 (0030, 0031) and 12/11b (0032) released in v0.1.9 and v0.1.10 | `patches/fbneo/README.md`, `tools/coeurs/`, `tools/linux/README.md` |
 | Platforms | **Batocera 43**: installer and service (tried on 43.1 PC in a virtual machine; ARM 64-bit not tried, ARM 32-bit not supported); RetroBat: note not tried; Recalbox: launching from the game list not working yet; **standalone FinalBurn Neo** (Windows x64): test build, tried under Wine only | `docs/guide/installation-batocera.md`, `tools/batocera/`, `tools/retrobat/` |
-| Building on Windows | issue #2 fixed in the repository (links, home folder, paths in generated code, encoding, line endings); 5 zips = Linux in simulation; junction not checked under wine; not released yet (next version) | §215, rule 10 of §2 |
-| Hyper + Arcade (route B) | buildable from the ISO, state **ro9a38** (§212, §217, §221, §223); each delivery of the graft is carried over into the build copy through the diff of its code (not a new copy: portability fixes), constant `HA_ETAT` of `hsfa_build.py` (LISEZMOI of `construction/`); translator of the graft: frozen copy v161 (`e47/untranspile3_v161` = v160 + diff v160 → v161, state ro9a37, §221) | `tools/greffe-arcade/construction/`, `docs/rapports/BUILD.md` §11, `docs/architecture/voie-b-greffe.md` |
+| Building on Windows | issue #2 fixed in the repository (links, home folder, paths in generated code, encoding, line endings); 5 zips = Linux in simulation; junction not checked under wine; released in v0.1.9 | §215, rule 10 of §2 |
+| Hyper + Arcade (route B) | buildable from the ISO, state **ro9a41** (§212, §217, §221, §223, §224, §225-§228, §230); each delivery of the graft is carried over into the build copy through the diff of its code (not a new copy: portability fixes), constant `HA_ETAT` of `hsfa_build.py` (LISEZMOI of `construction/`); translator of the graft: frozen copy v161 (`e47/untranspile3_v161` = v160 + diff v160 → v161, state ro9a37, §221) | `tools/greffe-arcade/construction/`, `docs/rapports/BUILD.md` §11, `docs/architecture/voie-b-greffe.md` |
 | Upper MAX | experimental, from the two discs (§202); round behaviour of the MAX characters aligned on the PSP (11/11); **Upper MAX follows the current translator (v161)**: the integration no longer reads any hard-coded image address (unique patterns + MIPS va of the map; `tools/integration-max/upper_max/controle/`) | `max/` (MAX session), `docs/rapports/BUILD.md` §10, `docs/rapports/INTEGRATION-MAX-UPPER.md` |
 | MAX in the graft | prepared, then on hold (patch 0028 proven, code converted, §211) | §205, §211 |
 | SFA1 / SFA2 stages | extracted from the ISO, common converter proven (§205, §208); "hybrid" route in Upper's format studied (§211); to be integrated into the graft | `tools/decors/sfa1-iso/`, `tools/decors/sfa2-iso/`, `tools/decors/integration/` |
-| Open limits | Hyper's per-version voices without the replay table (v0.2); 16:9 in *Raw*: black or stale columns at the ends of the arena (stage-locked view as an option); Upper keeps the hybrid sound ROM (Dee Jay's taunt probably silent, not checked, §218). Fixed in the repository: ground shadow with the ISO-only route (§216), parry in Hyper's Mazi S-ISM (issue #1, §218) | `CHANGELOG.md` "En cours", README (known limits) |
+| Open limits | Hyper's per-version voices without the replay table (v0.2); 16:9 in *Raw*: black or stale columns at the ends of the arena (stage-locked view as an option); Upper keeps the hybrid sound ROM (its two silent PS2-only sounds, Dee Jay's taunt and one of Birdie's, are added from the ISO since v0.1.10). Fixed: ground shadow with the ISO-only route (§216), parry in Hyper's Mazi S-ISM (issue #1, §218) | `CHANGELOG.md`, README (known limits) |
 | Benches | common tools (§208); last green daily bench: 263/263 (§211); v161 daily bench not run yet (§219) | `tools/bancs/README.md` |
 | `re/` index | cross-checked with cps2recomp (§213); **38** conflicts in `zones.py --verifie` (11/11), 2 of them new, between the graft's random draw and the stage reserve (§211) | `re/CONFLITS.md` |
 | Research | sheets J to R: cps2recomp, neighbouring projects, room on a real CPS-2 | `docs/rapports/recherche/README.md` §8 |

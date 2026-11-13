@@ -2,7 +2,7 @@
 
 One executable per system turns the player's own discs into the HSFA game archives, with nothing else to install:
 - the *Street Fighter Alpha Anthology* PS2 image (`.iso` or `.chd`);
-- optionally, the *SFA3 MAX* PSP ISO (Europe, `.iso` or `.chd`), for Upper MAX.
+- optionally, the *SFA3 MAX* PSP ISO (USA or Europe, `.iso` or `.chd`), for Upper MAX.
 
 It runs `scripts/construction/hsfa_build.py` unchanged. It embeds Python with NumPy, Capstone and Pillow, the HSFA
 scripts (`scripts/`, `src/`, `tools/`, `max/`) and three native tools:

@@ -75,9 +75,9 @@ Last full check written here: on 2026-10-24, from a fresh tree at commit `af5d3f
 of the time (16 plus 11b) apply without errors (one whitespace warning for patch 4), and the resulting tree is identical, apart from generated
 files, to the reference tree `94c666a` (empty `git diff`). The 4:3 and 16:9 cores build. Since then, every batch of cores has been built with the whole chain on
 `af5d3f3`. Batches recorded: 0001-0026 (batch of 2026-11-09, 12 cores), then 0027 (batch of 10/11, journal §210), then
-0029 (batch of 11/11, CHANGELOG "En cours"), then 0030 and 0031 (batch of 12/11), then 0032 (batch of 12/11b). Linux core compatible with glibc 2.27: recipe
-[`tools/linux/`](../../tools/linux/README.md), made on the Linux tree of the batch of 10/11. Published cores: 0001-0026 and 0007b in v0.1.7, 0001-0027 and 0007b in the v0.1.8 pre-release
-(release notes); 0029-0031: next version (CHANGELOG "En cours"); details: [LIVRAISONS](../../docs/guide/LIVRAISONS.md) §4.
+0029 (batch of 11/11), then 0030 and 0031 (batch of 12/11), then 0032 (batch of 12/11b). Linux core compatible with glibc 2.27: recipe
+[`tools/linux/`](../../tools/linux/README.md), made on the Linux tree of the batch of 10/11. Published cores: 0001-0026 and 0007b in v0.1.7, 0001-0027 and 0007b in the v0.1.8 pre-release, 0001-0027, 0029-0032 and 0007b (batch of 12/11b) in the v0.1.9 pre-release and in v0.1.10
+(release notes); details: [LIVRAISONS](../../docs/guide/LIVRAISONS.md) §4.
 
 **Numbers.** Number `0028` is reserved: graphics area of the MAX characters in the graft (tile region from 80 to
 96 MB), proven in the workshop on 08/11 (journal §211), so before 0029, but **not handed over**; the chain goes from 0027 to 0029.

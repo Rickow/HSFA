@@ -20,8 +20,8 @@ Full report: [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 of the journ
 - The USA ISO (`SLUS-21317`, 2,048 bytes/sector). `.chd`, `.bin` and `.cso` images are refused: convert to `.iso`
   first. A folder that contains `X_DATA.BIN` is accepted too.
 - Optional: `--arcade sfa3.zip` (SFA3 arcade graphics ROM) instead of rebuilding it from the ISO.
-- For **Upper MAX** (Upper + Eagle, Maki, Yun, Ingrid; §5): the **European** PSP ISO of *Street Fighter Alpha 3
-  MAX* (ULES-00235 v1.01, `.iso`). Nothing else to install: the MAX code is assembled by the project's 68000
+- For **Upper MAX** (Upper + Eagle, Maki, Yun, Ingrid; §5): the PSP ISO of *Street Fighter Alpha 3 MAX*, **USA**
+  (ULUS-10062) or **European** (ULES-00235 v1.01), `.iso`. Nothing else to install: the MAX code is assembled by the project's 68000
   assembler (`tools/asm68k/`, Python). vasm can still be used for comparison (`HSFA_ASM=vasm`, or `HSFA_ASM=compare`).
 
 ## 2. Configure
@@ -42,7 +42,7 @@ python3 scripts/construction/hsfa_build.py \
 | Option | Effect |
 |---|---|
 | `--jeux sfa3,upper,hyper` | games to build (default: the three); `uppermax` as well: Upper MAX (§5); `hyperarcade`: Hyper + Arcade (§6, experimental) |
-| `--psp-iso ISO` | (Upper MAX) European PSP ISO of SFA3 MAX; without it, `uppermax` = Upper |
+| `--psp-iso ISO` | (Upper MAX) PSP ISO of SFA3 MAX (USA or Europe); without it, `uppermax` = Upper |
 | `--vasm CHEMIN` | (Upper MAX, optional) path of `vasmm68k_mot` for `HSFA_ASM=vasm` or `compare` |
 | `--arcade ZIP\|DOSSIER` | arcade graphics ROM (otherwise "ISO only" route, the default) |
 | `--liste` | list of the steps |
@@ -99,15 +99,21 @@ What is guaranteed (BUILD report §0, §3, §5; check of 2026-10-27 against the 
 
 ```bash
 python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
-    --psp-iso "Street Fighter Alpha 3 MAX (Europe).iso" --sortie hsfa_sortie --jeux upper,uppermax
+    --psp-iso "Street Fighter Alpha 3 MAX (USA).iso" --sortie hsfa_sortie --jeux upper,uppermax
 ```
 
 - Result: `archives/sfa3umhsfa.zip` (driver `sfa3umhsfa` of the core). It is the state of batch **2b31**, ported to the current translator (v161: the
   program follows Upper's). The sound ROM is identical to that batch; with `--arcade`, the graphics too, except `hsfa_info.txt`.
-- No PPSSPP dump and no decrypted EBOOT are needed: the ISO's `BOOT.BIN` is already in the clear. The ISO is
-  checked: identity and fingerprints of the files read. A patched ISO (16:9 for example), an encrypted EBOOT or
-  another region are refused with a message.
-- Only the **European edition** is supported. The US and JP editions have shifted code.
+- No PPSSPP dump and no decrypted EBOOT are needed: the ISO's `BOOT.BIN` is already in the clear (a "decrypted" ISO
+  is accepted too: it only differs by `EBOOT.BIN`, which is not read). The ISO is checked: edition (`PARAM.SFO`) and
+  fingerprints of the files read. A patched ISO (16:9 for example) or an encrypted EBOOT are refused with a message.
+- **USA (ULUS-10062) and European (ULES-00235) editions give the same game, byte for byte.** The edition is detected
+  from the disc. The US `BOOT.BIN` has its code 8 bytes lower (one screen function of the engine is shorter): the
+  build moves it back to the European addresses. 6 lines of the MAX characters' texts spell "Shadowloo" on the US disc:
+  they are rewritten "Shadaloo", as on the European disc and everywhere in the Anthology
+  (`tools/integration-max/upper_max/psp_region.py`).
+- The Japanese edition (*Street Fighter Zero 3 Double Upper*, ULJM) is refused with a message: other code layout
+  and Japanese texts.
 - Time: about 2 min 30 more than Upper alone; space: about 500 MB more.
 - Details and proof: [rapports/BUILD.md](../rapports/BUILD.md) §10;
   [tools/integration-max/upper_max](../../tools/integration-max/upper_max/README.md).
@@ -119,12 +125,12 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
     --sortie hsfa_sortie --jeux hyperarcade [--rejeu-table hsfa_rejeu_table.txt] [--arcade sfa3.zip]
 ```
 
-- Translator: the graft has its frozen copy of translator **v161** (`untranspile3_v161`, states ro9a37 and ro9a38, §221, §223): the
+- Translator: the graft has its frozen copy of translator **v161** (`untranspile3_v161`, states ro9a37 to ro9a41, §221, §223, §224, §228, §230): the
   v161 fixes (§219) reach Hyper + Arcade.
-- Result: `archives/sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a38** (12/11). `hyperarcade`
+- Result: `archives/sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a41** (13/11; ro9a40 + 10 pairs of words of the graft's data no longer relocated as code pointers, §230; ro9a40: colours and portraits of the versions, green band of the logo transition, §225-§228). `hyperarcade`
   adds `upper` and `hyper`: the graft starts from their outputs (modules, animations, banks, sound). Extra steps:
   `greffe_hyperarcade` (frozen code of `tools/greffe-arcade/construction/`, about 3 min) and `paquet_hyperarcade`.
-- **With the arcade ROM and the replay table**: the zip is the ro9a38 one (delivered on 12/11, CRC `AC7D9F00`), except
+- **With the arcade ROM and the replay table**: the zip is the ro9a41 one (delivered on 13/11, CRC `C9107FC2`), except
   `hsfa_info.txt` (provenance) and the sound ROM (`hx3.01`, `hx3.02`, `hx3.14m`: sounds specific to the PS2 port added,
   §218; with `HSFA_SONS_PS2=0`, identical).
 - **Without the replay table**: the graft starts from Hyper's original module. Hyper keeps SFA3's voices for all
@@ -134,7 +140,7 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
   game and the picture are the same (the ground shadow of the ZERO / ZERO 2 characters is transparent on both routes
   since `HSFA_OMBRE_CODES`, BUILD §11.5).
 - **Records**: the graft reads tables taken from MAME passes and workshop analyses (addresses and numbers
-  only, 4.5 MB of TSV in `tools/greffe-arcade/construction/releves_ro9a38/`); `--greffe-releves` provides
+  only, 4.5 MB of TSV in `tools/greffe-arcade/construction/releves_ro9a41/`); `--greffe-releves` provides
   others. Details: [tools/greffe-arcade/construction](../../tools/greffe-arcade/construction/LISEZMOI.md).
 - Time: about 2 min 30 more than Upper + Hyper (graft 130-160 s, package 8 s); space: about 0.4 GB more.
 - Details and proof: [rapports/BUILD.md](../rapports/BUILD.md) §11.

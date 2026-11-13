@@ -115,7 +115,9 @@ def table_d4():
     bloc (mesure e25a : avec l'ordre « i ^ 1 » de ro9a17, J2 $19 donnait $30 = D4[$18] et $00 donnait $02 = D4[$01]).
     D4_ORDRE=0 : ordre de ro9a17 (t[i ^ 1] = D4[i])."""
     t = bytearray(128); x = 0 if os.environ.get("D4_ORDRE", "1") == "1" else 1
-    for l in open(os.path.join(G, 'decors', 'd4', 'regle_d4_decidee.tsv')).read().splitlines()[1:]:
+    # (L1 des MAX) D4_REGLE = nom du fichier de regle dans decors/d4/ (defaut regle_d4_decidee.tsv) ; regle_d4_l1.tsv :
+    # Yun / Ingrid en $2D / $2E (ids d'Upper MAX), $28 / $29 inutilises (base Ryu, decor $00)
+    for l in open(os.path.join(G, 'decors', 'd4', os.environ.get("D4_REGLE", "regle_d4_decidee.tsv"))).read().splitlines()[1:]:
         c = l.split('\t'); t[int(c[0][1:], 16) ^ x] = int(c[5][1:], 16)
     return bytes(t)
 if FENETRES: GRF_X = FEN_PS2[0][0]
@@ -851,45 +853,59 @@ E2B_DEFI = os.environ.get("E2B_DEFI", "0") == "1"
 # renumerotation) X2_TABLES=1 : les tables par perso lues par les copies d'Upper (index $116 = perso de base, ou $7F(A6))
 # ont 40 entrees ($00-$27) ; un id de base $28-$2F (MAX) lisait la table suivante (erreur d'adresse $A08 a la carte /
 # au face-a-face : essai 05c). Chaque table est recopiee a la fin du bloc de donnees de la greffe (fenetre PS2
-# $F18000-$FE0000 = 68K $410000-$4D8000, avant la table D4) avec X2_N entrees : ses 40 entrees, puis l'entree $00 (Ryu, valeur neutre : c'est ce que lit
-# aujourd'hui un MAX, T_BASE[$26-$2F] = 0) ; la constante lui/addiu de chaque lecteur copie est redirigee (les lecteurs
-# d'Hyper gardent l'original). Pointeurs de code recopies : ajoutes a greffe_ptrs. Les MAX ne sont pas integres : tables
-# seulement. =0 : comme ro9a37.
+# $F18000-$FE0000 = 68K $410000-$4D8000, avant la table D4) avec X2_N entrees ; la constante lui/addiu de chaque lecteur
+# copie est redirigee (les lecteurs d'Hyper gardent l'original). Pointeurs de code recopies : ajoutes a greffe_ptrs.
+# (ro9a39, L1 des MAX, work/l1_max_greffe/CONCEPTION.md) X2 v2 : liste lue dans x2_tables.tsv (54 tables, lots A-D,
+# colonnes de X2_L1.tsv) ; remplissage de chaque rangee par x2_entree (entrees 40-44 = octets qui suivent la table :
+# pseudo-ids d'Upper inchanges ; 45 / 46 = entree 0 ou valeur MAX de X2_VALEURS ; 47 = entree 39) ; genres simple, dec
+# (+ ':ptr' : pointeurs de DONNEES de T_614E00 rediriges), rangs (R rangees de 48), banque, 967bf0, lignes32 (lot D :
+# lignes $20-$2F = lignes 0-15, masque ANDI #$1F -> #$3F) ; constantes de rangee (addiu / imm / dep / sll / andi, une
+# seule instruction de la forme attendue a +-$10 du site) ; constantes interieures ]T, T + taille[ redirigees si
+# d < e (ou debut de rangee), sinon arret. =0 : comme ro9a38.
 X2_TABLES = os.environ.get("X2_TABLES", "0") == "1"
 X2_N0, X2_N = 0x28, 0x30
-# (table exec, table d'Hyper ?, taille d'une entree, acces dans Upper (decalage fichier, copie greffee))
-X2_LISTE = ((0x74C358, False, 4, (0x1711A4,)),       # longs (pointeurs absolus) ; copie e4a564 (ro9a37)
-            (0x617290, False, 2, (0x1A75A4,)),       # mots ; e6e0e4
-            (0x61BBC0, False, 4, (0x2500C4,)),       # 4 o, masque $3F ; ebf544 / ebf56c (meme constante)
-            (0x699408, False, 1, (0x401A0,)),        # octets ; copie basse 0x9780
-            (0x63B5A4, True, 1, (0x3FF80,)),         # table d'HYPER partagee (40 octets $30) ; copie basse 0x9560
-            (0x97CA90, False, 4, (0x18A718,)),       # longs (pointeurs absolus), zone des decors ; e5ab58
-            # tables a EN-TETE de decalages (40 mots relatifs a la table, puis le corps ; ('dec', avant, apres) = octets
-            # recopies avant la table (decalages negatifs) et depuis son debut) : en-tete prolonge (+$10 a chaque decalage
-            # positif, entrees $28-$2F = celle de $00), corps recopie autour
-            (0x6F72B0, False, ('dec', 0x780, 0x7FD0), (0x2132EC,)),   # mots ; ead80c ($24/$25 : decalages negatifs)
-            (0x978D1C, False, ('dec', 0, 0x14F0), (0x2501D8,)),       # zone des decors ; ebf658 (5 mots par perso)
-            # (ro9a38, essai 05c + sonde de lecture x2_lect.sh) lues par la carte d'Upper avec l'id ($117)
-            (0x7251A0, False, ('dec', 0, 0x6C50), (0x25D9CC,)),       # palettes des portraits de la carte (6 x $80 o)
-            (0x960090, False, ('dec', 0, 0x100), (0x25D170,)),        # suites d'octets par perso (zone des decors)
-            # (ro9a38, sonde de lecture a l'ecran de victoire) : lecteur de l'ecran de victoire SEULEMENT (le lecteur copie
-            # 0x5F7E0 lit aussi la suite, des mots de donnees ; 0x211FE0 = fins, index $7F(A6)) : 40 pointeurs par perso
-            (0x72BDF0, False, 4, (0x196CAC,), False),
-            # deux demi-tables de 40 octets (id, ou id + $28 si $90(A5)) : demi-tables prolongees, ADDI.W #$28 -> #$30
-            (0x616850, False, ('demi', 0x194B4C), (0x194B7C,)),
-            # banque d'animations d'HYPER partagee (en-tete de 66 decalages ; 18 groupes de 40 x 8 octets par perso, puis
-            # des entrees isolees) lue par 11 copies d'Upper (carte : id x 8 -> l'id $2E bloquait la carte) : groupes
-            # prolonges de 8 entrees (= entree $00), decalages recalcules ; les 3 lecteurs d'Hyper gardent l'original
-            (0x62EBA0, True, ('banque', 8), (0x19DCB4,)),
-            # (ro9a38, sonde d'ecriture : objet de la carte de J1, anim = banque + groupe + id x 8 ; id $2E -> pas nul, boucle
-            # sans fin en Upper 0x1992E8) les deux autres banques du meme lecteur (Upper 0x19DBC4 / 0x19DD24) : meme forme
-            (0x967F2A, False, ('banque', 8), (0x19DD64,)),            # zone des decors
-            (0x648BC8, False, ('banque', 8), (0x19DC04,)))
-# ecartees (essai : la carte plante a l'image 677 SANS falsifier l'id quand TOUS leurs lecteurs passent a la copie) :
-# T_619B50 (lue par $7F(A6) x 4, id d'OBJET des fins : entrees >= $28 = pointeurs 0x3FF3A0... d'autres objets) ; T_72BDF0
-# n'est prolongee que pour le lecteur de l'ecran de victoire (le lecteur copie 0x5F7E0 lit aussi les mots qui la suivent).
+X2_BUDGET = int(os.environ.get("X2_BUDGET", "1C000"), 16)   # (L1, decision D6 revue le 12/11 : lot A mesure 78 Ko) 112 Ko au plus pour X2, le reste aux decors
 X2_SAUF = {int(x, 16) for x in os.environ.get("X2_SAUF", "").split(',') if x}   # (essais) tables laissees telles quelles
-X2_LISTE = tuple(t[:4] + ((t[4],) if len(t) > 4 else (True,)) for t in X2_LISTE if t[0] not in X2_SAUF)   # 5e champ : tous les lecteurs copies
+X2_VALEURS = [int(x, 16) for x in os.environ.get("X2_VALEURS", "").split(',') if x]   # (L1, D1 : vide) ids 26 27 2d 2e
+assert X2_TABLES or not X2_VALEURS, "X2_VALEURS sans X2_TABLES"
+assert all(v_ in (0x26, 0x27, 0x2D, 0x2E) for v_ in X2_VALEURS), X2_VALEURS
+
+def x2_liste():
+    """lignes de x2_tables.tsv (en-tete : lot upper table_ro9a37 cote genre e n0 rangs lecteurs_a_rediriger sites_temoins
+    constantes valeurs v26 v27 v2D v2E ryu role note) -> dicts ; X2_SAUF (adresse d'Upper ou de la table) retire une
+    table ; le lot D (lignes32) est indivisible"""
+    L_ = open(os.path.join(G, 'etape3', 'x2_tables.tsv'), encoding='utf-8').read().splitlines()
+    k_ = L_[0].split('\t'); out_ = []
+    for l_ in L_[1:]:
+        if not l_.strip(): continue
+        d_ = dict(zip(k_, l_.split('\t') + [''] * (len(k_) - len(l_.split('\t')))))
+        d_['u'] = int(d_['upper'], 16); d_['hyp'] = d_['cote'].startswith('HYPER')
+        d_['adr'] = int(d_['table_ro9a37'][2:], 16) if d_['hyp'] else d_['u']
+        d_['e'] = int(d_['e']); d_['n0'] = int(d_['n0']); d_['R'] = int(d_['rangs'])
+        d_['sites'] = [int(s_, 16) for s_ in d_['sites_temoins'].split()]
+        lr_ = d_['lecteurs_a_rediriger']; d_['tous'] = not lr_.startswith('listes:')
+        if not d_['tous']: d_['sites'] = [int(s_, 16) for s_ in lr_[7:].split(',')]
+        d_['consts'] = [tuple([c_.split(':')[0]] + [int(v_, 16) for v_ in c_.split(':')[1:]])
+                        for c_ in d_['constantes'].split() if ':' in c_ and not c_.startswith('garde:')]
+        # garde:ADR : constante interieure gardee (ses lecteurs lisent l'original, inchange : neutre en L1)
+        d_['gardes'] = {int(c_[6:], 16) for c_ in d_['constantes'].split() if c_.startswith('garde:')}
+        out_.append(d_)
+    sauf_ = [d_ for d_ in out_ if d_['u'] in X2_SAUF or d_['adr'] in X2_SAUF]
+    lotd_ = [d_ for d_ in out_ if d_['genre'] == 'lignes32']
+    assert not any(d_ in sauf_ for d_ in lotd_) or all(d_ in sauf_ for d_ in lotd_), "X2_SAUF : lot D indivisible"
+    return [d_ for d_ in out_ if d_ not in sauf_]
+
+def x2_entree(lit, e, i, val=None):
+    """entree i (0-47) d'une rangee prolongee ; lit(k, n) : octets a partir de la base de la rangee ; val : octets MAX"""
+    if i < 45: b = lit(e * i, e)
+    elif i < 47: b = val if val is not None else lit(0, e)
+    else: b = lit(e * 39, e)
+    assert len(b) == e, (e, i)
+    return bytes(b)
+
+def x2_src(e, i):
+    """decalage source (dans la rangee) de l'entree i, sans valeur MAX"""
+    return e * i if i < 45 else (0 if i < 47 else e * 39)
 DEFI_CPT = 0xFE0A                                     # $FF7E0A : compteur de la sortie de defi (zone fixe de la greffe, D2)
 DEFI_N = int(os.environ.get("E2B_IMAGES", "6"))
 U_DEFI_JSR, U_DEFI_CIBLE = 0x1353EC, 0x1354E0         # Upper : JSR du chemin « challenger accepte » de u1353A0 et sa cible
@@ -921,6 +937,98 @@ def stub_scene2_bases(cible):
     if not A2A_VS: w[i] |= (L - i - 1) & 0xffff
     if E2B_DEFI: br += [(j0, L), (j1, L)]
     for k_, L_ in br: w[k_] |= (L_ - k_ - 1) & 0xffff
+    return w
+# (couleur du CPU, 12/11) une version ZERO / ZERO 2 / ALPHA / EX (CPU tire ou J1) changeait de couleur au FIGHT. Deux
+# defauts : D1 = au face-a-face (Hyper 0x9A4E0) et a chaque reprise de manche (0x9FFEC), le talon moteur_pal appelle sur un
+# decor d'Upper la copie d'Upper 0x4B270 (chargeur 0x4B5A0 : palettes ZERO 3 par $117 = perso de BASE), puis au FIGHT
+# Hyper appelle son dispatcher 0x60A90 (fichier 0x9C428 ; chargeur 0x60D50 : palettes par $103 = VERSION) ; D2 = sur la
+# carte, la copie d'Upper 0x262930 pose la couleur du CPU par la regle d'Upper $129 = ($133 + 1) x 2 (= 2 apres le tirage,
+# $133 = 0) : 3e couleur de la version chez Hyper.
+# PAL_VERSION=1 (D1) : talon moteur_pal, chemin « decor d'Upper » (Arcade, VERSUS D4) = copie d'Upper 0x4B270 PUIS
+# dispatcher d'Hyper 0x60A90 (l'appel d'Hyper au FIGHT, chargeur 0x60D50 par $103) : palette de la version du face-a-face
+# a la fin, reprises comprises (sans effet en ZERO 3 : $103 = $117). Au 1er ecran du face-a-face le 2e chargement finit
+# apres l'image (1 image de palette ZERO 3 dans les emplacements 5-9) : invisible, l'ecran VS n'affiche pas les sprites des
+# joueurs (captures MAME identiques a celles d'une variante sans cette image). Variantes essayees : chargeur d'un joueur
+# route vers Hyper (meme resultat, plus de code) ; entree 0 de la sous-table de combat (la reprise rechargeait apres).
+# =0 : comme ro9a39.
+PAL_VERSION = os.environ.get("PAL_VERSION", "0") == "1"
+H_PAL_JOUEURS = 0x60A90                               # dispatcher des palettes des joueurs d'Hyper (par $138 ; chargeur 0x60D50)
+# COUL_CPU_VERSION=1 (D2) : les deux JSR de la copie 0x262930 qui suivent la pose de la couleur du CPU ($129 ; J1 CPU :
+# Upper 0x262D18, J2 CPU : 0x262E10 ; cible = homologue d'Hyper de 0x263820) -> talons coul_cpu_1 / coul_cpu_2 : appel
+# d'origine, puis si le CPU n'est pas dans sa version de base ($103 != $117) : $129 = 0 (couleur par defaut de la version),
+# sauf miroir exact (meme $103 que l'autre joueur, dont le $129 vaut 0) : $129 = COUL_CPU_MIROIR (1 ; decision de
+# l'utilisateur du 12/11 : equivalent de la regle d'Upper). CPU en version de base (ZERO 3) : regle d'Upper gardee.
+# =0 : comme ro9a39.
+COUL_CPU_VERSION = os.environ.get("COUL_CPU_VERSION", "0") == "1"
+COUL_MIROIR = int(os.environ.get("COUL_CPU_MIROIR", "1"), 16)
+COUL_TMP = 0xFE24                                     # $FF7E24 (mot) : temporaire des comparaisons (re/allocations.tsv)
+U_COUL_SITES = ((0x262D18, 0x400, 0x800), (0x262E10, 0x800, 0x400))   # (JSR de la copie, CPU, autre joueur : depl. de A5)
+COUL_JAL = 2                                          # indice du JSR d'origine dans le talon (pose apres la construction du module)
+def _cmp_octets_a5(a, b):
+    """octets a(A5) et b(A5) compares (sans signe) : MOVEQ #0,D0 ; MOVE.B b(A5),D0 ; MOVE.W D0,COUL_TMP(A5) ; MOVEQ #0,D0 ;
+    MOVE.B a(A5),D0 ; CMP.W COUL_TMP(A5),D0 (forme_cmp_14c, deplacement change) -> RES (0 = egaux) ; D0 change"""
+    f = forme_cmp_14c(); f[2] = 0x84630000 | (COUL_TMP & 0xffff)
+    return _d0_de_a5(b) + [0x3c037000, 0x84641124, 0x3c037000, 0x8c631114, 0xa4640000 | (COUL_TMP & 0xffff)] + \
+           _d0_de_a5(a) + f + _RES
+_EMPILE_D0 = [0x3c027000, 0x8c441124, 0x3c027000, 0x8c42114c, 0x2443fffc, 0x3c027000, 0xac43114c, 0xac640000]   # MOVE.L D0,-(SP)
+_DEPILE_D0 = [0x3c037000, 0x8c65114c, 0x24a40004, 0x3c037000, 0xac64114c, 0x8ca40000, 0x3c037000, 0xac641124]   # MOVE.L (SP)+,D0
+def stub_coul_cpu(cpu, autre):
+    """(COUL_CPU_VERSION) a la place du JSR qui suit la pose de la couleur du CPU : JSR d'origine (mot COUL_JAL, pose apres
+    la construction du module), puis couleur du CPU (structure cpu(A5)) selon sa version ; D0 garde"""
+    w = [0x27bdff40, 0xffbf00b8, j_(3, 0), 0x00000000] + _EMPILE_D0
+    w += _cmp_octets_a5(cpu + 0x103, cpu + 0x117); i_b = len(w); w += [0x10600000, 0]    # version de base -> Lf (Upper)
+    w += _cmp_octets_a5(cpu + 0x103, autre + 0x103); i_d = len(w); w += [0x14600000, 0]  # autre perso / version -> L0
+    w += _test_octet(autre + 0x129); i_c = len(w); w += [0x14600000, 0]                  # autre couleur -> L0
+    w += _pose_octet(cpu + 0x129, COUL_MIROIR); j = len(w); w += [0x10000000, 0]         # miroir exact -> Lf
+    L0 = len(w); w += _pose_octet(cpu + 0x129, 0)
+    Lf = len(w); w += _DEPILE_D0 + [0xdfbf00b8, 0x27bd00c0, 0x03e00008, 0x00000000]
+    for i_, L_ in ((i_b, Lf), (i_d, L0), (i_c, L0), (j, Lf)): w[i_] |= (L_ - i_ - 1) & 0xffff
+    assert w[COUL_JAL] == j_(3, 0)
+    return w
+# (couleur des portraits, 13/11) PORT_VERSION=1 (F3) : les portraits de la carte, du face-a-face de la carte et de l'ecran de
+# victoire sont colores par deux copies d'Upper : 0x25D730 (table T_7251a0, perso de base en D0, couleur en D2 = $129(A4))
+# et 0x196A30 (T_72BDF0 + $129(A4) x $100) : palette ZERO 3 d'Upper a la couleur $129, alors que le sprite d'une version
+# prend la couleur $129 de la table d'Hyper (Dan ZERO couleur 0 : portrait orange, sprite rose). Hyper colore ses portraits
+# avec la MEME table (copie d'Hyper de T_7251a0, image $15D3A0) a la couleur 2 imposee (MOVE.B #$2,D1, Hyper 0x31FA24),
+# quelle que soit la couleur choisie : la couleur 0 d'une version y est celle de la couleur 2 d'Upper (palette de corps
+# identique a 14 mots sur 15 pour presque toutes les versions, outils carte_coul.py). Ici, pour un joueur dans une version
+# ($103 != $117 de A4) : couleur 2, comme Hyper ; version de base (ZERO 3) : couleur $129 (regle d'Upper). Appels lui/addiu
+# de 0x25D730 avec A4 = joueur (Upper 0x18001C carte / face-a-face, 0x184640, 0x19D548 carte) -> talon port_carte (D2 = 2) ;
+# JSR 0x196A30 (Upper 0x1967CC, ecran de victoire) -> talon port_vict ($129(A4) = 2 pendant l'appel, puis remis). =0 :
+# comme ro9a39.
+PORT_VERSION = os.environ.get("PORT_VERSION", "0") == "1"
+PORT_COUL = 2                                         # couleur des portraits d'une version (Hyper 0x31FA24 : MOVE.B #$2,D1)
+U_PORT_CARTE, U_PORT_CARTE_SITES = 0x25D730, (0x18001C, 0x184640, 0x19D548)
+U_PORT_VICT, U_PORT_VICT_SITE = 0x196A30, 0x1967CC
+PORT_SAUVE = 0xFE26                                   # $FF7E26 : $129 du joueur sauve pendant le chargeur de victoire
+def _version_a4():
+    """MOVEQ #0,D7 ; MOVE.B $117(A4),D7 ; MOVE.W D7,COUL_TMP(A5) ; MOVEQ #0,D7 ; MOVE.B $103(A4),D7 ; CMP.W COUL_TMP(A5),D7
+    (RES : 0 = version de base). D7 (domicile 0x1140) : les deux chargeurs le posent eux-memes (nombre de palettes) ; pas
+    de pile entre la comparaison et le branchement (le traducteur emet la comparaison au branchement : essai x1)"""
+    f = forme_cmp_14c(); f[2] = 0x84630000 | (COUL_TMP & 0xffff); f[6] = 0x84631140
+    assert forme_cmp_14c()[6] == 0x84631124
+    d7 = lambda off: [0x3c037000, 0xac601140, 0x3c037000, 0x8c631110, 0x80640000 | off, 0x3c037000, 0xa0641140]
+    return d7(0x116) + [0x3c037000, 0x84641140, 0x3c037000, 0x8c631114, 0xa4640000 | (COUL_TMP & 0xffff)] + \
+           d7(0x102) + f + _RES
+def stub_port_carte(cible):
+    """(PORT_VERSION) a la place de l'appel de la copie de 0x25D730 : version (A4) -> MOVEQ #2,D2 (forme d'Upper 0x1EF748) ;
+    JSR cible"""
+    w = [0x27bdff40, 0xffbf00b8] + _version_a4(); i_ = len(w); w += [0x10600000, 0]       # version de base -> L
+    w += [0x24030000 | PORT_COUL, 0x3c027000, 0xac43112c]                                 # MOVEQ #2,D2
+    L = len(w); w += [j_(3, cible), 0x00000000, 0xdfbf00b8, 0x27bd00c0, 0x03e00008, 0x00000000]
+    w[i_] |= (L - i_ - 1) & 0xffff
+    return w
+def stub_port_vict(cible):
+    """(PORT_VERSION) a la place du JSR de la copie de 0x196A30 : $129(A4) sauve ; version (A4) -> $129(A4) = 2 ; JSR cible ;
+    $129(A4) remis"""
+    w = [0x27bdff40, 0xffbf00b8, 0x3c027000, 0x8c421110, 0x80430128, 0x3c027000, 0x8c421114,
+         0xa0430000 | ((PORT_SAUVE ^ 1) & 0xffff)]                                         # MOVE.B $129(A4),$FE26(A5)
+    w += _version_a4(); i_ = len(w); w += [0x10600000, 0]                                  # version de base -> L
+    w += [0x24030000 | PORT_COUL, 0x3c027000, 0x8c421110, 0xa0430128]                     # MOVE.B #2,$129(A4)
+    L = len(w); w += [j_(3, cible), 0x00000000]
+    w += [0x3c027000, 0x8c421114, 0x80430000 | ((PORT_SAUVE ^ 1) & 0xffff), 0x3c027000, 0x8c421110, 0xa0430128]   # remis
+    w += [0xdfbf00b8, 0x27bd00c0, 0x03e00008, 0x00000000]
+    w[i_] |= (L - i_ - 1) & 0xffff
     return w
 def stub_plans_scene(cible, restaure=False, bases=None, efface=(), masque_s1=False, masque_sortie=False):
     """scenes 6/8/A d'Upper (CONTINUE, GAME OVER, fin) : plans d'Upper, JSR cible, puis si la scene est quittee vers
@@ -1001,6 +1109,15 @@ def _remet_12a():
 # chemin « plans d'Upper », A5+8 < 4 et $5E01(A5) non nul -> scroll1 = $4400 (alias S1_ALIAS : memes tuiles d'Upper,
 # banque commune d'Hyper) tant que l'objet vit. =0 : comme ro9a31.
 BARRE_LOGO = os.environ.get("BARRE_LOGO", "0") == "1"
+# (logo_final_ha, retour du 12/11 soir, HANDOFF §227 : meme bande verte a la transition « logo » qui precede l'ecran de
+# dialogue d'Upper : rival tire en ZERO 3 a l'etape 8 (decor $14, ex. Sakura contre Ryu) et combat final) l'objet $FFDE00
+# nait a la fin de la victoire (A5+8 = 8) et vit ~145 images ; la carte ne dure alors que 4 images (A5+8 = 2) et l'ecran
+# de dialogue est en A5+8 = 4, A5+C = 0 (puis 2) : chemin « plans d'Upper » mais hors du test A5+8 < 4 -> scroll1 =
+# $0400 quand la barre s'affiche (fin de l'objet). BARRE_LOGO_FACE=1 (avec BARRE_LOGO=1) : l'alias vaut aussi pour A5+8 = 4 et A5+C = 0
+# (ecran du dialogue / face-a-face) tant que $5E01 est non nul. PAS pour A5+C = 2 (ecran VS, logo d'entree en combat) :
+# la colonne « VERSUS / VS » d'Upper est en scroll1, emplacement 0 (banque commune d'Upper) -> cassee par l'alias
+# (essai lfa, logo_final_ha/essais/cmp_lfa.png). =0 : comme ro9a39.
+BARRE_LOGO_FACE = os.environ.get("BARRE_LOGO_FACE", "0") == "1"
 BARRE_LOGO_OBJ = 0x5E01
 PLANS_BARRE_LOGO = (0x4400, 0x440, 0x4A0)
 def stub_plans_auto(couches=0):
@@ -1048,7 +1165,12 @@ def stub_plans_auto(couches=0):
         w += _bases(PLANS_HYPER); jb_ = len(w); w += [0x10000000, 0]
         w[ib_] |= (len(w) - ib_ - 1) & 0xffff
     if BARRE_LOGO:  # (e42) transition « logo » d'Hyper active ($5E01(A5)) sur la carte (A5+8 < 4) : scroll1 en alias
-        w += forme_cmpi_w(0x0008, 4) + [0x3c037000, 0x8c631158]; ibl = len(w); w += [0x04610000, 0]   # bgez C -> Upper (>= 4)
+        if BARRE_LOGO_FACE:
+            w += forme_cmpi_w(0x0008, 4) + [0x3c037000, 0x8c631158]; ilt = len(w); w += [0x04600000, 0]   # bltz C -> test (< 4)
+            w += forme_cmpi_w(0x000C, 0) + [0x3c037000, 0x8c631150]; ibl = len(w); w += [0x14600000, 0]   # bne RES -> Upper (A5+C != 0)
+            w[ilt] |= (len(w) - ilt - 1) & 0xffff
+        else:
+            w += forme_cmpi_w(0x0008, 4) + [0x3c037000, 0x8c631158]; ibl = len(w); w += [0x04610000, 0]   # bgez C -> Upper (>= 4)
         w += _test_octet(BARRE_LOGO_OBJ); ibo = len(w); w += [0x10600000, 0]                           # beq (inactive) -> Upper
         w += _bases(PLANS_BARRE_LOGO); jbl = len(w); w += [0x10000000, 0]
         w[ibl] |= (len(w) - ibl - 1) & 0xffff; w[ibo] |= (len(w) - ibo - 1) & 0xffff
@@ -1682,7 +1804,7 @@ def main():
         if D4_CHOIX and D4_VERSUS: SYN += [('d4_vs', stub_d4_vs(FEN_DECORS[0]))]
         if D4_VERSUS and DECORS_UPPER: SYN += [('plans_vs', stub_plans_vs())]
         if DECORS_UPPER and VS_UPPER:
-            SYN += [('moteur_plans', stub_moteur([0, 0] if OBJETS_DECOR and OBJETS_PARCOURS else [0], [0], S1_MASQUE, EFFET_12A)), ('moteur_plans_vs', stub_moteur([0], [0], m12a=EFFET_12A)), ('moteur_pal', stub_moteur([0], [0])),
+            SYN += [('moteur_plans', stub_moteur([0, 0] if OBJETS_DECOR and OBJETS_PARCOURS else [0], [0], S1_MASQUE, EFFET_12A)), ('moteur_plans_vs', stub_moteur([0], [0], m12a=EFFET_12A)), ('moteur_pal', stub_moteur([0, 0] if PAL_VERSION else [0], [0])),
                     ('moteur_effet', stub_moteur([0], [0]))]
             Greffe2.PAR_APPELANT_SYNTH = {0x151B80: ('moteur_plans_vs', _VS), 0x4B270: ('moteur_pal', _VS)}
             if OBJETS_DECOR:
@@ -1698,6 +1820,8 @@ def main():
         if DAN_SUPER: SYN += [('dan_super', stub_dan_super())]
         if PLANS and CONT_SORTIE: SYN += [('scene2_bases', stub_scene2_bases(4))]   # (e46) en dernier
         if PLANS and CONT_SORTIE and E2B_DEFI: SYN += [('defi_sortie', stub_defi_sortie(4))]   # (ro9a38) en dernier
+        if COUL_CPU_VERSION: SYN += [('coul_cpu_%d' % (k_ + 1), stub_coul_cpu(c_, o_)) for k_, (_, c_, o_) in enumerate(U_COUL_SITES)]   # (couleur du CPU) en dernier
+        if PORT_VERSION: SYN += [('port_carte', stub_port_carte(0)), ('port_vict', stub_port_vict(0))]   # (portraits) en dernier
     g = Greffe2(routines, Pl.dec, a5, synth=SYN)
     FEN, TROUS = fenetres() if FENETRES else (None, TROU_SON)
     if FENETRES:
@@ -1787,11 +1911,13 @@ def main():
         if DAN_SUPER: g.synth += [('dan_super', stub_dan_super())]
         if PLANS and CONT_SORTIE: g.synth += [('scene2_bases', stub_scene2_bases(H_SCENE2 + BASE))]   # (e46) en dernier
         if PLANS and CONT_SORTIE and E2B_DEFI: g.synth += [('defi_sortie', stub_defi_sortie(X(U_DEFI_CIBLE)))]   # (ro9a38)
+        if COUL_CPU_VERSION: g.synth += [('coul_cpu_%d' % (k_ + 1), stub_coul_cpu(c_, o_)) for k_, (_, c_, o_) in enumerate(U_COUL_SITES)]   # (couleur du CPU)
+        if PORT_VERSION: g.synth += [('port_carte', stub_port_carte(X(U_PORT_CARTE))), ('port_vict', stub_port_vict(X(U_PORT_VICT)))]   # (portraits)
         if GARDE_ANIM0: g.synth += [('garde_anim0', stub_garde_anim0(struct.unpack_from('<13I', open(MODULE_SOURCE, 'rb').read(), GA_SITE)))]
         if DECORS_UPPER and VS_UPPER:
             g.synth += [('moteur_plans', stub_moteur([X(0x151B80)] + ([X(0xFD620)] if OBJETS_DECOR and OBJETS_PARCOURS else []), [0x30EC10 + BASE], S1_MASQUE, EFFET_12A)),
                         ('moteur_plans_vs', stub_moteur([X(0x151B80)], [0x30EC10 + BASE], m12a=EFFET_12A)),
-                        ('moteur_pal', stub_moteur([X(0x4B270)], [0x60A20 + BASE])),
+                        ('moteur_pal', stub_moteur([X(0x4B270)] + ([H_PAL_JOUEURS + BASE] if PAL_VERSION else []), [0x60A20 + BASE])),   # (PAL_VERSION) + palettes par version
                         ('moteur_effet', stub_moteur([X(0x13BB10)], [0x391E50 + BASE]))]
             if OBJETS_DECOR: g.synth += [('moteur_objets', stub_moteur([X(0x4C1B0)], [0xAC050 + BASE]))]
             if OBJETS_DECOR and OBJETS_MANCHE: g.synth += [('objets_manche', stub_moteur([0xAC050 + BASE, X(0x4C1B0)], [0xAC050 + BASE]))]
@@ -1827,65 +1953,119 @@ def main():
             struct.pack_into('<I', blob, o4, g.synth_place['plans_vict'] + BASE)
     SITE_PERSO_J1 = g.synth_place['fin_selection'] + 4 * stub_fin_selection(0, 0)[1]
     x2_sites = []
-    if X2_TABLES:                                      # (ro9a38) tables par perso prolongees a X2_N entrees, a la fin du bloc
+    if X2_TABLES:                                      # (ro9a38, L1 : X2 v2) tables par perso prolongees a X2_N entrees, a la fin du bloc
         assert ZONE_DECORS and FENETRES and TROUS and D4_TABLE, "X2_TABLES : zone des decors et fenetres attendues"
+        assert D3, "X2_TABLES : zone $3A0000-$3BFFFF reservee au code MAX (D3=1) attendue"
         src_ = open(MODULE_SOURCE, 'rb').read(); ptr_s = set(ptr_code); zp_s = set(FD.zone_ptr); zl_ = FD.zone[0]
-        blob += bytes(-len(blob) & 0xFF)
-        for xu_, xhyp_, xt_, xsites_, xtous_ in X2_LISTE:
-            if xhyp_: xa_ = xu_; xlit_ = lambda k, n: src_[xa_ - BASE + k:xa_ - BASE + k + n]; xptr_ = lambda k: False
-            elif zl_ <= xu_ < FD.zone[1]:
-                xa_ = FD.zone[2] + xu_ - zl_; xz_ = (zl_ & 15) + xu_ - zl_
-                xlit_ = lambda k, n: zbuf[xz_ + k:xz_ + k + n]; xptr_ = lambda k: (xu_ - zl_ + k) in zp_s
-            else:
-                xa_ = exec_donnee(g, xu_); xb_ = xa_ - GRF_X; assert 0 <= xb_ < len(blob), hex(xa_)
-                xlit_ = lambda k, n: blob[xb_ + k:xb_ + k + n]; xptr_ = lambda k: (xb_ + k) in ptr_s
+        blob += bytes(-len(blob) & 0xFF); x2_debut_ = len(blob)
+        def x2_lieu_(xu_, xhyp_):
+            """(adresse d'execution, lit(k, n), est_pointeur(k), (tampon, decalage)) de la table d'Upper xu_ / d'Hyper"""
+            if xhyp_: return xu_, (lambda k, n: src_[xu_ - BASE + k:xu_ - BASE + k + n]), (lambda k: False), None
+            if zl_ <= xu_ < FD.zone[1]:
+                xz_ = (zl_ & 15) + xu_ - zl_
+                return (FD.zone[2] + xu_ - zl_, (lambda k, n: zbuf[xz_ + k:xz_ + k + n]),
+                        (lambda k: (xu_ - zl_ + k) in zp_s), (zbuf, xz_))
+            xa_ = exec_donnee(g, xu_); xb_ = xa_ - GRF_X; assert 0 <= xb_ < len(blob), hex(xa_)
+            return xa_, (lambda k, n: blob[xb_ + k:xb_ + k + n]), (lambda k: (xb_ + k) in ptr_s), (blob, xb_)
+        def x2_valeurs_(xd_, xlit_):
+            """X2_VALEURS -> {entree : octets} (tables 'directes') ; ordre des octets choisi par la colonne ryu = entree 0
+            de la table d'Upper (module ro5) : dans le bloc, une entree peut avoir ete relogee
+            comme un pointeur (T_615AC0 [0] et [6] : (dx, dy) = $005A0000 / $005EFFE0 pris pour des adresses)"""
+            if xd_['valeurs'] != 'directes' or not X2_VALEURS: return {}
+            xe_ = xd_['e']
+            e0_ = bytes(PL.b5[xd_['u'] - BASE:xd_['u'] - BASE + xe_])   # colonne ryu = valeur d'Upper (meme pour une table d'Hyper partagee)
+            f_ = [lambda b: b, lambda b: b''.join(b[i + 1:i + 2] + b[i:i + 1] for i in range(0, len(b), 2)),
+                  lambda b: b''.join(b[i:i + 4][::-1] for i in range(0, len(b), 4))]
+            ok_ = [f for f in f_ if len(bytes.fromhex(xd_['ryu'])) == xe_ and f(bytes.fromhex(xd_['ryu'])) == e0_]
+            out_ = {}
+            for id_ in X2_VALEURS:
+                h_ = xd_[{0x26: 'v26', 0x27: 'v27', 0x2D: 'v2D', 0x2E: 'v2E'}[id_]]
+                r_ = {f(bytes.fromhex(h_)) for f in ok_}
+                assert len(r_) == 1 and len(bytes.fromhex(h_)) == xe_, "X2_VALEURS : ordre des octets de T_%x ambigu ou faux (ryu %s, entree 0 %s)" % (xd_['u'], xd_['ryu'], e0_.hex())
+                out_[id_] = r_.pop()
+            return out_
+        def x2_rangee_(xlit_, b_, xe_, vals_):
+            """48 entrees d'une rangee de base b_ -> (octets, decalage source de chaque entree ou None)"""
+            o_ = bytearray(); s_ = []
+            for i_ in range(X2_N):
+                v_ = vals_.get(i_)
+                o_ += v_ if (v_ is not None and i_ in (0x26, 0x27)) else x2_entree(lambda k, n: xlit_(b_ + k, n), xe_, i_, v_)
+                s_.append(None if v_ is not None else b_ + x2_src(xe_, i_))
+            return bytes(o_), s_
+        for xd_ in x2_liste():
+            xu_, xhyp_, xe_, xg_ = xd_['u'], xd_['hyp'], xd_['e'], xd_['genre']
+            xa_, xlit_, xptr_, _ = x2_lieu_(xd_['adr'], xhyp_)
             while len(blob) % 16 != (xa_ & 15): blob += b'\0'
-            xaddi_ = None
-            if isinstance(xt_, tuple) and xt_[0] == 'demi':  # deux demi-tables d'octets : [40 + 8] [40 + 8]
-                xaddi_ = xt_[1]; xh0_ = bytes(xlit_(0, X2_N0)); xh1_ = bytes(xlit_(X2_N0, X2_N0))
-                assert len(xh0_) == len(xh1_) == X2_N0, hex(xu_)
-                xnv_ = GRF_X + len(blob); blob += xh0_ + xh0_[:1] * (X2_N - X2_N0) + xh1_ + xh1_[:1] * (X2_N - X2_N0)
-                xtxt_ = "deux demi-tables de %d octets, ADDI #$%X -> #$%X en Upper 0x%X" % (X2_N0, X2_N0, X2_N, xaddi_)
-            elif isinstance(xt_, tuple) and xt_[0] == 'banque':   # en-tete de decalages vers des groupes de 40 entrees
-                xe_ = xt_[1]; xg_ = X2_N0 * xe_; xd0_ = struct.unpack_from('<h', bytes(xlit_(0, 2)))[0]; xhn_ = xd0_ // 2
-                xd_ = list(struct.unpack('<%dh' % xhn_, bytes(xlit_(0, xd0_)))); xs_ = sorted(set(v_ for v_ in xd_ if v_))
-                xfin_ = xs_[-1] + xg_                       # dernier segment : taille inconnue -> traite comme un groupe de 40
-                xcorps0_ = bytes(xlit_(0, xfin_)); assert len(xcorps0_) == xfin_ and xs_[0] == xd0_, hex(xu_)
+            vals_ = x2_valeurs_(xd_, xlit_); xpas_ = None
+            if xg_ in ('simple', 'rangs'):             # R rangees de 40 entrees -> R rangees de 48
+                xR_ = xd_['R'] if xg_ == 'rangs' else 1; assert xR_ == 1 or xd_['n0'] == X2_N0, hex(xu_)
+                xlu_ = (X2_N0 * (xR_ - 1) + max(xd_['n0'], 45)) * xe_
+                assert len(xlit_(0, xlu_)) == xlu_, "X2_TABLES : T_%x : %x o illisibles" % (xu_, xlu_)
+                xnv_ = GRF_X + len(blob); xc_ = bytearray(); xs_ = []
+                for r_ in range(xR_):
+                    o_, s_ = x2_rangee_(xlit_, r_ * X2_N0 * xe_, xe_, vals_); xc_ += o_; xs_ += s_
+                if xe_ % 4 == 0:
+                    for i_, s_ in enumerate(xs_):
+                        for k_ in range(0, xe_, 4):
+                            if s_ is not None and xptr_(s_ + k_): ptr_code.append(xnv_ - GRF_X + i_ * xe_ + k_)
+                blob += xc_; xtaille_ = xd_['n0'] * xe_ * xR_; xpas_ = (X2_N0 * xe_, X2_N * xe_, xR_)
+                xtxt_ = "%d rangee(s) de %d x %d o%s" % (xR_, X2_N0, xe_, ', valeurs %s' % ' '.join('%x' % v_ for v_ in sorted(vals_)) if vals_ else '')
+            elif xg_ == 'banque':                      # en-tete de decalages vers des groupes de 40 entrees
+                xg8_ = X2_N0 * xe_; xd0_ = struct.unpack_from('<h', bytes(xlit_(0, 2)))[0]; xhn_ = xd0_ // 2
+                xd_l = list(struct.unpack('<%dh' % xhn_, bytes(xlit_(0, xd0_)))); xs_ = sorted(set(v_ for v_ in xd_l if v_))
+                xfin_ = xs_[-1] + xg8_                  # dernier segment : taille inconnue -> traite comme un groupe de 40
+                xcorps0_ = bytes(xlit_(0, xfin_ + 5 * xe_)); assert len(xcorps0_) == xfin_ + 5 * xe_ and xs_[0] == xd0_, hex(xu_)
                 xnouv_ = {0: 0}; xc_ = bytearray(); xpos_ = xd0_; xng_ = 0
                 while xpos_ < xfin_:
                     xsuiv_ = min([v_ for v_ in xs_ if v_ > xpos_] + [xfin_])
                     xnouv_[xpos_] = xd0_ + len(xc_)
-                    xc_ += xcorps0_[xpos_:xsuiv_]
-                    if xsuiv_ - xpos_ == xg_: xc_ += xcorps0_[xpos_:xpos_ + xe_] * (X2_N - X2_N0); xng_ += 1
+                    if xsuiv_ - xpos_ == xg8_:
+                        xc_ += x2_rangee_(lambda k, n, p=xpos_: xcorps0_[p + k:p + k + n], 0, xe_, {})[0]; xng_ += 1
+                    else: xc_ += xcorps0_[xpos_:xsuiv_]
                     xpos_ = xsuiv_
                 xnv_ = GRF_X + len(blob)
-                blob += struct.pack('<%dh' % xhn_, *[xnouv_[v_] for v_ in xd_]) + bytes(xc_)
-                assert max(xnouv_.values()) < 0x8000, hex(xu_)
+                blob += struct.pack('<%dh' % xhn_, *[xnouv_[v_] for v_ in xd_l]) + bytes(xc_)
+                assert max(xnouv_.values()) < 0x8000, hex(xu_); xtaille_ = xfin_
                 xtxt_ = "banque : %d decalages, %d groupes de %d x %d o prolonges, %x o -> %x o" % (xhn_, xng_, X2_N0, xe_, xfin_, xd0_ + len(xc_))
-            elif isinstance(xt_, tuple):                     # en-tete de decalages (mots signes relatifs a la table)
-                _, xav_, xap_ = xt_; xh_ = 2 * X2_N0; xp_ = 2 * (X2_N - X2_N0)
-                xd_ = struct.unpack('<%dh' % X2_N0, bytes(xlit_(0, xh_)))
-                assert xd_[0] == xh_ and all(v_ >= xh_ or -xav_ <= v_ < 0 for v_ in xd_) and max(xd_) + xp_ < 0x8000, hex(xu_)
-                xd_ = [v_ + xp_ if v_ >= xh_ else v_ for v_ in xd_]
+            elif xg_.startswith('dec:'):              # en-tete de decalages (mots signes relatifs a la table)
+                xav_, xap_ = (int(v_, 16) for v_ in xg_.split(':')[1:3]); xh_ = 2 * X2_N0; xp_ = 2 * (X2_N - X2_N0)
+                xd_l = struct.unpack('<%dh' % X2_N0, bytes(xlit_(0, xh_)))
+                assert xd_l[0] == xh_ and all(v_ >= xh_ or -xav_ <= v_ < 0 for v_ in xd_l) and max(xd_l) + xp_ < 0x8000, hex(xu_)
+                xtr_ = lambda v_: v_ + xp_ if v_ >= xh_ else v_
+                xmots_ = [struct.unpack('<h', x2_entree(lambda k, n: xlit_(k, n), 2, i_))[0] for i_ in range(X2_N)]
                 xavant_ = bytes(xlit_(-xav_, xav_)) if xav_ else b''; xcorps_ = bytes(xlit_(xh_, xap_ - xh_))
                 assert len(xavant_) == xav_ and len(xcorps_) == xap_ - xh_, hex(xu_)
                 blob += xavant_; xnv_ = GRF_X + len(blob)
-                blob += struct.pack('<%dh' % X2_N, *(xd_ + [xd_[0]] * (X2_N - X2_N0))) + xcorps_
+                blob += struct.pack('<%dh' % X2_N, *[xtr_(v_) for v_ in xmots_]) + xcorps_; xtaille_ = xap_
                 xtxt_ = "en-tete de decalages, %x o avant, %x o de corps" % (xav_, xap_ - xh_)
-            else:
-                xn0_ = X2_N0 * xt_; xcorps_ = bytes(xlit_(0, xn0_)); assert len(xcorps_) == xn0_, hex(xu_)
-                xneutre_ = bytes(xlit_(0, xt_))             # entree $00 (Ryu) : ce que lisent aujourd'hui les ids >= $26 (T_BASE = 0)
-                xnv_ = GRF_X + len(blob); blob += xcorps_ + xneutre_ * (X2_N - X2_N0)
-                if xt_ >= 4:
-                    for xk_ in range(0, xn0_, 4):
-                        if xptr_(xk_): ptr_code.append(xnv_ - GRF_X + xk_)
-                    if xptr_(0):
-                        for xe_ in range(X2_N0, X2_N): ptr_code.append(xnv_ - GRF_X + xe_ * xt_)
-                xtxt_ = "%d o x %d" % (xt_, X2_N0)
-            x2_sites.append((xu_, xa_, xnv_, xsites_, xtous_, xaddi_))
-            print("X2_TABLES : T_%x (%s %x, %s) -> %x (%d entrees, $%02X-$%02X = entree $00)" % (xu_, 'Hyper' if xhyp_ else 'copie', xa_, xtxt_, xnv_, X2_N, X2_N0, X2_N - 1))
+                if xg_.endswith(':ptr'):               # (L1) table atteinte par des pointeurs de DONNEES (T_614E00[langue])
+                    _, _, _, xbo_ = x2_lieu_(0x614E00, False); xb1_ = x2_lieu_(0x614E20, False)[3]
+                    assert xbo_ and xb1_ and xbo_[0] is xb1_[0] and xbo_[1] < xb1_[1], "X2_TABLES : T_614E00 / T_614E20"
+                    xn_ = 0
+                    for o_ in range(xbo_[1], xb1_[1], 4):
+                        if struct.unpack_from('<I', xbo_[0], o_)[0] == xa_:
+                            struct.pack_into('<I', xbo_[0], o_, xnv_); xn_ += 1
+                    assert xn_ >= 1, "X2_TABLES : aucun pointeur de donnees vers T_%x dans T_614E00" % xu_
+                    xtxt_ += ", %d pointeur(s) de donnees de T_614E00 rediriges" % xn_
+            elif xg_ == '967bf0':                      # en-tete $30, mots x 40 ($30, $80), octets x 40 ($D0, $F8), paires ($120, 16 o)
+                assert len(xlit_(0, 0x130)) == 0x130, hex(xu_)
+                xnv_ = GRF_X + len(blob); xc_ = bytearray(xlit_(0, 0x30))
+                for b_, e_ in ((0x30, 2), (0x80, 2), (0xD0, 1), (0xF8, 1)): xc_ += x2_rangee_(xlit_, b_, e_, {})[0]
+                xc_ += xlit_(0x120, 16); assert len(xc_) == 0x160, hex(len(xc_))
+                blob += xc_; xtaille_ = 0x130; xtxt_ = "disposition d'agrandit_max ($30, $90, $F0, $120, $150)"
+            elif xg_ == 'lignes32':                    # (lot D) 48 lignes de 32 o : lignes $20-$2F = lignes (h & $1F)
+                assert len(xlit_(0, X2_N0 * 32)) == X2_N0 * 32, hex(xu_)
+                xnv_ = GRF_X + len(blob)
+                blob += b''.join(bytes(xlit_(32 * (h_ if h_ < 32 else h_ & 0x1F), 32)) for h_ in range(X2_N))
+                xtaille_ = X2_N0 * 32; xtxt_ = "48 lignes de 32 o, lignes $20-$2F = lignes 0-15"
+            else: raise AssertionError("X2_TABLES : genre inconnu %s (T_%x)" % (xg_, xu_))
+            x2_sites.append(dict(d=xd_, a=xa_, nv=xnv_, taille=xtaille_, pas=xpas_))
+            print("X2_TABLES : T_%x (lot %s, %s %x, %s) -> %x (%d entrees ; 40-44 = suite, 45-46 = entree 0, 47 = entree 39)" % (xu_, xd_['lot'], 'Hyper' if xhyp_ else 'copie', xa_, xtxt_, xnv_, X2_N))
         assert GRF_X + len(blob) <= FEN_DECORS[0], "X2_TABLES : bloc sur la fenetre des decors (%x)" % (GRF_X + len(blob))
-        print("X2_TABLES : bloc de donnees %d o, fin %x (fenetre des decors : %x)" % (len(blob), GRF_X + len(blob), FEN_DECORS[0]))
+        assert len(blob) - x2_debut_ <= X2_BUDGET, "X2_TABLES : %x o > budget %x (D6, 112 Ko)" % (len(blob) - x2_debut_, X2_BUDGET)
+        assert 0xF18000 <= GRF_X + x2_debut_, "X2_TABLES : debut %x hors de la fenetre $F18000-$FE0000 (68K $410000-$4D7FFF)" % (GRF_X + x2_debut_)
+        print("X2_TABLES : %d tables, bloc X2 %d o (budget %d), bloc de donnees %d o, fin %x (fenetre des decors : %x) ; reste %d o avant la fenetre des decors"
+              % (len(x2_sites), len(blob) - x2_debut_, X2_BUDGET, len(blob), GRF_X + len(blob), FEN_DECORS[0], FEN_DECORS[0] - GRF_X - len(blob)))
     T_D4 = None
     if FENETRES and TROUS and D4_TABLE:                   # fenetre des decors (T1b) : table D4 en tete
         assert GRF_X + len(blob) <= FEN_DECORS[0], "bloc de donnees sur la fenetre des decors (%x)" % (GRF_X + len(blob))
@@ -1917,30 +2097,63 @@ def main():
         old = (((w1 & 0xffff) << 16) + ((w2 & 0xffff) - (0x10000 if w2 & 0x8000 else 0))) & 0xffffffff
         struct.pack_into('<II', mod, f9, (w1 & 0xffff0000) | (((cible + 0x8000) >> 16) & 0xffff), (w2 & 0xffff0000) | (cible & 0xffff))
         patchs.append(dict(type='constante', site=hex(f9), avant=hex(old), apres=hex(cible), quoi=quoi))
-    if x2_sites:                                       # (ro9a38, X2_TABLES) constantes lui/addiu des tables -> copies prolongees
+    if x2_sites:                                       # (ro9a38, L1 : X2 v2) constantes lui/addiu des tables -> copies prolongees
         xpl_ = sorted((n_, n_ + b_ - a_) for a_, b_, n_ in g.place)   # code d'Upper copie (fichier du module)
-        xv_ = {xa_: (xu_, xnv_, xsites_, xtous_, xaddi_) for xu_, xa_, xnv_, xsites_, xtous_, xaddi_ in x2_sites}; xvu_ = collections.defaultdict(list)
+        xall_ = collections.defaultdict(list)         # toutes les constantes lui/addiu adjacentes (meme registre) des copies
         for xd0_, xd1_ in xpl_:
             for xc_ in range(xd0_, xd1_ - 4, 4):
                 xw1_, xw2_ = struct.unpack_from('<II', mod, xc_)
                 if (xw1_ >> 26) == 0x0f and (xw2_ >> 26) == 0x09 and ((xw1_ >> 16) & 31) == ((xw2_ >> 21) & 31) == ((xw2_ >> 16) & 31):
                     xval_ = (((xw1_ & 0xffff) << 16) + ((xw2_ & 0xffff) - (0x10000 if xw2_ & 0x8000 else 0))) & 0xffffffff
-                    if xval_ in xv_: xvu_[xval_].append(xc_)
-        for xa_, (xu_, xnv_, xsites_, xtous_, xaddi_) in xv_.items():
-            xpris_ = []
-            for xus_ in xsites_:                       # les acces releves par la revue / la sonde : constante trouvee avant eux
-                xn_ = g.neuf(xus_); xc0_ = [c_ for c_ in xvu_[xa_] if xn_ - 0x600 < c_ < (xn_ or 0)]
+                    xall_[xval_].append(xc_)
+        xdebuts_ = {s_['a'] for s_ in x2_sites}
+        def x2_instr_(kind_, site_, old_, new_, xu_):
+            """(L1) constante de rangee / masque / decalage : l'unique instruction de la forme attendue a +-$10 du site"""
+            xn_ = g.neuf(site_); assert xn_ is not None, "X2_TABLES : site %x non copie (T_%x)" % (site_, xu_)
+            xk_ = []
+            for o_ in range(xn_ - 0x10, xn_ + 0x14, 4):
+                w_ = struct.unpack_from('<I', mod, o_)[0]; op_ = w_ >> 26; rs_ = (w_ >> 21) & 31; im_ = w_ & 0xffff
+                ok_ = {'addiu': op_ == 0x09 and rs_ != 0 and im_ == old_,
+                       'imm': op_ in (0x09, 0x0d) and rs_ == 0 and im_ == old_,
+                       'dep': (op_ == 0x09 and rs_ != 0 or op_ in (0x20, 0x21, 0x23, 0x24, 0x25)) and im_ == old_,
+                       'andi': op_ == 0x0c and im_ == old_,
+                       'sll': w_ != 0 and (w_ & 0xFC00003F) == 0 and ((w_ >> 6) & 31) == old_}[kind_]
+                if ok_: xk_.append(o_)
+            assert len(xk_) == 1, "X2_TABLES : T_%x : %s $%X en Upper %x : %d candidat(s) a +-$10" % (xu_, kind_, old_, site_, len(xk_))
+            o_ = xk_[0]; w_ = struct.unpack_from('<I', mod, o_)[0]
+            w2_ = (w_ & ~(31 << 6)) | (new_ << 6) if kind_ == 'sll' else (w_ & 0xffff0000) | new_
+            struct.pack_into('<I', mod, o_, w2_)
+            patchs.append(dict(type='mips', site=hex(o_ + BASE), quoi="X2_TABLES : Upper 0x%X (%x) %s $%X -> $%X (T_%x)" % (site_, o_ - xn_ + site_, kind_, old_, new_, xu_)))
+            print("X2_TABLES : T_%x : %s $%X -> $%X en %x (Upper 0x%X)" % (xu_, kind_, old_, new_, o_, o_ - xn_ + site_))
+        for s_ in x2_sites:
+            xd_ = s_['d']; xu_, xa_, xnv_ = xd_['u'], s_['a'], s_['nv']; xvu_ = list(xall_.get(xa_, ())); xpris_ = []
+            for xus_ in xd_['sites']:                  # les acces releves par l'inventaire / la sonde : constante trouvee avant eux
+                xn_ = g.neuf(xus_); xc0_ = [c_ for c_ in xvu_ if xn_ - 0x600 < c_ < (xn_ or 0)]
                 assert xn_ is not None and xc0_, "X2_TABLES : constante %x introuvable avant %x (Upper %x)" % (xa_, xn_ or 0, xus_)
                 xpris_.append(max(xc0_))
-            if not xtous_: xvu_[xa_] = sorted(set(xpris_))   # lecteurs listes seulement
-            if xaddi_ is not None:                     # demi-tables : ADDI.W #X2_N0 -> #X2_N (addiu rt,rs,X2_N0)
-                xn_ = g.neuf(xaddi_); xw_ = struct.unpack_from('<I', mod, xn_)[0]
-                assert (xw_ >> 26) == 0x09 and (xw_ & 0xffff) == X2_N0, (hex(xaddi_), hex(xw_))
-                struct.pack_into('<I', mod, xn_, (xw_ & 0xffff0000) | X2_N)
-                patchs.append(dict(type='mips', site=hex(xn_ + BASE), quoi="X2_TABLES : Upper 0x%X ADDI.W #$%X -> #$%X (deuxieme demi-table de T_%x)" % (xaddi_, X2_N0, X2_N, xu_)))
-            for xc_ in xvu_[xa_]:
+            if not xd_['tous']: xvu_ = sorted(set(xpris_))   # lecteurs listes seulement
+            for k_ in xd_['consts']: x2_instr_(*k_, xu_)
+            for xc_ in xvu_:
                 const_(xc_, xnv_, "X2_TABLES : T_%x (%x) -> copie prolongee %x (%d entrees), lecteur copie d'Upper" % (xu_, xa_, xnv_, X2_N))
-            print("X2_TABLES : T_%x : %d constante(s) redirigee(s) (%s)" % (xu_, len(xvu_[xa_]), ' '.join('%x' % c_ for c_ in xvu_[xa_])))
+            xint_ = []
+            if xd_['tous']:                            # (L1) constantes interieures ]T, T + taille[
+                for xv_, xcs_ in sorted(xall_.items()):
+                    if not (xa_ < xv_ < xa_ + s_['taille']) or xv_ in xdebuts_: continue
+                    if xv_ in xd_['gardes']:
+                        print("X2_TABLES : ATTENTION T_%x : constante interieure %x (T + $%X) gardee en %s (x2_tables.tsv : garde)" % (xu_, xv_, xv_ - xa_, ' '.join('%x' % c_ for c_ in xcs_)))
+                        continue
+                    xdl_ = xv_ - xa_; xpas_ = s_['pas']
+                    xhd_ = 2 * X2_N0 if xd_['genre'].startswith('dec:') else (struct.unpack('<h', bytes(x2_lieu_(xd_['adr'], xd_['hyp'])[1](0, 2)))[0] if xd_['genre'] == 'banque' else None)
+                    if xhd_ is not None and xdl_ >= xhd_:   # pointeur dans le CORPS d'origine (reste en place, inchange) : garde
+                        print("X2_TABLES : ATTENTION T_%x : constante interieure %x (T + $%X, corps) gardee en %s (lit le corps d'origine, inchange)" % (xu_, xv_, xdl_, ' '.join('%x' % c_ for c_ in xcs_)))
+                        continue
+                    if xdl_ < xd_['e'] and xd_['genre'] in ('simple', 'rangs'): xcib_ = xnv_ + xdl_
+                    elif xpas_ and xdl_ % xpas_[0] == 0 and xdl_ // xpas_[0] < xpas_[2]: xcib_ = xnv_ + xdl_ // xpas_[0] * xpas_[1]
+                    else: raise AssertionError("X2_TABLES : T_%x : constante interieure %x (T + $%X) en %s : non traitee" % (xu_, xv_, xdl_, ' '.join('%x' % c_ for c_ in xcs_)))
+                    for xc_ in xcs_:
+                        const_(xc_, xcib_, "X2_TABLES : T_%x + $%X -> %x (constante interieure)" % (xu_, xdl_, xcib_)); xint_.append(xc_)
+                    print("X2_TABLES : ATTENTION T_%x : constante interieure %x (T + $%X) -> %x en %s" % (xu_, xv_, xdl_, xcib_, ' '.join('%x' % c_ for c_ in xcs_)))
+            print("X2_TABLES : T_%x : %d constante(s) redirigee(s) (%s)%s" % (xu_, len(xvu_), ' '.join('%x' % c_ for c_ in xvu_), ', %d interieure(s)' % len(xint_) if xint_ else ''))
     long_(0x5B4210, a_exec(g, 0x4E1C0), "lanceur ARCADE du menu (entree 0) -> lanceur d'Upper 0x4E1C0")
     # (etape 7) MENU_ARCADE=1 : le menu du titre d'Hyper ne propose pas l'entree 0 (curseur $C201 : tables « suivant »
     # 0x5B41F0 (Bas) et « precedent » 0x5B4200 (Haut) sans 0 : VERSUS 1, TRAINING 4, OPTION 5, EXIT 6) -> ARCADE (0)
@@ -1960,6 +2173,25 @@ def main():
             n_ = g.neuf(U_DEFI_JSR); w_ = struct.unpack_from('<I', mod, n_)[0]
             assert (w_ >> 26) == 3 and ((w_ & 0x3ffffff) << 2) == a_exec(g, U_DEFI_CIBLE), (hex(n_), hex(w_))
             jal_(n_, g.synth_place['defi_sortie'] + BASE, "Upper 0x%X (u1353A0, defi accepte) : JSR 0x%X -> talon defi_sortie (couches masquees, bases d'Hyper retardees de %d images)" % (U_DEFI_JSR, U_DEFI_CIBLE, DEFI_N))
+    if COMBAT_HYPER and COUL_CPU_VERSION:              # (couleur du CPU) JSR de la copie 0x262930 apres la pose de $129 du CPU
+        for k_, (us_, c_, o_) in enumerate(U_COUL_SITES):
+            n_ = g.neuf(us_); assert n_ is not None, hex(us_)
+            w_ = struct.unpack_from('<I', mod, n_)[0]; p_ = g.synth_place['coul_cpu_%d' % (k_ + 1)] + 4 * COUL_JAL
+            assert (w_ >> 26) == 3 and struct.unpack_from('<I', mod, p_)[0] == j_(3, 0), (hex(n_), hex(w_))
+            struct.pack_into('<I', mod, p_, w_)       # JSR d'origine (homologue d'Hyper de 0x263820) dans le talon
+            jal_(n_, g.synth_place['coul_cpu_%d' % (k_ + 1)] + BASE, "Upper 0x%X (copie de 0x262930, couleur du CPU J%d) : JSR 0x%X -> talon coul_cpu_%d (version non de base : $129 = 0, miroir exact : %d)" % (us_, c_ // 0x400, (w_ & 0x3ffffff) << 2, k_ + 1, COUL_MIROIR))
+    if COMBAT_HYPER and PORT_VERSION:                  # (portraits) chargeurs de portraits d'Upper -> talons port_carte / port_vict
+        np_ = 0
+        for us_ in U_PORT_CARTE_SITES:
+            n_ = g.neuf(us_)
+            if n_ is None: continue                    # appelant non greffe
+            const_(n_, g.synth_place['port_carte'] + BASE, "PORT_VERSION : Upper 0x%X : appel de 0x%X (portrait de carte, A4 = joueur) -> talon port_carte (version : couleur %d)" % (us_, U_PORT_CARTE, PORT_COUL))
+            assert int(patchs[-1]['avant'], 16) == a_exec(g, U_PORT_CARTE), patchs[-1]['avant']
+            np_ += 1
+        assert np_ >= 2, np_
+        n_ = g.neuf(U_PORT_VICT_SITE); w_ = struct.unpack_from('<I', mod, n_)[0]
+        assert (w_ >> 26) == 3 and ((w_ & 0x3ffffff) << 2) == a_exec(g, U_PORT_VICT), (hex(n_), hex(w_))
+        jal_(n_, g.synth_place['port_vict'] + BASE, "PORT_VERSION : Upper 0x%X : JSR 0x%X (portrait de victoire, A4 = joueur) -> talon port_vict (version : couleur %d)" % (U_PORT_VICT_SITE, U_PORT_VICT, PORT_COUL))
     for k, f5, q in ((3, 0x2614A0, 'CONTINUE'), (4, 0x2614D0, 'GAME OVER'), (5, 0x261500, 'FIN + generique')):
         if g.neuf(f5) is not None:
             if COMBAT_HYPER and PLANS:
@@ -2240,6 +2472,10 @@ def main():
                 a5_inconnus=sorted(hex(d) for d in inconnus),
                 rapport={k: [[h(z) for z in e] for e in v] for k, v in g.rap.items()}, rapport_donnees=rap_donnees,
                 decisions={hex(f): [d[0]] + ([hex(d[1]) if isinstance(d[1], int) else d[1]] if len(d) > 1 and d[1] is not None else []) + [Pl.raison[f]] for f, d in Pl.dec.items() if f in Pl.refs or f in Pl.atteint})
+    if x2_sites:                                       # (L1) releve des tables prolongees (preuve P2 : l1_max_greffe/essais/x2_neutre.py)
+        info['x2'] = [dict(upper=hex(s_['d']['u']), table=hex(s_['a']), copie=hex(s_['nv']), genre=s_['d']['genre'], e=s_['d']['e'],
+                           n0=s_['d']['n0'], rangs=s_['d']['R'], taille=hex(s_['taille']), lot=s_['d']['lot'], valeurs=s_['d']['valeurs'])
+                      for s_ in x2_sites]
     json.dump(info, open(os.path.join(P_, 'greffe.json'), 'w'), indent=1)
     A_ = assets_json(g, plages, os.path.join(P_, 'assets.json'), {SITE_PERSO_J1: 0}); banques(A_, os.path.join(P_, 'banques_hx'))
     env = dict(MODULE='ro9', TRAVAIL=os.path.join(P_, 'b9'), XDATA='@HA_XDATA@',

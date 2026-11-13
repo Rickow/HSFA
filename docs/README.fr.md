@@ -13,7 +13,7 @@ Documentation de travail du projet HSFA, en français. Présentation et état : 
 | [guide/installation-android.fr.md](guide/installation-android.fr.md) | cœur FBNeo HSFA sur RetroArch Android |
 | [guide/installation-rocknix.fr.md](guide/installation-rocknix.fr.md) | cœur sur RGB10X / ROCKNIX |
 | [guide/installation-recalbox.md](guide/installation-recalbox.md) | cœur sur Recalbox 10 (Raspberry Pi) |
-| [guide/installation-fbneo-autonome-windows.fr.md](guide/installation-fbneo-autonome-windows.fr.md) | FinalBurn Neo HSFA autonome pour Windows, sans RetroArch (version d'essai, prévue avec la prochaine version) |
+| [guide/installation-fbneo-autonome-windows.fr.md](guide/installation-fbneo-autonome-windows.fr.md) | FinalBurn Neo HSFA autonome pour Windows, sans RetroArch (version d'essai, jointe aux v0.1.9 et v0.1.10) |
 | [guide/installation-batocera.fr.md](guide/installation-batocera.fr.md) | cœurs et cinq jeux sous Batocera 43 (installeur et service ; essayé sur PC) ; RetroBat : [note non essayée](../tools/retrobat/NOTE-RETROBAT.md) |
 | [guide/LIVRAISONS.fr.md](guide/LIVRAISONS.fr.md) | registre des cœurs et archives remis (noms, md5) jusqu'au 2026-10-24 ; ensuite, cœurs de chaque release et lots non publiés (§4) |
 

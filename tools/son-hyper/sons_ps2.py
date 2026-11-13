@@ -21,13 +21,18 @@ Interrupteur : HSFA_SONS_PS2=0 (ou HSFA_PARADE=0) -> ROM de base recopiée telle
 HSFA_SONS_PS2=nom1,nom2 -> seulement ces sons (noms de SONS_SPEC).
 
 Usage : sons_ps2.py --base DOSSIER_HX3 --xdata X_DATA.BIN --manifeste manifest.csv --sortie DOSSIER [--journal F]
-        [--jeu hyper|upper|uppermax]
+        [--jeu hyper|upper|uppermax|hypermax]
 
 Upper and Upper MAX (--jeu upper / uppermax; docs/rapports/SONS-PS2-UPPER.md): same hybrid driver, same native table
 (ro5 = ro9), but Upper's code reaches only two of these sounds (static inventory of the ro5 module and of the translated
 image): Birdie, entry 15 of his sound table (040F), and Dee Jay's taunt, entry 34 (057D). Base = the hybrid ROM (Upper)
 or the MAX sound ROM (Upper MAX, step son_uppermax); same switch HSFA_SONS_PS2 (0 = byte-identical copy). Their pieces
 go to bank 6 (MORC_JEU): bank 15 is full in the MAX sound ROM.
+
+Hyper + Arcade with the MAX characters (--jeu hypermax, L1 of the MAX integration, decision D2): Hyper's 21 sounds, with
+their pieces in bank 6 (0x2A000, like Upper) on the MAX sound ROM (base = roms_son_max_pas, before --jeu uppermax).
+Only the future driver with MAX uses it; --jeu hyper (default) does not change: Hyper's and the graft's sound ROM keep
+their checksums.
 """
 import os, sys, struct, hashlib, zlib, argparse, shutil, wave
 import numpy as np
@@ -48,8 +53,9 @@ NT = 23                                        # NEWPT[23] ($6B3E) : dernier mot
 BANQUES = (0xFF, 0xFD, 0xFC, 0xF7, 0xF5, 0xF2, 0xF1, 0xF0, 0xEF, 0xEE, 0xED, 0xEC, 0xEA, 0xE8, 0xE2)
 MORC = 0x4F400                                 # région audiocpu (banque 15, zone libre 0x4DE9A-0x4FFFF) : morceaux de 47 o
 # Upper / Upper MAX: bank 15 is used up to 0x4FDCF by the MAX voices in the MAX sound ROM, so their pieces go to bank 6
-# (free 0x29B55-0x2BBFF in the hybrid and in the MAX ROM, SON-HYPER-ROM §6); Hyper keeps 0x4F400 (ROM unchanged)
-MORC_JEU = {"hyper": MORC, "upper": 0x2A000, "uppermax": 0x2A000}
+# (free 0x29B55-0x2BBFF in the hybrid and in the MAX ROM, SON-HYPER-ROM §6); Hyper keeps 0x4F400 (ROM unchanged);
+# hypermax (Hyper's sounds on the MAX sound ROM, L1) uses 0x2A000 too
+MORC_JEU = {"hyper": MORC, "upper": 0x2A000, "uppermax": 0x2A000, "hypermax": 0x2A000}
 NOTE, OCTAVE = 0xB9, 3
 CRETE, GAIN_MAX = 124, 4.0
 VOL_REF, G_REF = 0x10DF, 0.98                  # parade : op 07 $75 (table $2E92 = $10DF) pour un gain de conversion 0,98,
@@ -77,7 +83,7 @@ SONS_UPPER = [
     ("birdie", [0x040F], 322, [15], None),                         # Birdie: entry 15 of his sound table (also silent in SFA3 arcade)
     ("dee_jay", [0x057D], 342, [29], None),                        # Dee Jay: taunt, entry 34 of his sound table
 ]
-SPECS = {"hyper": SONS_SPEC, "upper": SONS_UPPER, "uppermax": SONS_UPPER}
+SPECS = {"hyper": SONS_SPEC, "upper": SONS_UPPER, "uppermax": SONS_UPPER, "hypermax": SONS_SPEC}
 
 
 VOLUMES = {  # op 07 par commande (côté 2 identique), calibré au cœur (outils/calibre.py sur des rendus isolés) :
@@ -316,7 +322,7 @@ def choisis():
 
 def choisis_jeu(jeu):
     """sons de SPECS[jeu] retenus par HSFA_SONS_PS2 (Hyper : choisis())"""
-    if jeu == "hyper": return choisis()
+    if jeu in ("hyper", "hypermax"): return choisis()
     v = os.environ.get("HSFA_SONS_PS2", "1")
     if v == "0": return []
     if v == "1": return list(SPECS[jeu])

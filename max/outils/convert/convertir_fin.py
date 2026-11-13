@@ -6,7 +6,7 @@ Règles établies en alignant les 32 fins d'arcade (ROM sfa3ud, table $26DCC) su
   - x4 : PSP 2 args -> 1 arg = 2 × 1er arg PSP (0402 (3, 1) -> 0401 (6) ; 1402 (10, 0) -> 1401 (20)) ;
   - texte 0034 : PSP (16, 192, 0, 0) -> arcade (16, 192, n, n), n = n° GLOBAL de la table des textes de fin (la fin 1
     commence à 45, la 3 à 76) : base + k, k = n° de ligne dans l'ordre du script (base fixée à l'intégration) ;
-  - fondus x2 : A200 -> 4200, F200 -> 5200 ; D200 / C200 (ajouts PSP) retirés ;
+  - fondus x2 : A200 -> 4200, F200 -> 5200 ; D200 / C200 (ajouts PSP) retirés ; règles F1-F3 (FONDUS, ci-dessous) ;
   - insertions PSP retirées (option `psp_seul`) : palettes 0904 de jeu >= `pal_max`, 0A02 (0, FFC0) avant une scène.
 Usage : python3 convertir_fin.py valider   (reconvertit les fins d'arcade et mesure la concordance avec la ROM)
         python3 convertir_fin.py ecrire    (écrit converti/plXX/fin/script_fin_XX.s des 4 fins MAX, modèles MODELES)"""
@@ -15,23 +15,66 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import script_fin as S
 
 
+def psp_seul_3204(op, args):
+    """(compatibilité) toujours faux : 3204 (0, 0, 0, 0) est désormais CONVERTI (règle FONDUS, voir convertir)"""
+    return False
+
+
+# (2026-11-13, session MAX) RÈGLE DES FONDUS x2, établie sur l'interpréteur arcade ($26206 : 0200 recopie la page et
+# lance la tâche de fondu $1801 / niveau 0 ; 2200 : $1A01 / niveau $F (vers le blanc) ; 3204 a, b, c, d : charge 4 jeux
+# de palettes puis $2001 / $F (depuis le blanc) ; 4200 / 5200 : SAUVENT la base des palettes $20(A5) et passent en
+# $9220 / $9240 ; 6200 : RESTAURE la base sauvée) et sur les 32 fins d'arcade contre leurs scripts PSP :
+#  - F1 : « 3204 (0, 0, 0, 0) » PSP (sortie du blanc sans nouveaux jeux) = « 0200 » arcade (fins 02, 07, 0B, 18, 1C, 1D) ;
+#  - F2 : les F200 PSP qui le suivent jusqu'au prochain 0301 / 0034 / 2700 / 1204 / 0A02 n'existent pas en arcade ;
+#  - F3 : un 6200 PSP sans 4200 / 5200 (A200 / F200 PSP) en attente n'a rien à restaurer (arcade : base sauvée périmée,
+#         0 -> palettes lues en ROM, générique de Yun noir) : retiré (fins 0D, 0F, 10, 19).
+# F1 pour les fins MAX (pas d'original arcade ; référence = PSP, captures PPSSPP du 13/11 : le générique final de Yun montre
+# la scène en couleurs, puis en gris) : FIN_3204 = « scene » (défaut) -> 3204 <palettes de la dernière scène 1108> (sortie du
+# blanc vers la scène, comme les 3204 des fins d'arcade, dont les arguments = palettes a5-a8 du 1108 précédent) ;
+# « 0200 » -> règle des natifs (fondu au noir ; mesure de `valider`) ; « psp » -> gardé tel quel.
+# FIN_FONDUS_PSP=1 : ancien comportement (tout gardé).
+FONDUS = os.environ.get("FIN_FONDUS_PSP") != "1"
+MODE_3204 = os.environ.get("FIN_3204", "scene")
+
+
+SOURCES = []                                   # (13/11) index PSP de chaque instruction produite par le dernier convertir()
+def _ajoute(out, i_src, x):
+    out.append(x); SOURCES.append(i_src)
+
+
 def convertir(ins, pos=None, pal_max=None, base_texte=0):
     """ins = [(off, att, op, args)] PSP -> [(att, op, args)] arcade ; pos(a1, a2, a3) -> (a1, a2, a3) ou None"""
-    out = []; k_texte = 0; notes = collections.Counter()
-    for _, att, op, args in ins:
+    out = []; k_texte = 0; notes = collections.Counter(); SOURCES.clear()
+    apres_3204 = False; base_sauvee = False
+    for i_src, (_, att, op, args) in enumerate(ins):
         cl = (op >> 4) & 7; sous = (op >> 8) & 0xF
+        if FONDUS:
+            if op == 0x3204 and tuple(args) == (0, 0, 0, 0) and MODE_3204 == "0200":  # F1 (natifs)
+                _ajoute(out, i_src, (att, 0x0200, ())); apres_3204 = True; notes["fondu F1 : 3204 nul -> 0200"] += 1; continue
+            if apres_3204 and op in (0x0301, 0x0034, 0x2700, 0x1204, 0x0A02): apres_3204 = False
+            if apres_3204 and op == 0xF200:                                        # F2
+                notes["fondu F2 : F200 après 3204 nul retiré"] += 1
+                if att and out: out[-1] = (out[-1][0] + att,) + out[-1][1:]
+                continue
+            if op in (0xA200, 0xF200): base_sauvee = True
+            if op == 0x6200:                                                       # F3
+                if not base_sauvee:
+                    notes["fondu F3 : 6200 sans base sauvée retiré"] += 1
+                    if att and out: out[-1] = (out[-1][0] + att,) + out[-1][1:]
+                    continue
+                base_sauvee = False
         if op == 0x1109:
             a = list(args[:8])
             if pos: a[0], a[1], a[2] = pos(a[0], a[1], a[2])
             a[3] = 0
-            out.append((att, 0x1108, tuple(a))); continue
+            _ajoute(out, i_src, (att, 0x1108, tuple(a))); continue
         if cl == 0 and sous == 4 and op & 0xF == 2:
-            out.append((att, op - 1, (2 * args[0],))); continue          # arcade = 2 × arg PSP (durée)
+            _ajoute(out, i_src, (att, op - 1, (2 * args[0],))); continue          # arcade = 2 × arg PSP (durée)
         if op == 0x0034:
-            out.append((att, op, (args[0], args[1], base_texte + k_texte, base_texte + k_texte))); k_texte += 1; continue
+            _ajoute(out, i_src, (att, op, (args[0], args[1], base_texte + k_texte, base_texte + k_texte))); k_texte += 1; continue
         if op in (0xA200, 0xF200):
-            out.append((att, {0xA200: 0x4200, 0xF200: 0x5200}[op], args)); continue
-        if op in (0xD200, 0xC200):
+            _ajoute(out, i_src, (att, {0xA200: 0x4200, 0xF200: 0x5200}[op], args)); continue
+        if op in (0xD200, 0xC200) or psp_seul_3204(op, args):
             notes["fondu PSP retiré %04X" % op] += 1
             if att and out: out[-1] = (out[-1][0] + att,) + out[-1][1:]   # garder la durée
             continue
@@ -39,11 +82,13 @@ def convertir(ins, pos=None, pal_max=None, base_texte=0):
             notes["palettes PSP retirées"] += 1
             if att and out: out[-1] = (out[-1][0] + att,) + out[-1][1:]
             continue
-        out.append((att, op, tuple(args)))
+        _ajoute(out, i_src, (att, op, tuple(args)))
     return out, notes
 
 
 def valider():
+    global MODE_3204
+    MODE_3204 = os.environ.get("FIN_3204", "0200")       # les natifs : règle arcade (0200)
     tot = collections.Counter(); ecarts = collections.Counter()
     for fin in range(0x20):
         p = os.path.join(S.SRC, "end%02x_e.pac" % fin)
@@ -94,7 +139,9 @@ def convertir_avec_modele(n, fin_modele, base_texte=0):
     T = table_modele(fin_modele); out = []; manques = collections.Counter()
     base, notes = convertir(S.psp(n), base_texte=base_texte)
     psp = S.psp(n); j = 0
-    for (_, att, op, args), (att2, op2, args2) in zip([x for x in psp if x[2] not in (0xD200, 0xC200)], base):
+    for (_, att, op, args), (att2, op2, args2) in zip([psp[i] for i in SOURCES], base):
+        if op2 != op and not (op == 0x1109 and op2 == 0x1108):   # instruction transformée (fondus) : prise telle quelle
+            out.append((att2, op2, args2)); continue
         sous = (op >> 8) & 0xF; classe0 = (op >> 4) & 7 == 0
         if op == 0x1109:
             m = T.get((op, args[:4]))
@@ -114,6 +161,12 @@ def convertir_avec_modele(n, fin_modele, base_texte=0):
             # dans leur carte -> vitesse 0 (FIN_OPA_PSP=1 : ancien comportement)
             out.append((att2, op2, (args2[0], 0))); manques["opA PSP -> vitesse 0"] += 1; continue
         out.append((att2, op2, args2))
+    if FONDUS and MODE_3204 == "scene":                  # F1 (fins MAX) : 3204 nul -> palettes de la dernière scène
+        sc = None
+        for k, (a_, o_, g_) in enumerate(out):
+            if o_ == 0x1108: sc = g_[4:8]
+            if o_ == 0x3204 and tuple(g_) == (0, 0, 0, 0) and sc:
+                out[k] = (a_, o_, tuple(sc)); manques["fondu F1 : 3204 nul -> palettes de la scène %s" % " ".join("%x" % v for v in sc)] += 1
     return out, manques
 
 

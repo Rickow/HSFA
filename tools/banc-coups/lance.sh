@@ -6,6 +6,10 @@
 # Jamais -state : la sauvegarde d'etat est prise et rechargee par le script Lua (-state_directory = <dossier>/tmp/sta).
 set -u
 D=$(readlink -f "$1"); MOD=$2; LUA=$(readlink -f "$3"); shift 3
+# (max58, 13/11) readlink -f rend une chaîne VIDE si le parent n'existe pas : dossier vide -> mkdir '' + /mame.txt ;
+# script vide -> MAME tournait sans script jusqu'au délai (fins « OK, 0 manche »). Refus net dans les deux cas.
+[ -n "$D" ] && [ "$D" != "/" ] || { echo "lance.sh : dossier de sortie invalide « $1 » (parent absent ?)" >&2; exit 2; }
+[ -n "$LUA" ] && [ -f "$LUA" ] || { echo "lance.sh : script Lua introuvable « $3 »" >&2; exit 2; }
 # (agent_integration_max, b38, 01/11) MAXDIR passé en argument : exporté AVANT le choix du module (sinon le module max
 # chargeait max6 : fd.py / frame_data.sh mesuraient max6 quelle que soit la copie demandée)
 for kv in "$@"; do case $kv in MAXDIR=*) export "$kv";; esac; done

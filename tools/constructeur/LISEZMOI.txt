@@ -3,7 +3,7 @@ Constructeur HSFA -- de vos disques aux jeux HSFA, sans rien installer
 
 Il vous faut :
   - votre image PS2 de Street Fighter Alpha Anthology (USA, SLUS-21317), en .iso ou .chd ;
-  - (facultatif) votre ISO PSP de Street Fighter Alpha 3 MAX (Europe, ULES-00235), en .iso ou .chd :
+  - (facultatif) votre ISO PSP de Street Fighter Alpha 3 MAX (USA ULUS-10062 ou Europe ULES-00235), en .iso ou .chd :
     elle ajoute Upper MAX (Eagle, Maki, Yun, Ingrid) ;
   - environ 3 Go libres (5 Go depuis un .chd), 10 a 20 minutes.
 Le constructeur ne contient aucune donnee de jeu : tout est lu sur VOS images.

@@ -32,4 +32,3 @@ brouillon_yun.s	psp_1baf6c	cmpi.b #$21, $102(a1)	1	mort	intro croisée (adversai
 brouillon_yun.s	psp_1baf6c	movea.l 0(a0,d0.w), a0	1	mort	intro croisée ($21) sautée
 brouillon_ingrid.s	psp_1c208c	cmpi.b #$19, $102(a1)	1	mort	intro croisée (adversaire $19) sautée
 brouillon_ingrid.s	psp_1c208c	movea.l 0(a0,d0.w), a0	1	mort	intro croisée ($19) sautée
-brouillon_yun.s	psp_1bc300	tst.b $32d(a1)	1	defaut_connu	revue B2 : champ $32D non typé, l'image lit l'octet voisin (doit lire image $32C) ; correctif = ligne « objet $32D » de types_complement.tsv, en essai au banc : RETIRER cette ligne quand il est versé

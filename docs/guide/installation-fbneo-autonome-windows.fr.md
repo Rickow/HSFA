@@ -2,7 +2,7 @@
 
 **English: [installation-fbneo-autonome-windows.md](installation-fbneo-autonome-windows.md)**
 
-Version **d'essai**, publiée avec la v0.1.9 (pré-version) ; voir `CHANGELOG.md`.
+Version **d'essai**, jointe à la v0.1.9 (pré-version) et à la v0.1.10 (même version) ; voir `CHANGELOG.md`.
 FinalBurn Neo pour Windows 64 bits, sans RetroArch, avec les pilotes et les réglages du cœur HSFA. Il lance les **mêmes archives de jeu** que le cœur libretro (`sfa3hsfa.zip`, `sfa3uhsfa.zip`,
 `sfa3umhsfa.zip`, `sfa3hhsfa.zip`, `sfa3hahsfa.zip`, construites par le script du projet depuis vos disques).
 

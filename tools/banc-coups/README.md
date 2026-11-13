@@ -25,3 +25,10 @@ source config.env
 tools/banc-coups/banc_coups.sh ro3 Ryu A
 tools/banc-coups/banc_max.sh <workspace>/work/banc_coups/max53 coups fins
 ```
+
+`banc_max.sh … fins` (max58, 13/11): the Arcade script is `TOURNEE_FINS` (default `<HSFA_WORKSPACE>/work/mame/tournee.lua`,
+the folder `lance.sh` runs in; the step stops if it is missing). Options: `FINS="00,01"` (subset, hex ids), `FINS_PAR`
+(games run side by side; default `MAXMAME`/2, set it to `MAXMAME` once the references are cached), `REPRISE=1` (skips
+the ids already in `fins.tsv`). A game with no frame logged (reference or candidate) is `VIDE`, never `OK`, and is
+listed apart in `RESUME-MAX.md` ("non concluant", to rerun); `lance.sh` refuses an empty output folder or Lua script.
+Before this fix the copies outside `<workspace>/work/banc_coups` ran MAME with no script and wrote "OK, 0 round".

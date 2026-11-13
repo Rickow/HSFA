@@ -131,6 +131,8 @@ depuis la v0.1.2, Recalbox ; leurs SHA-256 sont dans `SHA256SUMS.txt` de la rele
 
 | release | date | patchs du cœur | remarque |
 |---|---|---|---|
+| v0.1.10 (stable) | 2026-11-13 | 0001-0027, 0029-0032, 0007b | mêmes cœurs que la v0.1.9 (lot du 12/11b) |
+| v0.1.9 (pré-version) | 2026-11-12 | 0001-0027, 0029-0032, 0007b | lot du 12/11b : sauvegardes d'état complètes (0029, 0032), 16:9 Raw par défaut (0031) ; cœur Linux : glibc 2.27 ; Batocera |
 | v0.1.8 (pré-version) | 2026-11-08 | 0001-0027, 0007b | 0027 : objets au délai de l'arcade ; cœur Linux : glibc 2.43 exigée |
 | v0.1.7 (stable) | 2026-11-08 | 0001-0026, 0007b | constructeur tout-en-un ; cœur Linux : glibc 2.43 exigée |
 | v0.1.6 | 2026-11-07 | 0001-0025, 0007b | tuiles du portage dans SFA3 (0025) |
@@ -151,9 +153,9 @@ les nomme) :
 | 2026-11-08 | 0001-0025 | journal §201 |
 | 2026-11-09 | 0001-0026, 0007b, 0021b, 0021c | [`patches/fbneo/README.md`](../../patches/fbneo/README.fr.md) (« Construire ») |
 | 2026-11-10 | 0027 en plus | journal §210, §211 ; cœur Linux : [`tools/linux/README.md`](../../tools/linux/README.md) |
-| 2026-11-11 | 0029 en plus (sauvegardes d'état) ; cœur Linux compatible glibc 2.27 ; paquet Batocera ; zip `28dd52b2…` (détail au tableau ci-dessus) | [CHANGELOG](../../CHANGELOG.md) « En cours », [`tools/linux/`](../../tools/linux/README.md) |
-| 2026-11-12 | 0030 et 0031 en plus (16:9 : « Widescreen edges » = Raw par défaut, vue calée en option) ; zip `5c1adaac…` (détail au tableau ci-dessus) ; FinalBurn Neo autonome (essai, W01-W05) à part | [CHANGELOG](../../CHANGELOG.md) « En cours », [`patches/fbneo/README.md`](../../patches/fbneo/README.fr.md) (patch 34) |
-| 2026-11-12b | 0032 en plus (zone HSFA des états vérifiée avant d'être appliquée, valeurs bornées) ; zip `6bf00dee…` (détail au tableau ci-dessus) ; FinalBurn Neo autonome (essai, W01-W06) à part | [CHANGELOG](../../CHANGELOG.md) « En cours », [`patches/fbneo/README.md`](../../patches/fbneo/README.fr.md) (patch 35) |
+| 2026-11-11 | 0029 en plus (sauvegardes d'état) ; cœur Linux compatible glibc 2.27 ; paquet Batocera ; zip `28dd52b2…` (détail au tableau ci-dessus) | [CHANGELOG](../../CHANGELOG.md) v0.1.9, [`tools/linux/`](../../tools/linux/README.md) |
+| 2026-11-12 | 0030 et 0031 en plus (16:9 : « Widescreen edges » = Raw par défaut, vue calée en option) ; zip `5c1adaac…` (détail au tableau ci-dessus) ; FinalBurn Neo autonome (essai, W01-W05) à part | [CHANGELOG](../../CHANGELOG.md) v0.1.9, [`patches/fbneo/README.md`](../../patches/fbneo/README.fr.md) (patch 34) |
+| 2026-11-12b | 0032 en plus (zone HSFA des états vérifiée avant d'être appliquée, valeurs bornées) ; zip `6bf00dee…` (détail au tableau ci-dessus) ; FinalBurn Neo autonome (essai, W01-W06) à part | [CHANGELOG](../../CHANGELOG.md) v0.1.9, [`patches/fbneo/README.md`](../../patches/fbneo/README.fr.md) (patch 35) |
 
 Archives de jeu : plus aucune n'est livrée depuis la v0.1 ; chacun les construit depuis son ISO, et les empreintes de
 référence sont dans [construction-iso.fr.md](construction-iso.fr.md). Les zips d'essai de la greffe (Hyper + Arcade) et des

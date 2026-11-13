@@ -25,6 +25,13 @@ from banc import PERSOS_SFA3, nomf
 
 LUA = os.path.join(B, 'lua', 'banc_coups.lua')
 TOURNEE = os.path.join(B, 'lua', 'tournee_max_copie.lua')
+# (max58, 13/11) tournee.lua des fins : AVANT, os.path.join(B, '..', 'mame', 'tournee.lua') = chemin herite de
+# <workspace>/work/banc_coups (-> work/mame) ; ici (tools/banc-coups) il n'existe pas : lance.sh recevait un script vide,
+# MAME tournait sans script jusqu'au delai (3500 s) et les fins sortaient « OK, 0 manche ». TOURNEE_FINS=<fichier>, sinon
+# celui du dossier ou lance.sh se place (<HSFA_WORKSPACE>/work/mame, cd de lance.sh) ; src/hsfa/mame/tournee.lua du depot
+# n'est pas utilisable tel quel (chemins <workspace> des dofile). Introuvable -> arret net (etape fins).
+TOURNEE_FINS = os.environ.get('TOURNEE_FINS') or (
+    os.path.join(os.environ['HSFA_WORKSPACE'], 'work', 'mame', 'tournee.lua') if os.environ.get('HSFA_WORKSPACE') else '')
 VERSION = 'm1'
 NATIFS_PALETTE = {'Guile': 0x20, 'Fei-Long': 0x21, 'Dee Jay': 0x22, 'T. Hawk': 0x23, 'Evil Ryu': 0x17, 'Shin Akuma': 0x24,
                   'Balrog EX': 0x25}
@@ -133,14 +140,18 @@ def resume_tournee(log):
 
 def travail_fin(et, cand, pid, pool):
     env = {'PERSO': '%02x' % pid, 'NF': '180000' if pid == 0x07 else '90000', 'DELAI': '3500'}
-    f, ref = ref_cache('fin_%02x' % pid, 'fin', 'ro5', os.path.join(B, '..', 'mame', 'tournee.lua'), env, pool, ('FIN',))
+    f, ref = ref_cache('fin_%02x' % pid, 'fin', 'ro5', TOURNEE_FINS, env, pool, ('FIN',))
     d = os.path.join(B, 'essais', 'max_' + et, 'fins', 'p%02x' % pid)
-    fc = pool.submit(lance, d, 'max', os.path.join(B, '..', 'mame', 'tournee.lua'), env, cand)
+    fc = pool.submit(lance, d, 'max', TOURNEE_FINS, env, cand)
     if f is not None:
         f.result()
     fc.result()
     a, b = resume_tournee(ref), resume_tournee(os.path.join(d, 'log.txt'))
-    if b['exc'] and not a['exc']:
+    # (max58, 13/11) une partie sans aucune image journalisee (journal absent ou vide) n'a RIEN mesure : jamais « OK »
+    vides = [n for n, x in (('réf', a), ('cand', b)) if x['nf'] is None]
+    if vides:
+        v, c = 'VIDE', 'mesure vide (%s : aucune image journalisée ; script ou lancement en défaut)' % ' et '.join(vides)
+    elif b['exc'] and not a['exc']:
         v, c = 'KO', 'exception au candidat : %s' % b['exc']
     elif a['fin'] != b['fin']:
         v, c = 'KO' if a['fin'] == 'finie' else 'DIFFÉRENT', 'fin réf %s, cand %s' % (a['fin'], b['fin'])
@@ -225,15 +236,24 @@ def main():
                 for l in tp.map(lambda j: travail_coups(et, cand, j[0], j[1], pool), jobs):
                     print(l, flush=True)
         elif e == 'fins':
+            if not os.path.isfile(TOURNEE_FINS):
+                sys.exit('fins : script de tournee introuvable (%s) : poser TOURNEE_FINS=<tournee.lua> ou HSFA_WORKSPACE'
+                         % (TOURNEE_FINS or 'ni TOURNEE_FINS ni HSFA_WORKSPACE'))
             ids = [i for i in range(0x00, 0x26) if i not in (0x12, 0x13, 0x14)]
+            if os.environ.get('FINS'):   # (max58) sous-ensemble : FINS="00,01,02" (ids hexa)
+                ids = [i for i in ids if i in set(int(x, 16) for x in os.environ['FINS'].split(','))]
             fts = os.path.join(R, 'fins.tsv')
             if os.environ.get('REPRISE') == '1' and os.path.exists(fts):
-                faits = set(int(l.split('\t')[0], 16) for l in open(fts).readlines()[1:] if l.strip())
+                # (max58) une ligne VIDE (mesure vide) n'est pas une partie faite : elle est rejouee
+                faits = set(int(l.split('\t')[0], 16) for l in open(fts).readlines()[1:]
+                            if l.strip() and l.split('\t')[1] != 'VIDE')
                 ids = [i for i in ids if i not in faits]
                 mode = 'a'
             else:
                 mode = 'w'
-            with ThreadPoolExecutor(max(1, nm // 2)) as tp, open(fts, mode) as f:
+            # (max58) FINS_PAR = parties de fins menees de front (defaut MAXMAME/2 : reference + candidat) ; quand les
+            # references sont deja en cache, FINS_PAR=MAXMAME occupe toutes les places (le pool limite toujours a MAXMAME)
+            with ThreadPoolExecutor(int(os.environ.get('FINS_PAR') or max(1, nm // 2))) as tp, open(fts, mode) as f:
                 if mode == 'w':
                     f.write('perso\tverdict\tdetail\tmanches_ref/cand\tfin_ref/cand\texception\n')
                 for l in tp.map(lambda i: travail_fin(et, cand, i, pool), ids):

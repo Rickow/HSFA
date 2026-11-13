@@ -1,0 +1,55 @@
+lot	upper	table_ro9a37	cote	genre	e	n0	rangs	lecteurs_a_rediriger	sites_temoins	constantes	valeurs	v26	v27	v2D	v2E	ryu	role	note
+A	74c358	T_d6a338	COPIE	simple	4	40	1	tous	1711a4		bloc MAX (neutre en L1)					0074fd06	positions d'objets attachés : [ID propriétaire] → $40 d'un o	
+A	617290	T_de7560	COPIE	simple	2	40	1	tous	1a75a4		directes	0070	0066	005e	005e	005e	hauteur Y d'un objet posé sur le perso (étoiles d'étourdisse	
+A	61bbc0	T_debe90	COPIE	simple	4	40	1	tous	24fd90 2500c4 2500ec		neutre					ff0a0109	enregistrements de 4 octets par perso (mode arcade)	index masque $3F
+A	699408	T_e3c738	COPIE	simple	1	40	1	tous	401a0		neutre					10	seuil par perso comparé à la vitalité $50 (variante)	
+A	6993e0	T_63b5a4	HYPER partagee	simple	1	40	1	tous	3ff80		neutre					30	seuil par perso comparé à la vitalité $50	table d'HYPER T_63b5a4 : lecteurs d'Hyper gardent l'original
+A	97ca90	T_1513db0	COPIE	simple	4	40	1	tous	18a718		bloc MAX (neutre en L1)					0097cb30	pointeur par perso → 3 mots (ism) → objet (A3 = joueur)	zone des decors
+A	6f72b0	T_f73a80	COPIE	dec:780:7fd0	2	40	1	tous	4a9bc 4b88c 1916f4 1b4cec 1b518c 1cbbc0 1cbffc 2132ec 213400 213498 407dfc		bloc MAX (neutre en L1)						palettes par perso (Upper MAX : table deplacee a part, 40 blocs)	2 decalages negatifs ($24/$25)
+A	978d1c	T_151003c	COPIE	dec:0:14f0	2	40	1	tous	2501d8 25021c 250250 250284 2502b8 2502ec		bloc MAX (neutre en L1)						offset vers 16 parcours de 10 adversaires (octets ID) par pe	parcours ; zone des decors
+A	7251a0	T_e3ecb0	COPIE	dec:0:6c50	2	40	1	tous	5f694 25d9c0		bloc MAX (neutre en L1)						palettes des portraits de la carte et de la selection : en-tete de 40 	palettes des portraits de la carte
+A	960090	T_14f73b0	COPIE	dec:0:100	2	40	1	tous	25d168 25d1c8		bloc MAX (neutre en L1)						offset -> liste d'octets (n° de ligne) terminée par 0	zone des decors
+A	72bdf0	T_e45900	COPIE	simple	4	40	1	listes:196cac	5f80c 196ca4 21200c		bloc MAX (neutre en L1)					0072be90	palettes (portraits ?) par perso, ID masqué & $1F	lecteur de l'ecran de victoire SEUL (0x5F7E0 lit la suite ; 0x211FE0 = id d'objet)
+A	616850	T_de6b20	COPIE	rangs	1	40	2	tous	194b74	addiu:194b4c:28:30	bloc MAX (neutre en L1)					00	noms graphiques (ID, ID+$28 selon $90(A5))	ex-genre 'demi' ; valeurs = rangs de T_966740 (blocs MAX)
+A	674c00	T_62eba0	HYPER partagee	banque	8	40	1	tous	17e068 180128 18474c 191918 19338c 19dca8 1b2c0c 1ef500		bloc MAX (neutre en L1)						poses des portraits	table d'HYPER T_62eba0 ; MOVEQ #39 -> #47 : PAS en L1 (L4)
+A	967f2a	T_14ff24a	COPIE	banque	8	40	1	tous	19dd58		bloc MAX (neutre en L1)						carte du monde (Arcade) : listes 2/3 par perso (va 0x19DD20 ; $34 nul 	zone des decors ; cause du blocage de $2E
+A	648bc8	T_e068b8	COPIE	banque	8	40	1	tous	19dbf8		bloc MAX (neutre en L1)						listes d'animation par perso (3 listes de 40 x 8)	
+B	60b220	T_ddb4f0	COPIE	simple	4	44	1	tous	29e50		bloc MAX (neutre en L1)					009184b2	fin : acteurs (JP)	fin (index $1C9(A5)) : 41 + 3 nulles
+B	60b2d0	T_ddb5a0	COPIE	simple	4	44	1	tous	29f2c		bloc MAX (neutre en L1)					009184b2	fin : acteurs (US)	fin
+B	60b5a0	T_ddb870	COPIE	simple	4	44	1	tous	2aae0		bloc MAX (neutre en L1)					00918ac0	fin : $8008 (JP)	fin
+B	60b650	T_ddb920	COPIE	simple	4	44	1	tous	2abcc		bloc MAX (neutre en L1)					00918ac0	fin : $8008 (US)	fin
+B	60b700	T_ddb9d0	COPIE	simple	4	44	1	tous	2ac18		bloc MAX (neutre en L1)					00918ca4	fin : $800C (JP)	fin
+B	60b7b0	T_ddba80	COPIE	simple	4	44	1	tous	2ad04		bloc MAX (neutre en L1)					00918ca4	fin : $800C (US)	fin
+B	60b860	T_ddbb30	COPIE	simple	4	44	1	tous	2ad50		bloc MAX (neutre en L1)					00917f00	fin : script $8034 (JP)	fin
+B	60b910	T_ddbbe0	COPIE	simple	4	44	1	tous	2ae3c		bloc MAX (neutre en L1)					00917f00	fin : script $8034 (US)	fin
+B	60b9c0	T_ddbc90	COPIE	simple	6	42	1	tous	2aa50 2aa80 2aab0		bloc MAX (neutre en L1)					2118.0010.2ca8	fin : 3 mots -> $802A/$802E/$8030	fin : 3 mots (lies aux blocs de fin MAX) ; (L1) 41 entrees + 1 nulle ($29) : T + $100 = autre table (pointeurs de code, lue en Upper 0x2FB94, qui n'est pas un lecteur de celle-ci) -> n0 = 42, site 2fb94 retire
+B	6132e0	T_de35b0	COPIE	simple	1	40	1	tous	138d10		neutre					00	masque #$03210D40 -> table d'octets ro5	
+B	613350	T_de3620	COPIE	simple	1	45	1	tous	13a838		directes	11	10	1a	12	09	musique par perso (adversaire) ; 40-44 = musiques spéciales (va 0x13A8	musique ; 40-44 = musiques speciales (pseudo-ids) : A GARDER
+B	614e20	T_de50f0	COPIE	simple	1	40	1	tous	15c5ac		bloc MAX (neutre en L1)					08	octet par gagnant ($132(A5)) -> index de citation (va 0x15C584)	index de citation ; Upper MAX = FF (talon_citation) : neutre en L1
+B	615ac0	T_de5d90	COPIE	simple	4	40	1	tous	178dec 178e18		directes	0057fff9	00550000	0044fff0	005a0000	005a0000	(dx, dy) par perso propriétaire ($3A d'un objet)	(dx, dy), pas des pointeurs ; index $3A de l'objet
+B	616180	T_de6450	COPIE	simple	1	40	1	tous	184be0		directes	20	07	21	00	0a	ID → ID de référence pour un objet (Ryu→$0A, variantes → 0/$	
+B	616b30	T_de6e00	COPIE	simple	4	40	1	tous	1989b8 1989e4		directes	03760114	038e0175	037e0160	038e0175	038e0175	carte du monde : (x, y) de départ par perso (lecteur va 0x3889C0 ; aud	carte : (x, y) de depart ; lecteurs a +0 et +2
+B	61b4e0	T_deb7b0	COPIE	simple	1	40	1	tous	2496a0		neutre					01	masque #$E76BFFFB -> table d'octets ro5	
+B	61b510	T_deb7e0	COPIE	simple	1	40	1	tous	249710		neutre					01	masque #$3F4AFB9B -> table d'octets ro5	
+B	61b540	T_deb810	COPIE	simple	1	40	1	tous	249780		neutre					00	masque 32 bits #$2640F310 (ro3, dans le code) -> table d'oct	
+B	61b650	T_deb920	COPIE	simple	1	40	1	tous	2667d4 266c24		neutre					ff	octet par perso -> $147(A5) (va 0x2667B4)	
+B	61b680	T_deb950	COPIE	simple	1	40	1	tous	2490cc		directes	15	ff	1e	ff	ff	combat secret : $15 (Balrog, décor $14) ou $1E (Juli+Juni, d	combat secret
+B	61bd60	T_dec030	COPIE	simple	1	40	1	tous	24e270		directes	01	03	02	03	00	ID -> $176(A5) (variante 0-4 : fin/illustration ; tirée au h	l'inventaire voit un index masque $1F : a relire (sans effet sur la prolongation)
+B	61be10	T_dec0e0	COPIE	simple	1	40	1	tous	251984		directes	08	07	21	00	00	ID -> décor (home stage) ; correctif $90(A5)=8 : $18->$0C	decor maison
+B	61be40	T_dec110	COPIE	simple	1	40	1	tous	251aa0		directes	08	07	21	00	00	ID -> décor / 2, variante $C3A4(A5) ≠ 0 (va 0x441AA8 ; R21, 2b26)	decor maison (variante)
+B	749838	T_c28eb8	COPIE	simple	4	40	1	tous	1b499c 213258		bloc MAX (neutre en L1)					0079b650	TABLES D'ANIMATION PAR COUP : pointeur → 3 × 4 pointeurs (is	
+B	74c5d8	T_c5ade8	COPIE	simple	4	40	1	tous	71e48 1cc354		bloc MAX (neutre en L1)					0074fea8	effet lié au pas : [ID] → $264 (joueur) / $50, $60 (objets)	
+B	613490	T_5c5230	HYPER partagee	simple	2	40	1	tous	14ff84 14ffb0	garde:5c5240	directes	05d9	05e2	05f0	06f6	0300	BASE DE LA BANQUE DE VOIX par perso (0x300 + 0x20 × n)	table d'HYPER T_5c5230 (base de voix) ; valeurs = ROM son MAX seulement ; lecteurs a +0 et +1 / +2 ; (L1) les lecteurs 0x2552D8 / 0x255304 / 0x25564C / 0x255684 chargent T + $10 (= 5c5240, aussi base de lecteurs d'Hyper) avec id x 2 : gardes sur l'original (neutre en L1 ; a revoir en L2 avec la ROM son MAX)
+B	615380	T_5c59a0	HYPER partagee	simple	1	40	1	tous	172598		neutre					00	octet par perso, test (va 0x1725A8)	table d'HYPER T_5c59a0
+B	615940	T_5c5f90	HYPER partagee	simple	4	42	1	tous	176010 17603c		neutre					00000000	pseudo-ID de Vega (40/41) : 42 longs	table d'HYPER T_5c5f90 ; 40/41 = pseudo-ids de Vega : A GARDER
+B	6180f0	T_5c7bd0	HYPER partagee	simple	2	40	1	tous	1c6744		directes	0000	fffc	000b	0000	000b	décalage X d'un objet attaché (signé selon le sens)	table d'HYPER T_5c7bd0
+C	616130	T_de6400	COPIE	rangs	1	40	2	tous	18329c	addiu:183274:28:30	neutre					00	octet par perso, 2 rangées ($169/$15C(A5))	site = va d'agrandit_max : chercher l'addiu a +-0x10
+C	61b6d0	T_5b6030	HYPER partagee	rangs	1	40	2	tous	24f928	addiu:24f824:28:30	neutre					0a	décor imposé aux combats 8/9	table d'HYPER T_5b6030 (decor impose) ; K8 : les decors partiront de cette copie
+C	61ba10	T_debce0	COPIE	rangs	1	40	3	tous	25063c	dep:25063c:50:60	neutre					00	octet par perso, 3 rangées (ID, +$28 si $124, +$50) -> drapeaux (va 0x	lecteur copie lit la rangee 2 par un deplacement $50 : A LIRE (les 3 ADDI d'Upper MAX sont dans une routine renvoyee a Hyper)
+C	61b580	T_deb850	COPIE	rangs	1	40	3	tous	267430	sll:2673bc:2:3	bloc MAX (neutre en L1)						scenarios de dialogue speciaux, 3 x 40	index = k x 20 + id (k = $13F - 8, pair) : 20 -> 24 par le 2e decalage (sll 2 -> 3) ; valeurs = talon_dialogues ; (L1) site exact du 2e decalage : Upper 0x2673BC (sll 4 en 0x2673A8)
+C	967bf0	T_14fef10	COPIE	967bf0	2	40	1	tous	19cd88 19cea8 19cf58 19cfb4 19cfe4	addiu:19ce88:50:60 imm:19cec0:d0:f0 addiu:19cf08:28:30 imm:19cf14:120:150 garde:14ff038	bloc MAX (neutre en L1)						mots/octets par ID à rangées (VS ?)	disposition d'agrandit_max (C_967) : $30 mots, $90 mots, $F0 octets, $120 octets, $150 paires ; (L1) T + $128 (milieu des paires, 4 lecteurs copies, pas d'index par id) : garde sur l'original
+C	961af0	T_697ed0	HYPER partagee	banque	8	40	1	tous	182660 191a08		bloc MAX (neutre en L1)						noms / bandeaux (sprites par perso)	table d'HYPER T_697ed0 (noms / bandeaux), en-tete de 28 decalages
+C	67e2a0	T_e225b0	COPIE	dec:0:3d32:ptr	2	40	1	pointeurs de donnees			bloc MAX (neutre en L1)						citations de victoire : en-tete de 40 decalages -> 8 citations par per	citations : atteinte par T_614e00[langue] (pointeurs de DONNEES a rediriger, pas de constante de code) ; (L1) corps jusqu a $3D32 (fin de la derniere citation, $3B5A + $19B)
+D	697fe0	T_e3b310	COPIE	lignes32	32	40	1	tous	3fb6c	andi:3faf0:1f:3f	bloc MAX (neutre en L1)					0000.0000.0000.0000	moteur de coups : octet [ID défenseur × 32 + $126] (base de	defense par victime ; lignes $20-$2F = ligne (id & $1F) ; valeurs MAX = table PSP (L2) ; (L1) masque de l id : Upper 0x3FAF0 ($1134 = ligne, partagee par 40130 / 40344 ; leurs andi $1F masquent la colonne)
+D	6989e0	T_e3bd10	COPIE	lignes32	32	40	1	tous	40130	(meme masque)	neutre					0606.0606.0606.0606	moteur de coups : octet [ID × 32 + aléa 0-31]	meme groupe : a prolonger AVEC 697fe0
+D	698ee0	T_e3c210	COPIE	lignes32	32	40	1	tous	40344	(meme masque)	neutre					0202.0202.0202.0202	moteur de coups : octet [ID × 32 + aléa 0-31] (variante)	meme groupe

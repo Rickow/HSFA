@@ -438,6 +438,13 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §221 | 6144 | sfa3ha | Hyper + Arcade passe au traducteur v161 (ro9a37) : Mazi ×1,5 (octet image $ED), enchaînements, couleur miroir ; =0 → ro9a36 ; VERSUS = ro9a36 ; banc des fins 85/85 |
 | §222 | 6182 | hsfa | Revues critiques (traducteur, Upper MAX, greffe, cœur) : où sont les rapports et les reprises |
 | §223 | 6198 | sfa3ha | Hyper + Arcade ro9a38 : correctifs R3 (pointeurs prouvés), X6 (13 états d'acteurs de fin), A2a (bases après un VERSUS), E2b (nouveau challenger) ; =0 → ro9a37 ; X2 (ids MAX) hors lot |
+| §224 | 6239 | sfa3ha | Hyper + Arcade ro9a39 : L1 des MAX (54 tables par perso à 48 entrées, D4 Yun / Ingrid en $2D / $2E, sons hypermax), invisible ; =0 → ro9a38 ; VERSUS = ro9a38, décors 40/40 |
+| §225 | 6280 | sfa3ha | Hyper + Arcade : couleur des persos en ZERO / ZERO 2 / ALPHA (CPU et J1) stable du face-à-face à la fin (PAL_VERSION : moteur_pal + 0x60A90 ; COUL_CPU_VERSION : $129 = 0, miroir exact 1) ; portraits non traités ; =0 → ro9a39 |
+| §226 | 6338 | sfa3ha | Hyper + Arcade : portraits (carte, face-à-face, victoire) d'un perso en version à la couleur 2 comme Hyper (PORT_VERSION) ; cas à deux humains de §225 prouvé ; =0 → ro9a39 |
+| §227 | 6374 | sfa3ha | Hyper + Arcade : bande verte de la transition « logo » avant l'écran de dialogue (rival ZERO 3 de l'étape 8 et combat final, 54 cas) : BARRE_LOGO_FACE ; =0 → ro9a39 ; fins 85/85, VERSUS identique |
+| §228 | 6404 | sfa3ha | Hyper + Arcade ro9a40 (livraison) : recette ro9a39 + PAL_VERSION, COUL_CPU_VERSION, PORT_VERSION, BARRE_LOGO_FACE ; copie figée ro9a40/ ; =0 → ro9a39 ; fins 85/85, VERSUS, décors 40/40 |
+| §229 | 6422 | sfa3um | Upper MAX max58 : bancs réparés (VIDE ≠ OK), tables 615940 et masques PSP, Yun $32d, fins (décors, générique, fondus, Guy, 3204) ; fins des natifs = max57 ; entrées de hsfa_build en arbre |
+| §230 | 6444 | sfa3ha | Hyper + Arcade ro9a41 : PAIRES_CODE (10 paires de mots relogées comme pointeurs de code, dont T_615AC0 [0] [6] ; 68 cases de la même famille listées) ; fin $27 forcée : plante dans Upper seul, inatteignable ; 4 décors : moteur, pas la greffe |
 
 ---
 

@@ -150,6 +150,14 @@ if _PP:
 _PD = "@HA_G@/donnees/ptr_exclus_desc.txt"
 if os.environ.get("DESC_FIN", "1") == "1" and os.path.exists(_PD):
     PTR_EXCLUS |= set(int(l.split()[0], 16) for l in open(_PD) if l.strip() and not l.startswith('#'))
+# (ro9a41) PAIRES_CODE=1 : + donnees/ptr_exclus_paires.txt : paires de mots signes (dx, dy) de tables decrites dans
+# re/ (mesure) que la classe « code » relogeait comme pointeurs de code (moitie basse $FFxx / $0000, entree de routine ou
+# milieu homologue) : T_615AC0 [0] [6] ($005A0000, $005EFFE0 : (dx, dy) d'objet attache faux pour Ryu et le perso 6,
+# aussi dans la copie X2 [0] [6] [45] [46]), T_60DAE0, T_6139A4, T_613BA0, T_615940 (2 cases chacune). =0 (defaut) :
+# comme ro9a40.
+if os.environ.get("PAIRES_CODE", "0") == "1":
+    _PQ = "@HA_G@/donnees/ptr_exclus_paires.txt"; assert os.path.exists(_PQ), _PQ
+    PTR_EXCLUS |= set(int(l.split()[0], 16) for l in open(_PQ) if l.strip() and not l.startswith('#'))
 REUTIL_STRICT = os.environ.get("REUTIL_STRICT", "0") == "1"   # (etape 6) reutilisation d'Hyper sans masque si > 25 % de pointeurs
 BANQUES_LU = os.environ.get("BANQUES_LU", "1") == "1"
 TEXTES_LU = os.environ.get("TEXTES_LU", "1") == "1"

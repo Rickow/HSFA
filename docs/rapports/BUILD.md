@@ -512,7 +512,7 @@ Les autres sous-commandes (`tout`, `312`) n'ont pas changé de code.
 Agent `script_um`, 2026-11-07 (§202 du journal). Le jeu `uppermax` produit `sfa3umhsfa.zip` : Upper avec Eagle,
 Maki, Yun et Ingrid, à l'état du lot **2b31** (banc_max52). Il part de deux entrées seulement :
 - l'ISO PS2 de l'Anthology ;
-- l'ISO PSP **européenne** de *SFA3 MAX* (ULES-00235 v1.01).
+- l'ISO PSP de *SFA3 MAX*, **européenne** (ULES-00235 v1.01) ou **américaine** (ULUS-10062, depuis le 13/11 : §10.7).
 
 Il n'utilise ni programme d'arcade, ni EBOOT déchiffré, ni fichier d'atelier. Les outils sont dans
 `tools/integration-max/upper_max/` (README) et `max/` (session MAX). Il faut aussi **vasm** (`vasmm68k_mot`,
@@ -522,7 +522,7 @@ Il n'utilise ni programme d'arcade, ni EBOOT déchiffré, ni fichier d'atelier. 
 
 | Étape | Outil | Durée (07/11, machine chargée) |
 |---|---|---|
-| `psp` | identité (`PARAM.SFO` = ULES00235), empreintes de `BOOT.BIN` (EBOOT **déjà en clair** dans l'ISO) et des 4 `plXX_e.pac` | < 1 s |
+| `psp` | édition (`PARAM.SFO` : ULES00235 ou ULUS10062), empreintes de `BOOT.BIN` (EBOOT **déjà en clair** dans l'ISO ; US : remis en disposition européenne) et des 4 `plXX_e.pac` | < 1 s (US : 3 s) |
 | `max_donnees` | `regen_max.py` : cache MAX v2 et sources `.s`, produits par les outils de `max/` ; il ajoute les compléments (scripts et palettes de fin, portraits de victoire, sauts, parcours) | 83 s |
 | `son_uppermax` | `son/chaine_son.py` : voix (VAG des pac), `se_mid`, table son ro9 → ROM son MAX (6 fichiers) et `commandes_*_max.s` | 8 s |
 | `prog_uppermax` | `um_prog.py` : intégration MAX=1 figée à l'état 2b31 (`integration_2b31/`), vasm, traducteur | 56 s |
@@ -592,7 +592,7 @@ tuiles nulles jusqu'à G_MAX. Ce correctif est sans effet en voie arcade.
   - `parcours_max.json` : commentaires seulement.
 - `s/acteurs_fins_max.s` reste à l'**état 2b31** : il est produit avec le `traduire.py` de d98c4f1
   (`traduire_2b31.py`). La version actuelle de la session MAX passera d'abord par un lot d'essai et un banc des fins.
-- **Région** : EU seulement. US et JP ont un EBOOT décalé ; il faudrait une table VA EU → US et un nouveau banc.
+- **Région** : EU et US (§10.7), même jeu à l'octet. JP (ULJM) refusée : autre disposition du code, textes japonais.
 - **Assembleur** : depuis le 2026-11-07, `tools/asm68k/hsfa_asm68k.py` (MIT, bibliothèque standard) remplace vasm,
   dont la licence ne permet pas de l'embarquer. Sortie identique à vasm (binaire, liste, symboles) sur les 5 appels
   de la construction et sur un corpus synthétique ; construction Upper MAX sans vasm = même zip (128fb48d). Variables :
@@ -627,22 +627,54 @@ principal :
   - `d(An)`, `d(An,Xn)`, `d(PC)` ;
   - `abs.w`, `abs.l`, `#imm`, listes de registres.
 
+### 10.7 Disque PSP américain (ULUS-10062, agent `psp_us`, 13/11)
+
+Demande : construire Upper MAX sans mélanger une ISO PS2 américaine et une ISO PSP européenne. Décision (13/11) : la
+US est acceptée et donne le **même jeu** que l'EU (textes à l'orthographe de l'Anthology).
+
+- **Fichiers** : 381 de chaque côté (`USRDIR/USA/DATA`, suffixe `_U`, contre `USRDIR/EUR/DATA`, `_E`). 366 sont
+  identiques à l'octet, dont `PL26-29` (sprites, palettes, sons des 4 persos MAX), `SE_MID`, tous les `WIN`, `OP`, `PL`.
+  Différents : icônes, `PARAM.SFO` (US v1.00, EU v1.01), mise à jour système, logo du titre (`TITLE`, `OPEN` : non
+  lus), `BOOT.BIN`, et 4 fichiers de textes.
+- **`BOOT.BIN`** (EBOOT en clair, PRX) : une seule différence de code, une fonction d'écran du moteur (`0xBDAB4`) plus
+  courte de 2 instructions en US. Tout le code qui suit, dont les modules des 41 persos (`0xE9724-0x1CAF0C`), est 8 octets
+  plus bas ; `.rodata`, `.data`, `.bss` ne bougent pas. `psp_region.relaie()` remet le code US aux adresses européennes :
+  2 `nop` en `0xBDAC4`, puis branches, `j`/`jal`, paires HI16/LO16 et mots R_MIPS_32 recalculés grâce aux tables `.rel.*`
+  du PRX, en-têtes de section et de programme (2 branches, 9 180 sauts, 41 paires, 9 005 mots). Le résultat diffère
+  encore de l'EBOOT européen en 30 zones (10 754 o), aucune lue par la construction : cette fonction d'écran, une
+  variable de `.bss`, une image PNG intégrée et les variables qui la suivent, les chaînes de région (`usa`/`eur`,
+  `_u`/`_e`, numéro de série), 4 numéros de sprite d'une animation d'écran (`0x2234E4`).
+- **Textes** : 6 lignes écrivent « Shadowloo » sur le disque US, « Shadaloo » sur l'EU et partout dans l'Anthology
+  (78 fois dans Upper) : le scénario d'Eagle et la fin d'Ingrid (`END26`, `END29`), un dialogue d'Eagle et trois de
+  Yun (`BD26`, `BD28`). `psp_region.normalise()` les réécrit (octet de longueur − 1, x de la ligne + 3 ou 4 : 6 règles,
+  aucun texte du jeu dans le dépôt) ; les 4 fichiers obtenus ont l'empreinte des fichiers européens (contrôlé).
+- **Lecture** : étape `psp` (édition par le DISC_ID, empreintes de la table de la version, `cache/psp/BOOT.BIN` en
+  disposition européenne) ; `regen_max.py` copie le `DATA` de l'édition sous les noms européens ;
+  `max/outils/convert/dialogues_max.py`, qui relit l'ISO (`eur/data` en dur), est lancé avec une lecture servie par
+  ce cache : `max/` n'est pas modifié. Le disque japonais (ULJM) est refusé avec un message qui le nomme.
+- **Preuves** (même ISO PS2, voie ISO seule) : `sfa3umhsfa.zip` construit depuis l'ISO EU avec le code d'avant, et
+  avec le code neuf depuis l'ISO PSP US d'origine, l'ISO US « déchiffrée », l'ISO EU et l'ISO EU « déchiffrée » (sorties
+  neuves, puis disque changé dans la même sortie, dans les deux sens) : **les 7 zips sont identiques à l'octet**
+  (29/29 membres, md5 `5e40447a92ef6947c44d5eb3bc12966d`). Le cache MAX
+  régénéré (`cache/max_regen`) est identique hors `title_e.pac` / `open_e.pac` (non lus) et dates du zip graphique
+  interne. Les ISO « déchiffrées » ne diffèrent des ISO d'origine que par `SYSDIR/EBOOT.BIN`, qui n'est pas lu.
+
 ## 11. Hyper + Arcade (`--jeux hyperarcade`) : la greffe du mode Arcade d'Upper, depuis l'ISO (expérimental)
 
 Agent `script_ha`, 2026-11-08 (journal §212) ; passage à ro9a36 le 11/11 (§217, §11.6), à ro9a37 (traducteur v161)
-le 12/11 (§221, §11.7), à ro9a38 le 12/11 (§223, §11.8). Le jeu `hyperarcade` produit `sfa3hahsfa.zip` (pilote `sfa3hahsfa`) à l'état **ro9a38** de la
-greffe (programme `sz3ud.03c` `2dfdb15c…` ; ro9a37 : `627c98c4…` ; ro9a36 : `93e88fee…` ; ro9a35b : `650b1bec…`). Il ajoute `upper` et `hyper` : la greffe part de leurs sorties.
+le 12/11 (§221, §11.7), à ro9a38 le 12/11 (§223, §11.8), à ro9a39 le 12/11 (§224, §11.9), à ro9a40 le 13/11 (§228, §11.10), à ro9a41 le 13/11 (§230, §11.11). Le jeu `hyperarcade` produit `sfa3hahsfa.zip` (pilote `sfa3hahsfa`) à l'état **ro9a41** de la
+greffe (programme `sz3ud.03c` `be88f3f9…`, `sz3ud.04c` `ae411424…` ; ro9a40 : même `sz3ud.03c`, `sz3ud.04c` `998374db…` ; ro9a39 : `2459b5a5…` ; ro9a38 : `2dfdb15c…` ; ro9a37 : `627c98c4…` ; ro9a36 : `93e88fee…` ; ro9a35b : `650b1bec…`). Il ajoute `upper` et `hyper` : la greffe part de leurs sorties.
 
 ### 11.1 Étapes
 
 | Étape | Outil | Durée (08/11, 4 constructions en parallèle) |
 |---|---|---|
-| `greffe_hyperarcade` | `tools/greffe-arcade/construction/greffe_ha.py` : code figé `ro9a38/` + relevés (`releves_ro9a38/`, TSV reconstitués par `releves_tsv.py`) matérialisés dans `cache/greffe_ha` ; plan seul → table A5 → module, bloc, traduction (traducteur de la greffe v161) | 150-160 s |
-| `paquet_hyperarcade` | `ro9a38/paquet/paquet_fbneo.py ro9a` (flux Ogg : encodeur v3 portable) | 8 s |
+| `greffe_hyperarcade` | `tools/greffe-arcade/construction/greffe_ha.py` : code figé `ro9a41/` + relevés (`releves_ro9a41/`, TSV reconstitués par `releves_tsv.py`) matérialisés dans `cache/greffe_ha` ; plan seul → table A5 → module, bloc, traduction (traducteur de la greffe v161) | 150-160 s |
+| `paquet_hyperarcade` | `ro9a41/paquet/paquet_fbneo.py ro9a` (flux Ogg : encodeur v3 portable) | 8 s |
 
 Entrées venues de la construction : modules ro5 / ro9 décompressés, cache des anims, `X_DATA.BIN`, banques d'Hyper et
-d'Upper, module ro9 (corrigé si la table du rejeu est donnée, sinon d'origine). Recette : `ro9a38/greffe/vars_ro9a38.txt`
-(interrupteurs de ro9a37 + R3, X6, A2a, E2b ; `HA_VARS` la remplace ; `vars_ro9a37.txt` redonne ro9a37, `vars_ro9a36.txt` ro9a36,
+d'Upper, module ro9 (corrigé si la table du rejeu est donnée, sinon d'origine). Recette : `ro9a41/greffe/vars_ro9a41.txt`
+(interrupteurs de ro9a40 + `PAIRES_CODE=1` ; `HA_VARS` la remplace ; `vars_ro9a40.txt` redonne ro9a40, = ro9a39 + `PAL_VERSION=1 COUL_CPU_VERSION=1 PORT_VERSION=1 BARRE_LOGO_FACE=1` ; `vars_ro9a39.txt` redonne ro9a39, = ro9a38 + `X2_TABLES=1 D4_REGLE=regle_d4_l1.tsv` ; `vars_ro9a38.txt` redonne ro9a38 ; ro9a38 = ro9a37 + R3, X6, A2a, E2b ; `vars_ro9a37.txt` redonne ro9a37, `vars_ro9a36.txt` ro9a36,
 `vars_ro9a35b.txt` ro9a35b). L'état vient d'une seule
 constante de `hsfa_build.py`, `HA_ETAT`. Python + NumPy seulement : pas de MAME, pas de vasm ; la greffe
 relance le traducteur par `sys.executable` (constructeur tout-en-un) et copie au lieu de lier si le système refuse
@@ -687,8 +719,8 @@ traducteur plus ancien). Sans les journaux, la greffe change de 2,3 Mo ; sans le
 
 ### 11.4 Limites
 
-- Expérimental. Avec la ROM d'arcade et la table du rejeu, le zip est ro9a38, le zip livré le 12/11, hors
-  `hsfa_info.txt` et la ROM son (sons PS2 du §218 ; `HSFA_SONS_PS2=0` : identique) (§11.8).
+- Expérimental. Avec la ROM d'arcade et la table du rejeu, le zip est ro9a41, le zip livré le 13/11, hors
+  `hsfa_info.txt` et la ROM son (sons PS2 du §218 ; `HSFA_SONS_PS2=0` : identique) (§11.11).
 - Voie ISO seule : ombres au sol opaques au lieu de transparentes (Hyper seul aussi) : corrigé, §11.5.
 - Windows : liens symboliques remplacés par des copies ou des jonctions (§215 ; voie Windows simulée sous Linux :
   zips identiques, §11.6) ; constructeur tout-en-un : modules embarqués suffisants (relevé des imports), non essayé.
@@ -767,3 +799,37 @@ traducteur plus ancien). Sans les journaux, la greffe change de 2,3 Mo ; sans le
   v161 build guards as in ro9a37.
 - **Proof** (clone of the repository + hand-over, arcade ROM + replay table, `HSFA_OMBRE_CODES=0`, `HSFA_SONS_PS2=0`):
   graft alone (code and TSV of the repository) = `ro9a38_fige` byte for byte (34/35 of MD5SUMS, only `env.sh`: paths); full build (488 s, 1.3 GB): `sz3ud.03c` `2dfdb15c`, zip **31/32 members identical to the delivered zip** (CRC `AC7D9F00`), only `hsfa_info.txt` differs; Upper `ac053140`, Hyper `dbfd237d` (unchanged).
+
+### 11.9 Moving to ro9a39: L1 of the MAX characters, invisible (12/11, §224)
+
+- **Carry-over**: folder `ro9a38/` -> `ro9a39/` (workshop code `greffe_arcade/e49/code`: `etape3/greffe3.py` X2 v2 and
+  `D4_REGLE`, new `etape3/x2_tables.tsv`, `decors/d4/regle_d4_l1.tsv`, `vars_ro9a39.txt`), `releves_ro9a38/` ->
+  `releves_ro9a39/` (records unchanged); `HA_ETAT = "ro9a39"`. Recipe `vars_ro9a39.txt` = `vars_ro9a38.txt` +
+  `X2_TABLES=1 D4_REGLE=regle_d4_l1.tsv`. Translator and package unchanged. New step `sons_ps2_hypermax` (MAX sound
+  ROM + Hyper's PS2-only sounds at 0x2A000), only with `HSFA_ETAPES_PLUS=sons_ps2_hypermax`: no package uses it yet.
+- **Workshop**: all switches at 0 = `ro9a38_fige` byte for byte; ro9a39: `sz3ud.03c` `2459b5a5…`, zip CRC `D31889B0`
+  (against ro9a38: `sz3ud.03c`, `sz3ud.04c`, `sz3.10b`, `hsfa_ext.bin`, `hsfa_trous.bin`, `hsfa_info.txt`; sound ROM and
+  graphics identical).
+- **Proof**: graft alone (code and TSV of the repository) = `ro9a39_fige` byte for byte (34/35 of MD5SUMS, only `env.sh`); with the arcade ROM, the replay table, `HSFA_OMBRE_CODES=0` and `HSFA_SONS_PS2=0` (495 s, 1.3 GB): `sz3ud.03c` `2459b5a5`, zip **31/32 members identical to the delivered zip** (CRC `D31889B0`), only `hsfa_info.txt` differs; Upper `ac053140`, Hyper `dbfd237d` (unchanged).
+
+### 11.10 Moving to ro9a40: colours and portraits of the versions, green band of the logo transition (13/11, §228)
+
+- **Carry-over**: folder `ro9a39/` -> `ro9a40/` (code already carried over in place by §225, §226 and §227, switches at 0),
+  `releves_ro9a39/` -> `releves_ro9a40/` (records unchanged); `HA_ETAT = "ro9a40"`. Recipe `vars_ro9a40.txt` =
+  `vars_ro9a39.txt` + `PAL_VERSION=1 COUL_CPU_VERSION=1 PORT_VERSION=1 BARRE_LOGO_FACE=1`. Translator and package
+  unchanged.
+- **Workshop**: recipe `vars_ro9a39.txt` on the ro9a40 code = `ro9a39_fige` byte for byte (34/35 of MD5SUMS, only
+  `env.sh`); ro9a40: `sz3ud.03c` `be88f3f9…`, zip CRC `68B5EE56` (against ro9a39: `sz3ud.03c`, `sz3ud.04c`, `sz3.10b`,
+  `hsfa_ext.bin`, `hsfa_trous.bin`, `hsfa_info.txt`; sound ROM and graphics identical).
+- **Proof**: graft alone (code and TSV of the repository) = `ro9a40_fige` byte for byte (it is the frozen copy); with the arcade ROM, the replay table, `HSFA_OMBRE_CODES=0` and `HSFA_SONS_PS2=0` (612 s, 1.3 GB): `sz3ud.03c` `be88f3f9`, zip **31/32 members identical to the delivered zip** (CRC `68B5EE56`), only `hsfa_info.txt` differs; Upper `ac053140`, Hyper `dbfd237d` (unchanged).
+
+### 11.11 Moving to ro9a41: word pairs no longer relocated as code pointers (13/11, §230)
+
+- **Carry-over**: folder `ro9a40/` -> `ro9a41/` (new switch `PAIRES_CODE` in `greffe/etape2/donnees2.py`, default 0, and
+  its list `greffe/donnees/ptr_exclus_paires.txt`), `releves_ro9a40/` -> `releves_ro9a41/` (records unchanged);
+  `HA_ETAT = "ro9a41"`. Recipe `vars_ro9a41.txt` = `vars_ro9a40.txt` + `PAIRES_CODE=1`. Translator and package unchanged.
+- **Workshop**: recipe `vars_ro9a40.txt` on the ro9a41 code = `ro9a40_fige` byte for byte (34/35 of MD5SUMS, only
+  `env.sh`); ro9a41: `sz3ud.03c` `be88f3f9…` (unchanged), `sz3ud.04c` `ae411424…`, zip CRC `C9107FC2` (against ro9a40:
+  `sz3ud.04c`, `hsfa_ext.bin`, `hsfa_trous.bin` and `hsfa_info.txt` change; `sz3ud.03c`, `sz3.10b`, sound ROM and
+  graphics identical).
+- **Proof**: graft alone (code and TSV of the repository) = `ro9a41_fige` byte for byte (it is the frozen copy); with the arcade ROM, the replay table, `HSFA_OMBRE_CODES=0` and `HSFA_SONS_PS2=0` (423 s, 1.3 GB): `sz3ud.03c` `be88f3f9`, `sz3ud.04c` `ae411424`, zip **31/32 members identical to the delivered zip** (CRC `C9107FC2`), only `hsfa_info.txt` differs; Upper `ac053140`, Hyper `dbfd237d` (unchanged).

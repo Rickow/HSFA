@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""fige35.py -- copie figee des outils de la greffe Arcade (figee a l'etat ro9a35b le 08/11 ; ro9a36 = report du diff de greffe3.py, ro9a37 = traducteur de la greffe v161, ro9a38 = report du diff de greffe3.py, force3.py, donnees2.py, LISEZMOI) et materialisation parametree.
+"""fige35.py -- copie figee des outils de la greffe Arcade (figee a l'etat ro9a35b le 08/11 ; ro9a36 = report du diff de greffe3.py, ro9a37 = traducteur de la greffe v161, ro9a38 = report du diff de greffe3.py, force3.py, donnees2.py, LISEZMOI ; ro9a39 = L1 des MAX : greffe3.py X2 v2, etape3/x2_tables.tsv, decors/d4/regle_d4_l1.tsv ; ro9a40 = recette vars_ro9a40.txt, code deja reporte par les diffs de greffe3.py des §225-§227 ; ro9a41 = recette vars_ro9a41.txt, donnees2.py PAIRES_CODE + donnees/ptr_exclus_paires.txt, §230) et materialisation parametree.
 (derive de fige.py, etat ro9a22 du 01/11)
 
   python3 fige.py figer        : copie (UNE fois) les outils de l'atelier dans fige_ro9a22/ ; les chemins d'atelier

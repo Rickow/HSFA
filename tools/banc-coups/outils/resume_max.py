@@ -7,7 +7,7 @@ R = sys.argv[1]
 et = os.path.basename(R.rstrip('/'))
 L = ['# Non-régression de l\'intégration MAX — candidat `%s`' % et, '',
      'Référence : Upper v150 (`references/v150/ro5`). Outil : `banc_max.sh` (détail des méthodes dans BANC-COUPS.md §7).', '']
-graves, maxd, ralentis = [], [], []
+graves, maxd, ralentis, vides = [], [], [], []  # vides : mesures vides (max58, 13/11)
 # 1. coups des natifs
 n, parp = collections.Counter(), collections.defaultdict(collections.Counter)
 for f in sorted(glob.glob(os.path.join(R, 'coups_*.tsv'))):
@@ -35,7 +35,9 @@ if os.path.exists(f):
     c = collections.Counter(r['verdict'] for r in rows)
     L += ['## 2. Fins d\'Arcade des natifs', '', ', '.join('%s %d' % kv for kv in sorted(c.items())) + ' (sur %d persos)' % len(rows), '']
     for r in rows:
-        if r['verdict'] != 'OK':
+        if r['verdict'] == 'VIDE':   # rien mesure (script ou lancement en defaut) : ni OK ni regression, a relancer
+            vides.append('fin native | $%s | %s' % (r['perso'], r['detail']))
+        elif r['verdict'] != 'OK':
             graves.append('fin native | $%s | %s : %s' % (r['perso'], r['verdict'], r['detail']))
 # 3. persos MAX
 n3 = collections.Counter(); sp = collections.defaultdict(list)
@@ -74,7 +76,11 @@ if os.path.exists(f):
         if r['verdict'] != 'OK':
             maxd.append('arcade MAX | %s | %s' % (r['max'], r['detail']))
     L.append('')
-L += ['## Défauts', '', '### Régressions natives (GRAVE) : %d' % len(graves), '']
+L += ['## Défauts', '']
+if vides:
+    L += ['### MESURES VIDES (banc en défaut : rien mesuré, passage NON CONCLUANT, à relancer) : %d' % len(vides), '']
+    L += ['- ' + g for g in vides] + ['']
+L += ['### Régressions natives (GRAVE) : %d' % len(graves), '']
 L += ['- ' + g for g in graves[:200]] or ['- aucune']
 L += ['', '### Ralentissements (même jeu tour par tour) et essais INSTABLES (non reproductibles) des natifs : %d' % len(ralentis), '']
 L += ['- ' + g for g in ralentis[:100]] or ['- aucun']
@@ -84,4 +90,5 @@ an = os.path.join(R, 'ANALYSES.md')
 if os.path.exists(an):
     L += ['', open(an).read()]
 open(os.path.join(R, 'RESUME-MAX.md'), 'w').write('\n'.join(L) + '\n')
-print('RÉSUMÉ %s : natifs %s ; régressions natives %d ; défauts MAX %d' % (et, dict(n), len(graves), len(maxd)))
+print('RÉSUMÉ %s : natifs %s ; régressions natives %d ; défauts MAX %d%s' % (et, dict(n), len(graves), len(maxd),
+      ' ; MESURES VIDES %d (non concluant)' % len(vides) if vides else ''))

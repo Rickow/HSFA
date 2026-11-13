@@ -1,0 +1,13 @@
+# (ro9a41) PAIRES_CODE=1 : pairs of signed words (dx, dy) that the "code" class relocated as code pointers (greffe_ptrs),
+# low half $FFxx / $0000 inside a table of such pairs; each table is described in re/connaissances/ro5.tsv (measured).
+# Format: Upper PS2 execution address  value
+615ac0  005a0000   T_615AC0 [0] (dx, dy) of an attached object, owner Ryu
+615ad8  005effe0   T_615AC0 [6]
+60dafc  0043ffe8   T_60DAE0 (dx, dy) start offsets of Vega's detached claw
+60db10  0053ffcc   T_60DAE0
+613a04  003dff08   T_6139A4 signed word pairs (child object of P2 at K.O.)
+613a1c  002bff04   T_6139A4
+613c00  003dff08   T_613BA0 (same path as T_6139A4)
+613c18  002bff04   T_613BA0
+615964  0040ffd4   T_615940 [9] (dx, dy) of a linked effect, read as words by Upper 0x175E58
+6159c4  004effdc   T_615940 [33]

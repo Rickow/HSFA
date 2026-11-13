@@ -530,6 +530,44 @@ retrouver dans Upper, banque de l'emplacement 4 : lignes `anim` de `carte.txt`).
   the Yun `$32D` fix = the b2 test batch (`sz3.10b` `295a44eb`). Bench tests (written, not run yet):
   `<workspace>/work/arbitrages_um/essais/`.
 
+### 8 quater. max58 (13/11, agent `max58`): Yun `$32D` fixed, PSP tables on by default
+
+- **Yun `$32D`** (A1): `objet $32D 1 u8 $32C` in `conv/types_complement.tsv`; the `defaut_connu` line is removed from
+  `conv/non_resolus_admis.tsv` (25 unresolved lines left, 0 not listed). Build: only `sz3.10b` changes vs max57, one byte
+  (image `$3AA4B7`: `$2D` -> `$2C`), identical to the b2 test batch. The 12/11 bench run touched nothing (all bench TSV
+  files identical) but its probe never saw the site run (no `TEST` line). max58 bench (Yun VERSUS against 8 natives both
+  ways + Arcade, probe on the site): the site runs 3 times, always with the jump counter at 0, so the PSP branch is not
+  due there; the in-game effect is still unobserved (deduced from the PSP / arcade code).
+- **`MAX_615940_PSP` and `MAX_MASQUES_PSP` default to 1** (`=0` gives back max57 + the Yun fix, byte for byte, measured).
+  Bench (measured): `0x615940` dx = PSP for the 4 MAX (Eagle -40, Maki 32, Yun -16, Ingrid -18 on the unturned side);
+  the first probe's dy (54 everywhere, natives included) was an artefact (opcode tap fired on prefetch, before the `$16`
+  write) and is re-read from `D0`. Arcade masks: at the secret fight Eagle and Yun now get `$162` = `$FF` and take the
+  same `$C` = 8 sequence as natives `$08` and `$04`; Eagle's fight `$13E` = `$A` keeps `$162` = 1 like the PSP; every
+  Arcade finishes.
+- **`MAX_PALE_PLEINES` stays 0**: measured on the max58 bench (`max` step, VERSUS, Arcade), the MAX ask for effect
+  palettes 0-23 only, never >= 30.
+- **MAX ending sets and final credits** (MAX session deliveries of 13/11, integrated in max58): ND29_41 = Ingrid's
+  portrait (class `$4A`); ND29_123-128 (class `$49`) through `talon_decors49` (9 ending sites, PSP numbers >= 114 ->
+  `FIN118_29`, slot 4; `MAX_DECORS49`, default 1); ND28_114 at rank `$3C` of `0x674C00 + 3012`; `talon_generique` (single
+  `$4E/00` site `$4BF40`: MAX ranks of the final credits in slot 4; `MAX_GENERIQUE_E4`, default 1). Yun's final credits
+  scene was still dark with these alone (fade commands of the converted PSP script: see the next point). Ingrid's Arcade run diverges from max57 at
+  its 22nd fight (2nd Arcade of the run): measured, the random seed `$FF80AE` is identical when the 1st ending ends and at
+  fight 21; only three counters differ by one (`$FF8081`, `$FF8095` object page, `$FF81CF`): the corrected ending is one
+  lag frame longer or shorter, and the AI reads the frame counter. Same trace with `MAX_DECORS49=0` (data only).
+- **Fades of the MAX ending scripts** (MAX session, `max/outils/convert/convertir_fin.py`): an unpaired PSP `6200`
+  (restore of a saved palette base that was never saved) is dropped, a null PSP `3204` takes the palettes of the last
+  `1108` (`FIN_3204=scene`; `0200` = the natives' rule, used by `valider`); `FIN_FONDUS_PSP=1` gives back the previous
+  scripts byte for byte. Maki, Yun and Ingrid change, Eagle does not; Yun's final credits become visible. The scripts
+  live in the MAX cache: since 13/11 `hsfa_build.py` hashes every file under `max/outils` and `integration_2b31` (sub-folders
+  included), so a change there rebuilds `max_donnees` and `prog_uppermax` (before, only top-level `.py` / `.json` counted).
+- **Ending fixes** (MAX session): Guy drawn with his own tile bank in Maki's ending (the ending loader talon activates
+  player object 3 with Guy's ID; `MAX_FIN_INVITE`, default 1); the `3204` of a scene reloads the same new OBJ set as the
+  scene's `1108` (Ingrid "The catalyst...", Yun's credits, Maki; `MAX_FIN_3204_IMAGE`, default 1). Each switch at 0 gives
+  back the previous build byte for byte.
+- Build (max58): `sz3ud.03c` `2c647278`, `sz3ud.04c` `56c42f12`, `sz3.09c` `0bb9a753`, `sz3.10b` `57ccc640`,
+  `ext_b80000.bin` `ef99d3bd`, `ext_e80000.bin` `fce18b80`. Bench (max58): `max` step (command palette of the 4 MAX, 12 files) identical
+  to max57; MAX vs natives VERSUS 64/64; MAX Arcade 4/4 finished; native endings: see the max58 report.
+
 ## 9. Questions pour la session MAX
 
 1. **Gestionnaires d'Eagle** (§4) : `brouillons.py` découpe les modules à la racine, or les gestionnaires des persos

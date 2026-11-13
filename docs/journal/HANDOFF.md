@@ -6235,3 +6235,260 @@ Agent `greffe38` (sfa3ha). Fixes found by the review of the graft (§222, `<work
   graft alone from the repository = `ro9a38_fige` byte for byte (34/35, only `env.sh`); with the arcade ROM, the replay table and `HSFA_SONS_PS2=0`, the zip has 31/32 members identical to the delivered zip (CRC `AC7D9F00`), only `hsfa_info.txt` differs; Upper and Hyper unchanged.
 
 - Added 12/11: the review reports and their tools are now in the repository: `docs/rapports/reviews/` (English summary + original French text) and `tools/reviews/`.
+
+### 224. 12/11: Hyper + Arcade ro9a39: L1 of the MAX characters (per-character tables at 48 entries, invisible)
+Agent `l1max` (sfa3ha, Opus), from the design of agent `l1` (Fable, `<workspace>/work/l1_max_greffe/CONCEPTION.md`)
+and the user's decisions D1-D6 of 12/11. Nothing changes for the player: no character, slot, portrait or sound; the
+step only prepares the graft for Eagle, Maki, Yun and Ingrid.
+- **X2 v2** (`X2_TABLES=1`, `etape3/greffe3.py`, list `etape3/x2_tables.tsv`): 54 per-character tables read by Upper's
+  grafted code (15 of ro9a38's X2 work + 29 simple + 7 structured + 3 of the move engine) are copied to the end of the
+  graft's data block with 48 entries per row; the grafted readers (lui/addiu constants) point to the copies, Hyper's
+  readers keep the originals. Fill rule: entries 0-44 = the bytes of the table and the bytes that follow it (Upper's
+  pseudo-ids $28-$2C read exactly what they read before), 45 / 46 = entry 0 (Ryu, or the MAX value of `X2_VALEURS`,
+  empty in L1, decision D1), 47 = entry 39. Kinds: simple, rows (R rows of 48), offset header (+ data pointers of
+  T_614E00 for the victory quotes 67E2A0), animation banks, the 967BF0 layout, and the move engine's per-victim lines
+  (48 lines, $20-$2F = lines 0-15, mask `ANDI #$1F` -> `#$3F` at Upper 0x3FAF0; kept since VERSUS is byte-identical,
+  decision D3). Row / mask constants: one instruction of the expected form within ±$10 of the site, else the build
+  stops; interior constants: redirected if they point inside entry 0 or at a row start, kept on the original if they
+  point into a body or are listed `garde:` (5C5240 = T_5C5230 + $10, 14FF038 = T_967BF0 + $128), else the build stops.
+- Measured size: 109 840 bytes (lot A 79 896, B+C+D 29 944; the design's 27 KB for lot A was wrong): budget raised to
+  112 KB (`X2_BUDGET`, D6 revised by the coordinator), 103 664 bytes left to the stages before $FE0000.
+- Out of L1 (D4): 619B50, 749338 and the 74E0DE family (object-indexed or projection tables).
+- **D4 table** (`D4_REGLE=regle_d4_l1.tsv`, `decors/d4/`): Yun and Ingrid move from $28 / $29 to $2D / $2E (two bytes).
+- **Sound** (D2): `sons_ps2.py --jeu hypermax` (Hyper's 21 PS2-only sounds with their pieces at 0x2A000 on the MAX sound
+  ROM `roms_son_max_pas`), step `sons_ps2_hypermax` of `hsfa_build.py`, wired to no package (only with
+  `HSFA_ETAPES_PLUS=sons_ps2_hypermax`). `--jeu hyper` unchanged (byte for byte).
+- **Reserved, nothing wired** (index lines): graphics ROM $5400000-$5FFFFFF (Eagle, Maki, Yun, Ingrid, common MAX),
+  bank slot 5 "common MAX" (`plan2` of slot 1 is full: 65 536 codes, D5), code $3A0000-$3BFFFF (assert `D3=1`), T4 / T5
+  $710000-$8FFFFF, RAM $FF7F00-$FF7FFF (MAX_ALPHA), Z80 0x2A000-0x2A7B5 and 0x4C600-0x4FDCF.
+- Recipe `ro9a39/greffe/vars_ro9a39.txt` = `vars_ro9a38.txt` + `X2_TABLES=1 D4_REGLE=regle_d4_l1.tsv`. `sz3ud.03c`
+  `2459b5a5…`, zip CRC `D31889B0`.
+- **Checks**: all switches at 0 = `ro9a38_fige` byte for byte (34/35, only `env.sh`); the new code reduced to lot A with
+  the old fill rule = ro9a38's X2 build byte for byte; static check of the 54 tables and 95 constants (`x2_neutre.py`):
+  0 difference; VERSUS (60 rounds) = ro9a38 **byte for byte**; stage bench (twin without CPU draw) **40/40** = ro9a38
+  (28/40 against Upper, as before); ids $26 / $27 / $2D / $2E forced on the map, face-off and victory screen: 0
+  exception, 11 rounds; endings played with the ending number forced: 0 exception for $26 / $2D / $2E ($27, one of
+  Upper's own slots: one exception at the same frame and pc in ro9a38, an old artefact of forcing $103); read probe:
+  no read past the end of a table; `X2_VALEURS=26,27,2d,2e` puts the MAX values (byte order taken from Upper's
+  module); endings bench (85 Arcade games up to the credits, with the CPU draw): **85/85** reached, no exception, durations and states identical to ro9a38 (0/81, 0/4); sound N1-N6 (`l1_max_greffe/essais/son_nonreg.py`); zip: sound ROM and graphics identical to ro9a38.
+- **Found on the way**: in the graft's data block, T_615AC0 entries 0 and 6 ((dx, dy) of an attached object,
+  $005A0000 / $005EFFE0) were relocated as code pointers (since before ro9a38): Ryu's and character 6's values are
+  wrong there. Not changed in L1.
+- **Build copy** (`tools/greffe-arcade/construction/`): `ro9a38/` -> `ro9a39/` (code of the workshop `e49/code`),
+  `releves_ro9a38/` -> `releves_ro9a39/` (unchanged), `HA_ETAT = "ro9a39"`. Proof (BUILD §11.9): graft alone (code and TSV of the repository) = `ro9a39_fige` byte for byte (34/35 of MD5SUMS, only `env.sh`); with the arcade ROM, the replay table, `HSFA_OMBRE_CODES=0` and `HSFA_SONS_PS2=0` (495 s, 1.3 GB): `sz3ud.03c` `2459b5a5`, zip **31/32 members identical to the delivered zip** (CRC `D31889B0`), only `hsfa_info.txt` differs; Upper `ac053140`, Hyper `dbfd237d` (unchanged).
+
+### 225. 12/11: Hyper + Arcade: a CPU in ZERO / ZERO 2 / ALPHA no longer changes colour at "FIGHT" (PAL_VERSION, COUL_CPU_VERSION)
+Agent `couleurcpu2` (sfa3ha), after the analysis of `<workspace>/work/couleur_cpu_ha/RAPPORT.md`. Report from the player:
+in Arcade, a CPU opponent drawn in ZERO 2 or ALPHA showed its default colour before the fight, then an alternative colour
+after "FIGHT" (and back at every new round). J1 in a version had the same jump. Not a regression of v161 (ro9a36 to ro9a38
+behave the same); visible on the CPU since TIRAGE_CPU (ro9a33).
+- **Cause, two defects.** D1: on an Upper stage (Arcade, VERSUS D4) the `moteur_pal` stub loads the players' palettes with the
+  copy of Upper 0x4B270 (dispatcher 0x4B2E0, per-player loader 0x4B5A0: ZERO 3 table indexed by the **base** character
+  `$117`), at the face-off and at every round restart; at "FIGHT" (state 4/6/6) Hyper calls its own dispatcher 0x60A90
+  (file 0x9C428, loader 0x60D50: table `T_6452e0` indexed by the **version** `$103`). D2: on the map, the copy of Upper
+  0x262930 sets the CPU colour with Upper's rule `$129 = ($133 + 1) x 2`; the draw sets `$133 = 0` for a version, so
+  `$129 = 2` = third colour of the version in Hyper's table.
+- **`PAL_VERSION=1`** (`etape3/greffe3.py`): the "Upper stage" path of `moteur_pal` calls the copy of 0x4B270 **then**
+  Hyper's 0x60A90: the version palette is in place from the face-off to the end, round restarts included. On the first
+  face-off frame the second load ends after the frame (one frame of ZERO 3 palette in slots 5-9): invisible, the VS screen
+  does not draw the players' sprites (MAME captures of 10808-10838 identical to a variant without that frame, which routed
+  the per-player loader to Hyper; it was dropped: same result, more code). A third variant (round start entry of the
+  copied combat sub-table) left 8 frames of ZERO 3 palette at each round restart, dropped.
+- **`COUL_CPU_VERSION=1`**: the two `JSR` that follow the colour store in the copy of 0x262930 (Upper 0x262D18 for J1 as
+  CPU, 0x262E10 for J2) go to new stubs `coul_cpu_1` / `coul_cpu_2`: original call (Hyper homologue 0x2D90D0 of
+  0x263820), then, if the CPU is not in its base version (`$103 != $117`), `$129 = 0` (default colour of the version), or
+  **1 for an exact mirror** (same `$103` as the other player, whose `$129` is 0), the maintainer's decision of 12/11
+  (Upper's rule, and Hyper's VERSUS mirror test of §221). A CPU in its base version (ZERO 3) keeps Upper's rule.
+  Temporary word `$FF7E24` (re/allocations.tsv). The 68K translation of the stubs is the expected one
+  (`MOVE.B $0503(A5),D0 … CMP.W $FE24(A5),D0 ; BEQ …`, `MOVE.B #$0,$0929(A5)`, D0 saved on the stack).
+- Both are needed (simulation of the analysis): D2 alone inverts the symptom, D1 alone freezes the alternative colour.
+  **Default of the delivery: both at 1** (recipe), switches in the code default to 0.
+- **Proofs** (MAME, oracle game of the graft; construction = ro9a39 + the two switches, `sz3ud.03c` `27ebe7ba…`; the same
+  measurements were first made on ro9a38, same results):
+  - switches at 0 = `ro9a39_fige` **byte for byte** (34/35 of MD5SUMS, only `env.sh`: paths), final code (also
+    `ro9a38_fige` 34/35 before the rebase);
+  - CPU Sagat ZERO 2 (`$4B`, step 6): `$129` = 2 then 0 (stub); J2 palette `fdb6f652` from the face-off to the end
+    (ro9a39 as delivered: `fdb6f652` then `fb96f530` at FIGHT 11095 and back at the round restart 11613); the five J2
+    palettes are constant from the second face-off frame;
+  - J1 Sagat ZERO 2 (colour 0, Hyper's select): `fdb6f652` from the face-off to the end, round 2 included (ro9a39:
+    `fa73f420` then `fdb6f652` at every FIGHT);
+  - J1 Sagat **ALPHA** (`$6B`), colours chosen with the button kept from the face-off to the end: colour 0 `fdb6f652`,
+    colour 2 `fb96f530`, colour 4 `fda7f641`, rounds 2 and next stage included (ro9a39, colour 4: `fd96f632` (ZERO 3 table
+    of Upper) until FIGHT, `fda7f641` after, back at each round restart);
+  - exact mirror (J1 Sagat ZERO 2 or ALPHA colour 0, CPU forced to the same version by a Lua tap after the draw): CPU
+    `$129` = 1, palette `fb73f520` (J1 `fdb6f652`), constant;
+  - not measured: two humans (challenger accepted; the challenger driver did not trigger in this test). By construction
+    `COUL_CPU_VERSION` only acts in the CPU branch of the copy of 0x262930 (`$524` / `$924(A5)` non-zero) and never touches
+    a human's colour; `PAL_VERSION` loads both players by version (the dispatcher handles both sides);
+  - ZERO 3 CPUs and J1 ZERO 3 (steps 0-5, 10 640 frames): record identical to ro9a39 line for line (palettes, states,
+    round frames);
+  - endings bench (85 Arcade games up to the credits, with the CPU draw): **85/85** reached, no exception, ending durations and states identical to ro9a39's bench (0/81 and 0/4 differ by more than 2 frames);
+  - VERSUS under MAME (60 rounds, reference list): = ro9a39 **byte for byte** (`vs.log`);
+  - Linux core of 12/11 b (4:3): CPU Dan ZERO: ro9a39 pink gi until FIGHT then orange; with the fix pink from the intro to
+    the end (round 2 included); J1 Sagat ZERO 2: white shorts in the intro and at round 2 on ro9a39, purple from the intro to the end with the fix.
+- **Not fixed: portraits** (map / face-off of the map, victory screen): their palettes are loaded by copies of Upper,
+  not by `moteur_pal`: map and face-off, copy of Upper 0x25D9xx (table `T_7251a0`, base character in D0, colour in D2,
+  X-ism through D1); victory screen, copy of Upper 0x196Cxx (`$117(A4)` base character, X-ism through `$133`, table
+  `T_72BDF0` + `$129(A4)` x $100); both write through Hyper's copy routine 0x38D97C (MAME write probe, `PORTAP`). A
+  version therefore gets Upper's ZERO 3 portrait of its base character in the colour `$129` chosen in Hyper's table (J1),
+  or colour 0 for the CPU with `COUL_CPU_VERSION` (before: 2; Dan ZERO: orange-yellow portrait, pink sprite). A fix (F3)
+  needs portrait palettes per version from Hyper (Hyper alone VERSUS probe started, not concluded): open.
+
+
+### 226. 13/11: Hyper + Arcade: portraits of a character in ZERO / ZERO 2 / ALPHA coloured like Hyper (PORT_VERSION), and the two-human case of §225
+Agent `couleurcpu2` (sfa3ha), follow-up of §225 (PAL_VERSION, COUL_CPU_VERSION). Report from the player: the portraits of
+the map, of the map's face-off and of the victory screen of a character in a version kept the wrong colour (example: a CPU
+Dan ZERO with an orange portrait and a pink sprite after §225).
+- **Where the portrait palettes come from** (MAME write / read probes on the palette RAM, `PORTAP`, `READTAP`, `POKEPAL`):
+  in the graft, two copies of Upper load them, never `moteur_pal`: 0x25D730 (table `T_7251a0`, base character in D0,
+  colour in D2 = `$129(A4)`; called from Upper 0x18001C map and face-off, 0x184640, 0x19D548 map) and 0x196A30 (victory
+  screen: `$117(A4)`, table `T_72BDF0` + `$129(A4)` x $100; JSR at Upper 0x1967CC). Both index Upper's ZERO 3 tables by
+  the base character with the colour number chosen in Hyper's version table.
+- **Hyper alone** (VERSUS, Dan ZERO / Sagat ALPHA): Hyper colours its portraits (select screen, VS) with its own copy of
+  the same table (image `$15D3A0`) and a **forced colour 2** (`MOVE.B #$2,D1`, Hyper 0x31FA24), whatever the colour
+  chosen; filling palette slots with a marker colour shows that the VS portraits use exactly those slots. Data check
+  (`carte_coul.py`, modules ro9 / ro5): the body palettes (0-2) of colour 0 of a version are those of Upper's colour 2 for
+  23 versions out of 53 and very close for the others; for colours 1-5 only 2 pairs out of 265 have an identical Upper
+  colour, so a per-colour table would bring almost nothing: Hyper's rule is kept.
+- **`PORT_VERSION=1`** (`etape3/greffe3.py`): for a player in a version (`$103 != $117` of A4), colour 2 in both loaders:
+  the three `lui/addiu` calls of 0x25D730 go to a stub `port_carte` (`MOVEQ #2,D2`, form of Upper 0x1EF748, then the
+  copy); the JSR of 0x196A30 goes to `port_vict` (`$129(A4)` saved in `$FF7E26`, set to 2 for the call, then restored).
+  Base version (ZERO 3): Upper's rule unchanged. The comparison uses D7 (set by both loaders themselves): a first try
+  that pushed D0 around it was translated with the pop before the compare (the translator emits a compare at its branch).
+  Switch at 0 by default.
+- **Proofs** (construction = ro9a39 + `PAL_VERSION=1 COUL_CPU_VERSION=1 PORT_VERSION=1`, `sz3ud.03c` `aa905e8c…`):
+  - switches at 0 = `ro9a39_fige` byte for byte (34/35, only `env.sh`); `PORT_VERSION=0` with F1 + F2 = the construction
+    measured for §225 byte for byte;
+  - map portrait of J1 Dan ZERO colour 0: Upper colour 0 (orange) → colour 2, whose first palette is the sprite's
+    (`ffc9fb64`); J1 Sagat ZERO 2 colour 0 and the CPU Sagat ZERO 2 of step 6 (face-off): colour 0 → 2; J1 Sagat ALPHA
+    colour 4: colour 4 → 2 (as in Hyper); victory screen: J1 portrait in colour 2, `$129` back to its value after the
+    call; ZERO 3 CPUs and J1 ZERO 3: record identical to the reference;
+  - **two humans** (§225 left it open): challenger accepted on the map (driver of the review test 08b), J2 forced to
+    Sagat ZERO 2 after its selection: ro9a39 `fa73f420` until FIGHT then `fdb6f652`, back at round 2; with the fix
+    `fdb6f652` constant; J2's colour (set by Hyper's select) is never rewritten by `coul_cpu` during the challenge;
+  - VERSUS under MAME (60 rounds, reference list) = ro9a39 byte for byte; endings bench: **85/85** reached, no exception, durations and states identical to ro9a39's bench (0/81 and 0/4 differ by more than 2 frames);
+  - Linux core of 12/11 b (4:3): CPU Dan ZERO: pink portrait on the VS screen and pink sprite from the intro to the end (ro9a39: pink portrait, sprite orange after FIGHT; §225 alone: orange portrait); J1 Sagat ZERO 2: VS portrait in colour 2, as in Hyper.
+- **Limit (same as Hyper)**: a version played in another colour (1-5) shows the colour-2 portrait.
+
+
+### 227. 13/11: Hyper + Arcade: green band at the "logo" transition before the dialogue screen (BARRE_LOGO_FACE)
+Agent `logo_final_ha` (sfa3ha), follow-up of the e42 fix `BARRE_LOGO` (ro9a32). Report from the player: Sakura, before
+Ryu ("not going straight to Bison"), the big green "A" left the band of letter tiles in the middle of the screen again.
+- **When**: with `TIRAGE_CPU=1`, a rival drawn in ZERO 3 at step 8 (stage $14 imposed, Upper's rival scene) and the
+  final fight at step 9 go through Upper's dialogue screen. Hyper's logo object `$FFDE00` (`$5E01(A5)` = 1) is born at
+  the end of the victory (A5+8 = 8, A5+C = $C) and lives about 145 frames. The map then lasts only 4 frames
+  (A5+8 = 2), and the logo ends on the dialogue screen (A5+8 = 4, A5+C = 0). `stub_plans_auto` takes the "Upper planes"
+  path there, but `BARRE_LOGO` only acts for A5+8 < 4. So scroll1 = $0400 when the bar is drawn, and its slot-0 codes
+  read Upper's common bank. Reproduced in `hsfa_run` (FBNeo core of 09/11) with seed 4000, Sakura ALPHA: Ryu ZERO 3 at
+  step 8. With the seeds of 12/11, Ryu was drawn in ALPHA / ZERO: the dialogue happens in the stage and there is no band.
+- **`BARRE_LOGO_FACE=1`** (`etape3/greffe3.py`, with `BARRE_LOGO=1`): the alias bases (4400,440,4A0) also apply for
+  A5+8 = 4 and A5+C = 0 while `$5E01` is set. A first form that also covered A5+C = 2 broke the VS screen: the
+  "VERSUS / VS" column is on scroll1, slot 0, Upper's common bank. A5+C = 2 is left out. The game waits for the end of
+  the logo before A5+C = 2; the VS → fight logo is a new life of the object and ends at A5+C = 4, on the stage bases.
+  Switch at 0 by default.
+- **Proofs**:
+  - switch at 0 = `ro9a39_fige` byte for byte; construction after the rebase onto §226 = the one measured before;
+  - 10 key cadences (no key; Button 1 in the victory / map / dialogue states, from 0 to 100 frames, every 7 to 30
+    frames; Start): the first life of the logo always ends at A5+8 = 4, A5+C = 0, with scroll1 $4400;
+  - 85 characters and versions, seed 4000, no key from the 12th round: ro9a39 has 54 lives of the logo that end with
+    scroll1 $0400 off a fight. All have the form "victory → 4-frame map → dialogue screen": ZERO 3 rival at step 8 and
+    final fight at step 9. With the switch, all 54 end with $4400. The only ones left are 2 VS logos cut by the end of
+    the run;
+  - captures 4:3 and 16:9: only the band frames change (thin bar, as in Upper);
+  - in `hsfa_run`, 22 runs of 85 drift in time: the stub does 2 more tests per frame on the VS screen, which changes
+    the random numbers and the K.O. times. The opponents are the same, with no exception and no blocking, and each zip
+    replays byte for byte;
+  - endings bench under MAME: **85/85** reached, no exception, durations, states and start frames identical to
+    ro9a39's bench (0/81, 0/4). VERSUS (60 rounds) = ro9a39 byte for byte.
+
+### 228. 13/11: Hyper + Arcade ro9a40: delivery of the colour, portrait and logo-band fixes
+Agent `logo_final_ha` (sfa3ha), delivery in the format of §224. ro9a40 = ro9a39 + the four switches of §225, §226 and
+§227 at 1 in the recipe; their code was already carried over into the build copy (switches at 0, ro9a39 byte for byte).
+- **Build copy** (`tools/greffe-arcade/construction/`): `ro9a39/` -> `ro9a40/`, `releves_ro9a39/` -> `releves_ro9a40/`
+  (records unchanged), `HA_ETAT = "ro9a40"`. Recipe `ro9a40/greffe/vars_ro9a40.txt` = `vars_ro9a39.txt` +
+  `PAL_VERSION=1 COUL_CPU_VERSION=1 PORT_VERSION=1 BARRE_LOGO_FACE=1`. Translator (v161) and package unchanged.
+- **Build**: `sz3ud.03c` `be88f3f9…` (`sz3ud.04c` `998374db…`, `sz3.10b` `11ad1b26…`), zip CRC `68B5EE56`. Against
+  ro9a39: `sz3ud.03c`, `sz3ud.04c`, `sz3.10b`, `hsfa_ext.bin`, `hsfa_trous.bin`, `hsfa_info.txt` change; sound ROM and
+  graphics identical.
+- **Proofs**:
+  - recipe `vars_ro9a39.txt` on the ro9a40 code = `ro9a39_fige` byte for byte (34/35 of MD5SUMS, only `env.sh`); twin
+    without the CPU draw (`TIRAGE_CPU=0`) of that recipe = ro9a39's twin (`sz3ud.03c` `74b35a4f…`);
+  - endings bench under MAME (85 Arcade games up to the credits, with the CPU draw): **85/85** reached, no exception; durations, states and ids identical to ro9a39's bench (0/81 and 0/4 differ by more than 2 frames; 2 durations differ by 1 frame, 37 start frames move: the stubs change the cycles before the ending, §227);
+  - VERSUS under MAME (60 rounds, reference list) = ro9a39 **byte for byte**;
+  - stage bench (twin without the CPU draw, `sz3ud.03c` `da94facf…`): **40/40** identical to ro9a39's twin, 28/40 against Upper as before (the bench looks at the stage objects; the four fixes do not touch them);
+  - Linux core of 12/11 b, 4:3 and 16:9 (`hsfa_run`, seed 4000, Sakura ALPHA, no key): map and VS screen: J1 portrait in colour 2 (ro9a39: colour 0); CPU Charlie ZERO of step 1: same colour before and after "FIGHT" and at round 2 (ro9a39: other colour after "FIGHT"); Ryu ZERO 3 of step 8: thin bar instead of the band (7 frames change); the two games stay frame-aligned up to step 5;
+  - build from the ISO in a clone (`--jeux hyperarcade`, arcade ROM, replay table, `HSFA_OMBRE_CODES=0`, `HSFA_SONS_PS2=0`; 612 s, 1.3 GB): `sz3ud.03c` `be88f3f9`, zip 31/32 members identical to the delivered zip, only `hsfa_info.txt` differs; Upper `ac053140`, Hyper `dbfd237d` (unchanged).
+
+### 229. 13/11: Upper MAX max58 (bench repairs, PSP-aligned tables, ending fixes)
+Agent `max58` (sfa3um) with deliveries of the MAX session; critical review by Fable before merging
+(`<workspace>/work/max58/REVUE_FABLE.md`).
+- **Benches repaired**: the endings bench ran MAME without its script (wrong `tournee.lua` path) and reported "OK, 0
+  rounds"; an empty measurement is now `VIDE`, never OK (`tools/banc-coups/outils/banc_max.py`, `resume_max.py`,
+  `lance.sh` refuses an empty folder or script). The daily bench was not affected (own path). max57 re-run: 35/35.
+- **Switches on by default** (each = previous build byte for byte at 0): `MAX_615940_PSP` (dx, dy of the 4 MAX = PSP),
+  `MAX_MASQUES_PSP` (Arcade masks: Eagle and Yun take the natives' route to the secret fight), Yun `$32d` (types; site
+  reached 3 times with a zero counter: effect deduced, not observed). Unresolved conversions 26 -> 25.
+- **Endings** (MAX session): 6 of the 7 missing ending stages (Ingrid's portrait, `$49` actors through a talon,
+  `MAX_DECORS49`), Yun's credits actors in slot 4 (`MAX_GENERIQUE_E4`), PSP fades converted to the arcade's rules
+  (`convertir_fin.py`, 355d2ce: Yun's credits, Maki's Bison scene visible), Guy's tile bank in Maki's ending
+  (`MAX_FIN_INVITE`), the `3204` of a scene loads the MAX picture's palette set (`MAX_FIN_3204_IMAGE`: Ingrid, Maki,
+  Yun's characters as on the PSP).
+- **Checks**: the 35 natives' endings identical to max57 game by game; Arcade of the 4 MAX to the end; "max" step 12/12
+  and cross fights 64/64 (max58f, combat code unchanged since). Ingrid's 22nd fight in a 2nd Arcade differs: same random
+  seed, 3 counters shifted by one frame by the corrected ending (the AI reads one): not a native defect.
+- **Build inputs** (review): `hsfa_build.py` now hashes every file under `max/outils` and `integration_2b31` (sub-folders
+  included); before, a change there could leave old ending scripts and program in an existing output.
+- Open: a full `hsfa_build.py` run from an empty output (EU and US PSP ISO) and a look at the MAX endings on that build,
+  before the stable release.
+
+### 230. 13/11: Hyper + Arcade ro9a41: word pairs relocated as code pointers, ending $27, the four unexplained stages
+Agent `greffe_restes` (sfa3ha), the three defects left open after ro9a40, delivery in the format of §228. ro9a41 =
+ro9a40 + `PAIRES_CODE=1`. Workshop `work/greffe_restes/` (ETAT.md, RAPPORT.md).
+- **T_615AC0 [0] and [6]** (found by L1, §224). Cause, in `etape2/donnees2.py`, class "code": `$005A0000` (Ryu) has a
+  low half below `$100`, but its target is a routine entry and its neighbour `0x615ABC` is a real code pointer (end of
+  the jump table before it), so the `PTR_BAS` rule lets it through; `$005EFFE0` (character 6) is taken for the middle
+  of a routine that has a homologue in Hyper. Both were relocated (`greffe_ptrs.txt`) and X2 copied them into entries
+  0, 6, 45 and 46. Upper reads the table as two words (0x368DCC: `MOVE.W 0(A0,D0.W)`, `MOVE.W 2(A0,D0.W)`).
+  - Fix `PAIRES_CODE` (default 0) + `greffe/donnees/ptr_exclus_paires.txt`: the 10 cases of tables that `re/` describes
+    as measured pairs of signed words: T_615AC0 [0] [6], T_60DAE0 +$1C +$30 (Vega's claw), T_6139A4 +$60 +$78,
+    T_613BA0 +$60 +$78 (FILTRE3 only looks at data pointers; these two pairs per table were still relocated as code)
+    and T_615940 +$24 +$84 (read as words by Upper 0x175E58, measured in §229). Exactly 14 longs of the data block
+    change (the 10 and the X2 copy of T_615AC0 [0] [6] [45] [46]), 14 entries leave `greffe_ptrs.txt`; `sz3ud.03c`
+    does not change.
+  - Same family, listed and NOT fixed (`work/greffe_restes/sorties/paires_code_ro9a40.txt`, rule: relocated as code,
+    low half `$FFxx` or `$00xx`, at least 2 of the 4 neighbours of the same shape left raw): 68 cases, of which the 10
+    above; the others: around
+    T_6102B0, T_615640, T_617290, T_60DF10 and the switch 0x620630 (1-3 each), 12 in the per-character file blocks
+    after 0x628470, 5 in the sprite lists 0x678066, 20 in the per-character data behind T_74C358 / T_74C5D8
+    (0x74FE08-0x768014), 10 in the attach table of the ending actors (0x786D28-0x792D70). In the 54 X2 tables only
+    T_615AC0 had relocated data (the other relocated cases are real pointers or the bytes 40-44 that follow a table).
+  - Read probe (all 68 cases and the X2 copy, two full Arcade games with their ending, Ryu ZERO 3 and character 06
+    ZERO 3, ro9a40): **0 reads**. The reader of T_615AC0 (object attached to a player in state `$202` with `$55` = `$C`)
+    is never created in these games: the fix is right, no effect was seen, so no core capture.
+- **Ending $27 forced** (L1, §224: exception at pc `$A08`, return in Hyper's animation code 0x95398, actor `$FFBD80`).
+  Same exception when only `$1C9` is forced (base id left at Ryu): it does not come from `FIN_ID_BASE`. **Upper alone**
+  (`fige/ro5`, same forcing): exception at pc `$A08` too, 2 792 frames into the ending; ending `$26` forced on Upper
+  goes to the end. In the graft, `$1C9` = `$133` = `$117` of the winner (the copied writers read `$117`), and
+  `$117` = `T_5C5300[$102]` ≤ `$24` (`$24` -> `$0A`): ending `$27` cannot be reached in normal play. Not a defect of the
+  graft; a MAX character given base id `$27` (L2) needs its own ending, Upper's slot `$27` crashes in Upper itself.
+- **Stages 4A, 22 / 26, 40 and class `$11`** (§223 review, "flou" point 1): no defect of the graft's data or code found
+  (about 1 h of the 3 h allowed). Class `$28` (4A) is created after the start of the fight by the class `$29` object
+  when the combat flags `$106` / `$11D` allow it (Upper: +20, +22, +36, +38 frames; graft: +14, +30, +46, +77; start x
+  `$265` / `$28E` against `$260` / `$2B6`) and is killed outside the scroll1 window (A3 = T_60FCA0[1] = `$FF8200`,
+  `$12` / `$16`). Class `$1B` (22 / 26): object 15 is already at x `$3CD` (Upper) / `$3D2` (graft) at frame −30, before
+  the seed is forced (draws made during the decor set-up). Class `$11` (14, 2A, 3C, 3E): y = `T_612370[T_612360[(draw
+  + $81(A5)) & $F]]` (frame counter); its timer reads Hyper's T_5C87D8, equal to Upper's T_612380 (the R1 relocation
+  of the T_612380 copy is not read). Classes `$2C` / `$2D` (40): thresholds on scroll1 x `$212`, camera y `$292` and
+  the players. A probe forcing the seed from the start of the match changes the run itself (control stage 00
+  diverges): not usable.
+- **Build**: `sz3ud.03c` `be88f3f9…` (unchanged), `sz3ud.04c` `ae411424…`, `sz3.10b` `11ad1b26…` (unchanged), zip CRC
+  `C9107FC2`. Against ro9a40: `sz3ud.04c`, `hsfa_ext.bin`, `hsfa_trous.bin` and `hsfa_info.txt` change; `sz3ud.03c`, `sz3.10b`, sound ROM and
+  graphics identical.
+- **Proofs**:
+  - recipe `vars_ro9a40.txt` on the ro9a41 code = `ro9a40_fige` byte for byte (34/35 of MD5SUMS, only `env.sh`);
+  - endings bench under MAME (85 Arcade games up to the credits, with the CPU draw): **85/85** reached, no exception; durations, states, ids and start frames identical to ro9a40's bench (0/81 and 0/4 differ, not even the start frames);
+  - VERSUS under MAME (60 rounds, reference list): = ro9a40 **byte for byte**;
+  - stage bench (twin without the CPU draw, `sz3ud.03c` `da94facf…` as ro9a40's twin): **40/40** identical to ro9a40's twin, 28/40 against Upper as before;
+  - build from the ISO in a clone (`--jeux hyperarcade`, arcade ROM, replay table, `HSFA_OMBRE_CODES=0`,
+    `HSFA_SONS_PS2=0`): 423 s, 1.3 GB, `sz3ud.03c` `be88f3f9`, `sz3ud.04c` `ae411424`, zip 31/32 members identical to the delivered zip (only
+    `hsfa_info.txt` differs); Upper `ac053140`, Hyper `dbfd237d` (unchanged).

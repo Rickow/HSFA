@@ -198,3 +198,13 @@ SIMM flash 29F016 de la 00716C-3 prouvent qu'une flash convient), place mécaniq
   jeu vient d'être lu comme données juste avant l'écriture de l'entrée (`objectsFromExtra`, `scrollFromExtra`). Même principe
   que nos banques (deux réserves de tuiles et un aiguillage), mais aiguillage déduit du comportement, purement logiciel et non
   transposable sur une carte ; le registre explicite du fork HSFA s'y prête mieux.
+
+### Note (2026-11-12) : article de morphus56k, « CPS2 maximum ROM expansion » (lu le 12/11, mis à jour par son auteur le 27/07/2026)
+- Ses chiffres « 128 Mo de graphismes / 16 Mo de son » sont la TAILLE DES FICHIERS d'un hack de *MvC* (8 puces × 16 Mo,
+  2 × 8 Mo), pas de l'espace adressable : l'auteur corrige lui-même sa première version (« 148 Mo adressables » faux). Sur
+  MAME d'origine et sur une vraie carte, la fenêtre reste 32 Mo / 8 Mo ; il atteint 64 Mo de graphismes et 16 Mo de son
+  avec un cœur FBNeo modifié (bit 12 de Y reporté sur le bit 18 du code, comme le 19e bit du fork HSFA).
+- Programme : 4 Mo au plus ; *MvC* et *Alpha 3* les remplissent déjà (il ne reste que quelques blocs libres).
+- Désaccord à trancher : il donne au DSP QSound un registre de banque de 8 bits (16 Mo adressables), cette fiche (ligne
+  « Échantillons QSound ») 15 bits d'après MAME. Sans effet pratique : la carte câble 8 Mo.
+- Rien sur CN5 / CN6 / CN7, les cartes filles ni les kits à carte SD.

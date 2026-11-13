@@ -131,6 +131,8 @@ since v0.1.2, Recalbox; their SHA-256 sums are in the release's `SHA256SUMS.txt`
 
 | release | date | core patches | note |
 |---|---|---|---|
+| v0.1.10 (stable) | 2026-11-13 | 0001-0027, 0029-0032, 0007b | same cores as v0.1.9 (batch of 12/11b) |
+| v0.1.9 (pre-release) | 2026-11-12 | 0001-0027, 0029-0032, 0007b | batch of 12/11b: complete savestates (0029, 0032), 16:9 Raw by default (0031); Linux core: glibc 2.27; Batocera |
 | v0.1.8 (pre-release) | 2026-11-08 | 0001-0027, 0007b | 0027: objects with the arcade delay; Linux core: glibc 2.43 required |
 | v0.1.7 (stable) | 2026-11-08 | 0001-0026, 0007b | all-in-one builder; Linux core: glibc 2.43 required |
 | v0.1.6 | 2026-11-07 | 0001-0025, 0007b | tiles of the port in SFA3 (0025) |
@@ -151,9 +153,9 @@ names them):
 | 2026-11-08 | 0001-0025 | journal §201 |
 | 2026-11-09 | 0001-0026, 0007b, 0021b, 0021c | [`patches/fbneo/README.md`](../../patches/fbneo/README.md) ("Construire") |
 | 2026-11-10 | 0027 as well | journal §210, §211; Linux core: [`tools/linux/README.md`](../../tools/linux/README.md) |
-| 2026-11-11 | 0029 as well (savestates); Linux core compatible with glibc 2.27; Batocera package; zip `28dd52b2…` (details in the table above) | [CHANGELOG](../../CHANGELOG.md) "En cours", [`tools/linux/`](../../tools/linux/README.md) |
-| 2026-11-12 | 0030 and 0031 as well (16:9: "Widescreen edges" = Raw by default, stage-locked view as an option); zip `5c1adaac…` (details in the table above); standalone FinalBurn Neo (test, W01-W05) separately | [CHANGELOG](../../CHANGELOG.md) "En cours", [`patches/fbneo/README.md`](../../patches/fbneo/README.md) (patch 34) |
-| 2026-11-12b | 0032 as well (HSFA zone of the states checked before being applied, bounded values); zip `6bf00dee…` (details in the table above); standalone FinalBurn Neo (test, W01-W06) separately | [CHANGELOG](../../CHANGELOG.md) "En cours", [`patches/fbneo/README.md`](../../patches/fbneo/README.md) (patch 35) |
+| 2026-11-11 | 0029 as well (savestates); Linux core compatible with glibc 2.27; Batocera package; zip `28dd52b2…` (details in the table above) | [CHANGELOG](../../CHANGELOG.md) v0.1.9, [`tools/linux/`](../../tools/linux/README.md) |
+| 2026-11-12 | 0030 and 0031 as well (16:9: "Widescreen edges" = Raw by default, stage-locked view as an option); zip `5c1adaac…` (details in the table above); standalone FinalBurn Neo (test, W01-W05) separately | [CHANGELOG](../../CHANGELOG.md) v0.1.9, [`patches/fbneo/README.md`](../../patches/fbneo/README.md) (patch 34) |
+| 2026-11-12b | 0032 as well (HSFA zone of the states checked before being applied, bounded values); zip `6bf00dee…` (details in the table above); standalone FinalBurn Neo (test, W01-W06) separately | [CHANGELOG](../../CHANGELOG.md) v0.1.9, [`patches/fbneo/README.md`](../../patches/fbneo/README.md) (patch 35) |
 
 Game archives: none has been delivered since v0.1; everyone builds them from their ISO, and the reference
 fingerprints are in [construction-iso.md](construction-iso.md). The test zips of the graft (Hyper + Arcade) and of the

@@ -3,7 +3,7 @@
 Upper avec les quatre persos de *Street Fighter Alpha 3 MAX* (PSP) : Eagle, Maki, Yun et Ingrid. Le résultat est
 l'archive FBNeo `sfa3umhsfa.zip`, à l'état du lot **2b31** (banc_max52). On part de deux disques seulement :
 - l'ISO PS2 de *Street Fighter Alpha Anthology* (USA) ;
-- l'ISO PSP de *SFA3 MAX* (Europe, ULES-00235 v1.01).
+- l'ISO PSP de *SFA3 MAX*, Europe (ULES-00235 v1.01) ou USA (ULUS-10062) : même jeu à l'octet (`psp_region.py`).
 
 Il ne faut ni programme d'arcade, ni EBOOT déchiffré, ni dump. Seul outil en plus : `vasm` (`vasmm68k_mot`), qui
 assemble le code MAX.
@@ -12,7 +12,7 @@ assemble le code MAX.
 
 | Étape | Outil | Entrées | Sorties |
 |---|---|---|---|
-| `psp` | `hsfa_build.py` (`tools/max/iso_psp.py`) | ISO PSP | `cache/psp/BOOT.BIN` (EBOOT déjà en clair dans l'ISO), `pac/pl26-29_e.pac` ; identité et empreintes contrôlées |
+| `psp` | `hsfa_build.py` (`psp_region.py`, `tools/max/iso_psp.py`) | ISO PSP | `cache/psp/BOOT.BIN` (EBOOT déjà en clair dans l'ISO ; US : remis en disposition européenne), `pac/pl26-29_e.pac` ; édition et empreintes contrôlées |
 | `max_donnees` | `regen_max.py` | ISO PSP (`DATA`), sorties d'Upper (anims, X_DATA, extraction, `mame_ro5`), ROM graphique de SFA3 (`cache/arcade`) | `cache/max_regen/` : cache MAX v2 (`converti/`, `fork/`, `s/`) et sources `.s` de `rosette_code`, avec les outils de `max/` |
 | `son_uppermax` | `son/chaine_son.py` | ISO PSP (pac, `se_mid.pac`), ROM son hybride d'Upper, module ro9 | `travail/agent_son_max/roms_son_max_pas/` (hx3.*), `commandes_voix_max.s`, `commandes_son_max.s` |
 | `prog_uppermax` | `um_prog.py` (+ `fige.py`, `integration_2b31/`) | Upper sans MAX (banc de référence), cache MAX, sources | `travail/mame_ro5um/banc/` (programme, `ext_*.bin`, banques) |
@@ -22,6 +22,13 @@ Sans `--psp-iso`, `uppermax` donne Upper sans les persos MAX, identique à `--je
 
 ## Contenu du dossier
 
+- `psp_region.py` : éditions acceptées du disque PSP (DISC_ID de `PARAM.SFO`) et passage à la disposition européenne,
+  pour laquelle les outils de `max/` sont écrits. Europe ULES-00235 : telle quelle. USA ULUS-10062 : mêmes fichiers de
+  données (dossier `USA/DATA`, suffixe `_U`, écrits sous les noms `*_e.pac`) ; `BOOT.BIN` remis aux adresses
+  européennes (`relaie()` : 2 `nop` en `0xBDAC4`, sauts, branches, paires HI16/LO16 et mots relogés par les tables
+  `.rel.*` du PRX) ; 6 lignes « Shadowloo » réécrites « Shadaloo » (`normalise()`, 6 règles, empreintes européennes
+  vérifiées). Japon (ULJM) : refusé. `python3 psp_region.py ISO` : contrôle d'une ISO.
+
 - `regen_max.py` : pilote de régénération du cache MAX. Il suit l'ordre de l'atelier :
   - Yun sans l'onde d'efct pour `gfx_fork` ;
   - `portraits_fork` après l'habillage ;
@@ -30,6 +37,8 @@ Sans `--psp-iso`, `uppermax` donne Upper sans les persos MAX, identique à `--je
   Il ajoute les compléments (scripts et palettes de fin, sauts, parcours). Sans programme d'arcade, il saute les
   étapes d'apprentissage de la Rosette et lit les tables apprises versionnées dans `max/`. L'option `--sfa3ud` sert
   au développement : elle refait cet apprentissage.
+  Il copie le `DATA` de l'ISO sous les noms européens (`psp_region.donnees`) et lance `dialogues_max.py` (qui relit
+  l'ISO, chemin `eur/data` en dur) avec une lecture servie par ce cache : `max/` reste inchangé.
 - `parcours_max.json` : table de décision, avec des ids seulement. C'est le tirage du parcours Arcade relevé sur PSP
   (R6 de l'intégration). Le rang 5, le rival et le boss sont relus dans l'EBOOT.
 - `traduire_2b31.py` : copie du `max/outils/rosette_code/traduire.py` de **d98c4f1**. Il sert seulement à produire
@@ -72,14 +81,15 @@ l'octet : `um_prog.py … --upper <Upper v160> --env A8_ENTREE=0 …` (tous les 
   neighbouring byte) must be listed in `integration_2b31/ag/conv/non_resolus_admis.tsv` (file, entry label, normalised
   instruction, count, verdict, reason); `prepare_max.py` stops on any other. Verdicts: `admis` (hand-written in image
   layout, word access, symbol checked elsewhere), `mort` (crossed intros skipped by the `bra` of `sources()`; checked:
-  the line must lie in the skipped zone), `defaut_connu` (Yun `$32D`, to be removed when its fix lands). A listed line
+  the line must lie in the skipped zone), `defaut_connu` (known defect whose fix is being benched; none left since max58: Yun `$32D` is now typed in `ag/conv/types_complement.tsv`). A listed line
   that disappears is reported (`AVIS`), not blocking. `CONV_NON_RESOLUS_LIBRES` (even empty) lets everything through, to
   rebuild old batches; an engine address let through by `CONV_SANS_ADRESSES` is not counted.
-- **Switches, default 0 until the test bench validates them** (default build = batch max57, byte for byte):
-  `MAX_615940_PSP=1` (linked effect offset table `0x615940` <- PSP `0x2205E8`), `MAX_MASQUES_PSP=1` (Arcade masks
-  `0x61B540` / `0x61B4E0` / `0x61B510` <- PSP `0x20B676` / `0x20B6A0` / `0x20B6CA`): MAX entries read from the EBOOT, the
-  set of native entries that differ is checked; `MAX_PALE_PLEINES=1`: full MAX effect palette blocks (36, Ingrid 72)
-  instead of 30 (the cut is now written to the build log).
+- **PSP-aligned tables, ON by default since max58** (benched 12-13/11: values = PSP, Arcade like the natives, no
+  regression; `=0` gives back max57 + the Yun `$32D` fix): `MAX_615940_PSP` (linked effect offset table `0x615940` <- PSP
+  `0x2205E8`), `MAX_MASQUES_PSP` (Arcade masks `0x61B540` / `0x61B4E0` / `0x61B510` <- PSP `0x20B676` / `0x20B6A0` /
+  `0x20B6CA`): MAX entries read from the EBOOT, the set of native entries that differ is checked.
+- **Switch, default 0** (measured first, see the arbitrations): `MAX_PALE_PLEINES=1`: full MAX effect palette blocks
+  (36, Ingrid 72) instead of 30 (the cut is now written to the build log).
 
 ## Garanties (07/11, agent script_um)
 

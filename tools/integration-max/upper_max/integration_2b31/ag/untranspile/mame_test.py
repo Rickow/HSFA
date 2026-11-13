@@ -605,10 +605,14 @@ def main():
                 tfin = o_pj
                 for k, n in enumerate(afin): struct.pack_into('>I', img, tfin + 4*k, AN.swapped(ava[n]) if n else 0)
                 o_pj = tfin + 4*len(afin)
-                w = ([0x4279, 0x0080, 0x4240] if MAX else []) + [0x48e7, 0x8080, 0x7000, 0x102d, (T.D8_HOME + 1) & 0xffff,   # MOVEM.L D0/A0,-(SP) ; MOVEQ #0,D0 ;
+                inv = IM.fin_invites() if MAX else []               # (13/11, session MAX) invités des fins MAX (objet joueur 3)
+                w = ([0x4279, 0x0080, 0x4240] if MAX else []) + [0x48e7, 0x8080, 0x7000, 0x102d, (T.D8_HOME + 1) & 0xffff]   # MOVEM.L D0/A0,-(SP) ; MOVEQ #0,D0 ;
                                                                        # MOVE.B $87F1(A5),D0 (octet bas de D8 = index)
-                     0x0c40, len(afin), 0x6412,                        # CMPI.W #N,D0 ; BCC fin
-                     0xe548, 0x41f9, tfin >> 16, tfin & 0xffff,        # LSL.W #2,D0 ; LEA tfin,A0
+                for nf_, id_ in inv:                                # CMPI.W #fin,D0 ; BNE.S +16 ; MOVE.B #id,$FF8D03 ; MOVE.B #1,$FF8C01
+                    w += [0x0c40, nf_, 0x6610, 0x13fc, id_, 0x00ff, 0x8d03, 0x13fc, 0x0001, 0x00ff, 0x8c01]
+                w += [0x0c40, len(afin), 0x6412]                       # CMPI.W #N,D0 ; BCC fin
+                w += [
+0xe548, 0x41f9, tfin >> 16, tfin & 0xffff,        # LSL.W #2,D0 ; LEA tfin,A0
                      0x2030, 0x0000, 0x6704,                           # MOVE.L 0(A0,D0.W),D0 ; BEQ fin
                      0x2b40, P['be48'],                                # MOVE.L D0,$be48(A5)
                      0x4cdf, 0x0101, 0x4e75]                           # fin : MOVEM.L (SP)+,D0/A0 ; RTS
