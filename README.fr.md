@@ -13,16 +13,18 @@
    Pi ; essayé sur un Pi 3B) ; Batocera 43 : `hsfa-<version>-cores-batocera.zip` et son guide. Chaque archive
    contient le cœur 4:3 (`fbneo_hsfa`) et le cœur 16:9 (`fbneo_hsfaws`), avec leur licence. La version stable est la
    **v0.1.10** ; les versions plus anciennes et les pré-versions sont sur la même page.
-2. **Construire les jeux depuis votre ISO** (Python 3.8+, environ 6 minutes). Sans rien installer : le constructeur
-   tout-en-un `hsfa-constructeur-<système>.zip` de la release (Windows, Linux, macOS). Sinon : télécharger
-   `hsfa-<version>-construction.zip` dans la release (ou ce dépôt), puis lancer **`construire.sh`** (Linux, macOS, WSL) ou
-   double-cliquer sur **`construire.bat`** (Windows, expérimental : pas encore testé) et lui donner votre ISO. Il prépare
-   Python, compile l'encodeur Ogg si `gcc` est là et construit les trois jeux dans `sortie/archives/`. À la main :
+2. **Construire les jeux depuis votre ISO** (environ 10 minutes). Windows, Linux, macOS : le constructeur tout-en-un
+   `hsfa-constructeur-<système>.zip` de la release (Windows : `hsfa-constructeur-windows-x86_64.zip`, avec fenêtre),
+   sans rien installer ; les zips arrivent dans le dossier de sortie, les fichiers de travail dans son sous-dossier
+   `hsfa-travail/`. Usage avancé (Python 3.8+) : cloner ce dépôt (ou prendre l'archive « Source code » de GitHub),
+   puis lancer **`construire.sh`** (Linux, macOS, WSL) et lui donner votre ISO : il prépare Python, compile
+   l'encodeur Ogg si `gcc` est là et construit les trois jeux dans `sortie/` (fichiers de travail dans
+   `sortie/hsfa-travail/`). À la main :
    ```bash
    pip install -r requirements.txt
    python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" --sortie hsfa_sortie
    ```
-   On obtient `hsfa_sortie/archives/sfa3hsfa.zip` (SFA3), `sfa3uhsfa.zip` (Upper) et `sfa3hhsfa.zip` (Hyper).
+   On obtient `hsfa_sortie/sfa3hsfa.zip` (SFA3), `sfa3uhsfa.zip` (Upper) et `sfa3hhsfa.zip` (Hyper).
    - L'ISO doit être l'USA (`SLUS-21317`), en image `.iso` (2 048 octets par secteur) ; la variante « All Unlocked »
      convient aussi. Un `.chd` se convertit d'abord (`chdman extractdvd`).
    - La musique est rangée en Ogg Vorbis : il faut `gcc` et `g++`. L'encodeur (`tools/flux/oggenc`) se compile une

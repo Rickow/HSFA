@@ -49,7 +49,7 @@ HSFA stands on the work of many people. Thank you all.
   lists and frame data checked against our bench, hidden content of the Anthology, CPS-2 music loops.
 - **omegakatana92**, [Street-Fighter-Alpha-Recomp](https://github.com/omegakatana92/Street-Fighter-Alpha-Recomp-):
   *Street Fighter Alpha* port made with cps2recomp; its memory map of SFA1 was read as a reference. No code taken.
-- **theweathervane**, [sfa3max-decomp](https://github.com/theweathervane/sfa3max-decomp): C decompilation of the PSP
+- **theweathervane**, [a3mx](https://github.com/theweathervane/a3mx) (formerly sfa3max-decomp): C decompilation of the PSP
   *Street Fighter Alpha 3 MAX* (US); its table of per-character round behaviour led us to align the MAX characters of
   Upper MAX on the PSP (addresses converted to the European release and checked on it). Ideas only: no code taken
   (GPL-3.0).

@@ -3,7 +3,7 @@
 tous les fichiers sont fabriques ici (dossiers temporaires, signal synthetique en entiers).
 
   test_windows.py [--parties P,P...] [--natifs BIN] [--exe EXE] [--non-admin] [--rapport FICHIER]
-  parties : liens maison fige encodage git flux (defaut) ; exe (avec --exe : l'executable PyInstaller) ;
+  parties : liens maison fige encodage git flux (defaut) ; exe, interprete (avec --exe : l'executable PyInstaller) ;
             etape (seulement DANS l'executable : une etape lancee comme hsfa_build le fait)
   --non-admin : relance « liens » avec un jeton SANS droit d'administrateur ni privilege (comme un compte limite, ou un
                 administrateur sous UAC sans elevation) ; l'enfant verifie qu'os.symlink y echoue (WinError 1314)
@@ -24,6 +24,8 @@ Points couverts (src/hsfa/liens.py, ticket #2 et PIEGES_WINDOWS) :
   flux      hsfa_oggenc / fluxtool : ADX synthetique -> PCM -> Ogg (flux_ogg.encode, chaine de la construction) ->
             PCM ; empreintes = celles de Linux (REF_FLUX)
   exe       hsfa-constructeur --auto-test ; PYTHONUTF8 honore ; l'exe comme « python » (-c, script .py)
+  interprete l'exe comme « python » des etapes, reponses comparees au vrai python : PYTHONPATH, dossier courant, -I, -B,
+            PYTHONDONTWRITEBYTECODE, codes de sortie, script a un argument stdin ouvert (attente d'Entree de la v0.1.10)
 """
 import argparse, hashlib, os, shutil, struct, subprocess, sys, tempfile
 
@@ -152,6 +154,12 @@ def _liens(liens, T, exige_sans_droit):
     verifie("liens/dossier/realpath", os.path.normcase(os.path.realpath(L)) == os.path.normcase(os.path.realpath(S)),
             os.path.realpath(L))
     verifie("liens/dossier/lien_si_absent_rien", liens.lien_si_absent(S, L) is None)
+    # lien qui designe un autre endroit (dossier de sortie deplace / range en hsfa-travail, v0.1.11) : refait
+    S2 = os.path.join(T, "Source deplacee"); os.makedirs(S2); open(os.path.join(S2, "a.txt"), "wb").write(b"neuf\n")
+    L2 = os.path.join(T, "lien_perime"); liens.lien(S, L2)
+    r = liens.lien_si_absent(S2, L2)
+    verifie("liens/dossier/lien_perime_refait", r is not None and open(os.path.join(L2, "a.txt"), "rb").read() == b"neuf\n"
+            and os.path.isfile(os.path.join(S, "a.txt")), "%s ; source d'origine intacte : %s" % (r, os.path.isfile(os.path.join(S, "a.txt"))))
     # cible relative (relative au dossier du lien, comme os.symlink)
     os.makedirs(os.path.join(T, "r")); p2 = liens.lien(os.path.join("..", "Source dossier é ø"), os.path.join(T, "r", "rel"))
     verifie("liens/dossier/cible_relative", os.path.isfile(os.path.join(T, "r", "rel", "a.txt")), p2)
@@ -588,6 +596,73 @@ def umprog(exe=None):
                 note("INFO" if cas == "env_um_prog" else "ECHEC", "umprog/%s/%s" % (nom, cas), "%s: %s" % (type(x).__name__, x))
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+INTERPRETE_SCRIPT = r"""import json, os, sys
+print("SCRIPT " + json.dumps({"argv": sys.argv, "nom": __name__, "pyc": sys.dont_write_bytecode}))
+"""
+
+
+@protege("interprete")
+def interprete(exe=None):
+    """l'executable comme « python » des etapes, compare au vrai python (memes reponses attendues) : PYTHONPATH (regen_max :
+    dialogues_max « -c import iso_psp »), dossier courant pour -c, copie sur disque prioritaire sur un module embarque,
+    -I, PYTHONDONTWRITEBYTECODE / -B, codes de sortie (sys.exit, exception, script absent), script a UN argument avec
+    stdin ouvert (v0.1.10 Windows : attente d'Entree), et la regle d'attente elle-meme (_garder_console_ouverte)"""
+    T = tempfile.mkdtemp(prefix="hsfa_interp_")
+    try:
+        pp, cwd, sd = (os.path.join(T, d) for d in ("pp", "cwd", "s"))
+        for d in (pp, cwd, sd): os.makedirs(d)
+        open(os.path.join(pp, "hsfa_essai_pp.py"), "w", encoding="utf-8").write("print('PP_OK')\n")
+        open(os.path.join(pp, "chd_iso.py"), "w", encoding="utf-8").write("print('DISQUE')\n")      # meme nom qu'un module embarque
+        open(os.path.join(cwd, "hsfa_essai_cwd.py"), "w", encoding="utf-8").write("print('CWD_OK')\n")
+        open(os.path.join(sd, "etape.py"), "w", encoding="utf-8").write(INTERPRETE_SCRIPT)
+        propre = {k: v for k, v in os.environ.items() if not k.startswith("PYTHON")}
+        regen = ("import os, runpy, sys, hsfa_essai_pp\nsys.argv = ['etape.py', 'source']\n"
+                 "runpy.run_path(%r, run_name='__main__')\n" % os.path.join(sd, "etape.py"))
+        cas = [   # nom, argv, env en plus, attendu (code, texte present dans la sortie)
+            ("pythonpath_-c", ["-c", "import hsfa_essai_pp"], {"PYTHONPATH": pp}, (0, "PP_OK")),
+            ("forme_regen_max", ["-c", regen], {"PYTHONPATH": pp}, (0, '"source"')),
+            ("dossier_courant_-c", ["-c", "import hsfa_essai_cwd"], {}, (0, "CWD_OK")),
+            ("disque_avant_embarque", ["-c", "import chd_iso"], {"PYTHONPATH": pp}, (0, "DISQUE")),
+            ("-I_ignore_pythonpath", ["-I", "-c", "import hsfa_essai_pp"], {"PYTHONPATH": pp}, (1, "ModuleNotFoundError")),
+            ("pythondontwritebytecode", ["-c", "import sys; print('PYC', sys.dont_write_bytecode)"],
+             {"PYTHONDONTWRITEBYTECODE": "1"}, (0, "PYC True")),
+            ("-B", ["-B", "-c", "import sys; print('PYC', sys.dont_write_bytecode)"], {}, (0, "PYC True")),
+            ("-u", ["-u", "-c", "print('U_OK')"], {}, (0, "U_OK")),
+            ("sys.exit(3)", ["-c", "import sys; sys.exit(3)"], {}, (3, "")),
+            ("exception", ["-c", "raise ValueError('essai')"], {}, (1, "ValueError: essai")),
+            ("script_absent", [os.path.join(T, "absent.py")], {}, (2, "absent.py")),
+            ("script_un_argument_stdin_ouvert", [os.path.join(sd, "etape.py"), "source"], {}, (0, '"source"')),
+        ]
+        for nom, py in (("python", sys.executable), ("exe", exe and os.path.abspath(exe))):
+            if not py: continue
+            for c, args, plus, (code, texte) in cas:
+                # stdin = tube jamais ferme par l'essai : une attente d'Entree se voit au delai depasse
+                p = subprocess.Popen([py] + args, cwd=cwd, env=dict(propre, **plus), stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                try:
+                    out = p.communicate(timeout=120)[0].decode("utf-8", "replace")
+                except subprocess.TimeoutExpired:
+                    p.kill(); p.communicate()
+                    verifie("interprete/%s/%s" % (nom, c), False, "delai depasse : attente (stdin ?)"); continue
+                verifie("interprete/%s/%s" % (nom, c), p.returncode == code and texte in out,
+                        "code %d : %s" % (p.returncode, out.strip().replace("\n", " | ")[-300:]))
+        # regle d'attente d'Entree de l'executable (Windows, image glissee) : jamais en role d'interpreteur
+        sys.path.insert(0, ICI)
+        try:
+            import hsfa_constructeur as H
+            g = H._garder_console_ouverte
+            verifie("interprete/attente/image_glissee", g(["exe", "C:\\jeux\\anthology.iso"], False, windows=True))
+            verifie("interprete/attente/role_python", not g(["exe", "C:\\jeux\\anthology.iso"], True, windows=True))
+            verifie("interprete/attente/script_un_argument", not g(["exe", "convert_max.py"], False, windows=True))
+            verifie("interprete/attente/option", not g(["exe", "--console"], False, windows=True))
+            verifie("interprete/attente/hors_windows", not g(["exe", "anthology.iso"], False, windows=False))
+        finally:
+            sys.path.remove(ICI)
+    finally:
+        shutil.rmtree(T, ignore_errors=True)
+
+
 def lance_non_admin(argv):
     """relance argv avec un jeton restreint (groupe Administrateurs en refus seul, aucun privilege, integrite moyenne :
     comme un compte limite / UAC sans elevation) ; rend le code de sortie"""
@@ -676,6 +751,7 @@ def main():
     if "coeur" in P: coeur()
     if "exe" in P: exe_(a.exe)
     if "umprog" in P: umprog(a.exe)
+    if "interprete" in P: interprete(a.exe)
     if "etape" in P: etape()
     n = sum(1 for r in resultats if r[0] == "ECHEC")
     bilan = "BILAN : %d OK, %d ECHEC, %d INFO (%s, %s)" % (sum(1 for r in resultats if r[0] == "OK"), n,

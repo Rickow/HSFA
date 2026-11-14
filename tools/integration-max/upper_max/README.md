@@ -16,7 +16,7 @@ assemble le code MAX.
 | `max_donnees` | `regen_max.py` | ISO PSP (`DATA`), sorties d'Upper (anims, X_DATA, extraction, `mame_ro5`), ROM graphique de SFA3 (`cache/arcade`) | `cache/max_regen/` : cache MAX v2 (`converti/`, `fork/`, `s/`) et sources `.s` de `rosette_code`, avec les outils de `max/` |
 | `son_uppermax` | `son/chaine_son.py` | ISO PSP (pac, `se_mid.pac`), ROM son hybride d'Upper, module ro9 | `travail/agent_son_max/roms_son_max_pas/` (hx3.*), `commandes_voix_max.s`, `commandes_son_max.s` |
 | `prog_uppermax` | `um_prog.py` (+ `fige.py`, `integration_2b31/`) | Upper sans MAX (banc de référence), cache MAX, sources | `travail/mame_ro5um/banc/` (programme, `ext_*.bin`, banques) |
-| `paquet_uppermax` | `tools/fbneo-hsfa/paquet_fbneo.py upper_max` | tout ce qui précède | `archives/sfa3umhsfa.zip` |
+| `paquet_uppermax` | `tools/fbneo-hsfa/paquet_fbneo.py upper_max` | tout ce qui précède | `sfa3umhsfa.zip` (racine de la sortie) |
 
 Sans `--psp-iso`, `uppermax` donne Upper sans les persos MAX, identique à `--jeux upper`.
 

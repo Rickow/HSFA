@@ -6,6 +6,12 @@
 Alpha Anthology*: extraction, translation of the three modules, graphics ROM, sound, tables, and FBNeo core archives.
 Full report: [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 of the journal).
 
+**Players (Windows, Linux, macOS): use the all-in-one builder** `hsfa-constructeur-<system>.zip` attached to the
+releases (`tools/constructeur/`; Windows: `hsfa-constructeur-windows-x86_64.zip`, with a window): nothing to install,
+it reads `.iso` and `.chd` files and runs this same chain. This guide is for advanced use: clone the repository (or take
+GitHub's "Source code" archive) and run `hsfa_build.py` (below) or `construire.sh` (Linux, macOS, WSL). Since v0.1.11
+there is no `construire.bat` and no `hsfa-<version>-construction.zip` any more.
+
 ## 1. Requirements
 
 - Python 3.8+ and the modules of `requirements.txt` (`pip install -r requirements.txt`, preferably in a venv);
@@ -59,13 +65,28 @@ python3 scripts/construction/hsfa_build.py \
 | `--outils-*` | location of each group of tools (otherwise `HSFA_OUTILS_*`) |
 
 Each step is **idempotent**: it is skipped if its inputs, its tools and its parameters have not changed
-(`etat.json`). A full build takes about 6 min (including 1 min 30 of Ogg encoding); a rerun without changes, a few seconds.
+(`etat.json`). A build of the three games takes about 10 min (SFA3 ~3 min, Upper ~3 min, Hyper ~4 min, Ogg encoding
+included), Upper MAX ~3 min more; a rerun without changes, a few seconds; longer on a slow machine.
+
+Before the first step, `hsfa_build.py` announces its **estimated time**, per game and in total, counting only the steps
+that will run (the steps already up to date in `etat.json` count for nothing):
+`Durée estimée / estimated time: SFA3 ~3 min, Upper ~3 min, Hyper ~4 min ; total ~9 min, 23 étapes / steps`. The
+reference durations are the medians of about a hundred builds (`DUREES_REF` in `hsfa_build.py`); a step already measured
+in the same output folder counts for its own time, the others are scaled by the speed of this machine measured there.
+Each step line then shows `(étape/step n/N, reste/left ~X min)`, the time left following the speed observed so far.
+A step shared by several games counts for the first game that needs it (SFA3, Upper, Hyper, Upper MAX, Hyper +
+Arcade, Hyper + Arcade MAX).
+
+Any game can be built alone or with others, in any order: the steps it depends on are added (`--jeux hyper` alone also
+runs Upper's graphics step `gfx_upper`, without making Upper's archive). `scripts/construction/test_plan.py` checks the
+plan of every combination of games, without game data.
 
 ## 4. Outputs and checking
 
-- `hsfa_sortie/EMPREINTES.txt`: md5 of all the ROMs produced and of the archive contents.
-- `hsfa_sortie/journal.txt` (marks `>>` step, `ok`, `!!` anomaly) and `journaux/<étape>.log`.
-- Core archives: `archives/sfa3hsfa.zip`, `sfa3uhsfa.zip`, `sfa3hhsfa.zip`. They are deterministic: two
+- `hsfa_sortie/hsfa-travail/EMPREINTES.txt`: md5 of all the ROMs produced and of the archive contents.
+- `hsfa_sortie/hsfa-travail/journal.txt` (marks `>>` step, `ok`, `!!` anomaly) and `journaux/<étape>.log`.
+- Core archives, at the root of the output folder (since v0.1.11; before: `archives/`): `sfa3hsfa.zip`,
+  `sfa3uhsfa.zip`, `sfa3hhsfa.zip`. They are deterministic: two
   builds give the same bytes, Ogg included. Since 08/11 (§206, `hsfa_oggenc`), this holds from one
   system to another (Linux, Windows, macOS, x86_64, ARM): same fingerprints everywhere.
 
@@ -102,7 +123,7 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
     --psp-iso "Street Fighter Alpha 3 MAX (USA).iso" --sortie hsfa_sortie --jeux upper,uppermax
 ```
 
-- Result: `archives/sfa3umhsfa.zip` (driver `sfa3umhsfa` of the core). It is the state of batch **2b31**, ported to the current translator (v161: the
+- Result: `sfa3umhsfa.zip` (driver `sfa3umhsfa` of the core). It is the state of batch **2b31**, ported to the current translator (v161: the
   program follows Upper's). The sound ROM is identical to that batch; with `--arcade`, the graphics too, except `hsfa_info.txt`.
 - No PPSSPP dump and no decrypted EBOOT are needed: the ISO's `BOOT.BIN` is already in the clear (a "decrypted" ISO
   is accepted too: it only differs by `EBOOT.BIN`, which is not read). The ISO is checked: edition (`PARAM.SFO`) and
@@ -127,7 +148,7 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
 
 - Translator: the graft has its frozen copy of translator **v161** (`untranspile3_v161`, states ro9a37 to ro9a41, §221, §223, §224, §228, §230): the
   v161 fixes (§219) reach Hyper + Arcade.
-- Result: `archives/sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a41** (13/11; ro9a40 + 10 pairs of words of the graft's data no longer relocated as code pointers, §230; ro9a40: colours and portraits of the versions, green band of the logo transition, §225-§228). `hyperarcade`
+- Result: `sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a41** (13/11; ro9a40 + 10 pairs of words of the graft's data no longer relocated as code pointers, §230; ro9a40: colours and portraits of the versions, green band of the logo transition, §225-§228). `hyperarcade`
   adds `upper` and `hyper`: the graft starts from their outputs (modules, animations, banks, sound). Extra steps:
   `greffe_hyperarcade` (frozen code of `tools/greffe-arcade/construction/`, about 3 min) and `paquet_hyperarcade`.
 - **With the arcade ROM and the replay table**: the zip is the ro9a41 one (delivered on 13/11, CRC `C9107FC2`), except

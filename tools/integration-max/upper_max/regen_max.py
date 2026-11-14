@@ -74,7 +74,8 @@ class Regen:
         nom = nom or "_".join([os.path.splitext(args[0])[0]] + [x.replace("/", "_") for x in args[1:]])
         j = os.path.join(s.R, "journaux", nom + ".log"); t = time.time()
         with open(j, "w") as f:
-            r = subprocess.run([s.py] + args, cwd=cwd or os.path.join(s.O, dossier), env=env or s.env(), stdout=f, stderr=subprocess.STDOUT)
+            r = subprocess.run([s.py] + args, cwd=cwd or os.path.join(s.O, dossier), env=env or s.env(), stdout=f, stderr=subprocess.STDOUT,
+                               stdin=subprocess.DEVNULL)   # une etape ne lit jamais la console
         der = open(j, errors="replace").read().strip().splitlines()[-1:] or [""]
         s.log("%s/%s : code %d (%.0f s) %s" % (dossier, " ".join(args), r.returncode, time.time() - t, der[0][:110]))
         if r.returncode and not echec_admis: raise SystemExit("regen_max : échec de %s %s (journal %s)" % (dossier, " ".join(args), j))
@@ -113,7 +114,7 @@ class Regen:
         code = ("import assets_natifs as A; A.EXTRACT=%r; A.CACHE=A.CACHE_ECRIT=%r; A.fichier(289)"
                 % (os.path.join(S, "cache", "anthology_extract"), os.path.join(R, "work", "cps2", "anims")))
         subprocess.run([s.py, "-c", code], cwd=os.path.join(R, "depot", "src", "hsfa"), check=True,
-                       env=s.env(XDATA=os.path.join(S, "cache", "iso", "X_DATA.BIN")), stdout=subprocess.DEVNULL)
+                       env=s.env(XDATA=os.path.join(S, "cache", "iso", "X_DATA.BIN")), stdout=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
         # tuiles d'Upper (HSFA_GFX) : les outils MAX numérotent les tuiles neuves à partir de $40000 + tuiles d'Upper ;
         # l'intégration et le paquet les placent en G_MAX (max_cache.py, $4DAAB = arcade). En voie ISO seule, Upper a
         # moins de tuiles propres (celles de l'Anthology sont dans la ROM reconstruite) : on complète de tuiles nulles

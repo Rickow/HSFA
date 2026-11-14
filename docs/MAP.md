@@ -1,8 +1,8 @@
 # Project map
 
 One page to find your way around HSFA: the games, where each kind of information lives, how a change is proven, and
-the project's vocabulary. It summarises and links; it copies nothing. State on 2026-11-14 (release v0.1.10, journal
-up to §231). If this page and a linked source disagree, the source is right.
+the project's vocabulary. It summarises and links; it copies nothing. State on 2026-11-14, evening (release v0.1.10, journal
+up to §232). If this page and a linked source disagree, the source is right.
 
 ## 1. The project in three sentences
 
@@ -20,7 +20,7 @@ Details: [AGENTS.md](../AGENTS.md) §1, [README](../README.md).
 | Hyper Street Fighter Alpha | `ro9` | `sfa3hhsfa` | `hyper` | VERSUS complete |
 | Upper MAX (Upper + the four PSP characters) | `ro5` + PSP disc | `sfa3umhsfa` | `uppermax --psp-iso` | experimental |
 | Hyper + Arcade (Upper's Arcade mode grafted onto Hyper, "route B") | `ro9` + Arcade layer of `ro5` | `sfa3hahsfa` | `hyperarcade` | experimental, state `ro9a41` |
-| Hyper + Arcade with the MAX characters | same + PSP disc | `sfa3hamhsfa` | `hyperarcademax --psp-iso` | in progress: Eagle playable in VERSUS (§231), not released |
+| Hyper + Arcade with the MAX characters | same + PSP disc | `sfa3hamhsfa` | `hyperarcademax --psp-iso` | in progress: Eagle playable in VERSUS (§231, experimental, no release yet); Eagle's Arcade mode under way |
 
 Building: [guide/construction-iso.md](guide/construction-iso.md). What each release contains:
 [CHANGELOG.md](../CHANGELOG.md), [guide/LIVRAISONS.md](guide/LIVRAISONS.md). Development bench: a MAME fork, game
@@ -71,11 +71,15 @@ Kept short on purpose; the table that is maintained is [AGENTS.md](../AGENTS.md)
 
 | workstream | state |
 |---|---|
-| MAX characters in the graft | five steps: L1 tables and sound (done, invisible to the player), L2 Eagle in VERSUS (done, §231), L3 Eagle complete (designed), L4 Maki and L5 Yun and Ingrid (designed) |
-| SFA1 / SFA2 stages in the graft | data step done; first wiring step ready; shown through a core option during the prototype |
-| Upper MAX | fidelity to the PSP game audited; remaining ending defects being fixed |
+| MAX characters in the graft | five steps: L1 tables and sound (done, invisible to the player), L2 Eagle in VERSUS (done, §231), L3 Eagle complete (first step proven on the 85 Arcade runs; paused), L4 Maki and L5 Yun and Ingrid (designed) |
+| Arcade endings of the graft | now compared image by image with Upper; ending actor routines being moved from Hyper's counterparts to Upper's own code (next state `ro9a42`) |
+| SFA1 / SFA2 stages in the graft | data step done; first wiring step done (§232, switch off by default); shown through a core option during the prototype |
+| Upper MAX | fidelity to the PSP game audited; the ending script engine (identical in the arcade game and in Upper) has been read and the PSP-to-arcade conversion rules rewritten from it; ending fixes resume after measurements |
+| Knowledge index (`re/`) | two identification passes on Hyper (combat chain, stage drawing, menus); map of the PSP game's functions and of their arcade, Upper and Hyper counterparts, each link with its own level of proof |
+| Hyper's in-game options page | designed (stored in the EEPROM, original / HSFA presets); built after the stages and the MAX characters |
 | Hyper's per-version voices from the disc alone | designed (replay table rebuilt during the build, planned for v0.2) |
-| Fidelity audit of the translator and the graft | done; the largest gap is the 68000 load in fights |
+| Fidelity audit of the translator and the graft | done; the largest gap is the 68000 load in fights; data reorganisation stays on hold until that load is fully measured |
+| Builder | announced duration, progress bar, Hyper buildable alone; v0.1.11 in preparation |
 | Output targets | standalone FinalBurn Neo for Windows as a test build; a "banked board" specification later |
 
 ## 6. Vocabulary
@@ -93,7 +97,12 @@ Kept short on purpose; the table that is maintained is [AGENTS.md](../AGENTS.md)
 | byte witness | a rebuild with the new switches at 0, compared file by file with the previous frozen copy |
 | fingerprint | checksum of what the emulator actually loads; a mismatch stops the bench |
 | oracle | the measured reference (arcade, Upper, PSP or PS2 game) |
-| image address, va, map | address in the produced 68000 image; original MIPS address; `carte_image.txt` links them. Image addresses change with every build: never hard-code one |
+| image address, va, map | address in the produced 68000 image; original MIPS address; `carte_image.txt` links them. Image addresses change with every build: never hard-code one, and never carry one from a build to another |
+| file address, execution address | a routine of a PS2 module is named by its offset in the module file ("file va") or by its address when loaded; execution = file + `0x1F0000`. Always say which one |
+| byte at XOR 1 | a byte field of the PS2 game sits at the neighbouring address in the 68000 image (`$116` on the PS2 side is `$117` in the image) |
+| counterpart (homologue) | the routine of one game that plays the role of a routine of another (arcade, Upper, Hyper, PSP). In the graft, an Upper routine is either copied or served by its Hyper counterpart; a counterpart is trusted only with a proof of equivalence, and a proof never carries over from one pair of games to another |
+| read / played | "read": established by reading the code or the bytes; "played": seen in the emulator on a bench. A status says which |
+| sentinel | probe that logs, during the benches, every entry into a routine whose equivalence is not proven |
 | tag `$01` | high byte put on a 68000 address outside the ROM so that it is not converted like a PS2 address |
 | `RETAG24` | translator rule that restores the `$01` tag after a 24-bit mask; its code depends on the number of tagged ranges, so adding a range moves the translated code |
 | holes | free areas of the CPS2 memory map that receive added data |
@@ -123,3 +132,5 @@ these principles; if it cannot, stop and say why.
    characters): compare before deciding; a kept difference is a recorded decision, never an oversight.
 5. **Reuse a proven method** (Upper MAX, earlier graft steps) before inventing one.
 6. **No hard-coded image address**, no game data in the repository, everything rebuilt from the player's disc.
+7. **Know the routine before touching it**: read its entry in the function map and its counterparts (PSP / arcade /
+   Upper / Hyper) with their level of proof; a guessed counterpart is not a fix.

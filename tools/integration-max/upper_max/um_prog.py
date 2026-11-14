@@ -31,7 +31,7 @@ def lance(cmd, cwd, env, log):
     with open(log, "a") as f:
         f.write("\n=== %s (cwd %s)\n" % (" ".join(cmd), cwd)); f.flush()
         pre = ["nice", "-n", "19"] if os.name == "posix" and shutil.which("nice") else []
-        r = subprocess.run(pre + cmd, cwd=cwd, env=env, stdout=f, stderr=subprocess.STDOUT)
+        r = subprocess.run(pre + cmd, cwd=cwd, env=env, stdout=f, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
     if r.returncode: sys.exit("échec (%d) : %s ; voir %s" % (r.returncode, " ".join(cmd), log))
 
 
@@ -107,7 +107,7 @@ def main():
           XDATA=absp(a.xdata), ANIM_CACHE=absp(a.anims)), os.path.join(BANC, "construction.log"))
     # 6. marques de fin des blocs ajoutés (piège 0x960090)
     with open(os.path.join(BANC, "marques.tsv"), "w") as f:
-        r = subprocess.run([py, os.path.join(AG, "outils", "audit", "marques.py"), BANC], env=env, stdout=f)
+        r = subprocess.run([py, os.path.join(AG, "outils", "audit", "marques.py"), BANC], env=env, stdout=f, stdin=subprocess.DEVNULL)
     if r.returncode: sys.exit("ÉCHEC : marque de fin absente (marques.tsv)")
     print("prog_uppermax : persos %s ; banc %s" % (",".join(act), BANC))
 

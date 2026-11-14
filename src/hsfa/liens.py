@@ -111,16 +111,31 @@ def lien_si_absent(cible, chemin):
     """comme « os.path.lexists(chemin) or os.symlink(cible, chemin) » ; une copie presente qui n'est plus a jour
     (cible plus recente ou de taille differente) est refaite. Rend le procede employe, ou None si rien n'a ete fait."""
     if os.path.lexists(chemin):
-        if os.path.islink(chemin) or est_jonction(chemin) or os.path.isdir(chemin):
-            return None
-        try:
-            a, b = os.stat(chemin), os.stat(_absolue(cible, chemin))   # copy2 garde la date de la cible
-            if a.st_size == b.st_size and a.st_mtime_ns == b.st_mtime_ns:
+        if os.path.islink(chemin) or est_jonction(chemin):
+            if os.path.normcase(os.path.realpath(chemin)) == os.path.normcase(os.path.realpath(_absolue(cible, chemin))):
                 return None
-        except OSError:
-            pass
-        os.remove(chemin)
+            _retire_lien(chemin)       # lien vers un AUTRE endroit (dossier de sortie deplace ou range, v0.1.11) : refait
+        elif os.path.isdir(chemin):
+            return None
+        else:
+            _a_jour = False
+            try:
+                a, b = os.stat(chemin), os.stat(_absolue(cible, chemin))   # copy2 garde la date de la cible
+                _a_jour = a.st_size == b.st_size and a.st_mtime_ns == b.st_mtime_ns
+            except OSError:
+                pass
+            if _a_jour:
+                return None
+            os.remove(chemin)
     return lien(cible, chemin)
+
+
+def _retire_lien(chemin):
+    """retire un lien symbolique ou une jonction (pas sa cible) ; Windows : un lien de dossier se retire par rmdir"""
+    try:
+        os.unlink(chemin)
+    except (IsADirectoryError, PermissionError):
+        os.rmdir(chemin)
 
 
 def reel(chemin):

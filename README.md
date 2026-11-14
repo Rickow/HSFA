@@ -13,16 +13,17 @@
    a Pi 3B); Batocera 43: `hsfa-<version>-cores-batocera.zip` and its guide. Each archive holds the 4:3 core
    (`fbneo_hsfa`) and the 16:9 core (`fbneo_hsfaws`), with their licence. The stable version is **v0.1.10**; older
    versions and pre-releases are on the same page.
-2. **Build the games from your ISO** (Python 3.8+, about 6 minutes). Nothing to install: the all-in-one builder
-   `hsfa-constructeur-<system>.zip` from the release (Windows, Linux, macOS). Otherwise: download
-   `hsfa-<version>-construction.zip` from the release (or this repository), then run **`construire.sh`** (Linux, macOS, WSL) or double-click
-   **`construire.bat`** (Windows, experimental: untested so far) and give it your ISO. It sets up Python, builds the
-   Ogg encoder if `gcc` is there, and builds the three games into `sortie/archives/`. By hand:
+2. **Build the games from your ISO** (about 10 minutes). Windows, Linux, macOS: the all-in-one builder
+   `hsfa-constructeur-<system>.zip` from the release (Windows: `hsfa-constructeur-windows-x86_64.zip`, with a window),
+   nothing to install; the zips land in the output folder, the work files in its `hsfa-travail/` subfolder. Advanced
+   use (Python 3.8+): clone this repository (or take GitHub's "Source code" archive), then run **`construire.sh`**
+   (Linux, macOS, WSL) and give it your ISO: it sets up Python, builds the Ogg encoder if `gcc` is there, and builds
+   the three games into `sortie/` (work files in `sortie/hsfa-travail/`). By hand:
    ```bash
    pip install -r requirements.txt
    python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" --sortie hsfa_out
    ```
-   You get `hsfa_out/archives/sfa3hsfa.zip` (SFA3), `sfa3uhsfa.zip` (Upper) and `sfa3hhsfa.zip` (Hyper).
+   You get `hsfa_out/sfa3hsfa.zip` (SFA3), `sfa3uhsfa.zip` (Upper) and `sfa3hhsfa.zip` (Hyper).
    - The ISO must be the USA one (`SLUS-21317`), as a `.iso` image (2,048 bytes per sector); the "All Unlocked"
      variant is accepted too. Convert a `.chd` first (`chdman extractdvd`).
    - Music is packed as Ogg Vorbis: this needs `gcc` and `g++`. The encoder (`tools/flux/oggenc`) is compiled once

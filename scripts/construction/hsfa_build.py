@@ -19,6 +19,9 @@ Usage :
             mister et cps2-banques ne sont pas encore disponibles : mode BILAN (concessions par jeu et budgets mesures
             annonces, confirmation demandee, rien n'est construit ni ecrit ; --anthology et --sortie y sont
             facultatifs). --oui (--yes) confirme sans question. Langue des annonces : HSFA_LANGUE=fr|en, sinon le systeme.
+Sortie (v0.1.11) : les archives des jeux (sfa3hsfa.zip...) a la RACINE de DIR ; tout le reste (cache, travail,
+journaux, etat.json, journal.txt, EMPREINTES.txt, <jeu>_sources.txt) dans DIR/hsfa-travail/. Une sortie de l'ancienne
+forme (archives/ et etat.json a la racine) est rangee ainsi au premier passage (le rangement ne force aucune etape).
 Etapes : voir --liste.  Chaque etape est idempotente : elle est sautee si ses entrees, ses outils et ses
 parametres n'ont pas change depuis la derniere execution reussie (etat.json) et que ses sorties sont intactes.
 Dependances : Python 3.8+ ; numpy pour les etapes graphiques (gfx_*), cherche dans --python-numpy, sinon
@@ -58,6 +61,7 @@ OUTILS_DEFAUT = {
 # (hyperarcade) etat fige de la greffe Arcade dans tools/greffe-arcade/construction : code <HA_ETAT>/, recette
 # <HA_ETAT>/greffe/vars_<HA_ETAT>.txt, releves releves_<HA_ETAT>/ ; seule ligne a changer a chaque nouvelle livraison
 HA_ETAT = "ro9a41"
+TRAVAIL = "hsfa-travail"          # sous-dossier des fichiers de travail ; les archives des jeux sont a la racine de --sortie
 PYTHON_NUMPY_DEFAUT = os.environ.get("HSFA_PYTHON_NUMPY", _d("venv", "bin", "python"))
 
 # --------------------------------------------------------------------------------------------------------------------
@@ -152,6 +156,49 @@ REF_SON_MAX = {   # ROM son MAX regeneree (son/chaine_son.py) : empreintes du lo
     "hx3.13m": "65c573eb71d7963c7fbe7f22f86b114c", "hx3.14m": "1dacb518b9ce363233a499650f9b1276",
 }
 
+# Estimated duration of each step (s): medians of 97 builds (journal.txt of <workspace>/work, 5-14/11/2026: Linux x86_64,
+# Python 3 + NumPy, nice -n 19, often next to other builds), Ogg encoding included (paquet_upper, paquet_hyper). Only
+# the steps that will run count; a step already measured in this output folder (etat.json, « duree ») counts for its own
+# time, the others are scaled by the speed of this machine measured there; during the build, the time left follows the
+# speed observed so far. test_plan.py checks that every step has a duration here.
+DUREES_REF = {
+    "iso": 1, "afs": 1, "module_ro3": 1, "module_ro5": 1, "module_ro9": 1, "arcade": 9, "flux": 1, "max": 0,
+    "empreintes": 3,
+    "son_sfa3": 1, "prog_sfa3": 43, "gfx_sfa3": 102, "paquet_sfa3": 4,
+    "son_upper": 1, "sons_ps2_upper": 2, "prog_upper": 50, "gfx_upper": 88, "paquet_upper": 13,
+    "sons_ps2": 2, "son_hyper": 1, "prog_hyper": 75, "gfx_hyper": 90, "paquet_hyper": 54,
+    "greffe_hyperarcade": 155, "paquet_hyperarcade": 8,
+    "psp": 1, "max_donnees": 89, "son_uppermax": 8, "sons_ps2_uppermax": 2, "prog_uppermax": 66, "paquet_uppermax": 5,
+    "sons_ps2_hypermax": 3, "greffe_hyperarcademax": 396, "paquet_hyperarcademax": 8,
+}
+JEUX_AFFICHES = ["sfa3", "upper", "hyper", "uppermax", "hyperarcade", "hyperarcademax"]     # order of the announcement
+JEUX_LIBELLES = {"sfa3": "SFA3", "upper": "Upper", "hyper": "Hyper", "uppermax": "Upper MAX",
+                 "hyperarcade": "Hyper + Arcade", "hyperarcademax": "Hyper + Arcade MAX"}
+
+
+def duree_texte(s):
+    """« 0 min », « < 1 min », « ~3 min », « ~1 h 05 »"""
+    if s <= 0: return "0 min"
+    if s < 60: return "< 1 min"
+    m = int(s / 60 + 0.5)
+    return "~%d min" % m if m < 60 else "~%d h %02d" % (m // 60, m % 60)
+
+
+# Progress callback (the builder's window): AVANCEMENT(evenement, **infos), called from the thread of the build ;
+#   "plan"  : jeux=[(label, s)], total=s, N=steps to run
+#   "etape" : n (1..N), N, nom, reste=s left, fait=False when step n starts, True when it is done (or found up to date)
+# None: the terminal lines only. An error in the callback never stops the build.
+AVANCEMENT = None
+
+
+def signale(evenement, **infos):
+    if AVANCEMENT is not None:
+        try:
+            AVANCEMENT(evenement, **infos)
+        except Exception:
+            pass
+
+
 # Chemins codes en dur dans les scripts existants, remplaces a l'execution (module, attribut) -> role.
 # A rendre parametrables dans les scripts eux-memes (variable d'environnement), voir BUILD.md.
 PARAMETRAGES = [
@@ -212,6 +259,36 @@ def chemin_pour_coeur(p):
             return court.encode("mbcs", "strict") if court else p.encode("utf-8")
         except UnicodeEncodeError:
             return p.encode("utf-8")       # illisible par le coeur : musique QSound (comme sans ydata.txt)
+
+def dossier_travail(sortie):
+    """dossier des fichiers de travail d'une sortie (<sortie>/hsfa-travail) ; une sortie de l'ancienne forme (jusqu'a la
+    v0.1.10 : cache/, travail/, archives/, etat.json... a la racine) y est d'abord rangee : les archives deja construites
+    passent a la racine et etat.json suit (aucune etape refaite pour ce rangement)"""
+    sortie = os.path.abspath(sortie)
+    T = os.path.join(sortie, TRAVAIL)
+    ancien = os.path.join(sortie, "etat.json")       # marque de l'ancienne forme, deplacee EN DERNIER : un rangement
+    if not os.path.isfile(ancien):                   # interrompu (fichier verrouille...) reprend au passage suivant
+        return T
+    os.makedirs(T, exist_ok=True)
+    for n in ("journaux", "cache", "travail", "specs", "systeme", "archives", "journal.txt", "EMPREINTES.txt"):
+        if os.path.lexists(os.path.join(sortie, n)) and not os.path.lexists(os.path.join(T, n)):
+            os.replace(os.path.join(sortie, n), os.path.join(T, n))
+    e = json.load(open(ancien, encoding="utf-8"))
+    for v in e.values():                 # sorties « archives/<jeu>.zip » -> « ../<jeu>.zip » (zip deplace a la racine)
+        so = v.get("sorties") if isinstance(v, dict) else None
+        if not so: continue
+        for k in list(so):
+            if k.replace("\\", "/").startswith("archives/") and k.endswith(".zip"):
+                z, d = os.path.join(T, k), os.path.join(sortie, os.path.basename(k))
+                if os.path.isfile(z):
+                    os.replace(z, d)
+                if os.path.isfile(d):
+                    so[os.path.join(os.pardir, os.path.basename(k))] = so.pop(k)
+    json.dump(e, open(ancien + ".tmp", "w", encoding="utf-8"), indent=1)
+    os.replace(ancien + ".tmp", ancien)
+    os.replace(ancien, os.path.join(T, "etat.json"))
+    return T
+
 
 class Echec(Exception):
     pass
@@ -294,7 +371,9 @@ def _lancer(spec_chemin):
 class Construction:
     def __init__(self, a):
         self.a = a
-        self.S = os.path.abspath(a.sortie)
+        self.A = os.path.abspath(a.sortie)                # archives des jeux (racine de la sortie)
+        os.makedirs(self.A, exist_ok=True)
+        self.S = dossier_travail(self.A)                 # tout le reste (hsfa-travail/)
         for d in ("journaux", "cache", "travail", "archives", "specs"):
             os.makedirs(os.path.join(self.S, d), exist_ok=True)
         self.log = Journal(os.path.join(self.S, "journal.txt"))
@@ -321,6 +400,9 @@ class Construction:
         if self.uppermax:
             self.jeux = [j for j in self.jeux if j != "uppermax"]
             if "upper" not in self.jeux: self.jeux.insert(0 if self.jeux[:1] != ["sfa3"] else 1, "upper")
+        # fixed order (sfa3, upper, hyper, hyperarcade), whatever the order of --jeux: a step always comes after the
+        # steps it depends on (« --jeux hyper,upper » ran gfx_hyper before gfx_upper)
+        self.jeux = sorted(set(self.jeux), key=list(JEUX).index)
         self.psp = os.path.join(self.S, "cache", "psp")
         self.cache = os.path.join(self.S, "cache")
         self.xdata = os.path.join(self.cache, "iso", "X_DATA.BIN")
@@ -348,7 +430,10 @@ class Construction:
         return h.hexdigest()
 
     def cle(self, nom, deps, outils, params):
-        h = hashlib.sha1(json.dumps([nom, params], sort_keys=True).encode())
+        texte = json.dumps([nom, params], sort_keys=True)
+        if getattr(sys, "frozen", False):    # constructeur gele : depot extrait dans un dossier temporaire DIFFERENT a
+            texte = texte.replace(json.dumps(DEPOT)[1:-1], "<depot>")   # chaque lancement (_MEI...) -> cle stable
+        h = hashlib.sha1(texte.encode())
         for d in deps:
             e = self.etat.get(d)
             if not e or not e.get("fait"): raise Echec("etape %s : depend de %s, pas encore faite" % (nom, d))
@@ -397,7 +482,7 @@ class Construction:
             lg.write("\n=== %s  %s\n=== env : %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), " ".join(cmd),
                      {k: v for k, v in env.items() if k not in ("PATH", "HOME")}))
             lg.flush()
-            r = subprocess.run(cmd, env=env, stdout=lg, stderr=subprocess.STDOUT)
+            r = subprocess.run(cmd, env=env, stdout=lg, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)   # jamais d'attente
         if r.returncode:
             raise Echec("%s : le script a echoue (code %d), voir %s" % (etape, r.returncode, logp))
         self.log("%s : %.0f s (journal : %s)" % (spec.get("module") or spec["nom"], time.time() - t0,
@@ -505,8 +590,16 @@ class Construction:
     def modules_voulus(self):
         mods = {JEUX[j]["module"] for j in self.jeux}
         if "upper" in self.jeux or "hyper" in self.jeux: mods.add("ro3")   # MAX_DEMO Upper relit ro3 ; banques communes
+        if "hyper" in self.jeux: mods.add("ro5")      # gfx_upper (Upper's extended ROM, start of Hyper's), Hyper alone too
         if not self.a.sans_flux: mods.add("ro9")                            # table du lecteur de flux (= ro3 = ro5)
         return sorted(mods)
+
+    def jeux_gfx(self):
+        """games whose gfx_ step runs: the games built, plus Upper before Hyper when Hyper is built without it
+        (gfx_hyper starts from Upper's extended ROM, hsfa_gfx.bin of gfx_upper ; no Upper archive is made then)"""
+        g = [j for j in self.jeux if j != "hyperarcade"]
+        if "hyper" in g and "upper" not in g: g.insert(g.index("hyper"), "upper")
+        return g
 
     def e_module(self, m):
         os.makedirs(self.dec, exist_ok=True)
@@ -761,6 +854,7 @@ class Construction:
 
     def e_gfx(self, jeu):
         J = JEUX[jeu]; W = self.travail(jeu); U = self.O["untranspile"]
+        os.makedirs(W, exist_ok=True)             # (Hyper without Upper) gfx_upper without prog_upper, which creates W
         py = self.python_numpy()
         env = self.env(MODULE=J["module"], TRAVAIL=W, XDATA=self.xdata, ANIM_CACHE=self.anims)
         if self.plans_fenetre():                  # banques.py plans : codes dans la fenetre du plan d'abord (BUILD.md)
@@ -808,7 +902,13 @@ class Construction:
         # archives deterministes (SOURCE_DATE_EPOCH : dates fixes) et liste explicite des fichiers du jeu (HSFA_STRICT)
         self.lance("paquet_" + jeu, spec, self.env(HSFA_WORK=self.W, HSFA_SORTIE=dest, HSFA_STRICT="1",
                                                     SOURCE_DATE_EPOCH=self.a.date_source, **self.env_paquet()), nice=False)
-        return [os.path.join(dest, J["zip"] + ".zip")]
+        return [self.publie(os.path.join(dest, J["zip"] + ".zip"))]
+
+    def publie(self, z):
+        """archive construite dans hsfa-travail/archives -> racine de la sortie (son <jeu>_sources.txt reste au travail)"""
+        d = os.path.join(self.A, os.path.basename(z))
+        os.replace(z, d)
+        return d
 
     def env_paquet(self):
         """membres lus sur place par le coeur (paquet_fbneo.py) : flux musique (Upper, Hyper ; Ogg Vorbis par defaut,
@@ -895,7 +995,7 @@ class Construction:
         with open(logp, "a", encoding="utf-8") as lg:
             lg.write("\n=== %s  %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), " ".join(cmd))); lg.flush()
             r = subprocess.run((["nice", "-n", "19"] if os.name == "posix" else []) + cmd, env=self.env(),
-                               stdout=lg, stderr=subprocess.STDOUT)
+                               stdout=lg, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL)
         if r.returncode: raise Echec("greffe : echec (code %d), voir %s" % (r.returncode, logp))
         src = os.path.join(D, "outils", "greffe", "constructions", nom)
         dst = os.path.dirname(self.travail("hyperarcade"))
@@ -923,7 +1023,7 @@ class Construction:
                    HSFA_OUTILS=os.path.join(DEPOT, "tools"), SOURCE_DATE_EPOCH=self.a.date_source,
                    HSFA_CONSTR=os.environ.get("HA_NOM", HA_ETAT + "_fige"), **self.env_paquet()),
                    nice=False)
-        return [os.path.join(dest, "sfa3hahsfa.zip")]
+        return [self.publie(os.path.join(dest, "sfa3hahsfa.zip"))]
 
     # ---- (L2 of the MAX integration) hyperarcademax : graft WITH the MAX characters ------------------------------
     def greffe_ha(self, etape, dest, nom, vars_):
@@ -936,7 +1036,8 @@ class Construction:
         logp = os.path.join(self.S, "journaux", etape + ".log")
         with open(logp, "a", encoding="utf-8") as lg:
             lg.write("\n=== %s  %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), " ".join(cmd))); lg.flush()
-            r = subprocess.run((["nice", "-n", "19"] if os.name == "posix" else []) + cmd, env=self.env(), stdout=lg, stderr=subprocess.STDOUT)
+            r = subprocess.run((["nice", "-n", "19"] if os.name == "posix" else []) + cmd, env=self.env(), stdout=lg, stderr=subprocess.STDOUT,
+                               stdin=subprocess.DEVNULL)
         if r.returncode: raise Echec("%s : echec (code %d), voir %s" % (etape, r.returncode, logp))
         return os.path.join(dest, "outils", "greffe", "constructions", nom)
 
@@ -984,7 +1085,7 @@ class Construction:
                    HSFA_CONSTR_MAX=HA_ETAT + "_max_fige",
                    HSFA_SON_MAX=os.path.relpath(os.path.join(self.W, "agent_son_max", "roms_son_max_hyper_ps2"), self.W),
                    **self.env_paquet()), nice=False)
-        return [os.path.join(dest, "sfa3hamhsfa.zip")]
+        return [self.publie(os.path.join(dest, "sfa3hamhsfa.zip"))]
 
     def e_max(self):
         if not self.a.max:
@@ -1120,7 +1221,7 @@ class Construction:
                    SOURCE_DATE_EPOCH=self.a.date_source, MAX_BANC=os.path.relpath(os.path.join(W, "banc"), self.W),
                    MAX_SON=os.path.relpath(self.son_uppermax_dossier(), self.W), SFA3MAX_CACHE=self.max_donnees(),
                    HSFA_MAX_CACHE_DIR=os.path.join(W, "outils_max", "ag", "untranspile"), **self.env_paquet()), nice=False)
-        return [os.path.join(dest, J["zip"] + ".zip")]
+        return [self.publie(os.path.join(dest, J["zip"] + ".zip"))]
 
     def e_empreintes(self):
         lignes = ["# Empreintes des ROM et archives produites par hsfa_build.py (%s)" % time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -1136,8 +1237,8 @@ class Construction:
             r = self.roms("uppermax"); cibles += [os.path.join(r, f) for f in sorted(os.listdir(r)) if f in PRG]
         sh = os.path.join(self.W, "agent_son_ro5", "hybride", "roms_hybride")
         if "upper" in self.jeux and os.path.isdir(sh): cibles += [os.path.join(sh, f) for f in sorted(os.listdir(sh))]
-        ar = os.path.join(self.S, "archives")
-        cibles += [os.path.join(ar, f) for f in sorted(os.listdir(ar)) if f.endswith(".zip")]
+        noms = sorted({J["zip"] for J in JEUX.values() if J.get("zip")} | {"sfa3hamhsfa"})   # nos archives seulement
+        cibles += [os.path.join(self.A, n + ".zip") for n in noms]
         for p in cibles:
             if os.path.isfile(p):
                 lignes.append("%s  %9d  %s" % (md5_fichier(p), os.path.getsize(p), os.path.relpath(p, self.S)))
@@ -1203,7 +1304,7 @@ class Construction:
             E.append(("arcade", ["afs"], [os.path.join(CONSTR, "rom_iso.py"), os.path.join(U, "anthgfx.py"), os.path.join(U, "cps2rom.py"),
                                        os.path.join(os.path.dirname(U.rstrip("/")), "lz148778.py")],
                       self.e_arcade, "ROM graphique de SFA3 reconstruite depuis l'ISO (rom_iso.py) + phoenix.key"))
-        for j in [j for j in self.jeux if j != "hyperarcade"]:
+        for j in self.jeux_gfx():
             deps = ["module_" + JEUX[j]["module"], "afs", "arcade"] + (["gfx_upper"] if j == "hyper" else [])
             E.append(("gfx_" + j, deps, [U, M, os.path.dirname(U.rstrip("/"))], lambda j=j: self.e_gfx(j),
                       "tables de banques" + (" + ROM etendue + plans (hsfa_gfx/hsfa_plans)" if j != "sfa3" else "") + " de " + j))
@@ -1258,6 +1359,16 @@ class Construction:
                    self.e_paquet_uppermax, "archive FBNeo sfa3umhsfa.zip (paquet_fbneo.py upper_max)")] if self.uppermax else [])
         E.append(("max", [], [], self.e_max, "persos MAX depuis l'ISO PSP (--psp-iso ; avec --jeux ...,uppermax)"))
         E.append(("empreintes", [], [], self.e_empreintes, "empreintes de toutes les ROM et archives produites"))
+        # every dependency is in the plan, before the step (a missing one was silently dropped: --jeux hyper alone ran
+        # gfx_hyper without gfx_upper) ; checked for every combination of games by test_plan.py
+        place = {}
+        for k, (nom, deps, *_r) in enumerate(E):
+            for d in deps:
+                if d not in place:
+                    raise Echec("plan incoherent (bug de hsfa_build.py) : l'etape %s depend de %s, %s / incoherent plan: "
+                                "step %s needs %s" % (nom, d, "absente du plan" if d not in [e[0] for e in E] else
+                                                      "placee apres elle", nom, d))
+            place[nom] = k
         return E
 
     def liste(self):
@@ -1266,44 +1377,133 @@ class Construction:
             st = "faite %s" % e.get("date", "") if e.get("fait") else ("ECHEC : " + e.get("erreur", "")[:80] if e.get("erreur") else "a faire")
             print("%-14s %-60s [%s]" % (nom, desc, st))
 
+    def params(self, nom):
+        """parametres d'une etape qui entrent dans sa cle : seulement ce qui change la sortie"""
+        params = dict(iso=os.path.abspath(self.a.anthology), outils=self.O)
+        if nom == "max": params["max"] = self.a.max and os.path.abspath(self.a.max)
+        if nom in ("psp", "max_donnees", "son_uppermax", "prog_uppermax", "paquet_uppermax"):
+            params.update(psp=os.path.abspath(self.a.max), eboot=self.a.psp_eboot, uppermax=True)
+        if nom.startswith("paquet_"):
+            params.update(date_source=self.a.date_source, flux=self.a.flux_format, sans_flux=self.a.sans_flux,
+                          rejeu=self.table_rejeu_source(), redirection=self.redirection())
+        if nom == "greffe_hyperarcademax":     # (L2) recipe with MAX, PSP ISO
+            params.update(ha_vars=self.vars_greffe(), psp=os.path.abspath(self.a.max), releves=self.releves_greffe(),
+                          ha_vars_max=open(os.path.join(self.O["greffe"], HA_ETAT, "greffe", "vars_%s_max.txt" % HA_ETAT), encoding="utf-8").read().strip())
+        if nom == "greffe_hyperarcade":
+            params.update(ha_nom=os.environ.get("HA_NOM", HA_ETAT + "_fige"), ha_vars=self.vars_greffe(),
+                          voix=self.voix_greffe(), releves=self.releves_greffe())
+        if nom in ("son_hyper", "prog_hyper"):
+            params.update(rejeu=self.table_rejeu_source(), redirection=self.redirection())
+        if nom.startswith("sons_ps2"):       # (sons_ps2_upper) l'interrupteur change la sortie : il entre dans la cle
+            params["sons_ps2"] = os.environ.get("HSFA_SONS_PS2", "1")
+        if nom == "arcade": params["source"] = "arcade" if self.a.arcade else "iso"
+        if nom.startswith("gfx_"): params["plans_fenetre"] = self.plans_fenetre()
+        if nom == "gfx_hyper": params["ombre_codes"] = self.ombre_codes()
+        if nom == "iso": params["groupes"] = sorted({g for j in self.jeux for g in GROUPES_REQUIS[j]})
+        return params
+
+    def bornes(self, E):
+        """(debut, fin) de --etape / --jusqua dans la table des etapes"""
+        noms = [e[0] for e in E]
+        if self.a.etape and self.a.etape not in noms: raise Echec("etape inconnue : %s (voir --liste)" % self.a.etape)
+        if self.a.jusqua and self.a.jusqua not in noms: raise Echec("etape inconnue : %s (voir --liste)" % self.a.jusqua)
+        return (noms.index(self.a.etape) if self.a.etape else 0), (noms.index(self.a.jusqua) + 1 if self.a.jusqua else len(E))
+
+    def force(self, nom, k, debut):
+        return self.a.force or (self.a.etape and k == debut) or nom == "empreintes"
+
+    # ---- duree estimee et avancement ----------------------------------------------------------------------------------
+    def prevoit(self, E=None):
+        """plan de la construction SANS rien lancer : [(nom, a_faire, secondes estimees, jeu)] des etapes entre --etape
+        et --jusqua. Une etape est a faire si elle est forcee, pas faite, si sa cle ou ses sorties ont change, ou si une
+        etape dont elle depend est a faire (prevision prudente : elle peut finalement etre sautee)."""
+        E = E or self.etapes(); debut, fin = self.bornes(E)
+        jeu = self.jeu_des_etapes(E); vitesse = self.vitesse_poste()
+        a_faire, plan = set(), []
+        for k, (nom, deps, outils, _f, _d) in enumerate(E[:fin]):
+            if k < debut: continue
+            e = self.etat.get(nom, {})
+            faire = bool(self.force(nom, k, debut) or not e.get("fait") or any(d in a_faire for d in deps))
+            if not faire:
+                try:
+                    faire = e.get("cle") != self.cle(nom, deps, outils, self.params(nom)) or not self.sorties_intactes(e)
+                except Echec:
+                    faire = True
+            if faire: a_faire.add(nom)
+            plan.append((nom, faire, self.duree_estimee(nom, vitesse) if faire else 0, jeu[nom]))
+        return plan
+
+    def vitesse_poste(self):
+        """rapport duree mesuree / duree de reference des etapes deja faites dans CETTE sortie (etat.json) : la vitesse
+        de ce poste ; 1 sans mesure suffisante (moins d'une minute de reference)"""
+        mes = ref = 0
+        for nom, e in self.etat.items():
+            if e.get("fait") and "duree" in e and DUREES_REF.get(nom, 0) >= 5:
+                mes += e["duree"]; ref += DUREES_REF[nom]
+        return min(max(mes / ref, 0.25), 8.0) if ref >= 60 else 1.0
+
+    def duree_estimee(self, nom, vitesse=1.0):
+        """duree mesuree sur ce poste (etat.json) si l'etape y a deja ete faite, sinon reference x vitesse du poste"""
+        e = self.etat.get(nom, {})
+        return e["duree"] if "duree" in e else DUREES_REF.get(nom, 30) * vitesse
+
+    def jeu_des_etapes(self, E):
+        """{etape -> jeu} : chaque etape compte pour le PREMIER jeu (ordre JEUX_AFFICHES) dont l'archive en depend ;
+        une etape dont aucune archive ne depend (flux, max, empreintes...) compte pour le premier jeu construit. La
+        somme des durees par jeu est donc le total."""
+        archives = [j for j in JEUX_AFFICHES if "paquet_" + j in [e[0] for e in E]]
+        deps = {e[0]: e[1] for e in E}
+        besoin = {}                                # etape -> etapes dont elle depend, transitivement
+        for nom, ds, *_r in E:
+            besoin[nom] = set(ds).union(*[besoin[d] for d in ds])
+        res = {}
+        for nom in deps:
+            j = next((j for j in archives if nom == "paquet_" + j or nom in besoin["paquet_" + j]), None)
+            res[nom] = j or (archives[0] if archives else None)
+        return res
+
+    def annonce(self, plan):
+        """« Duree estimee / estimated time: SFA3 ~3 min, ... ; total ~12 min » (journal, terminal, fenetre)"""
+        par_jeu = {}
+        for _n, faire, s, j in plan:
+            if j: par_jeu[j] = par_jeu.get(j, 0) + s
+        total = sum(s for _n, _f, s, _j in plan)
+        n = sum(1 for p in plan if p[1])
+        jeux = [(JEUX_LIBELLES[j], par_jeu[j]) for j in JEUX_AFFICHES if j in par_jeu]
+        txt = ", ".join("%s %s" % (lib, duree_texte(s) if s else "à jour / up to date") for lib, s in jeux)
+        self.log("Durée estimée / estimated time: %s ; total %s, %d étapes / steps (plus sur une machine lente / longer on "
+                 "a slow machine)" % (txt, duree_texte(total), n), "")
+        signale("plan", jeux=jeux, total=total, n=n, N=n)
+        return total
+
     def run(self):
         E = self.etapes(); noms = [e[0] for e in E]
-        debut = noms.index(self.a.etape) if self.a.etape else 0
-        if self.a.etape and self.a.etape not in noms: raise Echec("etape inconnue : %s (voir --liste)" % self.a.etape)
-        fin = noms.index(self.a.jusqua) + 1 if self.a.jusqua else len(E)
+        debut, fin = self.bornes(E)
         self.log("=== hsfa_build : jeux %s, sortie %s" % (",".join(self.jeux + (["hyperarcademax"] if self.hyperarcademax else [])), self.S), "")
+        plan = {p[0]: p for p in self.prevoit(E)}
+        self.annonce(list(plan.values()))
+        N = sum(1 for p in plan.values() if p[1]); n = 0
+        prevu_fait = reel_fait = 0.0                     # temps restant recale sur la vitesse observee
+        def reste(apres):
+            f = min(max(reel_fait / prevu_fait, 0.25), 8.0) if prevu_fait >= 30 else 1.0
+            return f * sum(p[2] for q, p in plan.items() if p[1] and noms.index(q) > apres)
         for k, (nom, deps, outils, f, desc) in enumerate(E[:fin]):
             if k < debut:
                 if not self.etat.get(nom, {}).get("fait"):
                     raise Echec("--etape %s : l'etape anterieure %s n'est pas faite" % (self.a.etape, nom))
                 continue
-            params = dict(iso=os.path.abspath(self.a.anthology), outils=self.O)      # seulement ce qui change la sortie
-            if nom == "max": params["max"] = self.a.max and os.path.abspath(self.a.max)
-            if nom in ("psp", "max_donnees", "son_uppermax", "prog_uppermax", "paquet_uppermax"):
-                params.update(psp=os.path.abspath(self.a.max), eboot=self.a.psp_eboot, uppermax=True)
-            if nom.startswith("paquet_"):
-                params.update(date_source=self.a.date_source, flux=self.a.flux_format, sans_flux=self.a.sans_flux,
-                              rejeu=self.table_rejeu_source(), redirection=self.redirection())
-            if nom == "greffe_hyperarcademax":     # (L2) recipe with MAX, PSP ISO
-                params.update(ha_vars=self.vars_greffe(), psp=os.path.abspath(self.a.max), releves=self.releves_greffe(),
-                              ha_vars_max=open(os.path.join(self.O["greffe"], HA_ETAT, "greffe", "vars_%s_max.txt" % HA_ETAT), encoding="utf-8").read().strip())
-            if nom == "greffe_hyperarcade":
-                params.update(ha_nom=os.environ.get("HA_NOM", HA_ETAT + "_fige"), ha_vars=self.vars_greffe(),
-                              voix=self.voix_greffe(), releves=self.releves_greffe())
-            if nom in ("son_hyper", "prog_hyper"):
-                params.update(rejeu=self.table_rejeu_source(), redirection=self.redirection())
-            if nom.startswith("sons_ps2"):       # (sons_ps2_upper) l'interrupteur change la sortie : il entre dans la cle
-                params["sons_ps2"] = os.environ.get("HSFA_SONS_PS2", "1")
-            if nom == "arcade": params["source"] = "arcade" if self.a.arcade else "iso"
-            if nom.startswith("gfx_"): params["plans_fenetre"] = self.plans_fenetre()
-            if nom == "gfx_hyper": params["ombre_codes"] = self.ombre_codes()
-            if nom == "iso": params["groupes"] = sorted({g for j in self.jeux for g in GROUPES_REQUIS[j]})
-            cle = self.cle(nom, [d for d in deps if d in noms], outils, params)
+            prevu = plan[nom][2] if plan[nom][1] else 0
+            if plan[nom][1]: n += 1
+            cle = self.cle(nom, deps, outils, self.params(nom))
             e = self.etat.get(nom, {})
-            force = self.a.force or (self.a.etape and k == debut) or nom == "empreintes"
-            if not force and e.get("fait") and e.get("cle") == cle and self.sorties_intactes(e):
-                self.log("[%s] a jour, sautee" % nom, ">> "); continue
-            self.log("[%s] %s" % (nom, desc), ">> ")
+            if not self.force(nom, k, debut) and e.get("fait") and e.get("cle") == cle and self.sorties_intactes(e):
+                self.log("[%s] a jour, sautee" % nom, ">> ")
+                if plan[nom][1]:                         # prevue a faire, finalement a jour : rien n'a ete fait
+                    signale("etape", n=n, N=N, nom=nom, reste=reste(k), fait=True)
+                continue
+            r = reste(k - 1)
+            self.log("[%s] %s (étape/step %d/%d, reste/left %s)" % (nom, desc, n, N, duree_texte(r)), ">> ")
+            signale("etape", n=n, N=N, nom=nom, reste=r, fait=False)
             t0 = time.time()
             try:
                 sorties = f()
@@ -1317,7 +1517,11 @@ class Construction:
             self.etat[nom] = dict(fait=True, cle=cle, date=time.strftime("%Y-%m-%d %H:%M:%S"),
                                   duree=round(time.time() - t0), sorties=self.note_sorties(sorties))
             self.sauve_etat()
-            self.log("[%s] faite (%.0f s, %d sorties)" % (nom, time.time() - t0, len(sorties)), "ok ")
+            if prevu: prevu_fait += prevu; reel_fait += time.time() - t0
+            r = reste(k)
+            self.log("[%s] faite (%.0f s, %d sorties) (%d/%d, reste/left %s)" % (nom, time.time() - t0, len(sorties), n, N,
+                                                                                 duree_texte(r)), "ok ")
+            signale("etape", n=n, N=N, nom=nom, reste=r, fait=True)
         self.log("=== termine", "")
         return 0
 
@@ -1348,9 +1552,7 @@ def bilan_cible(a):
     return 0
 
 
-def main():
-    if len(sys.argv) > 2 and sys.argv[1] == "_lancer":
-        return _lancer(sys.argv[2])
+def parseur():
     ap = argparse.ArgumentParser(description="Construit les jeux HSFA a partir de l'ISO de l'utilisateur.")
     ap.add_argument("--anthology", help="ISO PS2 de Street Fighter Alpha Anthology (USA, SLUS-21317) (obligatoire, sauf "
                     "mode bilan : --cible mister ou cps2-banques)")
@@ -1360,7 +1562,8 @@ def main():
                     "verifie s'il est donne")
     ap.add_argument("--vasm", help="(controle) vasmm68k_mot, avec HSFA_ASM=vasm ou compare ; par defaut le code MAX est "
                                    "assemble par tools/asm68k/hsfa_asm68k.py")
-    ap.add_argument("--sortie", help="dossier de sortie (cache, travail, archives, journal) (obligatoire, sauf mode bilan)")
+    ap.add_argument("--sortie", help="dossier de sortie : archives des jeux a la racine, le reste dans hsfa-travail/ "
+                                     "(obligatoire, sauf mode bilan)")
     ap.add_argument("--cible", choices=("fbneo-hsfa", "fbneo-autonome", "mister", "cps2-banques"), default="fbneo-hsfa",
                     help="format de sortie (défaut fbneo-hsfa : la sortie actuelle) ; fbneo-autonome : version d'essai, "
                          "mêmes archives ; mister, cps2-banques : mode bilan, rien n'est construit (concessions et "
@@ -1398,6 +1601,20 @@ def main():
     ap.add_argument("--python-numpy", help="interpreteur Python avec numpy (etapes graphiques)")
     for k in OUTILS_DEFAUT:
         ap.add_argument("--outils-" + k.replace("_", "-"), dest="outils_" + k, help="dossier des outils : " + k)
+    return ap
+
+
+def prevision(argv):
+    """(builder) announce the estimated duration of « hsfa_build.py ARGV » (journal, terminal, AVANCEMENT) without
+    building anything, e.g. before unpacking a .chd ; returns the total in seconds"""
+    c = Construction(parseur().parse_args(argv))
+    return c.annonce(c.prevoit())
+
+
+def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "_lancer":
+        return _lancer(sys.argv[2])
+    ap = parseur()
     a = ap.parse_args()
     produit = a.cible in ("fbneo-hsfa", "fbneo-autonome")           # formats qui produisent des archives
     if produit and (not a.anthology or not a.sortie):

@@ -13,7 +13,8 @@ VIDE = 0xFFFFFFFF
 
 
 def charge(build):
-    z = zipfile.ZipFile(os.path.join(build, "archives", "sfa3umhsfa.zip"))
+    z = os.path.join(build, "sfa3umhsfa.zip")                  # v0.1.11 : a la racine de la sortie ; avant : archives/
+    z = zipfile.ZipFile(z if os.path.isfile(z) else os.path.join(build, "archives", "sfa3umhsfa.zip"))
     T = cps2rom.decode({s: z.read("sz3.%s" % s) for g in cps2rom.GROUPS for s in g})
     b0 = z.read("hsfa_gfx.bin"); b0 = b0[:len(b0) // 128 * 128]
     a = np.unpackbits(np.frombuffer(b0, np.uint8).reshape(-1, 16, 2, 4, 1), axis=-1)

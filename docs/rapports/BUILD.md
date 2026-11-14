@@ -124,7 +124,7 @@ Toutes les étapes sont des appels aux scripts existants (sous-processus `hsfa_b
 | `gfx_sfa3` | `banques.py tout`, `banques.py 312`, `banques.py plans` (`HSFA_PLANS_FENETRE=1` en voie ISO) | X_DATA, ROM graphique, module | `travail/mame/banques/` | 25-45 s | **fait** |
 | `gfx_upper` | idem (`525`), puis `hsfa_gfx.py`, `hsfa_plans.py` | idem | `banques/`, `banques_hx/`, `hsfa_gfx.bin`, `hsfa_plans.bin` | 45-60 s | **fait** |
 | `gfx_hyper` | idem (`548`) avec `HSFA_GFX_BASE` = ROM étendue d'Upper | idem + `gfx_upper` | idem (`mame_ro9`) | 35-40 s | **fait** (identique au banc), non publié |
-| `paquet_sfa3/upper` | `paquet_fbneo.construit()` (`HSFA_WORK`, `HSFA_SORTIE`) | tout ce qui précède | `archives/sfa3hsfa.zip`, `sfa3uhsfa.zip` (+ `_sources.txt`) | 3-5 s | **fait** |
+| `paquet_sfa3/upper` | `paquet_fbneo.construit()` (`HSFA_WORK`, `HSFA_SORTIE`) | tout ce qui précède | `sfa3hsfa.zip` (racine de la sortie), `sfa3uhsfa.zip` (+ `_sources.txt`) | 3-5 s | **fait** |
 | `paquet_hyper` | — | — | — | — | **à faire** : pilote FBNeo d'Hyper et entrée de `paquet_fbneo.JEUX` |
 | `flux` | `gen_table_flux.main()` (`--module ro9 --toc ""`) | module ro9 | `systeme/fbneo/hsfa/hsfa_flux_table.txt` + `ydata.txt` (chemin de l'ISO) | <1 s | **fait** (558 codes, identique hors commentaires) |
 | `max` | — | `--max ISO_PSP` | — | — | **squelette** (ignorée sans `--max`, refusée avec) |

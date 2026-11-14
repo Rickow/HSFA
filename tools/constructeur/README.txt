@@ -21,6 +21,8 @@ The builder contains no game data: everything is read from YOUR images.
        ./hsfa-constructeur                                  (window)
        ./hsfa-constructeur Anthology.iso --psp MAX.iso      (no window)
    In the window: pick the PS2 image, the PSP ISO if you have it, the output folder, then "Build".
+   The builder first announces the estimated time (per game and in total), then the bar shows the current step
+   (step n / N) and the time left.
 
 3. Warnings (expected: the executable is not signed)
    Windows: "Windows protected your PC" (SmartScreen) -> "More info" -> "Run anyway". Some antivirus tools are wary
@@ -30,11 +32,13 @@ The builder contains no game data: everything is read from YOUR images.
    Linux: if double-clicking does nothing: chmod +x hsfa-constructeur
 
 4. Where the zips go
-   When it is done, the output folder (HSFA-sortie next to the executable by default) holds archives/:
+   When it is done (sound, window brought to the front, message "Done: N games in ..."), the output folder
+   (HSFA-sortie next to the executable by default) holds the zips themselves:
      sfa3hsfa.zip (SFA3), sfa3uhsfa.zip (Upper), sfa3hhsfa.zip (Hyper), sfa3umhsfa.zip (Upper MAX, with the PSP ISO).
    Copy them WITHOUT RENAMING into RetroArch's (or your console's) ROM folder, next to the project's
    "FinalBurn Neo HSFA" core, then load a zip with that core. Guides: docs/guide/ in the repository.
-   The rest of the output folder (cache, travail) can be deleted; keeping it makes a rebuild faster.
+   The hsfa-travail subfolder (work files) can be deleted; keeping it makes a rebuild faster.
+   (An output folder from an earlier version, with archives/, is tidied up this way on the first run.)
 
-Problem? Attach journal.txt (output folder) to an issue on the repository, in English or French.
+Problem? Attach hsfa-travail/journal.txt (output folder) to an issue on the repository, in English or French.
 Third-party licences: TIERS.md.

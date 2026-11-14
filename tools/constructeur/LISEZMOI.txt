@@ -21,6 +21,8 @@ Le constructeur ne contient aucune donnee de jeu : tout est lu sur VOS images.
        ./hsfa-constructeur                                  (fenetre)
        ./hsfa-constructeur Anthology.iso --psp MAX.iso      (sans fenetre)
    Dans la fenetre : choisissez l'image PS2, l'ISO PSP si vous l'avez, le dossier de sortie, puis « Construire ».
+   Le constructeur annonce d'abord la duree estimee (par jeu et au total), puis la barre montre l'etape en cours
+   (etape n / N) et le temps restant.
 
 3. Avertissements (normaux : l'executable n'est pas signe)
    Windows : « Windows a protege votre ordinateur » (SmartScreen) -> « Informations complementaires » ->
@@ -31,11 +33,13 @@ Le constructeur ne contient aucune donnee de jeu : tout est lu sur VOS images.
    Linux : si le double-clic ne lance rien : chmod +x hsfa-constructeur
 
 4. Ou mettre les zips
-   A la fin, le dossier de sortie (par defaut HSFA-sortie, a cote de l'executable) contient archives/ :
+   A la fin (son, fenetre au premier plan, message « Termine : N jeux dans ... »), le dossier de sortie (par defaut
+   HSFA-sortie, a cote de l'executable) contient directement les zips :
      sfa3hsfa.zip (SFA3), sfa3uhsfa.zip (Upper), sfa3hhsfa.zip (Hyper), sfa3umhsfa.zip (Upper MAX, avec l'ISO PSP).
    Copiez-les SANS LES RENOMMER dans le dossier des ROM de RetroArch (ou de votre console), a cote du coeur
    « FinalBurn Neo HSFA » du projet, puis chargez un zip avec ce coeur. Guides : docs/guide/ du depot.
-   Le reste du dossier de sortie (cache, travail) peut etre efface ; le garder accelere une reconstruction.
+   Le sous-dossier hsfa-travail (fichiers de travail) peut etre efface ; le garder accelere une reconstruction.
+   (Un dossier de sortie d'une version precedente, avec archives/, est range ainsi au premier passage.)
 
-Probleme ? Joignez journal.txt (dossier de sortie) a un ticket du depot (Issues), en francais ou en anglais.
+Probleme ? Joignez hsfa-travail/journal.txt (dossier de sortie) a un ticket du depot (Issues), en francais ou en anglais.
 Licences des composants : TIERS.md.

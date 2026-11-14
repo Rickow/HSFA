@@ -112,6 +112,8 @@ jobs:
           dist/${{ matrix.exe }} --version
           dist/${{ matrix.exe }} -c "import numpy, zlib, json, tkinter; print(numpy.__version__)" || \
           dist/${{ matrix.exe }} -c "import numpy, zlib, json; print(numpy.__version__, 'sans tkinter')"
+      - name: L'executable repond comme un vrai python (PYTHONPATH, dossier courant, codes de sortie, aucune attente d'Entree)
+        run: python tools/constructeur/test_windows.py --parties interprete --exe "dist/${{ matrix.exe }}"
       - name: Paquet (executable, guide, licences, empreinte)
         run: |
           P="hsfa-constructeur-${{ matrix.cible }}"
@@ -218,7 +220,7 @@ jobs:
         run: python tools/constructeur/fabrique.py --natifs "$BIN" --dist dist
       - name: Essais de l'executable (auto-test, PYTHONUTF8, l'exe comme python des etapes)
         if: ${{ !cancelled() }}
-        run: python "$T" --parties exe,umprog --exe "dist/${{ matrix.exe }}" --rapport rapports/exe.txt
+        run: python "$T" --parties exe,umprog,interprete --exe "dist/${{ matrix.exe }}" --rapport rapports/exe.txt
       - name: Executable sous jeton sans droit (etape d'Upper MAX avec l'environnement d'um_prog)
         if: ${{ !cancelled() && runner.os == 'Windows' }}
         run: python "$T" --non-admin --parties umprog,coeur --exe "dist/${{ matrix.exe }}"

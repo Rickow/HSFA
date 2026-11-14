@@ -9,6 +9,31 @@ est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports
 
 ## Unreleased
 
+- **Fix: Upper MAX with the all-in-one builder** (Windows test of v0.1.10): every build step started with a single
+  argument waited for Enter (build stuck at 0 % CPU), and the step `dialogues_max` died (« Failed to execute script »:
+  the frozen executable ignored `PYTHONPATH`). The executable now answers like a real `python` for the steps
+  (`PYTHONPATH`, current folder, `-B`, `-u`, `-I`..., exit codes) and never waits for Enter there; the steps never read
+  the console. It also reuses the steps already done (a finished or interrupted build) instead of redoing everything
+  at each launch. The archives are unchanged, byte for byte (checked with the executable itself, 4 games).
+- **Builder output**: the game zips are now at the ROOT of the output folder; the work files go into its
+  `hsfa-travail/` subfolder. An output folder of an earlier version is tidied up this way on the first run (its links
+  are made again). End of build: system sound, window brought to the front, message « Done: N games in … » or the
+  failure with the log path.
+- **Windows: use the builder executable; `construire.bat` removed.** The releases no longer carry
+  `hsfa-<version>-construction.zip`: Windows, Linux and macOS use the builder (`hsfa-constructeur-<system>.zip`);
+  advanced use: clone the repository (or GitHub's "Source code" archive) and run `hsfa_build.py` / `construire.sh`.
+- **Build: estimated time and progress** (builder and `hsfa_build.py`): before building, the estimated time per game
+  and in total is announced (only the steps that will run count: the steps already up to date in the output folder
+  count for nothing), from the medians of about a hundred builds, scaled by the speed of the machine once measured in
+  the output folder. The builder's window shows a progress bar « step n / N » with the time left, updated at each step,
+  without ever freezing; in a terminal, each step line shows the same. The archives are unchanged, byte for byte.
+- **Fix: Hyper built without Upper** (`--jeux hyper`, `--jeux sfa3,hyper`, `--jeux hyper,hyperarcade`...): Upper's
+  graphics step, on which Hyper's depends, was missing or came too late ("depend de gfx_upper, pas encore faite"); it
+  is now added and placed before (without making Upper's archive), the games are always built in the same order
+  whatever the order of `--jeux`, and a plan with a missing or misplaced dependency is refused instead of being run.
+  `scripts/construction/test_plan.py` checks every combination of games, without game data. Hyper's archive built
+  alone is the same, byte for byte, as in a full build.
+
 - **Hyper + Arcade with the MAX characters** (new, test driver `sfa3hamhsfa`, core patch 0033): step L2 of the MAX
   characters' integration. Eagle can be picked in VERSUS (both sides, the three isms) and fights with his own moves,
   throws, portrait, name and life-bar face; in Arcade his cell still shows "?". Built from the two discs with

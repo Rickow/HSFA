@@ -55,5 +55,5 @@ echo "Construction (quelques minutes) / Building (a few minutes)..."
 
 echo
 echo "Termine / Done. Archives pour le coeur / core archives:"
-ls -1 "$SORTIE/archives/"*.zip
+ls -1 "$SORTIE/"*.zip
 echo "Copiez-les dans le dossier des ROM de FinalBurn Neo (voir README) / copy them to your FBNeo ROM folder."
