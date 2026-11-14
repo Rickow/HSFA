@@ -445,6 +445,8 @@ Titre abrégé et mots-clés. Les sections §116-§144 ont aussi un résumé au 
 | §228 | 6404 | sfa3ha | Hyper + Arcade ro9a40 (livraison) : recette ro9a39 + PAL_VERSION, COUL_CPU_VERSION, PORT_VERSION, BARRE_LOGO_FACE ; copie figée ro9a40/ ; =0 → ro9a39 ; fins 85/85, VERSUS, décors 40/40 |
 | §229 | 6422 | sfa3um | Upper MAX max58 : bancs réparés (VIDE ≠ OK), tables 615940 et masques PSP, Yun $32d, fins (décors, générique, fondus, Guy, 3204) ; fins des natifs = max57 ; entrées de hsfa_build en arbre |
 | §230 | 6444 | sfa3ha | Hyper + Arcade ro9a41 : PAIRES_CODE (10 paires de mots relogées comme pointeurs de code, dont T_615AC0 [0] [6] ; 68 cases de la même famille listées) ; fin $27 forcée : plante dans Upper seul, inatteignable ; 4 décors : moteur, pas la greffe |
+| §231 | 6496 | hsfa | L2 des persos MAX : Eagle jouable en VERSUS dans la greffe (pilote sfa3hamhsfa, patch cœur 0033, hyperarcademax de hsfa_build) ; habillage par tables, prises en MOVEQ, recul par tables ; Arcade du pilote avec MAX : référence = base MAX (RETAG24) ; sentinelle de plan2 |
+| §232 | 6570 | sfa3ha | Hyper + Arcade : lots SFA1 / SFA2 et tuiles des décors servis par la greffe (DECORS_LOTS, étape E1 du prototype des décors), rien ne les lit encore ; =0 -> ro9a41 ; ROM programme identiques (deux pilotes), VERSUS 90/90, décors 40/40 à l'octet |
 
 ---
 

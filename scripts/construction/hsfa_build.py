@@ -137,6 +137,11 @@ JEUX = {
 JEUX["uppermax"] = dict(module="ro5", travail="mame_ro5um", roms=os.path.join("banc", "roms_ro5"), b32=525,
                         zip="sfa3umhsfa", paquet="upper_max")
 GROUPES_REQUIS["uppermax"] = ["ro5", "ro3"]
+# (L2 of the MAX integration) Hyper + Arcade WITH the MAX characters (Eagle in VERSUS), driver sfa3hamhsfa (core patch 0033) :
+# the graft built twice (MAX base, then with MAX after prep_max_ro9.py), needs the PSP ISO (--psp-iso) ; zip sfa3hamhsfa
+JEUX["hyperarcademax"] = dict(module="ro9", travail=os.path.join("greffe_arcade", "constructions", HA_ETAT + "_max_fige", "b9"),
+                              roms="roms_ro9", b32=None, zip="sfa3hamhsfa", paquet="ro9a_max")
+GROUPES_REQUIS["hyperarcademax"] = GROUPES_REQUIS["hyperarcade"]
 OUTILS_UM = os.environ.get("HSFA_OUTILS_UPPERMAX", os.path.join(DEPOT, "tools", "integration-max", "upper_max"))
 # ISO PSP de SFA3 MAX : editions acceptees (europeenne ULES-00235 v1.01 = reference des outils MAX, americaine
 # ULUS-10062 v1.00 remise en disposition europeenne), fichiers lus et empreintes : upper_max/psp_region.py (aucune
@@ -302,6 +307,11 @@ class Construction:
         self.jeux = [j.strip() for j in a.jeux.split(",") if j.strip()]
         for j in self.jeux:
             if j not in JEUX: raise Echec("jeu inconnu : %s (connus : %s)" % (j, ", ".join(JEUX)))
+        # (L2) hyperarcademax = hyperarcade + the MAX characters ; without the PSP ISO : hyperarcade only
+        self.hyperarcademax = "hyperarcademax" in self.jeux
+        if self.hyperarcademax:
+            self.jeux = [j for j in self.jeux if j != "hyperarcademax"]
+            if "hyperarcade" not in self.jeux: self.jeux.append("hyperarcade")
         if "hyperarcade" in self.jeux:                 # (hyperarcade) la greffe part des sorties d'Upper et d'Hyper
             for j in ("upper", "hyper"):
                 if j not in self.jeux: self.jeux.insert(self.jeux.index("hyperarcade"), j)
@@ -915,6 +925,67 @@ class Construction:
                    nice=False)
         return [os.path.join(dest, "sfa3hahsfa.zip")]
 
+    # ---- (L2 of the MAX integration) hyperarcademax : graft WITH the MAX characters ------------------------------
+    def greffe_ha(self, etape, dest, nom, vars_):
+        G = self.O["greffe"]
+        if os.path.isdir(dest): shutil.rmtree(dest)
+        cmd = [sys.executable, os.path.join(G, "greffe_ha.py"), "--dest", dest, "--nom", nom, "--vars", vars_,
+               "--code", os.path.join(G, HA_ETAT), "--releves", self.releves_greffe(), "HA_UT=" + self.O["untranspile"],
+               "HA_EXTRACT=" + self.ext, "HA_ANIMS=" + self.anims, "HA_XDATA=" + self.xdata, "HA_MODULES_SON=" + self.modules_son,
+               "HA_MAME_RO9=" + self.travail("hyper"), "HA_MAME_RO5=" + self.travail("upper")]
+        logp = os.path.join(self.S, "journaux", etape + ".log")
+        with open(logp, "a", encoding="utf-8") as lg:
+            lg.write("\n=== %s  %s\n" % (time.strftime("%Y-%m-%d %H:%M:%S"), " ".join(cmd))); lg.flush()
+            r = subprocess.run((["nice", "-n", "19"] if os.name == "posix" else []) + cmd, env=self.env(), stdout=lg, stderr=subprocess.STDOUT)
+        if r.returncode: raise Echec("%s : echec (code %d), voir %s" % (etape, r.returncode, logp))
+        return os.path.join(dest, "outils", "greffe", "constructions", nom)
+
+    def e_greffe_max(self):
+        """(L2) 1. MAX base = the graft recipe + MAX_ZONES=1 (zones T4 / T5 declared, nothing posed : its map is the
+        reference of the conversion) ; 2. prep_max_ro9.py (MAX code and data converted for this base, regenerated from
+        the PSP ISO : never in the repository) ; 3. the graft with recipe vars_<HA_ETAT>_max.txt + MAX_PREP / MAX_CACHE ;
+        result copied to travail/greffe_arcade/constructions/<HA_ETAT>_max_fige (layout of paquet_fbneo.py ro9a_max)"""
+        G = self.O["greffe"]; t0 = time.time()
+        for x in (self.cache, self.max_donnees()):
+            if " " in x: raise Echec("hyperarcademax : chemin avec une espace (--vars de greffe_ha.py) : %s" % x)
+        base = self.greffe_ha("greffe_hyperarcademax", os.path.join(self.cache, "greffe_ha_maxbase"), HA_ETAT + "_maxbase",
+                              self.vars_greffe() + " MAX_ZONES=1")
+        prep = os.path.join(self.cache, "max_prep_ro9")
+        argv = ["prep_max_ro9.py", "--dest", prep, "--base", base, "--depot", DEPOT,
+                "--rosette", os.path.join(self.max_donnees(), "depot", "max", "outils", "rosette_code"),
+                "--cache-max", self.max_donnees(), "--upper", self.travail("upper"), "--extract", self.ext,
+                "--anims", self.anims, "--xdata", self.xdata, "--eboot", os.path.join(self.psp, "BOOT.BIN"),
+                "--pac", os.path.join(self.psp, "pac"), "--python", self.python_numpy()] + (["--vasm", self.vasm()] if self.vasm() else [])
+        M = os.path.join(G, HA_ETAT, "greffe", "max")
+        self.lance("greffe_hyperarcademax", dict(cwd=self.cache, sys_path=[M], argv=argv,
+                   code="import sys\nsys.argv = %r\nimport prep_max_ro9\nprep_max_ro9.main()\n" % argv), self.env(), python=self.python_numpy())
+        vm = open(os.path.join(G, HA_ETAT, "greffe", "vars_%s_max.txt" % HA_ETAT), encoding="utf-8").read().strip()
+        vm += " MAX_PREP=%s MAX_CACHE=%s" % (os.path.join(prep, "outils_max", "ag", "prep"), os.path.join(self.max_donnees(), "fork"))
+        src = self.greffe_ha("greffe_hyperarcademax", os.path.join(self.cache, "greffe_ha_max"), HA_ETAT + "_max_fige", vm)
+        dst = os.path.dirname(self.travail("hyperarcademax"))
+        if os.path.isdir(dst): shutil.rmtree(dst)
+        shutil.copytree(src, dst, symlinks=True)
+        out = [os.path.join(self.roms("hyperarcademax"), n) for n in PRG] + [os.path.join(dst, "hsfa_gfx_max.bin")]
+        self.log("hyperarcademax : %.0f s, sz3ud.03c md5 %s" % (time.time() - t0, md5_fichier(out[0])))
+        return out
+
+    def e_paquet_hamax(self):
+        roms = self.roms("hyperarcademax")
+        for n in list(REF_ARCADE_GFX) + ["phoenix.key"]:
+            d = os.path.join(roms, n)
+            if os.path.lexists(d): os.remove(d)
+            shutil.copyfile(os.path.join(self.arcade, n), d)
+        dest = os.path.join(self.S, "archives"); os.makedirs(dest, exist_ok=True)
+        P = os.path.join(self.O["greffe"], HA_ETAT, "paquet")
+        spec = dict(cwd=dest, sys_path=[P], argv=["paquet_fbneo.py", "ro9a_max"],
+                    code="import paquet_fbneo\npaquet_fbneo.construit('ro9a_max')\n")
+        self.lance("paquet_hyperarcademax", spec, self.env(HSFA_WORK=self.W, HSFA_SORTIE=dest, HSFA_STRICT="1",
+                   HSFA_OUTILS=os.path.join(DEPOT, "tools"), SOURCE_DATE_EPOCH=self.a.date_source,
+                   HSFA_CONSTR_MAX=HA_ETAT + "_max_fige",
+                   HSFA_SON_MAX=os.path.relpath(os.path.join(self.W, "agent_son_max", "roms_son_max_hyper_ps2"), self.W),
+                   **self.env_paquet()), nice=False)
+        return [os.path.join(dest, "sfa3hamhsfa.zip")]
+
     def e_max(self):
         if not self.a.max:
             self.log("pas d'ISO PSP (--psp-iso) : %s" % ("uppermax -> Upper SANS les persos MAX (sfa3uhsfa.zip, identique "
@@ -1153,7 +1224,7 @@ class Construction:
         if not self.a.sans_flux:
             E.append(("flux", ["module_ro9"], [self.O["flux"], self.O["son_table"]], self.e_flux,
                       "table du lecteur de flux ADX (gen_table_flux.py) -> systeme/fbneo/hsfa/"))
-        if self.uppermax and self.a.max:
+        if (self.uppermax or self.hyperarcademax) and self.a.max:
             E += [("psp", [], [os.path.join(DEPOT, "tools", "max", "iso_psp.py"), os.path.join(OUTILS_UM, "psp_region.py")], self.e_psp,
                    "ISO PSP de SFA3 MAX (EU ULES-00235 ou US ULUS-10062) : empreintes, BOOT.BIN (EBOOT en clair, disposition europeenne) et .pac des 4 persos"),
                   ("max_donnees", ["psp", "gfx_upper", "prog_upper", "afs", "arcade"],
@@ -1163,19 +1234,28 @@ class Construction:
                    "donnees MAX regenerees depuis l'ISO PSP (outils de max/, regen_max.py)"),
                   ("son_uppermax", ["son_upper", "max_donnees"], [os.path.join(OUTILS_UM, "son"), os.path.join(DEPOT, "max", "outils", "sons")],
                    self.e_son_uppermax, "ROM son MAX (voix, cris, voix d'Ingrid) depuis l'ISO PSP et la ROM hybride d'Upper"),
-                  ("sons_ps2_uppermax", ["son_uppermax", "afs"], [os.path.join(self.O["son_hyper"], "sons_ps2.py")],
+                  ] + ([("sons_ps2_uppermax", ["son_uppermax", "afs"], [os.path.join(self.O["son_hyper"], "sons_ps2.py")],
                    self.e_sons_ps2_uppermax, "sons propres au portage PS2 (provocation de Dee Jay, Birdie) : ROM son "
-                   "d'Upper MAX = ROM son MAX + sons tires du X_DATA (sons_ps2.py --jeu uppermax)"),
-                  ] + ([("sons_ps2_hypermax", ["son_uppermax", "afs"], [os.path.join(self.O["son_hyper"], "sons_ps2.py")],
-                   self.e_sons_ps2_hypermax, "(L1, asked for by name : HSFA_ETAPES_PLUS=sons_ps2_hypermax) Hyper's PS2 "
-                   "sounds at 0x2A000 on the MAX sound ROM, for the future driver with MAX (sons_ps2.py --jeu hypermax)")]
-                   if "sons_ps2_hypermax" in os.environ.get("HSFA_ETAPES_PLUS", "").split(",") else []) + [
+                   "d'Upper MAX = ROM son MAX + sons tires du X_DATA (sons_ps2.py --jeu uppermax)")] if self.uppermax else []) + \
+                  ([("sons_ps2_hypermax", ["son_uppermax", "afs"], [os.path.join(self.O["son_hyper"], "sons_ps2.py")],
+                   self.e_sons_ps2_hypermax, "(L1 ; L2 : with hyperarcademax) Hyper's PS2 "
+                   "sounds at 0x2A000 on the MAX sound ROM, for the driver with MAX (sons_ps2.py --jeu hypermax)")]
+                   if self.hyperarcademax or "sons_ps2_hypermax" in os.environ.get("HSFA_ETAPES_PLUS", "").split(",") else []) + \
+                  ([("greffe_hyperarcademax", ["greffe_hyperarcade", "max_donnees", "psp"],
+                     [os.path.join(self.O["greffe"], "greffe_ha.py"), os.path.join(self.O["greffe"], "fige35.py"),
+                      os.path.join(OUTILS_UM, "fige.py")] + arbre(os.path.join(self.O["greffe"], HA_ETAT))
+                     + arbre(os.path.join(OUTILS_UM, "integration_2b31")) + arbre(self.releves_greffe()),   # (L2, revue finale V2) arbre : sous-dossiers compris
+                     self.e_greffe_max, "(L2) graft WITH the MAX characters : MAX base, prep_max_ro9.py, graft with MAX (code fige %s)" % HA_ETAT),
+                    ("paquet_hyperarcademax", ["greffe_hyperarcademax", "sons_ps2_hypermax", "gfx_upper", "gfx_hyper", "arcade"],
+                     [os.path.join(self.O["greffe"], HA_ETAT, "paquet")], self.e_paquet_hamax,
+                     "(L2) archive FBNeo sfa3hamhsfa.zip (paquet_fbneo.py ro9a_max ; core patch 0033)")] if self.hyperarcademax else []) + \
+                 ([
                   ("prog_uppermax", ["prog_upper", "gfx_upper", "psp", "max_donnees", "son_uppermax", "afs", "module_ro5"],
                    [os.path.join(OUTILS_UM, "um_prog.py"), os.path.join(OUTILS_UM, "fige.py")]
                    + arbre(os.path.join(OUTILS_UM, "integration_2b31")),   # arbre : sous-dossiers compris (revue max58)
                    self.e_prog_uppermax, "programme d'Upper MAX (integration MAX=1, etat 2b31 : prepare_max + mame_test)"),
                   ("paquet_uppermax", ["prog_uppermax", "son_uppermax", "sons_ps2_uppermax", "gfx_upper", "arcade"], [self.O["paquet"]],
-                   self.e_paquet_uppermax, "archive FBNeo sfa3umhsfa.zip (paquet_fbneo.py upper_max)")]
+                   self.e_paquet_uppermax, "archive FBNeo sfa3umhsfa.zip (paquet_fbneo.py upper_max)")] if self.uppermax else [])
         E.append(("max", [], [], self.e_max, "persos MAX depuis l'ISO PSP (--psp-iso ; avec --jeux ...,uppermax)"))
         E.append(("empreintes", [], [], self.e_empreintes, "empreintes de toutes les ROM et archives produites"))
         return E
@@ -1191,7 +1271,7 @@ class Construction:
         debut = noms.index(self.a.etape) if self.a.etape else 0
         if self.a.etape and self.a.etape not in noms: raise Echec("etape inconnue : %s (voir --liste)" % self.a.etape)
         fin = noms.index(self.a.jusqua) + 1 if self.a.jusqua else len(E)
-        self.log("=== hsfa_build : jeux %s, sortie %s" % (",".join(self.jeux), self.S), "")
+        self.log("=== hsfa_build : jeux %s, sortie %s" % (",".join(self.jeux + (["hyperarcademax"] if self.hyperarcademax else [])), self.S), "")
         for k, (nom, deps, outils, f, desc) in enumerate(E[:fin]):
             if k < debut:
                 if not self.etat.get(nom, {}).get("fait"):
@@ -1204,6 +1284,9 @@ class Construction:
             if nom.startswith("paquet_"):
                 params.update(date_source=self.a.date_source, flux=self.a.flux_format, sans_flux=self.a.sans_flux,
                               rejeu=self.table_rejeu_source(), redirection=self.redirection())
+            if nom == "greffe_hyperarcademax":     # (L2) recipe with MAX, PSP ISO
+                params.update(ha_vars=self.vars_greffe(), psp=os.path.abspath(self.a.max), releves=self.releves_greffe(),
+                              ha_vars_max=open(os.path.join(self.O["greffe"], HA_ETAT, "greffe", "vars_%s_max.txt" % HA_ETAT), encoding="utf-8").read().strip())
             if nom == "greffe_hyperarcade":
                 params.update(ha_nom=os.environ.get("HA_NOM", HA_ETAT + "_fige"), ha_vars=self.vars_greffe(),
                               voix=self.voix_greffe(), releves=self.releves_greffe())
@@ -1284,7 +1367,7 @@ def main():
                          "budgets annoncés, confirmation)")
     ap.add_argument("--oui", "--yes", dest="oui", action="store_true",
                     help="(--cible autre que fbneo-hsfa) confirmer sans question")
-    ap.add_argument("--jeux", default="sfa3,upper,hyper", help="sfa3,upper,hyper,uppermax,hyperarcade (defaut : les trois "
+    ap.add_argument("--jeux", default="sfa3,upper,hyper", help="sfa3,upper,hyper,uppermax,hyperarcade,hyperarcademax (defaut : les trois "
                     "premiers ; hyperarcade = Hyper + mode Arcade d'Upper greffe, ajoute upper et hyper ; experimental)")
     ap.add_argument("--arcade", action="append", help="(facultatif) ROM d'arcade de SFA3 (sfa3.zip ou dossier) : sz3.13m-20m ; "
                     "sans elle, la ROM graphique est reconstruite depuis l'ISO")

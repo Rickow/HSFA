@@ -6492,3 +6492,138 @@ ro9a40 + `PAIRES_CODE=1`. Workshop `work/greffe_restes/` (ETAT.md, RAPPORT.md).
   - build from the ISO in a clone (`--jeux hyperarcade`, arcade ROM, replay table, `HSFA_OMBRE_CODES=0`,
     `HSFA_SONS_PS2=0`): 423 s, 1.3 GB, `sz3ud.03c` `be88f3f9`, `sz3ud.04c` `ae411424`, zip 31/32 members identical to the delivered zip (only
     `hsfa_info.txt` differs); Upper `ac053140`, Hyper `dbfd237d` (unchanged).
+
+### 231. 13/11: L2 of the MAX integration: Eagle playable in VERSUS in the graft (driver sfa3hamhsfa, core patch 0033)
+Agent `l2max` (hsfa). Design `work/l2_max_greffe/CONCEPTION.md` (Fable), mid-term review `REVUE_MI_PARCOURS.md`, final
+review `REVUE_FINALE.md` (corrections V1 to V6 done, V7 left to the user), workshop status `ETAT.md`; lessons of Upper
+MAX (`depuis_session_max/LECONS_UPPER_MAX.md`) applied. Built on `435d819` (ro9a41, §230; started on ro9a40, moved with
+the rename).
+- **Core**: patch `0033-HSFA-pilote-sfa3hamhsfa-tuiles-MAX.patch`: driver `sfa3hamhsfa` = members of `sfa3hahsfa` +
+  mandatory `hsfa_gfx_max.bin` (12 MB) at $5400000, graphics region of 96 MB for that driver only, no parent;
+  `HsfaSang` expects 2 sites. No new config key and no new slot (the slot-5 key of the first draft was removed by the
+  review: the dressing goes by tables). `sfa3hahsfa` and the other drivers unchanged: non-regression against batch
+  0032 (6 games x 4:3 / 16:9 + sfa3 16:9 `stage`, frozen graft zip, states A / R1 / D): 18/18 comparisons identical,
+  228/228 segments without defect.
+- **Graft code** (`ro9a41/greffe`; switches at 0 = ro9a41 byte for byte: control build 34/35 of MD5SUMS, `env.sh` only):
+  `greffe3.py` (MAX_ZONES T4 / T5, MAX_SEL bytes, `max_banques`, X2 line E), `mame_test.py` (5 hooks under `if MAX:`),
+  new `greffe/max/` (`prep_max_ro9.py`, `l2_sources.py`, `integre_max_ro9.py`, `fait_gfx_max.py`, `plan_commun_max.py`,
+  `correspondances_hyper_ro9a.tsv`: addresses only), recipe `vars_ro9a41_max.txt`
+  (= `vars_ro9a41.txt` + 7 MAX switches). MAX game code regenerated from the
+  PSP ISO at each build (integration 2b31 of max58, 25 admitted unresolved conversions), never stored.
+- **Build**: `hsfa_build.py --jeux hyperarcademax --psp-iso` (MAX base, prep, graft with MAX, `paquet_fbneo.py
+  ro9a_max`): full run from an empty output, from the two discs (PS2, PSP EU), with Ogg music streams: OK
+  (graft with MAX 360 s, zip 197 MB; redone on ro9a41 with the Ogg cache of the first run). The three other zips
+  (`sfa3uhsfa`, `sfa3hhsfa`, `sfa3hahsfa`) and all their members are byte-identical in a run with and in a run
+  without `hyperarcademax` (164/164 fingerprints). Cache key of `greffe_hyperarcademax`: `arbre()` of the frozen code
+  and of `integration_2b31`. The Ogg encoder sources were copied from a local folder (the builder offers to download
+  them); `hsfa_build.py` must run with the numpy Python when music streams are made.
+  Limits: stops cleanly if the output folder contains a space (recipe passes paths in `--vars`); never built under
+  Windows nor from the US PSP ISO.
+- **Fixes found on the way**: engine correspondences re-matched by content (move-input stubs, super stubs on the grab
+  routine = K.O. blocked, $2AA08); MAX projectile attacks padded to Hyper's 40 bytes; recoil types 28-32 -> 40-44.
+- **No stub on the natives' path** (method of Upper MAX, decision of 13/11):
+  - recoil: the two rel16 sequence tables (0x66A260 / 0x66A5AE) and their sequences copied into the MAX block, 5 MAX
+    entries added (64-68), `LEA` redirected (same instruction);
+  - throws: Hyper's per-id masks completed from the PSP 48-bit masks, Eagle's bits written in the original `MOVEQ`
+    (#$17 -> #$57 ground KK, #$29 -> #$69 air PP): zero stub, zero cycle. Maki / Yun / Ingrid need more than a `MOVEQ`
+    (sign extension): L4;
+  - dressing by tables: HUD name and face, portraits, selection / VS name in slot 1 (plan2), from `P2_BASE = $D000`
+    (one constant, `plan_commun_max.py`); selection preview in slot 0 (f545 extended); selection palettes: one stub
+    outside fights (like Upper MAX `talon_selpal`), generic for ids $26-$2F. The part $B570-$FFFF of plan2 (19 088
+    entries) was used by no object in 125 runs (85 endings, 40 stages, VERSUS; the first base $B3D0 was refuted by the
+    endings of $21-$23 Z3): **not seen, not proven free**; 6 800 entries stay untouched above $B560.
+    A sentinel in the shared bench (`work/mame/banc_sprites.lua`, `BANC_SENTINELLE=lo-hi:file`, user's agreement; without
+    the variable the bench behaves as before: natives VERSUS of ro9a41 with 90/90 captures and 3 endings with 40/40
+    captures identical; copy `banc_sprites.lua.avant_sentinelle`) logs any slot-1 code of the range:
+    Eagle's codes seen ($D0FE-$D90F) and none below $D000 in his VERSUS run; none at all in defeat + CONTINUE and
+    GAME OVER runs of natives, and none in the 85 endings of the natives on the MAX driver (170 runs). Not exercised:
+    new challenger, time over / draw, drawn modes, VERSUS end screen.
+- **Proofs** (final build):
+  - natives VERSUS of the MAX driver = ro9a41: `vs.log` byte for byte and 90/90 captures (60 rounds);
+  - Arcade of natives (oracle runs, 40 captures each): 00 Z3, 01 A, 02 Z2 identical to ro9a41; 21 Z3 and 23 Z3
+    diverge from ro9a41 by one frame at a round end (round 6) **in the MAX base already** (ro9a41 + `MAX_ZONES=1`, no MAX
+    character), and the final build is identical to that base (journal and 40/40 captures). Cause measured
+    (on ro9a40, same code and sites in ro9a41) with two throw-away builds: the MAX base without the T4 / T5 ranges in
+    RETAG24 is ro9a40 byte for byte (34/35, `env.sh` only); with two empty 2-byte ranges in their place it diverges
+    exactly like the MAX base. So the RETAG24
+    sequence made longer by 2 ranges at its 40 sites (cost and code shift) moves a round end by one frame; no native
+    value is re-tagged. L2 itself adds nothing. User's decision: the MAX base (ro9a41 + `MAX_ZONES=1`)
+    is the reference of the 85 endings of the MAX driver now; placing T4 / T5 next to a range RETAG24 already tests
+    (same cost, natives identical to ro9a41) is the first task of L3. The 85 endings of the natives (L1 recipe, oracle
+    runs): final build = MAX base for 85/85 (journal and every capture byte for byte);
+  - Eagle VERSUS against every base, both sides, 3 isms, mirror: 0 exception, id 26 (final build: 24 rounds, 26 Eagle
+    sides);
+  - moves bench against Upper MAX, side g, isms A / X / V in 3 cadence phases each: robust differences (no phase
+    equal to Upper MAX) 6 / 6 / 12, all on Hyper's proximity guard (J2 goes through state 02000402, same life):
+    **supposed native, counter-test not done**;
+  - core 0033 4:3 / 16:9: Eagle in selection, VS, fight with portrait, name, HUD; blood 2 sites.
+- **Not seen / not checked**: Eagle's cries (tables and sound ROM made, never listened to); the VERSUS end-of-match
+  screen with Eagle (no bench sees it, `CONTOURNE_E`; `hsfa_run` shows a brown screen there, natives too): victory
+  portrait, eyes (poses >= 32), WINNER banner and line never displayed: human look at the core asked before any public
+  pre-release (V7).
+- **Not done**: eyes of VS / victory, WINNER banners, map name, grid icon, defense per victim (PSP values), vertical
+  throw tables, projection columns $26 of the natives (Eagle hit by a native projectile uses line `id & $1F`), the 3
+  value tables with no Upper MAX equivalent, music, endings, Maki / Yun / Ingrid (tables at 48 for $2D / $2E).
+  L3 note (ro9a41 agent): Upper's ending slot $27 crashes in Upper itself; a MAX character on base $27 needs its own
+  ending.
+
+### 232. 14/11: Hyper + Arcade: SFA1 / SFA2 stage lots and tiles served by the graft (DECORS_LOTS, step E1 of the stage prototype)
+Agent `decors_proto` E1 (sfa3ha; design by Fable, `work/decors_proto/CONCEPTION.md` §4 "E1 — detailed section";
+workshop `work/greffe_arcade/e52/`, status `work/decors_proto/ETAT.md`). Built on `d16412d` (ro9a41 §230 + L2 §231).
+Decisions of 12/11 (D1-D10, `docs/ATTENTES-ET-DECISIONS.md`) unchanged; the slot 0 split of `re/allocations.tsv`
+(imported stages `$8000-$BFFF`, MAX `$7000-$7FFF` then `$C000+`) is applied.
+- **What E1 does** (`DECORS_LOTS=1`, default 0, recipe `greffe/vars_ro9a41_decors.txt` = `vars_ro9a41.txt` +
+  `DECORS_LOTS=1`; the data folder is given by `DECORS_DONNEES`): the stage data are *served*, nothing reads them yet.
+  - stage zone body (68K `$4E8000-$5D3FFF`, tagged `$01`): Upper's lot 1 unchanged (324 128 bytes), zeros, SFA1 lot v2
+    at `$537300-$55125F` (106 336 bytes, family 4, `$100` = `$A0-$B8`), zeros, SFA2 lot v2 at `$552000-$5BE8FF`
+    (444 672 bytes, family 3, `$50-$72`); 87 808 bytes left (`$5BE900-$5D3FFF`);
+  - `HSFADZ01` directory (`$4D8080`): 3 lots, occupied end `$5BE900`, index `$100 / 2` -> tagged base of the lot for
+    the 31 stages (109 bytes change, all in `$4D8080-$4D839F`);
+  - slot 0 tables `f545.bin` **and** `f351.bin` extended to 41 776 entries: `$8000-$9F6F` -> tiles `$56A00+` (SFA2
+    objects), `$A000-$A32F` -> `$9AA00+` (SFA1 objects), holes `$FFFFFFFF`, earlier entries untouched. Done **after**
+    `max_banques`: `fait_gfx_max.py` needs its MAX preview codes (`$7000+`) beyond the length of `f545` when it starts;
+  - the 4 tile files (`sfa2_plans.bin` `$2850000`, `sfa2_obj.bin` `$2B50000`, `sfa1_plans.bin` `$4C40000` (fills its
+    range to the byte), `sfa1_obj.bin` `$4D50000`) copied to `<construction>/decors_gfx/` with `plan.tsv` (name, address,
+    size, md5); `paquet_fbneo.py` (entries `ro9a` and `ro9a_max`) puts them into `hsfa_gfx.bin` after checking size,
+    md5 and that the range is still empty; no `plan.tsv`: nothing changes.
+- **Code**: new `greffe/decors/decors_lots.py` (no game data; checks magic, version, family, bias = first `$100`,
+  first local OBJ code, end pointer = base + size (lot made for that base), budgets, tile sizes); `greffe3.py`: the
+  switch and its dependencies (`ZONE_DECORS`, `OBJETS_DECOR`, `OBJETS_E0`, `D4_TABLE`, `FENETRES`, `TROUS`),
+  `zone_repertoire(..., index=None)` (same bytes without index), 4 call sites, `decors_lots` record in `greffe.json`;
+  `paquet_fbneo.py`: `image_gfx(..., decors)` and the `gfx_decors` key. The delivered recipes do not change: the
+  delivered zips stay identical until the chain from the ISO (E8) makes the lots.
+- **Data**: lots and tiles come from the player's ISO through the stage converters (`convertit_decors.py --v2`,
+  `work/decors_proto/outils/`, E0); nothing of the game is in the repository.
+- **Build**: `sz3ud.03c` `be88f3f9…` (= ro9a41), MAX driver `bb823b98…` (= L2 final build); the 8 program ROMs,
+  `carte_image.txt` and the other `ext_*.bin` are identical on both drivers.
+- **Proofs** (reference values precomputed outside the graft by `work/decors_proto/essais/03_simule_e1.py`):
+  - switch off (code of E1, `DECORS_LOTS=0`): ro9a41_fige **34/35** of MD5SUMS (`env.sh` only);
+  - switch on, ro9a41: 10 files differ and only them (`zone_decors.bin`, `greffe_donnees.bin`, `ro9a_module.bin`,
+    `b9/ext_4e8000.bin`, `b9/ext_410000.bin`, `banques_hx/f545.bin`, `f351.bin`, `greffe.json`, `construction.log`,
+    `env.sh`); the five data files byte-identical to the references (`2a7725cd`, `3d8b58cb`, `3b54c9f1`, `b3dffa59`,
+    `bc8d0fe5`). `ro9a_module.bin` and `greffe_donnees.bin` differ only by the same 109 directory bytes (the PS2 copy
+    of the stages window is part of the module; the design had not listed it); `greffe.json` only by the new key;
+  - MAX driver (`vars_ro9a41_max.txt` + `DECORS_LOTS=1`) against L2's final build: the same 10 files, ROMs and
+    `hsfa_gfx_max.bin` identical, `fait_gfx_max` goes through (f545 31 005 -> 41 776), references `8f3da65c`,
+    `b9e208de`, `bc8d0fe5` met;
+  - places (`00_place.py --apres`): the 4 tile ranges hold the right files byte for byte (rest zero), slot 0 codes
+    point to the right global tiles in both tables, both lots at their base: 0 fault;
+  - zips: the clone's `paquet_fbneo.py` on ro9a41_fige gives the delivered `sfa3hahsfa.zip` **32/32** members (even
+    `hsfa_info.txt`); with E1, 4 members change (`hsfa_gfx.bin` `8d205430`, `hsfa_trous.bin` `3e5ce38f`, `hsfa_tab.bin`,
+    `hsfa_info.txt`), 28 identical. MAX driver: 4 change, 29 identical; `hsfa_trous.bin` `d6f0260a` = reference
+    recomputed on a ro9a41 MAX witness zip (the reference of 13/11 had been computed on L2's ro9a40 zip);
+  - bank rules (`spec_banques/essais/01_regles_statiques.py`, first run on a graft table): R7 holds (41 776 codes);
+    R6 flags `f351` (4.46 MB of distinct tiles > 3.5 MB "common" budget) because the script counts the stage
+    sub-range as common: without `$8000-$BFFF` the bank is unchanged (3.38 MB), the stage objects are 1.08 MB
+    (budget "stage family objects" 1.25 MB, SPEC §3.5). The script should learn the sub-range (spec_banques);
+  - MAME bench: VERSUS 60 rounds with the 4 tile files and the build's banks: `vs.log` = ro9a41 byte for byte,
+    **90/90 captures** identical, plan2 sentinel (`$B570-$FFFF`) empty; memory probe (frames 3 000 and 59 000):
+    68K `$4E8000-$5BE8FF` = `ext_4e8000.bin` and `$4D8080-$4D839F` = the directory of the build (the lots are really
+    served over their whole length);
+  - stages bench (twin without the CPU draw, `sz3ud.03c` `da94facf…` = ro9a41's twin): 40/40 by `compare_bd.py`, and stricter: the 40 journals and the 160 captures **byte-identical** to
+    ro9a41's twin bench (`bd41`, §230);
+  - core 0033 (Linux), VERSUS from the title to a fight, 31 captures, 4:3 and 16:9: E1 zip = ro9a41 zip, and MAX E1
+    zip = MAX witness zip (journal and every capture identical).
+- **Open**: E2 (family and planes of the first stage, M. Bison SFA2 `$64`) after the step 1 of L3; `sfa1_plans.bin`
+  fills its range to the byte (any growth moves the `$4D50000` bound of the SFA1 objects); slot 0 margin below `$8000`
+  on the MAX driver: 1 763 codes.

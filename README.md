@@ -72,6 +72,15 @@ They run in two environments:
 
 > **Picking the project up** (human or agent): read [AGENTS.md](AGENTS.md): rules, method, findings and open work, updated with every discovery.
 
+## How this project is made
+
+HSFA is developed with an AI coding assistant, Claude (Anthropic), directed, played and tested by Rickow; commits say so
+(`Co-Authored-By: Claude`). Nothing is taken on trust: every change is checked against the arcade original by automated
+benches (endings played to the credits, fights compared frame by frame, byte-for-byte witnesses with each new switch
+off), larger steps are reviewed critically before they are merged, and the method and findings are written down in
+[`docs/journal`](docs/journal) and [`re/`](re). No game data is in this repository: everything is rebuilt from your own
+disc.
+
 ## Status (2026-11-13; stable release v0.1.10)
 
 "Since v0.1.x" below = the release that brought it; the details of each release are in the

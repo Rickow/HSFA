@@ -55,7 +55,15 @@ HSFA stands on the work of many people. Thank you all.
   (GPL-3.0).
 - For the study of a real CPS-2 target (`docs/rapports/recherche/`, notes M to R): **Jotego**'s CPS-2 FPGA core
   (jtcps, MiSTer) and **Darksoft**'s SD-loaded multi-game boards, cited as references; **Valley Bell**'s
-  [qsound-hle](https://github.com/ValleyBell/qsound-hle) kept as the reference for the replay QSound.
+  [qsound-hle](https://github.com/ValleyBell/qsound-hle) kept as the reference for the replay QSound; **WydD**'s
+  wiring survey of the CPS-2 B board (arcade-projects forum, `Wiring` sheet) settled what the CN7 connector carries
+  (notes O and R); **morphus56k**'s article on CPS-2 ROM expansion was read and discussed (note O).
+
+## The book
+
+- [*Street Fighter Alpha: From Arcade to HSFA*](https://github.com/Rickow/sfa-alpha-book) (English, CC BY 4.0): an
+  unofficial book on the series and on this project, written by Claude (Anthropic), directed and edited by Rickow; its
+  own CREDITS list the sources it quotes.
 
 ## Bug reports
 
@@ -83,6 +91,6 @@ projets voisins qui ont aidé par leurs idées ou leurs recoupements, sans repri
 Dreamcast Recomp ; Zer0-NexuS : patcheur Upper NAOMI et SFZ2A-DASH-CPS2 ; wikis SuperCombo, StrategyWiki,
 Street Fighter Wiki, TCRF et VGMRips pour les recoupements ; tmcleroy : cps2recomp et sfa2-recomp, d'où vient l'idée de la
 vue 16:9 calée sur le décor ; omegakatana92 : Street Fighter Alpha Recomp ; theweathervane : sfa3max-decomp, d'où vient
-l'alignement du comportement de manche des MAX sur la PSP ; Jotego, Darksoft et Valley Bell cités pour l'étude d'une vraie
+l'alignement du comportement de manche des MAX sur la PSP ; Jotego, Darksoft, Valley Bell, WydD (relevé du câblage de la carte B, connecteur CN7) et morphus56k (article sur l'extension des ROM) cités pour l'étude d'une vraie
 CPS-2) ; tests Windows avec Wine et GitHub Actions ; signalements : pokeshark ; livres et guides cités par page, rien de
 reproduit ; auteurs : Rickow, avec Claude (Anthropic) comme assistant de programmation.*

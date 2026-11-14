@@ -74,6 +74,15 @@ Ils tournent dans deux environnements :
 
 > **Reprendre le projet** (personne ou agent) : lire [AGENTS.md](AGENTS.md), qui condense règles, méthode, acquis et chantiers, tenu à jour à chaque découverte.
 
+## Comment ce projet est fait
+
+HSFA est développé avec un assistant de programmation IA, Claude (Anthropic), dirigé, joué et testé par Rickow ; les
+commits le disent (`Co-Authored-By: Claude`). Rien n'est pris sur parole : chaque changement est vérifié contre
+l'original d'arcade par des bancs automatiques (fins jouées jusqu'au générique, combats comparés image par image, témoins
+à l'octet avec chaque nouvel interrupteur coupé), les grosses étapes passent une revue critique avant d'être versées, et
+la méthode et les trouvailles sont écrites dans [`docs/journal`](docs/journal) et [`re/`](re). Aucune donnée de jeu
+n'est dans ce dépôt : tout est reconstruit depuis votre propre disque.
+
 ## État (2026-11-13 ; release stable v0.1.10)
 
 « Depuis la v0.1.x » ci-dessous = la release qui l'a apporté ; le détail de chaque release est dans le

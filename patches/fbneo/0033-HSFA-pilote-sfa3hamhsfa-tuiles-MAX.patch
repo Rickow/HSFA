@@ -1,0 +1,163 @@
+From 7f898625248cb329f972a8ef43d5b4b9bce5e491 Mon Sep 17 00:00:00 2001
+From: Rickow <30348240+Rickow@users.noreply.github.com>
+Date: Fri, 13 Nov 2026 17:00:00 +0100
+Subject: [PATCH] HSFA: sfa3hamhsfa driver (graft with the MAX characters),
+ hsfa_gfx_max.bin at $5400000
+
+Patch 0028 (reserved number, never published) adapted after 0032 and
+renumbered 0033 (decision D1 of 12/11).
+
+- New driver sfa3hamhsfa ("Hyper Street Fighter Alpha + Arcade MAX"): same
+  members as sfa3hahsfa plus the MANDATORY member hsfa_gfx_max.bin (12 MB,
+  tiles of the MAX characters) loaded and converted in place at $5400000,
+  above the stage area: graphics region of 96 MB for that driver only. No
+  parent: archives, states, configuration and NVRAM stay separate.
+- sfa3hahsfa and the other drivers do not declare the member: ROM list,
+  region size (80 MB for sfa3hahsfa) and loading are unchanged.
+- HsfaSang: sfa3hamhsfa expects the same 2 blood sites as sfa3hahsfa.
+- No new "config" key and no new slot: the dressing of the MAX characters
+  (portraits, names, HUD) is in the graft's own tables (slot 1 table and
+  the prolonged preview table), read by the existing code.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/burn/drv/capcom/cps_hsfa.cpp | 22 +++++++++++--
+ src/burn/drv/capcom/d_cps2.cpp   | 54 ++++++++++++++++++++++++++++++++
+ 2 files changed, 74 insertions(+), 2 deletions(-)
+
+diff --git a/src/burn/drv/capcom/cps_hsfa.cpp b/src/burn/drv/capcom/cps_hsfa.cpp
+index 63d0084..e56b742 100644
+--- a/src/burn/drv/capcom/cps_hsfa.cpp
++++ b/src/burn/drv/capcom/cps_hsfa.cpp
+@@ -36,6 +36,12 @@ INT32 bHsfaGfx20 = 0;
+ static UINT32 nHsfaExtBase = 0xA00000;
+ static UINT32 nHsfaExtLen = 0x500000;
+ #define HSFA_GFX_BASE	0x2000000					// ROM graphique etendue (code de tuile $40000)
++// (patch 0028) persos MAX dans la greffe sfa3hahsfa : tuiles MAX (sprites, portraits, HUD) dans hsfa_gfx_max.bin, membre
++// FACULTATIF charge en $5400000 (codes d'objet $A8000-$BFFFF, sur 20 bits), au-dessus de la zone des decors
++// ($4C40000-$53FFFFF) : les plans d'Hyper ne bougent pas. (patch 0033) Seul le pilote sfa3hamhsfa (greffe avec MAX) le
++// declare, obligatoire (region de 96 Mo) ; sfa3hahsfa et les autres pilotes ne le declarent pas : chargement et region
++// inchanges (80 Mo pour sfa3hahsfa).
++#define HSFA_GFX_MAX_BASE	0x5400000
+ 
+ // (agent_coeur_banques, patch 0009, prototype) TROUS de la carte CPS2 68K servis en ROM : hsfa_trous.bin (membre
+ // FACULTATIF, mots echanges comme hsfa_ext.bin) = image des 7 plages ci-dessous mises bout a bout, dans cet ordre.
+@@ -803,7 +809,7 @@ static void HsfaSang()
+ 	if (nHsfaSangForce == -2) nHsfaSangForce = getenv("HSFA_SANG") ? atoi(getenv("HSFA_SANG")) : -1;
+ 	const UINT16 nImm = ((nHsfaSangForce >= 0) ? (nHsfaSangForce == 0) : ((HsfaFluxDip & 0x04) != 0)) ? 1 : 0;
+ 	const char *pszDrv = BurnDrvGetTextA(DRV_NAME);
+-	const INT32 nAttendu = (pszDrv && strcmp(pszDrv, "sfa3hahsfa") == 0) ? 2 : 1;
++	const INT32 nAttendu = (pszDrv && (strcmp(pszDrv, "sfa3hahsfa") == 0 || strcmp(pszDrv, "sfa3hamhsfa") == 0)) ? 2 : 1;	// (0033) greffe avec MAX
+ 	UINT32 nSite[4] = { 0, 0, 0, 0 };
+ 	INT32 n = 0;
+ 	for (UINT32 a = 0; a + 12 <= nCpsRomLen; a += 2) {
+@@ -1597,6 +1603,16 @@ static INT32 HsfaLoadData()
+ 			HsfaConvertGfx(p, ri.nLen, p);
+ 			bHsfaGfx20 = 1;
+ 		}
++		else if (strcmp(pszName, "hsfa_gfx_max.bin") == 0) {	// (patch 0028 ; 0033 : obligatoire pour sfa3hamhsfa) absent et facultatif = zone vide
++			if (HSFA_GFX_MAX_BASE + ri.nLen > nCpsGfxLen) return 1;
++			UINT8 *p = CpsGfx + HSFA_GFX_MAX_BASE;
++			if (BurnLoadRom(p, i, 1)) {
++				if (!(ri.nType & BRF_OPT)) return 1;
++				memset(p, 0, ri.nLen);
++				continue;
++			}
++			HsfaConvertGfx(p, ri.nLen, p);
++		}
+ 	}
+ 	return (HsfaTab == NULL) ? 1 : 0;
+ }
+@@ -1687,7 +1703,8 @@ static INT32 HsfaExtTaille()
+ 
+ // (patch 0008) taille minimale de la region graphique : $2000000 + taille de hsfa_gfx.bin dans la liste de ROM du
+ // pilote, et au moins 64 Mo (Upper, Hyper : inchange). ro9a : hsfa_gfx.bin de 48 Mo (plans d'Upper en $4000000)
+-// -> 80 Mo. Appelee avant PhoenixInit (allocation de la region).
++// -> 80 Mo ; (patch 0028) avec hsfa_gfx_max.bin declare ($5400000 + 12 Mo, pilote sfa3hamhsfa) : 96 Mo. Appelee avant PhoenixInit
++// (allocation de la region).
+ UINT32 HsfaGfxLenMin()
+ {
+ 	UINT32 n = 0x4000000;
+@@ -1699,6 +1716,7 @@ UINT32 HsfaGfxLenMin()
+ 		char *pszName = NULL;
+ 		BurnDrvGetRomName(&pszName, i, 0);
+ 		if (pszName && strcmp(pszName, "hsfa_gfx.bin") == 0 && HSFA_GFX_BASE + ri.nLen > n) n = HSFA_GFX_BASE + ri.nLen;
++		if (pszName && strcmp(pszName, "hsfa_gfx_max.bin") == 0 && HSFA_GFX_MAX_BASE + ri.nLen > n) n = HSFA_GFX_MAX_BASE + ri.nLen;	// (patch 0028)
+ 	}
+ 	return n;
+ }
+diff --git a/src/burn/drv/capcom/d_cps2.cpp b/src/burn/drv/capcom/d_cps2.cpp
+index 02a011a..804727b 100644
+--- a/src/burn/drv/capcom/d_cps2.cpp
++++ b/src/burn/drv/capcom/d_cps2.cpp
+@@ -15605,6 +15605,50 @@ static struct BurnRomInfo Sfa3hahsfaRomDesc[] = {
+ STD_ROM_PICK(Sfa3hahsfa)
+ STD_ROM_FN(Sfa3hahsfa)
+ 
++// (patch 0033) Hyper + Arcade avec les persos MAX ("greffe avec MAX") : memes fichiers que sfa3hahsfa, plus les tuiles
++// des persos MAX (hsfa_gfx_max.bin, obligatoire) en $5400000 : region de 96 Mo. Pilote distinct (sans parent) pour que
++// sfa3hahsfa reste strictement inchange et que zips, etats, configuration et NVRAM ne se melangent pas.
++static struct BurnRomInfo Sfa3hamhsfaRomDesc[] = {
++	// programme 68000 retraduit (CRC variable : cherche par nom dans l'archive)
++	{ "sz3ud.03c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3ud.04c",     0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.05c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.06c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.07c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.08c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.09c",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++	{ "sz3.10b",       0x080000, 0x00000000, CPS2_PRG_68K | BRF_ESS | BRF_PRG },
++
++	{ "sz3.13m",       0x400000, 0x0f7a60d9, CPS2_GFX | BRF_GRA },
++	{ "sz3.15m",       0x400000, 0x8e933741, CPS2_GFX | BRF_GRA },
++	{ "sz3.17m",       0x400000, 0xd6e98147, CPS2_GFX | BRF_GRA },
++	{ "sz3.19m",       0x400000, 0xf31a728a, CPS2_GFX | BRF_GRA },
++	{ "sz3.14m",       0x400000, 0x5ff98297, CPS2_GFX | BRF_GRA },
++	{ "sz3.16m",       0x400000, 0x52b5bdee, CPS2_GFX | BRF_GRA },
++	{ "sz3.18m",       0x400000, 0x40631ed5, CPS2_GFX | BRF_GRA },
++	{ "sz3.20m",       0x400000, 0x763409b4, CPS2_GFX | BRF_GRA },
++
++	// son hybride d'Upper (bruitages et voix ; musiques ZERO 3 en QSound, les autres en flux ADX)
++	{ "hx3.01",        0x020000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++	{ "hx3.02",        0x028000, 0x00000000, CPS2_PRG_Z80 | BRF_ESS | BRF_PRG },
++
++	{ "hx3.11m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.12m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.13m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++	{ "hx3.14m",       0x400000, 0x00000000, CPS2_QSND | BRF_SND },
++
++	{ "phoenix.key",   0x000014, 0x2cf772b0, CPS2_ENCRYPTION_KEY },
++
++	{ "hsfa_ext.bin",  0x5C0000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// $940000-$EFFFFF
++	{ "hsfa_tab.bin",  0x400000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_PRG },	// tables de banques
++	{ "hsfa_gfx.bin",  0x3000000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_GRA },	// region $2000000-$4FFFFFF (plans d'Upper en $4000000)
++	{ "hsfa_trous.bin", 0x516000, 0x00000000, CPS2_HSFA_DATA | BRF_OPT | BRF_PRG },	// (patch 0009, facultatif) trous de la carte 68K
++	{ "hsfa_gfx_max.bin", 0xC00000, 0x00000000, CPS2_HSFA_DATA | BRF_ESS | BRF_GRA },	// (patch 0033) tuiles des persos MAX, region $5400000-$5FFFFFF (96 Mo)
++};
++
++STD_ROM_PICK(Sfa3hamhsfa)
++STD_ROM_FN(Sfa3hamhsfa)
++
+ // Variante widescreen (coeur fbneo_hsfaws, -DHSFA_WS) : memes noms de pilotes et memes archives, image elargie a
+ // 512x224 (16:9). Le decor existe au-dela des 384 px ; FBNeo recentre plans et objets (nCpsGlobalXOffset = 64).
+ #ifdef HSFA_WS
+@@ -15710,6 +15754,16 @@ struct BurnDriver BurnDrvCpsSfa3hahsfa = {
+ 	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
+ };
+ 
++struct BurnDriver BurnDrvCpsSfa3hamhsfa = {
++	"sfa3hamhsfa", NULL, NULL, NULL, "2026",
++	"Hyper Street Fighter Alpha + Arcade MAX (HSFA, essai ro9a" HSFA_SUFFIXE ")\0", NULL, "HSFA", "CPS2",
++	NULL, NULL, NULL, NULL,
++	BDF_GAME_WORKING | BDF_HACK, 2, HARDWARE_CAPCOM_CPS2, GBF_VSFIGHT, FBF_SF,
++	NULL, Sfa3hamhsfaRomInfo, Sfa3hamhsfaRomName, NULL, NULL, NULL, NULL, HsfaInputInfo, HhsfaDIPInfo,
++	HsfaHyperInit, HsfaDrvExit, Cps2Frame, CpsRedraw, CpsAreaScan,
++	&CpsRecalcPal, 0x1000, HSFA_SCRW, 224, HSFA_ASPX, HSFA_ASPY
++};
++
+ struct BurnDriver BurnDrvCpsSfz3jr2d = {
+ 	"sfz3jr2d", "sfa3", NULL, NULL, "1998",
+ 	"Street Fighter Zero 3 (Japan 980629 Phoenix Edition) (bootleg)\0", NULL, "bootleg", "CPS2",
+-- 
+2.53.0
+

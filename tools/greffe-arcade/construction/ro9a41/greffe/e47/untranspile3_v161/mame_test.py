@@ -204,6 +204,13 @@ def main():
     # le bloc externe $940000 ; les tables d'animation natives (ASSET) descendent avec elles
     RESERVE_MAX = int(os.environ.get("RESERVE_MAX", "0"), 16)
     PLAFOND -= RESERVE_MAX
+    # (L2 des MAX, l2_max_greffe CONCEPTION §4.1) MAX=1 : persos MAX dans la greffe (pilote sfa3hamhsfa), crochets de
+    # greffe/max/integre_max_ro9.py ; MAX=0 : rien n'est importe ni change
+    MAX = os.environ.get("MAX", "0") == "1" and MODULE == 'ro9' and bool(os.environ.get("HSFA_GREFFE_DONNEES"))
+    if MAX:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'max'))
+        import integre_max_ro9 as IM
+        IM.debut(W, RESERVE_MAX)
     # (greffe_arcade, ossature des decors etape 2, conflit C4) HSFA_DONNEES_TROU="y:n:ext0" (hexa) : la coupure du bloc
     # externe ($940000) reste FIXE en PS2 ext0 (ext_940000 inchange) ; la place de l'image est reduite de n octets
     # (plafond des donnees abaisse) ; la tranche [T0, ext0) qui ne tient plus va dans un TROU de la carte 68K en y
@@ -385,6 +392,7 @@ def main():
         struct.pack_into('>%dH' % len(MUS), img, d0_, *MUS)
         print("intro : repere de musique arcade en $%x (au lieu de la table de ticks PS2)" % d0_)
     data = bytearray(buf[end:FIN_FICHIER]); data = data[:len(data)//2*2]
+    if MAX: IM.donnees(buf, data, end, T, W, GRF_BLOB)   # (L2) avant le relogement des pointeurs
     demo = os.environ.get("MAX_DEMO")                    # (HANDOFF §99) ex. pl26 : garde de Ryu -> frames 0-5 du perso MAX
     if demo:
         import json
@@ -533,6 +541,7 @@ def main():
                          "  ordre 68K" if p_ in T.RELOGE_NATIF_TABLES else ""))
             for va_, n_, tb_ in T.RELOGE_SITES:
                 f_.write("site mips %07x A%d $%06x  tables %s\n" % (va_, n_, lab(va_), ",".join("%06x" % t for t in tb_)))
+    if MAX: IM.tables_code(data, T); IM.palettes(data, end)   # (L2) apres l'etape B
     data = bytes(data)
     print("pointeurs de code relocalises dans les donnees :", nrel)
     be = bytes(b for i in range(0, len(data), 2) for b in (data[i+1], data[i]))
@@ -593,6 +602,7 @@ def main():
             print("donnees dans le trou : %d octets -> ext_%06x.bin" % (len(be) - t_, T.DATA_TROU_Y))
             be = be[:t_]
     img[T.DATA_BASE:T.DATA_BASE+len(be)] = be
+    if MAX: IM.image(img, its, T, W, EXT_PLUS, ["%06x %07x %s\n" % (it.off, it.va, it.mn) for it in its if it.ws or it.kind != 'fixed'], CODE + 2 * len(words))   # (L2)
     if por and MODULE == 'ro5' and pid is not None:
         # (HANDOFF §131) deviation du rendu des palettes de selection pour l'ID MAX (index pid x 2 dans D0) :
         # 'LEA $1BB4E0,A0 ; ADD.W (A0,D0.W),D1 ; ADDA.W D1,A0' -> 'JSR stub ; NOP x3' ; stub dans le trou entre la
@@ -815,6 +825,7 @@ def main():
                 for o, c, a, b in faits: f.write("%06x local %04x attr %04x -> %04x\n" % (o, c, a, b))
             print("tuiles scroll1 en miroir du portage : %d cases de super-tuiles retournees (S1_MIROIR ; plan1 : banques.py plans)"
                   % len(faits))
+    if MAX: IM.fin(img)   # (L2) code MAX et talons dans $3A0000-$3BFFFF
     sw = bytes(b for i in range(0, len(img), 2) for b in (img[i+1], img[i]))
     out = os.path.join(W, P['sortie'], "sfa3ud"); os.makedirs(out, exist_ok=True)
     names = ["sz3ud.03c", "sz3ud.04c", "sz3.05c", "sz3.06c", "sz3.07c", "sz3.08c", "sz3.09c", "sz3.10b"]

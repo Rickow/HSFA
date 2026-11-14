@@ -1,0 +1,128 @@
+# (L2 des MAX, 13/11) adresses du moteur appelées par le code MAX (arcade) -> va MIPS du module ro9a (fichier = exec - $1F0000).
+# genre hyper : va du code d'Hyper (stable d'une construction a l'autre) ; genre greffe : va du code d'UPPER (ro5) copie
+# par la greffe, traduite a la construction par greffe.json « blocs » ; vide : non resolu. Origine : max_hyper/fait_corr_hyper.py
+# (08/11, + 6 entrees de routines d'Hyper posees a la main), recalcule contre la base MAX de ro9a39 (l2, 12/11).
+arcade	nom	genre	va	statut	remarque
+$1B4D0	affichage / test de plan (parallaxe)	hyper	0x38b508	present	Hyper present (identique) ; Upper va 0xc65f8
+$1BD5C	A3 = table selon $E (plan)	hyper	0x38e614	present	Hyper present (identique) ; Upper va 0xcb0d4
+$1BD68	A3 = caméra du plan $E, D0 = décalage	hyper	0x38e67c	present	Hyper present (identique) ; Upper va 0xcb13c
+$1BDA6	aléa (graine $AE(A5))	hyper	0x38e8a0	present	Hyper present (identique) ; Upper va 0xcb360
+$1C1C8	allocation d'un projectile (réservoir)	hyper	0x390bac	identique	ENTRÉE de la routine Hyper (routine_ro9 0x390b80, 1re ligne de carte) : routine MODIFIÉE par Hyper (tests de version $D2), À REVOIR [repris du 08/11]
+$1C206	raz d'objet et retour au réservoir	hyper	0x390e74	present	Hyper present (quasi identique (>=90 %)) ; Upper va 0xccfd4
+$1C2C8	allocation d'objet standard ($10)	hyper	0x39147c	present	Hyper present (identique) ; Upper va 0xcd5cc
+$1C368	allocation d'effet ($18)	hyper	0x39173c	present	Hyper present (identique) ; Upper va 0xcdb4c
+$1C37E	allocation + raz d'effet	hyper	0x391854	present	Hyper present (identique) ; Upper va 0xcdc64
+$20674	points / réaction ($AC(A5), $125)	hyper	0xaa680	present	Hyper present (identique) ; Upper va 0x27da0
+$2068C	points, force $82 (pose $216)	hyper	0xaa8c8	present	Hyper present (identique) ; Upper va 0x27e68
+$206AE	points	hyper	0xaab30	present	Hyper present (identique) ; Upper va 0x280d0
+$2A708	lancer l'animation n (table $2B0)	hyper	0x2b8b18	present	Hyper present (identique) ; Upper va 0x2398d8
+$2A710	lancer l'animation n (table $2BC) + octets perso/ism -> $23E/$293	hyper	0x2b8b70	identique	ENTRÉE de la routine Hyper (routine_ro9 0x2b8b40, 1re ligne de carte) : routine MODIFIÉE par Hyper (tests de version $D2), À REVOIR [repris du 08/11]
+$2A758	lancer l'animation n (table $2B4)	greffe	0x239b28	identique	greffe (code d'Upper copié) ; Upper va 0x239b28
+$2A75E	lancer l'animation n (table $2B8)	hyper	0x2b8e28	modifie	Hyper 0x2B8E10 (BLOC-HYPER §2) : $2B8 indexée par n + 48·[$328≠0] + 48·[$28D≠0] -> $2B8 de MAX à 144 entrées (3 copies) ; image $072F4C [repris du 08/11]
+$2A770	charger le pas d'animation A0	hyper	0x2b8f98	present	Hyper present (identique) ; Upper va 0x239c48
+$2A7EA	avancer l'animation	hyper	0x2b9334	present	Hyper present (identique) ; Upper va 0x239fb4
+$2A98C	état $2000600 (garde/chute)	hyper	0x2ba4f8	modifie	Hyper modifie (modifiee (70-90 %)) ; Upper va 0x23acf8
+$2AA08	intégrer vitesse/accélération ($40-$4C)	hyper	0x2ba848	present	Hyper present (deplacements) ; Upper va 0x23afa8 ; (L2 13/11) corrigé : 0x2586d8 (appariement « deplacements ») travaille sur A4 : faux ; homologue de $2AA08 sur A6 = 0x2ba848 (juste après $2A98C, + test $D2 bit 4)
+$2AEBC	fin de coup -> $2F770 (efface $2C8, $5B)	greffe	0x23e970	modifiée par Upper	greffe (code d'Upper copié) ; Upper va 0x23e970
+$2AF7A	test de sol / atterrissage	hyper	0x2bfa1c	present	Hyper present (identique) ; Upper va 0x23ef2c
+$2B1FC	test	hyper	0x2c0ca4	present	Hyper present (identique) ; Upper va 0x240064
+$2BAF2	retour en garde (BSR $2B828 puis $2BAF8)	hyper	0x2c5a68	present	Hyper present (identique) ; Upper va 0x246548
+$2BB26	retour en garde	hyper	0x2c5b48	present	Hyper present (identique) ; Upper va 0x246628
+$2BB5A	retour au neutre	hyper	0x2c5c3c	modifie	Hyper modifie (modifiee (70-90 %)) ; Upper va 0x24671c
+$2C0AC	$D(A6) := table[mode $138(A5), côté $101]	hyper	0x2c7cd0	present	Hyper present (identique) ; Upper va 0x248470
+$2D5EA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E104	hyper	0x2c9624	present	Hyper present (identique) ; Upper va 0x10d104 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D5F2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E10C	hyper	0x2c9654	present	Hyper present (identique) ; Upper va 0x10d134 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D5FA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E134	hyper	0x2c9684	present	Hyper present (identique) ; Upper va 0x10d164 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D602	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E13C	hyper	0x2c96b4	present	Hyper present (identique) ; Upper va 0x10d194 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D60A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E114	hyper	0x2c96e4	present	Hyper present (identique) ; Upper va 0x10d1c4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D612	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E11C	hyper	0x2c9714	present	Hyper present (identique) ; Upper va 0x10d1f4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D61A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E124	hyper	0x2c9744	present	Hyper present (identique) ; Upper va 0x10d224 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D622	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E12C	hyper	0x2c9774	present	Hyper present (identique) ; Upper va 0x10d254 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D62A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E14C	hyper	0x2c97a4	present	Hyper present (identique) ; Upper va 0x10d284 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D632	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E154	hyper	0x2c97d4	present	Hyper present (identique) ; Upper va 0x10d2b4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D63A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E144	hyper	0x2c9864	present	Hyper present (identique) ; Upper va 0x10d2e4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D642	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E164	hyper	0x2c9894	present	Hyper present (identique) ; Upper va 0x10d314 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D64A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E16E	hyper	0x2c98c4	present	Hyper present (identique) ; Upper va 0x10d344 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D652	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E178	hyper	0x2c98f4	present	Hyper present (identique) ; Upper va 0x10d374 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D65A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E182	hyper	0x2c9924	present	Hyper present (identique) ; Upper va 0x10d3a4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D662	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E18C	hyper	0x2c9954	present	Hyper present (identique) ; Upper va 0x10d3d4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D66A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E198	hyper	0x2c9984	present	Hyper present (identique) ; Upper va 0x10d404 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D672	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1A4	hyper	0x2c99b4	present	Hyper present (identique) ; Upper va 0x10d434 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D67A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1B0	hyper	0x2c99e4	present	Hyper present (identique) ; Upper va 0x10d464 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D682	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1BC	hyper	0x2c9a14	present	Hyper present (identique) ; Upper va 0x10d494 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D68A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1C4	hyper	0x2c9a44	present	Hyper present (identique) ; Upper va 0x10d4c4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D692	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1CC	hyper	0x2c9a74	present	Hyper present (identique) ; Upper va 0x10d4f4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D69A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1D8	hyper	0x2c9aa4	present	Hyper present (identique) ; Upper va 0x10d524 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6A2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1E4	hyper	0x2c9ad4	present	Hyper present (identique) ; Upper va 0x10d554 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6AA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1F0	hyper	0x2c9b04	present	Hyper present (identique) ; Upper va 0x10d584 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6B2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E1FC	hyper	0x2c9b34	present	Hyper present (identique) ; Upper va 0x10d5b4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6BA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E208	hyper	0x2c9b64	present	Hyper present (identique) ; Upper va 0x10d5e4 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6C2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E216	hyper	0x2c9b94	present	Hyper present (identique) ; Upper va 0x10d614 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6CA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E224	hyper	0x2c9bc4	present	Hyper present (identique) ; Upper va 0x10d644 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6D2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E238	hyper	0x2c9bf4	present	Hyper present (identique) ; Upper va 0x10d674 ; (L2 13/11) corrigé : talon d'Hyper apparié par le CONTENU de la définition (l'appariement par corps donnait 0x2c9624 aux 45 talons)
+$2D6DA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E24C	-		absente	Hyper present (identique) ; Upper va 0x10d6a4 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D6EA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E25A	-		absente	Hyper present (identique) ; Upper va 0x10d704 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D6F2	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E260	-		absente	Hyper present (identique) ; Upper va 0x10d734 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D6FA	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E266	-		absente	Hyper present (identique) ; Upper va 0x10d764 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D702	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E272	-		absente	Hyper present (identique) ; Upper va 0x10d794 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D70A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E27E	-		absente	Hyper present (identique) ; Upper va 0x10d7c4 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D712	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E286	-		absente	Hyper present (identique) ; Upper va 0x10d7f4 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D71A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E28A	-		absente	Hyper present (identique) ; Upper va 0x10d824 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D722	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E282	-		absente	Hyper present (identique) ; Upper va 0x10d854 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D72A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E29E	-		absente	Hyper present (identique) ; Upper va 0x10d884 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D732	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E2A6	-		absente	Hyper present (identique) ; Upper va 0x10d8b4 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D73A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E28E	-		absente	Hyper present (identique) ; Upper va 0x10d8e4 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D742	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E296	-		absente	Hyper present (identique) ; Upper va 0x10d914 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D74A	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E2AE	-		absente	Hyper present (identique) ; Upper va 0x10d944 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2D752	manipulation (LEA déf.(PC),A3 ; BRA tronc commun) déf. $2E2B6	-		absente	Hyper present (identique) ; Upper va 0x10d974 ; (L2 13/11) 0x2c9624 FAUX ; Hyper a réécrit ces talons (tests par perso $103, troncs propres) : sans homologue, n° de TAB_MANIPS mis à 0 par l2_sources.py (aucun n'est employé par Eagle)
+$2E3E0	saisie (n -> $32F) variante adversaire $1C/$D	hyper	0x2d3a94	present	Hyper present (identique) ; Upper va 0x15cda4
+$2E3FE	déclenchement d'une saisie (n -> $32F), selon $3E / état $4-$6	hyper	0x2d3bd8	present	Hyper present (identique) ; Upper va 0x15cee8
+$2E422	saisie, chemin « joueur » de $2E3FE	hyper	0x2d3e74	present	Hyper present (identique) ; Upper va 0x15d184
+$2E4C2	victime mise en état « saisi »	hyper	0x2d4924	modifie	Hyper modifie (apparentee (40-70 %)) ; Upper va 0x15da04
+$2E636	saisie variante (adversaire $31, n -> $32F)	hyper	0x2d5e14	present	Hyper present (identique) ; Upper va 0x15ead4
+$2E700	saisie variante (adversaire $31 = 0, n -> $32F)	-		absente	
+$2E7F2	coup direct à la victime $38 (attaque n de $A0)	hyper	0x2d6fd0	modifie	Hyper modifie (modifiee (70-90 %)) ; Upper va 0x15f9a0
+$2E8C0	A0 = objet du camp ($156/$158(A5))	hyper	0x2d7474	present	Hyper present (identique) ; Upper va 0x15fd94
+$2E96C	prise, attaque n de $A0 (D2=1)	hyper	0x2d7e70	present	Hyper present (identique) ; Upper va 0x160790
+$2E970	prise, attaque n de $A0 (D2=0)	hyper	0x2d7e9c	present	Hyper present (identique) ; Upper va 0x1607bc
+$2EA06	mash (boutons $378) en saisie	hyper	0x2d8314	present	Hyper present (identique) ; Upper va 0x160ba4
+$2EA7A	mash de la victime ($AE)	hyper	0x2d8500	present	Hyper present (identique) ; Upper va 0x160d90
+$2EB06	annulation de coup normal	hyper	0x2d899c	modifie	Hyper modifie (modifiee (70-90 %)) ; Upper va 0x1611fc
+$2EC28	poing faible + pied faible	hyper	0x2d9abc	modifie	Hyper modifie (apparentee (40-70 %)) ; Upper va 0x161c7c
+$2ECD8	super : seuil de jauge $11E selon l'ism, puis $2ED02 (D2=1)	hyper	0x2da5c8	modifie	Hyper modifie (modifiee (70-90 %)) ; Upper va 0x162358
+$2ED00	super : D2=0 puis $2ED02 (test $2020400 / $31)	hyper	0x2da90c	present	Hyper present (identique) ; Upper va 0x16266c ; (L2 13/11) corrigé : talon MOVEQ #0,D2 ; JMP (suite de $2ECD8) ; l'appariement « identique » donnait 0x2d7e9c ($2E970) : faux
+$2ED28	super : D2=0 puis $2ED2A (test $2000606, état $200…)	hyper	0x2daebc	present	Hyper present (identique) ; Upper va 0x162b2c ; (L2 13/11) corrigé : talon MOVEQ #0,D2 ; JMP (suite du super à MOVEQ #1,D2 / TST.B $B8) ; l'appariement « identique » donnait 0x2d7e9c ($2E970) : faux
+$2EDA0	super : déclenchement (raz $5D/$5E, $2AF7A, $114:=2…)	hyper	0x2dba80	present	Hyper present (quasi identique (>=90 %)) ; Upper va 0x1633e0
+$2EF6C	gain de jauge super $11E	hyper	0x2dd960	identique	ENTRÉE de la routine Hyper (routine_ro9 0x2dd930, 1re ligne de carte) : routine MODIFIÉE par Hyper (tests de version $D2), À REVOIR [repris du 08/11]
+$2F52C	pose $291=1, $2A0=10 puis neutre	greffe	0x168564	identique	greffe (code d'Upper copié) ; Upper va 0x168564
+$2F53C	neutre (suite)	hyper	0x2e1a94	present	Hyper present (identique) ; Upper va 0x1685c4
+$2F5AC	neutre (variante)	greffe	0x168b38	identique	greffe (code d'Upper copié) ; Upper va 0x168b38
+$2F6F8	test contre-attaque ($125/$3E/$CE)	hyper	0x2e31c4	present	Hyper present (identique) ; Upper va 0x169b74
+$2F728	force du poing pressé -> $82	hyper	0x2e3308	present	Hyper present (identique) ; Upper va 0x169cb8
+$2F74C	force du pied pressé -> $82	hyper	0x2e33f8	present	Hyper present (identique) ; Upper va 0x169da8
+$2F770	raz $3E/$294, libère l'adversaire	hyper	0x2e34e4	present	Hyper present (quasi identique (>=90 %)) ; Upper va 0x169e94
+$2F796	remise à l'état neutre	hyper	0x2e3674	identique	ENTRÉE de la routine Hyper (routine_ro9 0x2e3620, 1re ligne de carte) : routine MODIFIÉE par Hyper (tests de version $D2), À REVOIR [repris du 08/11]
+$2F980	lecture de combinaison de boutons	hyper	0x2e4d48	present	Hyper present (identique) ; Upper va 0x16aab8
+$2F9BE	placer l'adversaire (table $DD212)	hyper	0x2e6d44	present	Hyper present (identique 68K) ; Upper va 0x16adb4
+$2FA36	se placer sur l'adversaire (table $DD212)	hyper	0x2e7134	present	Hyper present (identique 68K) ; Upper va 0x16b1a4
+$33074	projectile : routine commune	hyper	0x3786b8	present	Hyper present (identique) ; Upper va 0x137a18
+$330C4	projectile : demi-tour	hyper	0x2f0508	present	Hyper present (identique) ; Upper va 0x137c58
+$33120	projectile : renvoi (Soul Reflect)	hyper	0x2f0508	present	Hyper present (identique) ; Upper va 0x137ea8 ; (L2 13/11) DOUTEUX : même routine que $330C4 (corps différents dans Upper) ; Ingrid seulement, hors L2 : à établir avec elle
+$3323A	projectile : en-tête d'animation (5 mots relatifs -> $90-$A0)	hyper	0x379280	present	Hyper present (identique) ; Upper va 0x138520
+$0369C	son/voix propre au perso (masque par ID)	hyper	0x387fa0	present	Hyper present (identique) ; Upper va 0x138ea0
+$804DA	création de 3 objets fils	hyper	0x324aac	present	Hyper present (identique) ; Upper va 0x16f7cc
+$80668	création d'objet fils	hyper	0x325334	present	Hyper present (identique) ; Upper va 0x170054
+$80B70	objet fils lié à l'attaque n (table $A0)	hyper	0x2ebd74	identique	ENTRÉE de la routine Hyper (routine_ro9 0x2ebd60, 1re ligne de carte) : routine MODIFIÉE par Hyper (tests de version $D2), À REVOIR ; ARGUMENTS DIFFÉRENTS (Hyper : D1) [repris du 08/11]
+$80E8E	objet fils	hyper	0x328240	present	Hyper present (apparentee (40-70 %)) ; Upper va 0x172c7c
+$82E36	objet fils selon la force $82 / ism	hyper	0x32c3b4	present	Hyper present (identique) ; Upper va 0x176ad4
+$97CD6	effet / son	hyper	0x365000	present	Hyper present (modifiee (70-90 %)) ; Upper va 0x1c62a0
+$2E646	saisie : suite commune (TST.B $3E ; $24E(A1) ; état $200/$E…), cible de psp_670ac (= $2E700 absente d'Upper)	hyper	0x2d5f08	present	Hyper present (quasi identique (>=90 %)) ; Upper va 0x15ebc8
+$32A4	sauvegarde D0-D3/A3-A4 avant son (MOVEM.L … ,-$71A6(A5))	hyper	0x387400	present	Hyper present (identique) ; Upper va 0xce9c0
+$3938	jouer la commande son D1 (BTST #0,$59(A6) -> +$500)	hyper	0x388940	present	Hyper present (identique) ; Upper va 0x139780
+$1B0C4	intégration des vitesses (X += $40, $40 += $48, Y += $44, $44 += $4C)	hyper	0x1045e0	present	Hyper present (identique) ; Upper va 0xc5790
+$1B4EC	ajout à la liste d'affichage ($1 = 1, aiguillage sur $9)	hyper	0x38b6d4	present	Hyper present (identique) ; Upper va 0xc67c4
+$1B692	avance d'animation (SUBQ.B #1,$32 ; pas suivant par $1C)	hyper	0x38d094	present	Hyper present (identique) ; Upper va 0xc8184
+$82F20	création de 3 objets enfants (D0/D1 -> $50/$52, D2 -> $D)	hyper	0x13099c	present	Hyper present (nouvelle (<40 %)) ; Upper va 0x176f80 ; (L2 13/11) DOUTEUX : corps sans rapport (Hyper « nouvelle ») ; fins seulement (MAX_FINS=0), hors L2
+$AA630	pose l'animation D0 de l'acteur (table choisie par $7F, puis $1B6E0)	greffe	0x20e444	modifiée par Upper	greffe (code d'Upper copié) ; Upper va 0x20e444
+$1B6EE	pose du pas A0 : $1C <- A0, $32 <- 4 premiers octets du pas (queue de $1B6E0)	greffe	0xc85d0	identique	greffe (code d'Upper copié) ; Upper va 0xc85d0
+$1B6B6	avance d'un pas de 8 o de l'animation (SUBQ.B #1,$32 ; pas suivant ; $33 = $FF en fin)	greffe	0xc8304	identique	greffe (code d'Upper copié) ; Upper va 0xc8304 ; ajout l2 13/11 (complément d'Upper du 11/11)

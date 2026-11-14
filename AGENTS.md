@@ -12,7 +12,7 @@ Working language: **English** for the documentation and reports (since 2026-11-1
 |---|---|
 | mandatory rules | §2 below; the maintainer's decisions and expectations: `docs/ATTENTES-ET-DECISIONS.md` (private repository only, not exported) |
 | current state | §5 below, then `CHANGELOG.md` (top section); releases: **v0.1.10 stable** (2026-11-13), v0.1.9 and v0.1.8 pre-releases; work not released yet goes into an "Unreleased" section at the top of the CHANGELOG |
-| journal | `docs/journal/HANDOFF.md` (§1-§220, chronological order); index `docs/journal/INDEX-HANDOFF.md` (§0: the three numbering series; §13: one line per recent section) |
+| journal | `docs/journal/HANDOFF.md` (§1-§231, chronological order); index `docs/journal/INDEX-HANDOFF.md` (§0: the three numbering series; §13: one line per recent section) |
 | addresses, fields, memory areas | `re/` index: `re/README.md`, `python3 re/outils/quoi.py <adresse\|nom>`, `re/allocations.tsv`, `python3 re/outils/zones.py --verifie` |
 | benches and measurements | `tools/bancs/README.md` (`lance_emu`, fingerprint, daily bench); translator validation: `scripts/validation/`; method: `docs/methodes/oracle-et-non-regression.md` |
 | building the games, the cores | `docs/guide/construction-iso.md`; core patch chain: `patches/fbneo/README.md`; batch of the 12 cores: `tools/coeurs/README.md` |

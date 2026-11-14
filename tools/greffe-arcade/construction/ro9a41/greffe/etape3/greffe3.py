@@ -48,6 +48,26 @@ import commun as C
 from mips import Ins
 G = GR.G; BASE = GR.BASE
 MODULE_SOURCE = "@HA_MODULES_SON@/ro9_usa_prog68k.bin"       # Hyper + redirection des voix (actuel)
+MODULE_DOSSIER = os.path.dirname(MODULE_SOURCE)                # (L2) dossier des modules (EXTRACT_MODULES du traducteur)
+# (L2 des MAX, l2_max_greffe CONCEPTION §3.1) MAX_SEL=1 : identite et grille d'Eagle ($26) posees dans une COPIE du module
+# source (constructions/<nom>/module_source_max.bin), avant tout usage : tables_tirage() recopie T_BASE de ce module.
+# Octets en ordre PS2 (exec, avant, apres) : case (0,2) ; T_BASE[$26] ; proprietaire de banque T_5B5BB0[$26] ; lignes des
+# versions et « Start » [$26] = version unique ; « ? » restants renumerotes $2B / $2D / $2C (parite gardee, seuil $2A) ;
+# curseur T_5C5240[$2B..$2D] ; id du combat T_5B5DB0[$26]. =0 : module d'origine.
+MAX_SEL = os.environ.get("MAX_SEL", "0") == "1"
+MAX_SEL_OCTETS = ((0x5C5652, 'a6', '26'), (0x5C5326, '00', '26'), (0x5B5BD6, '00', '26'),
+                  (0x5C5418, '00000000', '26ffffff'), (0x5C54B8, '00000000', '26ffffff'),
+                  (0x5C5654, '67', '6b'), (0x5C5682, '69', '6d'), (0x5C5684, 'a8', 'ac'),
+                  (0x5C5296, '000000000000', '040004060206'),
+                  (0x5B5DD6, '00', '26'))   # (13/11) T_5B5DB0[$26] : id du joueur réécrit à l'init du combat (fichier 0xA2104), $26 -> Ryu sinon
+if MAX_SEL:
+    _h = bytearray(open(MODULE_SOURCE, 'rb').read())
+    for _ex, _av, _ap in MAX_SEL_OCTETS:
+        _o = _ex - BASE; _av = bytes.fromhex(_av)
+        assert _h[_o:_o + len(_av)] == _av, "MAX_SEL : %#x vaut %s (attendu %s)" % (_ex, _h[_o:_o + len(_av)].hex(), _av.hex())
+        _h[_o:_o + len(_av)] = bytes.fromhex(_ap)
+    _d = os.path.join(G, 'constructions', os.environ.get('NOM', 'ro9a')); os.makedirs(_d, exist_ok=True)
+    MODULE_SOURCE = os.path.join(_d, 'module_source_max.bin'); open(MODULE_SOURCE, 'wb').write(bytes(_h))
 SON_DONNEES = "@HA_MODULES_SON@/son_donnees_ro9.bin"
 Z80_0, Z80_1 = 0x20, 0x22B00
 Z2_EXEC = 0x1000000                                 # 2e zone de code (execution) ; fichier = exec - 0x1F0000
@@ -884,6 +904,10 @@ def x2_liste():
         d_['e'] = int(d_['e']); d_['n0'] = int(d_['n0']); d_['R'] = int(d_['rangs'])
         d_['sites'] = [int(s_, 16) for s_ in d_['sites_temoins'].split()]
         lr_ = d_['lecteurs_a_rediriger']; d_['tous'] = not lr_.startswith('listes:')
+        # (L2, D9) hyper:SITE[,SITE] : lecteurs d'HYPER (lui/addiu, fichier du module) rediriges vers la copie prolongee ;
+        # lot E = tables de L2 (pilote avec MAX) : ignore sans MAX=1 (greffe sans MAX inchangee)
+        d_['hyper'] = [int(s_, 16) for s_ in lr_[6:].split(',')] if lr_.startswith('hyper:') else []
+        if d_['lot'] == 'E' and not _MAX: continue
         if not d_['tous']: d_['sites'] = [int(s_, 16) for s_ in lr_[7:].split(',')]
         d_['consts'] = [tuple([c_.split(':')[0]] + [int(v_, 16) for v_ in c_.split(':')[1:]])
                         for c_ in d_['constantes'].split() if ':' in c_ and not c_.startswith('garde:')]
@@ -1282,9 +1306,34 @@ ZONE_DECORS = os.environ.get("ZONE_DECORS", "1" if OBJETS_DECOR else "0") == "1"
 ZONE_OBJETS = tuple(int(x, 16) for x in os.environ.get("ZONE_OBJETS", "950ce0-99ff00").split('-'))
 ZONE_CORPS = (0x4E8000, 0x5D4000)                    # T1b apres la tete (fenetre $FE0000) ; $5D4000 = tranche d'Hyper
 ZONE_TAG = 0x01000000
+# (L2, l2_max_greffe CONCEPTION §4.2, §6.1) MAX_ZONES=1 : « base MAX » du pilote avec MAX (sfa3hamhsfa). Zones T4
+# $710000-$7FFFFF (donnees, IA) et T5 $810000-$8FFFFF (frames, portraits) des persos MAX declarees au traducteur comme
+# ZONES 68K DIRECTES (etiquette ZONE_TAG, comme le corps des decors) : RETAG24 les connait, ce qui deplace le code traduit
+# (base MAX distincte de ro9a39, decision D7). Rien n'y est pose ici (integre_max_ro9.py, MAX=1). =0 : ro9a39 a l'octet.
+MAX_ZONES = os.environ.get("MAX_ZONES", "0") == "1"
+ZONES_MAX = ((0x710000, 0x800000), (0x810000, 0x900000))
+# (L2, CONCEPTION §6.1) dependances des interrupteurs des MAX (arret sinon)
+_MAX = os.environ.get("MAX", "0") == "1"
+assert not _MAX or (MAX_ZONES and os.environ.get("X2_TABLES", "0") == "1"), "MAX=1 exige MAX_ZONES=1 et X2_TABLES=1"
+assert _MAX or not (MAX_SEL or os.environ.get("MAX_E5", "0") == "1" or os.environ.get("MAX_PERSOS")), "MAX_SEL, MAX_E5, MAX_PERSOS exigent MAX=1"
+def max_banques(dossier, P_):
+    """(L2, CONCEPTION §2.2) MAX_PERSOS : tuiles des persos MAX (greffe/max/fait_gfx_max.py, cache MAX_CACHE = <cache>/fork
+    régénéré depuis l'ISO) -> f38NN.bin et segments.tsv dans banques_hx, hsfa_gfx_max.bin dans la construction ;
+    carte.txt : « perso <id> 38NN »"""
+    pers = [p_ for p_ in os.environ["MAX_PERSOS"].split(",") if p_]
+    subprocess.run([sys.executable, os.path.join(G, "max", "fait_gfx_max.py"), "--fork", os.environ["MAX_CACHE"],
+                    "--gfx-upper", "@HA_MAME_RO5@/hsfa_gfx.bin", "--gfx-greffe", "@HA_MAME_RO9@/hsfa_gfx.bin",
+                    "--persos", ",".join(pers), "--sortie", dossier, "--gfx-max", os.path.join(P_, "hsfa_gfx_max.bin")]
+                   + (["--prep", os.environ["MAX_PREP"]] if os.environ.get("MAX_E5") == "1" else []), check=True)   # (pas 8) commun MAX f3999
+    f_ = os.path.join(dossier, "carte.txt"); L_ = open(f_, encoding="utf-8").read().splitlines()
+    for p_ in pers:
+        i_ = int(p_, 16); k_ = [n_ for n_, l_ in enumerate(L_) if l_.split()[:2] == ["perso", str(i_)]]
+        assert len(k_) == 1, "carte.txt : perso %d" % i_
+        L_[k_[0]] = "perso %d %d" % (i_, 3800 + i_)
+    open(f_, "w", encoding="utf-8").write("\n".join(L_) + "\n")
 ZONE_REP = 0x80                                      # repertoire : decalage dans la fenetre des decors (apres D4)
 ZONE_REP_LOTS, ZONE_REP_DECORS = 16, 128
-def zone_repertoire(lots, fin_occupee):
+def zone_repertoire(lots, fin_occupee, index=None):
     """(e31) repertoire de la zone des decors (ordre PS2, petit-boutiste ; voir e31/DECORS-ZONE.md) :
     +$00 'HSFADZ01' ; +$08 u16 version, u16 nombre de lots ; +$0C u32 fin occupee du corps ; +$10 u32 debut du corps,
     +$14 u32 fin du corps (adresses 68K etiquetees) ; +$18 2 x u32 reserves ; +$20 16 lots x 16 o (u8 famille, u8 reserve,
@@ -1293,8 +1342,10 @@ def zone_repertoire(lots, fin_occupee):
     b = bytearray(b'HSFADZ01') + struct.pack('<HHIII8x', 1, len(lots), fin_occupee, ZONE_TAG | ZONE_CORPS[0], ZONE_TAG | ZONE_CORPS[1])
     assert len(lots) <= ZONE_REP_LOTS
     for fam, drap, base, taille, orig in lots: b += struct.pack('<BBHIII', fam, 0, drap, base, taille, orig)
-    b += bytes(0x20 + 16 * ZONE_REP_LOTS - len(b)) + bytes(4 * ZONE_REP_DECORS)
-    return bytes(b)
+    b += bytes(0x20 + 16 * ZONE_REP_LOTS - len(b))
+    ix_ = [0] * ZONE_REP_DECORS                       # (E1, DECORS_LOTS) index : $100 / 2 -> tagged base of the lot
+    for k_, v_ in (index or {}).items(): ix_[k_] = v_
+    return bytes(b) + struct.pack('<%dI' % ZONE_REP_DECORS, *ix_)
 OBJETS_PARCOURS = os.environ.get("OBJETS_PARCOURS", "1") == "1"
 # (e33) OBJETS_CLASSES=1 : CLASSES DE DECOR ENTIERES. (1) T_611E50 a $2F entrees (pas $28) : classes $28-$2E dans la
 # fermeture ; (2) routines de la fermeture (plages des classes) renvoyees a Hyper -> GREFFEES : la classe $26 (0xFFD80) et la
@@ -1316,6 +1367,19 @@ CONST_OBJET = None if CONST_OBJET == "0" else CONST_OBJET
 # Vide : comme e33.
 CONST_OBJET_PLUS = tuple(int(x, 16) for x in os.environ.get("CONST_OBJET_PLUS", "4dc80,50290,5ace0,11f510,1b3140,1b3f70").split(',') if x)
 OBJETS_E0 = os.environ.get("OBJETS_E0", "1") == "1"
+# (decors_proto E1, 14/11) DECORS_LOTS=1 : SFA1 / SFA2 stage lots SERVED (nothing reads them yet) : lots in the zone body
+# after lot 1 (SFA1 $537300, SFA2 $552000), directory = 3 lots + index $100 / 2 -> lot, slot 0 tables f545 / f351
+# extended ($8000-$9F6F SFA2, $A000-$A32F SFA1), 4 tile files in <construction>/decors_gfx (paquet : hsfa_gfx.bin).
+# Data from the player's ISO (stage converters), folder DECORS_DONNEES ; code : decors/decors_lots.py. 8 program ROMs
+# unchanged. =0 : as before, to the byte.
+DECORS_LOTS = os.environ.get("DECORS_LOTS", "0") == "1"
+if DECORS_LOTS:                                       # (E1) dependencies, then the 6 data files read and checked now
+    assert ZONE_DECORS and OBJETS_DECOR and OBJETS_E0 and D4_TABLE and FENETRES and TROUS, \
+        "DECORS_LOTS=1 needs ZONE_DECORS, OBJETS_DECOR, OBJETS_E0, D4_TABLE, FENETRES, TROUS"
+    import importlib.util as _ilu
+    _sp = _ilu.spec_from_file_location("decors_lots", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "decors", "decors_lots.py"))
+    DL = _ilu.module_from_spec(_sp); _sp.loader.exec_module(DL)
+    DL_DONNEES = DL.charge(os.environ.get("DECORS_DONNEES", ""))
 # (e46, ro9a36 : tour sombre dans le ciel de Ryu, lune de Sodom en double et non détourée, glitch devant la tour de Cammy)
 # DECOR_E0=1 : les objets de décor d'Upper (trames copiées dans la zone des décors, emplacement 0) donnent des codes de la
 # banque commune d'UPPER (f351). Au combat la banque e0 est f545 d'HYPER (prolongée par f351 seulement au-delà de $33F0,
@@ -1866,7 +1930,8 @@ def main():
             struct.pack_into('<H', zbuf, k_, 0xFFFF)
             print("objets de decor : decor %02X sans objets (zone, %x)" % (d_, L_))
         if DECOR_E0: zbuf = recode_decor_e0(zbuf)          # (e46) codes d'objets de décor -> banque e0 prolongée
-        zbuf = bytes(zbuf)
+        zbuf = bytes(zbuf); zlen1_ = len(zbuf)              # (E1) lot 1 size for the directory
+        if DECORS_LOTS: zbuf, lots_dec_, index_dec_ = DL.pose(DL_DONNEES, zbuf)   # (E1) + SFA1 / SFA2 lots
         assert ZONE_CORPS[0] + len(zbuf) <= ZONE_CORPS[1], "zone des decors pleine"
         print("zone des decors : Upper %x-%x (%d o) -> 68K $%X-$%X, %d pointeurs de code ; reste %d o" % (zl_, zh_, zh_ - zl_,
               ze_ & 0xFFFFFF, (ze_ & 0xFFFFFF) + zh_ - zl_, len(FD.zone_ptr), ZONE_CORPS[1] - ZONE_CORPS[0] - len(zbuf)))
@@ -2072,8 +2137,8 @@ def main():
         blob += bytes(FEN_DECORS[0] - GRF_X - len(blob)); T_D4 = GRF_X + len(blob); blob += table_d4()
         if ZONE_DECORS:                               # (e31) repertoire de la zone apres la table D4
             assert len(blob) == FEN_DECORS[0] - GRF_X + ZONE_REP
-            blob += zone_repertoire([(1, 0, ZONE_TAG | ZONE_CORPS[0], len(zbuf), FD.zone[0] - (FD.zone[0] & 15))],
-                                    ZONE_TAG | (ZONE_CORPS[0] + ((len(zbuf) + 0xFF) & ~0xFF)))
+            blob += zone_repertoire([(1, 0, ZONE_TAG | ZONE_CORPS[0], zlen1_, FD.zone[0] - (FD.zone[0] & 15))] + (lots_dec_ if DECORS_LOTS else []),
+                                    ZONE_TAG | (ZONE_CORPS[0] + ((len(zbuf) + 0xFF) & ~0xFF)), index_dec_ if DECORS_LOTS else None)
         if TIRAGE_CPU and D4_CHOIX:                    # (e43) tables du tirage : PS2 $FE1000 = 68K $4D9000
             assert len(blob) <= FEN_DECORS[0] - GRF_X + TIR_OFF, hex(len(blob))
             blob += bytes(FEN_DECORS[0] - GRF_X + TIR_OFF - len(blob))
@@ -2154,6 +2219,12 @@ def main():
                         const_(xc_, xcib_, "X2_TABLES : T_%x + $%X -> %x (constante interieure)" % (xu_, xdl_, xcib_)); xint_.append(xc_)
                     print("X2_TABLES : ATTENTION T_%x : constante interieure %x (T + $%X) -> %x en %s" % (xu_, xv_, xdl_, xcib_, ' '.join('%x' % c_ for c_ in xcs_)))
             print("X2_TABLES : T_%x : %d constante(s) redirigee(s) (%s)%s" % (xu_, len(xvu_), ' '.join('%x' % c_ for c_ in xvu_), ', %d interieure(s)' % len(xint_) if xint_ else ''))
+            for xh_ in xd_['hyper']:                   # (L2, D9) lecteur d'HYPER (lui/addiu du module) -> copie prolongee
+                xw1_, xw2_ = struct.unpack_from('<II', mod, xh_)
+                xold_ = (((xw1_ & 0xffff) << 16) + ((xw2_ & 0xffff) - (0x10000 if xw2_ & 0x8000 else 0))) & 0xffffffff
+                assert xold_ == xa_, "X2_TABLES : T_%x : lecteur d'Hyper %x vise %x" % (xu_, xh_ + BASE, xold_)
+                const_(xh_, xnv_, "X2_TABLES : T_%x : lecteur d'Hyper %x -> copie prolongee %x (L2)" % (xu_, xh_ + BASE, xnv_))
+                print("X2_TABLES : T_%x : lecteur d'Hyper %x redirige -> %x (L2)" % (xu_, xh_ + BASE, xnv_))
     long_(0x5B4210, a_exec(g, 0x4E1C0), "lanceur ARCADE du menu (entree 0) -> lanceur d'Upper 0x4E1C0")
     # (etape 7) MENU_ARCADE=1 : le menu du titre d'Hyper ne propose pas l'entree 0 (curseur $C201 : tables « suivant »
     # 0x5B41F0 (Bas) et « precedent » 0x5B4200 (Haut) sans 0 : VERSUS 1, TRAINING 4, OPTION 5, EXIT 6) -> ARCADE (0)
@@ -2476,12 +2547,20 @@ def main():
         info['x2'] = [dict(upper=hex(s_['d']['u']), table=hex(s_['a']), copie=hex(s_['nv']), genre=s_['d']['genre'], e=s_['d']['e'],
                            n0=s_['d']['n0'], rangs=s_['d']['R'], taille=hex(s_['taille']), lot=s_['d']['lot'], valeurs=s_['d']['valeurs'])
                       for s_ in x2_sites]
+    if DECORS_LOTS:                                    # (E1) lots served (record)
+        info['decors_lots'] = [dict(jeu=j_, famille=d_['fam'], base=hex(d_['base']), taille=len(d_['lot']), decors=d_['nb'], premier_100=hex(d_['p100']),
+                                    codes_e0=[hex(d_['code0']), hex(d_['code0'] + len(d_['obj']) // DL.T - 1)], md5_lot=d_['md5'])
+                               for j_, d_ in sorted(DL_DONNEES.items())]
     json.dump(info, open(os.path.join(P_, 'greffe.json'), 'w'), indent=1)
     A_ = assets_json(g, plages, os.path.join(P_, 'assets.json'), {SITE_PERSO_J1: 0}); banques(A_, os.path.join(P_, 'banques_hx'))
+    if os.environ.get("MAX_PERSOS"): max_banques(os.path.join(P_, 'banques_hx'), P_)   # (L2) tuiles et banques des MAX
+    if DECORS_LOTS:                                    # (E1) AFTER max_banques (fait_gfx_max : MAX codes beyond f545 at its entry)
+        for n_, (a_, b_) in DL.prolonge_e0(DL_DONNEES, os.path.join(P_, 'banques_hx')).items(): print("DECORS_LOTS : %s.bin %d -> %d entries" % (n_, a_, b_))
+        print("DECORS_LOTS : tiles -> %s" % DL.tuiles(DL_DONNEES, P_))
     env = dict(MODULE='ro9', TRAVAIL=os.path.join(P_, 'b9'), XDATA='@HA_XDATA@',
                HSFA_GREFFE_ASSETS=os.path.join(P_, 'assets.json'),
                MODULE_FICHIER=os.path.join(P_, 'ro9a_module.bin'), GREFFE_C0='%x' % g.g0, GREFFE_Z2='%x:%x' % (Z2_0, g.z2_fin),
-               EXTRACT_MODULES=os.path.dirname(MODULE_SOURCE), HSFA_SON_DONNEES=SON_DONNEES,
+               EXTRACT_MODULES=MODULE_DOSSIER, HSFA_SON_DONNEES=SON_DONNEES,
                HSFA_GREFFE_DONNEES=os.path.join(P_, 'greffe_donnees.bin'), HSFA_GREFFE_X='%x' % GRF_X, HSFA_GREFFE_Y='%x' % GRF_Y,
                HSFA_GREFFE_PTRS=os.path.join(P_, 'greffe_ptrs.txt'))
     if Y2: env['HSFA_GREFFE_Y2'] = '%x:%x' % Y2
@@ -2491,8 +2570,10 @@ def main():
     env['AIG_D1'] = os.environ.get('AIG_D1', '1')
     if env['AIG_D1'] != '0': env['AIG_D1_SEUL'] = os.environ.get('AIG_D1_SEUL', '181d20,2ef020')
     if FENETRES: env['HSFA_GREFFE_FEN'] = ','.join('%x:%x:%x' % f for f in FEN); env['HSFA_GREFFE_Y'] = '%x' % FEN[0][2]
+    assert ZONE_DECORS or not MAX_ZONES, 'MAX_ZONES=1 exige ZONE_DECORS=1'
     if ZONE_DECORS:
         env['HSFA_ZONES_68K'] = '%x-%x' % ZONE_CORPS
+        if MAX_ZONES: env['HSFA_ZONES_68K'] += ''.join(',%x-%x' % z_ for z_ in ZONES_MAX)   # (L2) T4 / T5
         env['HSFA_GREFFE_ZONE'] = '%x:%s:%s' % (ZONE_CORPS[0], os.path.join(P_, 'zone_decors.bin'), os.path.join(P_, 'zone_decors_ptrs.txt'))
     open(os.path.join(P_, 'env.sh'), 'w').write(''.join('export %s=%s\n' % kv for kv in env.items()))
     print("greffe %s : %d routines, MIPS %d o ; zone Z80 [%#x, %#x) %d o ; zone 2 [%#x, %#x) %d o ; donnees : %d copiees (%d o), %d reutilisees, %d ptr code"

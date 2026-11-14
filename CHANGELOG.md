@@ -7,6 +7,16 @@ est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports
 > **Language**: from 2026-11-12 on, the entries of this changelog are written in English (starting with the
 > v0.1.9 section below); the older entries stay in French.
 
+## Unreleased
+
+- **Hyper + Arcade with the MAX characters** (new, test driver `sfa3hamhsfa`, core patch 0033): step L2 of the MAX
+  characters' integration. Eagle can be picked in VERSUS (both sides, the three isms) and fights with his own moves,
+  throws, portrait, name and life-bar face; in Arcade his cell still shows "?". Built from the two discs with
+  `hsfa_build.py --jeux hyperarcademax --psp-iso` (the PS2 Anthology and the PSP *SFA3 MAX* disc); the core needs the
+  new driver (patch 0033: one more graphics member, 96 MB region for that driver only). The other games and drivers
+  are unchanged byte for byte. Not done yet: Eagle's ending and Arcade route, eyes and banners of the victory screen,
+  music; Maki, Yun and Ingrid come in the next steps. Natives in VERSUS play exactly as in ro9a41 (§231).
+
 ## v0.1.10 (2026-11-13)
 
 Stable version: it replaces v0.1.7 as the recommended version (v0.1.9 was a pre-release). Same cores as v0.1.9 (core

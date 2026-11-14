@@ -1,0 +1,7 @@
+# Sorties de la préparation MAX (prep_max_ro9.py) : code de jeu converti depuis l'ISO, jamais versionné.
+# La construction les régénère (comme Upper MAX, regen_max.py).
+*.s
+*.lst
+*.o
+outils_max/
+prep/

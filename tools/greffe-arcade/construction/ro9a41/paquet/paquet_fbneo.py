@@ -117,9 +117,31 @@ JEUX = {
                  gfx=[("mame_ro9/hsfa_gfx.bin", 0x0000000), ("mame_ro9/hsfa_plans.bin", 0x1000000),
                       ("mame_ro5/hsfa_plans.bin", 0x2000000)],
                  gfx_len=0x3000000,                   # taille fixe dans d_cps2.cpp (Sfa3hahsfaRomDesc)
+                 # (decors_proto E1) SFA1 / SFA2 stage tiles of a DECORS_LOTS=1 construction (decors_gfx/plan.tsv) ;
+                 # folder absent : nothing changes
+                 gfx_decors="greffe_arcade/constructions/" + os.environ.get("HSFA_CONSTR", "ro9a23_fige") + "/decors_gfx",
                  trous=True,                          # blocs ext_<trou>.bin -> hsfa_trous.bin (patch 0009)
                  ext=(0x940000, 0x5C0000),
                  flux="codes_hyper", rejeu=True),
+    # (L2 of the MAX integration, patch 0033 of the core) ro9a_max = the graft WITH the MAX characters (Eagle in VERSUS) :
+    # driver sfa3hamhsfa, same members as sfa3hahsfa + hsfa_gfx_max.bin (12 MB, MAX tiles at $5400000, built by
+    # greffe/max/fait_gfx_max.py into the construction ; the MAX dressing goes to slot 1 (plan2) and slot 0 (f545) by
+    # tables, no extra config key) ;
+    # sound ROM = MAX sound ROM + Hyper's PS2 sounds (sons_ps2.py --jeu hypermax). Construction HSFA_CONSTR_MAX, sound
+    # HSFA_SON_MAX (relative to HSFA_WORK).
+    "ro9a_max": dict(nom="sfa3hamhsfa", dossier="greffe_arcade/constructions/" + os.environ.get("HSFA_CONSTR_MAX", "ro9a41_max_fige") + "/b9",
+                     roms="greffe_arcade/constructions/" + os.environ.get("HSFA_CONSTR_MAX", "ro9a41_max_fige") + "/b9/roms_ro9/sfa3ud",
+                     banques="greffe_arcade/constructions/" + os.environ.get("HSFA_CONSTR_MAX", "ro9a41_max_fige") + "/banques_hx",
+                     son=(os.environ.get("HSFA_SON_MAX", "agent_son_max/roms_son_max_hyper_ps2"), ["hx3.01", "hx3.02", "hx3.11m", "hx3.12m", "hx3.13m", "hx3.14m"]),
+                     config={"commun": "545", "commun_upper": "351", "base_upper": "400", "marque_upper": "8000", "ptr_anim": "FF40BC", "gfx_intro": "456", "plans": "300,340,3a0"},
+                     tables_en_plus=("f351",),
+                     gfx=[("mame_ro9/hsfa_gfx.bin", 0x0000000), ("mame_ro9/hsfa_plans.bin", 0x1000000),
+                          ("mame_ro5/hsfa_plans.bin", 0x2000000)],
+                     gfx_len=0x3000000,
+                     gfx_decors="greffe_arcade/constructions/" + os.environ.get("HSFA_CONSTR_MAX", "ro9a41_max_fige") + "/decors_gfx",   # (E1)
+                     gfx_max="greffe_arcade/constructions/" + os.environ.get("HSFA_CONSTR_MAX", "ro9a41_max_fige") + "/hsfa_gfx_max.bin",
+                     trous=True, ext=(0x940000, 0x5C0000),
+                     flux="codes_hyper", rejeu=True),
     # Upper + persos MAX (construction MAX=1, publication de l'integration MAX) : pilote et archive propres sfa3umhsfa
     # (patch 0013), memes membres que sfa3uhsfa. Banc MAX_BANC (dossier de construction, relatif a HSFA_WORK) ; tuiles
     # MAX (cache SFA3MAX_CACHE de la session MAX, note dans <banc>/sfa3max_cache.txt) a la suite de hsfa_gfx.bin selon
@@ -297,7 +319,7 @@ def tables(dossier, config, en_plus=()):
     print("  tables : %d entrees, %d o" % (len(ent), len(blob)))
     return blob + bytes(TAB_LEN - len(blob))
 
-def image_gfx(liste, gfx_len=GFX_LEN):
+def image_gfx(liste, gfx_len=GFX_LEN, decors=None):
     img = bytearray(gfx_len)
     for rel, o in liste:
         d = lit(os.path.join(WORK, rel))
@@ -307,6 +329,23 @@ def image_gfx(liste, gfx_len=GFX_LEN):
             print("  ATTENTION : hsfa_gfx.bin > 16 Mo, recouvert par hsfa_plans.bin en $3000000")
         img[o:o + len(d)] = d
         print("  %s -> $%07x (%d o)" % (rel, 0x2000000 + o, len(d)))
+    # (decors_proto E1) stage tiles listed in <decors>/plan.tsv (name, graphics address, size, md5), each put into a range
+    # that must still be empty (zeros) and inside the region ; no plan.tsv : nothing more
+    plan = os.path.join(WORK, decors, "plan.tsv") if decors else None
+    if plan and os.path.exists(plan):
+        for l in lit(plan).decode("utf-8").splitlines():
+            if not l or l.startswith("#"):
+                continue
+            nom, adr, taille, m = l.split("\t")
+            d = lit(os.path.join(os.path.dirname(plan), nom)); o = int(adr, 16) - 0x2000000
+            if len(d) != int(taille) or hashlib.md5(d).hexdigest() != m:
+                raise SystemExit("%s : size or md5 differs from plan.tsv" % nom)
+            if o < 0 or o + len(d) > gfx_len:
+                raise SystemExit("%s : $%s + %d o outside the region" % (nom, adr, len(d)))
+            if any(img[o:o + len(d)]):
+                raise SystemExit("%s : range $%s + %d o not empty in hsfa_gfx.bin" % (nom, adr, len(d)))
+            img[o:o + len(d)] = d
+            print("  %s -> $%07x (%d o)" % (nom, 0x2000000 + o, len(d)))
     return bytes(img)
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -561,7 +600,7 @@ def construit(cle):
     for f in PRG + GFX + ["phoenix.key"]:
         fichiers.append((f, lit(os.path.join(roms, f))))
     sd, sl = J["son"]
-    if cle in ("hyper", "ro9a") and os.environ.get("HSFA_SON_HYPER"):   # (hyper_parade) hybride + sons PS2 seuls
+    if cle in ("hyper", "ro9a") and os.environ.get("HSFA_SON_HYPER"):   # (L2) pas ro9a_max : HSFA_SON_MAX   # (hyper_parade) hybride + sons PS2 seuls
         sd = os.environ["HSFA_SON_HYPER"]
     for f in sl:
         fichiers.append((f, lit(os.path.join(WORK, sd, f))))
@@ -584,7 +623,11 @@ def construit(cle):
             print("  (voix de l'arcade non appliquees : %s)" % e)
     fichiers.append(("hsfa_tab.bin", tables(os.path.join(WORK, J["banques"]), J["config"], J.get("tables_en_plus", ()))))
     if J["gfx"]:
-        fichiers.append(("hsfa_gfx.bin", image_gfx(J["gfx"], J.get("gfx_len", GFX_LEN))))
+        fichiers.append(("hsfa_gfx.bin", image_gfx(J["gfx"], J.get("gfx_len", GFX_LEN), J.get("gfx_decors"))))
+    if J.get("gfx_max"):                                # (L2, patch 0033) membre obligatoire de sfa3hamhsfa, déjà rangé
+        g_ = lit(os.path.join(WORK, J["gfx_max"]))
+        if len(g_) != 0xC00000: raise SystemExit("hsfa_gfx_max.bin : %d o (0xC00000 attendus)" % len(g_))
+        fichiers.append(("hsfa_gfx_max.bin", g_))
     stockes = []                                       # membres lus sur place par le coeur : sans compression
     mf = membres_flux(J)
     if mf:
