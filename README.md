@@ -11,7 +11,7 @@
 1. **Download the cores** from the [releases](../../releases) page: `hsfa-<version>-cores-<platform>.zip` for Android
    (arm64), ROCKNIX (aarch64: RGB10X, R36S…), Windows (x64), Linux (x86_64) or Recalbox 10 (Raspberry Pi; tested on
    a Pi 3B); Batocera 43: `hsfa-<version>-cores-batocera.zip` and its guide. Each archive holds the 4:3 core
-   (`fbneo_hsfa`) and the 16:9 core (`fbneo_hsfaws`), with their licence. The stable version is **v0.1.10**; older
+   (`fbneo_hsfa`) and the 16:9 core (`fbneo_hsfaws`), with their licence. The stable version is **v0.1.11**; older
    versions and pre-releases are on the same page.
 2. **Build the games from your ISO** (about 10 minutes). Windows, Linux, macOS: the all-in-one builder
    `hsfa-constructeur-<system>.zip` from the release (Windows: `hsfa-constructeur-windows-x86_64.zip`, with a window),
@@ -82,7 +82,7 @@ off), larger steps are reviewed critically before they are merged, and the metho
 [`docs/journal`](docs/journal) and [`re/`](re). No game data is in this repository: everything is rebuilt from your own
 disc.
 
-## Status (2026-11-13; stable release v0.1.10)
+## Status (2026-11-15; stable release v0.1.11)
 
 "Since v0.1.x" below = the release that brought it; the details of each release are in the
 [CHANGELOG](CHANGELOG.md).
@@ -96,10 +96,10 @@ disc.
 | Hyper (`ro9`) | VERSUS without exceptions (151-match tour); supers of the ZERO / ZERO 2 / ALPHA versions no longer crash; super gauge and TRAINING fixed; ZERO / ZERO 2 / ALPHA music in the zip (Ogg Vorbis); per-version SFA1 / SFA2 voices replayed on a 2nd QSound when the replay table is present (see below). Since v0.1.9: 21 sounds of the PS2 port that were silent (parry in Mazi S-ISM, issue #1; ZERO 2 / ALPHA custom combo, Birdie, Sagat in Saikyo S-ISM, Cammy ALPHA, Dee Jay's taunt…) are added to the sound ROM from your ISO (also in Hyper + Arcade); the ground shadow of the ZERO / ZERO 2 characters is transparent with the ISO alone too | [§145-§173](docs/journal/HANDOFF.md), [§216, §218](docs/journal/HANDOFF.md), [FBNEO-HYPER](docs/rapports/FBNEO-HYPER.md), [REJEU-FBNEO](docs/rapports/REJEU-FBNEO.md), [SONS-PS2-HYPER](docs/rapports/SONS-PS2-HYPER.md) |
 | Menus | OPTION and EXIT return to the mode menu; the PS2 option-screen settings (difficulty, damage, timer, speed, rounds) are core options | [§147-§148](docs/journal/HANDOFF.md), [OPTIONS](docs/rapports/OPTIONS.md) |
 | Translator | **v161** for SFA3, Upper, Hyper, Hyper + Arcade and Upper MAX (since v0.1.9; v0.1.7 / v0.1.8: v160): silent losses found by the critical review of the translator, fixed and proven against the arcade: Mazi mode ×1.5 damage bonus never applied, combo score bonus never added, hit shake missing (SFA3), 2nd initial written on the 4th (SFA3, Upper), and nine other comparisons or byte accesses (custom combo freeze, scrolling text, 2nd player colour in mirror matches of Upper and Hyper…); the build now counts these losses and stops on an untranslated comparison or recompiler helper. **Hyper + Arcade** uses its own frozen copy of translator v161 (since state ro9a37) | [journal §219-§220](docs/journal/HANDOFF.md), [pitfalls](docs/methodes/pieges-du-traducteur.md) |
-| FBNeo HSFA core | patches 0001-0027 and 0029-0032 (v0.1.9 and v0.1.10, same cores; v0.1.7: 0001-0026, v0.1.8: 0001-0027): complete and deterministic savestates (run-ahead, rewind, netplay), damaged states load safely; system folder of the standalone build under Windows; 16:9 "Widescreen edges" = Raw by default; Linux x86_64 core that needs glibc 2.27 only; Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, tested on a Pi 3B), Batocera 43 (tested on PC); "Blood" option (red, uncensored, by default); "Skip idle loops" option (on by default: 33-41 % less work per frame, same result); true 16:9 (v0.1.5: 512 x 224, exact aspect; stage-locked view at the arena ends with the HUD centred, the default up to v0.1.8, an option since 0031); 4:3 and 16:9 (with "Screen format (fill height)" for 4:3 to 16:10 screens); PSP-style transparent shadows; taunt on Select in fights; Upper's hidden characters (v0.1.2: hold Start + a button on Akuma / Balrog for Shin Akuma / EX Balrog, Coin for the roulette); tested by the user on RG477M and RGB10X | [patches](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
-| Build from the ISO | `hsfa_build.py` (or the all-in-one builder) builds the three games from your ISO alone; translator v161 programs (v0.1.9, v0.1.10): SFA3 `a569c361`, Upper `ac053140`, Hyper `dbfd237d` with the replay table (`ffc5eac1` without); v160 (v0.1.7, v0.1.8): SFA3 `9b06c7cf`, Upper `3a9b7fd9`, Hyper `0baed6af` (`e3806660`); zips identical from one build, and one system, to the next; since v0.1.9: Upper MAX builds on Windows without the right to create symbolic links (issue #2) | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
+| FBNeo HSFA core | patches 0001-0027 and 0029-0032 (v0.1.9 to v0.1.11, same cores; v0.1.7: 0001-0026, v0.1.8: 0001-0027): complete and deterministic savestates (run-ahead, rewind, netplay), damaged states load safely; system folder of the standalone build under Windows; 16:9 "Widescreen edges" = Raw by default; Linux x86_64 core that needs glibc 2.27 only; Android, Linux, ROCKNIX, Windows, Recalbox 10 (Raspberry Pi, tested on a Pi 3B), Batocera 43 (tested on PC); "Blood" option (red, uncensored, by default); "Skip idle loops" option (on by default: 33-41 % less work per frame, same result); true 16:9 (v0.1.5: 512 x 224, exact aspect; stage-locked view at the arena ends with the HUD centred, the default up to v0.1.8, an option since 0031); 4:3 and 16:9 (with "Screen format (fill height)" for 4:3 to 16:10 screens); PSP-style transparent shadows; taunt on Select in fights; Upper's hidden characters (v0.1.2: hold Start + a button on Akuma / Balrog for Shin Akuma / EX Balrog, Coin for the roulette); tested by the user on RG477M and RGB10X | [patches](patches/fbneo/README.md), [Android](docs/guide/installation-android.md), [ROCKNIX](docs/guide/installation-rocknix.md) |
+| Build from the ISO | `hsfa_build.py` (or the all-in-one builder) builds the three games from your ISO alone; translator v161 programs (v0.1.9 to v0.1.11): SFA3 `a569c361`, Upper `ac053140`, Hyper `dbfd237d` with the replay table (`ffc5eac1` without); v160 (v0.1.7, v0.1.8): SFA3 `9b06c7cf`, Upper `3a9b7fd9`, Hyper `0baed6af` (`e3806660`); zips identical from one build, and one system, to the next; since v0.1.9: Upper MAX builds on Windows without the right to create symbolic links (issue #2); v0.1.11: the builder executable builds Upper MAX (with v0.1.10 it stopped there; on Windows it also waited for Enter), the zips are at the root of the output folder (work files in `hsfa-travail/`), estimated time and progress bar, sound and message at the end; `construire.bat` and `hsfa-<version>-construction.zip` removed (Windows: the builder) | [guide](docs/guide/construction-iso.md), [BUILD](docs/rapports/BUILD.md) |
 | Output formats | since v0.1.9: `--cible` (builder: *Format de sortie / output* menu): `fbneo-hsfa` (default, unchanged zips); `fbneo-autonome` (standalone FinalBurn Neo HSFA for Windows, test build: same zips, byte for byte); `mister` and `cps2-banques` report only: per-game concessions and measured budgets, nothing is built | `scripts/construction/cibles.py`, [builder](tools/constructeur/README.md) |
-| Standalone FinalBurn Neo HSFA (Windows x64) | **test build** (attached to v0.1.9 and v0.1.10), without RetroArch: official FBNeo `84faab7` + the repository's patch chain + 6 patches of the Windows interface (W01-W06); two programs (4:3, 16:9); HSFA options in the DIPs, 16:9 in the Video menu; tried under Wine: pictures, game states and sound identical to the RetroArch core (±1 on a few samples of the Ogg streams); not tried on a real Windows yet | [guide](patches/fbneo-autonome/INSTALL-EN.md), [patches](patches/fbneo-autonome/README.md) |
+| Standalone FinalBurn Neo HSFA (Windows x64) | **test build** (attached to v0.1.9, v0.1.10 and v0.1.11), without RetroArch: official FBNeo `84faab7` + the repository's patch chain + 6 patches of the Windows interface (W01-W06); two programs (4:3, 16:9); HSFA options in the DIPs, 16:9 in the Video menu; tried under Wine: pictures, game states and sound identical to the RetroArch core (±1 on a few samples of the Ogg streams); not tried on a real Windows yet | [guide](patches/fbneo-autonome/INSTALL-EN.md), [patches](patches/fbneo-autonome/README.md) |
 | Batocera 43 | since v0.1.9: installer `tools/batocera/installer-hsfa-batocera.sh` (an `hsfa` service puts the cores back at every boot: survives reboots and updates; `retirer` uninstalls) and an `hsfa` system; tried on the official 43.1 PC image in a virtual machine: the five games from the game list to the fight, in 4:3 and 16:9, with sound | [guide](tools/batocera/INSTALL-batocera-EN.md) |
 | Upper MAX (`sfa3umhsfa`) | **experimental**: Eagle, Maki, Yun and Ingrid (SFA3 MAX, PSP) in Upper, built from your two discs (PS2 Anthology + PSP ISO of *SFA3 MAX*, USA ULUS-10062 or Europe ULES-00235): `hsfa_build.py --jeux uppermax --psp-iso <PSP ISO>`; without the PSP ISO, plain Upper is built. Since v0.1.9: translator v161 (no image address written in the integration any more; the `$1B6B6` call of the ending actors, Maki's and Yun's endings, now reaches the right routine); MAX characters' round behaviour aligned on the PSP. v0.1.10 (state max58): the US PSP disc is accepted as well as the European one (same zip, byte for byte); the 7 missing ending pieces are back; Yun's final credits and Maki's scene with Bison are no longer black; Guy drawn properly in Maki's ending; ending scene colours as on the PSP; linked effect positions and the Arcade route to the secret fight follow the PSP | [guide §5](docs/guide/construction-iso.md), [CONV-MAX](docs/rapports/CONV-MAX.md), [INTEGRATION-MAX-UPPER](docs/rapports/INTEGRATION-MAX-UPPER.md) |
 | Hyper + Arcade (`sfa3hahsfa`) | **experimental** (since the v0.1.8 pre-release): Upper's Arcade mode grafted onto Hyper ("route B"); v0.1.10: state ro9a41 (version colours of the CPU and the player kept from the face-off to the end, version portraits coloured like Hyper, no green band at the logo transition before a dialogue screen; select after a VERSUS, new challenger, ending actors; 10 pairs of words of the graft's data no longer relocated as code pointers, not seen in the games played; preparation of the MAX characters, invisible); v0.1.9: state ro9a37 (CONTINUE, stages of Ryu, Sodom and Cammy, Ken's ending; translator v161: Mazi mode ×1.5 damage bonus, combo score bonus, 2nd player's colour in mirror matches); `hsfa_build.py --jeux hyperarcade`; with the arcade ROM and the replay table, the zip is ro9a41 byte for byte except `hsfa_info.txt` and the PS2-only sounds (`HSFA_SONS_PS2=0`: byte for byte) | [guide §6](docs/guide/construction-iso.md), [architecture](docs/architecture/voie-b-greffe.md) |
@@ -111,7 +111,12 @@ disc.
   `hsfa_build.py` keeps Hyper's SFA3 voices for every version (translator v161: program `ffc5eac1` instead of
   `dbfd237d`) and the zip has no replay. Planned for v0.2: the build will regenerate the table from your own ISO.
 - Upper MAX endings: in Eagle's ending, Charlie and Eagle have the wrong colours in the scenes with Charlie; in Yun's
-  ending, one scene (« After many months of shooting ») shows a grid and bits of sprites where the PSP is black.
+  ending, one scene (« After many months of shooting ») shows a grid and bits of sprites where the PSP is black; the
+  text window turns black and the orange credit titles are missing in two scenes of Eagle's ending and in the final
+  credits of Eagle, Maki and Ingrid (cream window for Yun); the stage behind 9 of Eagle's texts and 2 of Ingrid's is
+  darker than on the PSP.
+- Hyper + Arcade endings: in most Arcade endings, some ending characters are missing or wrong, the orange credit
+  titles are missing and the credits are slightly shifted (cause found, fix in progress in the repository).
 - Hyper + Arcade: the stage objects of 4 Upper stages do not behave exactly as in Upper (Hyper's fight engine: camera,
   random draws, frame counter); a character in a ZERO / ZERO 2 / ALPHA version keeps the colour-2 portrait whatever
   colour is picked, as in Hyper alone.
@@ -139,20 +144,28 @@ disc.
 
 ## Getting started
 
+**Players** (Windows, Linux, macOS): nothing to install, no Python needed.
+1. From the [releases](../../releases) page, take the builder of your system, `hsfa-constructeur-<system>.zip`
+   (Windows: `hsfa-constructeur-windows-x86_64.zip`, with a window), and the cores `hsfa-<version>-cores-<platform>.zip`.
+2. Run the builder and give it your ISO of *Street Fighter Alpha Anthology* (USA, `.iso` or `.chd`) and, for Upper MAX,
+   the PSP ISO of *SFA3 MAX*: the game zips land at the root of the output folder (work files in `hsfa-travail/`).
+3. Install the cores and the zips: [Android](docs/guide/installation-android.md),
+   [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md), [Recalbox](docs/guide/installation-recalbox.md),
+   [Batocera](docs/guide/installation-batocera.md) or [Windows](tools/windows/LISEZMOI-windows.md) guide.
+
+**Developers** (working on the repository, the MAME bench, the cores):
 1. **Requirements**: Python 3.8 or newer, then `pip install -r requirements.txt` (numpy, capstone, pillow); your ISO
    of *Street Fighter Alpha Anthology* (USA). For the bench (optional): MAME 0.285 and the fork.
 2. **Paths** (optional; only for other tool locations or the MAME bench): `cp config.example.env config.env`, edit,
    then `source config.env`.
-3. **Build the games from the ISO**:
+3. **Build the games from the ISO** (`construire.sh` does the same on Linux, macOS, WSL):
    ```bash
    python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
        --sortie hsfa_sortie --jeux sfa3,upper,hyper
    ```
-   Options and expected fingerprints: [docs/guide/construction-iso.md](docs/guide/construction-iso.md).
-4. **Install the cores**: download them from the releases or build them from [`patches/fbneo/`](patches/fbneo/README.md),
-   then follow the [Android](docs/guide/installation-android.md), [ROCKNIX / RGB10X](docs/guide/installation-rocknix.md),
-   [Recalbox](docs/guide/installation-recalbox.md), [Batocera](docs/guide/installation-batocera.md) or
-   [Windows](tools/windows/LISEZMOI-windows.md) guide.
+   Options and expected fingerprints: [docs/guide/construction-iso.md](docs/guide/construction-iso.md); the builder
+   itself: [tools/constructeur/](tools/constructeur/README.md).
+4. **Cores**: download them from the releases or build them from [`patches/fbneo/`](patches/fbneo/README.md).
 
 Full walkthrough (MAME bench, diagnosis, non-regression): [docs/guide/demarrage.md](docs/guide/demarrage.md).
 

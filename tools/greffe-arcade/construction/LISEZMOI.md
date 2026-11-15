@@ -1,5 +1,11 @@
 # Greffe Arcade : construction depuis l'ISO (jeu `hyperarcade` de `hsfa_build.py`)
 
+Candidat **ro9a42** (14/11/2026, non basculé : `HA_ETAT` reste `ro9a41`) : recette `ro9a41/greffe/vars_ro9a42.txt` =
+`vars_ro9a41.txt` + `FINS_A=1 GENERIQUE_TITRES=1` : 26 routines d'acteurs de fin d'Upper greffées au lieu d'homologues
+d'Hyper sans rapport (`etape3/force3.py`, groupes `a1`, `sagat`, `1c`, `a2`) et les deux pointeurs impairs des titres du
+générique (`T_9590C0`) relogés (`etape2/donnees2.py`) ; programme `sz3ud.03c` `ca3d87d2…` ; les deux à 0 = ro9a41 à
+l'octet (§233).
+
 État figé : **ro9a41** (13/11/2026 ; programme `sz3ud.03c` md5 `be88f3f9…` (inchangé), `sz3ud.04c` `ae411424…`, zip de
 référence CRC `C9107FC2`) : ro9a40 + `PAIRES_CODE=1` : 10 longs du bloc de données de la greffe, paires de mots signés
 (dx, dy) de tables décrites dans `re/` (T_615AC0 [0] [6], T_60DAE0, T_6139A4, T_613BA0, T_615940), n'y sont plus relogés comme des

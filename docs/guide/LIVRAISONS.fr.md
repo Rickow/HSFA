@@ -131,6 +131,7 @@ depuis la v0.1.2, Recalbox ; leurs SHA-256 sont dans `SHA256SUMS.txt` de la rele
 
 | release | date | patchs du cœur | remarque |
 |---|---|---|---|
+| v0.1.11 (stable) | 2026-11-15 | 0001-0027, 0029-0032, 0007b | mêmes cœurs que la v0.1.10 et la v0.1.9 (lot du 12/11b) ; correctifs du constructeur seulement |
 | v0.1.10 (stable) | 2026-11-13 | 0001-0027, 0029-0032, 0007b | mêmes cœurs que la v0.1.9 (lot du 12/11b) |
 | v0.1.9 (pré-version) | 2026-11-12 | 0001-0027, 0029-0032, 0007b | lot du 12/11b : sauvegardes d'état complètes (0029, 0032), 16:9 Raw par défaut (0031) ; cœur Linux : glibc 2.27 ; Batocera |
 | v0.1.8 (pré-version) | 2026-11-08 | 0001-0027, 0007b | 0027 : objets au délai de l'arcade ; cœur Linux : glibc 2.43 exigée |

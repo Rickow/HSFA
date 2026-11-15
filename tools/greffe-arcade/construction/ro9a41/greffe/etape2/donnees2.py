@@ -187,6 +187,12 @@ def est_texte(b, i):
     if i < 5 or i + 4 > len(b) or b[i + 3] != 0: return False
     return all(_impr(x) for x in b[i - 5:i + 3])
 PREUVES = set(int(l, 16) for l in open(os.environ["PREUVES"])) if os.environ.get("PREUVES") else set()
+# (fins_greffe, ro9a42) GENERIQUE_TITRES=1 : T_9590C0 (exec PS2), table des flux de texte du generique d'Upper lue par
+# 0x11A090 (objets du reservoir $FFD000, indice $2(A6)) : cases 1 et 3 = flux des TITRES (« Producer », « Director »...),
+# a une adresse IMPAIRE (0x959691, 0x95968D) ; FILTRE3 ecarte un long impair non prouve -> pointeur laisse brut, les
+# titres lisaient l'adresse d'Upper (titres orange absents de toutes les fins). Les deux cases deviennent PROUVEES (les
+# cases 0 et 2, paires, l'etaient deja par le filtre). =0 : comme ro9a41.
+if os.environ.get("GENERIQUE_TITRES", "0") == "1": PREUVES |= {0x9590C4, 0x9590CC}
 ZONE_CIBLES = os.environ.get("ZONE_CIBLES", "1") == "1"   # (e33) voir bloc() ; =0 : comme e32
 FILTRE3 = os.environ.get("FILTRE3") == "1"
 OU3 = os.environ.get("OU3") == "1"

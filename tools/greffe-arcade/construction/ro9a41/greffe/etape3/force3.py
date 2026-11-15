@@ -238,5 +238,35 @@ def force():
     if os.environ.get("X6_FINS", "0") == "1":
         for _f in (0x204BB0, 0x207530, 0x207780, 0x20B2A0, 0x20B430, 0x20C6E0, 0x2094A0,
                    0x21D6C0, 0x21DD90, 0x21EA50, 0x21EDC0, 0x20FCE0, 0x21F670): d[_f] = ('GREFFE',)
+    # (fins_greffe, ro9a42) FINS_A=1 (ou des groupes de FINS_A ci-dessous : a1,sagat,1c,a2) : lot A des etats / gestionnaires
+    # d'acteurs de fin d'Upper encore renvoyes a un homologue d'Hyper SANS RAPPORT et ENTRES dans les fins (sonde des
+    # sentinelles, work/mesures_homologues/RAPPORT.md §2-3 ; plan work/etude_upper/FINS_GREFFE.md §3) -> GREFFE. Une case
+    # d'une table d'Upper (copiee) designe la routine ; l'homologue n'en fait pas le travail (acteur absent, fige ou libere).
+    # =0 : comme ro9a41.
+    _fa = os.environ.get("FINS_A", "0")
+    _fg = set(FINS_A) if _fa == "1" else {x.strip() for x in _fa.split(',') if x.strip() not in ("", "0")}
+    for _g in sorted(_fg):
+        for _f in FINS_A[_g]: d[_f] = ('GREFFE',)
     return d
+# groupes du lot A (va du module d'Upper) :
+FINS_A = {
+    # a1 : 11 etats « attendre la phase $7B(A6), puis l'etat suivant » (-> Hyper 0x301D0, qui attend un etat de SCENE) :
+    # fins 03 (avion, effet psychique), 04 / 0d / 18 / 19 / 1b / 1d (Bison), 0c (4 avions), 16, 17 et 1f-23 (Ryu), 1c (Vega)
+    'a1': (0x1E86F0, 0x1E8C00, 0x1EA7A0, 0x1F1260, 0x1F2AA0, 0x1F39E0, 0x1F3E70, 0x1F5F00, 0x1F8A20, 0x1FFB40, 0x202BE0),
+    # sagat : gestionnaire $37 (fin 0b, scene Bison contre Ryu ; -> Hyper 0xA0FD0) ET son etat 0 (-> Hyper 0x352DE0, qui
+    # avance l'etat sans armer la minuterie ni creer la boule) : les deux ensemble (FIN_SAGAT=1 seul : rien de visible, e42e)
+    'sagat': (0x2046C0, 0x204870),
+    # 1c : famille d'objets attaches de la fin $1C (-> Hyper 0x4CF60 code de joueur, 0x66CB0 qui LIBERE l'objet, 0x908A0
+    # drapeaux de fondu) : textes surimprimes pendant toute la fin, Vega reduit a la main
+    '1c': (0x20F3A0, 0x20F520, 0x210340),
+    # a2 : 0b / 18 / 1f (defilements du plan 2, -> 0x2A1440) ; 0c (Blanka et Dan, -> 0x3813D0 ; effets, -> 0x234680) ; 0d
+    # (Bison, -> 0x2AA270) ; 07 (desintegration de Bison : etat 0 -> 0xCFD50, etats 5 et 7 -> 0x1DB570, 0x1B2D30) ; 15 / 20 /
+    # 21 (acteur lie au joueur, -> 0x6FEA0 qui LIBERE l'objet ; createur d'enfants, -> 0x3A000). 0x214630 (objet de
+    # l'explosion de la fin 03, -> 0x386A40) N'Y EST PAS : greffe, il dessine des tuiles fausses (fin 03, images 6240-6300)
+    # alors que l'homologue d'Hyper donnait l'image d'Upper (banc fb, 14/11) : a instruire avant de le greffer.
+    # + 0x210710 (fin 21, etat atteint par les acteurs de 0x20D500 une fois greffes : sonde du banc fc, 21 Z3, images
+    # 3119-5333 ; -> Hyper 0x2D6FC0 qui ecrit $8B94 / $8B96(A5) et efface $1AE(A5) : bloc de 96 x 96 pixels faux en bas a
+    # gauche de 3180 a 4860) : regle de fermeture du plan (toute cible d'Hyper entree depuis la copie rejoint le lot A).
+    'a2': (0x1ED310, 0x1FBA90, 0x1FD6B0, 0x1FFF50, 0x20B230, 0x20B950, 0x20BB90, 0x20D240, 0x20D500, 0x210710),
+}
 FORCE = force()

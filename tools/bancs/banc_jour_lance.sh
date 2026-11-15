@@ -38,10 +38,16 @@ case $MOD in
           BANC_DIR=$M/ HSFA_EXT=$M UPPER=1
         JEU=($FORK sfa3hx -rompath $M/roms_fork);;
   greffe) [ -n "${GREFFE_C:-}" ] || { echo "module greffe : GREFFE_C obligatoire" >&2; exit 2; }
-        C=$(readlink -f "$GREFFE_C"); BQ=$R/ro9/banques_hx/; [ -d $C/banques_hx ] && BQ=$C/banques_hx/
+        C=$(readlink -f "$GREFFE_C")
+        # Banks and decor tiles always come from the construction under test: the shared ro9 banks stop earlier in
+        # the common bank (f545), so decor objects past their end vanish from the captures while log.txt stays the
+        # same. No silent fallback.
+        [ -f $C/banques_hx/carte.txt ] && [ -f $C/banques_hx/plan2.bin ] || { echo "module greffe : $C/banques_hx incomplete" >&2; exit 2; }
+        GFX=$R/ro9/hsfa_gfx.bin,$R/ro9/hsfa_plans.bin@3000000,$R/ro5/hsfa_plans.bin@4000000
+        if [ -f $C/decors_gfx/plan.tsv ]; then while IFS=$'\t' read -r n a _; do case $n in \#*|"") continue;; esac
+          GFX="$GFX,$C/decors_gfx/$n@$(printf '%x' $((0x$a)))"; done < $C/decors_gfx/plan.tsv; fi
         export BANC_DIR=$C/b9/ BANC_COMMUN=545 BANC_COMMUN_UPPER=351 HSFA_PLANS=300,340,3a0 \
-          HSFA_GFX=$R/ro9/hsfa_gfx.bin,$R/ro9/hsfa_plans.bin@3000000,$R/ro5/hsfa_plans.bin@4000000 \
-          BANC_BANQUES=$BQ BANC_PTR_ANIM=FF40BC HYPER=1
+          HSFA_GFX=$GFX BANC_BANQUES=$C/banques_hx/ BANC_PTR_ANIM=FF40BC HYPER=1
         RP=$C/roms_fork; [ -e $RP/sfa3hx ] || { RP=$D/tmp/roms; mkdir -p $RP; ln -sfn $C/b9/roms_ro9/sfa3ud $RP/sfa3hx; }
         JEU=($FORK sfa3hx -rompath $RP);;
   *) echo "module inconnu : $MOD" >&2; exit 2;;

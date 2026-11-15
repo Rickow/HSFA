@@ -7,7 +7,12 @@ est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports
 > **Language**: from 2026-11-12 on, the entries of this changelog are written in English (starting with the
 > v0.1.9 section below); the older entries stay in French.
 
-## Unreleased
+## v0.1.11 (2026-11-15)
+
+Stable version: it replaces v0.1.10 as the recommended version. Fixes of the all-in-one builder only: the games are
+the same as in v0.1.10, byte for byte (same programs: SFA3 `a569c361`, Upper `ac053140`, Hyper `ffc5eac1` without the
+replay table, Upper MAX `2c647278`, Hyper + Arcade `be88f3f9`), so a v0.1.10 build that worked need not be redone. Same
+cores as v0.1.10 and v0.1.9 (core batch of 12/11b: 0001-0027, 0029-0032, 0007b).
 
 - **Fix: Upper MAX with the all-in-one builder** (Windows test of v0.1.10): every build step started with a single
   argument waited for Enter (build stuck at 0 % CPU), and the step `dialogues_max` died (« Failed to execute script »:
@@ -34,8 +39,13 @@ est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports
   `scripts/construction/test_plan.py` checks every combination of games, without game data. Hyper's archive built
   alone is the same, byte for byte, as in a full build.
 
-- **Hyper + Arcade with the MAX characters** (new, test driver `sfa3hamhsfa`, core patch 0033): step L2 of the MAX
-  characters' integration. Eagle can be picked in VERSUS (both sides, the three isms) and fights with his own moves,
+- **Repository only, not in the release: Hyper + Arcade ro9a42** (switches `FINS_A`, `GENERIQUE_TITRES`, off by
+  default, so `hsfa_build.py --jeux hyperarcade` still builds ro9a41): 26 routines of Upper's ending actors that were
+  wired to unrelated Hyper routines become grafted ones, and the orange credits titles are read again; recipe
+  `tools/greffe-arcade/construction/ro9a41/greffe/vars_ro9a42.txt`, endings bench `etape4/cmp_fins_upper.py` (§233).
+- **Repository only, not in the released cores: Hyper + Arcade with the MAX characters** (new, test driver
+  `sfa3hamhsfa`, core patch 0033, which the v0.1.11 cores do not have): step L2 of the MAX characters' integration.
+  Eagle can be picked in VERSUS (both sides, the three isms) and fights with his own moves,
   throws, portrait, name and life-bar face; in Arcade his cell still shows "?". Built from the two discs with
   `hsfa_build.py --jeux hyperarcademax --psp-iso` (the PS2 Anthology and the PSP *SFA3 MAX* disc); the core needs the
   new driver (patch 0033: one more graphics member, 96 MB region for that driver only). The other games and drivers

@@ -39,6 +39,6 @@ Dans `etape3/greffe3.py` :
 
 ## Usage
 
-`outils/construit_e3.sh NOM ["VARS"]` construit une ro9a. `outils/balayage_liste.sh NOM PREFIXE` balaie les 85 combinaisons perso × version sélectionnables (MAME, 3 parties en parallèle). `etape4/tableau_fins.py PREFIXE` dresse le tableau.
+`outils/construit_e3.sh NOM ["VARS"]` construit une ro9a. `outils/balayage_liste.sh NOM PREFIXE` balaie les 85 combinaisons perso × version sélectionnables (MAME, 3 parties en parallèle). `etape4/tableau_fins.py PREFIXE` dresse le tableau. `etape4/cmp_fins_upper.py TRACES PREFIXE [TEMOIN]` compare les IMAGES de chaque fin à Upper (même graine, une capture toutes les 60 images depuis l'entrée en fin) et, avec un témoin, compte les images identiques, plus proches et plus loin d'Upper (§233). Les références d'Upper viennent de l'oracle `fige/ro5_v161` (traducteur v161, = l'Upper publié ; `fige/ro5`, traducteur v153, a 19 échanges `EXG Dx,Dy` cassés et téléporte des acteurs de fin) ; `--upper` choisit la série de références, `etape4/trois_voies.py` sépare ce qui vient de l'oracle de ce qui vient de la greffe, `etape4/recense_exg.py` compare les échanges de deux oracles, `etape4/fins_tsv.py` refait `donnees/fins_upper_v161.tsv` (§234).
 
 Le zip du cœur se construit avec `paquet_fbneo.py ro9a` ; la partie Arcade dans le cœur avec `outils/fa_coeur.sh`. État détaillé : `<workspace>/work/greffe_arcade/ETAT.md`.

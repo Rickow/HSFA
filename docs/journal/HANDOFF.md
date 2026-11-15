@@ -6627,3 +6627,158 @@ Decisions of 12/11 (D1-D10, `docs/ATTENTES-ET-DECISIONS.md`) unchanged; the slot
 - **Open**: E2 (family and planes of the first stage, M. Bison SFA2 `$64`) after the step 1 of L3; `sfa1_plans.bin`
   fills its range to the byte (any growth moves the `$4D50000` bound of the SFA1 objects); slot 0 margin below `$8000`
   on the MAX driver: 1 763 codes.
+
+### 233. 14/11: Hyper + Arcade ro9a42: Upper's ending actors and the orange credits titles (FINS_A, GENERIQUE_TITRES)
+Agent `fins_greffe` (sfa3ha; plan `work/etude_upper/FINS_GREFFE.md`, measures `work/mesures_homologues/RAPPORT.md`;
+workshop `work/greffe_arcade/e53/`, status `work/fins_greffe/ETAT.md`). Built on `f1701d6` (ro9a41 + E1 §232).
+ro9a42 = ro9a41 + `FINS_A=1 GENERIQUE_TITRES=1` (recipe `ro9a41/greffe/vars_ro9a42.txt`; `HA_ETAT` stays `ro9a41`:
+switching the default recipe is left to the merge).
+- **FINS_A** (`etape3/force3.py`, default 0; `1` = all groups, or a list `a1,sagat,1c,a2`): 26 routines of Upper's
+  ending actors that a copied Upper table still sent to an unrelated Hyper routine, all **entered** in the endings
+  (sentinel probe of `mesures_homologues`), become GREFFE:
+  - `a1` (11 states "wait for phase `$7B(A6)`, then the next state", sent to Hyper 0x301D0 which waits for a scene
+    state): 0x1E86F0 0x1E8C00 0x1EA7A0 0x1F1260 0x1F2AA0 0x1F39E0 0x1F3E70 0x1F5F00 0x1F8A20 0x1FFB40 0x202BE0;
+  - `sagat` (handler `$37` of ending 0b, -> 0xA0FD0, **and** its state 0, -> 0x352DE0, which advanced the state
+    without arming the timer nor creating the ball): 0x2046C0 0x204870 (closure: 0x2048B0, 0x204960);
+  - `1c` (attached objects of ending $1C, -> 0x4CF60 player code, 0x66CB0 which FREED the object, 0x908A0 fade
+    flags): 0x20F3A0 0x20F520 0x210340 (closure: 7 more GREFFE, 0x20FD10 -> Hyper 0x32A870 "e) equivalent");
+    checked first: 0x60D480 (reused from Hyper 0x5B4740) is byte-identical over 1 KB (PS2 addresses: file = exec -
+    `0x1F0000`), `$BA08(A5)` is relocated to itself and written by 0x20EEE0 (already GREFFE);
+  - `a2`: 0x1ED310 (plane 2 scroll, 0b / 18 / 1f), 0x1FBA90, 0x1FD6B0 (0c), 0x1FFF50 (0d), 0x20B230 + 0x20B950 +
+    0x20BB90 (Guy's disintegration of Bison), 0x20D240 (15 / 20 / 21, Hyper 0x6FEA0 freed the actor), 0x20D500 (21),
+    and 0x210710 (lot B, found by the probe once 0x20D500 works: ending 21, frames 3119-5333, sent to Hyper 0x2D6FC0
+    which writes `$8B94` / `$8B96(A5)`: a wrong 96 x 96 block bottom left from 3180 to 4860; closure rule of the plan);
+  - **0x214630** (ending 03 explosion object, -> 0x386A40) was tried and is **left to Hyper**: grafted, it draws
+    wrong tiles at frames 6240-6300 of ending 03 where Hyper's homologue gives Upper's picture. It is a screen-shake
+    object writing `$26(A5)` / `$28(A5)` (scroll positions in Upper's ending engine); lead not checked: in the graft
+    these words drive another plane.
+- **GENERIQUE_TITRES** (`etape2/donnees2.py`, default 0): cause of the missing orange titles of every ending. The two
+  credits objects (pool `$FFD000`, created by 0x11A190, handler 0x119890 copied, scroll 0x119A90 / 0x119D90 sent to
+  Hyper but word-for-word identical MIPS) take their text stream from `T_9590C0[$2(A6)]`: entries 0 / 2 (names,
+  0x9590D4 / 0x9590D0) are even, entries 1 / 3 (titles, 0x959691 / 0x95968D) are **odd**; `FILTRE3` rejects an
+  unproven odd long, so they stayed raw in ro9a41 (68K `$4F03E0`: `014F03F4 00959691 014F03F0 0095968D`). The two
+  cases become proven pointers -> `014F09B1`, `014F09AD`. 8 bytes of `ext_4e8000.bin` / `zone_decors.bin` change,
+  program ROMs identical to FINS_A=1 alone. The titles are back at Upper's place (Guy: identical pixels 2280-3060).
+- **Build** (e53g = `a_verser/ro9a42_fige`): `sz3ud.03c` `ca3d87d2…`, 2 989 routines (+35), zone 2 +12 KB; Hyper's
+  code does not move in the 68K image (116 151 module addresses checked). Zip (clone's `paquet_fbneo.py`): 6 members change (`sz3ud.03c`,
+  `sz3ud.04c`, `sz3.10b`, `hsfa_ext.bin`, `hsfa_trous.bin`, `hsfa_info.txt`), 26 identical.
+- **Proofs**:
+  - switches off with the final code (e53w): ro9a41_fige **34/35** of MD5SUMS (`env.sh` only); same for the first
+    witness e53y; the recipe `vars_ro9a42.txt` alone (e53r) gives the frozen build `ro9a42_fige` 34/35;
+  - **endings bench with image comparison to Upper**, new reusable tool `tools/greffe-arcade/etape4/cmp_fins_upper.py`
+    (per ending: mean difference to Upper at the same relative frame, first differing frame, and against a witness
+    build: identical frames, frames closer to / farther from Upper with their ranges). One MAME run per ending gives
+    the duration, the sentinel probe and a capture every 60 frames (`work/fins_greffe/outils/commun.sh`, `banc.sh`,
+    `file_jeux.sh`; probe re-targeted on each build by `sonde_prep.py`); Upper references made the same day;
+    final build (e53g) against the ro9a41 witness (same day, `t0`, identical to the `mesures_homologues` captures of
+    the afternoon on 135/135 frames of 0b): **85/85 endings**, durations = ro9a41 except 1-6 frames (05A 3760 = Upper;
+    07 5544, Upper 5541; 09 5656, Upper 5655; 1D 7719, Upper 7721; 1F 7580, Upper 7579: slowdown frames, see below);
+    9 569 frames compared to the witness: 5 633 identical, 929 closer to Upper, 464 farther (the farther ones were
+    looked at on the Z3 endings: credits with the titles now present but on a line offset, scene switches by a few frames, and actors
+    that now walk where the reference teleports them). Seen equal to Upper: 0b start (scroll) and Bison / ball,
+    Guy's disintegration, 0c planes, Blanka and Dan, 0d and 04 / 18 / 1b Bison, 15 Balrog, 17 Ryu, 18 stage, 21 ray
+    scene, the titles. Two regressions found by the bench and fixed before delivery: 0x214630 (03, left to Hyper)
+    and 0x2D6FC0 <- 0x210710 (21, grafted);
+  - sentinel probe on every step: from the copy, in the endings, only "e)" targets (0x32A870, 0x377460, 0x390B0 =
+    lone RTS; for these three, MIPS checked identical word for word), "f)" services (0x392270, 0x38B4C0: positive
+    controls, seen in every run), the imposed fight (0x9A6F0) and 0x386A40 <- 0x214630 (left to Hyper on purpose,
+    ending 03). 0x210710 (lot B) was entered once 0x20D500 worked and joined lot A; no other target of lot B;
+  - VERSUS 60 rounds on the final build: `vs.log` byte-identical to the reference of the day (E1's `vs_e52b` =
+    `vsd_ro9a41`), **90/90 captures** identical; stages bench on its twin without the CPU draw (`TIRAGE_CPU=0`):
+    **40/40 journals and 160/160 captures** byte-identical to ro9a41's twin bench (`bd41`).
+- **Measured, not graft defects**:
+  - **the Upper reference is wrong where an ending actor walks to a target with a negative speed**: 0x1EEE50 ("target
+    reached?") swaps x and the target when vx < 0; in `greffe_arcade/fige/ro5` (translator v153) the swap is
+    `MOVE.L D1,D0 ; MOVE.L D0,D1` (bytes `6a04 2001 2200`), in the graft (v161) `EXG D1,D0` (`6a02 c340`): the reference
+    reports "reached" at once and teleports the actor (Vega in 1c: x 0x1D0 -> 0x140 in one frame, identical fields
+    the frame before; the graft walks at -3.5 px/frame as the MIPS says). Same signature for Vega's body behind the
+    mask (1c, 3840: class `$49`, vx = -4, Upper already at its target) and probably Bison in 04 / 1b and the balls of
+    0b at 3780 and Chun-Li walking in from the right in 16 (2400-3180) (same look, not probed). 19 such broken exchanges in the reference's
+    code, 12 of them in ending actors (module 0x1E5FB0, 0x1E61FC, 0x1EEF60, 0x1EF200, 0x1FB280, 0x214F88, 0x216E00,
+    0x216F64, 0x21C7F0, 0x21CA3C, 0x21D088, 0x21E680), none in the graft. The ending oracle should be rebuilt with
+    the current translator;
+  - timing: the ending counter `$1CE(A5)` does not advance every frame (slowdown of the emulated 68K); one slowdown
+    frame less in 0b (the copy of 0x2046C0 is cheaper than Hyper's fight routine 0xA0FD0 called on 3 actors) creates
+    the credits at 4771 instead of 4772 (Upper: 4772); two more objects (titles) make Guy's ending 4 frames longer
+    (5544; Upper 5541, ro9a41 5540).
+- **Open**: the credits name column is still about one line higher than Upper's in places (already in ro9a41, also
+  in the witness; not the slowdown: 2 frames apart against ~14 px in 1c at 3840. The stream pointer `$54(A6)` of the
+  names object is +2 on both sides at 2900 but 5 bytes ahead in the graft at 3840; the copied text is identical to
+  Upper's and grafting the scroll routines 0x119A90 / 0x119D90 changes nothing (103/103 identical frames): cause not
+  found); 0xCB350 -> 0x38E890
+  ("e)" but 26 differing MIPS words, not probed, called by 0x1FBA90 and 0x20B230: explosion effects of 1b at 6000
+  differ); ending 21 last picture (wrong tiles, already in ro9a41; `$C0BC(A5)` differs but is constant over the whole
+  ending, so it is not the cause); Bison inside the ray (21, 2340) and his colours in the explosion (21, 5340); scene
+  switch of ending 04 (frame 1980) 10-20 frames later than Upper (already in ro9a41); 0x214630; the 43 other routines
+  of lot B (never entered) stay with Hyper; the core was not tried (MAME only).
+
+### 234. 15/11: the ending oracle of the graft rebuilt with translator v161 (`fige/ro5_v161`); ro9a42's endings compared again
+- **What `greffe_arcade/fige/ro5` is** (read): the Upper build (translator v153, 10/10; `sz3ud.03c` `a296538f…`)
+  that every Upper trace of the graft runs on: the ending references (`cmp_fins_upper.py`, §233), the oracle launchers
+  (`outils/oracle_upper.sh`, `compare_fin.sh`, `sonde_fin.sh`, `scripts_upper.sh`, `lance_upper_lua.sh`) and the
+  analysis tools that read its 68K addresses (`couverture.py`, `debuts68.py`, `voir.py`, `compare_68k.py`,
+  `preuve_ptrs.py`, e25 / e26 scripts). **The build of the graft reads no file of it** (read in the code of ro9a41 / ro9a42; the older `greffe_ha.py --audit` runs, ro9a22 /
+  ro9a35b, open none of it; the materialised `@HA_G@` has no `fige/`; `donnees2.py` reads the `u5_temoin7` map only with `PTR_INSTR=1`,
+  never set). Indirect link only: the frozen survey tables `releves_ro9a41/greffe/traces` (data read by Upper,
+  `journaux_*_lu`, and Upper's RAM maps) were measured on it (measured for `u_lu3_04`, deduced for the others from the
+  launchers and dates). Rebuilding the oracle therefore changes no byte of the graft; measuring those tables again on
+  the new oracle would be a separate decision.
+- **New oracle `greffe_arcade/fige/ro5_v161`** (frozen, read-only, `MD5SUMS`): followed copy of
+  `references/v161_banc/ro5` (`03c` `ac053140…`, `04c` `8147d4a6…`), the same layout as `fige/ro5`; its eight program
+  ROMs are byte-identical to those of the published Upper (`sfa3uhsfa.zip` built by the script on 14/11, = v0.1.10).
+  `fige/ro5` is kept untouched (tools that read its addresses, survey tables).
+- **The 19 exchanges** (`etape4/recense_exg.py`): the 19 `EXG_PILE_D` sites of v161 read `EXG Dx,Dy` in the ROM bytes
+  (`c340`, `c141`, `c342`, `c541`, `c543`, `c343`, `c742`), each one a `MOVE.L Dx,Dy ; MOVE.L Dy,Dx` pair in `fige/ro5`
+  (MIPS 0x15A780, 0x15A88C, 0x15ABDC, 0x17FA78, 0x17FB74, 0x1E5FB0, 0x1E61FC, 0x1EEF60, 0x1EF200, 0x1FB280, 0x214F88,
+  0x216E00, 0x216F64, 0x21C7F0, 0x21CA3C, 0x21D088, 0x21E680, 0x2C2A98, 0x3C342C). `tools/sondes-recherche/paires_exg.py`
+  up to `$A1000`: 20 pairs -> 1 (the one left, `MOVE.W D2,D1 ; MOVE.W D1,D2` at MIPS 0x19164C / 0x19165C, is a real copy
+  of two MIPS instructions, the same in both). The two oracles differ elsewhere too (111 MIPS addresses translated
+  differently: these 19, `AIDE_ROXR` 4, `BITOP_DN` 3, BCD 8, ~22 pointer reorderings + conversion calls dropped,
+  tests moved before the end of a register loan): "the oracle changed" is measured, "because of the exchange" only
+  where an actor was dumped.
+- **Ending references** again: same recipe as §233 (`fin_upper`), checked first on the OLD oracle (1c: 103 / 103
+  frames identical to the §233 reference). The 85 `fd` games of ro9a42 (program `ca3d87d2…`, fingerprints checked) are
+  reused. New Upper ending table `donnees/fins_upper_v161.tsv` (the 40 characters of `fins_upper.tsv`; `etape4/fins_tsv.py`; the same script gives back every
+  known value of `fins_upper.tsv` from the old references). Start frames move by up to 14 400 frames (07; different fights before the ending);
+  durations by 0-3 frames except 15 (-18), 1b (-10), 1d (-11), 09 (-5).
+- **Result** (`cmp_fins_upper.py --upper`, `etape4/trois_voies.py`): against the witness t0 (ro9a41's code),
+  9 569 frames, 5 633 identical, **closer to Upper / further: 929 / 464 with the old oracle, 950 / 782 with the new
+  one**: the net gain of ro9a42 over ro9a41 drops from +465 to +168 frames, part of the gain of §233 was measured
+  against the broken oracle. Of the frames further from Upper (812 by the same rule on the RGB maximum), 717 lose in
+  the credits column (x >= 200), 95 elsewhere. Mean distance graft-Upper 5.81 % -> 4.42 % (9 462 frames); the
+  oracle changed on 3 702 frames, the graft is closer to the new one on 2 584, further on 609; 654 frames differ in
+  the graft while both oracles agree. Text of the right-hand column (credits, some dialogue) superposed within 1 px:
+  1 985 / 3 120 frames -> 2 682 / 3 113.
+- **Open points reclassified**:
+  - artefacts of the old oracle (measured): Vega in 1c (new oracle at 2384: x 0x1CC.8, then 0x1C9, 0x1C5.8… = the
+    graft, state 2, vx -3.5; old: 0x140 at once, the broken exchange of 0x1EEE50) and Vega's body behind the mask (3840: state 2, x 0x180, vx -4 = the
+    graft); Chun-Li walking in from the right (16, 2400-3180); Bison's balls (0b, 3780); 1b (960; 36 of the 47 frames where the oracle changed come closer,
+    none left outside it); the credits column "one line higher" in 1c, 03, 21, 16, 19, 10, 0e (superposed within
+    1 px, old -> new oracle: 1c 33 -> 86 of 86, 03 73 -> 105, 21 69 -> 92, 16 57 -> 97, 19 67 -> 121, 10 86 -> 116,
+    0e 52 -> 85);
+  - real defects of the graft (both oracles agree, the graft differs): ending 04 (background / scene switch late from
+    1680-2100, Bison still on screen: Bison in 04 is this defect, not the oracle; 52 Z3 frames), 21 (Bison inside
+    the ray 2280-3000, his colours in the explosion 5280-5340, last picture 8520-8820); 03 6180-6360 (fire of the
+    last scene denser than Upper's, the same in ro9a41: the scene of 0x214630, left to Hyper; link supposed); already
+    in ro9a41 and outside the list: 08 (one scene late at 3000), 22 (wrong tiles at 3000 / 3660), 20 (credits
+    9960-13980), 18, 17;
+  - timing (measured, `lua/dump_acteurs.lua` of the fins workshop on ro9a42 and on the new oracle, same games as the
+    bench to the pixel): the credits of 15, 1d, 09 trail the new oracle because the ending counter `$1CE(A5)` of the
+    graft falls behind (15: equal up to 7260, -5 from 7320, -7 at 10140; 1d: -7 from 4500, up to -11; 09: -4 at
+    3660); the names objects (FFD800 / FFDA00) sit where Upper's were the same number of ticks earlier; 1d's scene
+    switch near 5040 is the same delay. Why the graft loses those ticks (more 68K work per frame at those moments) is
+    not established. One-pixel offsets (05, 0a: at 05 3300 ro9a41 = new Upper to the pixel, ro9a42 1 px off) are the
+    §233 mechanism (the two title objects), deduced. 1b's credits (72 / 115 frames superposed) not measured;
+  - not comparable: 03 5220-5400 and 1b 6000, explosions placed by the random draw; the two oracles differ between
+    themselves as much as from the graft (different fights before the ending).
+- **Tools** (no game data): `cmp_fins_upper.py --upper U` (series of references, default `u`); `UPPER_ORACLE` in
+  `lance_upper_lua.sh` (default `fige/ro5`, unchanged: the survey launchers e25 / e26 / `journaux_conv.sh` stay on the
+  build their tables come from) and in `oracle_upper.sh`, `compare_fin.sh`, `sonde_fin.sh`, `scripts_upper.sh`
+  (default `fige/ro5_v161`; they pick `donnees/fins_upper_v161.tsv`, or `fins_upper.tsv` for `fige/ro5`,
+  `FINS_UPPER=` to force; `sonde_fin.sh` PC_UPPER is an address in that oracle); `etape4/recense_exg.py`,
+  `etape4/trois_voies.py`, `etape4/fins_tsv.py`. These launchers were not run by this work (the bench recipe was).
+- **Decisions for the owner**: version `fige/ro5_v161` as the oracle of the endings (done in the workshop, nothing
+  removed); copy the changed launchers into `work/greffe_arcade/outils` when merging; measure the survey tables of
+  the graft again on the new oracle or not (would change `releves_*`, so possibly the graft); the real defects above
+  (04, 21, 03 6180-6360, 08, 22, 20) and the ticks lost in 15 / 1d / 09 stay to be done; the switch to ro9a42 should
+  be judged on 950 / 782 (new oracle), not on 929 / 464.
