@@ -87,7 +87,8 @@ def main():
     # _PYI_* (chargeur PyInstaller : sinon chaque etape re-extrait l'executable, dans ce dossier temporaire)
     env = {k: v for k, v in os.environ.items() if k in ("PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "SYSTEMROOT",
                                                         "USERPROFILE", "TEMP", "TMP", "HSFA_ASM", "HSFA_VASM",
-                                                        "HSFA_SANS_LIENS", "PYTHONUTF8") or k.startswith("_PYI_")}
+                                                        "HSFA_SANS_LIENS", "PYTHONUTF8",
+                                                        "MAX_ZONES_PSP") or k.startswith("_PYI_")}   # (impacts_max) hsfa_build pose 1 (max60) ; absent = 0 (max59)
     env.update(ENV_MAX, PYTHONDONTWRITEBYTECODE="1", PYTHONIOENCODING="utf-8", MAX_RACINE=AG,
                SFA3MAX_CACHE=absp(a.cache_max), SFA3MAX_EBOOT=absp(a.eboot), SFA3MAX_PAC_DIR=absp(a.pac),
                PYTHONPATH=os.path.join(absp(a.depot), "src", "hsfa"))          # mwo3_codec

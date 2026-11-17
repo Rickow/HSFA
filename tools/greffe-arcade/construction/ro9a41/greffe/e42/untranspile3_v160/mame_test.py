@@ -16,6 +16,12 @@ def _lien(src, dst):   # (hyperarcade, portabilite) src/hsfa/liens.py (@HA_UT@) 
     try: os.symlink(src, dst)
     except (OSError, NotImplementedError):
         import shutil; shutil.copyfile(src, dst)
+def _champs_chemins(s):   # (hyperarcade, Windows) « y:fichier:fichier » : la lettre de lecteur d'un chemin Windows
+    r = []                 # (« C:\... », « C:/... ») reste dans son champ ; sous Linux = s.split(':')
+    for x in s.split(':'):
+        if len(r) > 1 and len(r[-1]) == 1 and r[-1].isalpha() and x[:1] in ('\\', '/'): r[-1] += ':' + x
+        else: r.append(x)
+    return r
 D = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, D)
 os.environ["MEMMODE"] = "cps2"
 import translate as T
@@ -574,7 +580,7 @@ def main():
         # par la greffe vers des adresses 68K ETIQUETEES (HSFA_ZONES_68K) ; ici : pointeurs de code de la liste -> etiquettes
         # 68K (comme HSFA_GREFFE_PTRS), mots echanges, servi en ext_<y>.bin (trou de la carte : hsfa_trous.bin / banc_mem)
         if os.environ.get("HSFA_GREFFE_ZONE"):
-            zy_, zf_, zp_ = os.environ["HSFA_GREFFE_ZONE"].split(':'); zy_ = int(zy_, 16)
+            zy_, zf_, zp_ = _champs_chemins(os.environ["HSFA_GREFFE_ZONE"]); zy_ = int(zy_, 16)
             zb_ = bytearray(open(zf_, "rb").read()); zb_ += bytes(len(zb_) & 1); nz_ = 0
             for l_ in (open(zp_) if zp_ else ()):
                 if not l_.strip(): continue

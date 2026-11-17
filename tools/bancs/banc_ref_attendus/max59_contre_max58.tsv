@@ -1,0 +1,5 @@
+# Différences ATTENDUES de max59 contre max58 (work/max59_assemblage/ETAT.md, 15/11 19 h 40) : Arcade des 4 MAX = max58
+# jusqu'à : Eagle image 41442 (sous-état $C après le 9e combat : dialogue faux sous Sagat retiré, FIN_DLG_BALROG), Maki,
+# Yun, Ingrid DANS la 1re fin MAX (durée changée par les règles de conversion) ; ensuite divergence (l'IA lit le compteur
+# d'images). Croisés 64/64 et fins natives 35/35 : identiques (aucune ligne ici).
+arcade	*	journal.txt	*

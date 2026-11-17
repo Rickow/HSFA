@@ -7,14 +7,15 @@
 #   tools/flux/oggenc/construit_oggenc.py), libchdr (commit dans tools/constructeur/natifs.py), roues PyPI
 #   (--require-hashes). Actions epinglees par commit.
 # - Determinisme : chaque systeme execute hsfa_oggenc --signal et doit retrouver l'empreinte de reference
-#   (memes Ogg sur tous les systemes : sinon le travail echoue).
+#   (memes Ogg sur tous les systemes : sinon le travail echoue) ; de meme hsfa_rejeu_iso (gen_rejeu_iso.py --essai :
+#   meme journal du programme Z80 d'essai sur tous les systemes).
 name: constructeur
 
 on:
   workflow_dispatch:          # essai : executables en artefacts seulement
     inputs:
       essai_windows:
-        description: "Essais Windows seulement (tools/constructeur/test_windows.py, Linux en temoin) : pas d'executables des 5 systemes"
+        description: "Essais Windows seulement (tools/constructeur/test_windows.py, Linux en temoin ; macOS arm64 : parties portables) : pas d'executables des 5 systemes"
         type: boolean
         default: false
   release:
@@ -35,7 +36,7 @@ env:
 
 jobs:
   natifs:
-    # hsfa_oggenc, fluxtool et libchdr pour les 5 cibles, avec UN seul compilateur (zig = clang + libc de chaque cible)
+    # hsfa_oggenc, fluxtool, hsfa_rejeu_iso et libchdr pour les 5 cibles, avec UN seul compilateur (zig = clang + libc de chaque cible)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -98,11 +99,13 @@ jobs:
         run: |
           B="natifs/${{ matrix.cible }}"
           chmod +x "$B"/* || true
-          if [ "$RUNNER_OS" = macOS ]; then codesign -s - -f "$B"/hsfa_oggenc "$B"/fluxtool "$B"/libchdr.dylib; fi   # signature ad hoc
+          if [ "$RUNNER_OS" = macOS ]; then codesign -s - -f "$B"/hsfa_oggenc "$B"/fluxtool "$B"/hsfa_rejeu_iso "$B"/libchdr.dylib; fi   # signature ad hoc
           ls -la "$B"
           echo "BIN=$B" >> "$GITHUB_ENV"
       - name: Determinisme de l'Ogg sur ce systeme (signal d'essai, aucune donnee de jeu) -- BLOQUANT
         run: python tools/flux/oggenc/construit_oggenc.py --verifie "$BIN/hsfa_oggenc${{ runner.os == 'Windows' && '.exe' || '' }}"
+      - name: Determinisme de hsfa_rejeu_iso sur ce systeme (programme Z80 d'essai, aucune donnee de jeu) -- BLOQUANT
+        run: python tools/son-hyper/rejeu_iso/gen_rejeu_iso.py --essai "$BIN/hsfa_rejeu_iso${{ runner.os == 'Windows' && '.exe' || '' }}"
       - name: Python de fabrication (versions et empreintes fixees)
         run: python -m pip install --disable-pip-version-check --require-hashes -r tools/constructeur/requirements-constructeur.txt
       - name: Executable (PyInstaller, un seul fichier) + auto-test
@@ -120,7 +123,7 @@ jobs:
           mkdir -p "paquet/$P"
           cp "dist/${{ matrix.exe }}" "paquet/$P/"
           cp tools/constructeur/LISEZMOI.txt tools/constructeur/README.txt tools/constructeur/TIERS.md LICENSE "paquet/$P/"
-          cp "$BIN/LICENSE-libchdr.txt" "paquet/$P/"
+          cp "$BIN/LICENSE-libchdr.txt" "$BIN/LICENSE-z80.txt" "paquet/$P/"
           cd paquet
           if [ "$RUNNER_OS" = Windows ]; then 7z a -tzip -mx=9 "$P.zip" "$P" > /dev/null; else zip -qr -9 "$P.zip" "$P"; fi
           python -c "import hashlib,sys; f=sys.argv[1]; print(hashlib.sha256(open(f,'rb').read()).hexdigest()+'  '+f)" "$P.zip" > "$P.zip.sha256"
@@ -170,6 +173,9 @@ jobs:
           if [ "$RUNNER_OS" = Windows ]; then whoami; whoami //groups | grep -i -E "admin|S-1-16" || true; fi
       - name: Controle de portabilite du code de construction (tools/verifie_portabilite.py)
         run: python tools/verifie_portabilite.py
+      - name: Selection des jeux du constructeur (--jeux, cases de la fenetre ; tools/constructeur/test_selection.py)
+        if: ${{ !cancelled() }}
+        run: python tools/constructeur/test_selection.py
       - name: Python de fabrication (versions et empreintes fixees)
         if: ${{ !cancelled() }}
         run: python -m pip install --disable-pip-version-check --require-hashes -r tools/constructeur/requirements-constructeur.txt
@@ -228,6 +234,66 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: essai-rapports-${{ matrix.cible }}
+          path: rapports/
+          retention-days: 7
+          if-no-files-found: warn
+
+  essai-macos:
+    # workflow_dispatch avec essai_windows=true seulement : parties PORTABLES de test_windows.py qui ont un sens sur un Mac
+    # (arm64) : chemins (liens POSIX, dossier personnel, code genere, chemin de l'ISO pour le coeur), encodage, greffe
+    # (reconstitution du releve TSV), rejeu (hsfa_rejeu_iso), l'executable comme python des etapes (interprete). Aucune
+    # donnee de jeu. Rapports texte en artefacts.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.essai_windows }}
+    needs: natifs
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      T: tools/constructeur/test_windows.py
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0   # v7.1.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333   # v8.0.2
+        with:
+          name: natifs
+          path: natifs
+      - name: Outils natifs macos-arm64 (droits d'execution, signature ad hoc), contexte
+        run: |
+          B=natifs/macos-arm64
+          chmod +x "$B"/* || true
+          codesign -s - -f "$B"/hsfa_oggenc "$B"/fluxtool "$B"/hsfa_rejeu_iso "$B"/libchdr.dylib
+          echo "BIN=$B" >> "$GITHUB_ENV"
+          mkdir -p rapports
+          uname -m; sw_vers; python -c "import sys; print(sys.version, sys.getfilesystemencoding(), sys.flags.utf8_mode)"
+      - name: Controle de portabilite du code de construction (tools/verifie_portabilite.py)
+        run: python tools/verifie_portabilite.py
+      - name: Selection des jeux du constructeur (tools/constructeur/test_selection.py)
+        if: ${{ !cancelled() }}
+        run: python tools/constructeur/test_selection.py
+      - name: Essais portables (chemins, encodage, greffe, rejeu)
+        if: ${{ !cancelled() }}
+        run: python "$T" --parties liens,maison,fige,greffe,encodage,coeur,rejeu --natifs "$BIN" --rapport rapports/runner.txt
+      - name: Python de fabrication (versions et empreintes fixees)
+        if: ${{ !cancelled() }}
+        run: python -m pip install --disable-pip-version-check --require-hashes -r tools/constructeur/requirements-constructeur.txt
+      - name: Executable (PyInstaller, un seul fichier) + auto-test
+        if: ${{ !cancelled() }}
+        run: python tools/constructeur/fabrique.py --natifs "$BIN" --dist dist
+      - name: L'executable comme python des etapes (interprete ; auto-test deja fait par fabrique.py)
+        # pas la partie « exe » : elle rejoue « flux » dans l'exe, et le PCM DECODE de l'Ogg d'essai differe de Linux sur
+        # macOS arm64 (Ogg encode identique ; run 44040342748) -- le decodage ne sert qu'au controle, pas aux archives
+        if: ${{ !cancelled() }}
+        run: python "$T" --parties interprete --exe dist/hsfa-constructeur --rapport rapports/exe.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9   # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: essai-rapports-macos-arm64
           path: rapports/
           retention-days: 7
           if-no-files-found: warn

@@ -17,8 +17,9 @@ a fixed commit (libchdr) or `--require-hashes` (PyPI).
 | libvorbis, libogg (Xiph.Org) | 1.3.7, 1.3.6 | `hsfa_oggenc`: Ogg Vorbis music, unmodified except four lines of `lib/os.h` (portable rounding, see `tools/flux/oggenc/README.md`) | BSD-3-Clause |
 | musl (math functions, fdlibm) | 1.1.21 | `hsfa_oggenc`: the same math results on every system (15 files of `src/math`) | MIT; fdlibm files: Sun Microsystems notice (free use, notice kept) |
 | stb_vorbis (Sean Barrett) | 1.22 | Ogg check in `fluxtool` | public domain or MIT |
+| z80.h (Ivan Kosarev) | copy in `tools/son-hyper/tests` | `hsfa_rejeu_iso`: runs the original SFA1 / SFA2 sound drivers of your disc to rebuild Hyper's replay table | MIT; `LICENSE-z80.txt` |
 | libchdr (Romain Tisserand) | commit 47d7941 | reads `.chd` disc images | BSD-3-Clause; includes LZMA SDK (public domain), miniz (MIT), zstd (BSD-3-Clause), dr_flac (public domain / MIT-0); `LICENSE-libchdr.txt` |
-| zig toolchain runtime (native tools only) | 0.17.1 | C runtime linked into `hsfa_oggenc`, `fluxtool`, libchdr: musl libc (Linux, MIT), mingw-w64 runtime (Windows: ZPL-2.1 / MIT / public domain), LLVM libc++ / compiler-rt (Apache-2.0 WITH LLVM-exception) | as listed |
+| zig toolchain runtime (native tools only) | 0.17.1 | C runtime linked into `hsfa_oggenc`, `fluxtool`, `hsfa_rejeu_iso`, libchdr: musl libc (Linux, MIT), mingw-w64 runtime (Windows: ZPL-2.1 / MIT / public domain), LLVM libc++ / compiler-rt (Apache-2.0 WITH LLVM-exception) | as listed |
 
 Not included: FFmpeg (not needed since `flux_ogg` version 3), vasm (HSFA uses its own 68000 assembler,
 `tools/asm68k/`), MAME / chdman, any ROM, BIOS or disc image.

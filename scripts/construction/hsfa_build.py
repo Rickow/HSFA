@@ -58,9 +58,21 @@ OUTILS_DEFAUT = {
     # MAME / analyses de la greffe en tableaux TSV ; --greffe-releves en donne d'autres)
     "greffe": os.environ.get("HSFA_OUTILS_GREFFE", _d("tools", "greffe-arcade", "construction")),
 }
-# (hyperarcade) etat fige de la greffe Arcade dans tools/greffe-arcade/construction : code <HA_ETAT>/, recette
-# <HA_ETAT>/greffe/vars_<HA_ETAT>.txt, releves releves_<HA_ETAT>/ ; seule ligne a changer a chaque nouvelle livraison
+# (hyperarcade) etat fige de la greffe Arcade dans tools/greffe-arcade/construction : code <HA_ETAT>/, releves
+# releves_<HA_ETAT>/, recette <HA_ETAT>/greffe/<HA_RECETTE> (interrupteurs de greffe_ha.py). Une livraison qui ne change
+# que la recette (meme code, memes releves) ne change que HA_RECETTE ; HA_NOM (dossier de la construction, lu par
+# paquet_fbneo.py et ecrit dans hsfa_info.txt) en derive : vars_ro9a45.txt -> ro9a45_fige (= copie figee de l'atelier)
 HA_ETAT = "ro9a41"
+HA_RECETTE = "vars_ro9a45.txt"     # (16/11 soir) ro9a45 = ro9a44 + DONNEES_BRUTES=1 : code et releves de ro9a41, recette ro9a45
+HA_NOM = os.environ.get("HA_NOM") or HA_RECETTE[len("vars_"):-len(".txt")] + "_fige"
+# (L2) greffe AVEC les persos MAX (hyperarcademax) : base = recette ro9a41 + MAX_ZONES=1, puis recette avec MAX ; elle
+# garde la recette ro9a41 (vars_ro9a41_max.txt = vars_ro9a41.txt + interrupteurs MAX) tant que L3 ne livre pas la sienne
+HA_RECETTE_MAX_BASE = "vars_ro9a41.txt"
+HA_RECETTE_MAX = "vars_ro9a41_max.txt"
+# (uppermax) etat d'Upper MAX construit : max60 = max59 + MAX_ZONES_PSP=1 (points d'effets / brulures et flammes des MAX
+# aux positions de la PSP, impacts_max) ; MAX_ZONES_PSP=0 dans l'environnement redonne max59 a l'octet
+UM_ETAT = "max61"
+UM_ZONES_PSP = "1"
 TRAVAIL = "hsfa-travail"          # sous-dossier des fichiers de travail ; les archives des jeux sont a la racine de --sortie
 PYTHON_NUMPY_DEFAUT = os.environ.get("HSFA_PYTHON_NUMPY", _d("venv", "bin", "python"))
 
@@ -132,7 +144,7 @@ JEUX = {
     # (experimental) Hyper + mode Arcade d'Upper greffe : construit depuis les sorties d'Upper et d'Hyper ; meme
     # disposition que l'atelier pour paquet_fbneo.py ro9a (greffe_arcade/constructions/<HA_NOM>/b9)
     "hyperarcade": dict(module="ro9", travail=os.path.join("greffe_arcade", "constructions",
-                        os.environ.get("HA_NOM", HA_ETAT + "_fige"), "b9"), roms="roms_ro9", b32=None, zip="sfa3hahsfa",
+                        HA_NOM, "b9"), roms="roms_ro9", b32=None, zip="sfa3hahsfa",
                         paquet="ro9a"),
 }
 
@@ -161,16 +173,21 @@ REF_SON_MAX = {   # ROM son MAX regeneree (son/chaine_son.py) : empreintes du lo
 # the steps that will run count; a step already measured in this output folder (etat.json, « duree ») counts for its own
 # time, the others are scaled by the speed of this machine measured there; during the build, the time left follows the
 # speed observed so far. test_plan.py checks that every step has a duration here.
-DUREES_REF = {
+# Recalibrated on a user's machine (17/11/2026): the 5 games of the builder (SFA3, Upper, Hyper, Upper MAX, Hyper +
+# Arcade) from an empty output in 12 min on an i5-13500H (Windows), against 923 s (15 min 23 s) with the medians below:
+# every median is scaled by ECHELLE_REF (same distribution between steps, total 12 min).
+ECHELLE_REF = 720 / 923
+DUREES_MEDIANES = {
     "iso": 1, "afs": 1, "module_ro3": 1, "module_ro5": 1, "module_ro9": 1, "arcade": 9, "flux": 1, "max": 0,
     "empreintes": 3,
     "son_sfa3": 1, "prog_sfa3": 43, "gfx_sfa3": 102, "paquet_sfa3": 4,
     "son_upper": 1, "sons_ps2_upper": 2, "prog_upper": 50, "gfx_upper": 88, "paquet_upper": 13,
-    "sons_ps2": 2, "son_hyper": 1, "prog_hyper": 75, "gfx_hyper": 90, "paquet_hyper": 54,
+    "sons_ps2": 2, "rejeu_iso": 45, "son_hyper": 1, "prog_hyper": 75, "gfx_hyper": 90, "paquet_hyper": 54,
     "greffe_hyperarcade": 155, "paquet_hyperarcade": 8,
     "psp": 1, "max_donnees": 89, "son_uppermax": 8, "sons_ps2_uppermax": 2, "prog_uppermax": 66, "paquet_uppermax": 5,
     "sons_ps2_hypermax": 3, "greffe_hyperarcademax": 396, "paquet_hyperarcademax": 8,
 }
+DUREES_REF = {nom: s * ECHELLE_REF for nom, s in DUREES_MEDIANES.items()}
 JEUX_AFFICHES = ["sfa3", "upper", "hyper", "uppermax", "hyperarcade", "hyperarcademax"]     # order of the announcement
 JEUX_LIBELLES = {"sfa3": "SFA3", "upper": "Upper", "hyper": "Hyper", "uppermax": "Upper MAX",
                  "hyperarcade": "Hyper + Arcade", "hyperarcademax": "Hyper + Arcade MAX"}
@@ -458,12 +475,15 @@ class Construction:
     def env(self, **kw):
         garde = ("PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "TEMP", "TMP", "SYSTEMROOT", "USERPROFILE",
                  "HSFA_ASM", "HSFA_VASM",             # HSFA_ASM=vasm|compare : contrôle de l'assembleur 68000 (MAX)
-                 "HSFA_SANS_LIENS")                   # (essai) voie Windows sans lien symbolique (src/hsfa/liens.py)
+                 "HSFA_SANS_LIENS",                   # (essai) voie Windows sans lien symbolique (src/hsfa/liens.py)
+                 "MAX_ZONES_PSP")                     # (impacts_max) MAX : points d'effets et flammes = PSP (prog_uppermax : zones_psp())
         e = {k: v for k, v in os.environ.items() if k in garde}   # environnement PROPRE : aucun reglage d'essai
         # outils de la musique Ogg (tools/flux/flux_ogg.py : hsfa_oggenc, fluxtool preconstruits ou compiles par CC)
         # et chargeur PyInstaller du constructeur tout-en-un (_PYI_* : sinon chaque etape re-extrait l'executable)
         e.update({k: v for k, v in os.environ.items()
                   if k in ("HSFA_OGGENC", "HSFA_OGGENC_SOURCES", "HSFA_FLUXTOOL", "CC") or k.startswith("_PYI_")})
+        # replay table from the ISO (tools/son-hyper/rejeu_iso: hsfa_rejeu_iso prebuilt, or compiled by CXX)
+        e.update({k: v for k, v in os.environ.items() if k in ("HSFA_REJEU_ISO", "CXX")})
         e["PYTHONPYCACHEPREFIX"] = os.path.join(self.cache, "pyc")  # rien n'est ecrit dans les dossiers d'outils
         e["PYTHONIOENCODING"] = "utf-8"
         e["PYTHONUTF8"] = "1"            # Windows : open() en UTF-8 comme sous Linux (sinon cp1252 : UnicodeEncodeError, MAX)
@@ -788,12 +808,33 @@ class Construction:
         return out
 
     # ---- son d'Hyper : redirection des voix par version + table du rejeu (SON-HYPER-ROM.md §12-13) ----------------
-    def table_rejeu_source(self):
-        """table du rejeu (traces QSound de SFA1 / SFA2, hors depot) : --rejeu-table, sinon
+    def table_rejeu_externe(self):
+        """table du rejeu donnee (traces QSound de SFA1 / SFA2, hors depot) : --rejeu-table, sinon
         tools/son-hyper/rejeu/hsfa_rejeu_table.txt si elle est la ; None sinon"""
         if self.a.rejeu_table: return os.path.abspath(self.a.rejeu_table)
         p = os.path.join(self.O["son_hyper"], "rejeu", "hsfa_rejeu_table.txt")
         return p if os.path.exists(p) else None
+
+    def table_rejeu_iso(self):
+        """table du rejeu recreee depuis l'ISO (etape rejeu_iso) : Hyper construit, sans table donnee ni
+        --sans-redirection"""
+        if "hyper" not in self.jeux or self.table_rejeu_externe() or self.a.sans_redirection: return None
+        return os.path.join(self.cache, "rejeu_iso", "hsfa_rejeu_table.txt")
+
+    def table_rejeu_source(self):
+        """table du rejeu : la table donnee (prioritaire), sinon celle de l'ISO (faite par l'etape rejeu_iso, avant
+        son_hyper : connue des le plan) ; None sinon"""
+        return self.table_rejeu_externe() or self.table_rejeu_iso()
+
+    def e_rejeu_iso(self):
+        """table du rejeu recreee depuis l'ISO : les pilotes son de SFA1 / SFA2 (X_DATA e221 / e250) tournent hors
+        ligne (tools/son-hyper/rejeu_iso : hsfa_rejeu_iso, Z80 de z80.h), leurs ecritures QSound font la table"""
+        table = self.table_rejeu_iso(); d = os.path.dirname(table); os.makedirs(d, exist_ok=True)
+        argv = ["gen_rejeu_iso.py", "--xdata", self.xdata, "--sortie", table, "--travail", d]
+        self.lance("rejeu_iso", dict(cwd=d, sys_path=[os.path.join(self.O["son_hyper"], "rejeu_iso")], argv=argv,
+                                     code="import gen_rejeu_iso\ngen_rejeu_iso.main(%r)\n" % argv[1:]), self.env())
+        self.log("table du rejeu recreee depuis l'ISO : %s (%d o)" % (os.path.relpath(table, self.S), os.path.getsize(table)))
+        return [table]
 
     def redirection(self):
         """redirection des voix d'Hyper : seulement avec la table du rejeu (sans elle, les codes $2000+ / $4000+
@@ -912,7 +953,7 @@ class Construction:
 
     def env_paquet(self):
         """membres lus sur place par le coeur (paquet_fbneo.py) : flux musique (Upper, Hyper ; Ogg Vorbis par defaut,
-        decision D6), rejeu SFA1 / SFA2 (Hyper, si --rejeu-table) ; sources = l'ISO de l'utilisateur"""
+        decision D6), rejeu SFA1 / SFA2 (Hyper, table donnee ou recreee depuis l'ISO) ; sources = l'ISO de l'utilisateur"""
         e = dict(HSFA_XDATA=self.xdata, HSFA_OGG_CACHE=os.path.join(self.cache, "flux_ogg"),
                  HSFA_FLUX_FORMAT=self.a.flux_format)
         if self.a.sans_flux:
@@ -958,10 +999,14 @@ class Construction:
         sinon 'origine' (comme prog_hyper : Hyper garde les voix SFA3) ; HA_VOIX=corrige|origine force"""
         return os.environ.get("HA_VOIX") or ("corrige" if self.redirection() else "origine")
 
-    def vars_greffe(self):
-        """interrupteurs de la greffe : HA_VARS, sinon la recette figee (<HA_ETAT>/greffe/vars_<HA_ETAT>.txt)"""
+    def recette(self, nom):
+        """une recette figee de la greffe : <HA_ETAT>/greffe/<nom> (interrupteurs de greffe_ha.py, une ligne)"""
+        return open(os.path.join(self.O["greffe"], HA_ETAT, "greffe", nom), encoding="utf-8").read().strip()
+
+    def vars_greffe(self, recette=HA_RECETTE):
+        """interrupteurs de la greffe : HA_VARS, sinon la recette figee (<HA_ETAT>/greffe/<HA_RECETTE>)"""
         if os.environ.get("HA_VARS") is not None: return os.environ["HA_VARS"]
-        return open(os.path.join(self.O["greffe"], HA_ETAT, "greffe", "vars_%s.txt" % HA_ETAT), encoding="utf-8").read().strip()
+        return self.recette(recette)
 
     def releves_greffe(self):
         """releves de la greffe (journaux MAME d'Upper et d'Hyper, analyses : adresses et numeros seulement) : tableaux TSV
@@ -977,7 +1022,7 @@ class Construction:
     def e_greffe(self):
         """greffe_ha.py : code fige (HA_ETAT) + releves materialises dans cache/greffe_ha, entrees = sorties de cette
         construction ; resultat copie dans travail/greffe_arcade/constructions/<HA_NOM>/ (disposition de paquet_fbneo)"""
-        G = self.O["greffe"]; nom = os.environ.get("HA_NOM", HA_ETAT + "_fige")
+        G = self.O["greffe"]; nom = HA_NOM
         D = os.path.join(self.cache, "greffe_ha")
         if os.path.isdir(D): shutil.rmtree(D)
         ms = self.modules_son
@@ -1021,7 +1066,7 @@ class Construction:
                     code="import paquet_fbneo\npaquet_fbneo.construit('ro9a')\n")
         self.lance("paquet_hyperarcade", spec, self.env(HSFA_WORK=self.W, HSFA_SORTIE=dest, HSFA_STRICT="1",
                    HSFA_OUTILS=os.path.join(DEPOT, "tools"), SOURCE_DATE_EPOCH=self.a.date_source,
-                   HSFA_CONSTR=os.environ.get("HA_NOM", HA_ETAT + "_fige"), **self.env_paquet()),
+                   HSFA_CONSTR=HA_NOM, **self.env_paquet()),
                    nice=False)
         return [self.publie(os.path.join(dest, "sfa3hahsfa.zip"))]
 
@@ -1044,13 +1089,13 @@ class Construction:
     def e_greffe_max(self):
         """(L2) 1. MAX base = the graft recipe + MAX_ZONES=1 (zones T4 / T5 declared, nothing posed : its map is the
         reference of the conversion) ; 2. prep_max_ro9.py (MAX code and data converted for this base, regenerated from
-        the PSP ISO : never in the repository) ; 3. the graft with recipe vars_<HA_ETAT>_max.txt + MAX_PREP / MAX_CACHE ;
+        the PSP ISO : never in the repository) ; 3. the graft with recipe HA_RECETTE_MAX + MAX_PREP / MAX_CACHE ;
         result copied to travail/greffe_arcade/constructions/<HA_ETAT>_max_fige (layout of paquet_fbneo.py ro9a_max)"""
         G = self.O["greffe"]; t0 = time.time()
         for x in (self.cache, self.max_donnees()):
             if " " in x: raise Echec("hyperarcademax : chemin avec une espace (--vars de greffe_ha.py) : %s" % x)
         base = self.greffe_ha("greffe_hyperarcademax", os.path.join(self.cache, "greffe_ha_maxbase"), HA_ETAT + "_maxbase",
-                              self.vars_greffe() + " MAX_ZONES=1")
+                              self.vars_greffe(HA_RECETTE_MAX_BASE) + " MAX_ZONES=1")
         prep = os.path.join(self.cache, "max_prep_ro9")
         argv = ["prep_max_ro9.py", "--dest", prep, "--base", base, "--depot", DEPOT,
                 "--rosette", os.path.join(self.max_donnees(), "depot", "max", "outils", "rosette_code"),
@@ -1060,7 +1105,7 @@ class Construction:
         M = os.path.join(G, HA_ETAT, "greffe", "max")
         self.lance("greffe_hyperarcademax", dict(cwd=self.cache, sys_path=[M], argv=argv,
                    code="import sys\nsys.argv = %r\nimport prep_max_ro9\nprep_max_ro9.main()\n" % argv), self.env(), python=self.python_numpy())
-        vm = open(os.path.join(G, HA_ETAT, "greffe", "vars_%s_max.txt" % HA_ETAT), encoding="utf-8").read().strip()
+        vm = self.recette(HA_RECETTE_MAX)
         vm += " MAX_PREP=%s MAX_CACHE=%s" % (os.path.join(prep, "outils_max", "ag", "prep"), os.path.join(self.max_donnees(), "fork"))
         src = self.greffe_ha("greffe_hyperarcademax", os.path.join(self.cache, "greffe_ha_max"), HA_ETAT + "_max_fige", vm)
         dst = os.path.dirname(self.travail("hyperarcademax"))
@@ -1191,6 +1236,10 @@ class Construction:
             raise Echec("vasm (vasmm68k_mot) introuvable : il assemble le code MAX (http://sun.hasenbraten.de/vasm/) ; --vasm CHEMIN")
         return v
 
+    def zones_psp(self):
+        """(max60) MAX_ZONES_PSP d'Upper MAX : celui de l'environnement s'il est pose (0 = max59), sinon UM_ZONES_PSP"""
+        return os.environ.get("MAX_ZONES_PSP") or UM_ZONES_PSP
+
     def e_prog_uppermax(self):
         W = self.travail("uppermax"); os.makedirs(W, exist_ok=True)
         argv = ["um_prog.py", "--dest", W, "--upper", self.travail("upper"),
@@ -1198,8 +1247,9 @@ class Construction:
                 "--rosette", os.path.join(self.max_donnees(), "depot", "max", "outils", "rosette_code"),
                 "--eboot", os.path.join(self.psp, "BOOT.BIN"), "--pac", os.path.join(self.psp, "pac"), "--depot", DEPOT,
                 "--python", self.python_numpy()] + (["--vasm", self.vasm()] if self.vasm() else [])
+        self.log("uppermax : etat %s (MAX_ZONES_PSP=%s)" % (UM_ETAT if self.zones_psp() == UM_ZONES_PSP else "max59", self.zones_psp()))
         self.lance("prog_uppermax", dict(cwd=W, sys_path=[OUTILS_UM], argv=argv, code="import um_prog\num_prog.main()\n"),
-                   self.env(), python=self.python_numpy())
+                   self.env(MAX_ZONES_PSP=self.zones_psp()), python=self.python_numpy())
         B = os.path.join(W, "banc"); roms = self.roms("uppermax")
         out = [os.path.join(roms, n) for n in PRG] + [os.path.join(B, f) for f in sorted(os.listdir(B))
                                                        if f.startswith("ext_") or f == "max_plus_gfx.bin"]
@@ -1289,8 +1339,15 @@ class Construction:
                       "son d'Upper = hybride + sons tires du X_DATA (sons_ps2.py --jeu upper)"))
         if "hyper" in self.jeux:
             sh = self.O["son_hyper"]
-            E.append(("son_hyper", ["module_ro9"], [os.path.join(sh, f) for f in ("gen_redirection.py", "gen_rejeu.py",
-                      "ids_102.tsv", "correspondance.tsv")] + ([self.table_rejeu_source()] if self.table_rejeu_source() else []),
+            if self.table_rejeu_iso():
+                E.append(("rejeu_iso", ["iso"], [os.path.join(sh, f) for f in (
+                          os.path.join("rejeu_iso", "gen_rejeu_iso.py"), os.path.join("rejeu_iso", "rejeu_iso.cpp"),
+                          os.path.join("tests", "z80.h"), "gen_rejeu.py", "z80v105.py")], self.e_rejeu_iso,
+                          "table du rejeu d'Hyper depuis l'ISO : pilotes son de SFA1 / SFA2 executes hors ligne "
+                          "(gen_rejeu_iso.py, hsfa_rejeu_iso)"))
+            E.append(("son_hyper", ["module_ro9"] + (["rejeu_iso"] if self.table_rejeu_iso() else []),
+                      [os.path.join(sh, f) for f in ("gen_redirection.py", "gen_rejeu.py", "ids_102.tsv",
+                      "correspondance.tsv")] + ([self.table_rejeu_externe()] if self.table_rejeu_externe() else []),
                       self.e_son_hyper, "redirection des voix d'Hyper : module ro9 corrige, bloc $E70000, table du rejeu "
                       "(gen_redirection.py)"))
         for j in [j for j in self.jeux if j != "hyperarcade"]:
@@ -1313,7 +1370,8 @@ class Construction:
             E.append(("greffe_hyperarcade", ["module_ro5", "module_ro9", "afs", "son_hyper", "gfx_upper", "gfx_hyper"],
                       [os.path.join(G, "greffe_ha.py"), os.path.join(G, "fige35.py"), os.path.join(G, "releves_tsv.py")]
                       + arbre(os.path.join(G, HA_ETAT)) + arbre(self.releves_greffe()),
-                      self.e_greffe, "greffe du mode Arcade d'Upper dans Hyper (code fige %s, greffe_ha.py)" % HA_ETAT))
+                      self.e_greffe, "greffe du mode Arcade d'Upper dans Hyper (code fige %s, recette %s, greffe_ha.py)"
+                      % (HA_ETAT, HA_RECETTE)))
         for j in [j for j in self.jeux if j != "hyperarcade"]:
             son = {"sfa3": ["son_sfa3"], "upper": ["son_upper", "sons_ps2_upper"], "hyper": ["son_upper", "sons_ps2", "son_hyper"]}.get(j, [])
             E.append(("paquet_" + j, ["prog_" + j, "gfx_" + j, "arcade"] + son, [self.O["paquet"]],
@@ -1321,7 +1379,7 @@ class Construction:
         if "hyperarcade" in self.jeux:
             E.append(("paquet_hyperarcade", ["greffe_hyperarcade", "gfx_upper", "gfx_hyper", "arcade", "son_upper", "sons_ps2", "son_hyper"],
                       [os.path.join(self.O["greffe"], HA_ETAT, "paquet")], self.e_paquet_ha,
-                      "archive FBNeo sfa3hahsfa.zip (paquet_fbneo.py ro9a du code fige %s)" % HA_ETAT))
+                      "archive FBNeo sfa3hahsfa.zip (paquet_fbneo.py ro9a du code fige %s, construction %s)" % (HA_ETAT, HA_NOM)))
         if not self.a.sans_flux:
             E.append(("flux", ["module_ro9"], [self.O["flux"], self.O["son_table"]], self.e_flux,
                       "table du lecteur de flux ADX (gen_table_flux.py) -> systeme/fbneo/hsfa/"))
@@ -1354,7 +1412,7 @@ class Construction:
                   ("prog_uppermax", ["prog_upper", "gfx_upper", "psp", "max_donnees", "son_uppermax", "afs", "module_ro5"],
                    [os.path.join(OUTILS_UM, "um_prog.py"), os.path.join(OUTILS_UM, "fige.py")]
                    + arbre(os.path.join(OUTILS_UM, "integration_2b31")),   # arbre : sous-dossiers compris (revue max58)
-                   self.e_prog_uppermax, "programme d'Upper MAX (integration MAX=1, etat 2b31 : prepare_max + mame_test)"),
+                   self.e_prog_uppermax, "programme d'Upper MAX %s (integration MAX=1, etat 2b31 : prepare_max + mame_test)" % UM_ETAT),
                   ("paquet_uppermax", ["prog_uppermax", "son_uppermax", "sons_ps2_uppermax", "gfx_upper", "arcade"], [self.O["paquet"]],
                    self.e_paquet_uppermax, "archive FBNeo sfa3umhsfa.zip (paquet_fbneo.py upper_max)")] if self.uppermax else [])
         E.append(("max", [], [], self.e_max, "persos MAX depuis l'ISO PSP (--psp-iso ; avec --jeux ...,uppermax)"))
@@ -1387,13 +1445,15 @@ class Construction:
             params.update(date_source=self.a.date_source, flux=self.a.flux_format, sans_flux=self.a.sans_flux,
                           rejeu=self.table_rejeu_source(), redirection=self.redirection())
         if nom == "greffe_hyperarcademax":     # (L2) recipe with MAX, PSP ISO
-            params.update(ha_vars=self.vars_greffe(), psp=os.path.abspath(self.a.max), releves=self.releves_greffe(),
-                          ha_vars_max=open(os.path.join(self.O["greffe"], HA_ETAT, "greffe", "vars_%s_max.txt" % HA_ETAT), encoding="utf-8").read().strip())
+            params.update(ha_vars=self.vars_greffe(HA_RECETTE_MAX_BASE), psp=os.path.abspath(self.a.max), releves=self.releves_greffe(),
+                          ha_vars_max=self.recette(HA_RECETTE_MAX))
         if nom == "greffe_hyperarcade":
-            params.update(ha_nom=os.environ.get("HA_NOM", HA_ETAT + "_fige"), ha_vars=self.vars_greffe(),
+            params.update(ha_nom=HA_NOM, ha_recette=HA_RECETTE, ha_vars=self.vars_greffe(),
                           voix=self.voix_greffe(), releves=self.releves_greffe())
         if nom in ("son_hyper", "prog_hyper"):
             params.update(rejeu=self.table_rejeu_source(), redirection=self.redirection())
+        if nom == "prog_uppermax":           # (max60) l'interrupteur change le programme : il entre dans la cle
+            params.update(um_etat=UM_ETAT, zones_psp=self.zones_psp())
         if nom.startswith("sons_ps2"):       # (sons_ps2_upper) l'interrupteur change la sortie : il entre dans la cle
             params["sons_ps2"] = os.environ.get("HSFA_SONS_PS2", "1")
         if nom == "arcade": params["source"] = "arcade" if self.a.arcade else "iso"
@@ -1587,9 +1647,9 @@ def parseur():
     ap.add_argument("--greffe-releves", help="(hyperarcade) releves de la greffe Arcade (tableaux "
                     "TSV ou fichiers d'origine) ; defaut : HSFA_GREFFE_RELEVES, sinon ceux du depot "
                     "(tools/greffe-arcade/construction/releves_%s)" % HA_ETAT)
-    ap.add_argument("--rejeu-table", help="(Hyper) hsfa_rejeu_table.txt : rejeu QSound des sons SFA1 / SFA2 (defaut : "
-                    "tools/son-hyper/rejeu/hsfa_rejeu_table.txt si presente). Avec elle : redirection des voix (programme "
-                    "= v151) et rejeu ; sans elle : Hyper garde les voix SFA3, archive sans rejeu")
+    ap.add_argument("--rejeu-table", help="(Hyper) hsfa_rejeu_table.txt : rejeu QSound des sons SFA1 / SFA2, prioritaire "
+                    "(defaut : tools/son-hyper/rejeu/hsfa_rejeu_table.txt si presente, sinon la table recreee depuis "
+                    "l'ISO, etape rejeu_iso). Avec une table : redirection des voix (programme = v151) et rejeu")
     ap.add_argument("--sans-redirection", action="store_true", help="(Hyper) ni redirection des voix ni rejeu, meme "
                     "avec la table")
     ap.add_argument("--date-source", default=os.environ.get("SOURCE_DATE_EPOCH") or "315532800",

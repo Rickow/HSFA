@@ -131,6 +131,7 @@ since v0.1.2, Recalbox; their SHA-256 sums are in the release's `SHA256SUMS.txt`
 
 | release | date | core patches | note |
 |---|---|---|---|
+| v0.1.12 (stable) | 2026-11-17 | 0001-0027, 0029-0032, 0007b | same cores as v0.1.11, v0.1.10 and v0.1.9 (batch of 12/11b); new builder, Hyper + Arcade ro9a45, Upper MAX max61 |
 | v0.1.11 (stable) | 2026-11-15 | 0001-0027, 0029-0032, 0007b | same cores as v0.1.10 and v0.1.9 (batch of 12/11b); builder fixes only |
 | v0.1.10 (stable) | 2026-11-13 | 0001-0027, 0029-0032, 0007b | same cores as v0.1.9 (batch of 12/11b) |
 | v0.1.9 (pre-release) | 2026-11-12 | 0001-0027, 0029-0032, 0007b | batch of 12/11b: complete savestates (0029, 0032), 16:9 Raw by default (0031); Linux core: glibc 2.27; Batocera |

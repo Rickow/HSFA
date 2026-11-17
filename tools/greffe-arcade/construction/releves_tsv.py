@@ -189,7 +189,7 @@ def lire_arbre(lignes):
 def fichiers(src):
     for racine, _ds, fs in os.walk(src):
         for f in sorted(fs):
-            yield os.path.relpath(os.path.join(racine, f), src)
+            yield os.path.relpath(os.path.join(racine, f), src).replace(os.sep, "/")   # Windows : « / » comme ailleurs (tests endswith("/ram.txt.tsv")…)
 
 GROUPES = [("u_lu", "greffe/traces/u_lu"), ("defi_lu", "greffe/traces/defi_lu/"), ("objets_lu", "greffe/traces/objets_lu/")]
 

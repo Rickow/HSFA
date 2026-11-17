@@ -488,3 +488,6 @@ maison	tools/max/paths.py	3	SFA3MAX_CACHE / SFA3MAX_PAC_DIR fixes par regen_max 
 perso	tools/constructeur/test_windows.py	5	essai : chemins fictifs « C:\Users\test\... » du code genere (fige) et commentaires
 perso	tools/greffe-arcade/construction/fige35.py	1	commentaire qui explique le piege (« C:\Users » dans du code genere), pas un chemin utilise
 perso	tools/integration-max/upper_max/fige.py	1	commentaire qui explique le piege (« C:\Users » dans du code genere), pas un chemin utilise
+encodage	tools/bancs/banc_ref.py	25	hors construction : banc de non-regression d'atelier (fork MAME, Xvfb, Linux), jamais execute par une construction des 5 jeux (16/11)
+lien	tools/bancs/banc_ref.py	5	hors construction : banc de non-regression d'atelier (fork MAME, Xvfb, Linux), jamais execute par une construction des 5 jeux (16/11)
+maison	tools/bancs/banc_ref.py	3	hors construction : banc de non-regression d'atelier (fork MAME, Xvfb, Linux), jamais execute par une construction des 5 jeux (16/11)

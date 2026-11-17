@@ -8,7 +8,8 @@ Rapport complet : [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 du jour
 
 **Joueurs (Windows, Linux, macOS) : utilisez le constructeur tout-en-un** `hsfa-constructeur-<système>.zip` joint aux
 releases (`tools/constructeur/` ; Windows : `hsfa-constructeur-windows-x86_64.zip`, avec fenêtre) : rien à installer,
-il lit les `.iso` et les `.chd` et fait tourner cette même chaîne. Ce guide est pour l'usage avancé : cloner le dépôt
+il lit les `.iso` et les `.chd` et fait tourner cette même chaîne, pour les jeux cochés (une case par jeu, Hyper +
+Arcade compris ; `--jeux` sans fenêtre). Ce guide est pour l'usage avancé : cloner le dépôt
 (ou prendre l'archive « Source code » de GitHub) et lancer `hsfa_build.py` (ci-dessous) ou `construire.sh` (Linux,
 macOS, WSL). Depuis la v0.1.11, plus de `construire.bat` ni de `hsfa-<version>-construction.zip`.
 
@@ -59,8 +60,8 @@ python3 scripts/construction/hsfa_build.py \
 | `--plans-fenetre auto\|oui\|non` | tables de plans limitées aux codes honorés par le banc et le cœur |
 | `--flux-format ogg\|adx` | format des flux musique d'Upper et d'Hyper dans les zips (défaut `ogg`) |
 | `--sans-flux` | ni table de flux, ni flux dans les zips (musiques du disque absentes) |
-| `--rejeu-table FICHIER` | (Hyper) table du rejeu des sons SFA1 / SFA2 (défaut : `tools/son-hyper/rejeu/hsfa_rejeu_table.txt` si elle est là) ; avec elle, redirection des voix par version et rejeu (§4) |
-| `--sans-redirection` | (Hyper) ni redirection des voix ni rejeu, même avec la table |
+| `--rejeu-table FICHIER` | (Hyper) table du rejeu des sons SFA1 / SFA2, prise à la place de celle recréée depuis l'ISO (défaut : `tools/son-hyper/rejeu/hsfa_rejeu_table.txt` si elle est là, sinon la table de l'étape `rejeu_iso`) ; redirection des voix par version et rejeu (§4) |
+| `--sans-redirection` | (Hyper) ni redirection des voix ni rejeu, même avec la table (et pas d'étape `rejeu_iso`) |
 | `--greffe-releves DOSSIER` | (Hyper + Arcade) autres relevés de la greffe que ceux du dépôt (§6) |
 | `--outils-*` | emplacement de chaque groupe d'outils (sinon `HSFA_OUTILS_*`) |
 
@@ -78,7 +79,8 @@ la vitesse observée depuis le début. Une étape commune à plusieurs jeux comp
 (SFA3, Upper, Hyper, Upper MAX, Hyper + Arcade, Hyper + Arcade MAX).
 
 Chaque jeu se construit seul ou avec d'autres, dans n'importe quel ordre : les étapes dont il dépend sont ajoutées
-(`--jeux hyper` seul fait aussi l'étape graphique d'Upper `gfx_upper`, sans produire l'archive d'Upper).
+(`--jeux hyper` seul fait aussi l'étape graphique d'Upper `gfx_upper`, sans produire l'archive d'Upper ;
+`--jeux hyperarcade` construit Upper et Hyper en entier, archives comprises ; `uppermax` construit Upper en entier).
 `scripts/construction/test_plan.py` vérifie le plan de toutes les combinaisons de jeux, sans donnée de jeu.
 
 ## 4. Sorties et vérification
@@ -109,11 +111,17 @@ Ce qui est garanti (rapport BUILD §0, §3, §5 ; contrôle du 2026-10-27 contre
   `dcda2bb…`) et le bloc de données `$E70000` (`son_donnees_ro9.bin`, 19 712 o, `ebefd8b2…`). Les deux contiennent des
   octets du jeu : ils sont **régénérés à chaque construction** et jamais publiés. Le dépôt ne fournit que des tables :
   `ids_102.tsv` (versions), `correspondance.tsv` (code SFA3 → commande SFA1 / SFA2).
-- La **table du rejeu** (traces QSound des pilotes SFA1 / SFA2, 3,2 Mo) est une entrée à part : `--rejeu-table` ou
+- La **table du rejeu** (traces QSound des pilotes SFA1 / SFA2, 3,2 Mo) est **recréée depuis votre ISO** par l'étape
+  `rejeu_iso` (depuis la v0.1.12) : `tools/son-hyper/rejeu_iso` fait tourner hors ligne les pilotes son d'origine de
+  SFA1 / SFA2 du disque (entrées 221 / 250 de `X_DATA`, CRC contrôlés) dans `hsfa_rejeu_iso` (Z80 de `z80.h`, MIT ;
+  compilé une fois dans le cache par `g++`, ou préconstruit dans le constructeur tout-en-un), avec le protocole du
+  relevé d'atelier, et note leurs écritures de registres (30 à 60 s). Par rapport à la table d'atelier : mêmes sons,
+  mêmes écritures dans le même ordre, mêmes 19 sons tronqués, instants à quelques microsecondes près (99 % à moins de
+  33 µs). Une table donnée passe avant : `--rejeu-table` ou
   `tools/son-hyper/rejeu/hsfa_rejeu_table.txt`. La construction y ajoute la section des cris par version. Avec elle,
   le programme d'Hyper est celui de la v161 (`dbfd237d…` ; v160 : `0baed6af…` ; v159 : `8e4f9ef2…` ; v154-v158 : `b8e699cf…`) et le zip contient `hsfa_rejeu.bin` (8 Mo, copiés depuis le
   `X_DATA.BIN` de l'ISO, CRC contrôlés) et `hsfa_rejeu_table.txt`.
-- Sans table, Hyper garde les voix de SFA3 pour toutes ses versions (programme `ffc5eac1…` en v161, `e3806660…` en v160, `1f06234d…` en v159, `dda35430…` en v154-v158) et le zip n'a pas de
+- Sans table (`--sans-redirection`), Hyper garde les voix de SFA3 pour toutes ses versions (programme `ffc5eac1…` en v161, `e3806660…` en v160, `1f06234d…` en v159, `dda35430…` en v154-v158) et le zip n'a pas de
   rejeu : sans table, les codes de rejeu n'auraient pas de son.
 
 ## 5. Upper MAX (persos de SFA3 MAX)
@@ -144,18 +152,22 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
 
 ```bash
 python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
-    --sortie hsfa_sortie --jeux hyperarcade [--rejeu-table hsfa_rejeu_table.txt] [--arcade sfa3.zip]
+    --sortie hsfa_sortie --jeux hyperarcade [--arcade sfa3.zip]
 ```
 
 - Traducteur : la greffe a sa copie figée du traducteur **v161** (`untranspile3_v161`, états ro9a37 à ro9a41, §221, §223, §224, §228, §230) : les
   correctifs de la v161 (§219) atteignent Hyper + Arcade.
-- Résultat : `sfa3hahsfa.zip` (pilote `sfa3hahsfa` du cœur), état **ro9a41** (13/11 ; ro9a40 + 10 paires de mots des données de la greffe qui ne sont plus relogées comme des pointeurs de code, §230 ; ro9a40 : couleurs et portraits des versions, bande verte de la transition « logo », §225-§228). `hyperarcade`
+- Résultat : `sfa3hahsfa.zip` (pilote `sfa3hahsfa` du cœur), état **ro9a45** (16/11 au soir, recette `vars_ro9a45.txt` = ro9a44 + `DONNEES_BRUTES=1` : données copiées d'Upper gardées telles quelles au lieu d'être relogées comme des pointeurs de la RAM d'Upper, explosions de la séquence de la base des fins 0F / 10 / 19 / 1A à la bonne hauteur, couleurs de la machine du décor de Zangief en combat, §243 ; même `sz3ud.03c` `37799f69…` ; ro9a44, 16/11 : fins corrigées, budget du générique, menu des modes sur ARCADE, portraits à la couleur du bouton, §241-§242 ; ro9a41, 13/11 : ro9a40 + 10 paires de mots des données de la greffe qui ne sont plus relogées comme des pointeurs de code, §230 ; ro9a40 : couleurs et portraits des versions, bande verte de la transition « logo », §225-§228). `hyperarcade`
   ajoute `upper` et `hyper` : la greffe part de leurs sorties (modules, anims, banques, son). Étapes en plus :
   `greffe_hyperarcade` (code figé de `tools/greffe-arcade/construction/`, environ 3 min) et `paquet_hyperarcade`.
-- **Avec la ROM d'arcade et la table du rejeu** : le zip est celui de ro9a41 (livré le 13/11, CRC `C9107FC2`), hors
+- La table du rejeu est celle d'Hyper (recréée depuis l'ISO, ou `--rejeu-table`) : la greffe prend le module corrigé
+  (voix par version).
+- **Avec la ROM d'arcade et la table d'atelier** (`--rejeu-table`) : le zip est celui de ro9a45 (livré le 16/11 au soir, md5
+  `385770f3…`, CRC `9EAFF94E`), hors
   `hsfa_info.txt` (provenance) et la ROM son (`hx3.01`, `hx3.02`, `hx3.14m` : sons propres au portage PS2 ajoutés,
   §218 ; avec `HSFA_SONS_PS2=0`, identique).
-- **Sans la table du rejeu** : la greffe part du module d'Hyper d'origine. Hyper garde les voix de SFA3 pour toutes
+- **Avec la table recréée depuis l'ISO** : de même, hors aussi le membre `hsfa_rejeu_table.txt` (instants).
+- **Sans la table du rejeu** (`--sans-redirection`) : la greffe part du module d'Hyper d'origine. Hyper garde les voix de SFA3 pour toutes
   les versions, et le zip n'a pas de rejeu (`hsfa_rejeu.bin`, `hsfa_rejeu_table.txt` absents), comme Hyper seul.
 - **Sans la ROM d'arcade** (voie ISO seule) : ROM graphique reconstruite depuis l'ISO, comme pour Hyper ; seuls la
   ROM graphique, `hsfa_gfx.bin` et `hsfa_tab.bin` changent (codes de tuiles), le programme est le même. Au cœur, la

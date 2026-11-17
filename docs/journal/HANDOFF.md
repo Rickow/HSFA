@@ -6782,3 +6782,337 @@ switching the default recipe is left to the merge).
   the graft again on the new oracle or not (would change `releves_*`, so possibly the graft); the real defects above
   (04, 21, 03 6180-6360, 08, 22, 20) and the ticks lost in 15 / 1d / 09 stay to be done; the switch to ro9a42 should
   be judged on 950 / 782 (new oracle), not on 929 / 464.
+
+### 235. 15/11: Hyper's replay table rebuilt from the player's ISO (step `rejeu_iso`, no core patch)
+- **What was missing** (design of 13/11): not a datum but the measurement. The replay table is the journal of the
+  QSound register writes of the original SFA1 / SFA2 Z80 drivers (`X_DATA` e221 `F81A556D`, e250 `EA61AE3B`), measured
+  in the workshop MAME fork; the drivers and their samples (e222, e251) are on every disc.
+- **Tool** (`tools/son-hyper/rejeu_iso`): `hsfa_rejeu_iso` (`rejeu_iso.cpp`, Z80 of `z80.h`, MIT, integers only) runs a
+  driver with the sweep protocol of the workshop (1 100 frames, then per command FF00, the command 4 frames later, 240
+  frames; commands = priority $01-$7F, the rule gives exactly the 457 / 868 swept); QSound ready = the next DSP sample
+  tick after a write (41.6 us). `gen_rejeu_iso.py` applies the rules of `gen_rejeu.py` in integers and writes the table.
+  Three phases of the workshop session were set once against its journal (no game data): frame ends against the Z80
+  IRQ grid (MAME restarts the IRQ timer when the 68000 releases the Z80 reset), the handshake (IRQ period = 2 mod 4:
+  phase of the driver's 4-tick sequencer), CFFE != 0 (stereo). With the theoretical frame phase, 2 sounds (011A,
+  021A) changed length at the window end.
+- **Proofs** against the workshop table (private, not in the repository): same 1 323 sounds, headers, write sequences,
+  19 truncated sounds, INIT, STOP, REF, shouts section; times: median 2 us, 99th percentile 33 us, max 104 us.
+  Offline render of every sound (`rendu_qsound`): level within 0.08 dB, envelope correlation >= 0.9986. Same table
+  byte for byte with g++ -O0 / -O2, clang, the static tool of `natifs.py`; same journal under Windows (mingw, wine) and
+  in a separate Python harness (ctypes, same Z80 core). Builds `--jeux hyperarcade`: Hyper `dbfd237d`, Hyper + Arcade
+  `be88f3f9` (corrected module); against a build given the workshop table, only the member `hsfa_rejeu_table.txt`
+  changes; two builds: identical zips. In game (core of 11/11, scripted Hyper game): captures, game journal and replay
+  journal identical; the WAV is not identical (waveform correlation 0.993 / 0.996; envelopes 0.99995); the workshop
+  table itself shifted by 20 us gives 0.994 / 0.997: the times move writes across the core's 41.6 us sample steps.
+- **Build**: step `rejeu_iso` before `son_hyper` (only when Hyper is built, without `--rejeu-table` /
+  `--sans-redirection`), 25 to 76 s; the builder carries the tool prebuilt (`natifs.py`), `--auto-test` and the CI run
+  a self-test (Z80 loop of our own, same journal on every system); `gen_redirection.py` writes the completed table
+  in LF. Open: the CI (zig, 5 targets, macOS signature) was not run; decisions of the user pending (waveform
+  criterion of P5, the three phases in the repository, a build without tool nor compiler now fails for Hyper).
+
+### 236. 15/11: Hyper + Arcade: Upper's after-fight dialogue behind APRES_COMBAT (candidate recipe vars_ro9a43_dialogue.txt)
+Agent `apres_combat` (sfa3ha; design `work/sous_etats/LECTURE.md` §4, decisions D1-D3 of 15/11; workshop
+`work/apres_combat/`, status `ETAT.md`). Built on ro9a42 (recipe `vars_ro9a42.txt`), rebased on `3b34929`.
+- **APRES_COMBAT** (default 0; `etape3/force3.py`, `etape3/greffe3.py`, `etape3/x2_tables.tsv`):
+  - sub-state C of the copied fight table goes to the copy of Upper's dispatcher 0x26DFB0 (`T_61C3A0[$13E]`) and its
+    scene 0x26E280 (`T_61C3C0[$10]`; steps 0x26E2F0, 0x26E890, 0x26E8C0; the step-2 wait is inside 0x26E2F0's range)
+    instead of Hyper's leaf 0x9FD10; the two leaves stay Hyper's (0x26E1E0 -> 0x9FD10, 0xCCBC0 -> 0x390A30, read
+    identical); the decisions are applied last in `force()`;
+  - reader of `T_61B600` (2 rows of 40 after-fight scenarios) extended like lot C: X2 row `AC` (2 rows of 48, second
+    shift `sll 2 -> 3` found at 0x26E630, base id `$117` by patch_116), ignored without the switch (x2 stays at 54);
+    v26 = `9b/9d` (Eagle 155 / 157 from `max/outils/convert/dialogues_max.py`, used by L3's per-row values);
+  - Upper's Arcade K.O. follow-ups `KO_ARCADE` (0x26B7C0, 0x26B0B0, 0x272EB0) move from the start of state 7 (stub
+    `etat7`) to the start of sub-state C (stub `etatC`: called when `$10(A5)` = 0, then the dispatcher). Measured
+    first: with them in `etat7`, `$B9` was still 0 at C after a LOST 5th fight, the dialogue played, then was skipped
+    after the continue. In Upper they run at the K.O., before C.
+- **Proofs** (MAME fork, `lance_emu`, Upper oracle `fige/ro5_v161`):
+  - switch off with the final code (t2, after the rebase): ro9a42_fige 34/35 (`env.sh`), `greffe.json` identical;
+    the recipe alone (a3) = the switch build (a2) on 34 files; Hyper's code does not move in the 68K image (116 151
+    addresses), decisions: +7 (the five copies, the two leaves);
+  - VERSUS (`vs_fiable.sh`, 60 rounds): `vs.log` identical and 90/90 captures against ro9a42_fige replayed the same day;
+  - dialogue against Upper, Ken (row 0 and row 1): `$147` = 05 (5th fight), 07 (9th) on both sides, bit 2 / 4 of
+    `$148` set the same way, `$10` 0 -> 2 -> 4 -> 6, `$14` = 0, reader step 1 404 frames on both sides at equal inputs,
+    same lines and portraits; id `$15` (row 1 only): `$7C` both sides (48-entry stride); Ken Z2 (`$103` = `$41`):
+    05 / 07 (`$117`); `$8A` / `$8B` = 0 at every C entry (85 endings + test games; scene 4/6 and the victory screen's 4/8 counted together);
+  - counter-proofs: id 02 (no scenario): journal and 46 captures = ro9a42; lost 5th fight: no scene, game = ro9a42
+    frame for frame up to the won retry, then the scene (as Upper); second pass (bits 2 and 4 of `$148` forced
+    during the fights): journal and 44 captures = ro9a42 with the same forcing, no scene in Upper either;
+  - MAX recipe at 0 with this code (L3's preparation): = L3's e51v on its 41 files;
+  - 85 endings (`fins.sh` = the `fins_greffe` bench + a read-only probe; 4 witness endings of the final code at 0
+    give fd's 546 / 546 frames today): **85 / 85 reached**, no exception; ending durations = ro9a42 on 80, +-1 frame on
+    5 (09 Z2, 0b A, 0e A, 0e Z2, 15 Z3: slowdown frames; fd itself has 0e A 5841 / 0e Z2 5842); the scenes played match
+    `0x61B600[($13E - 8) / 2][$117]` on all 116; endings of characters without any after-fight scenario (02 x 4, 1e)
+    identical to ro9a42 frame for frame; elsewhere 7 053 / 9 569 frames identical, 1 889 differ only in the upper picture
+    (actors placed from the last fight, which the dialogue's frames changed), 627 in the credits column (one tick,
+    1-2 px) or a typed line one frame apart, plus frame 0 (transition); against Upper v161 (`cmp_fins_upper.py`) 443
+    frames closer, 681 further (different fights before the ending on both sides);
+- **Not covered**: a human challenger entering during the 5th fight (two humans, `$13E` = 8), a draw.
+- **Measured, not done** (decisions):
+  - D2 (round-end bonuses): at equal inputs the panel lasts 352 frames on both sides, but the graft shows COMPLETE
+    00000, VITAL 0, TIME VITAL x 0, SCORE 0 and the HUD score gets no bonus (2 200 against 932 200 after the 2nd fight);
+    Upper: `$8E3E` = `$300`, `$8E40` = `$300`, `$8E42` = `$25` / `$5`;
+  - fighters behind the dialogue windows: in Upper the loser stands up and `$12(A5)` = `$1E` (30-frame wait of step 2)
+    are done by Upper's PLAYER code (lose state, va 0x235238, `T_61A6F0` sub-state 0 tests `A5+C` = `$C`), not by the
+    five copies; the graft's fighters are Hyper's (combat = Hyper): loser down, winner in its victory pose, step 2 one
+    frame;
+  - Eagle (MAX proof branch = L3's local commits + this step): 5th fight `$147` = `$9B`, scenario 155 against Guile on
+    screen; 9th fight `$9D`: scenario 157 holds Balrog's lines ("You're the one who defeated Sagat?") and is shown with
+    Sagat's portrait (opponent of the 9th fight): placement chosen by `dialogues_max.py` (`PLACES`, note "placed after
+    the 2nd special fight"), to be decided by the MAX session.
+  - the stub `etatC` (decision written "no stub"): it only moves the three KO_ARCADE calls out of `etat7` (no new
+    call; Arcade table only, VERSUS untouched); without it (first candidate a1) the dialogue played after a lost 5th
+    fight. Separate commit, removable;
+  - MAX driver: the proof needs L3's unpushed commits (branch `max-preuve`) and a preparation redone on a MAX base built
+    with APRES_COMBAT=1 (with L3's preparation the build stops on "carte différente de la base MAX").
+
+### 237. 15/11 evening: Hyper + Arcade candidate ro9a43 (proven pointers union + MOTEUR_EFFET_ETAT + APRES_COMBAT + PRIMES_MANCHE)
+- **PRIMES_MANCHE** (decision D2 = Upper; default 0): sub-state A of the copied fight table goes to the copy of Upper's
+  dispatcher 0x26CB60 and its step 0 0x26CD00 (life / time bonuses -> `$8E3E`, `$8E40`, `$8E42`, added to the score by
+  0xCA990 -> Hyper 0x38DED0, e); steps 2 / 4 / 6 / 8 and entry 16 stay Hyper's; 0x2517C0 (bonus factors by `$137`,
+  `T_61BDE0`) copied; no reader of `$17A` (`$CC86`) copied, so no reset needed. Panel at equal inputs: VITAL 30000,
+  TIME VITAL x N and SCORE = score + bonuses, the same formula as Upper (timer 97 -> x25, 89 -> x8, 83 -> x5 on both sides;
+  the fights themselves are Hyper's and differ).
+- **ro9a43** = `vars_ro9a43.txt` = `vars_ro9a43_pointeurs.txt` (2ec08f2) + `MOTEUR_EFFET_ETAT=1` (13b2886 of the combat
+  stubs workshop, cherry-picked) + `APRES_COMBAT=1` + `PRIMES_MANCHE=1`; `HA_ETAT` unchanged. Build: 03c `fe68fdcc…`,
+  2 997 routines, DECOR_E0 786 frames.
+- **Proofs**: every switch at 0 on the final code (ro9a42 recipe) = ro9a42_fige 34/35, `greffe.json` identical;
+  VERSUS 90/90 and `vs.log` identical to ro9a42; 40 stages (twin TIRAGE_CPU=0 against ro9a42's `bdfd`): 159 / 160
+  captures, 21 / 40 journals identical, 18 differ in address fields only (same line counts), stage 40 changes course
+  (objects `$12` / `$14` as Upper, measured by the pointers workshop); 85 / 85 endings reached, no exception, 116 scenes
+  = the table; durations = ro9a42 on 78, +-1 frame on 3 (09 Z2, 0e Z2, 15 Z3), 05 x 4 = 3 758 instead of 3 760 (Upper
+  3 760; isolated: PRIMES_MANCHE alone gives it, pointers alone and MOTEUR_EFFET_ETAT alone keep 3 760; frames differ in
+  the credits column = slowdown ticks after a different game history); 6 889 / 9 569 frames identical to ro9a42,
+  2 116 upper picture only, 564 credits / typed text; against Upper v161: 390 closer, 655 further.
+- **Upper's poses during the dialogue** (asked "if possible without breaking anything"): not done. Upper stands the loser
+  up through a post-match pose layer of its PLAYER code (`T_61A6D0` by `$32D(A6)`, handlers `T_61A6F0` / `T_61A700` /
+  `T_61A710` / `T_61A720` at 0x235180-0x236270, testing `A5+C` = `$C`, `$278`, `$12` = `$1E` / `$3C`, walk of 3 px);
+  Hyper has no homologue of this layer (code homologues: none; its post-match table `T_5B6318` has other states) and
+  uses `$32D(A6)` for something else (counters set to `$15` / `$18`). Commanding the pose from the copied sub-state C
+  would mean writing Hyper's player state from outside without a read homologue; grafting the layer would touch the
+  player struct of the natives. Hyper's poses kept.
+
+### 238. 15/11: Upper MAX max59 (MAX endings converted by the engine's rules, `talon_palrecopie` removed, Eagle's secret fight scene)
+Agent `max59_assemblage` (sfa3um), from the pieces proven on 14-15/11: the 5 deliveries of the MAX session for max59
+(`<workspace>/work/max59/`), the conversion proposal of `fins_upper_m` (measurements M1-M9, 11 commits), the removal of
+`talon_palrecopie` with Maki's palette fixed at the source (391be29, `FIN_PAL_SCENE`), Eagle's dialogue before the secret
+Balrog fight (cc072c7 + `MAX_DLG_SECRET`). Details: `docs/rapports/INTEGRATION-MAX-UPPER.md` §8 quinquies.
+- **Endings**: the two regressions of the first max59 (dark text window in Maki's "You're finished" and Yun's Bison
+  scene; black window and missing credits titles in Eagle's last scene) and the 6 black / cream windows of max58 are
+  gone; dialogue backgrounds and credits are lit; Maki shows at the PSP position and colours (colour 1) in her scene.
+  Static checker (`verifie_fin_m`): no violation in the 4 MAX scripts.
+- **Natives**: without the talon, the 35 native endings are identical to max58 (journal, instructions, signatures,
+  dumps; MAX session, C46); this build's program equals that measured build except the dialogue tables (`04c`, `10b`,
+  `ext_e80000`).
+- **Build** (`hsfa_build.py --jeux uppermax`, empty output): PSP ISO EU and US give the same `sfa3umhsfa.zip`
+  (`839c7ef5`), program `sz3ud.03c` `01d27d2e`, `sz3ud.04c` `1e7092ff`, `sz3.06c` `3556ee07`, `sz3.10b` `454dc9ab`.
+  All switches at their witness values: max58 byte for byte on the whole bench folder.
+- **Bench** against max58: 12/12 TSV of the `max` step identical to max58; VERSUS MAX against natives 64/64 with
+  journals identical to max58 (probe lines aside); Arcade of the 4 MAX finished, journals identical to max58 up to
+  Eagle's removed after-Sagat dialogue and up to the first MAX ending of Maki, Yun and Ingrid (whose length changes);
+  the 35 native endings with game journals identical to max58 byte for byte (the 7 the talon shifted included);
+  captures of the MAX endings of Maki, Yun and Ingrid identical to the MAX session's measured build (C46), Eagle's the
+  same scenes (sampled at other frames: his Arcade route is shorter).
+- Open: Yun's secret fight (`$1E`, Juli + Juni) reads `0x61B650` too and finds `$FF`; his PSP scenario 4 ("the attack
+  on the base": "I'll knock out the bouncer! You go fight the female soldiers!") is chained after Fei-Long today and is
+  likely that fight's scene; its Fei-Long lines are marked as the opponent's and would show under Juli / Juni's
+  portrait: speakers and portraits to check on the PSP (measured: in Yun's Arcade the reader of va `0x2667B4` runs
+  before Bison and writes `$FF`, no scene; for the MAX session). Remaining small differences, all in
+  max58 or measured as such: scroll 3 / OBJ 30 at brightness E after the white exits of `3204` (Yun 25-28, Ingrid 17-20,
+  ~4 %), the white flash of stage `$14` (Maki), stray objects more visible in the now lit credits (Maki, Yun).
+
+### 239. 16/11: Hyper + Arcade: the ZERO 3 portrait follows the chosen button on Hyper's select and VS screens (PORT_COULEUR, candidate recipe vars_ro9a43_portraits.txt)
+
+(Proposed entry; number to be given by the coordinator. Workshop: `<workspace>/work/portraits_v1/ETAT.md`; study:
+`<workspace>/work/portraits_couleurs/ETUDE.md`; decision: ATTENTES-ET-DECISIONS « Couleur choisie sur les portraits ».)
+
+- **What**: Hyper forces colour 2 on every portrait of its select and VS screens (select object `MOVEQ #2,D2` va
+  `0x33BE70`; loader `0x31F854` `MOVE.B #2,D1` va `0x31FA24`). Upper passes the colour to the same loader (`0x18BFE0`).
+  `PORT_COULEUR=1` (`etape3/port_couleur.py`, applied by `mame_test.py` after the MAX step) restores Upper's rule for the
+  ZERO 3 version only: S1 `0x31FA24` `MOVE.B D2,D1 ; NOP`, S2 `0x33BE70` `NOP`, S4 `0x3313A4` `JSR talon_vs ; NOP`
+  (effective colour = `$129` when `$103 == $117`, else 2: same rule as `PORT_VERSION`). ZERO / ZERO 2 / ALPHA stay in
+  colour 2 (Hyper has no portrait palette for them). No data, no tile. Stub at `$37FF94` (`re/allocations.tsv`:
+  `$37FF80-$37FFA7`, `$37FF80-$37FF93` kept for the optional per-frame select stub S3,
+  `PORT_COULEUR_SEL_VERSION=1`, off by default and left off by decision of the porter: no visible effect, one frame
+  of drift in a select entry). The loader's third caller (va `0x377210`) sets `MOVEQ #2,D2` right before its call:
+  unchanged.
+- **Proofs** (construction z1b = `vars_ro9a43_portraits.txt`):
+  - `PORT_COULEUR=0` = ro9a43_fige byte for byte (`md5sum -c`, only `env.sh` paths differ); at 1 only `sz3ud.04c` and
+    `sz3.09c` change.
+  - Against **Upper v161** (2-player game in Upper, same characters and buttons; 7 pairs: Ryu LP / MP / HK / HP,
+    Sagat LK / MK / HP / HK / MP, Chun-Li LK / HK / LP, Ken MK, Rose HK): **VS screens 7 / 7 identical to Upper to the
+    pixel**; select screen, top of the big portrait just after the button: 12 / 12 identical. Before the button both
+    games show colour 2.
+  - Sagat MK = MP and HK = HP on screen: Upper's own data (portrait table `0x7251A0`: colours 2 / 3 and 4 / 5 differ
+    only in the 16th word of each palette, an index, not a colour); seen identical in Upper too. Not a defect.
+  - VERSUS (60 000 frames): `vs.log` identical to ro9a43; only the VS captures of pairs with a ZERO 3 player change.
+  - 85 endings (z1b against ro9a43's bench e43, same recipe of bench): 85 / 85 identical byte for byte (journals,
+    probes, sentinels, every capture: 9 569 / 9 569 images, durations 85 / 85, scenes 116 / 116).
+  - After rebasing on 0fe4425 (MENU_CURSEUR_ARCADE, default 0) and on d7da0da (Windows graft fix) the recipe rebuilds
+    to the same ROMs and blocks (z1r, z1s = z1b).
+  - MAX: Hyper's MAX path (L2-04, stub E at va `0x31FA64`, right after S1 in the same loader) now receives the button
+    colour for MAX ids too; Eagle's select / VS block has 6 slices of `$80` (like Upper MAX) and Eagle has
+    `$103 == $117`. Built on L2's MAX recipe `vars_ro9a41_max.txt` (+ `PORT_COULEUR=1`; the stub place is empty there
+    too): Eagle's VS portrait identical to the pixel to Upper MAX max58 at each of the 6 buttons (2-player game in
+    Upper MAX), select portrait identical too; at 0 Eagle stays in colour 2 (= Upper MAX's colour 2). No restriction
+    to native characters needed. VERSUS (natives, 60 000 frames) on that MAX build, 1 against 0: `vs.log`
+    identical, only the VS captures with a ZERO 3 player change. Note: `vars_ro9a43.txt` + the MAX variables does not build with main's code
+    (`integre_max_ro9.sites_selection`: site « seuil (copie greffee) » va `0xEC3D94` not in the map), with or
+    without `PORT_COULEUR`: a MAX matter (L3 / max-preuve branch), not this change.
+- **Not done**: Hyper alone (`sfa3hhsfa`), options page line, V2 pilot (portraits of the versions).
+
+### 240. 16/11: Hyper + Arcade: the small select-screen sprite follows the chosen button too (PORT_COULEUR, site S5)
+
+- Upper recolours the small character sprite of the select screen with the chosen button: its follower object (va
+  0x18A0CC) reloads palettes 08 (P1) / 09 (P2) through the sprite palette loader 0x381320 with `$55 = $129` whenever the
+  character, ism or `$129` changes. Hyper keeps the same object (va 0x339AEC) but forces `MOVEQ #2,D2` (va 0x339EB8)
+  before its loader 0x3429F0 (T_6452E0, indexed by the BASE id `$117`, word-sized colour, no mask).
+- S5 (under `PORT_COULEUR=1`, recipe `vars_ro9a43_portraits.txt` unchanged): `MOVEQ #2,D2` -> `EXT.W D2` in place
+  (same size, same cycles; reload triggers unchanged). PORT_COULEUR=0 = ro9a43_fige byte for byte; at 1 = previous V1
+  + 2 bytes of `sz3ud.04c`.
+- Measured (`work/portraits_v1b/ETAT.md`): palettes 08 / 09 written by the follower = Upper v161 for 18 / 18 (9 pairs,
+  buttons 1-6, P1 and P2, P2 on button 6 included); the witness ro9a43 gives 0 / 2. The sprite is only shown while the
+  player's `$103` is still the ZERO 3 id (state 0); captures differ from V1 only there. Buttons run: vs.log = ro9a43 and
+  = V1, 161 / 161 captures = V1; VERSUS: vs.log = ro9a43, 90 / 90 = V1 (70 / 90 against ro9a43, same 20 VS captures as
+  V1); 4 endings identical to ro9a43. With MAX (L2 recipe vars_ro9a41_max + port_couleur): Eagle's sprite palettes =
+  Upper MAX on the first 15 words of each palette; the 16th (a number, not a colour) is colour x 5 for the natives (Upper and graft) and in the graft's Eagle table, the bare colour in Upper MAX.
+- `$129` stays within 0..5 (buttons 0..5; mirror: +1 then 6 -> 0 in va 0x31FB70); mirror Ryu HK / Ryu HK played in both games: same sprite palettes (the shifted player keeps colour 5 on the sprite in both, the shift comes later).
+- ZERO / ZERO 2 / ALPHA: nothing to do on this screen as it stands (sprite hidden once the version is chosen; it is the
+  base ZERO 3 drawing). Hyper has exact per-button sprite palettes for every version (T_6452E0[$103], 4 or 6 colours,
+  from SFA1 / SFA2), so showing a version sprite after the version choice would need no invented data, but it changes
+  Hyper's screen (sprite kept visible, version drawing via $103) : a design decision, not V2.
+
+### 241. 16/11: Hyper + Arcade ro9a44 (candidate): Upper's ending images, scripts and maps kept as Upper; the shake of ending 03
+Agent `fins_restes` (sfa3ha), workshop `work/fins_restes/` (status `ETAT.md`), base ro9a43 (`vars_ro9a43.txt`), oracle
+`fige/ro5_v161`. Four switches, all default 0 (= ro9a43 byte for byte); candidate recipe `vars_ro9a44_fins.txt` = ro9a43 + the
+four; `HA_ETAT` unchanged.
+- **Causes found** (measured, then read):
+  - final portraits in slot-1 tiles (Fei-Long $21 last image, Dee Jay $22 at 3000 / 3660, Guile $20 credits): the
+    ending decor readers take their image records from T_674C00, an Hyper table SHARED with the graft (reused as
+    T_62EBA0, prolonged by X2_TABLES); for 41 images Hyper's slot-1 codes are Upper's + $200 ($3CC1 against $3AC1), drawn
+    with Upper's base (+$7700 in Upper's screens) -> wrong tiles. Not the tile base (A_APPROFONDIR n° 14): that base is
+    already handled by the `tuile_e1` stub.
+  - ending scripts (T_60B860, 42 scripts of words; the $90(A5) table T_60B910 points to the same scripts): two
+    neighbouring words formed longs taken for pointers: word $00A0-$00A6 + even word = "Upper RAM pointer"
+    $00A0xxxx -> $00B8xxxx: waits $A0 of endings 04 / 12, 08, 0E (+24 frames), text numbers $A0-$A6 of ending 06 / 14
+    (command $0034, 5 words: other lines), offset $A0 of the x9 command $1904 of ending 21 (Bison's palette taken 12
+    colours further: orange in the explosion once fixed); ending 1A: $0200 $00B4 taken for a file-390 pointer -> $9604
+    $00CB (fade command broken, rest of the script shifted).
+  - per-ending structures T_60B700 / T_60B7B0 (plane-2 block maps, word pairs): 14 false pointers (endings 03, 0A, 1F),
+    e.g. ending 03 blocks $8E $8F $90 -> $2E $65 $DD: rows 48-63 of scroll 2 wrong; the shake object 0x214630 shows
+    them (the mosaic of 14/11 that made `fins_greffe` leave it to Hyper).
+- **Switches**: `FINS_IMAGES` (greffe3.py: a copy of the X2 table whose records point to Upper's image where Hyper's
+  differs, for the three readers of the endings module, Upper 0x1EF4D8, 0x2110CC, 0x2120AC; placed after the X2 tables,
+  before the stage window: nothing moves), `SCRIPTS_FIN_BRUTS` and `CARTES_FIN_BRUTES` (donnees2.py: those cases ->
+  PTR_EXCLUS), `FIN_SECOUSSE` (force3.py: 0x214630 grafted; use with CARTES_FIN_BRUTES).
+- **Artefacts, not defects** (proof: captures one frame apart): Bison "invisible in the beam" of ending 21 (2280-3000)
+  and ending 03 at 5340 = blinking objects drawn on one parity of $80(A5) (frame counter), even at the sampled frames
+  on one side and odd on the other; the graft at 2341 = Upper at 2340.
+- **Proofs** (MAME fork, `lance_emu`, oracle `fige/ro5_v161`): the four switches at 0 with the final code = ro9a43_fige
+  34/35 (`env.sh`); the recipe alone = the switch build on 34 files; only decision changed: 0x214630 -> GREFFE;
+  CARTES_FIN_BRUTES changes exactly 14 longs of the data block, all back to Upper's values; ending scripts compared word
+  by word with Upper (`scripts_cmp.py`): 17 words differ in ro9a43, 0 in ro9a44. 85 / 85 endings reached, no exception;
+  durations of 04, 08, 0E, 1A = Upper (9 946, 6 447 / 6 446, 5 817, 7 549 / 7 548; were +24, +25, +24, +907); 8 455 /
+  9 547 frames identical to ro9a43, 956 closer to Upper, 12 further (credits column one tick apart, explosions placed at
+  random); to the pixel: ending 03 frames 6180-6361 (were 5.5-16 %), ending 21 last image 8580-8820, ending 04
+  1860-2520 (were up to 42 %), ending 08 2700-3180; close: Bison orange in the explosion of 21 (2.2-2.7 %, pose), 22
+  portraits (3 % at 3000: missing dialogue text), 20 credits portraits (<= 2.4 %). Probe of the
+  sentinels: no Hyper target of lot A or lot B entered from the copy (only e) equivalents, f) shared services, the
+  imposed combat), 0x386A40 no longer entered. VERSUS (`vs_fiable.sh`, ro9a43_fige replayed the same day): `vs.log`
+  identical (ef56bc41), 90/90 captures; 40 stages (twin TIRAGE_CPU=0, against the ro9a43 twin): 40/40 journals and
+  160/160 captures identical.
+- **Checked, not in cause**: the pair 0xCB350 -> 0x38E890 is the pseudo-random generator, MIPS identical over the whole
+  routine (the 26 different words lie after its RTS); lot B: never entered (probe above).
+- **Variant `vars_ro9a44_generique.txt`** (ro9a44 + `GENERIQUE_BUDGET=1`, for decision): a stub = raw copy of Upper's
+  credits-line body 0x1492B0-0x1497E0 (port registers and stack only: no absolute jump, no data, no A5 field), called by
+  the two JAL of Hyper's entries (commands 3 and 5 of the third drawing interpreter, 0x39DCB8 / 0x39DCE8) after Hyper's
+  D2 base is set. Measured: D7 at the credits lines = Upper ($184 -> $173 in 22, $260 -> $246 in 06); the stub runs only
+  in scene $A (all 85 endings), 0 times in VERSUS (60 rounds) and in the 40 stages, Hyper's old body never; VERSUS 90/90
+  and `vs.log` identical; stages 40/40 and 160/160 identical; 85 / 85 endings reached; dialogue text during the credits
+  back in 21 and 22 (`texte_absent.py`: 21 none left, 22 one frame), 82 frames closer to Upper. Costs: Hyper's code
+  between 0x39DCB8 and 0x3BF110 MOVES by up to $A bytes in the 68K image (4 226 addresses; ro9a44 itself: 0 moved;
+  the original call to the body that followed was short / folded, the new one is a long jump; instructions unchanged),
+  and the frames move here and there: credits column one tick late in 06 (49 frames x 4 versions: one more slowdown
+  frame measured at 3930, $1CE), 0A (14 x 4), 09, 15, 1D (durations +-1 frame; not looked at frame by frame).
+- **Left** (measured, not changed in ro9a44; see the variant above): dialogue text missing during the credits in endings 21 (7080-8220) and 22
+  (3000-4320): Hyper's credits-line command (third interpreter, body 0x39DD00) RESERVES $C0 sprites per object where
+  Upper's (0x1492B0) counts one per letter; the two credits objects take D7 from $184 to $04 and the dialogue window drawn
+  next has no budget left (Upper: $184 -> $173); a test giving the reservation back in the emulator gives Upper's frames
+  to the pixel (22 at 3000-4320). The other readers of T_674C00 (8, outside the endings module) still read Hyper's
+  images; in the endings bench they run in scene 4 (Hyper's tile base), scenes 6 / 8 (CONTINUE, GAME OVER) are not
+  played by the bench (nor a 2nd player, nor the Japanese version). 297 other longs taken for Upper RAM pointers remain in the copied data, among them word tables of the stage
+  objects (0x916E70-0x917EE0, read by Upper 0xFFC60-0x10A040: stage classes, combat): out of the endings.
+
+### 242.. 16/11: Hyper + Arcade ro9a44 (final candidate): endings of §241 + credits budget + menu on ARCADE + portraits in the button colour
+Agent `ro9a44` (sfa3ha), workshop `work/ro9a44/` (status `ETAT.md`), oracle `fige/ro5_v161`. `HA_ETAT` unchanged (the
+switch-over waits for the user's test on the core).
+- **Recipe** `vars_ro9a44.txt` = `vars_ro9a44_generique.txt` + `MENU_CURSEUR_ARCADE=1 PORT_COULEUR=1`
+  (`PORT_COULEUR_SEL_VERSION` stays 0) = ro9a43 + `FINS_IMAGES SCRIPTS_FIN_BRUTS CARTES_FIN_BRUTES FIN_SECOUSSE`
+  (§241) + `GENERIQUE_BUDGET` (§241, variant retained by the user) + the menu (`vars_ro9a43_menu.txt`) + the portraits V1b
+  (§239, §240). The recipe of §241 (endings only) is renamed `vars_ro9a44_fins.txt`; §241 and its index line still
+  call it `vars_ro9a44.txt`.
+- **No interaction** (build `f44` against `vars_ro9a44_generique` rebuilt from the same clone, itself = the build of
+  §241 on 34/35 files): differences = 1 byte of the module (0x6296C) and of `sz3ud.03c` (image `$010126`,
+  `MOVE.B #$1` -> `#$0`, same address as on ro9a43), the 4 portrait sites in `sz3ud.04c` (15 bytes) and the 20-byte stub
+  at `$37FF94` in `sz3.09c` (`$37FF80-$37FF93` still zero), 1 more patch in `greffe.json`; blocks, banks, data block
+  identical. All three switches find their sites by va (menu: MIPS word with assertion; portraits: va -> image map
+  after translation, byte assertions); the portrait sites land at the same image addresses as on ro9a43 ($081918,
+  $0866CC, $084B3A, $086198: below the range moved by `GENERIQUE_BUDGET`). Programme `sz3ud.03c` `37799f69…`,
+  `sz3ud.04c` `f818fa11…`.
+- **Measured** (MAME fork, `lance_emu`): VERSUS (`vs_fiable.sh`, menu Lua at 1): `vs.log` identical to ro9a43
+  (ef56bc41), 90/90 captures = the portraits-alone build, 70/90 against ro9a43 (the 20 VS screens of the ZERO 3 pairs);
+  TRAINING: `vs.log` identical, the VS screen changes (portraits); Arcade by Start, Start (Ken): cursor 0 on arrival, ARCADE
+  flag, after-fight dialogue at the 5th fight (1 407 frames, as ro9a43), bonuses on the panel; 40 stages (twin
+  TIRAGE_CPU=0): 40/40 journals and 160/160 captures = the `ro9a44_generique` twin; 85 endings: 85/85 reached, no exception, journals,
+  probes, seeds and 9 547 / 9 547 captures identical to `ro9a44_generique` (only the sentinel line of frame 337, the
+  menu label object, differs: remembered cursor 0 instead of 1, the bench Lua writes 0 anyway); against ro9a43: 7 940
+  identical, 1 002 closer to Upper, 259 further (credits column one tick apart, random explosions of 04).
+- **Delivery** (not published): copy `greffe_arcade/constructions/ro9a44_fige` (read-only, `MD5SUMS`), `sfa3hahsfa.zip`
+  CRC `6C1FFF89`, md5 `66634a05…` (same core and driver as ro9a43: only the construction lines of the sources list
+  change), loaded in the bench's MAME: menu on ARCADE, Start, Arcade fights.
+
+### 243. 16/11: Hyper + Arcade candidate ro9a45: copied Upper data no longer relocated as Upper RAM pointers (DONNEES_BRUTES)
+Agent `reloges_293` (sfa3ha), workshop `work/reloges_293/` (status `ETAT.md`, per-case table `CLASSEMENT.tsv`), oracle
+`fige/ro5_v161`. `HA_ETAT` / `HA_RECETTE` unchanged.
+- **Cause.** In the data copied from Upper, `donnees2.py` relocated as an "Upper RAM pointer" EVERY even long whose value
+  falls in `$A00000-$A7FFFF` (+`$180000`, class `ram`). §241 had fixed it for the ending scripts and maps; 283 such longs
+  remained in ro9a44 (293 longs differ from Upper by +`$180000`; the other 10 are true pointers into file 390, relocated
+  by the reuse map).
+- **Classification of the 293, one by one** (reader read in Upper's v161 68K map, Upper MIPS constants, conversion
+  journals `uc2_*`, Upper read journals `u_lu*`): 58 pointers: 45 RAM / video pointers measured (tables read by `MOVEA.L` / `MOVE.L` into a pointer field, 26 of
+  them converted by `CONV_An` in the journals), 10 pointers into file 390 (2 in the journals), 3 deduced (pointers to RAM
+  buffers `$FF3418` / `$FF35A0` that Upper's code addresses with `LEA`); 235 DATA (52 measured, 183 deduced from the
+  structure): object X / Y (T_615D70, T_618490, T_618A30, T_61A180..), word tables (T_60D480, T_612380, T_614050..), menu
+  coordinates (T_624AD0..), colours of the palette banks T_619110 (0x73AB8C, 0x7469BC-0x746A5C: same defect as e39,
+  whose list only caught longs with both halves changed), palette words of the stage palette streams of 0x2B8830,
+  the palette offsets of T_917BE0, an animation offset table (0x972C88), image headers / entries of T_674C00, 0x14-byte
+  animation records (T_817290, T_8AF1A8), AI scripts (T_74C100..), word streams of T_7495B8. No "data" case is in the
+  conversion journals; none is in an X2 table.
+- **Fix** `DONNEES_BRUTES` (`etape2/donnees2.py`, default 0 = ro9a44 byte for byte, witness 34/35 files, `env.sh`):
+  the 235 cases of `donnees/ram_donnees.txt` stay as in Upper, the 48 RAM / video pointers of `donnees/ram_pointeurs.txt`
+  (45 proven, 3 deduced) stay relocated, any other `ram` case is relocated as before but counted (`ram non classee`) and printed. At 1:
+  235 bytes change (one per case), in `ext_4e8000.bin` (24), `ext_c70000.bin` (21), `ext_d0c000.bin` (190) and the
+  module; no size or address moves, `sz3ud.03c` unchanged; `a5_inconnus` 30 -> 12. Recipe `vars_ro9a45.txt` =
+  `vars_ro9a44.txt` + `DONNEES_BRUTES=1`.
+- **Measured** (single bench `banc_ref.sh`, candidate against `ro9a44_fige`): VERSUS, training, Arcade, continue,
+  game over, 2nd player identical; 40 stages (twins `TIRAGE_CPU=0`) identical (journals, 160/160 captures); 85 endings: 85/85 reached, journals,
+  probes and durations identical, 77 endings identical, 8 with changed captures (0F x3, 10 x3, 19, 1A: 56 captures). Read taps on the 235 words in the greffe (`lua/tap.lua`, 4 Arcade routes): T_61A180 (endings),
+  0x972C88 (animation engine, VS transition), 6 palette colours (start of Guy's ending), palette streams (masked).
+- **Visible effects found** (both measured): (1) the explosions of the base sequence in endings 0F, 10, 19, 1A were
+  placed with Y + 24 px (T_61A180 Y `$B8` instead of `$A0`); with the fix 47 of the 56 changed captures are closer to
+  Upper inside the changed box, 8 further, 1 equal (the explosions also have a random part, noted by fins_restes),
+  ending 0F capture 0046 identical to Upper to the pixel; (2) in fights on Zangief's stage (route 0D), the palette
+  offset `$A0` of T_917BE0 (0x917C02) became `$B8` (misaligned palette): the machine behind the pipes was drawn with
+  wrong colours in ro9a44, coherent with the fix (dense captures ro9a44 vs candidate, 7 of 125 frames 1240-1990 differ;
+  the stage bench, 4 frames per stage, missed it). Read without a visible change: 0x972C88 (animation offset, VS
+  transition), 6 colours 0x7469BC-0x746A5C (start of Guy's ending), masked palette words. T_60D480 (3 words) is read by
+  Upper on routes 04 0C 0D 11.. but was not seen read in the greffe on routes 0D and 11: predicted only.
+- **Limits**: 183 of the 235 data verdicts are deduced from the structure; identical benches only show that these words
+  are not read visibly. Asymmetric risk: a true pointer among the deduced cases whose reader is grafted but never seen
+  read (field +$10 of the 0x14-byte records of T_817290 / T_8AF1A8, menus T_624AD0, decor zone tables) would break ro9a45
+  where ro9a44 worked.
+- **For the MAX base (L3)**: only data bytes change (235 bytes of the copied Upper data: 211 in the module, the
+  same bytes in the 68K blocks `ext_4e8000` (24), `ext_c70000` (21), `ext_d0c000` (190); `greffe.json`: `stat_donnees`,
+  `a5_inconnus` 30 -> 12); the lists are indexed by Upper execution address, valid on any base, no table moves, no code address moves; a recipe that adds
+  `DONNEES_BRUTES=1` must check that its build prints no `ram non classee` (new copied regions = new cases to classify).
+- Open: T_615360 / T_615370 are true pointers to `$FF0E8C-$FF1A94` whose A5 offsets have no Upper -> Hyper mapping
+  (`a5_inconnus` `$8E8C-$9A94`): relocated by the base only, as before (not covered by this switch).

@@ -35,6 +35,16 @@ def psp_seul_3204(op, args):
 # FIN_FONDUS_PSP=1 : ancien comportement (tout gardé).
 FONDUS = os.environ.get("FIN_FONDUS_PSP") != "1"
 MODE_3204 = os.environ.get("FIN_3204", "scene")
+# (2026-11-13 soir, session MAX, max59) F4 « SCÈNE DANS LE NOIR » (fins MAX). Arcade : une scène qui suit un fondu sortant
+# (0200 vers le noir, 2200 vers le blanc) s'écrit 0108 (scène chargée sans être montrée) et c'est le fondu entrant qui
+# suivra (1204 / 3204 a-d, a-d = palettes a5-a8 de la scène) qui la montre : 12 cas dans les 32 fins, jamais 1108 entre
+# les deux. La PSP y garde 1109 et un 1204 (0, 0, 0, 0) (fondu entrant sans nouveaux jeux), forme sans équivalent arcade.
+# Converti tel quel : le 1108 montre la scène tout de suite (fin de Yun, « After many months of shooting » : décor et
+# morceaux de sprites avant le portrait de Bison) et le 1204 nul recharge les jeux 0 (Bison aux couleurs fausses).
+#  - F4a : 1108 entre un fondu sortant et le fondu entrant qui le suit -> 0108 (seulement si ce fondu entrant existe) ;
+#  - F4b : 1204 (0, 0, 0, 0) -> 1204 <palettes a5-a8 de la dernière scène> (comme F1 pour 3204).
+# FIN_SCENE_NOIR=0 : témoin (sans F4).
+SCENE_NOIR = os.environ.get("FIN_SCENE_NOIR", "1") == "1"
 
 
 SOURCES = []                                   # (13/11) index PSP de chaque instruction produite par le dernier convertir()
@@ -63,11 +73,11 @@ def convertir(ins, pos=None, pal_max=None, base_texte=0):
                     if att and out: out[-1] = (out[-1][0] + att,) + out[-1][1:]
                     continue
                 base_sauvee = False
-        if op == 0x1109:
+        if op in (0x1109, 0x0109):                     # (max59) 0109 PSP = 0108 arcade (fins 08, 0A, 1C : 6 cas)
             a = list(args[:8])
             if pos: a[0], a[1], a[2] = pos(a[0], a[1], a[2])
             a[3] = 0
-            _ajoute(out, i_src, (att, 0x1108, tuple(a))); continue
+            _ajoute(out, i_src, (att, op - 1, tuple(a))); continue
         if cl == 0 and sous == 4 and op & 0xF == 2:
             _ajoute(out, i_src, (att, op - 1, (2 * args[0],))); continue          # arcade = 2 × arg PSP (durée)
         if op == 0x0034:
@@ -99,7 +109,7 @@ def valider():
                       and len(x[3]) > 1] or [0])
         c, _ = convertir(q, pal_max=pm)
         a = a[:len(c) + 20]
-        cle = lambda x: (x[1], x[2][3:] if x[1] == 0x1108 else x[2][:2] if x[1] == 0x34 else x[2])   # positions / n° de texte ignorés
+        cle = lambda x: (x[1], x[2][3:] if x[1] in (0x1108, 0x0108) else x[2][:2] if x[1] == 0x34 else x[2])   # positions / n° de texte ignorés
         sm = difflib.SequenceMatcher(None, [cle(x) for x in a], [cle(x) for x in c], autojunk=False)
         ok = sum(b.size for b in sm.get_matching_blocks())
         tot["instructions converties"] += len(c); tot["identiques à la ROM (positions de scène exclues)"] += ok
@@ -140,7 +150,7 @@ def convertir_avec_modele(n, fin_modele, base_texte=0):
     base, notes = convertir(S.psp(n), base_texte=base_texte)
     psp = S.psp(n); j = 0
     for (_, att, op, args), (att2, op2, args2) in zip([psp[i] for i in SOURCES], base):
-        if op2 != op and not (op == 0x1109 and op2 == 0x1108):   # instruction transformée (fondus) : prise telle quelle
+        if op2 != op and not (op, op2) in ((0x1109, 0x1108), (0x0109, 0x0108)):   # instruction transformée (fondus) : prise telle quelle
             out.append((att2, op2, args2)); continue
         sous = (op >> 8) & 0xF; classe0 = (op >> 4) & 7 == 0
         if op == 0x1109:
@@ -167,7 +177,25 @@ def convertir_avec_modele(n, fin_modele, base_texte=0):
             if o_ == 0x1108: sc = g_[4:8]
             if o_ == 0x3204 and tuple(g_) == (0, 0, 0, 0) and sc:
                 out[k] = (a_, o_, tuple(sc)); manques["fondu F1 : 3204 nul -> palettes de la scène %s" % " ".join("%x" % v for v in sc)] += 1
+    if FONDUS and SCENE_NOIR: scenes_dans_le_noir(out, manques)
     return out, manques
+
+
+def scenes_dans_le_noir(out, notes):
+    """F4 (voir SCENE_NOIR) sur un script arcade converti, en place"""
+    noir = False
+    for k, (a_, o_, g_) in enumerate(out):
+        if o_ in (0x0200, 0x2200): noir = True
+        elif o_ in (0x1204, 0x3204): noir = False
+        elif o_ == 0x1108 and noir:
+            suite = next((o for _, o, _ in out[k + 1:] if o in (0x1204, 0x3204, 0x0200, 0x2200, 0x1108, 0x0108)), None)
+            if suite in (0x1204, 0x3204):
+                out[k] = (a_, 0x0108, g_); notes["F4a : scène dans le noir 1108 -> 0108"] += 1
+    sc = None
+    for k, (a_, o_, g_) in enumerate(out):
+        if o_ in (0x1108, 0x0108): sc = g_[4:8]
+        if o_ == 0x1204 and tuple(g_) == (0, 0, 0, 0) and sc:
+            out[k] = (a_, o_, tuple(sc)); notes["F4b : 1204 nul -> palettes de la scène %s" % " ".join("%x" % v for v in sc)] += 1
 
 
 def ecrire_s(ins, nom, fichier, base_texte_sym=None):

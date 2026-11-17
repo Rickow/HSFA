@@ -207,7 +207,7 @@ def main(argv=None):
         if SECTION_CRIS in L: L = L[:L.index(SECTION_CRIS)]
         while L and not L[-1]: L.pop()
         L += [SECTION_CRIS] + cris_lignes
-        open(a.table_sortie or a.table_rejeu, "w").write("\n".join(L) + "\n")
+        open(a.table_sortie or a.table_rejeu, "w", newline="\n").write("\n".join(L) + "\n")
     open(os.path.join(out, "redirection_rejeu.txt"), "w").write(
         "# version($102) code_SFA3(cote 1) code_rejeu (cote 2 : code + $500 -> code_rejeu + $500)\n" + "\n".join(rej) + "\n")
     nv = sum(1 for iv in info.values() if "table" in iv)

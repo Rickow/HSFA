@@ -701,3 +701,10 @@ Toutes les adresses sont des **décalages fichier** de `ro9_usa_prog68k.bin` (ex
    puis ces deux scripts.
 6. Non-régression : `nonreg.sh` habituel, plus un essai ZERO, ZERO 2 et ALPHA en jeu (`lance_hyper.sh` avec `RP9`,
    `BANC9`, `HSFA_REJEU_TABLE`, `HSFA_XDATA`).
+
+## 14. Since 15/11: the replay table is rebuilt from the player's ISO
+
+The table of §12 is no longer an outside input: the build step `rejeu_iso` runs the SFA1 / SFA2 drivers of the
+player's disc offline (`tools/son-hyper/rejeu_iso`, protocol of the sweep of §2) and writes the table with the rules
+of `gen_rejeu.py`; `--rejeu-table` still comes first. Same sounds and same writes as the workshop table, times a few
+microseconds apart. Details and proofs: journal §235, `docs/guide/construction-iso.md` §4.

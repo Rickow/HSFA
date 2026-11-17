@@ -247,7 +247,39 @@ def force():
     _fg = set(FINS_A) if _fa == "1" else {x.strip() for x in _fa.split(',') if x.strip() not in ("", "0")}
     for _g in sorted(_fg):
         for _f in FINS_A[_g]: d[_f] = ('GREFFE',)
+    # (fins_restes, 16/11) FIN_SECOUSSE=1 : 0x214630 (T_619DE0[5], objet « secousse » de l'explosion de la fin 03 : toutes les
+    # $7E(A6) images, $3B(A6) += 4 modulo $18 et $26 / $28(A5) = mots A6+$40+$3B / A6+$42+$3B, poses par son init 0x2121E0
+    # (greffee) ; phase >= $78(A6) : fin de vie 0x21A590 -> Hyper 0x32A870, e) equivalente) au lieu d'Hyper 0x386A40
+    # (service d'objets, aucun rapport : pas de secousse). Retiree du lot A le 14/11 (mosaique 6240-6300) : la cause etait
+    # la carte du scroll2 (lignes 48-63, blocs relogés a tort : CARTES_FIN_BRUTES), pas la routine ; a utiliser AVEC
+    # CARTES_FIN_BRUTES=1. =0 : comme ro9a43.
+    if os.environ.get("FIN_SECOUSSE", "0") == "1":
+        assert os.environ.get("CARTES_FIN_BRUTES", "0") == "1", "FIN_SECOUSSE=1 demande CARTES_FIN_BRUTES=1 (sinon mosaique, fin 03)"
+        d[0x214630] = ('GREFFE',)
+    # (apres_combat, 15/11) APRES_COMBAT=1 : sous-etat A5+C = C du combat = l'aiguilleur d'Upper et sa scene de dialogue
+    # d'apres combat (5e et 9e combats de l'Arcade, une fois par partie) au lieu de la feuille d'Hyper 0x9FD10 (meme
+    # mecanique qu'INTERMEDES pour A5+C = 2 ; work/sous_etats/LECTURE.md §4). Applique en dernier (rien ne le reprend).
+    # Les deux feuilles restent a Hyper (lues identiques) : 0x26E1E0 = 0x9FD10 (passer a l'etat suivant), 0xCCBC0 =
+    # 0x390A30 (vidage d'une reserve d'objets). =0 : comme ro9a42.
+    if os.environ.get("COMBAT_HYPER", "1") == "1" and os.environ.get("APRES_COMBAT", "0") == "1":
+        for _f in APRES_COMBAT: d[_f] = ('GREFFE',)
+        d.update(APRES_COMBAT_HYPER)
+    # (apres_combat, 15/11 soir, decision D2) PRIMES_MANCHE=1 : sous-etat A5+C = A (fin de manche) = l'aiguilleur d'Upper
+    # 0x26CB60 (T_61C380[$10(A5)]) et son etape 0 0x26CD00 (primes de vie / temps -> $8E3E, $8E40, $8E42, ajout au
+    # score, $138 du joueur) au lieu de 0x9F300 / 0x9F4A0 d'Hyper (sans primes) ; les autres etapes restent a Hyper
+    # (2, 6, 8 lues identiques ; 4 = Hyper : un contre un, meme effet, et pas de lecteur de $17A -> $CC86).
+    # =0 : comme ro9a42.
+    if os.environ.get("COMBAT_HYPER", "1") == "1" and os.environ.get("PRIMES_MANCHE", "0") == "1":
+        for _f in PRIMES_MANCHE: d[_f] = ('GREFFE',)
+        d.update(PRIMES_MANCHE_HYPER)
     return d
+# (apres_combat) PRIMES_MANCHE : aiguilleur 0x26CB60 et etape 0 0x26CD00 ; T_61C380 [2] [4] [6] [8] [16] -> Hyper
+PRIMES_MANCHE = (0x26CB60, 0x26CD00)
+PRIMES_MANCHE_HYPER = {0x26D5A0: ('HYPER', 0x9F7A0), 0x26D600: ('HYPER', 0x9F800), 0x26DD00: ('HYPER', 0x9FA60),
+                       0x26DD20: ('HYPER', 0x9FA80), 0x26E1E0: ('HYPER', 0x9FD10)}
+# (apres_combat) aiguilleur 0x26DFB0 (T_61C3A0[$13E(A5)]), scene 0x26E280 (T_61C3C0[$10(A5)]) et ses etapes 0, 4, 6
+APRES_COMBAT = (0x26DFB0, 0x26E280, 0x26E2F0, 0x26E890, 0x26E8C0)
+APRES_COMBAT_HYPER = {0x26E1E0: ('HYPER', 0x9FD10), 0xCCBC0: ('HYPER', 0x390A30)}
 # groupes du lot A (va du module d'Upper) :
 FINS_A = {
     # a1 : 11 etats « attendre la phase $7B(A6), puis l'etat suivant » (-> Hyper 0x301D0, qui attend un etat de SCENE) :

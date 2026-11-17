@@ -3,7 +3,7 @@
 tous les fichiers sont fabriques ici (dossiers temporaires, signal synthetique en entiers).
 
   test_windows.py [--parties P,P...] [--natifs BIN] [--exe EXE] [--non-admin] [--rapport FICHIER]
-  parties : liens maison fige encodage git flux (defaut) ; exe, interprete (avec --exe : l'executable PyInstaller) ;
+  parties : liens maison fige greffe encodage git flux coeur rejeu (defaut) ; exe, interprete (avec --exe : l'executable PyInstaller) ;
             etape (seulement DANS l'executable : une etape lancee comme hsfa_build le fait)
   --non-admin : relance « liens » avec un jeton SANS droit d'administrateur ni privilege (comme un compte limite, ou un
                 administrateur sous UAC sans elevation) ; l'enfant verifie qu'os.symlink y echoue (WinError 1314)
@@ -15,6 +15,9 @@ Points couverts (src/hsfa/liens.py, ticket #2 et PIEGES_WINDOWS) :
             paquet_fbneo.lit() (CRLF -> LF, chemin en « / » dans le journal de hsfa_info.txt)
   maison    os.path.expanduser lit USERPROFILE (Windows) / HOME
   fige      fige.py / fige35.py : chemin « C:\\Users\\...\\t...\\a... » dans du code genere, importe sans SyntaxError
+  greffe    greffe Arcade (hyperarcade), bugs Windows du 15/11 : releves_tsv.reconstituer d'un mini-releve TSV synthetique
+            -> fichiers attendus (ceux de Linux), sur ce systeme et en simulation de Windows (os.sep « \\ », ntpath ; ram.txt
+            laisse en plages) ; HSFA_GREFFE_ZONE « y:fichier:fichier » relu par mame_test.py avec des chemins « C:\\... »
   encodage  texte accentue avec et sans PYTHONUTF8 ; fins de ligne du mode texte
   git       copie Git du runner : core.autocrlf, git ls-files --eol, aucune table .txt / .tsv en CRLF ; temoin sans
             .gitattributes
@@ -23,6 +26,9 @@ Points couverts (src/hsfa/liens.py, ticket #2 et PIEGES_WINDOWS) :
   umprog    etape d'Upper MAX lancee avec l'environnement filtre d'um_prog.py (ni USERPROFILE, ni TEMP, ni _PYI_*)
   flux      hsfa_oggenc / fluxtool : ADX synthetique -> PCM -> Ogg (flux_ogg.encode, chaine de la construction) ->
             PCM ; empreintes = celles de Linux (REF_FLUX)
+  rejeu     hsfa_rejeu_iso (table du rejeu d'Hyper depuis l'ISO) : programme Z80 d'essai (pas de donnee de jeu), journal
+            = celui de Linux (gen_rejeu_iso.ESSAI_MD5), dans un dossier accentue hors page de code ANSI ; outil trouve
+            a cote de fluxtool comme dans le constructeur (gen_rejeu_iso.outil)
   exe       hsfa-constructeur --auto-test ; PYTHONUTF8 honore ; l'exe comme « python » (-c, script .py)
   interprete l'exe comme « python » des etapes, reponses comparees au vrai python : PYTHONPATH, dossier courant, -I, -B,
             PYTHONDONTWRITEBYTECODE, codes de sortie, script a un argument stdin ouvert (attente d'Entree de la v0.1.10)
@@ -296,6 +302,121 @@ def fige():
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Releves de la greffe Arcade (releves_tsv.reconstituer, hyperarcade) : mini-releve TSV synthetique (adresses inventees,
+# aucune donnee de jeu) dans le format du depot (releves_<HA_ETAT>/) et fichiers attendus = ceux que Linux reconstitue.
+# Bug du 15/11 (exe 7bec8d6) : sous Windows, fichiers() rendait « greffe\traces\h_versus\ram.txt.tsv », le test
+# endswith("/ram.txt.tsv") echouait et ram.txt restait en plages « ff0000-ff0006 » (relogement_a5_v3.py : ValueError).
+RELEVE_TSV = {
+    "RELEVES_TSV": "releves (essai)\n",
+    "greffe/traces/h_versus/ram.txt.tsv": "# releve (essai)\n# format : plages\nff0000-ff0006\t1\t2\t-1\t-1\nff0008\t3\t4\t5\t6\n",
+    "greffe/traces/journaux_u_lu.tsv": "# releve (essai)\n# journaux\tgreffe/traces/u_lu00\tgreffe/traces/u_lu01\n100-104\n200\n",
+    "greffe/donnees/pointeurs_prouves.txt.tsv": "# releve (essai)\n2a\n2c\n",
+    "eu/a5.tsv": "# releve (essai)\n0\tM\t-\t2\ni:10\t=abc\ni:20\t1f\n",
+}
+RELEVE_ATTENDU = {
+    "greffe/traces/h_versus/ram.txt": b"ff0000 1 2 -1 -1\nff0002 1 2 -1 -1\nff0004 1 2 -1 -1\nff0006 1 2 -1 -1\n"
+                                      b"ff0008 3 4 5 6\n",
+    "greffe/traces/u_lu00/lu.txt": b"100\n102\n104\n200\n",
+    "greffe/traces/u_lu01/lu.txt": b"",
+    "greffe/donnees/pointeurs_prouves.txt": b"2a\n2c\n",
+    "eu/a5.pkl": {0x10: "abc", 0x20: 0x1f},
+}
+
+
+def _arbre(d):
+    """fichiers de d -> {chemin en « / » : octets}"""
+    r = {}
+    for racine, _ds, fs in os.walk(d):
+        for f in fs:
+            p = os.path.join(racine, f)
+            with open(p, "rb") as h: r[os.path.relpath(p, d).replace(os.sep, "/")] = h.read()
+    return r
+
+
+def _compare_releve(nom, d):
+    import pickle
+    a = _arbre(d)
+    diff = [k for k in sorted(set(a) | set(RELEVE_ATTENDU)) if k not in a or k not in RELEVE_ATTENDU
+            or (a[k] != RELEVE_ATTENDU[k] if isinstance(RELEVE_ATTENDU[k], bytes) else pickle.loads(a[k]) != RELEVE_ATTENDU[k])]
+    return verifie(nom, not diff, "%d fichiers%s" % (len(a), (" ; differents : %s ; ram.txt = %r" % (
+        ", ".join(diff), a.get("greffe/traces/h_versus/ram.txt", b"")[:40])) if diff else ""))
+
+
+class _OsWindows:
+    """(simulation, tout systeme) module « os » vu par releves_tsv comme sous Windows : os.sep « \\ », os.path = ntpath,
+    os.walk rend des dossiers en « \\ » ; les chemins sont remis en « / » pour le vrai systeme de fichiers"""
+    import ntpath as path
+    sep = "\\"
+
+    @staticmethod
+    def walk(top):
+        for racine, ds, fs in os.walk(top):
+            yield top + racine[len(top):].replace("/", "\\"), ds, fs
+
+    @staticmethod
+    def makedirs(p, exist_ok=False):
+        os.makedirs(p if WIN else p.replace("\\", "/"), exist_ok=exist_ok)
+
+
+def _open_windows(p, *a, **k):
+    return open(p if WIN else p.replace("\\", "/"), *a, **k)   # noqa : mode et encodage de l'appelant
+
+
+@protege("greffe")
+def greffe():
+    sys.path.insert(0, os.path.join(depot(), "tools", "greffe-arcade", "construction"))
+    import releves_tsv
+    T = tempfile.mkdtemp(prefix="hsfa_releves_")
+    try:
+        src = os.path.join(T, "releves tsv")             # espace : comme un dossier de sortie choisi par le joueur
+        for r, t in RELEVE_TSV.items():
+            q = os.path.join(src, *r.split("/")); os.makedirs(os.path.dirname(q), exist_ok=True)
+            with open(q, "w", encoding="utf-8", newline="\n") as f: f.write(t)
+        # 1. ce systeme, tel quel (en CI Windows : la voie du constructeur)
+        releves_tsv.reconstituer(src, os.path.join(T, "natif"))
+        _compare_releve("releves/reconstitution_%s" % ("windows" if WIN else "ce_systeme"), os.path.join(T, "natif"))
+        # 2. simulation de Windows (os.sep « \\ », ntpath) sur tout systeme : le temoin Linux attrape aussi le bug
+        vrai_os = releves_tsv.os
+        releves_tsv.os, releves_tsv.open = _OsWindows, _open_windows
+        try:
+            brut = sorted(_OsWindows.path.relpath(_OsWindows.path.join(r_, f), src)
+                          for r_, _d, fs in _OsWindows.walk(src) for f in fs)
+            verifie("releves/simulation_effective", any("\\" in x for x in brut), "relpath brut : %s" % max(brut, key=len))
+            l = sorted(releves_tsv.fichiers(src))
+            verifie("releves/simulation_ntpath/fichiers_en_slash", bool(l) and all("\\" not in x for x in l), max(l, key=len))
+            releves_tsv.reconstituer(src, os.path.join(T, "simule"))
+        finally:
+            releves_tsv.os = vrai_os; del releves_tsv.open
+        _compare_releve("releves/reconstitution_simulation_ntpath", os.path.join(T, "simule"))
+        zone(T)
+    finally:
+        shutil.rmtree(T, ignore_errors=True)
+
+
+def zone(T):
+    """HSFA_GREFFE_ZONE = « y:corps.bin:ptrs.txt » (greffe3.py) relu par mame_test.py (traducteurs de la greffe) : la lettre
+    de lecteur d'un chemin Windows ne coupe pas le champ (15/11, 2e echec : « too many values to unpack »)"""
+    import ast, glob
+    tr = sorted(glob.glob(os.path.join(depot(), "tools", "greffe-arcade", "construction", "*", "greffe", "*",
+                                       "untranspile3_*", "mame_test.py")))
+    verifie("zone/traducteurs_trouves", bool(tr), len(tr))
+    natif = os.path.join(T, "sortie avec espace")
+    cas = [(natif + os.sep + "zone_decors.bin", natif + os.sep + "zone_decors_ptrs.txt"),
+           (r"Z:\home\a b\zone_decors.bin", r"Z:\home\a b\zone_decors_ptrs.txt"),
+           ("D:/jeux/x y/zone_decors.bin", ""), ("/srv/x y/zone_decors.bin", "/srv/x y/zone_decors_ptrs.txt")]
+    for p in tr:
+        with open(p, encoding="utf-8") as f: src = f.read()
+        nom = os.path.relpath(p, depot()).replace(os.sep, "/").split("/greffe/")[-1]
+        if "HSFA_GREFFE_ZONE" not in src: continue
+        verifie("zone/%s/sans_split_deux_points" % nom, 'os.environ["HSFA_GREFFE_ZONE"].split(' not in src)
+        fn = [n for n in ast.parse(src).body if isinstance(n, ast.FunctionDef) and n.name == "_champs_chemins"]
+        if not verifie("zone/%s/_champs_chemins" % nom, bool(fn)): continue
+        ns = {}; exec(compile(ast.Module(body=fn, type_ignores=[]), p, "exec"), ns)
+        res = [(ns["_champs_chemins"]("%x:%s:%s" % (0x950ce0, a, b)), ["950ce0", a, b]) for a, b in cas]
+        verifie("zone/%s/chemins" % nom, all(r == e for r, e in res), "; ".join(map(str, [r for r, e in res if r != e][:1])))
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 CODE_ENC = r"""
 import locale, sys
 p = sys.argv[1]; t = sys.argv[2]
@@ -555,6 +676,29 @@ def coeur():
         shutil.rmtree(T, ignore_errors=True)
 
 
+@protege("rejeu")
+def rejeu(natifs=None):
+    """hsfa_rejeu_iso : essai synthetique (meme journal que Linux), dossier « Łukasz ō », recherche a cote de fluxtool"""
+    X = ".exe" if WIN else ""
+    if natifs:
+        os.environ["HSFA_FLUXTOOL"] = os.path.abspath(os.path.join(natifs, "fluxtool" + X))
+    if not os.environ.get("HSFA_FLUXTOOL"):
+        note("ECHEC", "rejeu/outils", "--natifs ou HSFA_FLUXTOOL requis"); return
+    sys.path.insert(0, os.path.join(depot(), "tools", "son-hyper", "rejeu_iso"))
+    import gen_rejeu_iso as G
+    T = tempfile.mkdtemp(prefix="hsfa_rejeu_")
+    try:
+        ancien = os.environ.pop("HSFA_REJEU_ISO", None)
+        exe = G.outil(os.path.join(T, "ne_compile_pas"))     # a cote de fluxtool : aucune compilation
+        if ancien is not None: os.environ["HSFA_REJEU_ISO"] = ancien
+        verifie("rejeu/a_cote_de_fluxtool", os.path.dirname(exe) == os.path.dirname(os.environ["HSFA_FLUXTOOL"]), exe)
+        D = os.path.join(T, "Łukasz ō")
+        m = G.essai_synthetique(exe, D)
+        verifie("rejeu/meme_journal_que_linux", m == G.ESSAI_MD5, "%s (Linux : %s)" % (m, G.ESSAI_MD5))
+    finally:
+        shutil.rmtree(T, ignore_errors=True)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 GARDE_UM_PROG = ("PATH", "HOME", "LANG", "LC_ALL", "LC_CTYPE", "TMPDIR", "SYSTEMROOT", "HSFA_ASM", "HSFA_VASM",
                  "HSFA_SANS_LIENS", "PYTHONUTF8")          # um_prog.py AVANT correctif (main du 11/11) : temoin
@@ -715,7 +859,7 @@ def lance_non_admin(argv):
     return code.value
 
 
-DEFAUT = "liens,maison,fige,encodage,git,flux,coeur"
+DEFAUT = "liens,maison,fige,greffe,encodage,git,flux,coeur,rejeu"
 
 
 def main():
@@ -745,10 +889,12 @@ def main():
     if "liens" in P: liens_(a.exige_sans_droit)
     if "maison" in P: maison()
     if "fige" in P: fige()
+    if "greffe" in P: greffe()
     if "encodage" in P: encodage()
     if "git" in P: git()
     if "flux" in P: flux(a.natifs)
     if "coeur" in P: coeur()
+    if "rejeu" in P: rejeu(a.natifs)
     if "exe" in P: exe_(a.exe)
     if "umprog" in P: umprog(a.exe)
     if "interprete" in P: interprete(a.exe)

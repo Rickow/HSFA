@@ -3,6 +3,7 @@
 
   hsfa_oggenc  tools/flux/oggenc (libvorbis 1.3.7, libogg 1.3.6, musl 1.1.21 : IEEE strict, memes Ogg partout)
   fluxtool     tools/flux/fluxtool.cpp + stb_vorbis (decodeur ADX exact et relecture des Ogg ; MIT / domaine public)
+  hsfa_rejeu_iso  tools/son-hyper/rejeu_iso/rejeu_iso.cpp + z80.h (table du rejeu d'Hyper depuis l'ISO ; MIT)
   libchdr      lecture des .chd (BSD-3 ; commit LIBCHDR_COMMIT de github.com/rtissera/libchdr), bibliotheque partagee
 
 Compilateur : zig (ziglang.org, version et empreinte dans .github/workflows/constructeur.yml) pour toutes les cibles,
@@ -78,7 +79,13 @@ def main():
         lance(cc + ["-O2", "-c", "-w", "-I", FLUX, "-o", o, os.path.join(FLUX, "tests", "stb_vorbis_impl.c")])
         lance(cxx + ["-O2", "-DHSFA_FLUX_VORBIS", "-I", FLUX, "-o", os.path.join(out, "fluxtool" + x),
                      os.path.join(FLUX, "fluxtool.cpp"), o] + statique + ([] if systeme == "macos" else ["-s"]))
-    # 3. libchdr (construction « unity » : unity.c + le codec avhuff qu'il n'inclut pas ; sans cmake)
+    # 3. hsfa_rejeu_iso (Hyper's replay table from the ISO: tools/son-hyper/rejeu_iso, z80.h MIT ; same command as
+    #    gen_rejeu_iso.py)
+    SON = os.path.join(DEPOT, "tools", "son-hyper")
+    lance(cxx + ["-O2", "-std=c++11", "-I", os.path.join(SON, "tests"), "-o", os.path.join(out, "hsfa_rejeu_iso" + x),
+                 os.path.join(SON, "rejeu_iso", "rejeu_iso.cpp")] + statique + ([] if systeme == "macos" else ["-s"]))
+    shutil.copy(os.path.join(SON, "tests", "z80.LICENSE"), os.path.join(out, "LICENSE-z80.txt"))
+    # 4. libchdr (construction « unity » : unity.c + le codec avhuff qu'il n'inclut pas ; sans cmake)
     L = os.path.abspath(a.libchdr) if a.libchdr else libchdr_sources(a.sources, a.telecharge)
     nom = {"windows": "chdr.dll", "macos": "libchdr.dylib"}.get(systeme, "libchdr.so")
     lance(cclib + ["-O2", "-shared", "-fPIC", "-w", "-DCHD_DLL", "-DCHD_DLL_EXPORTS", "-DWANT_SUBCODE=0",

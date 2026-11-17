@@ -66,7 +66,12 @@ def palpropre():
             "        lea     $90c3c0, a1", "        bsr.s   .cp", "        lea     $91c3c0, a1", "        bsr.s   .cp",
             "        lea     $9203c0, a1", "        bsr.s   .cp",
             ".f:     movem.l (sp)+, d0/a0-a1", ".x:     rts",
-            ".cp:    move.l  a0, -(sp)", "        moveq   #7, d0", ".c:     move.l  (a0)+, (a1)+", "        dbra    d0, .c",
+            ".cp:    move.l  a0, -(sp)"] + ([
+            # (14/11, session MAX, max59) palette du joueur en ROM = luminosité 0 (« 0fc9 … ») ; les chargeurs du jeu posent
+            # $F000 (« ffc9 … ») -> perso MAX sombre (Eagle « brun », Maki brune). MAX_PALPROPRE_LUM=0 : copie brute (témoin)
+            "        moveq   #15, d0", ".c:     move.w  (a0)+, (a1)", "        ori.w   #$f000, (a1)+", "        dbra    d0, .c"]
+            if os.environ.get("MAX_PALPROPRE_LUM", "1") == "1" else
+            ["        moveq   #7, d0", ".c:     move.l  (a0)+, (a1)+", "        dbra    d0, .c"]) + [
             "        movea.l (sp)+, a0", "        rts",
             ".t:     move.b  $103(a0), d0", "        cmpi.b  #$26, d0", "        bcs.s   .n", "        cmpi.b  #$2d, d0",
             "        bcs.s   .b", "        subq.b  #5, d0", ".b:     cmp.b   $7e(a4), d0", "        rts",
@@ -269,13 +274,21 @@ def integration():
     # (18/10 nuit, session MAX) positions de projection (table 7495b8) : lignes MAX (PROJ_POS_xx) et lignes natives
     # étendues à 48 colonnes (PROJ_NAT_00-25) ; mots seulement (disposition image = source) ; posées par integre_max
     # (2b12) bandeau « WINNER : nom » (session MAX : converti/bandeau_noms/bandeau_noms_max.s, disposition image)
+    # (impacts_max, 16/11) MAX_ZONES_PSP=1 : (a) points d'effets posés sur le corps d'une victime MAX (ZONES_xx /
+    # ZONES2_xx de la session MAX, converti/zones/zones_effets_max.s ; posés par integre_max) ; (b) FLAMMES_xx :
+    # couples ÉCHANGÉS à l'inclusion -> ordre image (dy, dx) comme les natifs (flammes_max.s les écrit dans l'ordre du
+    # pac : flamme d'une victime MAX en (dy, dx), mesuré). À 0 (défaut) : rien d'inclus ni d'échangé = max59 à l'octet.
+    ZPSP = os.environ.get("MAX_ZONES_PSP", "0") == "1"
+    zfb = (MC.CV + "zones/zones_effets_max.s",) if ZPSP else ()
     for fb in (MC.CV + "bandeau_noms/bandeau_noms_max.s", MC.CV + "winner_noms/winner_noms_max.s",
                MC.CV + "carte_noms/carte_noms_max.s", MC.CV + "flammes/flammes_max.s", MC.CV + "recul/recul_max.s",
-               MC.CV + "bandeau_noms/frises_verticales_max.s"):
+               MC.CV + "bandeau_noms/frises_verticales_max.s") + zfb:
         # frames $0C : le lecteur du portage prend le pointeur des positions à l'adresse ALIGNÉE (frame + 6 arrondi à 4)
         # -> chaque frame doit commencer sur 4 (MAXWIN_26 en ≡ 2 mod 4 : entrées lues décalées d'un mot, relevé 2b12)
         if not os.path.exists(fb): continue
         t_ = re.sub(r"^((?:MAXWIN_|MAXBN_|MAXCARTE_|MAXBV_)\w+:)", r"        cnop    0,4\n\1", open(fb).read(), flags=re.M)
+        if ZPSP and fb.endswith("flammes/flammes_max.s"):
+            t_ = flammes_dy_dx(t_)
         D += ["        cnop    0,4", "; ---- %s (session MAX)" % os.path.basename(fb), t_, "        even"]
     # (2b19) flammes : index du pas masqué par & $1F (au lieu de $F) pour TOUS (même instruction, même coût : la nonreg
     # bougeait avec un JSR de test) ; les natifs reçoivent une copie DOUBLÉE de leurs 16 couples (entrée k+16 = entrée k)
@@ -715,6 +728,21 @@ def anim_reactions():
     im = bytes(ps2[k ^ 1] for k in range(len(ps2)))
     return ["        even", "MAX_ANIM_REACTIONS:         ; (agent_integration_max) octets PS2 0-33 = Upper 0x61B4A0 ; 34-36 = PSP",
             "        dc.b    " + ", ".join("$%02x" % x for x in im)]
+
+def flammes_dy_dx(t):
+    """(impacts_max) FLAMMES_xx de flammes_max.s : chaque couple (dx, dy) du pac -> (dy, dx) (ordre image des natifs,
+    cf. flammes_natives : d[k ^ 1]) ; lignes « dc.b » de longueur paire (16, 16, 12), contrôle du total (44 o par bloc)"""
+    L, n = [], 0
+    for l in t.split("\n"):
+        m = re.match(r"^(\s+dc\.b\s+)(.*)$", l)
+        if m:
+            v = [x.strip() for x in m.group(2).split(";")[0].split(",")]
+            assert len(v) % 2 == 0, l
+            v = [v[k ^ 1] for k in range(len(v))]; n += len(v)
+            l = m.group(1) + ", ".join(v)
+        L.append(l)
+    assert n == 4 * 44, "flammes_max.s : %d octets (4 x 44 attendus)" % n
+    return "\n".join(L)
 
 def flammes_natives():
     """(2b19) FLAMMES_N_<ptr> : 16 couples natifs (pointeur de 0x74C358[ID], IDs 0-$25) recopiés DEUX fois, ordre image"""

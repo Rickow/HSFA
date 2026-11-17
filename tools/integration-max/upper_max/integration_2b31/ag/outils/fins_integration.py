@@ -51,11 +51,16 @@ JEUX_PSP = {"26": [0], "27": [0, 1], "2d": [0], "2e": [0]}
 # garde $16 ; les autres x9 (Maki, jeu 1) -> jeu neuf k
 K_1108 = {"26": [1, 0, 3, 3, 3, 3, 0, 1, 1, 0, 0, 0], "27": [0] * 5, "2d": [0] * 8 + [1], "2e": [0, 0, 1, 1, 1, 2, 2, 2]}
 NB_OBJ = 30
-RX_1108 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$1108, (?:\$[0-9a-f]{4}, ){4})\$([0-9a-f]{4})(, .*)$", re.M)
+# (13/11 soir, session MAX, max59) règle F4 de convertir_fin (« scène dans le noir ») : une scène entre un fondu sortant et
+# le fondu entrant qui la montre s'écrit 0108 (comme les fins d'arcade) -> comptée et corrigée comme 1108 ; le 1204 qui la
+# montre prend le jeu de la scène comme 3204 (MAX_FIN_3204_IMAGE). MAX_FIN_0108=0 : 1108 seuls (témoin, scripts sans F4).
+X_SCENE = "[01]108" if os.environ.get("MAX_FIN_0108", "1") == "1" else "1108"
+X_ENTRANT = "[13]204" if os.environ.get("MAX_FIN_0108", "1") == "1" else "3204"
+RX_1108 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$" + X_SCENE + r", (?:\$[0-9a-f]{4}, ){4})\$([0-9a-f]{4})(, .*)$", re.M)
 def jeux_k(pid):
     """jeux PSP k employés (scènes 1108 + x9 autres que l'initial et le final d'Eagle)"""
     return sorted(set(K_1108.get(pid, [])) | set(k for k in JEUX_PSP.get(pid, []) if k))
-RX_3204 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$3204, )\$([0-9a-f]{4})(, .*)$", re.M)
+RX_3204 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$" + X_ENTRANT + r", )\$([0-9a-f]{4})(, .*)$", re.M)
 RX_X9 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$0904, \$0004, )\$([0-9a-f]{4})(, \$0000, \$0008)$", re.M)
 
 # (18/10 nuit, 5, session MAX) IMAGES DE PALETTES prêtes : converti/plXX/fin/jeux_palettes_cps2.bin (images de 32
@@ -65,6 +70,96 @@ RX_X9 = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$0904, \$0004, )\$([0-9a
 PL_FIN = {"26": "pl26", "27": "pl27", "2d": "pl28", "2e": "pl29"}
 NOIR = {"27"}
 RX_X5 = re.compile(r"^        dc\.w    \$[0-9a-f]{4}, \$1505, .*$")
+# (15/11, fins_upper_m, mesures M1-M9 du moteur des fins d'Upper ; etude_upper/REGLES_CONVERSION.md § 4) :
+# - x9 de $1D palettes (OBJ 0-28) : l'OBJ 29 est la fenêtre du texte et les titres du générique (chargée par le texte de chaque
+#   scène / fondu / x4, jamais par un x9) ; $1E l'écrasait par la palette 29 de l'image (fenêtre noire, titres absents).
+#   MAX_FIN_X9_NB=001E : témoin.
+X9_NB = os.environ.get("MAX_FIN_X9_NB", "001D")
+# - images de palettes stockées à la luminosité 0 (comme les jeux natifs) : 0108 + 1204 <jeux de la scène> fond alors la
+#   scène, la fenêtre et le texte ensemble ; les commandes à T != 0 posent $F000 elles-mêmes. MAX_FIN_IMG_LUM0=0 : témoin.
+MASQUE_LUM = 0x0FFF if os.environ.get("MAX_FIN_IMG_LUM0", "1") == "1" else 0xFFFF
+# - x4 (décor et palettes de COMBAT) et son x9 : T choisi par ce que la page doit montrer (la PSP n'a pas de luminosité de
+#   palette : son T ne dit rien). Texte ou sortie du blanc (3204) avant le prochain fondu / scène / fin -> page ALLUMÉE :
+#   1401 + 1904 <image courante>, $1D (forme des 32 cas natifs d'arcade ; x9 ajouté au lot s'il n'y en a pas). Sinon (1204,
+#   tenue, fondu, fin du script) -> 0401 + 0904 brut. MAX_FIN_X4_CONTEXTE=0 : témoin.
+RX_INS = re.compile(r"^        dc\.w    \$([0-9a-fA-F]{4}), \$([0-9a-fA-F]{4})((?:, [^,;]+)*?)\s*(;.*)?$")
+def regle_x4_x9(pid, s, n0):
+    if os.environ.get("MAX_FIN_X4_CONTEXTE", "1") != "1": return s
+    L = s.split("\n"); ins = []
+    for i, l in enumerate(L):
+        m = RX_INS.match(l)
+        if m: ins.append([i, int(m.group(1), 16), int(m.group(2), 16), [a.strip() for a in m.group(3).split(",")[1:]]])
+    lots = []
+    for j, x in enumerate(ins):
+        if not lots or x[1] > 1: lots.append([])
+        lots[-1].append(j)
+    def val(a):
+        return int(a[1:], 16) if a.startswith("$") else None
+    p_cour = None; ajouts = {}
+    for lot in lots:
+        for j in lot:
+            i, att, op, g = ins[j]
+            if op & 0xFFF == 0x108 and len(g) >= 5 and val(g[4]) is not None and val(g[4]) >= n0 and (val(g[4]) - n0) % 2 == 0:
+                p_cour = val(g[4]) + 1
+            if op & 0xFFF == 0x904 and len(g) >= 4 and val(g[0]) == 4 and val(g[1]) is not None and val(g[1]) >= n0:
+                p_cour = val(g[1])
+        x4 = [j for j in lot if ins[j][2] & 0xFFF == 0x401]
+        if not x4: continue
+        ctx = "fin"; i_ctx = None
+        for (i, att, op, g) in ins[x4[-1] + 1:]:
+            i_ctx, a_ctx = i, att
+            cl, sous, T = (op >> 4) & 7, (op >> 8) & 0xF, op >> 12
+            if cl == 3: ctx = "texte"; break
+            if cl != 0: continue
+            if sous == 2:
+                Tf = {7: 0, 8: 1, 9: 1, 0xA: 4, 0xB: 5, 0xC: 2, 0xD: 3, 0xE: 5, 0xF: 5}.get(T, T)
+                ctx = {1: "1204", 4: "tenue", 5: "tenue", 3: "3204", 0: "0200", 2: "2200"}.get(Tf, "fondu"); break
+            if sous in (1, 4) or op == 0: ctx = "scène" if op else "fin"; break
+        # natifs (Upper) : 1401 -> texte 41, scène 20, 5200 4, 1204 3, 0200 1 ; 0401 -> fin du script 30, 5200 11, 1204 3
+        # (0401 -> texte : 5 cas, tous allumés par un 1904 du même lot). T = 0 seulement devant 1204, une tenue, la fin.
+        T = 0 if ctx in ("1204", "tenue", "fin") else 1
+        # x4 FINAL (générique) : les natifs le chargent brut et un ACTEUR de leur table de fin rallume la page après 0000
+        # (img $4726E-$4733C, +1 toutes les 4 images) ; les tables d'acteurs MAX n'en ont pas (mesuré M9 : page figée à la
+        # luminosité 0 pendant tout le générique de max58 et de l'essai E1) -> page allumée tout de suite. MAX_FIN_X4_FIN=0 : brut.
+        if ctx == "fin" and os.environ.get("MAX_FIN_X4_FIN", "1") == "1": T = 1
+        # sortie du blanc (3204) juste après un x4 : la page est déjà la base $90C0 (le blanc n'est pas recopié) et la cible du
+        # 3204 = des JEUX (ceux de la scène), pas les palettes de combat -> plans = min(décor de combat, jeux) ; mesuré
+        # (M4, E1 Yun instr. 15 : plans figés à E). Forme native : « 2200 … 1401 ; 1904 » sans 3204 (fins 09, 0f) -> retiré.
+        if ctx == "3204" and a_ctx <= 1 and os.environ.get("MAX_FIN_X4_3204", "1") == "1":
+            L[i_ctx] = "; (fins_upper_m) 3204 après un x4 retiré (forme native 2200 … 1401 ; 1904) : " + L[i_ctx].strip()
+            ctx = "texte"
+        x9 = [j for j in lot if ins[j][2] & 0xFFF == 0x904 and len(ins[j][3]) >= 4 and val(ins[j][3][0]) == 4]
+        for j in x4 + x9:
+            i, att, op, g = ins[j]; op2 = (op & 0x0FFF) | (T << 12)
+            l = L[i].replace("$%04x" % op, "$%04x" % op2, 1).replace("$%04X" % op, "$%04x" % op2, 1)
+            if j in x9: l = re.sub(r"\$001[eE](?=\s*(;|$))", "$" + X9_NB, l)
+            L[i] = l + "  ; (fins_upper_m) T = %d : %s" % (T, ("page allumée (" if T else "page non montrée (") + ctx + ")")
+        # le T appliqué aux effets du lot est celui du DERNIER x1 / x4 / x5 (T != F) / x9 du lot (drapeau unique $805E(A5),
+        # mesuré M3) : aucun autre poseur ne doit le contredire
+        for j in lot:
+            op_ = ins[j][2]; cl_, so_, T_ = (op_ >> 4) & 7, (op_ >> 8) & 0xF, op_ >> 12
+            if cl_ == 0 and j not in x4 + x9 and (so_ in (1, 9) or (so_ == 5 and T_ != 0xF)) and j > x4[-1]:
+                raise AssertionError("script %s : lot du x4 ligne %d, %04x pose T = %x après le x4" % (pid, ins[x4[-1]][0], op_, T_))
+        if T and not x9 and p_cour is not None:
+            ajouts[ins[x4[-1]][0]] = "        dc.w    $0000, $1904, $0004, $%04x, $0000, $%s  ; (fins_upper_m) x9 image courante sur le x4 (page allumée, %s)" % (p_cour, X9_NB, ctx)
+    # scène dans le noir (0108, chargée brute et AFFICHÉE) dans le même lot qu'un fondu sortant (2200 / 0200) : la scène est
+    # posée avant le fondu (ordre des effets) -> c'est la NOUVELLE scène, brute, qui part au blanc / au noir. Forme native
+    # (fins 01, 0a, 23) : 0108 dans un lot APRÈS le fondu (attente gelée pendant le fondu) + 4200 / 5200 qui garde la page
+    # de tenue jusqu'au fondu entrant. MAX_FIN_0108_LOT=0 : témoin.
+    if os.environ.get("MAX_FIN_0108_LOT", "1") == "1":
+        for lot in lots:
+            fd = [j for j in lot if ins[j][2] in (0x2200, 0x0200)]
+            sc = [j for j in lot if ins[j][2] == 0x0108 and fd and j > fd[0]
+                  and not any((ins[j2][2] >> 8) & 0xF == 2 and (ins[j2][2] >> 4) & 7 == 0 for j2 in lot if j2 > j)]
+            for j in sc:
+                i = ins[j][0]
+                L[i] = re.sub(r"^(        dc\.w    )\$[0-9a-fA-F]{4}", r"\g<1>$0002", L[i]) + "  ; (fins_upper_m) attente 2 : après le fondu sortant"
+                ajouts[i] = (ajouts[i] + "\n" if i in ajouts else "") + "        dc.w    $0000, $%s00  ; (fins_upper_m) tenue de la page %s (forme native 0108 ; 4200)" % ("42" if ins[fd[0]][2] == 0x2200 else "52", "blanche" if ins[fd[0]][2] == 0x2200 else "noire")
+    out = []
+    for i, l in enumerate(L):
+        out.append(l)
+        if i in ajouts: out.append(ajouts[i])
+    return "\n".join(out)
 def images_fin(pid):
     f = CV + "%s/fin/jeux_palettes.json" % PL_FIN.get(pid, "")
     if not P4 or not os.path.exists(f): return None
@@ -74,15 +169,32 @@ def corrige_images(pid, s, J):
     S = lambda i: n0 + 2 * i; P = lambda i: n0 + 2 * i + 1; NR = n0 + 2 * ni
     ev = J["evenements"]
     sc = [e for e in ev if e["op"] == "scene"]; x5 = [e for e in ev if e["op"] == "x5"]; x9 = [e for e in ev if e["op"] == "x9"]
-    out = []; i9 = i5 = isc = 0; s_cour = None
-    for l in s.split("\n"):
+    out = []; i9 = i5 = isc = 0; s_cour = None; img_cour = None
+    # (14/11, session MAX, max59) F501 n (n >= 2) sans scène ni x9 avant le texte suivant (Eagle F501 $A « Sorry I
+    # dragged… », Maki F501 3 « That was too close! ») : la tâche de fin y recharge les palettes de COMBAT de J1 / J2 dans
+    # la page $90C000 (image $2990 -> $6668, relevé sonde_ecrit59b) et rien ne remet celles de la fin (PSP : F501 ne touche
+    # pas aux palettes) -> x9 de l'image courante ajouté. MAX_FIN_F501_X9=0 : témoin.
+    lignes_ = s.split("\n")
+    def op_(l):
+        m_ = re.match(r"^        dc\.w    \$[0-9a-f]{4}, \$([0-9a-f]{4})", l)
+        return m_.group(1) if m_ else None
+    def f501_seul(i_):
+        if os.environ.get("MAX_FIN_F501_X9", "1") != "1": return False
+        m_ = re.match(r"^        dc\.w    \$[0-9a-f]{4}, \$f501, \$([0-9a-f]{4})", lignes_[i_])
+        if not m_ or int(m_.group(1), 16) < 2: return False
+        for l_ in lignes_[i_ + 1:]:
+            o_ = op_(l_)
+            if o_ in ("1108", "0108", "0904"): return False
+            if o_ == "0034": return True
+        return False
+    for i_l, l in enumerate(lignes_):
         if RX_X9.match(l) or re.match(r"^        dc\.w    \$[0-9a-f]{4}, \$0904, ", l):
             e = x9[i9]; i9 += 1
             if i9 == 1:
                 out.append("; (agent_integration_max) x9 initial retiré (chaque scène recharge OBJ) : " + l.strip()); continue
             d = re.match(r"^        dc\.w    (\$[0-9a-f]{4}), ", l).group(1)
-            out.append("        dc.w    %s, $0904, $0004, $%04x, $0000, $001E  ; (agent_integration_max) x9 -> image %d (30 palettes : OBJ 30-31 = texte)" % (d, P(e["image"]), e["image"]))
-            continue
+            out.append("        dc.w    %s, $0904, $0004, $%04x, $0000, $%s  ; (agent_integration_max) x9 -> image %d (%d palettes)" % (d, P(e["image"]), X9_NB, e["image"], int(X9_NB, 16)))
+            img_cour = e["image"]; continue
         m3 = RX_3204.match(l)
         if m3 and s_cour is not None and os.environ.get("MAX_FIN_3204_IMAGE", "1") == "1":
             # (13/11, session MAX) 3204 a,b,c,d (sortie du blanc, règle F1 « scene » de convertir_fin) : a = jeu OBJ -> le
@@ -91,18 +203,26 @@ def corrige_images(pid, s, J):
             continue
         m = RX_1108.match(l)
         if m:
-            e = sc[isc]; isc += 1; s_cour = S(e["image"])
+            e = sc[isc]; isc += 1; s_cour = S(e["image"]); img_cour = e["image"]
             reste = m.group(3)
             if pid in NOIR:
                 reste = ", $%04x, $%04x, $%04x" % (NR, NR, NR)
             out.append(m.group(1) + "$%04x" % S(e["image"]) + reste + "  ; (agent_integration_max) a5 (OBJ) -> image %d%s" % (e["image"], " ; a6-a8 -> jeu noir" if pid in NOIR else ""))
             continue
         out.append(l)
+        if img_cour is not None and f501_seul(i_l):
+            out.append("        dc.w    $0000, $0904, $0004, $%04x, $0000, $%s  ; (agent_integration_max) après F501 sans scène : image %d (palettes de combat rechargées par le x4 du lot)" % (P(img_cour), X9_NB, img_cour))
         if RX_X5.match(l):
-            e = x5[i5]; i5 += 1
-            out.append("        dc.w    $0000, $0904, $0004, $%04x, $0000, $001E  ; (agent_integration_max) après x5 : image %d (30 palettes)" % (P(e["image"]), e["image"]))
+            e = x5[i5]; i5 += 1; img_cour = e["image"]
+            out.append("        dc.w    $0000, $0904, $0004, $%04x, $0000, $%s  ; (agent_integration_max) après x5 : image %d (%d palettes)" % (P(e["image"]), X9_NB, e["image"], int(X9_NB, 16)))
     assert (isc, i5, i9) == (len(sc), len(x5), len(x9)), "script %s : scènes %d/%d, x5 %d/%d, x9 %d/%d" % (pid, isc, len(sc), i5, len(x5), i9, len(x9))
-    return "\n".join(out)
+    s = regle_x4_x9(pid, "\n".join(out), n0)
+    # (15/11, fins_upper_m, M5) objets joueurs retirés en tête de la fin (« 0B00 », ouverture native « 0603 ; 5200 ; 0b00 ;
+    # 2700 ») : J1 restait affiché (petite Maki couchée des scènes de Maki). MAX_FIN_0B00=0 : témoin (mesuré M5 : J1 retiré, Bison et les acteurs du groupe 0 restent).
+    if os.environ.get("MAX_FIN_0B00", "1") == "1":
+        s, n_ = re.subn(r"^(        dc\.w    \$0000, \$0603, [^\n]*)$", r"\1\n        dc.w    $0000, $0b00  ; (fins_upper_m) objets joueurs retirés (0B00)", s, count=1, flags=re.M)
+        assert n_ == 1, "script %s : pas de 0603 en tête" % pid
+    return s
 
 RX_OPA = re.compile(r"^(        dc\.w    \$[0-9a-f]{4}, \$0a02, \$[0-9a-f]{4}, )\$([0-9a-f]{4})$", re.M)
 def corrige_script(pid, s):
@@ -204,7 +324,7 @@ def jeu_palettes(pid, pl):
         L = ["        even", "; ---- fin $%s : %d images de palettes (session MAX) ; jeux neufs S_i / P_i en %d.. après les jeux du modèle $%02X"
              % (pid, ni, len(old), m), "FIN%s_PAL_DONNEES:" % pid]
         for k in range(len(img) // 32):
-            L.append("        dc.w    " + ", ".join("$%04x" % w for w in st.unpack_from("<16H", img, 32 * k)))
+            L.append("        dc.w    " + ", ".join("$%04x" % (w & MASQUE_LUM) for w in st.unpack_from("<16H", img, 32 * k)))
         noms = []
         for i in range(ni):
             L += ["FIN%s_PAL_S%d:" % (pid, i), "        dc.w    $34, %d, $%x, 30" % (n, 0x400 * i),

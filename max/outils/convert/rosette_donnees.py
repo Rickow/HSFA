@@ -281,6 +281,31 @@ def direct_upper(fin, bank, n):
 # 1 688 enregistrements d'arcade : l'arcade n'y emploie que les bits 5-7) ; recopié par le générateur en $18, bit 0.
 # Posé : l'acteur garde le jeu de palettes chargé par les x9 du script de fin (pas de copie de la palette du joueur).
 PALETTE_PROPRE_BIT = 0
+# (2026-11-13 soir, session MAX, max59) INVITÉS SANS « PALETTE PROPRE » : depuis la 2b21, ce drapeau veut dire « palette de
+# COMBAT du joueur » (MAX_PALPROPRE de l'intégration : banque $7E = ID du joueur de la fin -> palette OBJ 30 = 1re palette
+# de la couleur du joueur). Or les invités sont rangés dans la banque du perso MAX (frames de son pac) : Guile et Charlie
+# de la fin d'Eagle, Fei-Long de la fin de Yun prenaient donc la palette d'Eagle / de Yun (Charlie et Guile bruns, Fei-Long
+# vert ; relevé c2_eu : $C = 30 pour tous les acteurs de la banque $26 / $28). Sur PSP, l'invité garde la palette de son
+# enregistrement (+6) dans le jeu de la scène (Eagle, « Charlie! Are you OK? » : +6 = 1 -> OBJ 1 = palette de fin 4, vert
+# camouflage). Les invités n'ont donc plus le drapeau ; FIN_INVITE_PALPROPRE=1 : ancien comportement (témoin).
+INVITE_PALPROPRE = os.environ.get("FIN_INVITE_PALPROPRE") == "1"
+# (2026-11-14, session MAX, max59) BISON (J2) DU 1er SEGMENT : le groupe G0 (avant le F501 2) s'affiche sur la page des
+# palettes de COMBAT (J1 = OBJ 0-4, J2 = OBJ 5-9). Sur PSP, l'acteur dont la banque = perso d'un joueur prend la palette de
+# ce joueur ; l'octet +6 PSP n'y sert pas. Eagle (+6 = 5) était juste par chance ; Maki / Yun (+6 = 1) et Ingrid (+6 = 2)
+# montraient Bison aux couleurs de J1 (bleu-blanc, vert, orange). Banque $0A dans G0 -> +6 = 5. FIN_J2_PALETTE=0 : témoin.
+J2_PALETTE = os.environ.get("FIN_J2_PALETTE", "1") == "1"
+# (2026-11-15, session MAX, max59) MAKI DANS LA SCÈNE « You're finished….!! » : PALETTE 0 DU JEU DE LA SCÈNE au lieu de la
+# « palette propre » (REGLES_CONVERSION § 4.6). La palette propre (OBJ 30) est réécrite par le chargeur des palettes de texte
+# (OBJ 29-31, appelé aux scènes, aux fondus et aux F501) : sans talon_palrecopie (retiré le 15/11, il décalait d'une image 7
+# fins natives), Maki y était rouge / orange (mesure np_27, captures 60-69). Ces 3 acteurs (groupe 0, phases 4 à $10) ne
+# vivent qu'après la scène 1108 dont le jeu OBJ est l'image 0 (fenêtre de phases +$18 >= 4) ; leur octet +6 PSP vaut déjà 0,
+# et la palette 0 de l'image 0 est la palette de fin 0, celle de Maki (couleur 1 du combat, « fc9 ea6 c74 … »). Mesuré
+# (pal46, captures 44-69) : Maki à la position et aux couleurs des captures PSP, y compris dans l'éclair vert (« Ahhhh… »)
+# où elle n'était qu'une silhouette claire. Prix : la couleur choisie par le joueur n'y est plus suivie (couleur 1). Les
+# phases 1-2 (page des palettes de COMBAT, avant la scène) et le groupe 2 gardent la palette propre. FIN_PAL_SCENE=0 :
+# ancien comportement (témoin).
+PAL_SCENE = os.environ.get("FIN_PAL_SCENE", "1") == "1"
+PALETTE_SCENE = {(0x27, 0, 10): 0, (0x27, 0, 11): 0, (0x27, 0, 9): 0}     # (fin, groupe, anim) -> palette OBJ (+6)
 INVITES = {(0x26, 3, 6): 0x26,      # Charlie, fin d'Eagle : boucle 681-682-683-682 (12 chacune)
            (0x28, 33, 20): 0x28}    # Fei-Long, fin de Yun : 13 pas, frames 801-806
 
@@ -342,6 +367,8 @@ def ecrire_acteurs_s(fin, fichier):
         L.append("%s_G%d:" % (nom, g))
         for r in recs:
             r = bytearray(r); note = ""
+            if J2_PALETTE and g == 0 and r[0] == 0x4B and r[0x1F] == 0x0A and r[6] != 5:
+                r[6] = 5                                # voir J2_PALETTE (Bison = J2, palette 0 de J2 = OBJ 5)
             if (r[0], r[1], r[3]) == (0x4F, 0x04, 0x5D):
                 # (2026-10-18, rectangles magenta des fins) FOND DE LA FENÊTRE DE TEXTE : la PSP le dessine par sa classe
                 # $4F/04 (anim $5D), l'arcade et Upper par $49/00 anim $5D en (192, 128) (1er acteur de chaque groupe de
@@ -355,6 +382,12 @@ def ecrire_acteurs_s(fin, fichier):
                 # du perso MAX lui-même : sur PSP, FUN_001D4C48 lui donne l'emplacement de sprites du JOUEUR (+0x56 =
                 # celui du joueur dont le perso = +0x49 = +$1F) -> palette de COMBAT du joueur, pas les palettes de fin
                 # (+6 = +0xD = 0). Même drapeau « palette propre » que les invités.
+                if PAL_SCENE and (fin, g, r[3]) in PALETTE_SCENE:
+                    assert r[0x18] >= 4 and r[6] == 0, "PAL_SCENE : fin $%02X groupe %d anim %d, phases %d-%d, +6 = %d" % (
+                        fin, g, r[3], r[0x18], r[0x19], r[6])
+                    r[6] = PALETTE_SCENE[(fin, g, r[3])]
+                    L.append("        dc.b    " + ", ".join("$%02x" % x for x in r) + "      ; perso MAX lui-même (banque $%02X, anim %d) : palette %d du jeu de la scène (voir PAL_SCENE)" % (fin, r[3], r[6]))
+                    continue
                 r[4] |= 1 << PALETTE_PROPRE_BIT
                 L.append("        dc.b    " + ", ".join("$%02x" % x for x in r) + "      ; perso MAX lui-même (banque $%02X, anim %d) : palette du joueur (PSP : emplacement du joueur)" % (fin, r[3]))
                 continue
@@ -362,7 +395,8 @@ def ecrire_acteurs_s(fin, fichier):
                 # (2026-10-18, mosaïques des invités, relevé HSFA b16) persos AJOUTÉS par Upper (Guile $20, Fei-Long $21,
                 # Dee Jay $22, T.Hawk $23) : leurs tuiles ne sont pas dans la ROM CPS2 ni chargées par la fin modèle ->
                 # invité dessiné avec les frames du pac du perso MAX (FIN_ANIM n° = anim PSP), comme Charlie
-                b0, n0 = r[0x1F], r[3]; r[0x1F] = fin; r[4] |= 1 << PALETTE_PROPRE_BIT
+                b0, n0 = r[0x1F], r[3]; r[0x1F] = fin
+                if INVITE_PALPROPRE: r[4] |= 1 << PALETTE_PROPRE_BIT
                 L.append("        dc.b    " + ", ".join("$%02x" % x for x in r) + "      ; invité AJOUTÉ par Upper (banque PSP $%02X, anim %d) : frames du pac du perso MAX -> banque $%02X, FIN_ANIM n° %d" % (b0, n0, fin, n0))
                 continue
             if (r[0], r[1]) == (0x4E, 0x00) and r[3] in (0x70, 0x71):
@@ -388,7 +422,7 @@ def ecrire_acteurs_s(fin, fichier):
                         r[3] = m; note = "      ; anim PSP %d -> arcade %d (banque %d, par contenu, score %d)" % (k[1], m, k[0], sc)
                     elif (fin, k[0], k[1]) in INVITES:
                         r[0x1F] = INVITES[(fin, k[0], k[1])]
-                        r[4] |= 1 << PALETTE_PROPRE_BIT      # drapeau « palette propre » (symboles_externes_max.s)
+                        if INVITE_PALPROPRE: r[4] |= 1 << PALETTE_PROPRE_BIT  # (max59 : témoin seulement, voir INVITE_PALPROPRE)
                         note = "      ; invité (banque PSP %d) : images dans le pac du perso MAX -> banque $%02X, FIN_ANIM n° %d" % (k[0], r[0x1F], k[1])
                     elif k[0] >= 0x20 or r[0] == 0x4B: note = "      ; ⚠ anim PSP %d de la banque %d : absente d'Upper (animation propre à la PSP)" % (k[1], k[0])
                     elif (r[0], r[1]) in TABLE_DECOR and decor_label(fin, k[1]):

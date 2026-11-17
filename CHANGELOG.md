@@ -7,6 +7,86 @@ est dans le [journal](docs/journal/HANDOFF.md) (« §N ») et dans les [rapports
 > **Language**: from 2026-11-12 on, the entries of this changelog are written in English (starting with the
 > v0.1.9 section below); the older entries stay in French.
 
+## v0.1.12 (2026-11-17)
+
+Stable version: it replaces v0.1.11 as the recommended version. A new builder (one check box per game with its
+approximate time, Hyper + Arcade in the window, elapsed-time counter, a log that grows with the window, Hyper's replay
+table rebuilt from your ISO, Windows fixes of the graft step, a macOS trial in the CI); Hyper + Arcade **ro9a45**
+(Upper's after-fight dialogue and round-end bonuses, Arcade endings fixed, mode menu opening on ARCADE, ZERO 3 portraits
+in the button colour, data copied from Upper kept as they are; journal §236-§243); Upper MAX **max61** (MAX endings
+converted with Upper's measured rules, burns and flames of the MAX characters at the PSP positions, the scenes of
+Eagle's and Yun's secret fights). Programs: SFA3 `a569c361` and Upper `ac053140` (same games as v0.1.11), Hyper
+`dbfd237d` (per-version voices by default, the replay table now comes from your ISO), Hyper + Arcade `37799f69`,
+Upper MAX `13650ed1`. Same cores as v0.1.11, v0.1.10 and v0.1.9 (core batch of 12/11b: 0001-0027, 0029-0032, 0007b).
+
+- **Upper MAX max61** (built by default, `UM_ETAT`): max60 + Yun's secret-fight scene (before Juli + Juni, his 6 PSP lines with Fei-Long as partner; MAX session). Bench against max60: Arcade 4/4 (Yun differs only from the secret fight on, as expected), crossed 64/64, native endings 35/35 identical. Known: the stage behind that scene is tinted magenta (cause under study).
+- **Builder window: approximate time under each game box, and the total** (« ≈ 2 min » under a game that will be
+  built, « +≈ 2 min » under a free box: what ticking it adds; « Total ≈ 10 min » for the selection; the rounded parts add
+  up to the total). The estimates are recalibrated on a user's measurement: the 5 games from an empty output folder in
+  12 min on an i5-13500H (Windows) (`hsfa_build.py`: `DUREES_REF` = the former medians x `ECHELLE_REF` = 720 / 923, same
+  share between steps). The log area now grows when the window is enlarged. The archives are unchanged.
+- **CI: macOS trial** (`constructeur.yml`, pass `essai_windows=true`): a macOS arm64 job (`macos-15`) runs the portable
+  parts of `test_windows.py` (paths: links, home folder, generated code, ISO path for the core; encoding; graft TSV
+  reconstitution; `hsfa_rejeu_iso` replay; the executable as the steps' Python), with no game data. Green on the private
+  repository. Seen there: the Ogg test signal is encoded byte for byte as on Linux, but its decoded PCM differs on macOS
+  arm64 (decoding only serves the check), so the `flux` part is not in the Mac trial.
+- **Builder: Hyper + Arcade is now ro9a45** (`HA_RECETTE = "vars_ro9a45.txt"`, build folder `ro9a45_fige`): ro9a44 +
+  `DONNEES_BRUTES=1` (§243). 235 words of data copied from Upper (a word `$00A0`-`$00A7` next to another word: object
+  X / Y, palette colours and offsets, AI scripts, animation records) were relocated as if they were Upper RAM pointers;
+  they are now kept as they are, the 48 real RAM / video pointers stay relocated. Visible effects: the explosions of the
+  base sequence in endings 0F, 10, 19 and 1A are at Upper's height (they were 24 pixels too low), and in fights
+  on Zangief's stage the machine behind the pipes has its right colours (misaligned palette offset). Same program
+  (`sz3ud.03c` `37799f69`); only data change (235 bytes). Against ro9a44 on the workshop bench: VERSUS, training,
+  Arcade, continue, game over, second player and 40 stages identical; 85 / 85 endings complete with identical logs and
+  durations, captures changed only in 0F, 10, 19 and 1A. Hyper + Arcade MAX keeps the ro9a41 recipes. With the arcade
+  ROM, the workshop replay table and `HSFA_SONS_PS2=0`, the zip is the delivered ro9a45 one (CRC `9EAFF94E`) except
+  `hsfa_info.txt`.
+- **Builder: Hyper + Arcade is now ro9a44 (then ro9a45, entry above) and Upper MAX is max60** (what `hsfa_build.py` builds by default; the games
+  ticked by default are unchanged). Hyper + Arcade: new constant `HA_RECETTE` next to `HA_ETAT`, the graft recipe
+  (`vars_ro9a44.txt`: ro9a43 + the endings fixes, the credits budget, the mode menu opening on ARCADE and the portraits in
+  the button colour, on the same code and records as ro9a41); the build folder is named after it (`ro9a44_fige`).
+  Hyper + Arcade MAX keeps the ro9a41 recipes (`HA_RECETTE_MAX_BASE`, `HA_RECETTE_MAX`). Upper MAX: new constant
+  `UM_ETAT = "max60"` = max59 with `MAX_ZONES_PSP=1` by default (burn points and flames on the MAX characters at the PSP
+  positions, `impacts_max`); `MAX_ZONES_PSP=0` in the environment gives max59 byte for byte. Both switches are in the
+  cache key: an old output folder rebuilds the graft and Upper MAX's program. Hyper + Arcade `sz3ud.03c` `37799f69`
+  (= the workshop's ro9a44; with the arcade ROM, the workshop replay table and `HSFA_SONS_PS2=0`, the zip is the delivered
+  ro9a44 one except `hsfa_info.txt`); Upper MAX `sz3ud.03c` `081343c9`, zip identical from the European and the US PSP
+  ISO and to the `impacts_max` build; the graft step of the Windows executable under Wine gives the Linux outputs.
+- **Builder on Windows: Hyper + Arcade builds again** (graft step, failed on 15/11 with the test executable of
+  7bec8d6). Two Windows-only faults: the graft's MAME records (`releves_tsv.py`) were rebuilt with « \ » paths, so
+  `ram.txt` stayed in range form (`ValueError ... 'ff0000-ff0182'`); then the translator split `HSFA_GREFFE_ZONE` on
+  « : », drive letter included. Both fixed. Under Wine, the graft step of the Windows executable gives the Linux
+  `sz3ud.03c` (`be88f3f9`) and the same outputs (the packaging step needs NumPy, which Wine 10 cannot load: the full
+  build is still to be tried on Windows). Linux output unchanged, byte for byte. The Windows CI checks both faults with
+  synthetic data (`test_windows.py`, part `greffe`).
+- **Upper MAX endings** (max59): the MAX ending scripts are converted with the measured rules of Upper's ending
+  engine. The text window is no longer black or cream in 6 places (Eagle, Maki, Yun, Ingrid), the orange titles of the
+  final credits are back, the combat background under the dialogues and the credits are lit, Guile and Charlie keep
+  their green, Eagle his white shirt, Bison his red in the first scene, the player objects the PSP does not show are
+  gone (small lying Maki, Eagle's sitting figure). Maki shows at the PSP position and in her colour 1 in the "You're
+  finished" scene. The 35 native endings are unchanged.
+- **Upper MAX, Eagle's secret fight**: his PSP dialogue with Balrog ("You're the one who defeated Sagat?") now plays
+  before the secret Balrog fight, under Balrog's portrait; it no longer shows after the Sagat fight under Sagat's.
+- **Builder: choose the games one by one, Hyper + Arcade included** (window: one check box per game; console:
+  `--jeux` / `--games`, default unchanged). What a game pulls in is read from `hsfa_build.py`'s own plan and shown as it
+  is: Hyper + Arcade (experimental) also builds Upper and Hyper with their zips, Upper MAX builds Upper with its zip
+  (ticked and greyed boxes); Hyper alone runs two of Upper's steps without its zip. Upper MAX is greyed until a PSP ISO
+  is given; Hyper + Arcade MAX is not offered (core patch 0033). The estimated time follows the selection; a small
+  counter shows the elapsed time, and the log ends with the total time. The archives are unchanged, byte for byte.
+- **Hyper's replay table rebuilt from your ISO** (no `--rejeu-table` needed any more): the new build step `rejeu_iso`
+  runs the original sound drivers of SFA1 and SFA2 that are on the disc (X_DATA entries 221 / 250) offline, with the
+  same sweep protocol as the workshop measurement, and writes `hsfa_rejeu_table.txt` from their QSound writes
+  (`tools/son-hyper/rejeu_iso`: `hsfa_rejeu_iso`, Z80 of `z80.h`, MIT; `gen_rejeu_iso.py`). Compared with the workshop
+  table: the same 1 323 sounds, the same register writes in the same order, the same 19 truncated sounds; times within
+  33 us at the 99th percentile (104 us at most, one QSound sample is 41.6 us). So every build from the ISO now has the
+  ZERO / ZERO 2 / ALPHA voices: Hyper's program is the one built with the replay table (`sz3ud.03c` `dbfd237d`) and
+  Hyper + Arcade takes the corrected module (`be88f3f9`), with no file from outside; compared with a build given the
+  workshop table, the ROMs do not change, only the zip member `hsfa_rejeu_table.txt` (times). `--rejeu-table` stays and
+  comes first. About 30 to 60 s more per build with Hyper (25 s for the drivers on the workshop PC). The builder carries
+  the tool prebuilt (`natifs.py`), next to `fluxtool`; the table is the same byte for byte with every compiler tried
+  (gcc, clang, mingw for Windows) and at -O0. The completed table is now written with LF line ends on every system (it
+  would have been CRLF on Windows).
+
 ## v0.1.11 (2026-11-15)
 
 Stable version: it replaces v0.1.10 as the recommended version. Fixes of the all-in-one builder only: the games are

@@ -251,6 +251,18 @@ def donnees(buf, data, end, T, W=None):
     for p in ACTIFS:
         if "FLAMMES_%s" % p.upper() in SYM: pose(0x74C358, int(p, 16), p32(S("FLAMMES_%s" % p.upper()))); nf += 1
     log("flammes (0x74C358) : %d entrées MAX" % nf)
+    # (impacts_max, 16/11) points d'effets posés sur le corps d'une victime MAX (brûlure du feu, objets classe $0A,
+    # lecteurs image $34624 / $3469C) : T_74C3F8 / T_74C498 [ID] -> ZONES_xx / ZONES2_xx de la session MAX
+    # (converti/zones/zones_effets_max.s : sections 20 / 21 de l'entrée [6], Yun 15 / 16, 22 zones de 4 points (dx, dy)).
+    # Sans : bloc de Ryu (14 zones ; $26, $2D, $2E) ou de la place $27 (Maki). MAX_ZONES_PSP=0 (défaut) : rien posé.
+    if os.environ.get("MAX_ZONES_PSP", "0") == "1":
+        nz = 0
+        for p in ACTIFS:
+            if "ZONES_%s" % p.upper() not in SYM: continue
+            pose(0x74C3F8, int(p, 16), p32(S("ZONES_%s" % p.upper())))
+            pose(0x74C498, int(p, 16), p32(S("ZONES2_%s" % p.upper()))); nz += 1
+        assert nz == len(ACTIFS), "points d'effets : %d entrées MAX sur %d (zones_effets_max.s absent ?)" % (nz, len(ACTIFS))
+        log("points d'effets (0x74C3F8 / 0x74C498) : %d entrées MAX ; flammes MAX en ordre image (dy, dx)" % nz)
     # (2b18) recul des types de réaction 28-32 (session MAX, converti/recul/recul_max.s, ORDRE IMAGE) : séquences
     # RECUL_S25-S29 en entrées 25-29 des deux tables rel16 (0x9719C0 / 0x971CC0, mêmes séquences) ; T_61B460 -> RECUL_TYPES
     # (33 types, LEA en image $52DCE posé par image())
@@ -345,6 +357,13 @@ def donnees(buf, data, end, T, W=None):
         DLG_CHOIX = [(int(t, 16), (int(c) - 8) // 2, int(i, 16), int(v)) for t, c, i, v in
                      _re.findall(r"; +0x(61B580|61B600)\[\((\d+) - 8\) / 2 \* 40 \+ \$([0-9A-F]{2})\] = (\d+)", txt)]
         log("dialogues MAX : %d répliques (0x683C28), %d scénarios (0x970F40), %d choix" % (nr, ns, len(DLG_CHOIX)))
+        if os.environ.get("MAX_DLG_SECRET", "1") == "1":
+            # (15/11, session MAX) 3e rangée « après » (0x61B650 = rangée 2 de 0x61B600) : lue aussi, dans sa copie agrandie
+            # (agrandit_max, image $E81320), par les scènes des combats SECRETS (« MOVE.B 1(A0,D0.W),$147(A5) », D0 = perso
+            # de J1 ; va 0x2667B4 Juli + Juni, va 0x266C04 Balrog). talon_dialogues ne déplace que les lecteurs de 0x61B580 /
+            # 0x61B600 : mesuré (sonde d'écriture de $147, dlg157), Eagle contre Balrog lisait $FF. MAX_DLG_SECRET=0 : sans.
+            for t_, r_, i_, v_ in DLG_CHOIX:
+                if t_ == 0x61B600 and r_ == 2: pose(0x61B650, i_, bytes([v_]))
     # (2b22, R8 / R9 de la session MAX : converti/tables_id/tables_id_max.s) valeurs physiques par perso et carte du monde
     ft = MC.CV + "tables_id/tables_id_max.s"
     if os.path.exists(ft):

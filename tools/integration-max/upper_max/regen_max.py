@@ -173,6 +173,9 @@ class Regen:
         s.etape("convert", ["portraits_fork.py"], nom="portraits_fork_2")  # APRÈS l'habillage
         for o in ("bandeau_noms_max.py", "carte_noms_max.py", "winner_noms_max.py"): s.etape("convert", [o, "source"])
         for o in ("recul_max.py", "flammes_max.py", "tables_id_max.py", "ia_max.py"): s.etape("convert", [o])
+        # (impacts_max, 16/11) points d'effets posés sur le corps (T_74C3F8 / T_74C498) : convertis si max/ a le
+        # convertisseur (session MAX) ; posés par l'intégration seulement si MAX_ZONES_PSP=1
+        if os.path.exists(os.path.join(s.O, "convert", "zones_effets_max.py")): s.etape("convert", ["zones_effets_max.py"])
         # dialogues_max.py relit l'ISO (« eur/data/bdXX_e.pac » en dur) : lu ici dans le cache (noms européens, textes
         # normalisés), pour les deux disques ; max/ inchangé
         code = ("import os, runpy, sys, iso_psp\n"

@@ -889,6 +889,18 @@ X2_SAUF = {int(x, 16) for x in os.environ.get("X2_SAUF", "").split(',') if x}   
 X2_VALEURS = [int(x, 16) for x in os.environ.get("X2_VALEURS", "").split(',') if x]   # (L1, D1 : vide) ids 26 27 2d 2e
 assert X2_TABLES or not X2_VALEURS, "X2_VALEURS sans X2_TABLES"
 assert all(v_ in (0x26, 0x27, 0x2D, 0x2E) for v_ in X2_VALEURS), X2_VALEURS
+# (apres_combat, 15/11) APRES_COMBAT=1 : dialogue d'apres combat d'Upper (5e et 9e combats de l'Arcade) : sous-etat C de
+# la sous-table de combat copiee = copie de l'aiguilleur d'Upper 0x26DFB0 (force3.py) ; son lecteur de T_61B600 (2 rangees
+# de 40 scenarios, index ($13E - 8) x 20 + id) prolonge a 2 rangees de 48 comme le lot C (ligne « AC » de x2_tables.tsv :
+# 20 -> 24 par le 2e decalage, id du perso de base par patch_116). Les suites Arcade du K.O. d'Upper (KO_ARCADE : $B9 = 1
+# et $AD quand le joueur a perdu, lus par l'aiguilleur) passent du debut de l'etat 7 (talon etat7) au debut du sous-etat C
+# (talon etatC : appelees quand $10(A5) = 0, puis l'aiguilleur) : chez Upper elles tournent au K.O., avant C ; dans la
+# greffe elles restent apres les etats 4-6 d'Hyper (pose de victoire). =0 : comme ro9a42 (ligne AC ignoree).
+APRES_COMBAT = os.environ.get("APRES_COMBAT", "0") == "1"
+# (apres_combat, 15/11 soir, D2) PRIMES_MANCHE=1 : primes de fin de manche d'Upper (force3.py) : entree 5 de la sous-table
+# de combat copiee = copie de l'aiguilleur 0x26CB60. =0 : comme ro9a42.
+PRIMES_MANCHE = os.environ.get("PRIMES_MANCHE", "0") == "1"
+assert not APRES_COMBAT or X2_TABLES, "APRES_COMBAT exige X2_TABLES=1 (lecteur de T_61B600 en rangees de 48)"
 
 def x2_liste():
     """lignes de x2_tables.tsv (en-tete : lot upper table_ro9a37 cote genre e n0 rangs lecteurs_a_rediriger sites_temoins
@@ -908,6 +920,7 @@ def x2_liste():
         # lot E = tables de L2 (pilote avec MAX) : ignore sans MAX=1 (greffe sans MAX inchangee)
         d_['hyper'] = [int(s_, 16) for s_ in lr_[6:].split(',')] if lr_.startswith('hyper:') else []
         if d_['lot'] == 'E' and not _MAX: continue
+        if d_['lot'] == 'AC' and not APRES_COMBAT: continue   # (apres_combat) T_61B600 : sans l'interrupteur, lecteur non copie
         if not d_['tous']: d_['sites'] = [int(s_, 16) for s_ in lr_[7:].split(',')]
         d_['consts'] = [tuple([c_.split(':')[0]] + [int(v_, 16) for v_ in c_.split(':')[1:]])
                         for c_ in d_['constantes'].split() if ':' in c_ and not c_.startswith('garde:')]
@@ -930,6 +943,70 @@ def x2_entree(lit, e, i, val=None):
 def x2_src(e, i):
     """decalage source (dans la rangee) de l'entree i, sans valeur MAX"""
     return e * i if i < 45 else (0 if i < 47 else e * 39)
+# (fins_restes, 16/11) FINS_IMAGES=1 : images des DECORS DE FIN d'Upper (portrait final des fins $21 Fei-Long, $22 Dee
+# Jay...). Les lecteurs de T_674C00 du module des fins (copies de Upper 0x1EF4D8, 0x2110CC : MOVEQ #14, 0x2120AC : MOVEQ
+# #12 ; LEA T_674C00 puis decalage de rangee et enregistrement $71 x 8) lisent des enregistrements (mot 8, drapeaux,
+# POINTEUR d'image). T_674C00 est une table d'HYPER partagee (T_62EBA0, X2_TABLES « poses des portraits », copie prolongee
+# a 48 entrees) : ses enregistrements visent les images d'HYPER, dont les codes d'emplacement 1 sont, pour 44 images (fins
+# $15 $17 $1E $1F $20 $21 $22 $23 $25 $27...), decales de $200 par rapport a ceux d'Upper ($3CC1 contre $3AC1) ; dessinees
+# en codes d'Upper (talon tuile_e1 : +$7700 dans les ecrans d'Upper), elles donnent des tuiles fausses (mesure : fins_restes,
+# derniere image de la fin $21, fin $22 a 3000 / 3660). Ici : une COPIE de la table prolongee X2 (meme disposition), dont
+# chaque pointeur vise l'image d'HYPER si ses octets sont EGAUX a ceux de l'image d'Upper de meme rang, sinon une copie des
+# octets de l'image d'Upper (meme alignement modulo 4) ; placee apres les tables X2 (avant la fenetre des decors : rien ne
+# bouge) ; seuls les LEA des lecteurs du module des fins (FINS_IMAGES_SITES, jamais appeles en combat) la visent. =0 : comme
+# ro9a43 (aucun octet change).
+FINS_IMAGES = os.environ.get("FINS_IMAGES", "0") == "1"
+FINS_IMAGES_U, FINS_IMAGES_H = 0x674C00, 0x62EBA0
+FINS_IMAGES_SITES = tuple(int(x, 16) for x in os.environ.get("FINS_IMAGES_SITES", "1ef4d8,2110cc,2120ac").split(',') if x)
+def fins_images_table(blob, x2nv):
+    """ajoute a blob (bytearray, bloc de donnees PS2 a GRF_X) la copie de la table prolongee X2 de T_674C00 (adresse
+    d'execution x2nv) aux images d'Upper ; rend (adresse d'execution, texte)"""
+    U_ = PL.b5; H_ = open(MODULE_SOURCE, 'rb').read()
+    u16 = lambda b, a: struct.unpack_from('<H', b, a - BASE)[0]; u32 = lambda b, a: struct.unpack_from('<I', b, a - BASE)[0]
+    def image(b, p):                                   # image de type 8 : [8, budget, n] puis n + 1 entrees de 8 o
+        if not (0x600000 <= p < 0xA00000) or u16(b, p) != 8: return None
+        return bytes(b[p - BASE:p - BASE + 6 + 8 * (u16(b, p + 4) + 1)])
+    o2 = x2nv - GRF_X; nh_ = struct.unpack_from('<h', blob, o2)[0] // 2
+    off2 = struct.unpack_from('<%dh' % nh_, blob, o2); offu = struct.unpack_from('<%dh' % nh_, U_, FINS_IMAGES_U - BASE)
+    offh = struct.unpack_from('<%dh' % nh_, H_, FINS_IMAGES_H - BASE)
+    assert offu == offh and nh_ == 66, "FINS_IMAGES : en-tetes d'Upper et d'Hyper differents"
+    lg = max(off2) + 8 * X2_N
+    while len(blob) & 15 != x2nv & 15: blob += b'\0'
+    t = GRF_X + len(blob); copie = bytearray(blob[o2:o2 + lg]); cop = {}; vus = set(); n_eg = n_cop = 0
+    d2 = sorted(set(v for v in off2 if v)); fin2 = lg   # groupes de la copie X2 : rangee prolongee (48 x 8 o) ou brute
+    for k in range(nh_):
+        if not off2[k] or off2[k] in vus: continue
+        vus.add(off2[k]); j_ = d2.index(off2[k]); e_ = (d2[j_ + 1] if j_ + 1 < len(d2) else fin2) - off2[k]
+        prol_ = e_ == 8 * X2_N
+        for i in range(X2_N if prol_ else e_ // 8):
+            r2 = off2[k] + 8 * i; ru = FINS_IMAGES_U + offu[k] + (x2_src(8, i) if prol_ else 8 * i)
+            q = struct.unpack_from('<I', copie, r2 + 4)[0]; p = u32(U_, ru + 4)
+            bu = image(U_, p)
+            if bu is None: continue
+            if 0x200000 <= q < 0x1000000 and q - BASE < len(H_) and bytes(H_[q - BASE:q - BASE + len(bu)]) == bu: n_eg += 1; continue
+            cop.setdefault(p, []).append(r2); n_cop += 1
+    blob += copie
+    for p in sorted(cop):
+        bu = image(U_, p)
+        while (GRF_X + len(blob)) & 3 != p & 3: blob += b'\0'
+        a = GRF_X + len(blob); blob += bu
+        for r2 in cop[p]: struct.pack_into('<I', blob, t - GRF_X + r2 + 4, a)
+    return t, "FINS_IMAGES : copie %x de la table X2 %x (%x o) : %d enregistrements -> images d'Hyper egales, %d -> %d images d'Upper copiees ; fin %x" % (t, x2nv, lg, n_eg, n_cop, len(cop), GRF_X + len(blob))
+# (fins_restes, 16/11) GENERIQUE_BUDGET=1 : budget de sprites des lignes du GENERIQUE (commandes 3 et 5 du 3e interpreteur
+# de dessin, objets du reservoir $FFD000). Hyper (corps 0x39DD00) RESERVE $C0 sprites par objet (CMPI.W #$C0,D7 ; BCS ;
+# ADDI.W #-$C0,D7) ; Upper (corps 0x1492B0) n'exige qu'un budget positif et decompte UN sprite par lettre (TST.W D7 ; BLE ;
+# SUBQ.W #1,D7). Mesure (fins_restes, fin 22 a 3000) : les deux objets du generique font passer D7 de $184 a $04 et la
+# fenetre de dialogue, dessinee ensuite, n'a plus de budget (texte absent pendant le generique : fins 21, 22). Ici : un
+# talon = copie BRUTE du corps d'Upper [0x1492B0, 0x1497E0) (registres du portage $11xx et pile seulement : aucun saut
+# absolu, aucune donnee, aucun champ A5 ; branches relatives internes), et les deux JAL des entrees d'Hyper (0x39DCB8,
+# 0x39DCE8, apres la pose de D2 = $1280001F / $1280001D, base d'Hyper gardee) visent ce talon. Mesure : ces commandes
+# ne sont executees que pendant les fins (scene $A ; 0 passage en VERSUS et en combat). =0 : comme ro9a43.
+GENERIQUE_BUDGET = os.environ.get("GENERIQUE_BUDGET", "0") == "1"
+U_GEN_CORPS, H_GEN_CORPS, H_GEN_JAL = (0x1492B0, 0x1497E0), 0x39DD00, (0x39DCB8, 0x39DCE8)
+def stub_generique_corps():
+    a_, b_ = U_GEN_CORPS; w = list(struct.unpack('<%dI' % ((b_ - a_) // 4), bytes(PL.b5[a_:b_])))
+    assert w[-2] == 0x03e00008 and all((x >> 26) not in (2, 3) for x in w), "GENERIQUE_BUDGET : corps d'Upper inattendu"
+    return w
 DEFI_CPT = 0xFE0A                                     # $FF7E0A : compteur de la sortie de defi (zone fixe de la greffe, D2)
 DEFI_N = int(os.environ.get("E2B_IMAGES", "6"))
 U_DEFI_JSR, U_DEFI_CIBLE = 0x1353EC, 0x1354E0         # Upper : JSR du chemin « challenger accepte » de u1353A0 et sa cible
@@ -1391,6 +1468,14 @@ if DECORS_LOTS:                                       # (E1) dependencies, then 
 DECOR_E0 = os.environ.get("DECOR_E0", "0") == "1"
 DECOR_E0_PAL = int(os.environ.get("DECOR_E0_PAL", "f"), 16)
 DECOR_E0_DEBUT = 0x6C60
+# (releves_v161, 15/11) DECOR_E0_HAUTS : mots hauts admis du pointeur de trame ($00ED / $00EE en dur jusqu'ici). Le bloc des
+# données de la greffe peut grossir quand les relevés changent (journaux re-mesurés sur l'oracle v161 : +20 Ko) ; les
+# pointeurs passent alors en $00EE / $00EF et 2 trames sur 3 n'étaient plus reconnues (objets du décor de Ken faux en
+# VERSUS). « auto » : mots hauts de la fenêtre $ED0000-$EFFFFF ; défaut ed,ee = ro9a42 à l'octet.
+DECOR_E0_HAUTS = os.environ.get("DECOR_E0_HAUTS", "ed,ee")
+DECOR_E0_HAUTS = (0xED, 0xEE, 0xEF) if DECOR_E0_HAUTS == "auto" else tuple(int(x, 16) for x in DECOR_E0_HAUTS.split(",") if x)
+# DECOR_E0_MIN=n : garde-fou, la construction ÉCHOUE si moins de n trames sont reconnues (ro9a42 : 786 ; 0 = sans contrôle).
+DECOR_E0_MIN = int(os.environ.get("DECOR_E0_MIN", "0"))
 _DECOR_E0_TABLE = {}                                   # nouveau code -> entrée de f351 d'Upper (rempli par recode_decor_e0)
 def _banques_hu():
     W9, W5 = "@HA_MAME_RO9@/banques_hx", "@HA_MAME_RO5@/banques_hx"
@@ -1406,7 +1491,7 @@ def recode_decor_e0(zbuf):
         return [[((c & ~0xf) + (((c & 0xf) + i) & 0xf) + 0x10 * j) & 0xffff for i in range(W_)] for j in range(Hh)]
     nxt = DECOR_E0_DEBUT; deja = {}; n_ent = n_tr = 0
     for o in range(0, len(zbuf) - 12, 2):
-        if not (w_(o) == 2 and w_(o + 6) == 0 and w_(o + 4) < 0x80 and w_(o + 10) in (0xED, 0xEE)): continue
+        if not (w_(o) == 2 and w_(o + 6) == 0 and w_(o + 4) < 0x80 and w_(o + 10) in DECOR_E0_HAUTS): continue
         n_tr += 1
         for k in range(w_(o + 4) + 1):
             a = o + 12 + 4 * k
@@ -1424,6 +1509,7 @@ def recode_decor_e0(zbuf):
                 deja[cle] = base
             struct.pack_into('<H', zbuf, a, deja[cle]); n_ent += 1
     assert nxt <= 0x8000, "DECOR_E0 : codes au-delà de $7FFF"
+    assert n_tr >= DECOR_E0_MIN, "DECOR_E0 : %d trames reconnues < DECOR_E0_MIN %d (mots hauts %s : le bloc de donnees a-t-il bouge ?)" % (n_tr, DECOR_E0_MIN, DECOR_E0_HAUTS)
     print("DECOR_E0 : %d trames, %d entrées recodées, %d codes (%d sprites) -> $%04X-$%04X" % (n_tr, n_ent, len(_DECOR_E0_TABLE), len(deja), DECOR_E0_DEBUT, nxt - 1))
     return zbuf
 def _prolonge_e0(d):
@@ -1459,7 +1545,18 @@ if OBJETS_ANIM_POSE:
 OBJETS_ALLOC_GARDE = tuple(int(x, 16) for x in os.environ.get("OBJETS_ALLOC_GARDE", "103950,412120,413a90,418160").split(',') if x)
 def _pose_octet(d68, v): return [0x24030000 | (v & 0xffff), 0x3c027000, 0x8c421114, 0xa0430000 | ((d68 ^ 1) & 0xffff)]
 MASQUE_S1 = [0x3c027000, 0x8c421114, 0x94430032, 0x3063fffd, 0xa4430032]   # ANDI.W #$FFFD,$32(A5)
-def stub_moteur(si, sinon, masque=False, m12a=False):
+# (talons_combat, 15/11, principe 1 de CARTE.md §7) MOTEUR_EFFET_ETAT=1 : objet d'effet de decor d'Hyper (init 0x391DD0,
+# table d'etats T_5C9E20 : 0 = init, 2 = marche 0x391E50, 4 et 6 vides) : le choix « decor d'Upper ou non » est fait UNE
+# fois, a l'init (talon effet_init sur le JMP 0x391E38), au lieu de chaque image : decor d'Upper -> etat 4 (ADDQ.B #2 de
+# plus, memes mots que l'init d'origine 0x391DD8-0x391DEC) dont l'entree de table (vide dans Hyper) est la copie d'Upper
+# 0x13BB10 ; sinon etat 2 = marche d'Hyper 0x391E50, entree de table d'ORIGINE (plus de talon a chaque image). =0 : talon
+# moteur_effet a chaque image (ro9a42).
+MOTEUR_EFFET_ETAT = os.environ.get("MOTEUR_EFFET_ETAT", "0") == "1"
+def _addq_etat_a4():
+    h = open(MODULE_SOURCE, 'rb').read(); w = list(struct.unpack_from('<5I', h, 0x391DD8))
+    assert w == [0x3c027000, 0x8c431110, 0x80620004, 0x24420002, 0xa0620004], [hex(x) for x in w]   # ADDQ.B #2,$5(A4)
+    return w
+def stub_moteur(si, sinon, masque=False, m12a=False, pre=()):
     """partie Arcade ($FE00) ET decor d'Upper ($FE10) -> JSR si (copie d'Upper) [+ scroll1 masque], sinon JSR sinon
     (e28, D4_VERSUS) : ($FE00 OU $FE11) ET $FE10 ; le chemin de l'Arcade garde EXACTEMENT les instructions d'avant (la
     cadence du combat en depend : e28f/e28g, ou l'ordre des tests changeait, decalaient les combats de l'Arcade) : le bloc
@@ -1467,7 +1564,7 @@ def stub_moteur(si, sinon, masque=False, m12a=False):
     w = [0x27bdfff0, 0xffbf0000]; br = []
     w += _test_octet(FLAG); b0 = len(w); w += [0x10600000, 0]                        # beq -> Lv (D4_VERSUS) / sinon
     w += _test_octet(FLAG_DECOR); br.append(len(w)); w += [0x10600000, 0]           # beq -> sinon
-    Lsi = len(w); w += (_masque_12a() if m12a else []) + _appels(si) + (_remet_12a() if m12a else []) + (MASQUE_S1 if masque else []); j = len(w); w += [0x10000000, 0]
+    Lsi = len(w); w += list(pre) + (_masque_12a() if m12a else []) + _appels(si) + (_remet_12a() if m12a else []) + (MASQUE_S1 if masque else []); j = len(w); w += [0x10000000, 0]
     if D4_VERSUS:
         Lv = len(w); w[b0] |= (Lv - b0 - 1) & 0xffff
         w += _test_octet(FLAG_VS); br.append(len(w)); w += [0x10600000, 0]          # beq -> sinon
@@ -1861,6 +1958,7 @@ def main():
     if COMBAT_HYPER:
         SYN += [('ko_compte', stub_arcade([0], [0])),
                 ('etat7', stub_si([0], [0], octets=ETAT7_OCTETS, avant=[0] * len(KO_ARCADE))), ('vs_decor', stub_decor(0)),
+                ] + ([('etatC', stub_si([0], [0] * (len(KO_ARCADE) + 1), octets=(0x11,)))] if APRES_COMBAT else []) + [
                 ('type14', stub_arcade([0], [0])),
                 ('remap_ids', stub_remap_ids(4 if FOND_ARCADE else 0, ((4,) if CARTE_S1 else ()) + (4, 4) if FOND_ARCADE and CARTE_EFFACE else ())), ('plans_auto', stub_plans_auto(4 if COUCHES_UPPER else 0))]
         if PLANS: SYN += [('plans_s%X' % k, stub_plans_scene(4, k == 0xA and DECOR_FIN, (PLANS_S6 if k == 6 else PLANS_S68) if (k == 6 or (k == 8 and not PLANS_GO)) else None, ((4, 4, 4) if DECOR_BOSS_FIN else (4, 4)) if k == 0xA and EFFACE_FIN else (), k == 6 and CONT_S1_MASQUE, k == 6 and CONT_SORTIE)) for k in (6, 8, 0xA)]
@@ -1886,6 +1984,8 @@ def main():
         if PLANS and CONT_SORTIE and E2B_DEFI: SYN += [('defi_sortie', stub_defi_sortie(4))]   # (ro9a38) en dernier
         if COUL_CPU_VERSION: SYN += [('coul_cpu_%d' % (k_ + 1), stub_coul_cpu(c_, o_)) for k_, (_, c_, o_) in enumerate(U_COUL_SITES)]   # (couleur du CPU) en dernier
         if PORT_VERSION: SYN += [('port_carte', stub_port_carte(0)), ('port_vict', stub_port_vict(0))]   # (portraits) en dernier
+        if DECORS_UPPER and VS_UPPER and MOTEUR_EFFET_ETAT: SYN += [('effet_init', stub_moteur([0], [0], pre=_addq_etat_a4()))]   # (talons_combat) en dernier
+        if GENERIQUE_BUDGET: SYN += [('generique_corps', stub_generique_corps())]   # (fins_restes) en dernier
     g = Greffe2(routines, Pl.dec, a5, synth=SYN)
     FEN, TROUS = fenetres() if FENETRES else (None, TROU_SON)
     if FENETRES:
@@ -1960,8 +2060,9 @@ def main():
     if COMBAT_HYPER:
         X = lambda f: a_exec(g, f)
         g.synth += [('ko_compte', stub_arcade([X(0x269340)], [H_KO_COMPTE + BASE])),
-                    ('etat7', stub_si([X(0x26E900)], [H_ETAT7 + BASE], octets=ETAT7_OCTETS, avant=[X(f) for f in KO_ARCADE])),
+                    ('etat7', stub_si([X(0x26E900)], [H_ETAT7 + BASE], octets=ETAT7_OCTETS, avant=[] if APRES_COMBAT else [X(f) for f in KO_ARCADE])),
                     ('type14', stub_arcade([X(0x17FD50)], [0x3310F0 + BASE])),
+                    ] + ([('etatC', stub_si([X(0x26DFB0)], [X(f) for f in KO_ARCADE] + [X(0x26DFB0)], octets=(0x11,)))] if APRES_COMBAT else []) + [
                     ('vs_decor', stub_decor(VS_CIBLE(g))), ('remap_ids', stub_remap_ids(a_exec(g, 0x253A80) if FOND_ARCADE else 0, ((0x38AE50 + BASE,) if CARTE_S1 else ()) + (a_exec(g, 0xC5C10), a_exec(g, 0xC5C60)) if FOND_ARCADE and CARTE_EFFACE else ())), ('plans_auto', stub_plans_auto(a_exec(g, 0x15ACB0) if COUCHES_UPPER else 0))]
         SC = {6: a_exec(g, 0x2614A0), 8: a_exec(g, 0x2614D0), 0xA: a_exec(g, 0x261500)}
         if PLANS: g.synth += [('plans_s%X' % k, stub_plans_scene(SC[k], k == 0xA and DECOR_FIN, (PLANS_S6 if k == 6 else PLANS_S68) if (k == 6 or (k == 8 and not PLANS_GO)) else None, ((a_exec(g, 0x4C1B0), a_exec(g, 0x151B80), a_exec(g, 0x4B270)) if DECOR_BOSS_FIN else (a_exec(g, 0xC5C10), a_exec(g, 0xC5C60))) if k == 0xA and EFFACE_FIN else (), k == 6 and CONT_S1_MASQUE, k == 6 and CONT_SORTIE)) for k in (6, 8, 0xA)]
@@ -1984,8 +2085,10 @@ def main():
                         ('moteur_plans_vs', stub_moteur([X(0x151B80)], [0x30EC10 + BASE], m12a=EFFET_12A)),
                         ('moteur_pal', stub_moteur([X(0x4B270)] + ([H_PAL_JOUEURS + BASE] if PAL_VERSION else []), [0x60A20 + BASE])),   # (PAL_VERSION) + palettes par version
                         ('moteur_effet', stub_moteur([X(0x13BB10)], [0x391E50 + BASE]))]
+            if MOTEUR_EFFET_ETAT: g.synth += [('effet_init', stub_moteur([X(0x13BB10)], [0x391E50 + BASE], pre=_addq_etat_a4()))]   # (talons_combat)
             if OBJETS_DECOR: g.synth += [('moteur_objets', stub_moteur([X(0x4C1B0)], [0xAC050 + BASE]))]
             if OBJETS_DECOR and OBJETS_MANCHE: g.synth += [('objets_manche', stub_moteur([0xAC050 + BASE, X(0x4C1B0)], [0xAC050 + BASE]))]
+        if GENERIQUE_BUDGET: g.synth += [('generique_corps', stub_generique_corps())]   # (fins_restes) en dernier
         g.synth[0] = ('scene4_mode', stub_arcade([g.synth_place['plans_auto'] + BASE, a_exec(g, 0x261560)], ([g.synth_place['plans_vs'] + BASE] if D4_VERSUS and DECORS_UPPER else []) + [0x96620 + BASE]))
         for nom_, mots_ in g.synth: assert len(mots_) * 4 <= ((4 * len(dict(SYN)[nom_]) + 15) & ~15), nom_
         # sous-table de combat d'Upper copiee : entree 7 (fin de match) -> talon etat7
@@ -1995,6 +2098,11 @@ def main():
         for i_, h_ in enumerate(H_COMBAT):
             v_ = struct.unpack_from('<I', blob, e7 - GRF_X - 28 + 4 * i_)[0]
             if i_ == 1 and os.environ.get("INTERMEDES", "1") == "1": continue   # (28/10) sous-etat 2 = copie d'Upper (force3)
+            if i_ == 5 and PRIMES_MANCHE:                   # (apres_combat) sous-etat A = copie de l'aiguilleur d'Upper (force3)
+                assert v_ == X(0x26CB60), "T_61C2A0[5] = %x (attendu la copie de 0x26CB60, %x)" % (v_, X(0x26CB60)); continue
+            if i_ == 6 and APRES_COMBAT:                    # (apres_combat) sous-etat C = copie de l'aiguilleur d'Upper (force3),
+                assert v_ == X(0x26DFB0), "T_61C2A0[6] = %x (attendu la copie de 0x26DFB0, %x)" % (v_, X(0x26DFB0))
+                struct.pack_into('<I', blob, e7 - GRF_X - 28 + 4 * i_, g.synth_place['etatC'] + BASE); continue   # par le talon etatC
             assert v_ == h_ + BASE, "T_61C2A0[%d] = %x (attendu Hyper %x)" % (i_, v_, h_ + BASE)
         # sous-table de la scene 4/4 d'Upper copiee : entree 1 (ecran VS + decor d'Hyper) -> talon vs_decor
         # (e29) OBJETS_SANS=<decors hexa> : decors d'Upper SANS objets de decor (liste de T_950CE0 videe dans la copie :
@@ -2131,6 +2239,13 @@ def main():
         assert 0xF18000 <= GRF_X + x2_debut_, "X2_TABLES : debut %x hors de la fenetre $F18000-$FE0000 (68K $410000-$4D7FFF)" % (GRF_X + x2_debut_)
         print("X2_TABLES : %d tables, bloc X2 %d o (budget %d), bloc de donnees %d o, fin %x (fenetre des decors : %x) ; reste %d o avant la fenetre des decors"
               % (len(x2_sites), len(blob) - x2_debut_, X2_BUDGET, len(blob), GRF_X + len(blob), FEN_DECORS[0], FEN_DECORS[0] - GRF_X - len(blob)))
+    fins_images_t_ = None
+    if FINS_IMAGES:                                     # (fins_restes) table d'images du decor de fin, rangee FINS_IMAGES_D0
+        x2nv_ = [s_['nv'] for s_ in x2_sites if s_['d']['u'] == FINS_IMAGES_U]
+        assert len(x2nv_) == 1, "FINS_IMAGES : copie X2 de T_%x attendue (X2_TABLES=1)" % FINS_IMAGES_U
+        fins_images_t_, txt_ = fins_images_table(blob, x2nv_[0])
+        assert GRF_X + len(blob) <= FEN_DECORS[0], "FINS_IMAGES : bloc sur la fenetre des decors (%x)" % (GRF_X + len(blob))
+        print(txt_)
     T_D4 = None
     if FENETRES and TROUS and D4_TABLE:                   # fenetre des decors (T1b) : table D4 en tete
         assert GRF_X + len(blob) <= FEN_DECORS[0], "bloc de donnees sur la fenetre des decors (%x)" % (GRF_X + len(blob))
@@ -2225,6 +2340,23 @@ def main():
                 assert xold_ == xa_, "X2_TABLES : T_%x : lecteur d'Hyper %x vise %x" % (xu_, xh_ + BASE, xold_)
                 const_(xh_, xnv_, "X2_TABLES : T_%x : lecteur d'Hyper %x -> copie prolongee %x (L2)" % (xu_, xh_ + BASE, xnv_))
                 print("X2_TABLES : T_%x : lecteur d'Hyper %x redirige -> %x (L2)" % (xu_, xh_ + BASE, xnv_))
+    if fins_images_t_ is not None:                      # (fins_restes) LEA T_674C00 des lecteurs du module des fins -> FINS_IMAGES
+        x2v_ = {s_['nv'] for s_ in x2_sites if s_['d']['u'] == FINS_IMAGES_U}
+        for us_ in FINS_IMAGES_SITES:
+            n_ = g.neuf(us_); assert n_ is not None, "FINS_IMAGES : 0x%X non copie" % us_
+            c_ = []
+            for o_ in range(n_ - 0x20, n_ + 0x20, 4):
+                w1_, w2_ = struct.unpack_from('<II', mod, o_)
+                if (w1_ >> 26) == 0x0f and (w2_ >> 26) == 0x09 and ((w1_ >> 16) & 31) == ((w2_ >> 21) & 31) == ((w2_ >> 16) & 31):
+                    v_ = (((w1_ & 0xffff) << 16) + ((w2_ & 0xffff) - (0x10000 if w2_ & 0x8000 else 0))) & 0xffffffff
+                    if v_ in x2v_: c_.append(o_)
+            assert len(c_) == 1, "FINS_IMAGES : %d constante(s) de la copie X2 de T_%x pres de la copie de 0x%X" % (len(c_), FINS_IMAGES_U, us_)
+            const_(c_[0], fins_images_t_, "FINS_IMAGES : Upper 0x%X (lecteur de T_%x du module des fins) -> copie %x (images d'Upper la ou celles d'Hyper different)" % (us_, FINS_IMAGES_U, fins_images_t_))
+            print("FINS_IMAGES : Upper 0x%X : constante %x -> %x" % (us_, c_[0] + BASE, fins_images_t_))
+    if GENERIQUE_BUDGET:                                # (fins_restes) entrees des commandes 3 / 5 d'Hyper -> corps d'Upper (talon)
+        for f9_ in H_GEN_JAL:
+            w_ = struct.unpack_from('<I', mod, f9_)[0]; assert (w_ >> 26) == 3 and ((w_ & 0x3ffffff) << 2) == H_GEN_CORPS + BASE, (hex(f9_), hex(w_))
+            jal_(f9_, g.synth_place['generique_corps'] + BASE, "GENERIQUE_BUDGET : Hyper 0x%X (entree d'une commande de ligne du generique, D2 d'Hyper pose) : JAL 0x%X -> copie du corps d'Upper 0x%X (budget d'Upper : un sprite par lettre)" % (f9_, H_GEN_CORPS, U_GEN_CORPS[0]))
     long_(0x5B4210, a_exec(g, 0x4E1C0), "lanceur ARCADE du menu (entree 0) -> lanceur d'Upper 0x4E1C0")
     # (etape 7) MENU_ARCADE=1 : le menu du titre d'Hyper ne propose pas l'entree 0 (curseur $C201 : tables « suivant »
     # 0x5B41F0 (Bas) et « precedent » 0x5B4200 (Haut) sans 0 : VERSUS 1, TRAINING 4, OPTION 5, EXIT 6) -> ARCADE (0)
@@ -2233,6 +2365,16 @@ def main():
         for ex_, t_ in ((0x5B41F0, bytes([1, 4, 5, 5, 5, 6, 0])), (0x5B4200, bytes([6, 0, 1, 1, 1, 4, 5]))):
             o_ = ex_ - BASE; av_ = bytes(mod[o_:o_ + 7]); mod[o_:o_ + 7] = t_
             patchs.append(dict(type='octets', exec=hex(ex_), avant=av_.hex(), apres=t_.hex(), quoi="menu du titre : entree ARCADE (0) accessible"))
+    # (menu_arcade, 16/11) MENU_CURSEUR_ARCADE=1 : curseur du menu des modes sur ARCADE (0) a chaque arrivee. Tache du menu
+    # d'Hyper 0x2526E0 : « CMPI.B #5,$C201(A5) ; BEQ ; MOVE.B #1,$C201(A5) » (curseur pose sur VERSUS sauf au retour
+    # d'OPTION / EXIT, curseur 5) ; l'immediat du « addiu v1,zero,1 » (fichier 0x6296C) devient 0, comme Upper (sa tache
+    # du titre efface $C201, son menu ne le repose pas). Meme forme en 68K (MOVE.B #imm,d16(A5), 6 octets).
+    # (Le nom MENU_ARCADE est deja pris ci-dessus : entree ARCADE du menu, defaut 1.)
+    if os.environ.get("MENU_CURSEUR_ARCADE", "0") == "1":
+        o_ = 0x25296C - BASE; w_ = struct.unpack_from('<I', mod, o_)[0]
+        assert w_ == 0x24030001 and struct.unpack_from('<I', mod, o_ + 0xC)[0] == 0xa043c200, ("MENU_CURSEUR_ARCADE : site 0x25296C", hex(w_))
+        struct.pack_into('<I', mod, o_, 0x24030000)
+        patchs.append(dict(type='octets', exec=hex(0x25296C), avant='%08x' % w_, apres='24030000', quoi="MENU_CURSEUR_ARCADE : curseur du menu des modes pose sur ARCADE (0) au lieu de VERSUS (1)"))
     const_(0x318E30, g.synth_place['fin_selection'] + BASE, "fin de selection (0x318C40) : ARCADE -> animations du perso de J1 puis preparation du combat d'Upper 0x24EA30 (adversaire CPU)")
     long_(0x5B5E88, g.synth_place['scene4_mode'] + BASE, "scene A5+4=4 : aiguillage par le mode (ARCADE -> Upper 0x261560)")
     if COMBAT_HYPER:
@@ -2321,9 +2463,14 @@ def main():
         # (e26) EFFET PAR DECOR (objet d'Hyper : table d'etats 0x3D9E20, etat 2 = 0x391E50, aussi JMP depuis l'init 0x391E38) :
         # $C174 / $C176 et gestionnaire par T_5C9E00/08/30 (4 entrees) -> sur un decor d'Upper, copie d'Upper 0x13BB10
         # (T_6134E0 / T_613530 / T_6135A0, 40 entrees) ; e26e : palettes de Gen ($22) toutes blanches
-        jal_(0x391E38, g.synth_place['moteur_effet'] + BASE, "objet d'effet de decor d'Hyper 0x391DD0 : JMP 0x391E50 -> talon moteur_effet")
-        long_(0x3D9E24 + BASE, g.synth_place['moteur_effet'] + BASE, "table d'etats de l'objet d'effet de decor (etat 2 = 0x391E50) -> talon moteur_effet")
-        assert int(patchs[-1]['avant'], 16) == 0x391E50 + BASE, patchs[-1]['avant']
+        if MOTEUR_EFFET_ETAT:   # (talons_combat) choix a l'init ; etat 2 d'Hyper intact ; etat 4 (vide) = copie d'Upper
+            jal_(0x391E38, g.synth_place['effet_init'] + BASE, "objet d'effet de decor d'Hyper 0x391DD0 : JMP 0x391E50 -> talon effet_init (decor d'Upper : etat 4 = copie d'Upper 0x13BB10, une fois)")
+            long_(0x3D9E28 + BASE, a_exec(g, 0x13BB10), "table d'etats de l'objet d'effet de decor : etat 4 (vide dans Hyper) -> copie d'Upper 0x13BB10")
+            assert int(patchs[-1]['avant'], 16) == 0, patchs[-1]['avant']
+        else:
+            jal_(0x391E38, g.synth_place['moteur_effet'] + BASE, "objet d'effet de decor d'Hyper 0x391DD0 : JMP 0x391E50 -> talon moteur_effet")
+            long_(0x3D9E24 + BASE, g.synth_place['moteur_effet'] + BASE, "table d'etats de l'objet d'effet de decor (etat 2 = 0x391E50) -> talon moteur_effet")
+            assert int(patchs[-1]['avant'], 16) == 0x391E50 + BASE, patchs[-1]['avant']
     # (e30) INDIC_UPPER : indicateurs « PRESS START » (Hyper 0x10E4 -> 0x1134) en codes de la table plan2 prolongee
     if INDIC_UPPER:
         n_ = g.neuf(0x29CA4); assert n_ is not None

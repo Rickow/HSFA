@@ -1,0 +1,51 @@
+# (reloges_293, 16/11) DONNEES_BRUTES=1 : copied Upper data cases whose 'ram' class long IS a pointer (Upper work RAM
+# or video RAM through the port's RAM block): still relocated. Proof: conversion journal (CONV_An loading the case,
+# uc2_* games) or the reader (MOVEA.L / MOVE.L into a pointer field). Format: address  table  proof
+60be50  T_60BE50 / T_60BD90 (pointers)  journal
+60be54  T_60BE50 / T_60BD90 (pointers)  journal
+60be58  T_60BE50 / T_60BD90 (pointers)  journal
+60be5c  T_60BE50 / T_60BD90 (pointers)  journal
+60cd00  T_60CD00 (pointers)  reader
+60cd04  T_60CD00 (pointers)  reader
+60cd08  T_60CD00 (pointers)  reader
+60cd0c  T_60CD00 (pointers)  reader
+60cd10  T_60CD00 (pointers)  reader
+60cd50  T_60CD50 (pointers)  reader
+60cd54  T_60CD50 (pointers)  reader
+60cd58  T_60CD50 (pointers)  reader
+60cd5c  T_60CD50 (pointers)  reader
+60cd60  T_60CD50 (pointers)  reader
+60cd64  T_60CD50 (pointers)  reader
+60cd68  T_60CD50 (pointers)  reader
+60cd6c  T_60CD50 (pointers)  reader
+60fca0  T_60FCA0 (pointers)  journal
+60fca4  T_60FCA0 (pointers)  journal
+60fca8  T_60FCA0 (pointers)  journal
+60fcac  T_60FCA0 (pointers)  journal
+613580  T_613580 (pointers)  journal
+613584  T_613580 (pointers)  journal
+613588  T_613580 (pointers)  journal
+61358c  T_613580 (pointers)  journal
+613840  T_613840 (pointers)  reader
+613844  T_613840 (pointers)  journal
+613848  T_613840 (pointers)  journal
+61384c  T_613840 (pointers)  journal
+615360  T_615360 / T_615370 (pointers)  journal
+615364  T_615360 / T_615370 (pointers)  journal
+615368  T_615360 / T_615370 (pointers)  journal
+61536c  T_615360 / T_615370 (pointers)  reader
+615370  T_615360 / T_615370 (pointers)  journal
+615374  T_615360 / T_615370 (pointers)  journal
+615378  T_615360 / T_615370 (pointers)  journal
+61537c  T_615360 / T_615370 (pointers)  reader
+61a240  T_61A240 (pointers)  journal
+61a244  T_61A240 (pointers)  journal
+61a248  T_61A240 (pointers)  journal
+61a24c  T_61A240 (pointers)  journal
+61cb20  T_61CB20 (pointers)  reader
+61cb24  T_61CB20 (pointers)  reader
+61cb28  T_61CB20 (pointers)  journal
+61cb2c  T_61CB20 (pointers)  reader
+9668e4  T_966740 record (pointer slot)  reader (deduced: target = RAM buffer addressed by LEA in Upper)
+970214  T_96FEF4 pointer list  reader (deduced: target = RAM buffer addressed by LEA in Upper)
+9702a4  T_96FEF4 pointer list  reader (deduced: target = RAM buffer addressed by LEA in Upper)

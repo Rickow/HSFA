@@ -1,0 +1,239 @@
+# (reloges_293, 16/11) DONNEES_BRUTES=1 : copied Upper data cases (PS2 execution address of the aligned long) whose
+# long looked like an Upper RAM pointer (a word $00A0-$00A7 next to another word) and was relocated +$180000 by
+# the 'ram' class although Upper's code reads it as words / bytes / colours. Kept as in Upper.
+# Per-case proof: work/reloges_293/CLASSEMENT.tsv (workshop). Format: address  table
+60d734  T_60D480 (words)
+60d738  T_60D480 (words)
+60d82c  T_60D480 (words)
+610aa4  T_610A90 / T_610A92 (words)
+612380  T_612380 (words)
+6142d0  T_614050 (words)
+6142d4  T_614050 (words)
+6142d8  T_614050 (words)
+6142dc  T_614050 (words)
+6142e0  T_614050 (words)
+6142e4  T_614050 (words)
+6142e8  T_614050 (words)
+6142ec  T_614050 (words)
+6142f0  T_614050 (words)
+6142f4  T_614050 (words)
+6142f8  T_614050 (words)
+6142fc  T_614050 (words)
+614300  T_614050 (words)
+614304  T_614050 (words)
+614308  T_614050 (words)
+61430c  T_614050 (words)
+615d70  T_615D70 (words)
+615d78  T_615D70 (words)
+615d80  T_615D70 (words)
+615d88  T_615D70 (words)
+6184a8  T_618490 (words)
+6188b4  T_618890 (words)
+618914  T_618890 (words)
+6189ec  T_6189D0 (words)
+618a58  T_618A30 (words)
+61a188  T_61A180 (words)
+61a194  T_61A180 (words)
+61a1a8  T_61A180 (words)
+61a1b4  T_61A180 (words)
+61a1d8  T_61A180 (words)
+61a1e4  T_61A180 (words)
+61f4e0  T_61F4E0 (words)
+624e2c  menu records T_624AD0.. (coordinates)
+62509c  menu records T_624AD0.. (coordinates)
+6250ac  menu records T_624AD0.. (coordinates)
+6250bc  menu records T_624AD0.. (coordinates)
+6250cc  menu records T_624AD0.. (coordinates)
+6250fc  menu records T_624AD0.. (coordinates)
+625334  menu records T_624AD0.. (coordinates)
+625530  menu records T_624AD0.. (coordinates)
+625640  menu records T_624AD0.. (coordinates)
+625740  menu records T_624AD0.. (coordinates)
+6257dc  menu records T_624AD0.. (coordinates)
+6257ec  menu records T_624AD0.. (coordinates)
+625924  menu records T_624AD0.. (coordinates)
+625934  menu records T_624AD0.. (coordinates)
+625a24  menu records T_624AD0.. (coordinates)
+625a34  menu records T_624AD0.. (coordinates)
+625e48  menu records T_624AD0.. (coordinates)
+625e4c  menu records T_624AD0.. (coordinates)
+626014  menu records T_624AD0.. (coordinates)
+63329c  word streams of T_7495B8 (positions)
+6335e4  word streams of T_7495B8 (positions)
+633734  word streams of T_7495B8 (positions)
+633884  word streams of T_7495B8 (positions)
+633e6c  word streams of T_7495B8 (positions)
+638c50  word streams of T_7495B8 (positions)
+64bcd4  image record header (id word)
+679234  images of T_674C00 (header / sprite entries)
+67a540  images of T_674C00 (header / sprite entries)
+67afb4  images of T_674C00 (header / sprite entries)
+67b00c  images of T_674C00 (header / sprite entries)
+67b044  images of T_674C00 (header / sprite entries)
+67b08c  images of T_674C00 (header / sprite entries)
+67b0d4  images of T_674C00 (header / sprite entries)
+73ab8c  colours of the palette banks T_619110
+7469bc  colours of the palette banks T_619110
+7469dc  colours of the palette banks T_619110
+7469fc  colours of the palette banks T_619110
+746a1c  colours of the palette banks T_619110
+746a3c  colours of the palette banks T_619110
+746a5c  colours of the palette banks T_619110
+7710cc  word streams of T_7495B8 (positions)
+77110c  word streams of T_7495B8 (positions)
+77112c  word streams of T_7495B8 (positions)
+771e7c  word streams of T_7495B8 (positions)
+771f54  word streams of T_7495B8 (positions)
+7721dc  word streams of T_7495B8 (positions)
+77238c  word streams of T_7495B8 (positions)
+77251c  word streams of T_7495B8 (positions)
+772614  word streams of T_7495B8 (positions)
+7726ec  word streams of T_7495B8 (positions)
+7727c4  word streams of T_7495B8 (positions)
+772874  word streams of T_7495B8 (positions)
+772974  word streams of T_7495B8 (positions)
+793488  word streams (4-word records)
+7c0d38  T_7C0D18 (words)
+7cfbe4  increasing words (pointed by 0x613224)
+819314  0x14-byte animation records of T_817290
+819328  0x14-byte animation records of T_817290
+81933c  0x14-byte animation records of T_817290
+819350  0x14-byte animation records of T_817290
+819364  0x14-byte animation records of T_817290
+819378  0x14-byte animation records of T_817290
+81938c  0x14-byte animation records of T_817290
+8193a0  0x14-byte animation records of T_817290
+81959c  0x14-byte animation records of T_817290
+8195b0  0x14-byte animation records of T_817290
+8195c4  0x14-byte animation records of T_817290
+8195d8  0x14-byte animation records of T_817290
+8195ec  0x14-byte animation records of T_817290
+819600  0x14-byte animation records of T_817290
+819614  0x14-byte animation records of T_817290
+819628  0x14-byte animation records of T_817290
+819640  0x14-byte animation records of T_817290
+819654  0x14-byte animation records of T_817290
+819964  0x14-byte animation records of T_817290
+819978  0x14-byte animation records of T_817290
+81998c  0x14-byte animation records of T_817290
+8199a0  0x14-byte animation records of T_817290
+8199b4  0x14-byte animation records of T_817290
+8199c8  0x14-byte animation records of T_817290
+8199dc  0x14-byte animation records of T_817290
+8199f0  0x14-byte animation records of T_817290
+819a08  0x14-byte animation records of T_817290
+819a1c  0x14-byte animation records of T_817290
+819a30  0x14-byte animation records of T_817290
+819a44  0x14-byte animation records of T_817290
+819a58  0x14-byte animation records of T_817290
+819a6c  0x14-byte animation records of T_817290
+819a80  0x14-byte animation records of T_817290
+819a94  0x14-byte animation records of T_817290
+8b5260  0x14-byte animation records of T_8AF1A8
+8b529c  0x14-byte animation records of T_8AF1A8
+8b52d8  0x14-byte animation records of T_8AF1A8
+8b7d40  0x14-byte animation records of T_8AF1A8
+8b7d54  0x14-byte animation records of T_8AF1A8
+8b7d68  0x14-byte animation records of T_8AF1A8
+8b7d7c  0x14-byte animation records of T_8AF1A8
+8b7d90  0x14-byte animation records of T_8AF1A8
+8b8150  0x14-byte animation records of T_8AF1A8
+917254  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+917350  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+9173d4  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+91783c  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+917c00  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+917d84  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+917e68  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+917ed4  decor animations T_916E70.. (palette streams) / T_917BE0 (words)
+92f1b0  AI scripts (word streams of T_74C100..)
+92f430  AI scripts (word streams of T_74C100..)
+92fa78  AI scripts (word streams of T_74C100..)
+9313a4  AI scripts (word streams of T_74C100..)
+9324f8  AI scripts (word streams of T_74C100..)
+93a318  AI scripts (word streams of T_74C100..)
+93a380  AI scripts (word streams of T_74C100..)
+93a3f8  AI scripts (word streams of T_74C100..)
+93a48c  AI scripts (word streams of T_74C100..)
+93b1a8  AI scripts (word streams of T_74C100..)
+93b344  AI scripts (word streams of T_74C100..)
+93b4d0  AI scripts (word streams of T_74C100..)
+93c0f0  AI scripts (word streams of T_74C100..)
+93c2ac  AI scripts (word streams of T_74C100..)
+93d6d4  AI scripts (word streams of T_74C100..)
+93d7a4  AI scripts (word streams of T_74C100..)
+93d888  AI scripts (word streams of T_74C100..)
+93da08  AI scripts (word streams of T_74C100..)
+93e33c  AI scripts (word streams of T_74C100..)
+93e404  AI scripts (word streams of T_74C100..)
+93e4dc  AI scripts (word streams of T_74C100..)
+93e660  AI scripts (word streams of T_74C100..)
+93eb0c  AI scripts (word streams of T_74C100..)
+93ebc8  AI scripts (word streams of T_74C100..)
+93ecb0  AI scripts (word streams of T_74C100..)
+93ed94  AI scripts (word streams of T_74C100..)
+93f350  AI scripts (word streams of T_74C100..)
+93f440  AI scripts (word streams of T_74C100..)
+93fb14  AI scripts (word streams of T_74C100..)
+93fbd8  AI scripts (word streams of T_74C100..)
+93fca8  AI scripts (word streams of T_74C100..)
+93fe40  AI scripts (word streams of T_74C100..)
+940024  AI scripts (word streams of T_74C100..)
+9401d4  AI scripts (word streams of T_74C100..)
+9402e0  AI scripts (word streams of T_74C100..)
+9404f0  AI scripts (word streams of T_74C100..)
+940538  AI scripts (word streams of T_74C100..)
+9405a8  AI scripts (word streams of T_74C100..)
+9409cc  AI scripts (word streams of T_74C100..)
+940a3c  AI scripts (word streams of T_74C100..)
+940bc4  AI scripts (word streams of T_74C100..)
+940e18  AI scripts (word streams of T_74C100..)
+940ff8  AI scripts (word streams of T_74C100..)
+941680  AI scripts (word streams of T_74C100..)
+941af8  AI scripts (word streams of T_74C100..)
+941c3c  AI scripts (word streams of T_74C100..)
+942058  AI scripts (word streams of T_74C100..)
+942110  AI scripts (word streams of T_74C100..)
+9421f4  AI scripts (word streams of T_74C100..)
+942250  AI scripts (word streams of T_74C100..)
+942338  AI scripts (word streams of T_74C100..)
+9424a8  AI scripts (word streams of T_74C100..)
+94254c  AI scripts (word streams of T_74C100..)
+94285c  AI scripts (word streams of T_74C100..)
+942eac  AI scripts (word streams of T_74C100..)
+9434c0  AI scripts (word streams of T_74C100..)
+943780  AI scripts (word streams of T_74C100..)
+9437d4  AI scripts (word streams of T_74C100..)
+9438d4  AI scripts (word streams of T_74C100..)
+943b94  AI scripts (word streams of T_74C100..)
+943c6c  AI scripts (word streams of T_74C100..)
+944e78  AI scripts (word streams of T_74C100..)
+946310  AI scripts (word streams of T_74C100..)
+9464bc  AI scripts (word streams of T_74C100..)
+9464d0  AI scripts (word streams of T_74C100..)
+9464e4  AI scripts (word streams of T_74C100..)
+946980  AI scripts (word streams of T_74C100..)
+952cac  decor zone word tables
+960d0c  decor zone word tables
+969cc0  decor zone word tables
+96daf8  decor zone word tables
+96e040  decor zone word tables
+96e53c  decor zone word tables
+96f6f0  decor zone word tables
+96f774  decor zone word tables
+96f8e4  decor zone word tables
+96f9e0  decor zone word tables
+96fb18  decor zone word tables
+96fc5c  decor zone word tables
+96fda0  decor zone word tables
+9703ec  decor zone word tables
+9703f0  decor zone word tables
+9703f4  decor zone word tables
+9703f8  decor zone word tables
+9703fc  decor zone word tables
+97046c  decor zone word tables
+9704b4  decor zone word tables
+97097c  decor zone word tables
+970bd4  decor zone word tables
+972c88  decor zone word tables
+978be0  decor zone word tables

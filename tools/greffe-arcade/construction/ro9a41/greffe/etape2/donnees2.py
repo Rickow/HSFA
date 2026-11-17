@@ -137,6 +137,39 @@ PTR_EXCLUS = set(int(l.split()[0], 16) for l in open(_PX) if l.strip() and not l
 # « relogee » comme pointeur de code $00300150 -> $000759E2 : objet de la carte hors ecran, sortie de la carte +30 images.
 for _x in os.environ.get("PTR_EXCLUS_PLUS", "").split(','):
     if _x.strip(): PTR_EXCLUS.add(int(_x, 16))
+# (fins_restes, 16/11) SCRIPTS_FIN_BRUTS=1 : les SCRIPTS DE FIN d'Upper (T_60B860, 42 fins : instructions [attente, op,
+# n = op & $F arguments] de MOTS, fin = op 0) ne contiennent aucun pointeur ; deux mots voisins y formaient pourtant des
+# longs « reloges » : mot $00A0-$00A6 + mot pair = « pointeur de RAM d'Upper » $00A0xxxx -> $00B8xxxx : attentes $A0 des
+# fins 04 / 12, 08, 0E (+24 images), numeros de texte $A0-$A6 de la fin 06 / 14 (commande $0034, 5 mots : autres
+# repliques), decalage $A0 de la commande x9 $1904 de la fin 21 (palette de Bison prise 12 couleurs plus loin) ; et
+# $0200 $00B4 = pointeur du fichier 390 $00B40200 -> $00CB9604 (fin 1A : commande de fondu $0200 devenue $9604, attente
+# $B4 -> $CB, suite du script decalee). Mesure : fins_restes/outils/scripts_cmp.py (17 mots sur 42 scripts ; la table
+# de la variante $90(A5), T_60B910, designe les memes scripts) ; fin 08 : phase 8 posee 24 images apres Upper. Toutes
+# les cases (longs alignes) qui touchent un script deviennent PTR_EXCLUS (ni donnee, ni code, ni RAM). =0 : ro9a43.
+if os.environ.get("SCRIPTS_FIN_BRUTS", "0") == "1":
+    for _f in range(42):
+        _a = struct.unpack('<I', octets(0x60B860 + 4 * _f, 4))[0]
+        if source(_a) != 'module': continue
+        _p = _a
+        for _k in range(600):
+            _op = struct.unpack('<H', octets(_p + 2, 2))[0]; _p += 4 + 2 * (_op & 0xF)
+            if _op == 0: break
+        PTR_EXCLUS.update(range(_a & ~3, _p, 4))
+# (fins_restes, 16/11) CARTES_FIN_BRUTES=1 : structures par fin de T_60B700 / T_60B7B0 (variante $90(A5)) : octets
+# (numeros de blocs du plan 2 : carte du decor de la fin) et paires de mots ; aucun pointeur. Des longs y etaient
+# « reloges » : fin 03 0x91AC20 = blocs $8E $8F $90 $00 -> $2E $65 $DD (pointeur $00908F8E pris pour une donnee) : lignes
+# 48-63 du scroll2 fausses (mosaique quand la secousse 0x214630 les montre, banc fb du 14/11), 0x91AC68 ; fin 0A 0x91FA44 ;
+# 0x92EC5C : paires $0204 $00A0... prises pour des pointeurs de RAM, de donnees, de CODE ($00400204 -> $0109E564).
+# Mesure : toutes les cases qui different d'Upper dans ces structures sont des faux pointeurs (fins_restes). Cases de
+# [cible, cible suivante des tables par fin 0x60B220-0x60B860) (au plus $400 o) -> PTR_EXCLUS. =0 : comme ro9a43.
+if os.environ.get("CARTES_FIN_BRUTES", "0") == "1":
+    _cib = sorted({struct.unpack('<I', octets(_t + 4 * _i, 4))[0] for _t in range(0x60B220, 0x60B860, 0xB0) for _i in range(44)})
+    for _t in (0x60B700, 0x60B7B0):
+        for _i in range(44):
+            _a = struct.unpack('<I', octets(_t + 4 * _i, 4))[0]
+            if source(_a) != 'module': continue
+            _n = min([_x for _x in _cib if _x > _a] + [_a + 0x400, fin_source(_a)])
+            PTR_EXCLUS.update(range(_a & ~3, _n, 4))
 # (e39) PTR_EXCLUS_PAL=<fichier> (ex. e39/ptr_exclus_pal.txt, fait par e39/ptr_exclus_pal.py) : cases des BANQUES DE
 # PALETTES d'Upper (T_619110, 0x724570-0x749000) dont deux couleurs voisines ($0F58,$003E -> long $003E0F58) etaient
 # « relogees » comme pointeurs : generique de la fin de Zangief, losanges verts (MAME) / magenta (coeur) 2 images sur 56.
@@ -158,6 +191,20 @@ if os.environ.get("DESC_FIN", "1") == "1" and os.path.exists(_PD):
 if os.environ.get("PAIRES_CODE", "0") == "1":
     _PQ = "@HA_G@/donnees/ptr_exclus_paires.txt"; assert os.path.exists(_PQ), _PQ
     PTR_EXCLUS |= set(int(l.split()[0], 16) for l in open(_PQ) if l.strip() and not l.startswith('#'))
+# (reloges_293, 16/11) DONNEES_BRUTES=1 : the 'ram' class (end of Fermeture.bloc) relocated EVERY even long of the
+# copied data whose value fell in Upper's RAM block ($A00000-$A7FFFF) by +$180000 ; in ro9a44 283 such longs, of which
+# 235 are DATA : a word $00A0-$00A7 next to another word, read as words / bytes / colours by Upper's code (object X / Y
+# $A0 -> $B8 = +24 px, word tables, colours of the palette banks T_619110, palette offsets of T_917BE0, AI scripts,
+# 0x14-byte animation records, ending images...). donnees/ram_donnees.txt (235 cases) -> left as in Upper ;
+# donnees/ram_pointeurs.txt (48 cases : RAM / video pointer tables, 45 proven by the conversion journal or by the reader, 3 deduced)
+# -> relocated ; a 'ram' case in neither list -> relocated as before and counted ('ram non classee' in stat_donnees,
+# addresses printed) so that it gets classified (work/reloges_293/CLASSEMENT.tsv). =0 : ro9a44 byte for byte.
+DONNEES_BRUTES = os.environ.get("DONNEES_BRUTES", "0") == "1"
+def _cases(n):
+    return frozenset(int(l.split()[0], 16) for l in open("@HA_G@/donnees/" + n, encoding="utf-8") if l.strip() and not l.startswith('#'))
+RAM_DONNEES = _cases("ram_donnees.txt") if DONNEES_BRUTES else frozenset()
+RAM_POINTEURS = _cases("ram_pointeurs.txt") if DONNEES_BRUTES else frozenset()
+assert not RAM_DONNEES & RAM_POINTEURS
 REUTIL_STRICT = os.environ.get("REUTIL_STRICT", "0") == "1"   # (etape 6) reutilisation d'Hyper sans masque si > 25 % de pointeurs
 BANQUES_LU = os.environ.get("BANQUES_LU", "1") == "1"
 TEXTES_LU = os.environ.get("TEXTES_LU", "1") == "1"
@@ -691,6 +738,10 @@ class Fermeture:
                     q = g.valeur(p, ('donnee', v + i))
                     if q is not None: struct.pack_into('<I', blob_r, o, q); (self.zone_ptr if dz else ptr_code).append(o); stat['code'] += 1
                 elif cl == 'ram' and not (p & 1):
+                    if DONNEES_BRUTES:
+                        if (a_r + i) in RAM_DONNEES: stat['ram donnee laissee (DONNEES_BRUTES)'] += 1; continue
+                        if (a_r + i) in RAM_POINTEURS: stat['ram pointeur prouve'] += 1
+                        else: stat['ram non classee'] += 1; print("DONNEES_BRUTES : case 'ram' non classee %x (%08x)" % (a_r + i, p))
                     q = g.valeur(p, ('donnee', v + i))
                     if q is not None and q != p: struct.pack_into('<I', blob_r, o, q); stat['ram'] += 1
         self.stat = stat

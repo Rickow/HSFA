@@ -77,7 +77,7 @@ of the time (16 plus 11b) apply without errors (one whitespace warning for patch
 files, to the reference tree `94c666a` (empty `git diff`). The 4:3 and 16:9 cores build. Since then, every batch of cores has been built with the whole chain on
 `af5d3f3`. Batches recorded: 0001-0026 (batch of 2026-11-09, 12 cores), then 0027 (batch of 10/11, journal §210), then
 0029 (batch of 11/11), then 0030 and 0031 (batch of 12/11), then 0032 (batch of 12/11b). Linux core compatible with glibc 2.27: recipe
-[`tools/linux/`](../../tools/linux/README.md), made on the Linux tree of the batch of 10/11. Published cores: 0001-0026 and 0007b in v0.1.7, 0001-0027 and 0007b in the v0.1.8 pre-release, 0001-0027, 0029-0032 and 0007b (batch of 12/11b) in the v0.1.9 pre-release, in v0.1.10 and in v0.1.11
+[`tools/linux/`](../../tools/linux/README.md), made on the Linux tree of the batch of 10/11. Published cores: 0001-0026 and 0007b in v0.1.7, 0001-0027 and 0007b in the v0.1.8 pre-release, 0001-0027, 0029-0032 and 0007b (batch of 12/11b) in the v0.1.9 pre-release, in v0.1.10, v0.1.11 and v0.1.12
 (release notes); details: [LIVRAISONS](../../docs/guide/LIVRAISONS.md) §4.
 
 **Numbers.** Number `0028` (graphics area of the MAX characters in the graft, proven in the workshop on 08/11, journal

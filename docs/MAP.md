@@ -63,7 +63,7 @@ PNACH era.
 5. **A control build before each release**: the five games rebuilt from the disc, from a clean archive of the
    repository, and their program checksums compared with the delivered ones.
 6. **Hand-over**: a diff made with `git diff` in a clone rebased just before delivery, then
-   `tools/verifie_versement.sh` ([AGENTS.md](../AGENTS.md) §2, rule 11).
+   `bash tools/verifie_versement.sh --base origin/main` ([AGENTS.md](../AGENTS.md) §2, rule 11).
 
 ## 5. Workstreams on 2026-11-14
 

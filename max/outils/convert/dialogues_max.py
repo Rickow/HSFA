@@ -26,8 +26,28 @@ PLACES = {
     "Yun":    [(8, "avant"), (8, "après"), (10, "avant"), (10, "après"), (10, "après"), (12, "avant")],  # Dee Jay, Fei-Long, Bison
     "Ingrid": [(8, "avant"), (8, "après"), (10, "avant"), (10, "après"), (12, "avant")],   # Evil Ryu, Rose, Bison
 }
-NOTES = {"Eagle": "scénario 3 = face à Balrog (combat secret avant Bison) : placé après le 2e combat spécial",
-         "Yun": "scénarios 3 et 4 = après Fei-Long (alliance, puis l'attaque de la base) : enchaînés"}
+# (2026-11-15, session MAX) EAGLE, SCÉNARIO 3 (face à BALROG, combat secret avant Bison : « You're the one who defeated
+# Sagat? ») : placé jusqu'ici après le 2e combat spécial (0x61B600, $13E = 10), il s'affichait sous le portrait de SAGAT
+# (adversaire du 9e combat ; mesure work/apres_combat, eagle_9e.png). Les natifs à combat secret (0x61B680 = $15 / $1E :
+# Birdie, Charlie… ) jouent la scène de ce combat par la 3e rangée « après » (0x61B650, $13E = 12 ; ex. scénario 38 de
+# Birdie : « Now, Balrog.... Dispose of this rodent! ») ; Eagle n'a pas d'après-combat contre Sagat sur PSP.
+# FIN_DLG_BALROG=0 : ancien placement (témoin).
+if os.environ.get("FIN_DLG_BALROG", "1") == "1":
+    PLACES["Eagle"][3] = (12, "après")
+# (2026-11-16, session MAX) YUN, SCÉNARIO 4 (avec Fei-Long, contre les « soldates » : « ...! It seems they have detected
+# our movements! ») : c'est la scène du combat SECRET de Yun (0x61B680 = $1E, Juli + Juni ; routine va 0x2667B4, rangée
+# 0x61B650 = (12, « après »)). Sur PSP, Fei-Long y parle en « adversaire » (bit 15) ; dans cette scène d'Upper, J2 est
+# Juli / Juni : ses répliques passent en code 1 (bit 14 seul) = PARTENAIRE, portrait T_616180[perso de J1] (lecteur
+# image $36014 : bit 15 = côté, bit 14 -> T_616180) ; T_616180[$2D] = $21 (Fei-Long, valeur PSP de tables_id_max.py).
+# Même forme que R. Mika et Zangief (scénarios natifs 106 / 107). FIN_DLG_YUN_SECRET=0 : ancien placement (enchaîné après
+# Fei-Long).
+PARTENAIRE = {}
+if os.environ.get("FIN_DLG_YUN_SECRET", "1") == "1":
+    PLACES["Yun"][4] = (12, "après"); PARTENAIRE["Yun"] = {4}
+NOTES = {"Eagle": "scénario 3 = face à Balrog (combat secret avant Bison) : " + ("scène du combat secret (0x61B650)"
+                    if PLACES["Eagle"][3] == (12, "après") else "placé après le 2e combat spécial"),
+         "Yun": "scénario 4 (attaque de la base, avec Fei-Long) = scène du combat secret (0x61B650), Fei-Long en partenaire"
+                if PLACES["Yun"][4] == (12, "après") else "scénarios 3 et 4 = après Fei-Long (alliance, puis l'attaque de la base) : enchaînés"}
 
 
 def lire_iso(chemin_iso, nom):
@@ -101,7 +121,10 @@ def main():
                 rep_lignes.append('        dc.b    $%02X, "%s", 0' % (x, txt.replace('"', '""')))
         # scénarios par place (enchaînés si plusieurs scénarios PSP vont au même endroit)
         par_place = {}
-        for k, ws in enumerate(S): par_place.setdefault(PLACES[nom][k], []).extend(ws)
+        for k, ws in enumerate(S):
+            if k in PARTENAIRE.get(nom, ()):                 # adversaire PSP -> partenaire (code 1), voir PARTENAIRE
+                ws = [(x & 0x3FFF) | 0x4000 if x & 0x8000 else x for x in ws]
+            par_place.setdefault(PLACES[nom][k], []).extend(ws)
         for (st, quand), ws in sorted(par_place.items(), key=lambda kv: (kv[0][0], kv[0][1] != "avant")):
             mots = [(x & 0xC000) | (n_rep + (x & 0x3FF) - 1) for x in ws]
             scen_lignes += ["        even", "DLG_S%d:     ; %s, $13E = %d, %s combat" % (n_scen, nom, st, quand),

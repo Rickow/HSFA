@@ -16,6 +16,12 @@ def _lien(src, dst):   # (hyperarcade, portabilite) src/hsfa/liens.py (@HA_UT@) 
     try: os.symlink(src, dst)
     except (OSError, NotImplementedError):
         import shutil; shutil.copyfile(src, dst)
+def _champs_chemins(s):   # (hyperarcade, Windows) « y:fichier:fichier » : la lettre de lecteur d'un chemin Windows
+    r = []                 # (« C:\... », « C:/... ») reste dans son champ ; sous Linux = s.split(':')
+    for x in s.split(':'):
+        if len(r) > 1 and len(r[-1]) == 1 and r[-1].isalpha() and x[:1] in ('\\', '/'): r[-1] += ':' + x
+        else: r.append(x)
+    return r
 D = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, D)
 os.environ["MEMMODE"] = "cps2"
 import translate as T
@@ -583,7 +589,7 @@ def main():
         # par la greffe vers des adresses 68K ETIQUETEES (HSFA_ZONES_68K) ; ici : pointeurs de code de la liste -> etiquettes
         # 68K (comme HSFA_GREFFE_PTRS), mots echanges, servi en ext_<y>.bin (trou de la carte : hsfa_trous.bin / banc_mem)
         if os.environ.get("HSFA_GREFFE_ZONE"):
-            zy_, zf_, zp_ = os.environ["HSFA_GREFFE_ZONE"].split(':'); zy_ = int(zy_, 16)
+            zy_, zf_, zp_ = _champs_chemins(os.environ["HSFA_GREFFE_ZONE"]); zy_ = int(zy_, 16)
             zb_ = bytearray(open(zf_, "rb").read()); zb_ += bytes(len(zb_) & 1); nz_ = 0
             for l_ in (open(zp_) if zp_ else ()):
                 if not l_.strip(): continue
@@ -826,6 +832,15 @@ def main():
             print("tuiles scroll1 en miroir du portage : %d cases de super-tuiles retournees (S1_MIROIR ; plan1 : banques.py plans)"
                   % len(faits))
     if MAX: IM.fin(img)   # (L2) code MAX et talons dans $3A0000-$3BFFFF
+    # (portraits V1, 15/11) PORT_COULEUR=1 : ZERO 3 suit le bouton a la selection et au VS d'Hyper (greffe/etape3/
+    # port_couleur.py : 4 sites du code d'Hyper, 2 talons) ; =0 (defaut) : rien n'est importe ni change
+    if os.environ.get("PORT_COULEUR", "0") == "1" and MODULE == 'ro9':
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'etape3'))
+        import port_couleur as PC
+        va_ = {}
+        for it in its:
+            if (it.ws or it.kind != 'fixed') and (it.va not in va_ or it.off < va_[it.va]): va_[it.va] = it.off
+        PC.applique(img, va_, int(os.environ.get("PORT_COULEUR_TALON", "%x" % PC.TALON_DEFAUT), 16))
     sw = bytes(b for i in range(0, len(img), 2) for b in (img[i+1], img[i]))
     out = os.path.join(W, P['sortie'], "sfa3ud"); os.makedirs(out, exist_ok=True)
     names = ["sz3ud.03c", "sz3ud.04c", "sz3.05c", "sz3.06c", "sz3.07c", "sz3.08c", "sz3.09c", "sz3.10b"]

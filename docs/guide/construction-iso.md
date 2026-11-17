@@ -8,7 +8,8 @@ Full report: [rapports/BUILD.md](../rapports/BUILD.md) (§143-§144 of the journ
 
 **Players (Windows, Linux, macOS): use the all-in-one builder** `hsfa-constructeur-<system>.zip` attached to the
 releases (`tools/constructeur/`; Windows: `hsfa-constructeur-windows-x86_64.zip`, with a window): nothing to install,
-it reads `.iso` and `.chd` files and runs this same chain. This guide is for advanced use: clone the repository (or take
+it reads `.iso` and `.chd` files and runs this same chain, for the games ticked (one check box per game, Hyper + Arcade
+included; `--jeux` without the window). This guide is for advanced use: clone the repository (or take
 GitHub's "Source code" archive) and run `hsfa_build.py` (below) or `construire.sh` (Linux, macOS, WSL). Since v0.1.11
 there is no `construire.bat` and no `hsfa-<version>-construction.zip` any more.
 
@@ -59,8 +60,8 @@ python3 scripts/construction/hsfa_build.py \
 | `--plans-fenetre auto\|oui\|non` | layer tables limited to the codes honoured by the bench and the core |
 | `--flux-format ogg\|adx` | format of the Upper and Hyper music streams in the zips (default `ogg`) |
 | `--sans-flux` | no stream table and no streams in the zips (disc music missing) |
-| `--rejeu-table FICHIER` | (Hyper) replay table of the SFA1 / SFA2 sounds (default: `tools/son-hyper/rejeu/hsfa_rejeu_table.txt` if it is there); with it, per-version voice redirection and replay (§4) |
-| `--sans-redirection` | (Hyper) neither voice redirection nor replay, even with the table |
+| `--rejeu-table FICHIER` | (Hyper) replay table of the SFA1 / SFA2 sounds, used instead of the one rebuilt from the ISO (default: `tools/son-hyper/rejeu/hsfa_rejeu_table.txt` if it is there, otherwise the table of the step `rejeu_iso`); per-version voice redirection and replay (§4) |
+| `--sans-redirection` | (Hyper) neither voice redirection nor replay, even with the table (and no step `rejeu_iso`) |
 | `--greffe-releves DOSSIER` | (Hyper + Arcade) graft records other than the repository's (§6) |
 | `--outils-*` | location of each group of tools (otherwise `HSFA_OUTILS_*`) |
 
@@ -78,7 +79,8 @@ A step shared by several games counts for the first game that needs it (SFA3, Up
 Arcade, Hyper + Arcade MAX).
 
 Any game can be built alone or with others, in any order: the steps it depends on are added (`--jeux hyper` alone also
-runs Upper's graphics step `gfx_upper`, without making Upper's archive). `scripts/construction/test_plan.py` checks the
+runs Upper's graphics step `gfx_upper`, without making Upper's archive; `--jeux hyperarcade` builds Upper and Hyper in
+full, archives included; `uppermax` builds Upper in full). `scripts/construction/test_plan.py` checks the
 plan of every combination of games, without game data.
 
 ## 4. Outputs and checking
@@ -109,11 +111,16 @@ What is guaranteed (BUILD report §0, §3, §5; check of 2026-10-27 against the 
   `dcda2bb…`) and the `$E70000` data block (`son_donnees_ro9.bin`, 19,712 bytes, `ebefd8b2…`). Both contain game
   bytes: they are **regenerated at every build** and never published. The repository only provides tables:
   `ids_102.tsv` (versions), `correspondance.tsv` (SFA3 code → SFA1 / SFA2 command).
-- The **replay table** (QSound traces of the SFA1 / SFA2 drivers, 3.2 MB) is a separate input: `--rejeu-table` or
-  `tools/son-hyper/rejeu/hsfa_rejeu_table.txt`. The build adds the per-version shouts section to it. With it,
+- The **replay table** (QSound traces of the SFA1 / SFA2 drivers, 3.2 MB) is **rebuilt from your ISO** by the step
+  `rejeu_iso` (since v0.1.12): `tools/son-hyper/rejeu_iso` runs the original SFA1 / SFA2 sound drivers of the disc
+  (`X_DATA` entries 221 / 250, CRCs checked) offline in `hsfa_rejeu_iso` (Z80 of `z80.h`, MIT; compiled once in the
+  cache by `g++`, or prebuilt in the all-in-one builder), with the protocol of the workshop measurement, and writes
+  their register writes (30 to 60 s). Compared with the workshop table: same sounds, same writes in the same order,
+  same 19 truncated sounds, times a few microseconds apart (99 % within 33 us). A given table comes first:
+  `--rejeu-table` or `tools/son-hyper/rejeu/hsfa_rejeu_table.txt`. The build adds the per-version shouts section to it. With it,
   Hyper's program is the v161 one (`dbfd237d…`; v160: `0baed6af…`; v159: `8e4f9ef2…`; v154-v158: `b8e699cf…`) and the zip contains `hsfa_rejeu.bin` (8 MB, copied from the
   ISO's `X_DATA.BIN`, CRCs checked) and `hsfa_rejeu_table.txt`.
-- Without the table, Hyper keeps SFA3's voices for all its versions (program `ffc5eac1…` in v161, `e3806660…` in v160, `1f06234d…` in v159, `dda35430…` in v154-v158) and the zip has no
+- Without the table (`--sans-redirection`), Hyper keeps SFA3's voices for all its versions (program `ffc5eac1…` in v161, `e3806660…` in v160, `1f06234d…` in v159, `dda35430…` in v154-v158) and the zip has no
   replay: without the table, the replay codes would have no sound.
 
 ## 5. Upper MAX (SFA3 MAX characters)
@@ -143,18 +150,22 @@ python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Ant
 
 ```bash
 python3 scripts/construction/hsfa_build.py --anthology "Street Fighter Alpha Anthology (USA).iso" \
-    --sortie hsfa_sortie --jeux hyperarcade [--rejeu-table hsfa_rejeu_table.txt] [--arcade sfa3.zip]
+    --sortie hsfa_sortie --jeux hyperarcade [--arcade sfa3.zip]
 ```
 
 - Translator: the graft has its frozen copy of translator **v161** (`untranspile3_v161`, states ro9a37 to ro9a41, §221, §223, §224, §228, §230): the
   v161 fixes (§219) reach Hyper + Arcade.
-- Result: `sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a41** (13/11; ro9a40 + 10 pairs of words of the graft's data no longer relocated as code pointers, §230; ro9a40: colours and portraits of the versions, green band of the logo transition, §225-§228). `hyperarcade`
+- Result: `sfa3hahsfa.zip` (driver `sfa3hahsfa` of the core), state **ro9a45** (16/11 evening, recipe `vars_ro9a45.txt` = ro9a44 + `DONNEES_BRUTES=1`: data copied from Upper kept as they are instead of being relocated as Upper RAM pointers, explosions of the base sequence of endings 0F / 10 / 19 / 1A at the right height, colours of the machine of Zangief's stage in fights, §243; same `sz3ud.03c` `37799f69…`; ro9a44, 16/11: endings fixes, credits budget, mode menu on ARCADE, portraits in the button colour, §241-§242; ro9a41, 13/11: ro9a40 + 10 pairs of words of the graft's data no longer relocated as code pointers, §230; ro9a40: colours and portraits of the versions, green band of the logo transition, §225-§228). `hyperarcade`
   adds `upper` and `hyper`: the graft starts from their outputs (modules, animations, banks, sound). Extra steps:
   `greffe_hyperarcade` (frozen code of `tools/greffe-arcade/construction/`, about 3 min) and `paquet_hyperarcade`.
-- **With the arcade ROM and the replay table**: the zip is the ro9a41 one (delivered on 13/11, CRC `C9107FC2`), except
+- The replay table is the one of Hyper (rebuilt from the ISO, or `--rejeu-table`): the graft takes the corrected
+  module (per-version voices).
+- **With the arcade ROM and the workshop replay table** (`--rejeu-table`): the zip is the ro9a45 one (delivered on
+  16/11 evening, md5 `385770f3…`, CRC `9EAFF94E`), except
   `hsfa_info.txt` (provenance) and the sound ROM (`hx3.01`, `hx3.02`, `hx3.14m`: sounds specific to the PS2 port added,
   §218; with `HSFA_SONS_PS2=0`, identical).
-- **Without the replay table**: the graft starts from Hyper's original module. Hyper keeps SFA3's voices for all
+- **With the table rebuilt from the ISO**: the same, except also the member `hsfa_rejeu_table.txt` (times).
+- **Without the replay table** (`--sans-redirection`): the graft starts from Hyper's original module. Hyper keeps SFA3's voices for all
   the versions, and the zip has no replay (`hsfa_rejeu.bin`, `hsfa_rejeu_table.txt` absent), like Hyper alone.
 - **Without the arcade ROM** ("ISO only" route): graphics ROM rebuilt from the ISO, as for Hyper; only the
   graphics ROM, `hsfa_gfx.bin` and `hsfa_tab.bin` change (tile codes), the program is the same. In the core, the

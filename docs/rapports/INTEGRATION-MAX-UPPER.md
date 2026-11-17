@@ -568,6 +568,66 @@ retrouver dans Upper, banque de l'emplacement 4 : lignes `anim` de `carte.txt`).
   `ext_b80000.bin` `ef99d3bd`, `ext_e80000.bin` `fce18b80`. Bench (max58): `max` step (command palette of the 4 MAX, 12 files) identical
   to max57; MAX vs natives VERSUS 64/64; MAX Arcade 4/4 finished; native endings: see the max58 report.
 
+### 8 quinquies. max59 (14-15/11, agents `max59`, `fins_upper_m`, MAX session): conversion of the MAX ending scripts
+
+Corrections of the MAX endings, built on the study of Upper's ending engine (`<workspace>/work/etude_upper/`) and its
+measurements M1-M9 (`<workspace>/work/fins_upper_m/`). Every switch below at its witness value gives back max58 byte for
+byte (all of them together, measured on the build of the bench, see the end of this section).
+
+- **Engine rules corrected by measurement** (they replace the 14/11 study where they differ):
+  - **T is one flag per batch** (M3): the byte `$805E(A5)` is written by x1, x4, x5 (T != F) and x9; the effects of the
+    batch are applied after the whole batch, so x4 and x9 of a batch share the T of the LAST of these commands. `0401`
+    alone loads the combat background and palettes raw (brightness 0); `0401 … 1904` in Upper is `1401 … 1904` in the
+    arcade (lit). Rule I10 of the study ("T of the x4") is replaced by this one.
+  - **No "native half-light"** (V9 of the study, M3): the 5 native `0401` under a dialogue (endings `$17`, `$20`, `$21`)
+    all have a `1904` after them in their batch, so they are lit. The static checker now finds no V9 in the natives.
+  - **Final x4 of the credits** (M9): natives load it raw and an ACTOR (class `$49`, sub-type `$1A`, phase `0301 50`)
+    raises the brightness after `0000`; the MAX actor tables have no such actor, so the last x4 and x9 of a MAX
+    ending are lit (`MAX_FIN_X4_FIN`).
+  - **`0B00` at the start** (M5): the native opening; it removes the player objects that the PSP does not show (small
+    lying Maki, Eagle's sitting figure, small Ingrid); group 0 actors (Bison) are unaffected (`MAX_FIN_0B00`).
+  - `3204` after a null PSP `3204` takes the sets of the scene (M6, the native target is set 0 in the 4 blocks).
+- **Conversion** (`fins_integration.py`, `integre_max.py` of `tools/integration-max/upper_max/integration_2b31/ag/`): x9 of 29 palettes (`$1D`: OBJ 29 is
+  the text window and the credits titles; `MAX_FIN_X9_NB`, witness `001E`); MAX palette images stored at brightness 0
+  like the natives' sets (`MAX_FIN_IMG_LUM0`); x4 and its x9 lit or raw by what the page must show (`1401` + `1904`
+  under a dialogue or before `3204`, `0401` + `0904` before `1204`, a hold or the end; `MAX_FIN_X4_CONTEXTE`); no `3204`
+  right after an x4 (`MAX_FIN_X4_3204`); a scene in the dark (`0108`) in the batch of a fade-out goes to the next batch
+  (`MAX_FIN_0108_LOT`); scenes in the dark counted like `1108` / `3204` (`MAX_FIN_0108`); x9 after an `F501` without
+  scene (`MAX_FIN_F501_X9`); the player's own palette copied at brightness `$F000` (`MAX_PALPROPRE_LUM`).
+- **MAX session (`max/`)**: guests without own palette, Bison (P2) of the first segment in palette 5
+  (`FIN_INVITE_PALPROPRE`, `FIN_J2_PALETTE`); rule F4, scene in the dark (`FIN_SCENE_NOIR`); Maki in the "You're
+  finished" scene takes palette 0 of the scene's set (`FIN_PAL_SCENE`, 391be29) instead of the player's palette (OBJ 30),
+  which the text palette loader overwrites.
+- **`talon_palrecopie` removed** (decision of 15/11): it recopied the player's palette after the text palette loader
+  (4 sites `LEA $1A4420,A4`, also crossed by the natives' endings) and shifted 7 native endings by one frame (02, 07, 1a,
+  1d, 20, 21, 24; same content). Without it, and with `FIN_PAL_SCENE`, the 35 native endings are identical to max58
+  (journal, instructions, signatures, dumps; MAX session, candidate C46).
+- **Secret fight scenes**: Upper picks the scene of a SECRET fight from the third "after" row (`0x61B650`, `$13E` = 12),
+  read in its enlarged copy by va `0x266C04` (Balrog) and va `0x2667B4` (Juli + Juni); `talon_dialogues` only moves the
+  readers of `0x61B580` / `0x61B600`. `MAX_DLG_SECRET` (default 1) sets the MAX characters' row-12 "after" choices in
+  `0x61B650` too, and the MAX session moved Eagle's scenario 3 ("You're the one who defeated Sagat?") there
+  (`FIN_DLG_BALROG`, cc072c7): Eagle has his 6 PSP lines before Balrog under Balrog's portrait, and no dialogue after
+  Sagat any more. Yun (secret fight `$1E`, Juli + Juni) still has `$FF` there: see the open point below.
+- **Build** (max59, `hsfa_build.py --jeux uppermax`, empty output): PSP ISO EU and US give the same `sfa3umhsfa.zip`;
+  `sz3ud.03c` `01d27d2e`, `sz3ud.04c` `1e7092ff`, `sz3.06c` `3556ee07`, `sz3.10b` `454dc9ab`, `ext_b80000.bin` `4bf493af`,
+  `ext_c80000.bin` `9d2d3644`, `ext_e80000.bin` `73baba4a`. Witness (`FIN_INVITE_PALPROPRE=1`, every other switch above
+  at 0, `MAX_FIN_X9_NB=001E`): max58 byte for byte on the whole bench folder. The `tools/` part alone (with the `max/` of
+  before) builds but is a hybrid never played: deliver `tools/` and `max/` together.
+- **Bench** (against max58): 12/12 TSV of the `max` step identical to max58; VERSUS MAX against natives 64/64 with
+  journals identical to max58 (probe lines aside); Arcade of the 4 MAX finished, journals identical to max58 up to
+  Eagle's removed after-Sagat dialogue and up to the first MAX ending of Maki, Yun and Ingrid (whose length changes);
+  the 35 native endings with game journals identical to max58 byte for byte (the 7 the talon shifted included);
+  captures of the MAX endings of Maki, Yun and Ingrid identical to the MAX session's measured build (C46), Eagle's the
+  same scenes (sampled at other frames: his Arcade route is shorter).
+- **Open**: Yun's secret fight (`0x61B680` = `$1E`, Juli + Juni, reached in Arcade since max58) reads `0x61B650` like the
+  natives' (all 10 natives with a secret fight have a scenario there) and finds `$FF`; his PSP scenario 4 ("I'll knock
+  out the bouncer! You go fight the female soldiers!") is chained after Fei-Long today. `MAX_DLG_SECRET` sets any row-12
+  "after" choice, so the table side is ready for it; but in that scenario Fei-Long's lines are marked as the
+  opponent's (bit 15: "It seems they have detected our movements!", "I'll knock out the bouncer!…"), which in the
+  secret fight scene would show under Juli / Juni's portrait (Eagle's defect under Sagat): speakers and portraits to
+  check on the PSP first (bit 14, third character, exists). Measured (Arcade of Yun, probe of the `$147` writes):
+  before Bison, the reader of va `0x2667B4` (image `$5894A`) runs and writes `$FF`, so no scene; MAX session.
+
 ## 9. Questions pour la session MAX
 
 1. **Gestionnaires d'Eagle** (§4) : `brouillons.py` découpe les modules à la racine, or les gestionnaires des persos

@@ -1,0 +1,36 @@
+# Différences ATTENDUES de ro9a44 contre ro9a43 (work/ro9a44/ETAT.md ; recette vars_ro9a44 = générique + MENU_CURSEUR_ARCADE + PORT_COULEUR).
+# Colonnes : partie<TAB>clé (motif)<TAB>quoi (fichier ou captures)<TAB>valeurs (noms de captures, images de .sent, ou *).
+# MENU_CURSEUR_ARCADE=1 : curseur à l'arrivée au menu 0 (ARCADE) au lieu de 1 (VERSUS) : journal du menu (V44F / T44F).
+versus	versus	menu.txt	*
+training	training	menu.txt	*
+# PORT_COULEUR=1 : portraits du VS à la couleur du bouton : les 20 écrans VS des paires ZERO 3 (V44F contre R43, 70/90).
+versus	versus	captures	0000 0003 0006 0009 0012 0024 0027 0030 0033 0036 0048 0051 0054 0057 0060 0072 0075 0078 0081 0084
+# TRAINING (T44F) : capture 0000 = VS Ryu / Ken ZERO 3, portraits à la couleur du bouton.
+training	training	captures	0000
+# Arcade par le menu (arcade, continue, gameover, j2) : sur ro9a43 le curseur arrive sur VERSUS et le banc ajoute « Haut »
+# (sortie du menu à la même image 407) : seules les lignes MENU du journal changent (1re différence = l'arrivée au menu).
+arcade	*	journal.txt	~MENU_1_image_338
+continue	*	journal.txt	~MENU_1_image_338
+gameover	*	journal.txt	~MENU_1_image_338
+j2	*	journal.txt	~MENU_1_image_338
+# PORT_COULEUR : portrait de J1 à la sélection à la couleur du bouton (capture 0007, image 485 : Ken blanc au lieu de rouge,
+# cmp/… de l'atelier banc_unique) ; continue : dernière capture = menu 3 (curseur 0 au lieu de 1).
+continue	*	captures	0007 0131
+j2	*	captures	0007
+# GAME OVER puis retour au titre : au 3e menu, ro9a43 repart en VERSUS (curseur 1), ro9a44 en ARCADE (MENU_CURSEUR_ARCADE) :
+# la sélection de la 2e partie, donc la graine et les captures qui suivent (0083…), diffèrent. C'est l'effet voulu.
+gameover	*	captures	*
+gameover	*	graine.txt	*
+# Fins : la sonde des sentinelles note des adresses de code (PC 68K), qui bougent d'une construction à l'autre
+# (GENERIQUE_BUDGET, FINS_IMAGES, X2_TABLES, PORT_COULEUR déplacent le code) : .sent et .totaux ne se comparent qu'à
+# construction égale. Images : générique d'Upper (GENERIQUE_BUDGET) et images d'Upper (FINS_IMAGES) ; ETAT ro9a44 :
+# 7 940 identiques, 1 002 plus proches d'Upper, 259 plus loin -> à juger contre Upper (--upper), pas ici.
+fins	*	sent.txt	*
+fins	*	sent.txt.totaux	*
+fins	*	captures	*
+# Journaux des fins : GENERIQUE_BUDGET (générique d'Upper, « d'un tic ») et FINS_IMAGES changent la durée de certaines fins
+# de quelques images (ex. 04 A : 9 970 -> 9 946 ; 11 A : 2 296 -> 2 297) : la 1re ligne différente doit être DANS la fin
+# (état 0002 000a) ; une différence avant la fin reste « à qualifier ».
+fins	*	journal.txt	~:_0002_000a_
+# sf.txt (une ligne par capture de la fin, image absolue) suit la durée de la fin : plus court ou plus long avec elle.
+fins	*	sf.txt	*

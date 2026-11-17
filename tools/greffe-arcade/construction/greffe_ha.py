@@ -95,6 +95,10 @@ def main():
     lance([py, "etape3/greffe3.py", "--construire"], G, dict(env, NOM=a.nom), log)
     P = os.path.join(G, "constructions", a.nom)
     r = os.path.join(P, "b9", "roms_ro9", "sfa3ud", "sz3ud.03c")
+    if not os.path.exists(r):                  # greffe3.py ne rend pas le code de la traduction (mame_test.py)
+        cl = os.path.join(P, "construction.log")
+        fin = open(cl, encoding="utf-8", errors="replace").read().splitlines()[-12:] if os.path.exists(cl) else []
+        sys.exit("echec de la traduction (pas de sz3ud.03c) ; fin de %s :\n%s" % (cl, "\n".join(fin)))
     print("sz3ud.03c", hashlib.md5(open(r, "rb").read()).hexdigest())
     print(open(os.path.join(P, "construction.log")).read().splitlines()[-1])
 

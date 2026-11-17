@@ -20,7 +20,10 @@ The builder contains no game data: everything is read from YOUR images.
    macOS / Linux: double-click, or in a terminal:
        ./hsfa-constructeur                                  (window)
        ./hsfa-constructeur Anthology.iso --psp MAX.iso      (no window)
-   In the window: pick the PS2 image, the PSP ISO if you have it, the output folder, then "Build".
+       ./hsfa-constructeur Anthology.iso --games sfa3,hyper (some games only)
+   In the window: pick the PS2 image, the PSP ISO if you have it, the output folder, tick the games you want, then
+   "Build". Upper MAX needs the PSP ISO. Hyper + Arcade (experimental) also builds Upper and Hyper (with their zips):
+   their boxes are then ticked and greyed. A counter shows the elapsed time.
    The builder first announces the estimated time (per game and in total), then the bar shows the current step
    (step n / N) and the time left.
 
@@ -34,7 +37,8 @@ The builder contains no game data: everything is read from YOUR images.
 4. Where the zips go
    When it is done (sound, window brought to the front, message "Done: N games in ..."), the output folder
    (HSFA-sortie next to the executable by default) holds the zips themselves:
-     sfa3hsfa.zip (SFA3), sfa3uhsfa.zip (Upper), sfa3hhsfa.zip (Hyper), sfa3umhsfa.zip (Upper MAX, with the PSP ISO).
+     sfa3hsfa.zip (SFA3), sfa3uhsfa.zip (Upper), sfa3hhsfa.zip (Hyper), sfa3umhsfa.zip (Upper MAX, with the PSP ISO),
+     sfa3hahsfa.zip (Hyper + Arcade, if ticked).
    Copy them WITHOUT RENAMING into RetroArch's (or your console's) ROM folder, next to the project's
    "FinalBurn Neo HSFA" core, then load a zip with that core. Guides: docs/guide/ in the repository.
    The hsfa-travail subfolder (work files) can be deleted; keeping it makes a rebuild faster.
